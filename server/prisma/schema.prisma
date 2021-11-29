@@ -1,0 +1,269 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("API_DATABASE_URL")
+}
+
+model User {
+  id             String          @id
+  email          String          @unique
+  name           String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
+  albums         Album[]
+  artists        Artist[]
+  image          Image[]
+  imageFile      ImageFile[]
+  playlists      Playlist[]
+  tags           Tag[]
+  tracks         Track[]
+  trackFiles     TrackFile[]
+  sources        Source[]
+  sourceFiles    SourceFile[]
+  albumCoArtists AlbumCoArtist[]
+  trackCoArtist  TrackCoArtist[]
+  albumImages    AlbumImage[]
+  playlistTracks PlaylistTrack[]
+}
+
+model Tag {
+  id        String     @id
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  albums    Album[]
+  artists   Artist[]
+  tracks    Track[]
+  playlists Playlist[]
+
+  @@index([userId])
+}
+
+model Source {
+  id        String       @id
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @default(now()) @updatedAt
+  user      User         @relation(fields: [userId], references: [id])
+  userId    String
+  images    Image[]
+  tracks    Track[]
+  files     SourceFile[]
+
+  @@index([userId])
+}
+
+model SourceFile {
+  id        String   @id
+  region    String
+  filename  String?
+  sha256    String
+  filesize  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  source    Source   @relation(fields: [sourceId], references: [id])
+  sourceId  String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+
+  @@index([userId])
+  @@index([sourceId])
+}
+
+model Artist {
+  id             String          @id
+  name           String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now()) @updatedAt
+  user           User            @relation(fields: [userId], references: [id])
+  userId         String
+  tracks         Track[]
+  albums         Album[]
+  tags           Tag[]
+  albumCoArtists AlbumCoArtist[]
+  trackCoArtists TrackCoArtist[]
+
+  @@index([userId])
+}
+
+model AlbumImage {
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  album       Album    @relation(fields: [albumId], references: [id])
+  albumId     String
+  image       Image    @relation(fields: [imageId], references: [id])
+  imageId     String
+  nextImageId String? // foreign key constraint is currently omitted due to some operations
+
+  @@id([albumId, imageId])
+  // unique constraint is currently omitted due to some operations
+  //@@unique([albumId, nextImageId])
+  @@index([userId])
+  @@index([albumId])
+  @@index([imageId])
+  @@index([nextImageId])
+}
+
+model Album {
+  id        String          @id
+  title     String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+  user      User            @relation(fields: [userId], references: [id])
+  userId    String
+  artist    Artist          @relation(fields: [artistId], references: [id])
+  artistId  String
+  images    AlbumImage[]
+  tracks    Track[]
+  tags      Tag[]
+  coArtists AlbumCoArtist[]
+
+  @@index([userId])
+  @@index([artistId])
+}
+
+model Track {
+  id        String          @id
+  title     String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+  user      User            @relation(fields: [userId], references: [id])
+  userId    String
+  artist    Artist          @relation(fields: [artistId], references: [id])
+  artistId  String
+  album     Album           @relation(fields: [albumId], references: [id])
+  albumId   String
+  source    Source          @relation(fields: [sourceId], references: [id])
+  sourceId  String
+  files     TrackFile[]
+  playlists PlaylistTrack[]
+  tags      Tag[]
+  coArtists TrackCoArtist[]
+
+  @@index([userId])
+  @@index([albumId])
+  @@index([artistId])
+}
+
+model TrackFile {
+  id        String   @id
+  format    String
+  region    String
+  duration  Float
+  filesize  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  track     Track    @relation(fields: [trackId], references: [id])
+  trackId   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+
+  @@index([userId])
+  @@index([trackId])
+}
+
+model Image {
+  id        String       @id
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @default(now()) @updatedAt
+  user      User         @relation(fields: [userId], references: [id])
+  userId    String
+  source    Source       @relation(fields: [sourceId], references: [id])
+  sourceId  String
+  files     ImageFile[]
+  albums    AlbumImage[]
+
+  @@index([userId])
+}
+
+model ImageFile {
+  id        String   @id
+  format    String
+  region    String
+  width     Int
+  height    Int
+  filesize  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  image     Image    @relation(fields: [imageId], references: [id])
+  imageId   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+
+  @@index([userId])
+  @@index([imageId])
+}
+
+model AlbumCoArtist {
+  id        String   @id
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  artist    Artist   @relation(fields: [artistId], references: [id])
+  artistId  String
+  album     Album    @relation(fields: [albumId], references: [id])
+  albumId   String
+
+  @@index([userId])
+  @@index([artistId])
+  @@index([albumId])
+}
+
+model TrackCoArtist {
+  id        String   @id
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  artist    Artist   @relation(fields: [artistId], references: [id])
+  artistId  String
+  track     Track    @relation(fields: [trackId], references: [id])
+  trackId   String
+
+  @@index([userId])
+  @@index([artistId])
+  @@index([trackId])
+}
+
+model PlaylistTrack {
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  playlist    Playlist @relation(fields: [playlistId], references: [id])
+  playlistId  String
+  track       Track    @relation(fields: [trackId], references: [id])
+  trackId     String
+  nextTrackId String? // foreign key constraint is currently omitted due to some operations
+
+  @@id([playlistId, trackId])
+  // unique constraint is currently omitted due to some operations
+  //@@unique([playlistId, nextTrackId])
+  @@index([userId])
+  @@index([playlistId])
+  @@index([trackId])
+  @@index([nextTrackId])
+}
+
+model Playlist {
+  id        String          @id
+  name      String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
+  user      User            @relation(fields: [userId], references: [id])
+  userId    String
+  tags      Tag[]
+  tracks    PlaylistTrack[]
+
+  @@index([userId])
+}

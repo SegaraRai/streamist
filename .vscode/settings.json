@@ -1,0 +1,20 @@
+{
+  "cSpell.words": [
+    "fastify",
+    "vitesse",
+  ],
+  "eslint.run": "onSave",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "prettier.enable": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.localesPaths": "locales",
+  "i18n-ally.sortKeys": true,
+  "files.associations": {
+    "*.css": "postcss",
+  },
+}
