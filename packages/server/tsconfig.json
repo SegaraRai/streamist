@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "lib": [
+      "dom"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "$/*": [
+        "./*"
+      ],
+      "$prisma/*": [
+        "./node_modules/.prisma/*"
+      ]
+    },
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "target": "ESNext"
+  }
+}

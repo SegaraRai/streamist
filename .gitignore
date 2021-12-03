@@ -89,7 +89,7 @@ sw.*
 *.swp
 
 # server
-server/**/$*.ts
-server/**/*.db
-server/index.js
-server/upload/
+packages/server/**/$*.ts
+packages/server/**/*.db
+packages/server/index.js
+packages/server/upload/

@@ -1,11 +1,11 @@
 import { pathsToModuleNameMapper } from 'ts-jest/utils';
 import type { Config } from '@jest/types';
-import { compilerOptions } from './tsconfig.json';
+import { compilerOptions } from './packages/frontend/tsconfig.json';
 
 const config: { projects: Config.InitialOptions[] } = {
   projects: [
     {
-      testPathIgnorePatterns: ['<rootDir>/server'],
+      testMatch: ['<rootDir>/packages/frontend/test/**/*.ts'],
       moduleNameMapper: {
         ...pathsToModuleNameMapper(compilerOptions.paths, {
           prefix: '<rootDir>/',
@@ -15,18 +15,17 @@ const config: { projects: Config.InitialOptions[] } = {
       moduleFileExtensions: ['ts', 'js', 'vue', 'json'],
       transform: {
         '^.+\\.ts$': 'ts-jest',
-        '^.+\\.js$': 'babel-jest',
         '.*\\.(vue)$': 'vue-jest',
       },
       collectCoverageFrom: [
-        '<rootDir>/components/**/*.vue',
-        '<rootDir>/pages/**/*.vue',
+        '<rootDir>/packages/frontend/components/**/*.vue',
+        '<rootDir>/packages/frontend/pages/**/*.vue',
       ],
     },
     {
       preset: 'ts-jest',
       testEnvironment: 'node',
-      testMatch: ['<rootDir>/server/test/**/*.ts'],
+      testMatch: ['<rootDir>/packages/server/test/**/*.ts'],
       moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
         prefix: '<rootDir>/',
       }),

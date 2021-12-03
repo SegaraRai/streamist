@@ -3,12 +3,12 @@ module.exports = {
     {
       name: 'frourio-app',
       script: 'index.js',
-      cwd: './server/',
+      cwd: './packages/server/',
       instances: 1,
       wait_ready: true,
       listen_timeout: 10000,
       env: {
-        NODE_ENV: 'development'
+        NODE_ENV: 'development',
       },
       env_production: {
         NODE_ENV: 'production',
@@ -18,8 +18,8 @@ module.exports = {
         API_USER_PASS: process.env.API_USER_PASS,
         API_ORIGIN: process.env.API_ORIGIN,
         API_BASE_PATH: process.env.API_BASE_PATH,
-        API_SERVER_PORT: process.env.API_SERVER_PORT
-      }
-    }
-  ]
-}
+        API_SERVER_PORT: process.env.API_SERVER_PORT,
+      },
+    },
+  ],
+};
