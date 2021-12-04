@@ -21,5 +21,8 @@
     {
       "mode": "auto"
     }
-  ]
+  ],
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
 }

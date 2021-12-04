@@ -16,9 +16,26 @@
       ],
       "$prisma/*": [
         "./node_modules/.prisma/*"
-      ]
+      ],
+      ".prisma/*": [
+        "./node_modules/.prisma/*"
+      ],
+      "$shared/*": [
+        "../shared/*"
+      ],
+      "$shared-server/*": [
+        "../shared-server/*"
+      ],
+      "$transcoder/*": [
+        "../transcoder/src/*"
+      ],
     },
-    "rootDir": ".",
+    "rootDirs": [
+      ".",
+      "../shared",
+      "../shared-server",
+      "../transcoder",
+    ],
     "skipLibCheck": true,
     "strict": true,
     "strictPropertyInitialization": false,

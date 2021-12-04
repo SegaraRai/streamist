@@ -1,4 +1,3 @@
-import type { Region } from '$shared/regions.js';
 import type {
   FFprobeFormat,
   FFprobeResult,
@@ -6,11 +5,21 @@ import type {
   FFprobeTags,
 } from './ffprobe.js';
 import type { ImageMagickImage, ImageMagickResult } from './imageMagick.js';
+import type { Region } from '$shared/regions.js';
 
 export interface TranscoderRequestOptions {
+  /** POST <callbackURL> */
   callbackURL: string;
+  /** value of Authorization header */
+  callbackURLAuthorization: string;
+  /** set this true if the audio file is too large to store in /tmp */
+  downloadAudioToNFS: boolean;
   extractImages: boolean;
   preferExternalCueSheet: boolean;
+  defaultUnknownTrackArtist: string;
+  defaultUnknownTrackTitle: string;
+  defaultUnknownAlbumArtist: string;
+  defaultUnknownAlbumTitle: string;
 }
 
 export interface TranscoderRequestAudio {
@@ -20,6 +29,7 @@ export interface TranscoderRequestAudio {
   sourceFileId: string;
   cueSheetSourceFileId?: string | null;
   region: Region;
+  fileSize: number;
   options: TranscoderRequestOptions;
 }
 
@@ -31,6 +41,7 @@ export interface TranscoderRequestImage {
   /** empty for extracted file */
   albumId: string;
   region: Region;
+  fileSize: number;
   extracted: false;
   options: TranscoderRequestOptions;
 }
@@ -139,4 +150,5 @@ export type TranscoderResponseArtifact =
 export interface TranscoderResponse {
   request: TranscoderRequest;
   artifacts: TranscoderResponseArtifact[];
+  error: string | null;
 }

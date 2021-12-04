@@ -1,23 +1,23 @@
-import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from '$shared-server/cacheControl';
-import { generateTranscodedImageFileId } from '$shared-server/generateId';
-import { osGetFile, osPutFile } from '$shared-server/objectStorage';
-import {
-  getSourceFileKey,
-  getSourceFileOS,
-  getTranscodedImageFileKey,
-  getTranscodedImageFileOS,
-} from '$shared-server/objectStorages';
 import { stat, unlink } from 'node:fs/promises';
-import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
-import { getTempFilepath } from '../tempFile';
+import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools.js';
+import { getTempFilepath } from '../tempFile.js';
 import type {
   TranscoderRequestImage,
   TranscoderRequestImageExtracted,
   TranscoderResponseArtifactImage,
   TranscoderResponseArtifactImageFile,
-} from '../types/transcoder';
-import { TranscodeError } from './error';
-import { getTranscodeImageFormats } from './imageFormats';
+} from '../types/transcoder.js';
+import { TranscodeError } from './error.js';
+import { getTranscodeImageFormats } from './imageFormats.js';
+import {
+  getSourceFileKey,
+  getSourceFileOS,
+  getTranscodedImageFileKey,
+  getTranscodedImageFileOS,
+} from '$shared-server/objectStorages.js';
+import { osGetFile, osPutFile } from '$shared-server/objectStorage.js';
+import { generateTranscodedImageFileId } from '$shared-server/generateId.js';
+import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from '$shared-server/cacheControl.js';
 
 export async function processImageRequest(
   request: TranscoderRequestImage | TranscoderRequestImageExtracted
@@ -40,12 +40,14 @@ export async function processImageRequest(
     if (request.extracted) {
       sourceFileSHA256 = request.sha256;
     } else {
-      sourceFileSHA256 = (await osGetFile(
-        getSourceFileOS(region),
-        getSourceFileKey(userId, sourceFileId),
-        sourceImageFilepath,
-        'sha256'
-      ))!.toString('hex');
+      sourceFileSHA256 = (
+        await osGetFile(
+          getSourceFileOS(region),
+          getSourceFileKey(userId, sourceFileId),
+          sourceImageFilepath,
+          'sha256'
+        )
+      )[1];
     }
 
     const imageInfoList = await probeImage(
@@ -110,7 +112,7 @@ export async function processImageRequest(
 
       const fileStat = await stat(transcodedImageFilepath);
 
-      const sha256 = (await osPutFile(
+      const [, sha256] = await osPutFile(
         getTranscodedImageFileOS(region),
         getTranscodedImageFileKey(
           userId,
@@ -123,7 +125,7 @@ export async function processImageRequest(
           contentType: imageFormat.mimeType,
         },
         'sha256'
-      ))!.toString('hex');
+      );
 
       await unlink(transcodedImageFilepath);
 

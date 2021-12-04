@@ -13,3 +13,10 @@ export const tempDir =
   process.platform !== 'win32'
     ? '/tmp'
     : './temp';
+
+export const nfsTempDir =
+  process.env.NODE_ENV === 'production' ||
+  process.env.NODE_ENV === 'staging' ||
+  process.platform !== 'win32'
+    ? '/tmp'
+    : './temp';

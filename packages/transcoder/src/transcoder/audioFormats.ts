@@ -1,5 +1,5 @@
-import { filterFalsy } from '$shared/filter';
-import type { FFprobeResult, FFprobeStreamAudio } from '../types/ffprobe';
+import type { FFprobeResult, FFprobeStreamAudio } from '../types/ffprobe.js';
+import { filterFalsy } from '$shared/filter.js';
 
 export interface AudioFormat {
   /** フォーマットのID */
@@ -127,7 +127,6 @@ const transcodeAudioFormats: GetAudioFormat[] = [
     _ffprobeResult: FFprobeResult,
     audioStreamInfo: FFprobeStreamAudio
   ): AudioFormat => createV1AACFormat('256k', audioStreamInfo),
-  // 今後5.1chや7.1chに対応したフォーマットを作るかも
 ];
 
 export function getTranscodeAudioFormats(

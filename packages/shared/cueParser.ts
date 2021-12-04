@@ -36,7 +36,7 @@ export interface CueSheet extends Rem {
 }
 
 // エスケープ文字の対応付け
-const escapeMap = /*@__PURE__*/ new Map<string, string>([
+const escapeMap = /* #__PURE__ */ new Map<string, string>([
   ['"', '"'],
   ['\\', '\\'],
 ]);
@@ -78,7 +78,7 @@ function parseTime(strTime: string): number {
     (parseInt(minutes, 10) * 60 + parseInt(seconds, 10)) * 75 +
     parseInt(frames, 10);
   if (!isFinite(value)) {
-    throw new Error('invalid offset');
+    throw new TypeError('invalid offset');
   }
   return value;
 }
@@ -109,8 +109,8 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
     rems: [],
   };
 
-  let lastFile: File | undefined = undefined;
-  let lastTrack: Track | undefined = undefined;
+  let lastFile: File | undefined;
+  let lastTrack: Track | undefined;
 
   // 念の為BOM除去
   if (strCueSheet.startsWith('\uFEFF')) {

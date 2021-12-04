@@ -1,41 +1,45 @@
-import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from '$shared-server/cacheControl';
-import {
-  generateSourceFileId,
-  generateTranscodedAudioFileId,
-} from '$shared-server/generateId';
-import { osGetData, osGetFile, osPutFile } from '$shared-server/objectStorage';
-import {
-  getSourceFileKey,
-  getSourceFileOS,
-  getTranscodedAudioFileKey,
-  getTranscodedAudioFileOS,
-} from '$shared-server/objectStorages';
-import { CueSheet, parseCueSheet } from '$shared/cueParser';
-import { decodeText } from '$shared/decodeText';
 import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { rename, stat, unlink } from 'node:fs/promises';
-import logger from '../logger';
+import logger from '../logger.js';
 import {
   cleanAudio,
   extractImageFromAudio,
   probeAudio,
   transcodeAudio,
-} from '../mediaTools';
-import { getTempFilepath } from '../tempFile';
+} from '../mediaTools.js';
+import { getNFSTempFilepath, getTempFilepath } from '../tempFile.js';
 import type {
   FFprobeStreamAudio,
   FFprobeStreamVideo,
   FFprobeTags,
-} from '../types/ffprobe';
+} from '../types/ffprobe.js';
 import type {
   TranscoderRequestAudio,
   TranscoderRequestImageExtracted,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactAudioTrack,
-} from '../types/transcoder';
-import { getTranscodeAudioFormats } from './audioFormats';
-import { TranscodeError } from './error';
+} from '../types/transcoder.js';
+import { getTranscodeAudioFormats } from './audioFormats.js';
+import { TranscodeError } from './error.js';
+import { decodeText } from '$shared/decodeText.js';
+import { CueSheet, parseCueSheet } from '$shared/cueParser.js';
+import {
+  getSourceFileKey,
+  getSourceFileOS,
+  getTranscodedAudioFileKey,
+  getTranscodedAudioFileOS,
+} from '$shared-server/objectStorages.js';
+import {
+  osGetData,
+  osGetFile,
+  osPutFile,
+} from '$shared-server/objectStorage.js';
+import {
+  generateSourceFileId,
+  generateTranscodedAudioFileId,
+} from '$shared-server/generateId.js';
+import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from '$shared-server/cacheControl.js';
 
 function createTracksFromCueSheet(
   cueSheet: CueSheet,
@@ -190,11 +194,11 @@ function createTracksFromCueSheet(
   );
 }
 
-async function createTracks(
+function createTracks(
   audioStream: FFprobeStreamAudio,
   tags: FFprobeTags,
   cueSheet?: CueSheet
-): Promise<TranscoderResponseArtifactAudioTrack[]> {
+): TranscoderResponseArtifactAudioTrack[] {
   // 曲長（秒）
   const duration =
     (parseInt(audioStream.duration_ts.toString(), 10) *
@@ -234,17 +238,19 @@ export async function processAudioRequest(
       userId,
     } = request;
 
-    const sourceAudioFilepath = getTempFilepath(sourceFileId);
+    const sourceAudioFilepath = options.downloadAudioToNFS
+      ? getNFSTempFilepath(sourceFileId)
+      : getTempFilepath(sourceFileId);
 
     createdFiles.push(sourceAudioFilepath);
 
     // ユーザーがアップロードした音楽ファイルをローカルにダウンロード
-    const sourceFileSHA256 = (await osGetFile(
+    const [, sourceFileSHA256] = await osGetFile(
       getSourceFileOS(region),
       getSourceFileKey(userId, sourceFileId),
       sourceAudioFilepath,
       'sha256'
-    ))!.toString('hex');
+    );
 
     // 音楽ファイルの情報を解析
     const audioInfo = await probeAudio(
@@ -317,7 +323,7 @@ export async function processAudioRequest(
       // アップロード
       const imageSourceFileId = wrappedImageStream.imageFileId;
 
-      const sha256 = (await osPutFile(
+      const [imageFileSize, sha256] = await osPutFile(
         getSourceFileOS(region),
         getSourceFileKey(userId, imageSourceFileId),
         wrappedImageStream.filepath,
@@ -326,7 +332,7 @@ export async function processAudioRequest(
           contentType: 'application/octet-stream',
         },
         'sha256'
-      ))!.toString('hex');
+      );
 
       // ジョブ追加
       extractedImageRequests.push({
@@ -338,6 +344,7 @@ export async function processAudioRequest(
         sourceFileId, // not image's sourceFileId
         albumId: '',
         filePath: wrappedImageStream.filepath,
+        fileSize: imageFileSize,
         sha256,
         streamIndex: wrappedImageStream.stream.index,
         options,
@@ -435,7 +442,7 @@ export async function processAudioRequest(
 
         const fileStat = await stat(transcodedAudioFilepath);
 
-        const sha256 = (await osPutFile(
+        const [, sha256] = await osPutFile(
           getTranscodedAudioFileOS(region),
           getTranscodedAudioFileKey(
             userId,
@@ -448,7 +455,7 @@ export async function processAudioRequest(
             contentType: audioFormat.mimeType,
           },
           'sha256'
-        ))!.toString('hex');
+        );
 
         await unlink(transcodedAudioFilepath);
 

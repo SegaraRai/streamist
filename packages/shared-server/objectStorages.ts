@@ -1,19 +1,17 @@
-import type { Region } from '$shared/regions.js';
 import type { ObjectStorage } from './objectStorage.js';
+import type { Region } from '$shared/regions.js';
 
-const developmentOSMap: ReadonlyMap<Region, ObjectStorage> = new Map<
-  Region,
-  ObjectStorage
->([
-  [
-    'ap-northeast-1',
-    {
-      provider: 'wasabi',
-      region: 'ap-northeast-1',
-      bucket: 'development-wasabi-ap-northeast-1.stst.page',
-    },
-  ],
-]);
+const developmentOSMap: ReadonlyMap<Region, ObjectStorage> =
+  /* #__PURE__ */ new Map<Region, ObjectStorage>([
+    [
+      'ap-northeast-1',
+      {
+        provider: 'wasabi',
+        region: 'ap-northeast-1',
+        bucket: 'development-wasabi-ap-northeast-1.stst.page',
+      },
+    ],
+  ]);
 
 const sourceFileOSMap: ReadonlyMap<Region, ObjectStorage> = developmentOSMap;
 const transcodedAudioFileOSMap: ReadonlyMap<Region, ObjectStorage> =

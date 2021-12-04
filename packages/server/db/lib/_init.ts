@@ -1,5 +1,7 @@
-import { createHash } from 'crypto';
-import { client } from './client';
+import { is } from '$shared/is.js';
+import { createHash } from 'node:crypto';
+import { client } from './client.js';
+import type { SourceState } from './types.js';
 
 function prng(seed: string): () => number {
   let ctr: Buffer = Buffer.from(seed);
@@ -32,15 +34,15 @@ export function init(): Promise<void> {
         await txClient.user.create({
           data: {
             id,
-            name: '',
-            email: '',
+            name: '.sentinel',
+            email: 'sentinel@example.org',
           },
         });
 
         await txClient.tag.create({
           data: {
             id,
-            name: '',
+            name: '.sentinel',
             userId: id,
           },
         });
@@ -48,6 +50,7 @@ export function init(): Promise<void> {
         await txClient.source.create({
           data: {
             id,
+            state: is<SourceState>('transcoded'),
             userId: id,
           },
         });
@@ -55,7 +58,7 @@ export function init(): Promise<void> {
         await txClient.artist.create({
           data: {
             id,
-            name: '',
+            name: '.sentinel',
             userId: id,
           },
         });
@@ -63,7 +66,7 @@ export function init(): Promise<void> {
         await txClient.album.create({
           data: {
             id,
-            title: '',
+            title: '.sentinel',
             userId: id,
             artistId: id,
           },
@@ -72,7 +75,10 @@ export function init(): Promise<void> {
         await txClient.track.create({
           data: {
             id,
-            title: '',
+            title: '.sentinel',
+            discNumber: 1,
+            trackNumber: 1,
+            duration: 1,
             userId: id,
             artistId: id,
             albumId: id,
@@ -83,7 +89,7 @@ export function init(): Promise<void> {
         await txClient.playlist.create({
           data: {
             id,
-            name: '',
+            title: '.sentinel',
             userId: id,
           },
         });
@@ -103,6 +109,7 @@ export function init(): Promise<void> {
         await txClient.source.create({
           data: {
             id: sourceId,
+            state: is<SourceState>('transcoded'),
             userId,
           },
         });
@@ -147,6 +154,9 @@ export function init(): Promise<void> {
             data: {
               id: trackId,
               title: `Track.${trackId}`,
+              discNumber: 1,
+              trackNumber: 1,
+              duration: 1,
               userId,
               artistId,
               albumId,
@@ -162,7 +172,7 @@ export function init(): Promise<void> {
           await txClient.playlist.create({
             data: {
               id: playlistId,
-              name: `Playlist.${playlistId}`,
+              title: `Playlist.${playlistId}`,
               userId,
             },
           });

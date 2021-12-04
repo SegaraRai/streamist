@@ -37,5 +37,6 @@ export async function transcode(
   return {
     request,
     artifacts,
+    error: null,
   };
 }

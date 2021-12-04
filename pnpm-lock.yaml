@@ -7,6 +7,7 @@ importers:
       '@antfu/eslint-config': ^0.11.1
       '@commitlint/cli': ^15.0.0
       '@commitlint/config-conventional': ^15.0.0
+      '@nuxtjs/eslint-config-typescript': ^8.0.0
       '@types/jest': ^27.0.3
       cross-env: ^7.0.3
       dotenv: ^10.0.0
@@ -25,6 +26,7 @@ importers:
       '@antfu/eslint-config': 0.11.1_eslint@8.3.0
       '@commitlint/cli': 15.0.0
       '@commitlint/config-conventional': 15.0.0
+      '@nuxtjs/eslint-config-typescript': 8.0.0_eslint@8.3.0+jest@27.4.3
       '@types/jest': 27.0.3
       cross-env: 7.0.3
       dotenv: 10.0.0
@@ -2944,6 +2946,43 @@ packages:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.13.0
+
+  /@nuxtjs/eslint-config-typescript/8.0.0_eslint@8.3.0+jest@27.4.3:
+    resolution: {integrity: sha512-JcRIDCN+lfhzeNw6QGxjUSmXzfnRsEc2gTWO7Kbz9JfznTNwsI+1oWJ2wwOb6MP82d8SkDgu4yINkbDGDgkdaA==}
+    peerDependencies:
+      eslint: ^8.3.0
+    dependencies:
+      '@nuxtjs/eslint-config': 8.0.0_9717c847c012a2d3e6ac2010ada82435
+      '@typescript-eslint/eslint-plugin': 5.5.0_43d6410db0148b56249a5963c6bb1a5b
+      '@typescript-eslint/parser': 5.5.0_eslint@8.3.0
+      eslint: 8.3.0
+      eslint-import-resolver-typescript: 2.5.0_eslint@8.3.0
+    transitivePeerDependencies:
+      - eslint-plugin-import
+      - jest
+      - supports-color
+      - typescript
+    dev: true
+
+  /@nuxtjs/eslint-config/8.0.0_9717c847c012a2d3e6ac2010ada82435:
+    resolution: {integrity: sha512-NuZSiMdSCuBukwWgmNQuMYoA/jgL9SLfecOurUUQw/1QTcD0YKh0RxY4h9rNJB2jkfayzmZ+Y11hlOml40FVvw==}
+    peerDependencies:
+      eslint: ^8.3.0
+    dependencies:
+      eslint: 8.3.0
+      eslint-config-standard: 16.0.3_17d94e22f0d237f4f52a1e1d410e8097
+      eslint-plugin-import: 2.25.3_eslint@8.3.0
+      eslint-plugin-jest: 25.3.0_9717c847c012a2d3e6ac2010ada82435
+      eslint-plugin-node: 11.1.0_eslint@8.3.0
+      eslint-plugin-promise: 5.2.0_eslint@8.3.0
+      eslint-plugin-unicorn: 39.0.0_eslint@8.3.0
+      eslint-plugin-vue: 8.1.1_eslint@8.3.0
+    transitivePeerDependencies:
+      - '@typescript-eslint/eslint-plugin'
+      - jest
+      - supports-color
+      - typescript
+    dev: true
 
   /@opencensus/core/0.0.8:
     resolution: {integrity: sha512-yUFT59SFhGMYQgX0PhoTR0LBff2BEhPrD9io1jWfF/VDbakRfs6Pq60rjv0Z7iaTav5gQlttJCX2+VPxFWCuoQ==}
@@ -6006,6 +6045,23 @@ packages:
       resolve: 1.20.0
     dev: true
 
+  /eslint-import-resolver-typescript/2.5.0_eslint@8.3.0:
+    resolution: {integrity: sha512-qZ6e5CFr+I7K4VVhQu3M/9xGv9/YmwsEXrsm3nimw8vWaVHRDrQRp26BgCypTxBp3vUp4o5aVEJRiy0F2DFddQ==}
+    engines: {node: '>=4'}
+    peerDependencies:
+      eslint: '*'
+      eslint-plugin-import: '*'
+    dependencies:
+      debug: 4.3.3
+      eslint: 8.3.0
+      glob: 7.2.0
+      is-glob: 4.0.3
+      resolve: 1.20.0
+      tsconfig-paths: 3.12.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /eslint-module-utils/2.7.1:
     resolution: {integrity: sha512-fjoetBXQZq2tSTWZ9yWVl2KuFrTZZH3V+9iD1V1RfpDgxzJR+mPd/KZmMiA8gbPqdBzpNiEHOuT7IYEWxrH0zQ==}
     engines: {node: '>=4'}
@@ -6072,6 +6128,28 @@ packages:
       object.values: 1.1.5
       resolve: 1.20.0
       tsconfig-paths: 3.12.0
+    dev: true
+
+  /eslint-plugin-jest/25.3.0_9717c847c012a2d3e6ac2010ada82435:
+    resolution: {integrity: sha512-79WQtuBsTN1S8Y9+7euBYwxIOia/k7ykkl9OCBHL3xuww5ecursHy/D8GCIlvzHVWv85gOkS5Kv6Sh7RxOgK1Q==}
+    engines: {node: ^12.13.0 || ^14.15.0 || >=16.0.0}
+    peerDependencies:
+      '@typescript-eslint/eslint-plugin': ^4.0.0 || ^5.0.0
+      eslint: ^6.0.0 || ^7.0.0 || ^8.0.0
+      jest: '*'
+    peerDependenciesMeta:
+      '@typescript-eslint/eslint-plugin':
+        optional: true
+      jest:
+        optional: true
+    dependencies:
+      '@typescript-eslint/eslint-plugin': 5.5.0_43d6410db0148b56249a5963c6bb1a5b
+      '@typescript-eslint/experimental-utils': 5.5.0_eslint@8.3.0
+      eslint: 8.3.0
+      jest: 27.4.3
+    transitivePeerDependencies:
+      - supports-color
+      - typescript
     dev: true
 
   /eslint-plugin-jsonc/2.0.0_eslint@8.3.0:

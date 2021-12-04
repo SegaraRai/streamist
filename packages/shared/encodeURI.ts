@@ -8,19 +8,27 @@
 //   A-Z a-z 0-9 ! # $ &         + - . ^ _ ` | ~
 
 export function encodeRFC3986URIComponent(str: string): string {
-  return encodeURIComponent(str).replace(
-    /[!'()*]/g,
-    (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase()
-  ); // escape ! ' ( ) *
+  return (
+    encodeURIComponent(str)
+      // escape ! ' ( ) *
+      .replace(
+        /[!'()*]/g,
+        (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase()
+      )
+  );
 }
 
 export function encodeRFC5987ValueChars(str: string): string {
-  return encodeURIComponent(str)
-    .replace(
-      /['()*]/g,
-      (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase()
-    ) // escape ' ( ) *
-    .replace(/%(2[346B]|5E|60|7C)/gi, (_str, hex) =>
-      String.fromCharCode(parseInt(hex, 16))
-    ); // unescape # $ & + ^ ` |
+  return (
+    encodeURIComponent(str)
+      // escape ' ( ) *
+      .replace(
+        /['()*]/g,
+        (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase()
+      )
+      // unescape # $ & + ^ ` |
+      .replace(/%(2[346B]|5E|60|7C)/gi, (_str, hex) =>
+        String.fromCharCode(parseInt(hex, 16))
+      )
+  );
 }

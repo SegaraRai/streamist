@@ -1,6 +1,6 @@
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
-import { generateAlbumId } from '$/utils/id';
+import { generateAlbumId } from '$shared-server/generateId';
 import type { Album } from '$prisma/client';
 
 export function getAlbums(userId: string, artistId?: string): Promise<Album[]> {

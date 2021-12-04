@@ -89,32 +89,45 @@ export async function osPutFile(
   key: string,
   filepath: string,
   options: ObjectStorageUploadOptions,
+  hash: string | Hash
+): Promise<[fileSize: number, hash: string]>;
+export async function osPutFile(
+  objectStorage: ObjectStorage,
+  key: string,
+  filepath: string,
+  options: ObjectStorageUploadOptions
+): Promise<[fileSize: number, hash: undefined]>;
+
+export async function osPutFile(
+  objectStorage: ObjectStorage,
+  key: string,
+  filepath: string,
+  options: ObjectStorageUploadOptions,
   hash?: string | Hash
-): Promise<Buffer | undefined> {
+): Promise<[fileSize: number, hash: string | undefined]> {
   // compression is not currently supported
   const s3 = createS3Cached(objectStorage);
   const stream = createReadStream(filepath);
   const hash2 = typeof hash === 'string' ? createHash(hash) : hash;
-  let passThrough: PassThrough | undefined;
-  if (hash2) {
-    stream.on('data', (chunk) => {
-      hash2.update(chunk);
-    });
-    // PassThrough is needed to read data along with sending it to the S3 stream (https://stackoverflow.com/a/37366093)
-    // do not listen passThrough's data events, or it won't be sent to S3
-    passThrough = new PassThrough();
-    stream.pipe(passThrough);
-  }
+  let streamSize = 0;
+  stream.on('data', (chunk) => {
+    streamSize += chunk.length;
+    hash2?.update(chunk);
+  });
+  // PassThrough is needed to read data along with sending it to the S3 stream (https://stackoverflow.com/a/37366093)
+  // do not listen passThrough's data events, or it won't be sent to S3
+  const passThrough = new PassThrough();
+  stream.pipe(passThrough);
   await s3.putObject({
     Bucket: objectStorage.bucket,
     Key: key,
-    Body: passThrough || stream,
+    Body: passThrough,
     CacheControl: options.cacheControl,
     ContentType: options.contentType,
     ContentDisposition: options.contentDisposition,
     ContentEncoding: options.contentEncoding,
   });
-  return hash2?.digest();
+  return [streamSize, hash2?.digest('hex')];
 }
 
 export async function osGetData(
@@ -134,8 +147,20 @@ export async function osGetFile(
   objectStorage: ObjectStorage,
   key: string,
   filepath: string,
+  hash: string | Hash
+): Promise<[streamSize: number, hash: string]>;
+export async function osGetFile(
+  objectStorage: ObjectStorage,
+  key: string,
+  filepath: string
+): Promise<[streamSize: number, hash: undefined]>;
+
+export async function osGetFile(
+  objectStorage: ObjectStorage,
+  key: string,
+  filepath: string,
   hash?: string | Hash
-): Promise<Buffer | undefined> {
+): Promise<[streamSize: number, hash: string | undefined]> {
   // decompression is not currently supported
   const s3 = createS3Cached(objectStorage);
   const response = await s3.getObject({
@@ -143,15 +168,15 @@ export async function osGetFile(
     Key: key,
   });
   const hash2 = typeof hash === 'string' ? createHash(hash) : hash;
-  return new Promise<Buffer | undefined>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const rStream = response.Body as Readable;
     const wStream = createWriteStream(filepath);
 
-    if (hash2) {
-      rStream.on('data', (chunk) => {
-        hash2.update(chunk);
-      });
-    }
+    let streamSize = 0;
+    rStream.on('data', (chunk) => {
+      streamSize += chunk.length;
+      hash2?.update(chunk);
+    });
 
     rStream
       .once('error', (error) => {
@@ -164,7 +189,7 @@ export async function osGetFile(
         reject(error);
       })
       .once('close', () => {
-        resolve(hash2?.digest());
+        resolve([streamSize, hash2?.digest('hex')]);
       });
   });
 }
