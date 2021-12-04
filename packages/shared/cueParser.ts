@@ -117,7 +117,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
     strCueSheet = strCueSheet.substr(1);
   }
 
-  for (const [index, orgLine] of strCueSheet.split(/\r?\n/).entries()) {
+  for (const [lineIndex, orgLine] of strCueSheet.split(/\r?\n/).entries()) {
     try {
       const line = orgLine.trim();
 
@@ -125,13 +125,13 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
         continue;
       }
 
-      const match = line.match(/^(\S+)(?:\s+(.+))?$/);
-      if (!match) {
+      const lineMatch = line.match(/^(\S+)(?:\s+(.+))?$/);
+      if (!lineMatch) {
         // 起こらないはず
         throw new Error('failed to parse command');
       }
 
-      const [, command, args] = match;
+      const [, command, args] = lineMatch;
 
       switch (command.toUpperCase()) {
         case 'CATALOG':
@@ -266,7 +266,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
-        error.message += ` at line ${index + 1}`;
+        error.message += ` at line ${lineIndex + 1}`;
       }
       throw error;
     }

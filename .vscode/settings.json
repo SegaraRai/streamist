@@ -1,7 +1,10 @@
 {
   "cSpell.words": [
     "fastify",
-    "vitesse",
+    "ffprobe",
+    "magick",
+    "mkclean",
+    "vitesse"
   ],
   "eslint.run": "onSave",
   "editor.codeActionsOnSave": {
