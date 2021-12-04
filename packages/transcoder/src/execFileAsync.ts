@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import logger from './logger';
+import logger from './logger.js';
 
 export interface ExecFileResult {
   stdout$$q: string;
@@ -31,6 +31,7 @@ export function execFileAsync(
         timeout,
       },
       (error, stdout, stderr) => {
+        logger.info(`exec-end ${file} ${error}`);
         if (error) {
           reject(error);
           return;

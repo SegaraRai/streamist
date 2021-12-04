@@ -1,9 +1,14 @@
 import { S3 } from '@aws-sdk/client-s3';
 import { createHash, Hash } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
-import type { Readable } from 'node:stream';
-import { decodeBuffer } from './contentEncoding';
-import { nodeReadableStreamToBuffer } from './stream';
+import { PassThrough, Readable } from 'node:stream';
+import { decodeBuffer } from './contentEncoding.js';
+import { nodeReadableStreamToBuffer } from './stream.js';
+
+export interface ObjectStorageCredentials {
+  readonly WASABI_ACCESS_KEY_ID: string;
+  readonly WASABI_SECRET_ACCESS_KEY: string;
+}
 
 export interface ObjectStorage {
   readonly provider: 'r2' | 'wasabi';
@@ -18,12 +23,26 @@ export interface ObjectStorageUploadOptions {
   contentDisposition?: string;
 }
 
-const s3CacheMap = new Map<string, S3>();
+let gCredentials: ObjectStorageCredentials | undefined;
+
+export function setOSCredentials(credentials: ObjectStorageCredentials) {
+  if (gCredentials) {
+    throw new Error('credentials already set');
+  }
+
+  gCredentials = { ...credentials };
+}
+
+const gS3CacheMap = new Map<string, S3>();
 
 function createS3Cached(objectStorage: ObjectStorage): S3 {
+  if (!gCredentials) {
+    throw new Error('credentials not set');
+  }
+
   const key = `os://${objectStorage.provider}/${objectStorage.region}`;
 
-  let s3 = s3CacheMap.get(key);
+  let s3 = gS3CacheMap.get(key);
   if (!s3) {
     switch (objectStorage.provider) {
       case 'r2':
@@ -34,13 +53,13 @@ function createS3Cached(objectStorage: ObjectStorage): S3 {
           endpoint: `https://${objectStorage.region}.wasabisys.com`,
           region: objectStorage.region,
           credentials: {
-            accessKeyId: process.env.SECRET_WASABI_ACCESS_KEY_ID,
-            secretAccessKey: process.env.SECRET_WASABI_SECRET_ACCESS_KEY,
+            accessKeyId: gCredentials.WASABI_ACCESS_KEY_ID,
+            secretAccessKey: gCredentials.WASABI_SECRET_ACCESS_KEY,
           },
         });
         break;
     }
-    s3CacheMap.set(key, s3);
+    gS3CacheMap.set(key, s3);
   }
 
   return s3;
@@ -76,24 +95,25 @@ export async function osPutFile(
   const s3 = createS3Cached(objectStorage);
   const stream = createReadStream(filepath);
   const hash2 = typeof hash === 'string' ? createHash(hash) : hash;
+  let passThrough: PassThrough | undefined;
   if (hash2) {
     stream.on('data', (chunk) => {
       hash2.update(chunk);
     });
+    // PassThrough is needed to read data along with sending it to the S3 stream (https://stackoverflow.com/a/37366093)
+    // do not listen passThrough's data events, or it won't be sent to S3
+    passThrough = new PassThrough();
+    stream.pipe(passThrough);
   }
-  await s3
-    .putObject({
-      Bucket: objectStorage.bucket,
-      Key: key,
-      Body: stream,
-      CacheControl: options.cacheControl,
-      ContentType: options.contentType,
-      ContentDisposition: options.contentDisposition,
-      ContentEncoding: options.contentEncoding,
-    })
-    .finally(() => {
-      stream.close();
-    });
+  await s3.putObject({
+    Bucket: objectStorage.bucket,
+    Key: key,
+    Body: passThrough || stream,
+    CacheControl: options.cacheControl,
+    ContentType: options.contentType,
+    ContentDisposition: options.contentDisposition,
+    ContentEncoding: options.contentEncoding,
+  });
   return hash2?.digest();
 }
 
@@ -116,7 +136,7 @@ export async function osGetFile(
   filepath: string,
   hash?: string | Hash
 ): Promise<Buffer | undefined> {
-  // compression is not currently supported
+  // decompression is not currently supported
   const s3 = createS3Cached(objectStorage);
   const response = await s3.getObject({
     Bucket: objectStorage.bucket,

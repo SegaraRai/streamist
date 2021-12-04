@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs';
-import { calcDHash } from './dHash';
-import { execAndLog } from './execAndLog';
-import { FFprobeResult, normalizeFFprobeTags } from './types/ffprobe';
-import type { ImageMagickResult } from './types/imageMagick';
+import { calcDHash } from './dHash.js';
+import { execAndLog } from './execAndLog.js';
+import { FFprobeResult, normalizeFFprobeTags } from './types/ffprobe.js';
+import type { ImageMagickResult } from './types/imageMagick.js';
 
 const isProductionOrStagingEnv =
   process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
@@ -110,6 +110,9 @@ export async function extractImageFromAudio(
       // 肥大化を避けるためにメタデータは削除
       '-map_metadata',
       '-1',
+      // 出力形式を指定
+      '-f',
+      'rawvideo',
       // 出力先：ファイル
       destPath,
     ],

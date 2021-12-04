@@ -1,5 +1,5 @@
-import { randomBytes } from 'crypto';
-import { encodeBase32 } from './base32';
+import { randomBytes } from 'node:crypto';
+import { encodeBase32 } from './base32.js';
 
 export const enum IdTypeCode {
   Album = 'al',

@@ -1,20 +1,26 @@
-import type { CueSheet } from '$shared/cueParser';
-import type { Region } from '$shared/regions';
+import type { Region } from '$shared/regions.js';
 import type {
   FFprobeFormat,
   FFprobeResult,
   FFprobeStreamAudio,
   FFprobeTags,
-} from './ffprobe';
-import type { ImageMagickImage, ImageMagickResult } from './imageMagick';
+} from './ffprobe.js';
+import type { ImageMagickImage, ImageMagickResult } from './imageMagick.js';
+
+export interface TranscoderRequestOptions {
+  callbackURL: string;
+  extractImages: boolean;
+  preferExternalCueSheet: boolean;
+}
 
 export interface TranscoderRequestAudio {
   type: 'audio';
   userId: string;
   sourceId: string;
   sourceFileId: string;
-  cueSheetSourceFileId?: string;
+  cueSheetSourceFileId?: string | null;
   region: Region;
+  options: TranscoderRequestOptions;
 }
 
 export interface TranscoderRequestImage {
@@ -26,6 +32,7 @@ export interface TranscoderRequestImage {
   albumId: string;
   region: Region;
   extracted: false;
+  options: TranscoderRequestOptions;
 }
 
 export interface TranscoderRequestImageExtracted
@@ -112,7 +119,7 @@ export interface TranscoderResponseArtifactAudio {
   tracks: TranscoderResponseArtifactAudioTrack[];
   probe: TranscoderResponseArtifactAudioProbe;
   sha256: string;
-  cueSheet?: CueSheet;
+  strCueSheet?: string;
   cueSheetSHA256?: string;
 }
 

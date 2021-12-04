@@ -1,11 +1,11 @@
-import { processAudioRequest } from './transcoder/audio';
-import { processImageRequest } from './transcoder/image';
+import { processAudioRequest } from './transcoder/audio.js';
+import { processImageRequest } from './transcoder/image.js';
 import type {
   TranscoderRequest,
   TranscoderRequestInternal,
   TranscoderResponse,
   TranscoderResponseArtifact,
-} from './types/transcoder';
+} from './types/transcoder.js';
 
 export async function transcode(
   request: TranscoderRequest

@@ -28,37 +28,37 @@ export const transcodeImageFormats: GetImageFormat[] = [
     _imageMagickResult: ImageMagickResult,
     _imageInfo: ImageMagickImage
   ): ImageFormat => ({
-    name: 'v1-jpeg-240',
+    name: 'v1-jpeg-160',
     format: 'jpg',
     extension: '.jpg',
     mimeType: 'image/jpeg',
     quality: 90,
-    maxWidth: 240,
-    maxHeight: 240,
+    maxWidth: 160,
+    maxHeight: 160,
   }),
   (
     _imageMagickResult: ImageMagickResult,
     _imageInfo: ImageMagickImage
   ): ImageFormat => ({
-    name: 'v1-jpeg-720',
+    name: 'v1-jpeg-480',
     format: 'jpg',
     extension: '.jpg',
     mimeType: 'image/jpeg',
     quality: 90,
-    maxWidth: 720,
-    maxHeight: 720,
+    maxWidth: 480,
+    maxHeight: 480,
   }),
   (
     _imageMagickResult: ImageMagickResult,
     _imageInfo: ImageMagickImage
   ): ImageFormat => ({
-    name: 'v1-jpeg-2400',
+    name: 'v1-jpeg-1280',
     format: 'jpg',
     extension: '.jpg',
     mimeType: 'image/jpeg',
     quality: 90,
-    maxWidth: 2400,
-    maxHeight: 2400,
+    maxWidth: 1280,
+    maxHeight: 1280,
   }),
   (
     _imageMagickResult: ImageMagickResult,

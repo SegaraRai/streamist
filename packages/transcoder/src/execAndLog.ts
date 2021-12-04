@@ -1,12 +1,12 @@
-import { CACHE_CONTROL_NO_STORE } from '$shared-server/cacheControl';
-import { gzipAsync } from '$shared-server/gzip';
-import { osPutData } from '$shared-server/objectStorage';
+import { CACHE_CONTROL_NO_STORE } from '$shared-server/cacheControl.js';
+import { gzipAsync } from '$shared-server/gzip.js';
+import { osPutData } from '$shared-server/objectStorage.js';
 import {
   getTranscodeLogFileKey,
   getTranscodeLogFileOS,
-} from '$shared-server/objectStorages';
-import { ExecFileResult, execFileAsync } from './execFileAsync';
-import logger from './logger';
+} from '$shared-server/objectStorages.js';
+import { ExecFileResult, execFileAsync } from './execFileAsync.js';
+import logger from './logger.js';
 
 async function uploadJSON(
   userId: string,

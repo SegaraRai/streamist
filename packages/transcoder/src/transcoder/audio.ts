@@ -15,6 +15,7 @@ import { decodeText } from '$shared/decodeText';
 import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { rename, stat, unlink } from 'node:fs/promises';
+import logger from '../logger';
 import {
   cleanAudio,
   extractImageFromAudio,
@@ -39,7 +40,8 @@ import { TranscodeError } from './error';
 function createTracksFromCueSheet(
   cueSheet: CueSheet,
   audioStream: FFprobeStreamAudio,
-  duration: number
+  duration: number,
+  tags: FFprobeTags = {}
 ): TranscoderResponseArtifactAudioTrack[] {
   // TODO: 以下のチェック処理をsharedに移動し、クライアント側で同じチェックを行う
 
@@ -123,10 +125,14 @@ function createTracksFromCueSheet(
 
       // TODO(feat)?: タグがない場合に曲側のタグを持ってくる
       const trackTags: FFprobeTags = {
-        album: cueSheet.title,
-        albumartist: cueSheet.performer,
-        artist: track.performer || cueSheet.performer,
-        title: track.title || cueSheet.title,
+        album: cueSheet.title || tags.album || tags.title,
+        albumartist: cueSheet.performer || tags.albumartist || tags.artist,
+        artist:
+          track.performer ||
+          cueSheet.performer ||
+          tags.albumartist ||
+          tags.artist,
+        title: track.title || cueSheet.title || tags.album || tags.title,
         //
         arranger: getTagFromTrackAndCueSheet(['ARRANGER']),
         composer: getTagFromTrackAndCueSheet(['COMPOSER']),
@@ -184,6 +190,33 @@ function createTracksFromCueSheet(
   );
 }
 
+async function createTracks(
+  audioStream: FFprobeStreamAudio,
+  tags: FFprobeTags,
+  cueSheet?: CueSheet
+): Promise<TranscoderResponseArtifactAudioTrack[]> {
+  // 曲長（秒）
+  const duration =
+    (parseInt(audioStream.duration_ts.toString(), 10) *
+      parseInt(audioStream.time_base.split('/')[0], 10)) /
+    parseInt(audioStream.time_base.split('/')[1], 10);
+
+  // トラック作成
+  const tracks: TranscoderResponseArtifactAudioTrack[] = cueSheet
+    ? createTracksFromCueSheet(cueSheet, audioStream, duration)
+    : [
+        {
+          duration,
+          streamIndex: audioStream.index,
+          tags,
+          // to be filled later
+          files: [],
+        },
+      ];
+
+  return tracks;
+}
+
 export async function processAudioRequest(
   request: TranscoderRequestAudio
 ): Promise<
@@ -192,8 +225,14 @@ export async function processAudioRequest(
   const createdFiles: string[] = [];
 
   try {
-    const { cueSheetSourceFileId, region, sourceFileId, sourceId, userId } =
-      request;
+    const {
+      cueSheetSourceFileId,
+      options,
+      region,
+      sourceFileId,
+      sourceId,
+      userId,
+    } = request;
 
     const sourceAudioFilepath = getTempFilepath(sourceFileId);
 
@@ -232,10 +271,12 @@ export async function processAudioRequest(
 
     // 画像ストリームのインデックスを取得
     // 複数ある場合は対応可能なもの全て（あまり想定してない）
-    const imageStreams = audioInfo.streams.filter(
-      (stream) =>
-        stream.codec_type === 'video' && !!stream.disposition.attached_pic
-    ) as FFprobeStreamVideo[];
+    const imageStreams = options.extractImages
+      ? audioInfo.streams.filter(
+          (stream): stream is FFprobeStreamVideo =>
+            stream.codec_type === 'video' && !!stream.disposition.attached_pic
+        )
+      : [];
 
     const wrappedImageStreams = await Promise.all(
       imageStreams.map(async (stream) => {
@@ -269,7 +310,7 @@ export async function processAudioRequest(
         }
       } catch (error: unknown) {
         // TODO(feat): log error
-        console.error(error);
+        logger.warn(error);
         continue;
       }
 
@@ -299,21 +340,16 @@ export async function processAudioRequest(
         filePath: wrappedImageStream.filepath,
         sha256,
         streamIndex: wrappedImageStream.stream.index,
+        options,
       });
     }
-
-    // 曲長（秒）
-    const duration =
-      (parseInt(audioStream.duration_ts.toString(), 10) *
-        parseInt(audioStream.time_base.split('/')[0], 10)) /
-      parseInt(audioStream.time_base.split('/')[1], 10);
 
     // CUEシート抽出
     // NOTE: 優先順位は外部CUEシート→内部CUEシート
     // TODO(prod): preferenceを設定できるようにする
     let strCueSheet: string | undefined;
     let cueSheetSHA256: string | undefined;
-    if (cueSheetSourceFileId) {
+    if (options.preferExternalCueSheet && cueSheetSourceFileId) {
       // NOTE: ダウンロードや変換で例外が発生する可能性あり
       const buffer = await osGetData(
         getSourceFileOS(region),
@@ -331,18 +367,7 @@ export async function processAudioRequest(
       ? parseCueSheet(strCueSheet)
       : undefined;
 
-    // トラック作成
-    const tracks: TranscoderResponseArtifactAudioTrack[] = cueSheet
-      ? createTracksFromCueSheet(cueSheet, audioStream, duration)
-      : [
-          {
-            duration,
-            streamIndex: audioStream.index,
-            tags,
-            // to be filled later
-            files: [],
-          },
-        ];
+    const tracks = await createTracks(audioStream, tags, cueSheet);
 
     // トランスコード
     // TODO(pref)?: 並列化
@@ -433,7 +458,7 @@ export async function processAudioRequest(
           mimeType: audioFormat.mimeType,
           extension: audioFormat.extension,
           fileSize: fileStat.size,
-          bitrate: fileStat.size / track.duration,
+          bitrate: (fileStat.size / track.duration) * 8,
           duration: track.duration,
           sha256,
         });
@@ -453,7 +478,7 @@ export async function processAudioRequest(
           streamInfo: audioStream,
         },
         sha256: sourceFileSHA256,
-        cueSheet,
+        strCueSheet,
         cueSheetSHA256,
       },
       extractedImageRequests,

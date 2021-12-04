@@ -1,5 +1,5 @@
-import type { Region } from '$shared/regions';
-import type { ObjectStorage } from './objectStorage';
+import type { Region } from '$shared/regions.js';
+import type { ObjectStorage } from './objectStorage.js';
 
 const developmentOSMap: ReadonlyMap<Region, ObjectStorage> = new Map<
   Region,
@@ -10,7 +10,7 @@ const developmentOSMap: ReadonlyMap<Region, ObjectStorage> = new Map<
     {
       provider: 'wasabi',
       region: 'ap-northeast-1',
-      bucket: 'staging-wasabi-ap-northeast-1.stst.page',
+      bucket: 'development-wasabi-ap-northeast-1.stst.page',
     },
   ],
 ]);
@@ -24,7 +24,7 @@ const transcodedImageFileOSMap: ReadonlyMap<Region, ObjectStorage> =
 const transcodeLogFileOS: ObjectStorage = {
   provider: 'wasabi',
   region: 'ap-northeast-1',
-  bucket: 'staging-wasabi-ap-northeast-1.stst.page',
+  bucket: 'development-wasabi-ap-northeast-1.stst.page',
 };
 
 export function getSourceFileOS(region: Region): ObjectStorage {
