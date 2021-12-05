@@ -3,3 +3,5 @@ import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from './cacheControl.js';
 export const SOURCE_FILE_CONTENT_ENCODING = 'identity';
 export const SOURCE_FILE_CONTENT_TYPE = 'application/octet-stream';
 export const SOURCE_FILE_CACHE_CONTROL = CACHE_CONTROL_PRIVATE_IMMUTABLE;
+export const SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN = 60;
+export const SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART = 4 * 60 * 60;

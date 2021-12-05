@@ -14,6 +14,8 @@ import {
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
+  SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
+  SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
 } from '$shared/sourceFileConfig.js';
 import { client } from '$/db/lib/client.js';
 import { SourceFileType, SourceState } from '$/db/lib/types.js';
@@ -87,7 +89,10 @@ function createPresignedMultipartURLs(
             UploadId: uploadId,
             PartNumber: index + 1,
             ContentLength: partSize,
-          })
+          }),
+          {
+            expiresIn: SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
+          }
         ),
       })
     )
@@ -113,7 +118,10 @@ function createPresignedURL(
       CacheControl: SOURCE_FILE_CACHE_CONTROL,
       ContentType: SOURCE_FILE_CONTENT_TYPE,
       ContentEncoding: SOURCE_FILE_CONTENT_ENCODING,
-    })
+    }),
+    {
+      expiresIn: SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
+    }
   );
 }
 

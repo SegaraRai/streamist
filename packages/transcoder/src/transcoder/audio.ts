@@ -392,6 +392,7 @@ export async function processAudioRequest(
         await transcodeAudio(
           userId,
           sourceFileId,
+          audioFormat.name,
           sourceAudioFilepath,
           transcodedAudioFilepath,
           comment,
@@ -410,6 +411,7 @@ export async function processAudioRequest(
           await cleanAudio(
             userId,
             sourceFileId,
+            audioFormat.name,
             tempFilepath,
             transcodedAudioFilepath,
             audioFormat.cleanArgs

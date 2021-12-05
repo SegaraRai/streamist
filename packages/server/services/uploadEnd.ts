@@ -215,6 +215,8 @@ export async function onSourceFileUploaded(
     });
   }
 
+  // TODO(prod): lock file
+
   const allFilesUploaded = sourceFile.source.files.every(
     (file) => file.id === sourceFileId || file.uploaded
   );

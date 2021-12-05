@@ -42,24 +42,24 @@ export async function dbTrackCreateTx(
   const isSameArtist = trackArtistName === albumArtistName;
 
   // TODO(pref): generate id before the transaction
-  const albumArtistId = await generateArtistId();
-  const albumId = await generateAlbumId();
-  const trackArtistId = isSameArtist ? albumArtistId : await generateArtistId();
-  const trackId = await generateTrackId();
+  const newAlbumArtistId = await generateArtistId();
+  const newAlbumId = await generateAlbumId();
+  const newTrackArtistId = isSameArtist ? null : await generateArtistId();
+  const newTrackId = await generateTrackId();
 
   const albumArtist = await dbArtistGetOrCreateByNameTx(
     txClient,
     userId,
     albumArtistName,
-    albumArtistId
+    newAlbumArtistId
   );
 
   const album = await dbAlbumGetOrCreateByNameTx(
     txClient,
     userId,
-    albumArtistId,
+    albumArtist.id,
     albumTitle,
-    albumId
+    newAlbumId
   );
 
   const trackArtist = isSameArtist
@@ -68,15 +68,15 @@ export async function dbTrackCreateTx(
         txClient,
         userId,
         trackArtistName,
-        trackArtistId
+        newTrackArtistId!
       );
 
   const track = await txClient.track.create({
     data: {
       ...data,
-      id: trackId,
-      artistId: trackArtistId,
-      albumId,
+      id: newTrackId,
+      artistId: trackArtist.id,
+      albumId: album.id,
       sourceId,
       userId,
     },

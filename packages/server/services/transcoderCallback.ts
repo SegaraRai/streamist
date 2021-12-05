@@ -307,9 +307,7 @@ function handleTranscoderResponseSync(response: TranscoderResponse): void {
 
 export function registerTranscoderCallback(app: FastifyInstance): void {
   app.post(TRANSCODER_CALLBACK_API_PATH, (request, reply) => {
-    if (
-      request.headers.authorization !== process.env.TRANSCODER_CALLBACK_SECRET
-    ) {
+    if (request.headers.authorization !== TRANSCODER_CALLBACK_API_TOKEN) {
       reply.code(401).send();
       return;
     }

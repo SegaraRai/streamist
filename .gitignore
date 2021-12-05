@@ -87,9 +87,3 @@ sw.*
 
 # Vim swap files
 *.swp
-
-# server
-packages/server/**/$*.ts
-packages/server/**/*.db
-packages/server/index.js
-packages/server/upload/

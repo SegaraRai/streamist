@@ -1,1 +1,5 @@
 .prisma/
+$*.ts
+index.js
+
+*.db

@@ -126,6 +126,7 @@ export async function extractImageFromAudio(
 export async function transcodeAudio(
   userId: string,
   srcFileId: string,
+  formatName: string,
   srcPath: string,
   destPath: string,
   comment: string | undefined,
@@ -165,7 +166,7 @@ export async function transcodeAudio(
     ffprobeTranscodeAudioTimeout,
     userId,
     srcFileId,
-    'audio_transcode',
+    `audio_transcode_${formatName}`,
     {
       index,
     }
@@ -177,6 +178,7 @@ export async function transcodeAudio(
 export async function cleanAudio(
   userId: string,
   srcFileId: string,
+  formatName: string,
   srcPath: string,
   destPath: string,
   preArgs: string[]
@@ -194,7 +196,7 @@ export async function cleanAudio(
     mkcleanCleanAudioTimeout,
     userId,
     srcFileId,
-    'audio_clean'
+    `audio_clean_${formatName}`
   );
 }
 
@@ -277,6 +279,7 @@ export async function calcImageDHash(
 export async function transcodeImage(
   userId: string,
   srcFileId: string,
+  formatName: string,
   srcPath: string,
   destPath: string,
   comment: string | undefined,
@@ -332,7 +335,7 @@ export async function transcodeImage(
     imagemagickTranscodeImageTimeout,
     userId,
     srcFileId,
-    'image_transcode'
+    `image_transcode_${formatName}`
   );
 }
 

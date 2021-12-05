@@ -101,6 +101,7 @@ export async function processImageRequest(
       await transcodeImage(
         userId,
         sourceFileId,
+        imageFormat.name,
         sourceImageFilepath,
         transcodedImageFilepath,
         comment,

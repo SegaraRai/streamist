@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { is } from '$shared/is.js';
 import { client } from './client.js';
+import { dbInitSentinel } from './initSentinel.js';
 import type { SourceState } from './types.js';
 
 function prng(seed: string): () => number {
@@ -28,72 +29,7 @@ export function init(): Promise<void> {
       let playlistCounter = 0;
 
       // create sentinel nodes
-      {
-        const id = '/';
-
-        await txClient.user.create({
-          data: {
-            id,
-            name: '.sentinel',
-            email: 'sentinel@example.org',
-          },
-        });
-
-        await txClient.tag.create({
-          data: {
-            id,
-            name: '.sentinel',
-            userId: id,
-          },
-        });
-
-        await txClient.source.create({
-          data: {
-            id,
-            state: is<SourceState>('transcoded'),
-            userId: id,
-          },
-        });
-
-        await txClient.artist.create({
-          data: {
-            id,
-            name: '.sentinel',
-            userId: id,
-          },
-        });
-
-        await txClient.album.create({
-          data: {
-            id,
-            title: '.sentinel',
-            userId: id,
-            artistId: id,
-          },
-        });
-
-        await txClient.track.create({
-          data: {
-            id,
-            title: '.sentinel',
-            discNumber: 1,
-            trackNumber: 1,
-            duration: 1,
-            userId: id,
-            artistId: id,
-            albumId: id,
-            sourceId: id,
-          },
-        });
-
-        await txClient.playlist.create({
-          data: {
-            id,
-            title: '.sentinel',
-            userId: id,
-          },
-        });
-      }
+      await dbInitSentinel(txClient);
 
       for (let i = 0; i < 10; i++) {
         const userId = `us${++userCounter}`;
