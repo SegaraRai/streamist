@@ -1,12 +1,12 @@
-import { client } from './lib/client';
-import { dbAlbumGetOrCreateByNameTx } from './album';
-import { dbArtistGetOrCreateByNameTx } from './artist';
-import { Album, Artist, Prisma, Track } from '$prisma/client';
 import {
   generateAlbumId,
   generateArtistId,
   generateTrackId,
 } from '$shared-server/generateId';
+import { Album, Artist, Prisma, Track } from '$prisma/client';
+import { dbAlbumGetOrCreateByNameTx } from './album';
+import { dbArtistGetOrCreateByNameTx } from './artist';
+import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
 
 export type CreateTrackData = Omit<
@@ -96,7 +96,7 @@ export function dbTrackCreate(
   [track: Track, trackArtist: Artist, album: Album, albumArtist: Artist]
 > {
   return client.$transaction(
-    async (txClient): Promise<[Track, Artist, Album, Artist]> =>
+    (txClient): Promise<[Track, Artist, Album, Artist]> =>
       dbTrackCreateTx(
         txClient,
         userId,

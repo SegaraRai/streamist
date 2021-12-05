@@ -1,7 +1,7 @@
-import { client } from '$/db/lib/client';
-import { HTTPError } from '$/utils/httpError';
 import { generateAlbumId } from '$shared-server/generateId';
 import type { Album } from '$prisma/client';
+import { client } from '$/db/lib/client';
+import { HTTPError } from '$/utils/httpError';
 
 export function getAlbums(userId: string, artistId?: string): Promise<Album[]> {
   return client.album.findMany({

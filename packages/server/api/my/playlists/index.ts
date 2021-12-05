@@ -5,7 +5,7 @@ export type Methods = {
     resBody: Playlist[];
   };
   post: {
-    reqBody: Pick<Playlist, 'name'>;
+    reqBody: Pick<Playlist, 'title'>;
     resBody: Playlist;
     status: 201;
   };

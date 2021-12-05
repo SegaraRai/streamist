@@ -1,7 +1,7 @@
 require('dotenv').config({ path: '.env' });
 
-const { nodeExternalsPlugin } = require('esbuild-node-externals');
 const { build } = require('esbuild');
+const { nodeExternalsPlugin } = require('esbuild-node-externals');
 
 build({
   entryPoints: ['./src/indexDevelopment.ts'],

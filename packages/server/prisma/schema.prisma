@@ -62,17 +62,26 @@ model Source {
 }
 
 model SourceFile {
-  id        String   @id
-  region    String
-  filename  String?
-  sha256    String
-  fileSize  Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  source    Source   @relation(fields: [sourceId], references: [id])
-  sourceId  String
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
+  id             String   @id
+  // 'audio' | 'cueSheet' | 'image'
+  type           String
+  region         String
+  filename       String
+  fileSize       Int
+  sha256         String?
+  // only for audio files (optional)
+  cueSheetFileId String?
+  // only for image files (required)
+  albumId        String?
+  uploaded       Boolean  @default(false)
+  // UploadId for multipart uploads
+  uploadId       String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+  source         Source   @relation(fields: [sourceId], references: [id])
+  sourceId       String
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
 
   @@index([userId])
   @@index([sourceId])

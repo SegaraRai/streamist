@@ -1,21 +1,22 @@
 import type { FastifyInstance } from 'fastify';
 import { generateImageId } from '$shared-server/generateId.js';
+import { parseDate } from '$shared/parseDate';
+import type { Region } from '$shared/regions';
+import type { FFprobeTags } from '$transcoder/types/ffprobe';
 import type {
-  TranscoderRequest,
   TranscoderResponse,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactImage,
 } from '$transcoder/types/transcoder.js';
 import { dbAlbumAddImageTx } from '$/db/album.js';
-import { dbTrackCreateTx } from '$/db/track.js';
 import { client } from '$/db/lib/client.js';
 import type { SourceState, TransactionalPrismaClient } from '$/db/lib/types.js';
-import type { Region } from '$shared/regions';
-import { parseDate } from '$shared/parseDate';
-import type { FFprobeTags } from '$transcoder/types/ffprobe';
+import { dbTrackCreateTx } from '$/db/track.js';
+import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
 
-export const transcoderCallbackURL = `${process.env.BASE_URL}/internal/transcoder/callback`;
-export const transcoderCallbackSecret = `Bearer ${process.env.TRANSCODER_CALLBACK_SECRET}`;
+export const TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
+export const TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${TRANSCODER_CALLBACK_API_PATH}`;
+export const TRANSCODER_CALLBACK_API_TOKEN = `Bearer ${SECRET_TRANSCODER_CALLBACK_SECRET}`;
 
 function numberOr<T>(str: string | null | undefined, fallback: T): number | T {
   if (!str) {
@@ -102,7 +103,7 @@ async function registerImage(
       files: {
         create: artifact.files.map((file) => ({
           id: file.fileId,
-          region: region,
+          region,
           format: file.formatName,
           mimeType: file.mimeType,
           fileSize: file.fileSize,
@@ -121,13 +122,16 @@ async function registerImage(
 
 async function markSourceAs(
   txClient: TransactionalPrismaClient,
-  request: TranscoderRequest,
-  state: SourceState
+  userId: string,
+  sourceId: string,
+  state: SourceState,
+  preState: SourceState
 ): Promise<void> {
   await txClient.source.updateMany({
     where: {
-      id: request.sourceId,
-      userId: request.userId,
+      id: sourceId,
+      userId,
+      state: preState,
     },
     data: {
       state,
@@ -135,39 +139,65 @@ async function markSourceAs(
   });
 }
 
-async function handleTranscoderResponseAudio(
+async function handleTranscoderResponse(
   response: TranscoderResponse
 ): Promise<void> {
-  const { artifacts, request } = response;
+  const { artifacts } = response;
+
+  const audioArtifacts = artifacts.filter(
+    (artifact): artifact is TranscoderResponseArtifactAudio =>
+      artifact.type === 'audio'
+  );
+  const imageArtifacts = artifacts.filter(
+    (artifact): artifact is TranscoderResponseArtifactImage =>
+      artifact.type === 'image'
+  );
 
   await client.$transaction(async (txClient) => {
-    const audioArtifacts = artifacts.filter(
-      (artifact): artifact is TranscoderResponseArtifactAudio =>
-        artifact.type === 'audio'
-    );
-    const imageArtifacts = artifacts.filter(
-      (artifact): artifact is TranscoderResponseArtifactImage =>
-        artifact.type === 'image'
-    );
+    const markedSourceIdSet = new Set<string>();
+    const markSourceIdAsTranscoded = async (
+      userId: string,
+      sourceId: string
+    ) => {
+      if (markedSourceIdSet.has(sourceId)) {
+        return;
+      }
+      markedSourceIdSet.add(sourceId);
+      await markSourceAs(
+        txClient,
+        userId,
+        sourceId,
+        'transcoded',
+        'transcoding'
+      );
+    };
 
     // register album
-    let albumId: string | undefined;
+    const sourceFileIdToAlbumIdMap = new Map<string, string>();
     for (const artifact of audioArtifacts) {
+      const {
+        source: { filename, options, region, sourceFileId, sourceId, userId },
+      } = artifact;
+
       for (const artifactTrack of artifact.tracks) {
         const { duration, files, tags } = artifactTrack;
 
         const date = (tags.date && parseDate(tags.date)) || undefined;
         const [discNumber, trackNumber] = parseDiscAndTrackNumber(tags);
 
+        const defaultUnknownTrackTitle = options.useFilenameAsUnknownTrackTitle
+          ? filename
+          : options.defaultUnknownTrackTitle;
+
         const [track, , album] = await dbTrackCreateTx(
           txClient,
-          request.userId,
-          request.sourceId,
-          tags.album || request.options.defaultUnknownAlbumTitle,
-          tags.albumartist || request.options.defaultUnknownAlbumArtist,
-          tags.artist || request.options.defaultUnknownTrackArtist,
+          userId,
+          sourceId,
+          tags.album || options.defaultUnknownAlbumTitle,
+          tags.albumartist || options.defaultUnknownAlbumArtist,
+          tags.artist || options.defaultUnknownTrackArtist,
           {
-            title: tags.title || request.options.defaultUnknownTrackTitle,
+            title: tags.title || defaultUnknownTrackTitle,
             titleSort: tags.titlesort || null,
             discNumber,
             trackNumber,
@@ -181,6 +211,8 @@ async function handleTranscoderResponseAudio(
             replayGainPeak: floatOr(tags.replaygain_track_peak, null),
           }
         );
+
+        sourceFileIdToAlbumIdMap.set(sourceFileId, album.id);
 
         // update album
         {
@@ -198,7 +230,7 @@ async function handleTranscoderResponseAudio(
             albumPeak != null
           ) {
             await txClient.album.updateMany({
-              where: { id: album.id, userId: request.userId },
+              where: { id: album.id, userId },
               data: {
                 ...(albumTitleSort != null ? { albumTitleSort } : {}),
                 ...(albumGain != null ? { replayGainGain: albumGain } : {}),
@@ -214,109 +246,57 @@ async function handleTranscoderResponseAudio(
           await txClient.trackFile.create({
             data: {
               id: file.fileId,
-              region: request.region,
+              region,
               format: file.formatName,
               mimeType: file.mimeType,
               fileSize: file.fileSize,
               sha256: file.sha256,
               duration: file.duration,
               trackId: track.id,
-              userId: request.userId,
+              userId,
             },
           });
         }
-
-        if (!albumId) {
-          albumId = album.id;
-        }
       }
+
+      await markSourceIdAsTranscoded(userId, sourceId);
     }
 
     // register images
-    if (albumId) {
-      for (const artifact of imageArtifacts) {
-        if (artifact.request.extracted) {
-          const sourceFileId = artifact.request.sourceFileId;
-          await txClient.sourceFile.create({
-            data: {
-              id: sourceFileId,
-              userId: request.userId,
-              sourceId: request.sourceId,
-              fileSize: artifact.request.fileSize,
-              sha256: artifact.request.sha256,
-              region: artifact.request.region,
-            },
-          });
+    for (const artifact of imageArtifacts) {
+      const { source } = artifact;
+      const { extracted, region, sourceId, userId } = source;
+
+      let albumId;
+
+      if (extracted) {
+        albumId = sourceFileIdToAlbumIdMap.get(source.audioSourceFileId);
+        if (!albumId) {
+          // something went wrong with transcoding audio
+          // TODO(prod): remove transcoded images
+          // TODO(extractedImage)?: 抽出した画像ファイルをS3に上げる場合、削除
+          continue;
         }
 
-        const imageId = await generateImageId();
-        await registerImage(
-          txClient,
-          artifact,
-          request.region,
-          request.userId,
-          request.sourceId,
-          albumId,
-          imageId
-        );
-      }
-    }
-
-    // mark source as completed
-    await markSourceAs(txClient, request, 'transcoded');
-  });
-}
-
-async function handleTranscoderResponseImage(
-  response: TranscoderResponse
-): Promise<void> {
-  const { artifacts, request } = response;
-
-  if (request.type !== 'image') {
-    // should not occur
-    return;
-  }
-
-  await client.$transaction(async (txClient) => {
-    for (const artifact of artifacts) {
-      if (artifact.type !== 'image') {
-        // should not occur
-        continue;
+        // TODO(extractedImage)?: 抽出した画像ファイルをS3に上げる場合、DBに登録するならここ
+      } else {
+        albumId = source.albumId;
       }
 
       const imageId = await generateImageId();
       await registerImage(
         txClient,
         artifact,
-        request.region,
-        request.userId,
-        request.sourceId,
-        request.albumId,
+        region,
+        userId,
+        sourceId,
+        albumId,
         imageId
       );
+
+      await markSourceIdAsTranscoded(userId, sourceId);
     }
-
-    // mark source as completed
-    await markSourceAs(txClient, request, 'transcoded');
   });
-}
-
-async function handleTranscoderResponse(
-  response: TranscoderResponse
-): Promise<void> {
-  if (response.error != null) {
-    return;
-  }
-
-  switch (response.request.type) {
-    case 'audio':
-      await handleTranscoderResponseAudio(response);
-      break;
-
-    case 'image':
-      await handleTranscoderResponseImage(response);
-      break;
-  }
 }
 
 function handleTranscoderResponseSync(response: TranscoderResponse): void {
@@ -326,10 +306,9 @@ function handleTranscoderResponseSync(response: TranscoderResponse): void {
 }
 
 export function registerTranscoderCallback(app: FastifyInstance): void {
-  app.post('/internal/transcoder/callback', async (request, reply) => {
+  app.post(TRANSCODER_CALLBACK_API_PATH, (request, reply) => {
     if (
-      request.headers['authorization'] !==
-      process.env.TRANSCODER_CALLBACK_SECRET
+      request.headers.authorization !== process.env.TRANSCODER_CALLBACK_SECRET
     ) {
       reply.code(401).send();
       return;

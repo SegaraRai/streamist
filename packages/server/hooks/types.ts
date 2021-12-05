@@ -1,8 +1,8 @@
 import type {
   onRequestHookHandler,
+  preHandlerHookHandler,
   preParsingHookHandler,
   preValidationHookHandler,
-  preHandlerHookHandler,
 } from 'fastify';
 
 export type OnRequestHookHandler =

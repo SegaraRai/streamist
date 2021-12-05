@@ -1,6 +1,6 @@
+import type { Prisma } from '$prisma/client';
 import { client } from './client';
 import type { TransactionalPrismaClient } from './types';
-import type { Prisma } from '$prisma/client';
 
 const userIdColumn = 'userId' as const;
 

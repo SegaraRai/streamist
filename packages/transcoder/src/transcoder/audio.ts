@@ -1,6 +1,20 @@
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
+import { Stats } from 'node:fs';
 import { rename, stat, unlink } from 'node:fs/promises';
+import { generateTranscodedAudioFileId } from '$shared-server/generateId.js';
+import {
+  osGetData,
+  osGetFile,
+  osPutFile,
+} from '$shared-server/objectStorage.js';
+import {
+  getSourceFileKey,
+  getSourceFileOS,
+  getTranscodedAudioFileKey,
+  getTranscodedAudioFileOS,
+} from '$shared-server/objectStorages.js';
+import { CueSheet, parseCueSheet } from '$shared/cueParser.js';
+import { decodeText } from '$shared/decodeText.js';
 import logger from '../logger.js';
 import {
   cleanAudio,
@@ -8,38 +22,25 @@ import {
   probeAudio,
   transcodeAudio,
 } from '../mediaTools.js';
-import { getNFSTempFilepath, getTempFilepath } from '../tempFile.js';
+import {
+  generateTempFilename,
+  getNFSTempFilepath,
+  getTempFilepath,
+} from '../tempFile.js';
+import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig.js';
 import type {
   FFprobeStreamAudio,
   FFprobeStreamVideo,
   FFprobeTags,
 } from '../types/ffprobe.js';
 import type {
-  TranscoderRequestAudio,
-  TranscoderRequestImageExtracted,
+  TranscoderRequestFileAudio,
+  TranscoderRequestFileImageExtracted,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactAudioTrack,
 } from '../types/transcoder.js';
 import { getTranscodeAudioFormats } from './audioFormats.js';
 import { TranscodeError } from './error.js';
-import { decodeText } from '$shared/decodeText.js';
-import { CueSheet, parseCueSheet } from '$shared/cueParser.js';
-import {
-  getSourceFileKey,
-  getSourceFileOS,
-  getTranscodedAudioFileKey,
-  getTranscodedAudioFileOS,
-} from '$shared-server/objectStorages.js';
-import {
-  osGetData,
-  osGetFile,
-  osPutFile,
-} from '$shared-server/objectStorage.js';
-import {
-  generateSourceFileId,
-  generateTranscodedAudioFileId,
-} from '$shared-server/generateId.js';
-import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from '$shared-server/cacheControl.js';
 
 function createTracksFromCueSheet(
   cueSheet: CueSheet,
@@ -222,9 +223,9 @@ function createTracks(
 }
 
 export async function processAudioRequest(
-  request: TranscoderRequestAudio
+  file: TranscoderRequestFileAudio
 ): Promise<
-  [TranscoderResponseArtifactAudio, TranscoderRequestImageExtracted[]]
+  [TranscoderResponseArtifactAudio, TranscoderRequestFileImageExtracted[]]
 > {
   const createdFiles: string[] = [];
 
@@ -236,7 +237,7 @@ export async function processAudioRequest(
       sourceFileId,
       sourceId,
       userId,
-    } = request;
+    } = file;
 
     const sourceAudioFilepath = options.downloadAudioToNFS
       ? getNFSTempFilepath(sourceFileId)
@@ -284,76 +285,56 @@ export async function processAudioRequest(
         )
       : [];
 
-    const wrappedImageStreams = await Promise.all(
-      imageStreams.map(async (stream) => {
-        const imageFileId = await generateSourceFileId();
-        const filepath = getTempFilepath(imageFileId);
-        return {
-          filepath,
-          imageFileId,
-          stream,
-        };
-      })
-    );
-
-    const extractedImageRequests: TranscoderRequestImageExtracted[] = [];
+    const extractedImageFiles: TranscoderRequestFileImageExtracted[] = [];
 
     // 画像抽出処理
     // TODO(pref)?: 並列化
-    for (const wrappedImageStream of wrappedImageStreams) {
+    for (const imageStream of imageStreams) {
+      const imageFilepath = getTempFilepath(generateTempFilename());
+
+      let imageFileStat: Stats;
       try {
         // 画像を抽出
         await extractImageFromAudio(
           userId,
           sourceFileId,
           sourceAudioFilepath,
-          wrappedImageStream.filepath,
-          wrappedImageStream.stream.index
+          imageFilepath,
+          imageStream.index
         );
 
-        if (!existsSync(wrappedImageStream.filepath)) {
-          throw new Error('failed to extract image');
-        }
+        imageFileStat = await stat(imageFilepath);
       } catch (error: unknown) {
         // TODO(feat): log error
         logger.warn(error);
         continue;
       }
 
-      // アップロード
-      const imageSourceFileId = wrappedImageStream.imageFileId;
-
-      const [imageFileSize, sha256] = await osPutFile(
-        getSourceFileOS(region),
-        getSourceFileKey(userId, imageSourceFileId),
-        wrappedImageStream.filepath,
-        {
-          cacheControl: CACHE_CONTROL_PRIVATE_IMMUTABLE,
-          contentType: 'application/octet-stream',
-        },
-        'sha256'
-      );
+      // TODO(extractedImage): S3に抽出した画像ファイルをアップロードするならここで
 
       // ジョブ追加
-      extractedImageRequests.push({
+      extractedImageFiles.push({
         type: 'image',
-        extracted: true,
-        region,
         userId,
         sourceId,
-        sourceFileId, // not image's sourceFileId
-        albumId: '',
-        filePath: wrappedImageStream.filepath,
-        fileSize: imageFileSize,
-        sha256,
-        streamIndex: wrappedImageStream.stream.index,
         options,
+        extracted: true,
+        // TODO(extractedImage): 抽出した画像ファイルを別のsourceFileとして扱うならIDを生成してここを変更する
+        // このIDがサーバー側で参照され、トランスコード後のファイル群の親sourceFileとして扱われる
+        sourceFileId,
+        region,
+        fileSize: imageFileStat.size,
+        filename: '',
+        sha256: '',
+        albumId: '',
+        audioSourceFileId: sourceFileId,
+        filePath: imageFilepath,
+        streamIndex: imageStream.index,
       });
     }
 
     // CUEシート抽出
     // NOTE: 優先順位は外部CUEシート→内部CUEシート
-    // TODO(prod): preferenceを設定できるようにする
     let strCueSheet: string | undefined;
     let cueSheetSHA256: string | undefined;
     if (options.preferExternalCueSheet && cueSheetSourceFileId) {
@@ -451,7 +432,7 @@ export async function processAudioRequest(
           ),
           transcodedAudioFilepath,
           {
-            cacheControl: CACHE_CONTROL_PRIVATE_IMMUTABLE,
+            cacheControl: TRANSCODED_FILE_CACHE_CONTROL,
             contentType: audioFormat.mimeType,
           },
           'sha256'
@@ -477,7 +458,7 @@ export async function processAudioRequest(
     return [
       {
         type: 'audio',
-        request,
+        source: file,
         tracks,
         probe: {
           ffprobeResult: audioInfo,
@@ -488,7 +469,7 @@ export async function processAudioRequest(
         strCueSheet,
         cueSheetSHA256,
       },
-      extractedImageRequests,
+      extractedImageFiles,
     ];
   } catch (error: unknown) {
     try {

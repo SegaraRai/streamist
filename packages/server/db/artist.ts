@@ -1,8 +1,8 @@
 import { expectType } from 'tsd';
+import { generateArtistId } from '$shared-server/generateId';
+import { Artist, Prisma } from '$prisma/client';
 import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
-import { Artist, Prisma } from '$prisma/client';
-import { generateArtistId } from '$shared-server/generateId';
 
 // check types for `dbArtistGetOrCreateByNameTx`
 /* #__PURE__ */ expectType<'Artist'>(Prisma.ModelName.Artist);

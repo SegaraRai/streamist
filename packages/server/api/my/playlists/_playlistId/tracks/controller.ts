@@ -1,7 +1,7 @@
-import { defineController } from './$relay';
 import { client } from '$/db/lib/client';
 import { dbPlaylistAddTrackTx, dbPlaylistGetTracks } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ params, user }) => {

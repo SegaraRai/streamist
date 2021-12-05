@@ -1,7 +1,7 @@
 // register vue composition api globally
-import { ViteSSG } from 'vite-ssg';
-import generatedRoutes from 'virtual:generated-pages';
 import { setupLayouts } from 'virtual:generated-layouts';
+import generatedRoutes from 'virtual:generated-pages';
+import { ViteSSG } from 'vite-ssg';
 import App from './App.vue';
 
 // windicss layers

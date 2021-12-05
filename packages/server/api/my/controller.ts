@@ -1,6 +1,6 @@
-import { defineController } from './$relay';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ user }) => {

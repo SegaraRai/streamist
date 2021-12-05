@@ -1,8 +1,8 @@
-import { defineController } from './$relay';
-import { client } from '$/db/lib/client';
-import { generateAlbumId } from '$/utils/id';
-import { HTTPError } from '$/utils/httpError';
+import { generateAlbumId } from '$shared-server/generateId';
 import { dbAlbumCreate, dbAlbumGetOrCreateByName } from '$/db/album';
+import { client } from '$/db/lib/client';
+import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ user }) => {

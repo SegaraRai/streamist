@@ -1,7 +1,7 @@
-import { defineController } from './$relay';
-import { client } from '$/db/lib/client';
-import { generateArtistId } from '$/utils/id';
+import { generateArtistId } from '$shared-server/generateId';
 import { dbArtistGetOrCreateByName } from '$/db/artist';
+import { client } from '$/db/lib/client';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ user }) => {

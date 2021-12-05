@@ -2,7 +2,7 @@ import { processAudioRequest } from './transcoder/audio.js';
 import { processImageRequest } from './transcoder/image.js';
 import type {
   TranscoderRequest,
-  TranscoderRequestInternal,
+  TranscoderRequestFileInternal,
   TranscoderResponse,
   TranscoderResponseArtifact,
 } from './types/transcoder.js';
@@ -10,33 +10,39 @@ import type {
 export async function transcode(
   request: TranscoderRequest
 ): Promise<TranscoderResponse> {
-  const artifacts: TranscoderResponseArtifact[] = [];
+  try {
+    const artifacts: TranscoderResponseArtifact[] = [];
 
-  const requests: TranscoderRequestInternal[] = [request];
+    const files: TranscoderRequestFileInternal[] = [...request.files];
 
-  while (requests.length > 0) {
-    const currentRequest = requests.shift()!;
-    switch (currentRequest.type) {
-      case 'audio': {
-        const [artifact, imageRequests] = await processAudioRequest(
-          currentRequest
-        );
-        requests.push(...imageRequests);
-        artifacts.push(artifact);
-        break;
-      }
+    while (files.length > 0) {
+      const file = files.shift()!;
+      switch (file.type) {
+        case 'audio': {
+          const [artifact, imageFiles] = await processAudioRequest(file);
+          files.push(...imageFiles);
+          artifacts.push(artifact);
+          break;
+        }
 
-      case 'image': {
-        const artifact = await processImageRequest(currentRequest);
-        artifacts.push(artifact);
-        break;
+        case 'image': {
+          const artifact = await processImageRequest(file);
+          artifacts.push(artifact);
+          break;
+        }
       }
     }
-  }
 
-  return {
-    request,
-    artifacts,
-    error: null,
-  };
+    return {
+      request,
+      artifacts,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      request,
+      artifacts: [],
+      error: String(error),
+    };
+  }
 }

@@ -1,10 +1,10 @@
 import Fastify, { FastifyServerFactory } from 'fastify';
-import helmet from 'fastify-helmet';
 import cors from 'fastify-cors';
+import helmet from 'fastify-helmet';
 import fastifyJwt from 'fastify-jwt';
-import { API_JWT_SECRET, API_BASE_PATH } from '$/services/env';
-import { registerTranscoderCallback } from '$/services/transcoderCallback';
 import server from '$/$server';
+import { API_BASE_PATH, API_JWT_SECRET } from '$/services/env';
+import { registerTranscoderCallback } from '$/services/transcoderCallback';
 
 export const init = (serverFactory?: FastifyServerFactory) => {
   const app = Fastify({ serverFactory });

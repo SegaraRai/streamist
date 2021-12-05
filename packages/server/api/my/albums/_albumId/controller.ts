@@ -1,7 +1,7 @@
-import { defineController } from './$relay';
-import { deleteAlbum, updateAlbum } from '$/services/albums';
 import { client } from '$/db/lib/client';
+import { deleteAlbum, updateAlbum } from '$/services/albums';
 import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ params, query, user }) => {

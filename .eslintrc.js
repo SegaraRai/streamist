@@ -19,5 +19,47 @@ module.exports = {
         },
       },
     ],
+    'sort-imports': [
+      'error',
+      {
+        ignoreCase: false,
+        ignoreDeclarationSort: true,
+        ignoreMemberSort: false,
+        allowSeparatedGroups: true,
+      },
+    ],
+    'import/order': [
+      'error',
+      {
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: false,
+        },
+        groups: [
+          'builtin',
+          'external',
+          'unknown',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+        ],
+        pathGroups: [
+          {
+            pattern: '$/**',
+            group: 'internal',
+          },
+          {
+            pattern: '$prisma/**',
+            group: 'internal',
+            position: 'before',
+          },
+          {
+            pattern: '$*/**',
+            group: 'unknown',
+          },
+        ],
+      },
+    ],
   },
 };

@@ -1,7 +1,7 @@
-import { defineController } from './$relay';
+import { generatePlaylistId } from '$shared-server/generateId';
 import { client } from '$/db/lib/client';
 import { dbPlaylistCreate } from '$/db/playlist';
-import { generatePlaylistId } from '$/utils/id';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ user }) => {
@@ -15,7 +15,7 @@ export default defineController(() => ({
   post: async ({ body, user }) => {
     const playlist = await dbPlaylistCreate({
       id: await generatePlaylistId(),
-      name: body.name,
+      title: body.title,
       userId: user.id,
     });
 

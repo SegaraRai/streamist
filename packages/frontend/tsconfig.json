@@ -35,6 +35,9 @@
       "$prisma/*": [
         "../server/node_modules/.prisma/*"
       ],
+      ".prisma/*": [
+        "../server/node_modules/.prisma/*"
+      ],
       "$shared/*": [
         "../shared/*"
       ],

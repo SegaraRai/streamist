@@ -1,5 +1,5 @@
-import type { ObjectStorage } from './objectStorage.js';
 import type { Region } from '$shared/regions.js';
+import type { ObjectStorage } from './objectStorage.js';
 
 const developmentOSMap: ReadonlyMap<Region, ObjectStorage> =
   /* #__PURE__ */ new Map<Region, ObjectStorage>([

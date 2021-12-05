@@ -1,6 +1,6 @@
 import { expectType } from 'tsd';
+import { generateAlbumId } from '$shared-server/generateId';
 import { Album, Image, Prisma } from '$prisma/client';
-import { generateAlbumId } from '$/utils/id';
 import { client } from './lib/client';
 import { ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID } from './lib/config';
 import {
@@ -87,7 +87,7 @@ export async function dbAlbumGetOrCreateByNameTx(
   if (album.id === newAlbumId) {
     await txClient.albumImage.create({
       data: {
-        userId: userId,
+        userId,
         albumId: album.id,
         imageId: ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID,
         nextImageId: null,

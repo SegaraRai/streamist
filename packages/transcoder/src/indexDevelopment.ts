@@ -1,16 +1,19 @@
 import './checkEnv.js';
 import './initCredentials.js';
 
+import fetch from 'node-fetch';
 import { createServer } from 'node:http';
+import { nodeReadableStreamToBuffer } from '$shared-server/stream.js';
+import { TRANSCODER_API_PATH, TRANSCODER_PORT } from './devConfig.js';
 import logger from './logger.js';
 import { transcode } from './transcode.js';
-import { nodeReadableStreamToBuffer } from '$shared-server/stream.js';
+import type { TranscoderRequest } from './types/transcoder.js';
 
 const server = createServer();
 
 server.on('request', (req, res) => {
   (async () => {
-    if (req.method === 'POST' && req.url === '/api/transcode') {
+    if (req.method === 'POST' && req.url === TRANSCODER_API_PATH) {
       if (!/^application\/json;?/.test(req.headers['content-type'] || '')) {
         res.statusCode = 400;
         res.setHeader('Content-Type', 'text/plain');
@@ -18,17 +21,31 @@ server.on('request', (req, res) => {
         return;
       }
 
-      const transcodeRequest = JSON.parse(
+      const transcoderRequest = JSON.parse(
         (await nodeReadableStreamToBuffer(req)).toString('utf-8')
-      );
+      ) as TranscoderRequest;
 
-      const transcodeResponse = await transcode(transcodeRequest);
+      logger.info(transcoderRequest);
 
-      // NOTE: send request to transcodeRequest.callback on production
+      transcode(transcoderRequest)
+        .then((transcoderResponse) => {
+          logger.info(transcoderResponse);
 
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify(transcodeResponse, null, 2));
+          return fetch(transcoderRequest.callbackURL, {
+            method: 'POST',
+            headers: {
+              Authorization: transcoderRequest.callbackToken,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(transcoderResponse),
+          });
+        })
+        .catch((error) => {
+          logger.error(error);
+        });
+
+      res.statusCode = 204;
+      res.end();
 
       return;
     }
@@ -46,4 +63,4 @@ server.on('request', (req, res) => {
   });
 });
 
-server.listen(8744);
+server.listen(TRANSCODER_PORT);

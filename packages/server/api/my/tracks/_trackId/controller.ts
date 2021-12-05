@@ -1,9 +1,9 @@
-import { defineController } from './$relay';
+import { generateAlbumId, generateArtistId } from '$shared-server/generateId';
+import { dbAlbumGetOrCreateByNameTx } from '$/db/album';
+import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
-import { dbAlbumGetOrCreateByNameTx } from '$/db/album';
-import { generateAlbumId, generateArtistId } from '$/utils/id';
-import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ params, query, user }) => {
@@ -14,11 +14,11 @@ export default defineController(() => ({
       },
       include: {
         artist: !!query?.includeTrackArtist,
-        album: !!query?.includeAlbum
+        album: query?.includeAlbum
           ? {
               include: {
                 artist: !!query?.includeAlbumArtist,
-                images: !!query?.includeAlbumImages
+                images: query?.includeAlbumImages
                   ? {
                       include: {
                         image: true,
@@ -137,9 +137,5 @@ export default defineController(() => ({
     });
 
     return { status: 204, body: data };
-  },
-  delete: async ({ params, user }) => {
-    // TODO(track): implement delete track
-    return { status: 204 };
   },
 }));

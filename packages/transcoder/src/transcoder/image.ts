@@ -1,44 +1,44 @@
 import { stat, unlink } from 'node:fs/promises';
-import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools.js';
-import { getTempFilepath } from '../tempFile.js';
-import type {
-  TranscoderRequestImage,
-  TranscoderRequestImageExtracted,
-  TranscoderResponseArtifactImage,
-  TranscoderResponseArtifactImageFile,
-} from '../types/transcoder.js';
-import { TranscodeError } from './error.js';
-import { getTranscodeImageFormats } from './imageFormats.js';
+import { generateTranscodedImageFileId } from '$shared-server/generateId.js';
+import { osGetFile, osPutFile } from '$shared-server/objectStorage.js';
 import {
   getSourceFileKey,
   getSourceFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
 } from '$shared-server/objectStorages.js';
-import { osGetFile, osPutFile } from '$shared-server/objectStorage.js';
-import { generateTranscodedImageFileId } from '$shared-server/generateId.js';
-import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from '$shared-server/cacheControl.js';
+import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools.js';
+import { getTempFilepath } from '../tempFile.js';
+import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig.js';
+import type {
+  TranscoderRequestFileImage,
+  TranscoderRequestFileImageExtracted,
+  TranscoderResponseArtifactImage,
+  TranscoderResponseArtifactImageFile,
+} from '../types/transcoder.js';
+import { TranscodeError } from './error.js';
+import { getTranscodeImageFormats } from './imageFormats.js';
 
 export async function processImageRequest(
-  request: TranscoderRequestImage | TranscoderRequestImageExtracted
+  file: TranscoderRequestFileImage | TranscoderRequestFileImageExtracted
 ): Promise<TranscoderResponseArtifactImage> {
   const createdFiles: string[] = [];
 
   try {
-    const { userId, sourceId, sourceFileId, region, extracted } = request;
+    const { extracted, region, sourceFileId, sourceId, userId } = file;
 
     const transcodedFiles: TranscoderResponseArtifactImageFile[] = [];
 
     const sourceImageFilepath = extracted
-      ? request.filePath
+      ? file.filePath
       : getTempFilepath(sourceFileId);
 
     createdFiles.push(sourceImageFilepath);
 
     // ユーザーがアップロードした画像ファイルをローカルにダウンロード
     let sourceFileSHA256: string;
-    if (request.extracted) {
-      sourceFileSHA256 = request.sha256;
+    if (extracted) {
+      sourceFileSHA256 = file.sha256;
     } else {
       sourceFileSHA256 = (
         await osGetFile(
@@ -121,7 +121,7 @@ export async function processImageRequest(
         ),
         transcodedImageFilepath,
         {
-          cacheControl: CACHE_CONTROL_PRIVATE_IMMUTABLE,
+          cacheControl: TRANSCODED_FILE_CACHE_CONTROL,
           contentType: imageFormat.mimeType,
         },
         'sha256'
@@ -153,7 +153,7 @@ export async function processImageRequest(
 
     return {
       type: 'image',
-      request,
+      source: file,
       files: transcodedFiles,
       dHash,
       sha256: sourceFileSHA256,

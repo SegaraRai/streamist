@@ -1,8 +1,7 @@
-import { defineController } from './$relay';
 import { client } from '$/db/lib/client';
-import { dbPlaylistCreate, dbPlaylistRemove } from '$/db/playlist';
+import { dbPlaylistRemove } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
-import { generatePlaylistId } from '$/utils/id';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ params, query, user }) => {
@@ -48,7 +47,7 @@ export default defineController(() => ({
         userId: user.id,
       },
       data: {
-        name: body.name,
+        title: body.title,
       },
     });
     if (!newPlaylist) {

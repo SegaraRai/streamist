@@ -1,5 +1,5 @@
-import { defineHooks } from './$relay';
 import { onRequest } from '$/hooks/auth';
+import { defineHooks } from './$relay';
 
 export default defineHooks(() => ({
   onRequest,

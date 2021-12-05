@@ -1,7 +1,7 @@
-import { defineController } from './$relay';
 import { dbAlbumAddImageTx, dbAlbumGetImages } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ params, user }) => {

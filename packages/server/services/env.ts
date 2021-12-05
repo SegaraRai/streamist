@@ -1,23 +1,40 @@
-import dotenv from 'dotenv';
+import { config } from 'dotenv';
 
-dotenv.config();
+config();
 
-const API_JWT_SECRET = process.env.API_JWT_SECRET ?? '';
-const API_USER_ID = process.env.API_USER_ID ?? '';
-const API_USER_PASS = process.env.API_USER_PASS ?? '';
-const API_SERVER_PORT = +(process.env.API_SERVER_PORT ?? '8080');
+const API_SERVER_PORT = parseInt(process.env.API_SERVER_PORT || '8080', 10);
 const API_BASE_PATH = process.env.API_BASE_PATH ?? '';
 const API_ORIGIN = process.env.API_ORIGIN ?? '';
+const SECRET_API_JWT_SECRET = process.env.SECRET_API_JWT_SECRET ?? '';
+const SECRET_TRANSCODER_CALLBACK_SECRET =
+  process.env.SECRET_TRANSCODER_CALLBACK_SECRET ?? '';
+const SECRET_USER_WASABI_ACCESS_KEY_ID =
+  process.env.SECRET_USER_WASABI_ACCESS_KEY_ID ?? '';
+const SECRET_USER_WASABI_SECRET_ACCESS_KEY =
+  process.env.SECRET_USER_WASABI_SECRET_ACCESS_KEY ?? '';
 
-if (!API_JWT_SECRET) {
-  throw new Error('API_JWT_SECRET is not defined');
+if (!SECRET_API_JWT_SECRET) {
+  throw new Error('SECRET_API_JWT_SECRET is not defined');
+}
+
+if (!SECRET_TRANSCODER_CALLBACK_SECRET) {
+  throw new Error('SECRET_TRANSCODER_CALLBACK_SECRET is not defined');
+}
+
+if (!SECRET_USER_WASABI_ACCESS_KEY_ID) {
+  throw new Error('SECRET_USER_WASABI_ACCESS_KEY_ID is not defined');
+}
+
+if (!SECRET_USER_WASABI_SECRET_ACCESS_KEY) {
+  throw new Error('SECRET_USER_WASABI_SECRET_ACCESS_KEY is not defined');
 }
 
 export {
-  API_JWT_SECRET,
-  API_USER_ID,
-  API_USER_PASS,
   API_SERVER_PORT,
   API_BASE_PATH,
   API_ORIGIN,
+  SECRET_API_JWT_SECRET,
+  SECRET_TRANSCODER_CALLBACK_SECRET,
+  SECRET_USER_WASABI_ACCESS_KEY_ID,
+  SECRET_USER_WASABI_SECRET_ACCESS_KEY,
 };

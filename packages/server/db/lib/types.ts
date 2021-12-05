@@ -12,7 +12,22 @@ export type SourceState =
   // staled sources (i.e. 'uploaded' state for a long time) will be removed from the database
   | 'uploaded'
   // the files are successfully transcoded (final state)
+  | 'transcoding'
+  // the files are successfully transcoded (final state)
   | 'transcoded'
   // the transcoder failed to process the files (final state)
   // the files will be removed from the database and S3 later
   | 'failed';
+
+export type SourceFileType = 'audio' | 'cueSheet' | 'image';
+
+export function toSourceFileType(sourceFileType: string): SourceFileType {
+  switch (sourceFileType) {
+    case 'audio':
+    case 'cueSheet':
+    case 'image':
+      return sourceFileType;
+  }
+
+  throw new Error(`Invalid sourceFileType: ${sourceFileType}`);
+}

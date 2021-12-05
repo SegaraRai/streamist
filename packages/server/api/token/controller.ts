@@ -1,6 +1,6 @@
-import { defineController } from './$relay';
-import { HTTPError } from '$/utils/httpError';
 import { client } from '$/db/lib/client';
+import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController((fastify) => ({
   post: async ({ body }) => {

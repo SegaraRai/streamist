@@ -1,5 +1,5 @@
-import { is } from '$shared/is.js';
 import { createHash } from 'node:crypto';
+import { is } from '$shared/is.js';
 import { client } from './client.js';
 import type { SourceState } from './types.js';
 
@@ -160,7 +160,7 @@ export function init(): Promise<void> {
               userId,
               artistId,
               albumId,
-              sourceId: sourceId,
+              sourceId,
             },
           });
           trackIds.push(trackId);
@@ -180,7 +180,7 @@ export function init(): Promise<void> {
           // add sentinel nodes
           await txClient.playlistTrack.create({
             data: {
-              playlistId: playlistId,
+              playlistId,
               userId,
               trackId: '/',
               nextTrackId: null,

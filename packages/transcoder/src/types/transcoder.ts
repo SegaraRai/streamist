@@ -1,3 +1,4 @@
+import type { Region } from '$shared/regions.js';
 import type {
   FFprobeFormat,
   FFprobeResult,
@@ -5,61 +6,70 @@ import type {
   FFprobeTags,
 } from './ffprobe.js';
 import type { ImageMagickImage, ImageMagickResult } from './imageMagick.js';
-import type { Region } from '$shared/regions.js';
 
+/** options specific to transcoding or user's preference */
 export interface TranscoderRequestOptions {
-  /** POST <callbackURL> */
-  callbackURL: string;
-  /** value of Authorization header */
-  callbackURLAuthorization: string;
   /** set this true if the audio file is too large to store in /tmp */
   downloadAudioToNFS: boolean;
   extractImages: boolean;
   preferExternalCueSheet: boolean;
+  useFilenameAsUnknownTrackTitle: boolean;
   defaultUnknownTrackArtist: string;
   defaultUnknownTrackTitle: string;
   defaultUnknownAlbumArtist: string;
   defaultUnknownAlbumTitle: string;
 }
 
-export interface TranscoderRequestAudio {
+export interface TranscoderRequestFileAudio {
   type: 'audio';
   userId: string;
   sourceId: string;
+  options: TranscoderRequestOptions;
   sourceFileId: string;
-  cueSheetSourceFileId?: string | null;
   region: Region;
   fileSize: number;
-  options: TranscoderRequestOptions;
+  filename: string;
+  cueSheetSourceFileId?: string | null;
 }
 
-export interface TranscoderRequestImage {
+export interface TranscoderRequestFileImage {
   type: 'image';
   userId: string;
   sourceId: string;
+  options: TranscoderRequestOptions;
   sourceFileId: string;
+  region: Region;
+  filename: string;
+  fileSize: number;
   /** empty for extracted file */
   albumId: string;
-  region: Region;
-  fileSize: number;
   extracted: false;
-  options: TranscoderRequestOptions;
 }
 
-export interface TranscoderRequestImageExtracted
-  extends Omit<TranscoderRequestImage, 'extracted'> {
+export interface TranscoderRequestFileImageExtracted
+  extends Omit<TranscoderRequestFileImage, 'extracted'> {
   extracted: true;
+  audioSourceFileId: string;
   filePath: string;
   sha256: string;
   streamIndex: number;
 }
 
-export type TranscoderRequest = TranscoderRequestAudio | TranscoderRequestImage;
+export type TranscoderRequestFile =
+  | TranscoderRequestFileAudio
+  | TranscoderRequestFileImage;
 
-export type TranscoderRequestInternal =
-  | TranscoderRequestAudio
-  | TranscoderRequestImage
-  | TranscoderRequestImageExtracted;
+export type TranscoderRequestFileInternal =
+  | TranscoderRequestFile
+  | TranscoderRequestFileImageExtracted;
+
+export interface TranscoderRequest {
+  /** POST <callbackURL> */
+  callbackURL: string;
+  /** value of Authorization header */
+  callbackToken: string;
+  files: TranscoderRequestFile[];
+}
 
 export interface TranscoderResponseArtifactAudioFile {
   fileId: string;
@@ -126,7 +136,7 @@ export interface TranscoderResponseArtifactAudioTrack {
 
 export interface TranscoderResponseArtifactAudio {
   type: 'audio';
-  request: TranscoderRequestAudio;
+  source: TranscoderRequestFileAudio;
   tracks: TranscoderResponseArtifactAudioTrack[];
   probe: TranscoderResponseArtifactAudioProbe;
   sha256: string;
@@ -136,7 +146,7 @@ export interface TranscoderResponseArtifactAudio {
 
 export interface TranscoderResponseArtifactImage {
   type: 'image';
-  request: TranscoderRequestImage | TranscoderRequestImageExtracted;
+  source: TranscoderRequestFileImage | TranscoderRequestFileImageExtracted;
   files: TranscoderResponseArtifactImageFile[];
   probe: TranscoderResponseArtifactImageProbe;
   sha256: string;
