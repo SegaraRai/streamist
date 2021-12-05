@@ -10,7 +10,11 @@ build({
   target: 'node16',
   bundle: true,
   logLevel: 'info',
-  plugins: [nodeExternalsPlugin()],
+  plugins: [
+    nodeExternalsPlugin({
+      allowList: ['node-fetch'],
+    }),
+  ],
   watch: true,
   define: {
     'process.env.NODE_ENV': '"development"',

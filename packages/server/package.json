@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npm run migrate:dev && run-p dev:*",
+    "dev": "npm run migrate:dev && node deleteBadPrismaSchema.js && run-p dev:*",
     "dev:server": "run-p dev_server:*",
     "dev:frourio": "frourio --watch",
     "dev:prisma": "prisma generate --watch",
