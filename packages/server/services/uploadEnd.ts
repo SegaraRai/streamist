@@ -113,6 +113,7 @@ async function invokeTranscoderBySource(
     },
     data: {
       state: is<SourceState>('transcoding'),
+      transcodeStartedAt: new Date(),
     },
   });
   if (!updated.count) {
@@ -181,7 +182,7 @@ export async function onSourceFileUploaded(
     throw new HTTPError(409, `source file ${sourceFileId} already uploaded`);
   }
 
-  if (sourceFile.source.state !== is<SourceState>('initial')) {
+  if (sourceFile.source.state !== is<SourceState>('uploading')) {
     throw new HTTPError(500, `state of the source ${sourceId} is inconsistent`);
   }
 
@@ -194,6 +195,7 @@ export async function onSourceFileUploaded(
     },
     data: {
       uploaded: true,
+      uploadedAt: new Date(),
     },
   });
   if (!updated.count) {
@@ -229,6 +231,8 @@ export async function onSourceFileUploaded(
     where: {
       id: sourceId,
       userId,
+      // checking the state is required as it may be executed at the same time as the change from 'uploaded' to 'transcoding'
+      state: is<SourceState>('uploading'),
     },
     data: {
       state: is<SourceState>('uploaded'),

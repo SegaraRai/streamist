@@ -27,7 +27,7 @@ const isProductionOrStagingEnv =
   process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
 
 const webaMimeType = 'audio/webm; codecs=opus';
-const m4aMimeType = 'audio/mp4; codecs=mp4a.40.2';
+const m4aMimeType = 'audio/mp4; codecs=mp4a.40.2'; // AAC-LC
 
 //
 

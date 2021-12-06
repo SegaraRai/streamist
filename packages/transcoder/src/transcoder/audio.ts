@@ -3,6 +3,7 @@ import { Stats } from 'node:fs';
 import { rename, stat, unlink } from 'node:fs/promises';
 import { generateTranscodedAudioFileId } from '$shared-server/generateId.js';
 import {
+  osDelete,
   osGetData,
   osGetFile,
   osPutFile,
@@ -228,17 +229,20 @@ export async function processAudioRequest(
   [TranscoderResponseArtifactAudio, TranscoderRequestFileImageExtracted[]]
 > {
   const createdFiles: string[] = [];
+  const uploadedTranscodedAudioKeys: string[] = [];
+
+  const {
+    cueSheetSourceFileId,
+    options,
+    region,
+    sourceFileId,
+    sourceId,
+    userId,
+  } = file;
+
+  const os = getTranscodedAudioFileOS(region);
 
   try {
-    const {
-      cueSheetSourceFileId,
-      options,
-      region,
-      sourceFileId,
-      sourceId,
-      userId,
-    } = file;
-
     const sourceAudioFilepath = options.downloadAudioToNFS
       ? getNFSTempFilepath(sourceFileId)
       : getTempFilepath(sourceFileId);
@@ -285,54 +289,6 @@ export async function processAudioRequest(
         )
       : [];
 
-    const extractedImageFiles: TranscoderRequestFileImageExtracted[] = [];
-
-    // 画像抽出処理
-    // TODO(pref)?: 並列化
-    for (const imageStream of imageStreams) {
-      const imageFilepath = getTempFilepath(generateTempFilename());
-
-      let imageFileStat: Stats;
-      try {
-        // 画像を抽出
-        await extractImageFromAudio(
-          userId,
-          sourceFileId,
-          sourceAudioFilepath,
-          imageFilepath,
-          imageStream.index
-        );
-
-        imageFileStat = await stat(imageFilepath);
-      } catch (error: unknown) {
-        // TODO(feat): log error
-        logger.warn(error);
-        continue;
-      }
-
-      // TODO(extractedImage): S3に抽出した画像ファイルをアップロードするならここで
-
-      // ジョブ追加
-      extractedImageFiles.push({
-        type: 'image',
-        userId,
-        sourceId,
-        options,
-        extracted: true,
-        // TODO(extractedImage): 抽出した画像ファイルを別のsourceFileとして扱うならIDを生成してここを変更する
-        // このIDがサーバー側で参照され、トランスコード後のファイル群の親sourceFileとして扱われる
-        sourceFileId,
-        region,
-        fileSize: imageFileStat.size,
-        filename: '',
-        sha256: '',
-        albumId: '',
-        audioSourceFileId: sourceFileId,
-        filePath: imageFilepath,
-        streamIndex: imageStream.index,
-      });
-    }
-
     // CUEシート抽出
     // NOTE: 優先順位は外部CUEシート→内部CUEシート
     let strCueSheet: string | undefined;
@@ -355,7 +311,7 @@ export async function processAudioRequest(
       ? parseCueSheet(strCueSheet)
       : undefined;
 
-    const tracks = await createTracks(audioStream, tags, cueSheet);
+    const tracks = createTracks(audioStream, tags, cueSheet);
 
     // トランスコード
     // TODO(pref)?: 並列化
@@ -389,6 +345,7 @@ export async function processAudioRequest(
           audioFormat.name,
         ].join('\n');
 
+        createdFiles.push(transcodedAudioFilepath);
         await transcodeAudio(
           userId,
           sourceFileId,
@@ -403,6 +360,7 @@ export async function processAudioRequest(
 
         if (audioFormat.cleanArgs) {
           const tempFilepath = transcodedAudioFilepath + '.temp.weba';
+          createdFiles.push(tempFilepath);
 
           // 先程変換して出力されたファイルの名前を変更
           await rename(transcodedAudioFilepath, tempFilepath);
@@ -421,17 +379,15 @@ export async function processAudioRequest(
           await unlink(tempFilepath);
         }
 
-        createdFiles.push(transcodedAudioFilepath);
-
-        const fileStat = await stat(transcodedAudioFilepath);
-
-        const [, sha256] = await osPutFile(
-          getTranscodedAudioFileOS(region),
-          getTranscodedAudioFileKey(
-            userId,
-            transcodedAudioFileId,
-            audioFormat.extension
-          ),
+        const key = getTranscodedAudioFileKey(
+          userId,
+          transcodedAudioFileId,
+          audioFormat.extension
+        );
+        uploadedTranscodedAudioKeys.push(key);
+        const [fileSize, sha256] = await osPutFile(
+          os,
+          key,
           transcodedAudioFilepath,
           {
             cacheControl: TRANSCODED_FILE_CACHE_CONTROL,
@@ -447,12 +403,63 @@ export async function processAudioRequest(
           formatName: audioFormat.name,
           mimeType: audioFormat.mimeType,
           extension: audioFormat.extension,
-          fileSize: fileStat.size,
-          bitrate: (fileStat.size / track.duration) * 8,
+          fileSize,
+          bitrate: (fileSize / track.duration) * 8,
           duration: track.duration,
           sha256,
         });
       }
+    }
+
+    // 画像抽出処理
+    // TODO(pref)?: 並列化
+    const extractedImageFiles: TranscoderRequestFileImageExtracted[] = [];
+    for (const imageStream of imageStreams) {
+      const imageFilepath = getTempFilepath(generateTempFilename());
+
+      let imageFileStat: Stats;
+      try {
+        // 画像を抽出
+        createdFiles.push(imageFilepath);
+        await extractImageFromAudio(
+          userId,
+          sourceFileId,
+          sourceAudioFilepath,
+          imageFilepath,
+          imageStream.index
+        );
+
+        imageFileStat = await stat(imageFilepath);
+      } catch (error: unknown) {
+        // TODO(feat): log error
+        logger.warn(error);
+        await unlink(imageFilepath).catch((error) => {
+          logger.info(error);
+        });
+        continue;
+      }
+
+      // TODO(extractedImage): S3に抽出した画像ファイルをアップロードするならここで
+
+      // ジョブ追加
+      extractedImageFiles.push({
+        type: 'image',
+        userId,
+        sourceId,
+        options,
+        extracted: true,
+        // TODO(extractedImage): 抽出した画像ファイルを別のsourceFileとして扱うならIDを生成してここを変更する
+        // このIDがサーバー側で参照され、トランスコード後のファイル群の親sourceFileとして扱われる
+        sourceFileId,
+        region,
+        fileSize: imageFileStat.size,
+        filename: '',
+        sha256: '',
+        albumId: '',
+        audioSourceFileId: sourceFileId,
+        filePath: imageFilepath,
+        streamIndex: imageStream.index,
+      });
     }
 
     await unlink(sourceAudioFilepath);
@@ -476,6 +483,9 @@ export async function processAudioRequest(
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));
+      await Promise.allSettled(
+        uploadedTranscodedAudioKeys.map((key) => osDelete(os, key))
+      );
     } catch (_error: unknown) {
       // エラーになっても良い
     }

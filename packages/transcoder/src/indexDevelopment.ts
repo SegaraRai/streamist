@@ -35,7 +35,7 @@ server.on('request', (req, res) => {
             method: 'POST',
             headers: {
               Authorization: transcoderRequest.callbackToken,
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/json; charset=UTF-8',
             },
             body: JSON.stringify(transcoderResponse),
           });

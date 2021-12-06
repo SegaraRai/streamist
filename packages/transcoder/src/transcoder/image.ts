@@ -1,6 +1,10 @@
-import { stat, unlink } from 'node:fs/promises';
+import { unlink } from 'node:fs/promises';
 import { generateTranscodedImageFileId } from '$shared-server/generateId.js';
-import { osGetFile, osPutFile } from '$shared-server/objectStorage.js';
+import {
+  osDelete,
+  osGetFile,
+  osPutFile,
+} from '$shared-server/objectStorage.js';
 import {
   getSourceFileKey,
   getSourceFileOS,
@@ -23,10 +27,13 @@ export async function processImageRequest(
   file: TranscoderRequestFileImage | TranscoderRequestFileImageExtracted
 ): Promise<TranscoderResponseArtifactImage> {
   const createdFiles: string[] = [];
+  const uploadedTranscodedImageKeys: string[] = [];
+
+  const { extracted, region, sourceFileId, sourceId, userId } = file;
+
+  const os = getTranscodedImageFileOS(region);
 
   try {
-    const { extracted, region, sourceFileId, sourceId, userId } = file;
-
     const transcodedFiles: TranscoderResponseArtifactImageFile[] = [];
 
     const sourceImageFilepath = extracted
@@ -98,6 +105,7 @@ export async function processImageRequest(
         imageFormat.name,
       ].join('\n');
 
+      createdFiles.push(transcodedImageFilepath);
       await transcodeImage(
         userId,
         sourceFileId,
@@ -109,17 +117,16 @@ export async function processImageRequest(
         height,
         imageFormat.quality
       );
-      createdFiles.push(transcodedImageFilepath);
 
-      const fileStat = await stat(transcodedImageFilepath);
-
-      const [, sha256] = await osPutFile(
-        getTranscodedImageFileOS(region),
-        getTranscodedImageFileKey(
-          userId,
-          transcodedImageFileId,
-          imageFormat.extension
-        ),
+      const key = getTranscodedImageFileKey(
+        userId,
+        transcodedImageFileId,
+        imageFormat.extension
+      );
+      uploadedTranscodedImageKeys.push(key);
+      const [fileSize, sha256] = await osPutFile(
+        os,
+        key,
         transcodedImageFilepath,
         {
           cacheControl: TRANSCODED_FILE_CACHE_CONTROL,
@@ -135,7 +142,7 @@ export async function processImageRequest(
         formatName: imageFormat.name,
         mimeType: imageFormat.mimeType,
         extension: imageFormat.extension,
-        fileSize: fileStat.size,
+        fileSize,
         sha256,
         width,
         height,
@@ -167,7 +174,10 @@ export async function processImageRequest(
     };
   } catch (error: unknown) {
     try {
-      await Promise.all(createdFiles.map(unlink));
+      await Promise.allSettled(createdFiles.map(unlink));
+      await Promise.allSettled(
+        uploadedTranscodedImageKeys.map((key) => osDelete(os, key))
+      );
     } catch (_error: unknown) {
       // エラーになっても良い
     }

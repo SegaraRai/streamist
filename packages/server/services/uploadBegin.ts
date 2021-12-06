@@ -186,7 +186,7 @@ export async function createAudioSource(
   await client.source.create({
     data: {
       id: sourceId,
-      state: is<SourceState>('initial'),
+      state: is<SourceState>('uploading'),
       user: { connect: { id: userId } },
       files: {
         create: [
@@ -276,7 +276,7 @@ export async function createImageSource(
   await client.source.create({
     data: {
       id: sourceId,
-      state: is<SourceState>('initial'),
+      state: is<SourceState>('uploading'),
       user: { connect: { id: userId } },
       files: {
         create: [
@@ -338,7 +338,7 @@ export async function getUploadURLForSourceFile(
 
   if (
     sourceFile.uploaded ||
-    sourceFile.source.state !== is<SourceState>('initial')
+    sourceFile.source.state !== is<SourceState>('uploading')
   ) {
     throw new HTTPError(409, `source file ${sourceFileId} already uploaded`);
   }

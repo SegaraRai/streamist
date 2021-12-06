@@ -6,5 +6,5 @@ export function toRegion(region: string): Region {
       return region;
   }
 
-  throw new Error(`unknown region: ${region}`);
+  throw new TypeError(`unknown region: ${region}`);
 }

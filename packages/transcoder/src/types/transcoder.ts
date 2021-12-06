@@ -153,12 +153,18 @@ export interface TranscoderResponseArtifactImage {
   dHash: string;
 }
 
+export interface TranscoderResponseArtifactError {
+  type: 'error';
+  source: TranscoderRequestFileInternal;
+  error: string;
+}
+
 export type TranscoderResponseArtifact =
   | TranscoderResponseArtifactAudio
-  | TranscoderResponseArtifactImage;
+  | TranscoderResponseArtifactImage
+  | TranscoderResponseArtifactError;
 
 export interface TranscoderResponse {
   request: TranscoderRequest;
   artifacts: TranscoderResponseArtifact[];
-  error: string | null;
 }

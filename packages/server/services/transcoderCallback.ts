@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { generateImageId } from '$shared-server/generateId.js';
+import { is } from '$shared/is';
 import { parseDate } from '$shared/parseDate';
 import type { Region } from '$shared/regions';
 import type { FFprobeTags } from '$transcoder/types/ffprobe';
@@ -120,21 +121,20 @@ async function registerImage(
   await dbAlbumAddImageTx(txClient, userId, albumId, imageId);
 }
 
-async function markSourceAs(
+async function markSourceIdAsTranscodedTx(
   txClient: TransactionalPrismaClient,
   userId: string,
-  sourceId: string,
-  state: SourceState,
-  preState: SourceState
+  sourceId: string
 ): Promise<void> {
   await txClient.source.updateMany({
     where: {
       id: sourceId,
       userId,
-      state: preState,
+      state: is<SourceState>('transcoding'),
     },
     data: {
-      state,
+      state: is<SourceState>('transcoded'),
+      transcodeFinishedAt: new Date(),
     },
   });
 }
@@ -155,7 +155,7 @@ async function handleTranscoderResponse(
 
   await client.$transaction(async (txClient) => {
     const markedSourceIdSet = new Set<string>();
-    const markSourceIdAsTranscoded = async (
+    const markSourceIdAsTranscodedCached = async (
       userId: string,
       sourceId: string
     ) => {
@@ -163,13 +163,7 @@ async function handleTranscoderResponse(
         return;
       }
       markedSourceIdSet.add(sourceId);
-      await markSourceAs(
-        txClient,
-        userId,
-        sourceId,
-        'transcoded',
-        'transcoding'
-      );
+      await markSourceIdAsTranscodedTx(txClient, userId, sourceId);
     };
 
     // register album
@@ -259,7 +253,7 @@ async function handleTranscoderResponse(
         }
       }
 
-      await markSourceIdAsTranscoded(userId, sourceId);
+      await markSourceIdAsTranscodedCached(userId, sourceId);
     }
 
     // register images
@@ -273,8 +267,7 @@ async function handleTranscoderResponse(
         albumId = sourceFileIdToAlbumIdMap.get(source.audioSourceFileId);
         if (!albumId) {
           // something went wrong with transcoding audio
-          // TODO(prod): remove transcoded images
-          // TODO(extractedImage)?: 抽出した画像ファイルをS3に上げる場合、削除
+          // this will not happen because the image file is not extracted when the audio transcoding fails
           continue;
         }
 
@@ -294,7 +287,7 @@ async function handleTranscoderResponse(
         imageId
       );
 
-      await markSourceIdAsTranscoded(userId, sourceId);
+      await markSourceIdAsTranscodedCached(userId, sourceId);
     }
   });
 }

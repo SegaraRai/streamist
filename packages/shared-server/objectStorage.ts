@@ -193,3 +193,15 @@ export async function osGetFile(
       });
   });
 }
+
+export async function osDelete(
+  objectStorage: ObjectStorage,
+  key: string
+): Promise<void> {
+  // compression is not currently supported
+  const s3 = createS3Cached(objectStorage);
+  await s3.deleteObject({
+    Bucket: objectStorage.bucket,
+    Key: key,
+  });
+}
