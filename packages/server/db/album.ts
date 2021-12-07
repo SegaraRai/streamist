@@ -1,8 +1,9 @@
 import { expectType } from 'tsd';
 import { generateAlbumId } from '$shared-server/generateId';
+import { ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID } from '$shared/dbConfig';
+import { dbLinkedListSort } from '$shared/linkedListSort';
 import { Album, Image, Prisma } from '$prisma/client';
 import { client } from './lib/client';
-import { ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID } from './lib/config';
 import {
   dbLinkedListAppend,
   dbLinkedListAppendTx,
@@ -11,7 +12,6 @@ import {
   dbLinkedListRemoveAll,
   dbLinkedListRemoveTx,
 } from './lib/linkedList';
-import { dbLinkedListSort } from './lib/linkedListSort';
 import type { TransactionalPrismaClient } from './lib/types';
 
 // check types for `dbAlbumGetOrCreateByNameTx`

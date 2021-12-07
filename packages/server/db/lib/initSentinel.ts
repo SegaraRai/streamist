@@ -1,8 +1,8 @@
-import { is } from '$shared/is';
 import {
   ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID,
   PLAYLIST_TRACK_SENTINEL_NODE_TRACK_ID,
-} from './config';
+} from '$shared/dbConfig';
+import { is } from '$shared/is';
 import type { SourceState, TransactionalPrismaClient } from './types';
 
 export async function dbInitSentinel(

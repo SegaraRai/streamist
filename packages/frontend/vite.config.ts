@@ -1,21 +1,22 @@
-import path from 'path'
-import { defineConfig } from 'vite'
-import Vue from '@vitejs/plugin-vue'
-import Pages from 'vite-plugin-pages'
-import Layouts from 'vite-plugin-vue-layouts'
-import Icons from 'unplugin-icons/vite'
-import IconsResolver from 'unplugin-icons/resolver'
-import Components from 'unplugin-vue-components/vite'
-import AutoImport from 'unplugin-auto-import/vite'
-import Markdown from 'vite-plugin-md'
-import WindiCSS from 'vite-plugin-windicss'
-import { VitePWA } from 'vite-plugin-pwa'
-import VueI18n from '@intlify/vite-plugin-vue-i18n'
-import Inspect from 'vite-plugin-inspect'
-import Prism from 'markdown-it-prism'
-import LinkAttributes from 'markdown-it-link-attributes'
+import path from 'path';
+import VueI18n from '@intlify/vite-plugin-vue-i18n';
+import Vue from '@vitejs/plugin-vue';
+import Vuetify from '@vuetify/vite-plugin';
+import LinkAttributes from 'markdown-it-link-attributes';
+import Prism from 'markdown-it-prism';
+import AutoImport from 'unplugin-auto-import/vite';
+import IconsResolver from 'unplugin-icons/resolver';
+import Icons from 'unplugin-icons/vite';
+import Components from 'unplugin-vue-components/vite';
+import { defineConfig } from 'vite';
+import Inspect from 'vite-plugin-inspect';
+import Markdown from 'vite-plugin-md';
+import Pages from 'vite-plugin-pages';
+import { VitePWA } from 'vite-plugin-pwa';
+import Layouts from 'vite-plugin-vue-layouts';
+import WindiCSS from 'vite-plugin-windicss';
 
-const markdownWrapperClasses = 'prose prose-sm m-auto text-left'
+const markdownWrapperClasses = 'prose prose-sm m-auto text-left';
 
 export default defineConfig({
   resolve: {
@@ -86,16 +87,14 @@ export default defineConfig({
       headEnabled: true,
       markdownItSetup(md) {
         // https://prismjs.com/
-        // @ts-expect-error types mismatch
-        md.use(Prism)
-        // @ts-expect-error types mismatch
+        md.use(Prism);
         md.use(LinkAttributes, {
           pattern: /^https?:\/\//,
           attrs: {
             target: '_blank',
             rel: 'noopener',
           },
-        })
+        });
       },
     }),
 
@@ -140,6 +139,11 @@ export default defineConfig({
       // change this to enable inspect for debugging
       enabled: false,
     }),
+
+    // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
+    Vuetify({
+      autoImport: true,
+    }),
   ],
 
   server: {
@@ -155,14 +159,7 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    include: [
-      'vue',
-      'vue-router',
-      '@vueuse/core',
-      '@vueuse/head',
-    ],
-    exclude: [
-      'vue-demi',
-    ],
+    include: ['vue', 'vue-router', '@vueuse/core', '@vueuse/head'],
+    exclude: ['vue-demi'],
   },
-})
+});

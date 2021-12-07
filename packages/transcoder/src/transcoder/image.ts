@@ -79,7 +79,7 @@ export async function processImageRequest(
     const sourceHeight = imageInfo.geometry.height;
 
     // トランスコード
-    // TODO(pref)?: 並列化
+    // TODO(perf)?: 並列化
     for (const imageFormat of getTranscodeImageFormats(
       imageInfoList,
       imageInfo

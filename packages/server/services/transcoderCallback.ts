@@ -107,6 +107,7 @@ async function registerImage(
           region,
           format: file.formatName,
           mimeType: file.mimeType,
+          extension: file.extension,
           fileSize: file.fileSize,
           sha256: file.sha256,
           width: file.width,
@@ -183,16 +184,34 @@ async function handleTranscoderResponse(
           ? filename
           : options.defaultUnknownTrackTitle;
 
-        const [track, , album] = await dbTrackCreateTx(
+        const tagTrackArtist = tags.artist;
+        const tagTrackArtistSort = tags.artistsort;
+        const tagAlbumArtist =
+          tags.albumartist ||
+          (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtist);
+        const tagAlbumArtistSort =
+          tags.albumartistsort ||
+          (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtistSort);
+
+        const tagTrackTitle = tags.title;
+        const tagTrackTitleSort = tags.titlesort;
+        const tagAlbumTitle =
+          tags.album ||
+          (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitle);
+        const tagAlbumTitleSort =
+          tags.albumtitlesort ||
+          (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitleSort);
+
+        const [track, trackArtist, album, albumArtist] = await dbTrackCreateTx(
           txClient,
           userId,
           sourceId,
-          tags.album || options.defaultUnknownAlbumTitle,
-          tags.albumartist || options.defaultUnknownAlbumArtist,
-          tags.artist || options.defaultUnknownTrackArtist,
+          tagAlbumTitle || options.defaultUnknownAlbumTitle,
+          tagAlbumArtist || options.defaultUnknownAlbumArtist,
+          tagTrackArtist || options.defaultUnknownTrackArtist,
           {
-            title: tags.title || defaultUnknownTrackTitle,
-            titleSort: tags.titlesort || null,
+            title: tagTrackTitle || defaultUnknownTrackTitle,
+            titleSort: tagTrackTitleSort || null,
             discNumber,
             trackNumber,
             duration,
@@ -210,25 +229,54 @@ async function handleTranscoderResponse(
 
         // update album
         {
-          const albumGain = !album.replayGainGain
+          const newAlbumGain: number | null = !album.replayGainGain
             ? floatOr(tags.replaygain_album_gain, null)
             : null;
-          const albumPeak = !album.replayGainPeak
+          const newAlbumPeak: number | null = !album.replayGainPeak
             ? floatOr(tags.replaygain_album_peak, null)
             : null;
-          const albumTitleSort =
-            !album.titleSort && tags.albumsort ? tags.albumsort : null;
+          const newAlbumTitleSort: string | null = !album.titleSort
+            ? tagAlbumTitleSort || null
+            : null;
           if (
-            albumTitleSort != null ||
-            albumGain != null ||
-            albumPeak != null
+            newAlbumGain != null ||
+            newAlbumPeak != null ||
+            newAlbumTitleSort != null
           ) {
             await txClient.album.updateMany({
               where: { id: album.id, userId },
               data: {
-                ...(albumTitleSort != null ? { albumTitleSort } : {}),
-                ...(albumGain != null ? { replayGainGain: albumGain } : {}),
-                ...(albumPeak != null ? { replayGainPeak: albumPeak } : {}),
+                ...(newAlbumTitleSort != null
+                  ? { albumTitleSort: newAlbumTitleSort }
+                  : {}),
+                ...(newAlbumGain != null
+                  ? { replayGainGain: newAlbumGain }
+                  : {}),
+                ...(newAlbumPeak != null
+                  ? { replayGainPeak: newAlbumPeak }
+                  : {}),
+              },
+            });
+          }
+        }
+
+        // update track artist
+        if (!trackArtist.nameSort && tagTrackArtistSort) {
+          await txClient.artist.updateMany({
+            where: { id: trackArtist.id, userId },
+            data: {
+              nameSort: tagTrackArtistSort,
+            },
+          });
+        }
+
+        // update album artist
+        if (albumArtist.id !== trackArtist.id || !tagTrackArtistSort) {
+          if (!albumArtist.nameSort && tagAlbumArtistSort) {
+            await txClient.artist.updateMany({
+              where: { id: albumArtist.id, userId },
+              data: {
+                nameSort: tagAlbumArtistSort,
               },
             });
           }
@@ -243,6 +291,7 @@ async function handleTranscoderResponse(
               region,
               format: file.formatName,
               mimeType: file.mimeType,
+              extension: file.extension,
               fileSize: file.fileSize,
               sha256: file.sha256,
               duration: file.duration,
@@ -271,7 +320,7 @@ async function handleTranscoderResponse(
           continue;
         }
 
-        // TODO(extractedImage)?: 抽出した画像ファイルをS3に上げる場合、DBに登録するならここ
+        // TODO(ximg)?: 抽出した画像ファイルをS3に上げる場合、DBに登録するならここ
       } else {
         albumId = source.albumId;
       }

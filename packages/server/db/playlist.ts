@@ -1,6 +1,7 @@
+import { PLAYLIST_TRACK_SENTINEL_NODE_TRACK_ID } from '$shared/dbConfig';
+import { dbLinkedListSort } from '$shared/linkedListSort';
 import { Playlist, Prisma, Track } from '$prisma/client';
 import { client } from './lib/client';
-import { PLAYLIST_TRACK_SENTINEL_NODE_TRACK_ID } from './lib/config';
 import {
   dbLinkedListAppend,
   dbLinkedListAppendTx,
@@ -9,7 +10,6 @@ import {
   dbLinkedListRemoveAll,
   dbLinkedListRemoveTx,
 } from './lib/linkedList';
-import { dbLinkedListSort } from './lib/linkedListSort';
 import type { TransactionalPrismaClient } from './lib/types';
 
 export async function dbPlaylistCreateTx(

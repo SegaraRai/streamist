@@ -14,6 +14,8 @@ export interface TranscoderRequestOptions {
   extractImages: boolean;
   preferExternalCueSheet: boolean;
   useFilenameAsUnknownTrackTitle: boolean;
+  useTrackArtistAsUnknownAlbumArtist: boolean;
+  useTrackTitleAsUnknownAlbumTitle: boolean;
   defaultUnknownTrackArtist: string;
   defaultUnknownTrackTitle: string;
   defaultUnknownAlbumArtist: string;

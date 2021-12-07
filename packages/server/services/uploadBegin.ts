@@ -17,6 +17,11 @@ import {
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
 } from '$shared/sourceFileConfig.js';
+import {
+  MAX_SOURCE_AUDIO_FILE_SIZE,
+  MAX_SOURCE_CUE_SHEET_FILE_SIZE,
+  MAX_SOURCE_IMAGE_FILE_SIZE,
+} from '$shared/uploadConfig.js';
 import { client } from '$/db/lib/client.js';
 import { SourceFileType, SourceState } from '$/db/lib/types.js';
 import type {
@@ -28,7 +33,7 @@ import type {
 } from '$/types/index.js';
 import { HTTPError } from '$/utils/httpError.js';
 import { splitIntoParts, useMultipartUpload } from './uploadConfig.js';
-import { createUserS3Cached } from './userOS.js';
+import { createUserUploadS3Cached } from './userOS.js';
 
 /**
  * @note mutates S3
@@ -51,7 +56,7 @@ async function createMultipartUploadId(
 
   const os = getSourceFileOS(region);
   const key = getSourceFileKey(userId, sourceFileId);
-  const s3 = createUserS3Cached(os);
+  const s3 = createUserUploadS3Cached(os);
 
   const response = await s3.createMultipartUpload({
     Bucket: os.bucket,
@@ -75,7 +80,7 @@ function createPresignedMultipartURLs(
 
   const os = getSourceFileOS(region);
   const key = getSourceFileKey(userId, sourceFileId);
-  const s3 = createUserS3Cached(os);
+  const s3 = createUserUploadS3Cached(os);
 
   return Promise.all(
     partSizes.map(
@@ -107,7 +112,7 @@ function createPresignedURL(
 ): Promise<string> {
   const os = getSourceFileOS(region);
   const key = getSourceFileKey(userId, sourceFileId);
-  const s3 = createUserS3Cached(os);
+  const s3 = createUserUploadS3Cached(os);
 
   return getSignedUrl(
     s3,
@@ -167,7 +172,24 @@ export async function createAudioSource(
 ): Promise<CreateSourceResponse> {
   const region = toRegion(request.region);
 
-  // TODO(security): validate request, check file size
+  // TODO(security): validate request
+
+  if (request.audioFile.fileSize > MAX_SOURCE_AUDIO_FILE_SIZE) {
+    throw new HTTPError(
+      400,
+      `File size ${request.audioFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_AUDIO_FILE_SIZE}`
+    );
+  }
+
+  if (
+    request.cueSheetFile &&
+    request.cueSheetFile.fileSize > MAX_SOURCE_CUE_SHEET_FILE_SIZE
+  ) {
+    throw new HTTPError(
+      400,
+      `File size ${request.cueSheetFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_CUE_SHEET_FILE_SIZE}`
+    );
+  }
 
   const sourceId = await generateSourceId();
   const audioFileId = await generateSourceFileId();
@@ -229,7 +251,7 @@ export async function createAudioSource(
     sourceId,
     files: [
       {
-        request: request.audioFile,
+        requestFile: request.audioFile,
         sourceFileId: audioFileId,
         uploadURL: await createUploadURL(
           userId,
@@ -239,6 +261,20 @@ export async function createAudioSource(
           uploadId
         ),
       },
+      ...(request.cueSheetFile
+        ? [
+            {
+              requestFile: request.cueSheetFile,
+              sourceFileId: cueSheetFileId!,
+              uploadURL: await createUploadURL(
+                userId,
+                cueSheetFileId!,
+                region,
+                request.cueSheetFile.fileSize
+              ),
+            },
+          ]
+        : []),
     ],
   };
 }
@@ -249,7 +285,14 @@ export async function createImageSource(
 ): Promise<CreateSourceResponse> {
   const region = toRegion(request.region);
 
-  // TODO(security): validate request, check file size
+  // TODO(security): validate request
+
+  if (request.imageFile.fileSize > MAX_SOURCE_IMAGE_FILE_SIZE) {
+    throw new HTTPError(
+      400,
+      `File size ${request.imageFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_IMAGE_FILE_SIZE}`
+    );
+  }
 
   if (
     (await client.album.count({
@@ -302,7 +345,7 @@ export async function createImageSource(
     sourceId,
     files: [
       {
-        request: request.imageFile,
+        requestFile: request.imageFile,
         sourceFileId: imageFileId,
         uploadURL: await createUploadURL(
           userId,

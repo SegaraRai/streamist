@@ -1,8 +1,6 @@
-import type { SourceFile } from '$prisma/client';
-
 export type Methods = {
   patch: {
-    reqBody: Pick<SourceFile, 'uploaded'>;
+    reqBody: { uploaded: true; parts?: string[] };
     status: 204;
   };
 };

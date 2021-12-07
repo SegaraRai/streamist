@@ -19,7 +19,8 @@ import {
   TRANSCODER_CALLBACK_API_ENDPOINT,
   TRANSCODER_CALLBACK_API_TOKEN,
 } from './transcoderCallback.js';
-import { createUserS3Cached } from './userOS.js';
+import { splitIntoParts } from './uploadConfig.js';
+import { createUserUploadS3Cached } from './userOS.js';
 
 function createTranscoderRequestFiles(
   source: Source & { files: SourceFile[] },
@@ -131,6 +132,8 @@ async function invokeTranscoderBySource(
       defaultUnknownTrackArtist: 'Unknown Artist',
       defaultUnknownTrackTitle: 'Unknown Track',
       useFilenameAsUnknownTrackTitle: true,
+      useTrackArtistAsUnknownAlbumArtist: true,
+      useTrackTitleAsUnknownAlbumTitle: true,
       downloadAudioToNFS: false,
       extractImages: true,
       preferExternalCueSheet: true,
@@ -152,12 +155,14 @@ function invokeTranscodeBySourceSync(userId: string, sourceId: string): void {
  * @param userId
  * @param sourceId
  * @param sourceFileId
+ * @param etags
  * @returns
  */
 export async function onSourceFileUploaded(
   userId: string,
   sourceId: string,
-  sourceFileId: string
+  sourceFileId: string,
+  etags?: string[]
 ): Promise<void> {
   const sourceFile = await client.sourceFile.findFirst({
     where: {
@@ -186,6 +191,38 @@ export async function onSourceFileUploaded(
     throw new HTTPError(500, `state of the source ${sourceId} is inconsistent`);
   }
 
+  if (sourceFile.uploadId) {
+    if (!etags) {
+      throw new HTTPError(400, `etags must be specified for multipart upload`);
+    }
+
+    const partLength = splitIntoParts(sourceFile.fileSize).length;
+    if (etags.length !== partLength) {
+      throw new HTTPError(
+        400,
+        `etag count of the source file ${sourceFileId} is inconsistent`
+      );
+    }
+
+    // complete multipart upload
+    const os = getSourceFileOS(sourceFile.region as Region);
+    const key = getSourceFileKey(userId, sourceFileId);
+    const s3 = createUserUploadS3Cached(os);
+
+    // TODO(prod): error handling
+    await s3.completeMultipartUpload({
+      Bucket: os.bucket,
+      Key: key,
+      UploadId: sourceFile.uploadId,
+      MultipartUpload: {
+        Parts: etags!.map((etag, index) => ({
+          PartNumber: index + 1,
+          ETag: etag,
+        })),
+      },
+    });
+  }
+
   const updated = await client.sourceFile.updateMany({
     where: {
       id: sourceFileId,
@@ -203,21 +240,7 @@ export async function onSourceFileUploaded(
     return;
   }
 
-  if (sourceFile.uploadId) {
-    // complete multipart upload
-    const os = getSourceFileOS(sourceFile.region as Region);
-    const key = getSourceFileKey(userId, sourceFileId);
-    const s3 = createUserS3Cached(os);
-
-    // TODO(prod): error handling
-    await s3.completeMultipartUpload({
-      Bucket: os.bucket,
-      Key: key,
-      UploadId: sourceFile.uploadId,
-    });
-  }
-
-  // TODO(prod): lock file
+  // TODO(prod): lock object
 
   const allFilesUploaded = sourceFile.source.files.every(
     (file) => file.id === sourceFileId || file.uploaded

@@ -10,39 +10,50 @@ import type {
 export async function transcode(
   request: TranscoderRequest
 ): Promise<TranscoderResponse> {
-  try {
-    const artifacts: TranscoderResponseArtifact[] = [];
+  const artifacts: TranscoderResponseArtifact[] = [];
 
-    const files: TranscoderRequestFileInternal[] = [...request.files];
+  const files: TranscoderRequestFileInternal[] = [...request.files];
 
-    while (files.length > 0) {
-      const file = files.shift()!;
+  while (true) {
+    const file = files.shift();
+    if (!file) {
+      break;
+    }
+
+    let artifact: TranscoderResponseArtifact;
+    let additionalFiles: TranscoderRequestFileInternal[] | undefined;
+
+    try {
       switch (file.type) {
         case 'audio': {
-          const [artifact, imageFiles] = await processAudioRequest(file);
-          files.push(...imageFiles);
-          artifacts.push(artifact);
+          [artifact, additionalFiles] = await processAudioRequest(file);
           break;
         }
 
         case 'image': {
-          const artifact = await processImageRequest(file);
-          artifacts.push(artifact);
+          artifact = await processImageRequest(file);
           break;
         }
+
+        default:
+          throw new Error('unknown file type');
       }
+    } catch (error) {
+      artifact = {
+        type: 'error',
+        source: file,
+        error: String(error),
+      };
     }
 
-    return {
-      request,
-      artifacts,
-      error: null,
-    };
-  } catch (error) {
-    return {
-      request,
-      artifacts: [],
-      error: String(error),
-    };
+    artifacts.push(artifact);
+    if (additionalFiles) {
+      files.push(...additionalFiles);
+    }
   }
+
+  return {
+    request,
+    artifacts,
+  };
 }

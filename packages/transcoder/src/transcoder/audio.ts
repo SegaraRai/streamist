@@ -314,7 +314,7 @@ export async function processAudioRequest(
     const tracks = createTracks(audioStream, tags, cueSheet);
 
     // トランスコード
-    // TODO(pref)?: 並列化
+    // TODO(perf)?: 並列化
     for (const track of tracks) {
       for (const audioFormat of getTranscodeAudioFormats(
         audioInfo,
@@ -412,7 +412,7 @@ export async function processAudioRequest(
     }
 
     // 画像抽出処理
-    // TODO(pref)?: 並列化
+    // TODO(perf)?: 並列化
     const extractedImageFiles: TranscoderRequestFileImageExtracted[] = [];
     for (const imageStream of imageStreams) {
       const imageFilepath = getTempFilepath(generateTempFilename());
@@ -439,7 +439,7 @@ export async function processAudioRequest(
         continue;
       }
 
-      // TODO(extractedImage): S3に抽出した画像ファイルをアップロードするならここで
+      // TODO(ximg): S3に抽出した画像ファイルをアップロードするならここで
 
       // ジョブ追加
       extractedImageFiles.push({
@@ -448,7 +448,7 @@ export async function processAudioRequest(
         sourceId,
         options,
         extracted: true,
-        // TODO(extractedImage): 抽出した画像ファイルを別のsourceFileとして扱うならIDを生成してここを変更する
+        // TODO(ximg): 抽出した画像ファイルを別のsourceFileとして扱うならIDを生成してここを変更する
         // このIDがサーバー側で参照され、トランスコード後のファイル群の親sourceFileとして扱われる
         sourceFileId,
         region,

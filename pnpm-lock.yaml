@@ -47,12 +47,15 @@ importers:
       '@aspida/axios': ^1.7.1
       '@iconify-json/carbon': ^1.0.11
       '@intlify/vite-plugin-vue-i18n': ^3.2.1
+      '@mdi/font': ^6.5.95
       '@prisma/client': ^3.5.0
+      '@types/humanize-duration': ^3.27.0
       '@types/markdown-it-link-attributes': ^3.0.1
       '@types/nprogress': ^0.2.0
       '@vitejs/plugin-vue': ^1.10.1
       '@vue/compiler-sfc': ^3.2.23
       '@vue/server-renderer': ^3.2.23
+      '@vuetify/vite-plugin': ^1.0.0-alpha.9
       '@vueuse/core': ^7.1.2
       '@vueuse/head': ^0.7.2
       aspida: ^1.7.1
@@ -65,6 +68,7 @@ importers:
       cypress: ^9.1.0
       dotenv: ^10.0.0
       https-localhost: ^4.7.0
+      humanize-duration: ^3.27.1
       markdown-it-link-attributes: ^3.0.0
       markdown-it-prism: ^2.2.1
       npm-run-all: ^4.1.5
@@ -91,14 +95,17 @@ importers:
       vue-i18n: ^9.1.9
       vue-router: ^4.0.12
       vue-tsc: ^0.29.6
+      vuetify: ^3.0.0-alpha.12
     dependencies:
       '@aspida/axios': 1.7.1
+      '@mdi/font': 6.5.95
       '@prisma/client': 3.6.0_prisma@3.6.0
       '@vueuse/core': 7.1.2_vue@3.2.23
       '@vueuse/head': 0.7.2_vue@3.2.23
       axios: 0.24.0
       class-validator: 0.13.2
       core-js: 3.19.2
+      humanize-duration: 3.27.1
       nprogress: 0.2.0
       pinia: 2.0.5_typescript@4.5.2+vue@3.2.23
       prism-theme-vars: 0.2.2
@@ -108,14 +115,17 @@ importers:
       vue-demi: 0.12.1_vue@3.2.23
       vue-i18n: 9.1.9_vue@3.2.23
       vue-router: 4.0.12_vue@3.2.23
+      vuetify: 3.0.0-alpha.12_vue@3.2.23
     devDependencies:
       '@iconify-json/carbon': 1.0.11
       '@intlify/vite-plugin-vue-i18n': 3.2.1_vite@2.6.14+vue-i18n@9.1.9
+      '@types/humanize-duration': 3.27.0
       '@types/markdown-it-link-attributes': 3.0.1
       '@types/nprogress': 0.2.0
       '@vitejs/plugin-vue': 1.10.1_vite@2.6.14
       '@vue/compiler-sfc': 3.2.23
       '@vue/server-renderer': 3.2.23_vue@3.2.23
+      '@vuetify/vite-plugin': 1.0.0-alpha.9_1492cbf0a00b7a18c60e1c1f40919fd9
       aspida: 1.7.1
       babel-core: 7.0.0-bridge.0
       critters: 0.0.15
@@ -2996,6 +3006,10 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
+  /@mdi/font/6.5.95:
+    resolution: {integrity: sha512-ES5rj6J39FUkHe/b3C9SJs8bqIungYhuU7rBINTBaHOv/Ce4RCb3Gw08CZVl32W33UEkgRkzyWaIedV4at+QHg==}
+    dev: false
+
   /@nodelib/fs.scandir/2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
     engines: {node: '>= 8'}
@@ -3357,6 +3371,10 @@ packages:
     resolution: {integrity: sha512-anKkLmZZ+xm4p8JWBf4hElkM4XR+EZeA2M9BAkkTldmcyDY4mbdIJnRghDJH3Ov5ooY7/UAoENtmdMSkaAd7Cw==}
     dependencies:
       '@types/node': 16.11.11
+    dev: true
+
+  /@types/humanize-duration/3.27.0:
+    resolution: {integrity: sha512-ivv1EIdXz20vHPB9xftPvogUEjGLSSlgz2fipK2yyHQZvZeIgUQBZc23Kcuxa4zGbiUcRtr36Sw96CF+TO30Fw==}
     dev: true
 
   /@types/istanbul-lib-coverage/2.0.3:
@@ -3736,6 +3754,28 @@ packages:
 
   /@vue/shared/3.2.23:
     resolution: {integrity: sha512-U+/Jefa0QfXUF2qVy9Dqlrb6HKJSr9/wJcM66wXmWcTOoqg7hOWzF4qruDle51pyF4x3wMn6TSH54UdjKjCKMA==}
+
+  /@vuetify/loader-shared/1.2.2_vuetify@3.0.0-alpha.12:
+    resolution: {integrity: sha512-2SZSsvRnxodBWIQDymX5f/MDXq2mRCyzju9/IQNqSOvVotDV1r3CJqNZg3nkdEBIGr3l7sHHXtn3LTYTRUPiLA==}
+    peerDependencies:
+      vuetify: ^3.0.0-alpha.11
+    dependencies:
+      find-cache-dir: 3.3.2
+      upath: 2.0.1
+      vuetify: 3.0.0-alpha.12_vue@3.2.23
+    dev: true
+
+  /@vuetify/vite-plugin/1.0.0-alpha.9_1492cbf0a00b7a18c60e1c1f40919fd9:
+    resolution: {integrity: sha512-g+g2C0lmCEpcxzNjCS1RlVzJPKGB8rpXbI0xPQQ2yDfT4cILT6/1Je3ANKNcHJ8L5S7+m5R/duPCzI7JGcxAlA==}
+    engines: {node: '>=12'}
+    peerDependencies:
+      vite: ^2.5.0
+      vuetify: ^3.0.0-alpha.11
+    dependencies:
+      '@vuetify/loader-shared': 1.2.2_vuetify@3.0.0-alpha.12
+      vite: 2.6.14
+      vuetify: 3.0.0-alpha.12_vue@3.2.23
+    dev: true
 
   /@vueuse/core/7.1.2_vue@3.2.23:
     resolution: {integrity: sha512-SLoOPfhZdNRNUkZfx+wrHj6WycWdSw2RmNS8E4ngQ2kmBoJjRarGy51/GkGdjqHQqmhuwuFoNO2WaU0yBn3ffg==}
@@ -4318,7 +4358,7 @@ packages:
   /axios/0.24.0:
     resolution: {integrity: sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==}
     dependencies:
-      follow-redirects: 1.14.5_debug@4.3.3
+      follow-redirects: 1.14.5
     transitivePeerDependencies:
       - debug
     dev: false
@@ -4919,6 +4959,10 @@ packages:
   /common-tags/1.8.2:
     resolution: {integrity: sha512-gk/Z852D2Wtb//0I+kRFNKKE9dIIVirjoqPoA1wJU+XePVXZfGeBpk45+A1rKO4Q43prqWBNY/MiIeRLbPWUaA==}
     engines: {node: '>=4.0.0'}
+    dev: true
+
+  /commondir/1.0.1:
+    resolution: {integrity: sha1-3dgA2gxmEnOTzKWVDqloo6rxJTs=}
     dev: true
 
   /compare-func/2.0.0:
@@ -6921,6 +6965,15 @@ packages:
       unpipe: 1.0.0
     dev: true
 
+  /find-cache-dir/3.3.2:
+    resolution: {integrity: sha512-wXZV5emFEjrridIgED11OoUKLxiYjAcqot/NJdAkOhlJ+vGzwhOAfcG5OX1jP+S0PcjEn8bdMJv+g2jwQ3Onig==}
+    engines: {node: '>=8'}
+    dependencies:
+      commondir: 1.0.1
+      make-dir: 3.1.0
+      pkg-dir: 4.2.0
+    dev: true
+
   /find-my-way/4.4.0:
     resolution: {integrity: sha512-hpntHvK0iOHp3pqWRRUEzioar4tp8euBD8DkPG3VauOriZLgwGZLTNp6yZSrdctJ8RCDS7zhZSR2V+yOaBbNow==}
     engines: {node: '>=10'}
@@ -6972,6 +7025,16 @@ packages:
   /flatted/3.2.4:
     resolution: {integrity: sha512-8/sOawo8tJ4QOBX8YlQBMxL8+RLZfxMQOif9o0KUKTNTjMYElWPE0r/m5VNFxTRd0NSw8qSy8dajrwX4RYI1Hw==}
     dev: true
+
+  /follow-redirects/1.14.5:
+    resolution: {integrity: sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
 
   /follow-redirects/1.14.5_debug@4.3.3:
     resolution: {integrity: sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==}
@@ -7524,6 +7587,10 @@ packages:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
     dev: true
+
+  /humanize-duration/3.27.1:
+    resolution: {integrity: sha512-jCVkMl+EaM80rrMrAPl96SGG4NRac53UyI1o/yAzebDntEY6K6/Fj2HOjdPg8omTqIe5Y0wPBai2q5xXrIbarA==}
+    dev: false
 
   /husky/7.0.4:
     resolution: {integrity: sha512-vbaCKN2QLtP/vD4yvs6iz6hBEo6wkSzs8HpRah1Z6aGmF2KW5PdYuAd7uX5a+OyBZHBhd+TFLqgjUgytQr4RvQ==}
@@ -12484,6 +12551,14 @@ packages:
       '@vue/runtime-dom': 3.2.23
       '@vue/server-renderer': 3.2.23_vue@3.2.23
       '@vue/shared': 3.2.23
+    dev: false
+
+  /vuetify/3.0.0-alpha.12_vue@3.2.23:
+    resolution: {integrity: sha512-F9TwV3Xk6J/bSH422kATrKeIiumGRkzGJPsvM0/8vPwYF0HWh7dHRhhYsIKkfhl5UJl/LYdeGNm1L8+jtldA0w==}
+    peerDependencies:
+      vue: ^3.2.19
+    dependencies:
+      vue: 3.2.23
     dev: false
 
   /w3c-hr-time/1.0.2:

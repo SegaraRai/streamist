@@ -62,7 +62,7 @@ export interface CreateSourceRequestImage {
 }
 
 export interface CreateSourceResponseFile {
-  request:
+  requestFile:
     | CreateSourceRequestFileAudio
     | CreateSourceRequestFileCueSheet
     | CreateSourceRequestFileImage;

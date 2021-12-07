@@ -190,6 +190,7 @@ model TrackFile {
   region    String
   format    String
   mimeType  String
+  extension String
   fileSize  Int
   sha256    String
   duration  Float
@@ -226,6 +227,7 @@ model ImageFile {
   region    String
   format    String
   mimeType  String
+  extension String
   fileSize  Int
   sha256    String
   width     Int
