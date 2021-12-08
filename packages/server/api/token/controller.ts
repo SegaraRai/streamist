@@ -20,7 +20,7 @@ export default defineController((fastify) => ({
     }
 
     return {
-      status: 200,
+      status: 201,
       body: {
         token: fastify.jwt.sign({
           id: user.id,

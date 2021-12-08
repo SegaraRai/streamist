@@ -12,9 +12,6 @@ export type Methods = {
   };
   patch: {
     reqBody: Pick<Album, 'title'>;
-    status: 204;
   };
-  delete: {
-    status: 204;
-  };
+  delete: {};
 };

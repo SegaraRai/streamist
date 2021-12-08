@@ -7,6 +7,5 @@ export type Methods = {
   post: {
     reqBody: Pick<Playlist, 'title'>;
     resBody: Playlist;
-    status: 201;
   };
 };

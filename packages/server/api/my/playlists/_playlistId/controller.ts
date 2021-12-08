@@ -1,4 +1,4 @@
-import { dbAlbumSortImages } from '$/db/album';
+import { ImageSortableAlbum, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { dbPlaylistSortTracks } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
@@ -41,7 +41,7 @@ export default defineController(() => ({
       query.includeTrackAlbumImages
     ) {
       for (const track of playlist.tracks) {
-        const { album } = track;
+        const { album } = track as unknown as { album: ImageSortableAlbum };
         dbAlbumSortImages(album);
       }
     }

@@ -1,4 +1,4 @@
-import { dbAlbumSortImages } from '$/db/album';
+import { ImageSortableAlbum, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
@@ -40,16 +40,18 @@ export default defineController(() => ({
     }
     if (query?.includeAlbums && query.includeAlbumImages) {
       for (const album of artist.albums) {
-        dbAlbumSortImages(album);
+        dbAlbumSortImages(album as unknown as ImageSortableAlbum);
       }
     }
     if (
       query?.includeTracks &&
       query.includeTrackAlbum &&
-      query.includeTrackAlbum
+      query.includeTrackAlbumImages
     ) {
       for (const track of artist.tracks) {
-        const { album } = track;
+        const { album } = track as unknown as {
+          album: ImageSortableAlbum;
+        };
         dbAlbumSortImages(album);
       }
     }

@@ -10,6 +10,6 @@ export default defineController(() => ({
 
     await onSourceFileUploaded(user.id, params.sourceId, params.sourceFileId);
 
-    return { status: 204 };
+    return { status: 202 };
   },
 }));

@@ -1,6 +1,6 @@
-import { defineController } from './$relay';
-import { HTTPError } from '$/utils/httpError';
 import { dbAlbumMoveImageBefore, dbAlbumRemoveImage } from '$/db/album';
+import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   patch: async ({ body, params, user }) => {

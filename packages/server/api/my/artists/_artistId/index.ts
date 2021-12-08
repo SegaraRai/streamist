@@ -13,6 +13,5 @@ export type Methods = {
   };
   patch: {
     reqBody: Pick<Artist, 'name'>;
-    status: 204;
   };
 };

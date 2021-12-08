@@ -3,32 +3,27 @@ import {
   dbArraySerializeItemIds,
 } from '$shared/dbArray';
 import type { Prisma, PrismaClient } from '$prisma/client';
+import { HTTPError } from '$/utils/httpError';
 import { client } from './client';
 import type { TransactionalPrismaClient } from './types';
 
 /**
  * IDが重複している、DBに存在しない、所定のユーザーのものではない、等
  */
-export class DBArrayInvalidArgumentError extends Error {
-  status: number;
-
+export class DBArrayInvalidArgumentError extends HTTPError {
   constructor(status: number, message: string) {
-    super(message);
+    super(status, message);
     this.name = 'DBArrayInvalidArgumentError';
-    this.status = status;
   }
 }
 
 /**
  * 楽観ロックで中止した場合
  */
-export class DBArrayOptimisticLockAbortError extends Error {
-  status: number;
-
+export class DBArrayOptimisticLockAbortError extends HTTPError {
   constructor(message: string) {
-    super(message);
+    super(409, message);
     this.name = 'DBArrayOptimisticLockAbortError';
-    this.status = 409;
   }
 }
 

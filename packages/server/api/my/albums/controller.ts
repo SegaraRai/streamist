@@ -1,5 +1,5 @@
 import { generateAlbumId } from '$shared-server/generateId';
-import { dbAlbumCreate, dbAlbumGetOrCreateByName } from '$/db/album';
+import { dbAlbumGetOrCreateByName } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
@@ -27,11 +27,13 @@ export default defineController(() => ({
     }
 
     const album = query?.forceNewAlbum
-      ? await dbAlbumCreate({
-          id: newAlbumId,
-          title: body.title,
-          userId: user.id,
-          artistId: artist.id,
+      ? await client.album.create({
+          data: {
+            id: newAlbumId,
+            title: body.title,
+            userId: user.id,
+            artistId: artist.id,
+          },
         })
       : await dbAlbumGetOrCreateByName(
           user.id,

@@ -1,5 +1,9 @@
 import { generateAlbumId, generateArtistId } from '$shared-server/generateId';
-import { dbAlbumGetOrCreateByNameTx, dbAlbumSortImages } from '$/db/album';
+import {
+  ImageSortableAlbum,
+  dbAlbumGetOrCreateByNameTx,
+  dbAlbumSortImages,
+} from '$/db/album';
 import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
@@ -31,7 +35,7 @@ export default defineController(() => ({
     }
     if (query?.includeAlbum && query.includeAlbumImages) {
       const { album } = track;
-      dbAlbumSortImages(album);
+      dbAlbumSortImages(album as unknown as ImageSortableAlbum);
     }
     return {
       status: 200,

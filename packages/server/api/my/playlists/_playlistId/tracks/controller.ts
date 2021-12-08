@@ -1,35 +1,35 @@
 import { client } from '$/db/lib/client';
-import { dbPlaylistAddTrackTx, dbPlaylistGetTracks } from '$/db/playlist';
+import { dbPlaylistAddTrack, dbPlaylistSortTracks } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ params, user }) => {
-    const tracks = await dbPlaylistGetTracks(user.id, params.playlistId);
+    const playlist = await client.playlist.findFirst({
+      where: {
+        id: params.playlistId,
+        userId: user.id,
+      },
+      include: {
+        tracks: true,
+      },
+    });
+    if (!playlist) {
+      throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
+    }
+    dbPlaylistSortTracks(playlist);
     return {
       status: 200,
-      body: tracks,
+      body: playlist.tracks,
     };
   },
   post: async ({ body, params, user }) => {
-    await client.$transaction(async (txClient) => {
-      const track = await txClient.track.findFirst({
-        where: {
-          id: body.trackId,
-          userId: user.id,
-        },
-      });
-      if (!track) {
-        throw new HTTPError(400, `Track ${body.trackId} not found`);
-      }
-
-      await dbPlaylistAddTrackTx(
-        txClient,
-        user.id,
-        params.playlistId,
-        track.id
-      );
-    });
-    return { status: 204 };
+    await dbPlaylistAddTrack(user.id, params.playlistId, body.trackId);
+    return {
+      status: 201,
+      headers: {
+        Location: `/api/my/playlists/${params.playlistId}/tracks/${body.trackId}`,
+      },
+    };
   },
 }));
