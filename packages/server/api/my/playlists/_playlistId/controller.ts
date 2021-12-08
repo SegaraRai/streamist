@@ -1,4 +1,6 @@
+import { dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
+import { dbPlaylistSortTracks } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -12,11 +14,15 @@ export default defineController(() => ({
       include: {
         tracks: !!query?.includeTracks && {
           include: {
-            artist: !!query?.includeTrackArtist,
-            album: !!query?.includeTrackAlbum && {
+            artist: !!query.includeTrackArtist,
+            album: !!query.includeTrackAlbum && {
               include: {
-                artist: !!query?.includeTrackAlbumArtist,
-                images: !!query?.includeTrackAlbumImages,
+                artist: !!query.includeTrackAlbumArtist,
+                images: !!query.includeTrackAlbumImages && {
+                  include: {
+                    files: true,
+                  },
+                },
               },
             },
           },
@@ -25,6 +31,19 @@ export default defineController(() => ({
     });
     if (!playlist) {
       throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
+    }
+    if (query?.includeTracks) {
+      dbPlaylistSortTracks(playlist);
+    }
+    if (
+      query?.includeTracks &&
+      query.includeTrackAlbum &&
+      query.includeTrackAlbumImages
+    ) {
+      for (const track of playlist.tracks) {
+        const { album } = track;
+        dbAlbumSortImages(album);
+      }
     }
     return {
       status: 200,

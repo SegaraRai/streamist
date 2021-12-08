@@ -1,3 +1,4 @@
+import { dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { deleteAlbum, updateAlbum } from '$/services/albums';
 import { HTTPError } from '$/utils/httpError';
@@ -13,19 +14,18 @@ export default defineController(() => ({
       include: {
         artist: !!query?.includeAlbumArtist,
         images: !!query?.includeAlbumImages,
-        tracks:
-          !!query?.includeTracks &&
-          (query.includeTrackArtist
-            ? {
-                include: {
-                  artist: true,
-                },
-              }
-            : true),
+        tracks: !!query?.includeTracks && {
+          include: {
+            artist: !!query.includeTrackArtist,
+          },
+        },
       },
     });
     if (!album) {
       throw new HTTPError(404, `Album ${params.albumId} not found`);
+    }
+    if (query?.includeAlbumImages) {
+      dbAlbumSortImages(album);
     }
     return {
       status: 200,

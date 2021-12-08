@@ -14,6 +14,8 @@ import {
 import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
 
+export type ImageSortableAlbum = { imageOrder: string; images: Image[] };
+
 // check types for `dbAlbumGetOrCreateByNameTx`
 /* #__PURE__ */ expectType<'Album'>(Prisma.ModelName.Album);
 /* #__PURE__ */ expectType<'id'>(Prisma.AlbumScalarFieldEnum.id);
@@ -171,9 +173,7 @@ export function dbAlbumMoveImageBefore(
   );
 }
 
-export function dbAlbumSortImages<
-  T extends { imageOrder: string; images: Image[] }
->(album: T): T {
+export function dbAlbumSortImages<T extends ImageSortableAlbum>(album: T): T {
   dbArraySort(album.images, album.imageOrder);
   return album;
 }

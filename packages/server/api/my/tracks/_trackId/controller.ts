@@ -1,5 +1,5 @@
 import { generateAlbumId, generateArtistId } from '$shared-server/generateId';
-import { dbAlbumGetOrCreateByNameTx } from '$/db/album';
+import { dbAlbumGetOrCreateByNameTx, dbAlbumSortImages } from '$/db/album';
 import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
@@ -14,18 +14,24 @@ export default defineController(() => ({
       },
       include: {
         artist: !!query?.includeTrackArtist,
-        album: query?.includeAlbum
-          ? {
+        album: !!query?.includeAlbum && {
+          include: {
+            artist: !!query.includeAlbumArtist,
+            images: !!query.includeAlbumImages && {
               include: {
-                artist: !!query?.includeAlbumArtist,
-                images: !!query?.includeAlbumImages,
+                files: true,
               },
-            }
-          : false,
+            },
+          },
+        },
       },
     });
     if (!track) {
       throw new HTTPError(404, `track ${params.trackId} not found`);
+    }
+    if (query?.includeAlbum && query.includeAlbumImages) {
+      const { album } = track;
+      dbAlbumSortImages(album);
     }
     return {
       status: 200,

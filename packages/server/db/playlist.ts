@@ -11,6 +11,8 @@ import {
 } from './lib/array';
 import type { TransactionalPrismaClient } from './lib/types';
 
+export type TrackSortablePlaylist = { trackOrder: string; tracks: Track[] };
+
 export function dbPlaylistAddTrackTx(
   txClient: TransactionalPrismaClient,
   userId: string,
@@ -103,9 +105,9 @@ export function dbPlaylistMoveTrackBefore(
   );
 }
 
-export function dbPlaylistSortTracks<
-  T extends { trackOrder: string; tracks: Track[] }
->(playlist: T): T {
+export function dbPlaylistSortTracks<T extends TrackSortablePlaylist>(
+  playlist: T
+): T {
   dbArraySort(playlist.tracks, playlist.trackOrder);
   return playlist;
 }
