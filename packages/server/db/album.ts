@@ -1,17 +1,17 @@
 import { expectType } from 'tsd';
 import { generateAlbumId } from '$shared-server/generateId';
-import { ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID } from '$shared/dbConfig';
-import { dbLinkedListSort } from '$shared/linkedListSort';
-import { Album, Image, Prisma } from '$prisma/client';
-import { client } from './lib/client';
+import { dbArraySort } from '$shared/dbArray';
+import { Album, Image, ImageFile, Prisma } from '$prisma/client';
 import {
-  dbLinkedListAppend,
-  dbLinkedListAppendTx,
-  dbLinkedListMoveBefore,
-  dbLinkedListRemove,
-  dbLinkedListRemoveAll,
-  dbLinkedListRemoveTx,
-} from './lib/linkedList';
+  dbArrayAdd,
+  dbArrayAddTx,
+  dbArrayCreateMoveBeforeReorderCallback,
+  dbArrayRemove,
+  dbArrayRemoveAll,
+  dbArrayRemoveTx,
+  dbArrayReorder,
+} from './lib/array';
+import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
 
 // check types for `dbAlbumGetOrCreateByNameTx`
@@ -20,33 +20,6 @@ import type { TransactionalPrismaClient } from './lib/types';
 /* #__PURE__ */ expectType<'title'>(Prisma.AlbumScalarFieldEnum.title);
 /* #__PURE__ */ expectType<'artistId'>(Prisma.AlbumScalarFieldEnum.artistId);
 /* #__PURE__ */ expectType<'userId'>(Prisma.AlbumScalarFieldEnum.userId);
-
-export async function dbAlbumCreateTx(
-  txClient: TransactionalPrismaClient,
-  data: Prisma.AlbumCreateArgs['data'] & { userId: string }
-): Promise<Album> {
-  const album = await txClient.album.create({ data });
-
-  // create sentinel
-  await txClient.albumImage.create({
-    data: {
-      userId: data.userId,
-      albumId: data.id,
-      imageId: ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID,
-      nextImageId: null,
-    },
-  });
-
-  return album;
-}
-
-export function dbAlbumCreate(
-  data: Prisma.AlbumCreateArgs['data'] & { userId: string }
-): Promise<Album> {
-  return client.$transaction(
-    (txClient): Promise<Album> => dbAlbumCreateTx(txClient, data)
-  );
-}
 
 export async function dbAlbumGetOrCreateByNameTx(
   txClient: TransactionalPrismaClient,
@@ -83,18 +56,6 @@ export async function dbAlbumGetOrCreateByNameTx(
     );
   }
 
-  // create sentinel
-  if (album.id === newAlbumId) {
-    await txClient.albumImage.create({
-      data: {
-        userId,
-        albumId: album.id,
-        imageId: ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID,
-        nextImageId: null,
-      },
-    });
-  }
-
   return album;
 }
 
@@ -122,33 +83,31 @@ export function dbAlbumAddImageTx(
   txClient: TransactionalPrismaClient,
   userId: string,
   albumId: string,
-  imageId: string
+  imageIds: string | readonly string[]
 ): Promise<void> {
-  return dbLinkedListAppendTx<typeof Prisma.AlbumImageScalarFieldEnum>(
+  return dbArrayAddTx<typeof Prisma.AlbumScalarFieldEnum>(
     txClient,
-    Prisma.ModelName.AlbumImage,
     userId,
-    Prisma.AlbumImageScalarFieldEnum.albumId,
+    Prisma.ModelName.Album,
+    Prisma.ModelName.Image,
+    Prisma.AlbumScalarFieldEnum.imageOrder,
     albumId,
-    Prisma.AlbumImageScalarFieldEnum.imageId,
-    Prisma.AlbumImageScalarFieldEnum.nextImageId,
-    imageId
+    imageIds
   );
 }
 
 export function dbAlbumAddImage(
   userId: string,
   albumId: string,
-  imageId: string
+  imageIds: string | readonly string[]
 ): Promise<void> {
-  return dbLinkedListAppend<typeof Prisma.AlbumImageScalarFieldEnum>(
-    Prisma.ModelName.AlbumImage,
+  return dbArrayAdd<typeof Prisma.AlbumScalarFieldEnum>(
     userId,
-    Prisma.AlbumImageScalarFieldEnum.albumId,
+    Prisma.ModelName.Album,
+    Prisma.ModelName.Image,
+    Prisma.AlbumScalarFieldEnum.imageOrder,
     albumId,
-    Prisma.AlbumImageScalarFieldEnum.imageId,
-    Prisma.AlbumImageScalarFieldEnum.nextImageId,
-    imageId
+    imageIds
   );
 }
 
@@ -156,95 +115,104 @@ export function dbAlbumRemoveImageTx(
   txClient: TransactionalPrismaClient,
   userId: string,
   albumId: string,
-  imageId: string
+  imageIds: string | readonly string[]
 ): Promise<void> {
-  return dbLinkedListRemoveTx<typeof Prisma.AlbumImageScalarFieldEnum>(
+  return dbArrayRemoveTx<typeof Prisma.AlbumScalarFieldEnum>(
     txClient,
-    Prisma.ModelName.AlbumImage,
     userId,
-    Prisma.AlbumImageScalarFieldEnum.albumId,
+    Prisma.ModelName.Album,
+    Prisma.ModelName.Image,
+    Prisma.AlbumScalarFieldEnum.imageOrder,
     albumId,
-    Prisma.AlbumImageScalarFieldEnum.imageId,
-    Prisma.AlbumImageScalarFieldEnum.nextImageId,
-    imageId
+    imageIds
   );
 }
 
 export function dbAlbumRemoveImage(
   userId: string,
   albumId: string,
-  imageId: string
+  imageIds: string | readonly string[]
 ): Promise<void> {
-  return dbLinkedListRemove<typeof Prisma.AlbumImageScalarFieldEnum>(
-    Prisma.ModelName.AlbumImage,
+  return dbArrayRemove<typeof Prisma.AlbumScalarFieldEnum>(
     userId,
-    Prisma.AlbumImageScalarFieldEnum.albumId,
+    Prisma.ModelName.Album,
+    Prisma.ModelName.Image,
+    Prisma.AlbumScalarFieldEnum.imageOrder,
     albumId,
-    Prisma.AlbumImageScalarFieldEnum.imageId,
-    Prisma.AlbumImageScalarFieldEnum.nextImageId,
-    imageId
+    imageIds
   );
 }
 
-export async function dbAlbumRemoveAllImages(
+export function dbAlbumRemoveAllImages(
   userId: string,
   albumId: string
 ): Promise<void> {
-  await dbLinkedListRemoveAll<typeof Prisma.AlbumImageScalarFieldEnum>(
-    Prisma.ModelName.AlbumImage,
+  return dbArrayRemoveAll<typeof Prisma.AlbumScalarFieldEnum>(
     userId,
-    Prisma.AlbumImageScalarFieldEnum.albumId,
-    albumId,
-    Prisma.AlbumImageScalarFieldEnum.imageId,
-    Prisma.AlbumImageScalarFieldEnum.nextImageId,
-    ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID
+    Prisma.ModelName.Album,
+    Prisma.ModelName.Image,
+    Prisma.AlbumScalarFieldEnum.imageOrder,
+    albumId
   );
 }
 
-export async function dbAlbumMoveImageBefore(
+export function dbAlbumMoveImageBefore(
   userId: string,
   albumId: string,
   imageId: string,
-  referenceImageId?: string
+  referenceImageId?: string | null
 ): Promise<void> {
-  if (
-    imageId === ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID ||
-    referenceImageId === ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID
-  ) {
-    throw new Error('invalid parameter');
-  }
-  if (!referenceImageId) {
-    // insert into front
-    referenceImageId = ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID;
-  }
-  await dbLinkedListMoveBefore<typeof Prisma.AlbumImageScalarFieldEnum>(
-    Prisma.ModelName.AlbumImage,
+  return dbArrayReorder<typeof Prisma.AlbumScalarFieldEnum>(
     userId,
-    Prisma.AlbumImageScalarFieldEnum.albumId,
+    Prisma.ModelName.Album,
+    Prisma.AlbumScalarFieldEnum.imageOrder,
     albumId,
-    Prisma.AlbumImageScalarFieldEnum.imageId,
-    Prisma.AlbumImageScalarFieldEnum.nextImageId,
-    imageId,
-    referenceImageId
+    dbArrayCreateMoveBeforeReorderCallback(imageId, referenceImageId ?? null)
   );
+}
+
+export function dbAlbumSortImages<
+  T extends { imageOrder: string; images: Image[] }
+>(album: T): T {
+  dbArraySort(album.images, album.imageOrder);
+  return album;
 }
 
 export async function dbAlbumGetImages(
   userId: string,
-  albumId: string
-): Promise<Image[]> {
-  return dbLinkedListSort(
-    await client.albumImage.findMany({
-      where: {
-        userId,
-        albumId,
+  albumId: string,
+  includeFiles?: false
+): Promise<Image[]>;
+
+export async function dbAlbumGetImages(
+  userId: string,
+  albumId: string,
+  includeFiles: true
+): Promise<(Image & { files: ImageFile[] })[]>;
+
+export async function dbAlbumGetImages(
+  userId: string,
+  albumId: string,
+  includeFiles = false
+) {
+  const album = await client.album.findFirst({
+    where: {
+      id: albumId,
+      userId,
+    },
+    select: {
+      imageOrder: true,
+      images: {
+        include: {
+          files: includeFiles || false,
+        },
       },
-      include: {
-        image: true,
-      },
-    }),
-    Prisma.AlbumImageScalarFieldEnum.imageId,
-    Prisma.AlbumImageScalarFieldEnum.nextImageId,
-    ALBUM_IMAGE_SENTINEL_NODE_IMAGE_ID
-  ).map((albumImage) => albumImage.image);
+    },
+  });
+  if (!album) {
+    throw new Error(
+      `dbAlbumGetImages: album not found (userId=${userId}, albumId=${albumId})`
+    );
+  }
+  return dbAlbumSortImages(album).images;
 }

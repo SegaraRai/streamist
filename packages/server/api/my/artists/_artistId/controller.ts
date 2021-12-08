@@ -1,6 +1,6 @@
-import { defineController } from './$relay';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   get: async ({ params, query, user }) => {
@@ -10,38 +10,20 @@ export default defineController(() => ({
         userId: user.id,
       },
       include: {
-        albums:
-          !!query?.includeAlbums &&
-          (!!query.includeAlbumImages
-            ? {
-                include: {
-                  images: {
-                    include: {
-                      image: true,
-                    },
-                  },
-                },
-              }
-            : true),
-        tracks:
-          !!query?.includeTracks &&
-          (!!query?.includeTrackAlbum
-            ? {
-                include: {
-                  album: !!query?.includeTrackAlbumImages
-                    ? {
-                        include: {
-                          images: {
-                            include: {
-                              image: true,
-                            },
-                          },
-                        },
-                      }
-                    : true,
-                },
-              }
-            : true),
+        albums: !!query?.includeAlbums && {
+          include: {
+            images: !!query.includeAlbumImages,
+          },
+        },
+        tracks: !!query?.includeTracks && {
+          include: {
+            album: !!query?.includeTrackAlbum && {
+              include: {
+                images: !!query?.includeTrackAlbumImages,
+              },
+            },
+          },
+        },
       },
     });
     if (!artist) {

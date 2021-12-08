@@ -18,13 +18,7 @@ export default defineController(() => ({
           ? {
               include: {
                 artist: !!query?.includeAlbumArtist,
-                images: query?.includeAlbumImages
-                  ? {
-                      include: {
-                        image: true,
-                      },
-                    }
-                  : false,
+                images: !!query?.includeAlbumImages,
               },
             }
           : false,

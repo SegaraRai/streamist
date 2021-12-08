@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto';
 import { is } from '$shared/is.js';
 import { client } from './client.js';
-import { dbInitSentinel } from './initSentinel.js';
 import type { SourceState } from './types.js';
 
 function prng(seed: string): () => number {
@@ -27,9 +26,6 @@ export function init(): Promise<void> {
       let albumCounter = 0;
       let trackCounter = 0;
       let playlistCounter = 0;
-
-      // create sentinel nodes
-      await dbInitSentinel(txClient);
 
       for (let i = 0; i < 10; i++) {
         const userId = `us${++userCounter}`;
@@ -110,16 +106,6 @@ export function init(): Promise<void> {
               id: playlistId,
               title: `Playlist.${playlistId}`,
               userId,
-            },
-          });
-
-          // add sentinel nodes
-          await txClient.playlistTrack.create({
-            data: {
-              playlistId,
-              userId,
-              trackId: '/',
-              nextTrackId: null,
             },
           });
 

@@ -4,12 +4,12 @@ import NullableImage from '@/components/NullableImage.vue';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import api from '@/logic/api';
 import { compareAlbum } from '@/logic/sort';
-import type { AlbumImageWithImageFile, ImageWithFile } from '~/types/image';
+import type { ImageWithFile } from '~/types/image';
 import type { Album, Artist, Track } from '$prisma/client';
 
 interface ResponseAlbum extends Album {
   artist: Artist;
-  images: AlbumImageWithImageFile[];
+  images: ImageWithFile[];
   tracks: Track[];
 }
 
@@ -34,7 +34,7 @@ export default defineComponent({
     const items = computed(() => {
       return albums.value.map((album): Item => {
         const artist = album.artist;
-        const image = getDefaultAlbumImage(album.images);
+        const image = getDefaultAlbumImage(album);
 
         const releaseDate = album.tracks.find(
           (track) => track.releaseDate

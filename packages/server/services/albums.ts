@@ -54,7 +54,6 @@ export function updateAlbum(userId: string, albumId: string, title: string) {
 
 export function deleteAlbum(userId: string, albumId: string) {
   // fails if album has images or tracks
-  // TODO(db): delete sentinel node of AlbumImage
   return client.album.deleteMany({
     where: {
       id: albumId,

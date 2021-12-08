@@ -1,5 +1,4 @@
 import { client } from '$/db/lib/client';
-import { dbPlaylistRemove } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -13,19 +12,11 @@ export default defineController(() => ({
       include: {
         tracks: !!query?.includeTracks && {
           include: {
-            track: {
+            artist: !!query?.includeTrackArtist,
+            album: !!query?.includeTrackAlbum && {
               include: {
-                artist: !!query?.includeTrackArtist,
-                album: !!query?.includeTrackAlbum && {
-                  include: {
-                    artist: !!query?.includeTrackAlbumArtist,
-                    images: !!query?.includeTrackAlbumImages && {
-                      include: {
-                        image: true,
-                      },
-                    },
-                  },
-                },
+                artist: !!query?.includeTrackAlbumArtist,
+                images: !!query?.includeTrackAlbumImages,
               },
             },
           },
@@ -56,7 +47,15 @@ export default defineController(() => ({
     return { status: 204 };
   },
   delete: async ({ params, user }) => {
-    await dbPlaylistRemove(user.id, params.playlistId);
+    const deleted = await client.playlist.deleteMany({
+      where: {
+        id: params.playlistId,
+        userId: user.id,
+      },
+    });
+    if (deleted.count === 0) {
+      throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
+    }
     return { status: 204 };
   },
 }));

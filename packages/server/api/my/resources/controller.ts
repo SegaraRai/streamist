@@ -32,9 +32,6 @@ export default defineController(() => ({
         albumCoArtists: await txClient.albumCoArtist.findMany({
           where,
         }),
-        albumImages: await txClient.albumImage.findMany({
-          where,
-        }),
         albums: await txClient.album.findMany({
           where,
         }),
@@ -42,9 +39,6 @@ export default defineController(() => ({
           where,
         }),
         images: await txClient.image.findMany({
-          where,
-        }),
-        playlistTracks: await txClient.playlistTrack.findMany({
           where,
         }),
         playlists: await txClient.playlist.findMany({

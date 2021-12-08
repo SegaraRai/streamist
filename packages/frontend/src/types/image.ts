@@ -1,13 +1,13 @@
-import type { AlbumImage, Image, ImageFile } from '$prisma/client';
+import type { Album, Image, ImageFile } from '$prisma/client';
 
 export interface ImageWithFile extends Image {
   files: ImageFile[];
 }
 
-export interface AlbumImageWithImageFile extends AlbumImage {
-  image: ImageWithFile;
+export interface AlbumWithImageFile extends Album {
+  images: ImageWithFile[];
 }
 
-export interface AlbumImageWithImage extends AlbumImage {
-  image: Image;
+export interface AlbumWithImage extends Album {
+  images: Image[];
 }

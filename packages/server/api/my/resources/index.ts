@@ -1,11 +1,9 @@
 import type {
   Album,
   AlbumCoArtist,
-  AlbumImage,
   Artist,
   Image,
   Playlist,
-  PlaylistTrack,
   Tag,
   Track,
   TrackCoArtist,
@@ -21,11 +19,9 @@ export type Methods = {
       timestamp: number;
       user: User;
       albumCoArtists: AlbumCoArtist[];
-      albumImages: AlbumImage[];
       albums: Album[];
       artists: Artist[];
       images: Image[];
-      playlistTracks: PlaylistTrack[];
       playlists: Playlist[];
       tags: Tag[];
       trackCoArtists: TrackCoArtist[];

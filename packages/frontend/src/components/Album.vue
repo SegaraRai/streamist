@@ -144,7 +144,7 @@ export default defineComponent({
     const artist = computed(() => props.album?.artist);
 
     const image = computed(() => {
-      return props.album && getDefaultAlbumImage(props.album.images);
+      return props.album && getDefaultAlbumImage(props.album);
     });
 
     const releaseDate = computed(() => {

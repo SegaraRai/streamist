@@ -39,7 +39,7 @@ export default defineComponent({
             albumArtist$$q: albumArtist,
             artist$$q: artist,
             formattedDuration$$q: formatTime(track.duration),
-            image$$q: getDefaultAlbumImage(album.images),
+            image$$q: getDefaultAlbumImage(album),
             track$$q: track,
           };
         })

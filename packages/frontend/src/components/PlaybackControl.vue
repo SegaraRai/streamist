@@ -22,9 +22,7 @@ export default defineComponent({
     const shuffleEnabled = playbackStore.shuffle$$q;
 
     const image = computed<ImageWithFile | null | undefined>(
-      () =>
-        currentTrack.value &&
-        getDefaultAlbumImage(currentTrack.value.album.images)
+      () => currentTrack.value && getDefaultAlbumImage(currentTrack.value.album)
     );
 
     //

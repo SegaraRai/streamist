@@ -2,9 +2,7 @@ import { client } from './client.js';
 
 export function truncate(): Promise<void> {
   return client.$transaction(async (txClient): Promise<void> => {
-    await txClient.playlistTrack.deleteMany();
     await txClient.playlist.deleteMany();
-    await txClient.albumImage.deleteMany();
     await txClient.imageFile.deleteMany();
     await txClient.image.deleteMany();
     await txClient.trackCoArtist.deleteMany();

@@ -4,14 +4,13 @@ import { UnwrapRef, computed, defineComponent, ref, watch } from 'vue';
 import TrackList from '@/components/TrackList.vue';
 import api from '@/logic/api';
 import { formatTracksTotalDuration } from '@/logic/duration';
-import { getSortedPlaylistTracks } from '@/logic/playlistTrack';
 import { calcTrackListHeight } from '@/logic/util';
 import { usePlaybackStore } from '@/stores/playback';
 import { TrackForPlayback } from '~/types/playback';
-import type { Playlist, PlaylistTrack } from '$prisma/client';
+import type { Playlist } from '$prisma/client';
 
 type PlaylistForPlayback = Playlist & {
-  tracks: (PlaylistTrack & { track: TrackForPlayback })[];
+  tracks: TrackForPlayback[];
 };
 
 interface Props {
@@ -83,7 +82,7 @@ export default defineComponent({
 
             loading.value = false;
             playlist.value = responsePlaylist;
-            tracks.value = getSortedPlaylistTracks(responsePlaylist.tracks);
+            tracks.value = responsePlaylist.tracks;
 
             context.emit('load-playlist', responsePlaylist);
             context.emit('load-tracks', responsePlaylist.tracks);

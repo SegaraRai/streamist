@@ -28,8 +28,6 @@ model User {
   sourceFiles    SourceFile[]
   albumCoArtists AlbumCoArtist[]
   trackCoArtist  TrackCoArtist[]
-  albumImages    AlbumImage[]
-  playlistTracks PlaylistTrack[]
 }
 
 model Tag {
@@ -107,26 +105,6 @@ model Artist {
   @@index([userId])
 }
 
-model AlbumImage {
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  album       Album    @relation(fields: [albumId], references: [id])
-  albumId     String
-  image       Image    @relation(fields: [imageId], references: [id])
-  imageId     String
-  nextImageId String? // foreign key constraint is currently omitted due to some operations
-
-  // unique constraint is currently omitted due to some operations
-  //@@unique([albumId, nextImageId])
-  @@id([albumId, imageId])
-  @@index([userId])
-  @@index([albumId])
-  @@index([imageId])
-  @@index([nextImageId])
-}
-
 model Album {
   id             String          @id
   title          String
@@ -140,7 +118,8 @@ model Album {
   userId         String
   artist         Artist          @relation(fields: [artistId], references: [id])
   artistId       String
-  images         AlbumImage[]
+  images         Image[]
+  imageOrder     String          @default("")
   tracks         Track[]
   tags           Tag[]
   coArtists      AlbumCoArtist[]
@@ -176,7 +155,7 @@ model Track {
   source               Source          @relation(fields: [sourceId], references: [id])
   sourceId             String
   files                TrackFile[]
-  playlists            PlaylistTrack[]
+  playlists            Playlist[]
   tags                 Tag[]
   coArtists            TrackCoArtist[]
 
@@ -206,18 +185,18 @@ model TrackFile {
 }
 
 model Image {
-  id           String       @id
+  id           String      @id
   sourceWidth  Int
   sourceHeight Int
   dHash        String
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @default(now()) @updatedAt
-  user         User         @relation(fields: [userId], references: [id])
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
+  user         User        @relation(fields: [userId], references: [id])
   userId       String
-  source       Source       @relation(fields: [sourceId], references: [id])
+  source       Source      @relation(fields: [sourceId], references: [id])
   sourceId     String
   files        ImageFile[]
-  albums       AlbumImage[]
+  albums       Album[]
 
   @@index([userId])
 }
@@ -277,36 +256,17 @@ model TrackCoArtist {
   @@index([trackId])
 }
 
-model PlaylistTrack {
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
-  userId      String
-  playlist    Playlist @relation(fields: [playlistId], references: [id])
-  playlistId  String
-  track       Track    @relation(fields: [trackId], references: [id])
-  trackId     String
-  nextTrackId String? // foreign key constraint is currently omitted due to some operations
-
-  // unique constraint is currently omitted due to some operations
-  //@@unique([playlistId, nextTrackId])
-  @@id([playlistId, trackId])
-  @@index([userId])
-  @@index([playlistId])
-  @@index([trackId])
-  @@index([nextTrackId])
-}
-
 model Playlist {
-  id        String          @id
-  title     String
-  notes     String          @default("")
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @default(now()) @updatedAt
-  user      User            @relation(fields: [userId], references: [id])
-  userId    String
-  tags      Tag[]
-  tracks    PlaylistTrack[]
+  id         String   @id
+  title      String
+  notes      String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  tracks     Track[]
+  trackOrder String   @default("")
+  tags       Tag[]
 
   @@index([userId])
 }

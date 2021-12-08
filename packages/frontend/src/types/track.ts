@@ -1,13 +1,13 @@
-import type { PlaylistTrack, Track, TrackFile } from '$prisma/client';
+import type { Playlist, Track, TrackFile } from '$prisma/client';
 
 export interface TrackWithFile extends Track {
   files: TrackFile[];
 }
 
-export interface PlaylistTrackWithTrackFile extends PlaylistTrack {
-  track: TrackWithFile;
+export interface PlaylistWithTrackFile extends Playlist {
+  tracks: TrackWithFile[];
 }
 
-export interface PlaylistTrackWithTrack extends PlaylistTrack {
-  track: Track;
+export interface PlaylistWithTrack extends Playlist {
+  tracks: Track[];
 }
