@@ -15,9 +15,9 @@
   },
   "devDependencies": {
     "@esbuild-plugins/node-resolve": "^0.1.4",
-    "@types/node": "^16.11.11",
-    "esbuild": "^0.14.1",
-    "esbuild-node-externals": "^1.4.0",
+    "@types/node": "^16.11.12",
+    "esbuild": "^0.14.2",
+    "esbuild-node-externals": "^1.4.1",
     "node-dev": "^7.1.0",
     "nodemand": "^0.1.11",
     "ts-node": "^10.4.0",
