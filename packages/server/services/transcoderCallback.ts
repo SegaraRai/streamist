@@ -81,6 +81,7 @@ async function registerImage(
   imageId: string
 ): Promise<void> {
   // register image
+  // DO NOT connect to albums here, as it will be connected in dbAlbumAddImageTx
   await txClient.image.create({
     data: {
       id: imageId,
@@ -88,14 +89,6 @@ async function registerImage(
       sourceHeight: artifact.probe.height,
       dHash: artifact.dHash,
       user: { connect: { id: userId } },
-      albums: {
-        connect: {
-          albumId_imageId: {
-            albumId,
-            imageId,
-          },
-        },
-      },
       source: {
         connect: {
           id: sourceId,

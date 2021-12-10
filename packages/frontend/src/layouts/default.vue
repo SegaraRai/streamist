@@ -125,7 +125,7 @@ watchEffect(() => {
             <v-icon>mdi-home</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Home') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Home') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
@@ -134,7 +134,7 @@ watchEffect(() => {
             <v-icon>mdi-album</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Albums') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Albums') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item link to="/artists">
@@ -142,7 +142,7 @@ watchEffect(() => {
             <v-icon>mdi-account-music</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Artists') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Artists') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item link to="/tracks">
@@ -150,7 +150,7 @@ watchEffect(() => {
             <v-icon>mdi-music</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Tracks') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Tracks') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item link to="/playlists">
@@ -158,7 +158,7 @@ watchEffect(() => {
             <v-icon>mdi-playlist-music</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Playlists') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Playlists') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item link to="/tags">
@@ -166,7 +166,7 @@ watchEffect(() => {
             <v-icon>mdi-pound</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Tags') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Tags') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
@@ -175,7 +175,7 @@ watchEffect(() => {
             <v-icon>mdi-playlist-play</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Queue') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Queue') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item link to="/downloads">
@@ -188,7 +188,7 @@ watchEffect(() => {
             ></v-progress-linear>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Downloads') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Downloads') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item link to="/uploads">
@@ -201,7 +201,7 @@ watchEffect(() => {
             ></v-progress-linear>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Uploads') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Uploads') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-divider></v-divider>
@@ -210,10 +210,11 @@ watchEffect(() => {
             <v-icon>mdi-settings</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>{{ t('client/Settings') }}</v-list-item-title>
+            <v-list-item-title>{{ t('sidebar.Settings') }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
+      <div class="h-24" />
     </v-navigation-drawer>
 
     <template v-if="display.mdAndUp">
@@ -225,7 +226,12 @@ watchEffect(() => {
         :theme="theme.rightSidebarTheme"
         :hidden="!display.mdAndUp"
       >
-        <Queue />
+        <div class="flex flex-col h-full">
+          <div class="flex-1 overflow-y-auto overflow-x-hidden">
+            <Queue />
+          </div>
+          <div class="h-24 flex-none" />
+        </div>
       </v-navigation-drawer>
     </template>
 
@@ -249,7 +255,7 @@ watchEffect(() => {
         solo-inverted
         hide-details
         prepend-inner-icon="mdi-magnify"
-        :label="t('client/Search')"
+        :label="t('header.Search')"
         class="textfield"
       />
       <v-spacer></v-spacer>
@@ -263,31 +269,9 @@ watchEffect(() => {
 
     <v-main :class="theme.bgClass">
       <v-sheet tile :theme="theme.contentTheme" :class="theme.bgClass">
-        <router-view></router-view>
+        <router-view />
       </v-sheet>
-
-      <v-sheet tile class="playback-sheet position-fixed bottom-0">
-        <v-divider></v-divider>
-        <div class="pa-1">
-          <playback-control />
-        </div>
-        <v-progress-linear
-          class="upload-progress"
-          color="orange"
-          value="15"
-          height="2"
-          :active="true"
-          bottom
-        ></v-progress-linear>
-        <v-progress-linear
-          class="download-progress"
-          color="green"
-          value="15"
-          height="2"
-          :active="true"
-          bottom
-        ></v-progress-linear>
-      </v-sheet>
+      <div class="h-24" />
     </v-main>
 
     <v-dialog v-model="uploadDialog">
@@ -301,7 +285,7 @@ watchEffect(() => {
           <div>
             <h3>Files</h3>
             <v-list dense>
-              <v-subheader class="uppercase">In progress</v-subheader>
+              <v-list-subheader class="uppercase">In progress</v-list-subheader>
               <v-list-item-group color="primary">
                 <v-list-item>
                   <v-list-item-content>
@@ -330,5 +314,16 @@ watchEffect(() => {
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <div
+      class="playback-sheet position-fixed bottom-0 z-200 w-full ma-0 pa-0 h-24"
+    >
+      <v-sheet class="m-0 p-0 w-full h-full">
+        <v-divider />
+        <div class="pa-1">
+          <playback-control />
+        </div>
+      </v-sheet>
+    </div>
   </v-app>
 </template>

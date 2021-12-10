@@ -119,7 +119,7 @@ export default defineComponent({
 
     //
 
-    const selected = reactive([] as number[]);
+    const selected = ref([]);
 
     //
 
@@ -148,175 +148,165 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-list flat :class="themeStore$$q.bgClass">
-    <v-list-item-group v-model="s" multiple>
-      <v-sheet
-        tile
-        class="sheet-header"
-        :class="themeStore$$q.bgClass"
+  <v-list v-model="s" flat :class="themeStore$$q.bgClass">
+    <v-list-item class="list-header w-full flex flex-row">
+      <div class="list-header-column list-column-icon subtitle-2 mr-4 py-2">
+        {{
+          indexContent === 'index' || indexContent === 'trackNumber' ? '#' : ''
+        }}
+      </div>
+      <v-list-item-content
+        class="list-header-column list-column-content flex flex-row flex-nowrap items-center mr-6 py-2"
       >
-        <v-subheader class="list-header">
-          <div class="list-header-column list-column-icon subtitle-2 mr-4 py-2">
-            {{
-              indexContent === 'index' || indexContent === 'trackNumber'
-                ? '#'
-                : ''
-            }}
+        <v-list-item-title class="track-title subtitle-2">{{
+          t('trackList.Title')
+        }}</v-list-item-title>
+      </v-list-item-content>
+      <template v-if="showAlbum">
+        <v-list-item-content
+          class="list-header-column list-column-content flex flex-row flex-nowrap items-center mr-6 py-2"
+        >
+          <v-list-item-title class="track-album-title subtitle-2">{{
+            t('trackList.Album')
+          }}</v-list-item-title>
+        </v-list-item-content>
+      </template>
+      <div class="list-header-column list-column-duration py-1">
+        <v-icon>mdi-clock-outline</v-icon>
+      </div>
+    </v-list-item>
+    <v-divider />
+    <template v-for="(item, index) in items$$q" :key="index">
+      <template v-if="item.type$$q === 'discNumberHeader'">
+        <v-sheet
+          tile
+          class="sheet-disc-number-header w-full"
+          :class="themeStore$$q.bgClass"
+        >
+          <v-list-subheader class="list-disc-number-header">
+            <div class="list-column-disc-number flex align-center">
+              <v-icon>mdi-disc</v-icon>
+              <span class="disc-number-text numeric">{{
+                item.discNumber$$q
+              }}</span>
+            </div>
+          </v-list-subheader>
+          <v-divider />
+        </v-sheet>
+      </template>
+      <template v-else>
+        <v-list-item class="hover-container w-full" :ripple="false">
+          <div class="list-column-icon mr-4">
+            <!-- hiddenを切り替えるのとv-ifとどっちがいいか -->
+            <div
+              v-show="currentPlayingTrackId$$q === item.track$$q.id"
+              class="icon-container"
+            >
+              <!-- 再生中（または一時停止中）の曲 -->
+              <v-btn
+                icon
+                flat
+                text
+                :disabled="!setList"
+                @click.stop="play$$q(item.track$$q)"
+              >
+                <v-icon class="play-icon hover-display">{{
+                  playing$$q
+                    ? 'mdi-pause-circle-outline'
+                    : 'mdi-play-circle-outline'
+                }}</v-icon>
+                <v-icon class="play-icon hover-hidden">{{
+                  playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle'
+                }}</v-icon>
+              </v-btn>
+            </div>
+            <div
+              v-show="currentPlayingTrackId$$q !== item.track$$q.id"
+              class="icon-container"
+            >
+              <!-- それ以外の曲 -->
+              <v-btn
+                icon
+                flat
+                text
+                :disabled="!setList"
+                @click.stop="play$$q(item.track$$q)"
+              >
+                <template v-if="indexContent === 'index'">
+                  <div class="track-index numeric hover-hidden">
+                    {{ index + 1 }}
+                  </div>
+                </template>
+                <template v-if="indexContent === 'trackNumber'">
+                  <div class="track-index numeric hover-hidden">
+                    {{ item.track$$q.trackNumber }}
+                  </div>
+                </template>
+                <template v-if="indexContent === 'albumArtwork'">
+                  <nullable-image
+                    class="track-index hover-hidden"
+                    :image="item.image$$q"
+                    :width="imageSize$$q"
+                    :height="imageSize$$q"
+                    :aspect-ratio="1"
+                  />
+                </template>
+                <v-icon class="play-icon hover-display">
+                  mdi-play-circle-outline
+                </v-icon>
+              </v-btn>
+            </div>
           </div>
           <v-list-item-content
-            class="list-header-column list-column-content d-flex flex-row flex-nowrap mr-6 py-2"
+            class="list-column-content flex flex-col flex-nowrap justify-center mr-6"
           >
-            <v-list-item-title class="track-title subtitle-2">{{
-              t('tracklist/Title')
+            <v-list-item-title class="track-title">{{
+              item.track$$q.title
             }}</v-list-item-title>
+            <template
+              v-if="showArtist || item.artist$$q.id !== item.albumArtist$$q.id"
+            >
+              <v-list-item-subtitle class="track-artist">
+                <conditional-link
+                  :to="`/artists/${item.artist$$q.id}`"
+                  :disabled="linkExcludes.includes(item.artist$$q.id)"
+                >
+                  {{ item.artist$$q.name }}
+                </conditional-link>
+              </v-list-item-subtitle>
+            </template>
           </v-list-item-content>
           <template v-if="showAlbum">
             <v-list-item-content
-              class="list-header-column list-column-content d-flex flex-row flex-nowrap mr-6 py-2"
+              class="list-column-content flex flex-col flex-nowrap justify-center mr-6"
             >
-              <v-list-item-title class="track-album-title subtitle-2">{{
-                t('tracklist/Album')
-              }}</v-list-item-title>
+              <v-list-item-title class="track-album-title">
+                <conditional-link
+                  :to="`/albums/${item.album$$q.id}`"
+                  :disabled="linkExcludes.includes(item.album$$q.id)"
+                >
+                  {{ item.album$$q.title }}
+                </conditional-link>
+              </v-list-item-title>
+              <v-list-item-subtitle class="track-album-artist">
+                <conditional-link
+                  :to="`/artists/${item.albumArtist$$q.id}`"
+                  :disabled="linkExcludes.includes(item.albumArtist$$q.id)"
+                >
+                  {{ item.albumArtist$$q.name }}
+                </conditional-link>
+              </v-list-item-subtitle>
             </v-list-item-content>
           </template>
-          <div class="list-header-column list-column-duration py-1">
-            <v-icon>mdi-clock-outline</v-icon>
+          <div class="list-column-duration numeric body-2">
+            {{ item.formattedDuration$$q }}
           </div>
-        </v-subheader>
-        <v-divider />
-      </v-sheet>
-      <template v-for="(item, index) in items$$q" :key="index">
-        <template v-if="item.type$$q === 'discNumberHeader'">
-          <v-sheet
-            tile
-            class="sheet-discnumber-header"
-            :class="themeStore$$q.bgClass"
-          >
-            <v-subheader class="list-discnumber-header">
-              <div class="list-column-discnumber d-flex align-center">
-                <v-icon>mdi-disc</v-icon>
-                <span class="discnumber-text numeric">{{
-                  item.discNumber$$q
-                }}</span>
-              </div>
-            </v-subheader>
-            <v-divider />
-          </v-sheet>
-        </template>
-        <template v-else>
-          <v-list-item class="hover-container" :ripple="false">
-            <div class="list-column-icon mr-4">
-              <!-- hiddenを切り替えるのとv-ifとどっちがいいか -->
-              <div
-                v-show="currentPlayingTrackId$$q === item.track$$q.id"
-                class="icon-container"
-              >
-                <!-- 再生中（または一時停止中）の曲 -->
-                <v-btn
-                  icon
-                  text
-                  :disabled="!setList"
-                  @click.stop="play$$q(item.track$$q)"
-                >
-                  <v-icon class="play-icon hover-display">{{
-                    playing$$q
-                      ? 'mdi-pause-circle-outline'
-                      : 'mdi-play-circle-outline'
-                  }}</v-icon>
-                  <v-icon class="play-icon hover-hidden">{{
-                    playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle'
-                  }}</v-icon>
-                </v-btn>
-              </div>
-              <div
-                v-show="currentPlayingTrackId$$q !== item.track$$q.id"
-                class="icon-container"
-              >
-                <!-- それ以外の曲 -->
-                <v-btn
-                  icon
-                  text
-                  :disabled="!setList"
-                  @click.stop="play$$q(item.track$$q)"
-                >
-                  <template v-if="indexContent === 'index'">
-                    <div class="track-index numeric hover-hidden">
-                      {{ index + 1 }}
-                    </div>
-                  </template>
-                  <template v-if="indexContent === 'trackNumber'">
-                    <div class="track-index numeric hover-hidden">
-                      {{ item.track$$q.trackNumber }}
-                    </div>
-                  </template>
-                  <template v-if="indexContent === 'albumArtwork'">
-                    <nullable-image
-                      class="track-index hover-hidden"
-                      :image="item.image$$q"
-                      :width="imageSize$$q"
-                      :height="imageSize$$q"
-                      :aspect-ratio="1"
-                    />
-                  </template>
-                  <v-icon class="play-icon hover-display">
-                    mdi-play-circle-outline
-                  </v-icon>
-                </v-btn>
-              </div>
-            </div>
-            <v-list-item-content
-              class="list-column-content d-flex flex-row flex-nowrap mr-6"
-            >
-              <v-list-item-title class="track-title">{{
-                item.track$$q.title
-              }}</v-list-item-title>
-              <template
-                v-if="
-                  showArtist || item.artist$$q.id !== item.albumArtist$$q.id
-                "
-              >
-                <v-list-item-subtitle class="track-artist pl-4">
-                  <conditional-link
-                    :to="`/artists/${item.artist$$q.id}`"
-                    :disabled="linkExcludes.includes(item.artist$$q.id)"
-                  >
-                    {{ item.artist$$q.name }}
-                  </conditional-link>
-                </v-list-item-subtitle>
-              </template>
-            </v-list-item-content>
-            <template v-if="showAlbum">
-              <v-list-item-content
-                class="list-column-content d-flex flex-row flex-nowrap mr-6"
-              >
-                <v-list-item-title class="track-album-title">
-                  <conditional-link
-                    :to="`/albums/${item.album$$q.id}`"
-                    :disabled="linkExcludes.includes(item.album$$q.id)"
-                  >
-                    {{ item.album$$q.title }}
-                  </conditional-link>
-                </v-list-item-title>
-                <v-list-item-subtitle class="track-album-artist pl-4">
-                  <conditional-link
-                    :to="`/artists/${item.albumArtist$$q.id}`"
-                    :disabled="linkExcludes.includes(item.albumArtist$$q.id)"
-                  >
-                    {{ item.albumArtist$$q.name }}
-                  </conditional-link>
-                </v-list-item-subtitle>
-              </v-list-item-content>
-            </template>
-            <div class="list-column-duration numeric body-2">
-              {{ item.formattedDuration$$q }}
-            </div>
-          </v-list-item>
-          <template v-if="!item.isLast$$q">
-            <v-divider />
-          </template>
+        </v-list-item>
+        <template v-if="!item.isLast$$q">
+          <v-divider />
         </template>
       </template>
-    </v-list-item-group>
+    </template>
   </v-list>
 </template>
 
@@ -346,6 +336,9 @@ export default defineComponent({
 .list-header {
   height: 34px;
   user-select: none;
+  min-height: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .list-header-column {
@@ -353,18 +346,18 @@ export default defineComponent({
   line-height: 1 !important;
 }
 
-.sheet-discnumber-header {
+.sheet-disc-number-header {
   position: sticky;
   top: calc(48px + 1px + 34px);
   z-index: 1;
 }
 
-.list-discnumber-header {
+.list-disc-number-header {
   height: 28px;
   padding: 0 14px !important;
 }
 
-.discnumber-text {
+.disc-number-text {
   padding-left: 2px;
   font-weight: 700;
 }
@@ -373,6 +366,17 @@ export default defineComponent({
   width: 40px;
   text-align: center;
   line-height: 1 !important;
+}
+
+.list-column-content {
+  flex: 1 1 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.list-column-duration {
+  width: 120px;
+  text-align: right;
 }
 
 .icon-container {
@@ -384,7 +388,7 @@ export default defineComponent({
 .track-title,
 .track-album-title {
   flex: auto 0 0;
-  line-height: 1 !important;
+  align-items: baseline;
   max-width: 100%;
 }
 
@@ -392,6 +396,9 @@ export default defineComponent({
 .track-album-artist {
   flex: auto 0 0;
   line-height: 1 !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .track-artist::before,

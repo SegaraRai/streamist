@@ -2,6 +2,7 @@ import { Ref, UnwrapRef, computed, reactive, ref, toRefs, watch } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
 import { TrackProvider } from '@/logic/trackProvider';
 import type { TrackForPlayback } from '@/types/playback';
+import { loadAudio } from '~/logic/audio';
 
 // TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる
 
@@ -53,8 +54,6 @@ export interface PlaybackState {
   next$$q(): void;
 }
 
-const gTrackProvider = new TrackProvider();
-
 declare type Refs<Data> = {
   [K in keyof Data]: Data[K] extends Ref<infer V> ? Ref<V> : Ref<Data[K]>;
 };
@@ -74,6 +73,10 @@ async function loadRemote() {
 
 export function usePlaybackStore(): typeof refState {
   if (!state) {
+    const audio = new Audio();
+
+    const trackProvider = new TrackProvider();
+
     const playing = ref<boolean>(false);
     const position = ref<number | undefined>();
     const seeking = ref<boolean>(false);
@@ -82,34 +85,64 @@ export function usePlaybackStore(): typeof refState {
     const currentTrack = ref<TrackForPlayback | undefined>();
     const queue = ref<TrackForPlayback[]>([]);
 
-    gTrackProvider.addEventListener('trackChange', () => {
-      currentTrack.value = gTrackProvider.currentTrack$$q;
+    trackProvider.addEventListener('trackChange', () => {
+      const track = trackProvider.currentTrack$$q;
+      currentTrack.value = track;
+
+      // load audio here because watching currentTrack does not trigger if the previous track is the same
+      audio.src = '';
+      if (track) {
+        loadAudio(audio, track.files, true);
+        playing.value = true;
+      } else {
+        audio.pause();
+        playing.value = false;
+        position.value = undefined;
+      }
     });
 
-    gTrackProvider.addEventListener('queueChange', () => {
-      queue.value = [...gTrackProvider.queue$$q];
+    trackProvider.addEventListener('queueChange', () => {
+      queue.value = [...trackProvider.queue$$q];
     });
 
-    gTrackProvider.addEventListener('repeatChange', () => {
-      repeat.value = gTrackProvider.repeat$$q;
+    trackProvider.addEventListener('repeatChange', () => {
+      repeat.value = trackProvider.repeat$$q;
     });
 
-    gTrackProvider.addEventListener('shuffleChange', () => {
-      shuffle.value = gTrackProvider.shuffle$$q;
+    trackProvider.addEventListener('shuffleChange', () => {
+      shuffle.value = trackProvider.shuffle$$q;
+    });
+
+    audio.addEventListener('timeupdate', () => {
+      position.value = audio.currentTime;
+    });
+
+    audio.addEventListener('ended', () => {
+      trackProvider.next$$q();
     });
 
     watch(repeat, (newRepeat) => {
-      gTrackProvider.repeat$$q = newRepeat;
+      trackProvider.repeat$$q = newRepeat;
     });
 
     watch(shuffle, (newShuffle) => {
-      gTrackProvider.shuffle$$q = newShuffle;
+      trackProvider.shuffle$$q = newShuffle;
     });
 
-    watch(currentTrack, (newCurrentTrack) => {
-      if (!newCurrentTrack) {
+    watch(playing, (newPlaying) => {
+      if (audio.paused === !newPlaying) {
+        return;
+      }
+
+      if (!currentTrack.value) {
         playing.value = false;
-        position.value = undefined;
+        return;
+      }
+
+      if (newPlaying) {
+        audio.play();
+      } else {
+        audio.pause();
       }
     });
 
@@ -119,7 +152,7 @@ export function usePlaybackStore(): typeof refState {
     ): void => {
       playing.value = false;
       // NOTE: `setSetList$$q`に渡す`currentTrack`（第2引数）は`null`と`undefined`で挙動が異なる
-      gTrackProvider.setSetList$$q(tracks, tracks.length ? track : null);
+      trackProvider.setSetList$$q(tracks, tracks.length ? track : null);
       if (tracks.length) {
         position.value = 0;
         playing.value = true;
@@ -159,13 +192,13 @@ export function usePlaybackStore(): typeof refState {
       currentTrack$$q: currentTrack,
       queue$$q: queue,
       skipNext$$q: (n = 1) => {
-        gTrackProvider.skipNext$$q(n);
+        trackProvider.skipNext$$q(n);
       },
       skipPrevious$$q: (n = 1) => {
-        gTrackProvider.skipPrevious$$q(n);
+        trackProvider.skipPrevious$$q(n);
       },
       next$$q: () => {
-        gTrackProvider.next$$q();
+        trackProvider.next$$q();
       },
     });
 

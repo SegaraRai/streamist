@@ -16,6 +16,7 @@ export default defineController(() => ({
       data: {
         id: await generatePlaylistId(),
         title: body.title,
+        notes: body.notes,
         userId: user.id,
       },
     });

@@ -1,20 +1,24 @@
-import type { Album, Artist, Track } from '$prisma/client';
+import type { Album, Artist, Playlist, Track } from '$prisma/client';
 
 /* eslint-disable no-use-before-define */
 
-interface AlbumLike extends Album {
-  artist?: ArtistLike;
-  tracks?: TrackLike[];
+interface AlbumLike extends Readonly<Album> {
+  readonly artist?: ArtistLike;
+  readonly tracks?: readonly TrackLike[];
 }
 
-interface ArtistLike extends Artist {
-  albums?: AlbumLike;
-  tracks?: TrackLike[];
+interface ArtistLike extends Readonly<Artist> {
+  readonly albums?: readonly AlbumLike[];
+  readonly tracks?: readonly TrackLike[];
 }
 
-interface TrackLike extends Track {
-  artist?: ArtistLike;
-  album?: AlbumLike;
+interface TrackLike extends Readonly<Track> {
+  readonly artist?: ArtistLike;
+  readonly album?: AlbumLike;
+}
+
+interface PlaylistLike extends Readonly<Playlist> {
+  readonly tracks?: readonly TrackLike[];
 }
 
 /* eslint-enable no-use-before-define */
@@ -94,4 +98,8 @@ export function compareTrack(a: TrackLike, b: TrackLike): number {
     compareLocaleString(a.titleSort || a.title, b.titleSort || b.title) ||
     compareString(a.id, b.id)
   );
+}
+
+export function comparePlaylist(a: PlaylistLike, b: PlaylistLike): number {
+  return compareLocaleString(a.title, b.title) || compareString(a.id, b.id);
 }

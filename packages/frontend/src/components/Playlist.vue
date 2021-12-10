@@ -1,44 +1,25 @@
 <script lang="ts">
-import axios from 'axios';
-import { UnwrapRef, computed, defineComponent, ref, watch } from 'vue';
-import TrackList from '@/components/TrackList.vue';
-import api from '@/logic/api';
+import type { PropType } from 'vue';
 import { formatTracksTotalDuration } from '@/logic/duration';
 import { calcTrackListHeight } from '@/logic/util';
 import { usePlaybackStore } from '@/stores/playback';
-import { TrackForPlayback } from '~/types/playback';
-import type { Playlist } from '$prisma/client';
-
-type PlaylistForPlayback = Playlist & {
-  tracks: TrackForPlayback[];
-};
-
-interface Props {
-  playlistId: string;
-  linkExcludes: string[];
-}
+import { fetchPlaylistForPlayback } from '~/resources/playlist';
+import type { PlaylistForPlayback, TrackForPlayback } from '~/types/playback';
 
 export default defineComponent({
-  components: {
-    TrackList,
-  },
   props: {
     playlistId: {
       type: String,
     },
     linkExcludes: {
-      type: Array,
+      type: Array as PropType<readonly string[] | undefined>,
       default: (): string[] => [],
     },
   },
-  setup(_props: unknown, context) {
+  setup(props) {
     const { t } = useI18n();
 
-    const props = _props as UnwrapRef<Props>;
-
     const playbackStore = usePlaybackStore();
-
-    let cancelFormerRequest: (() => void) | null = null;
 
     const loading = ref<boolean>(true);
     const playlist = ref<PlaylistForPlayback | null>(null);
@@ -51,44 +32,21 @@ export default defineComponent({
 
     watch(
       playlistId,
-      (currentPlaylistId, _oldPlaylistId, onInvalidate) => {
-        onInvalidate(() => {
-          if (cancelFormerRequest) {
-            cancelFormerRequest();
-            cancelFormerRequest = null;
-          }
-        });
+      (newPlaylistId) => {
+        if (!newPlaylistId) {
+          return;
+        }
 
         loading.value = true;
 
-        api.my.playlists
-          ._playlistId(currentPlaylistId)
-          .$get({
-            query: {
-              includeTracks: true,
-              includeTrackAlbum: true,
-              includeTrackAlbumArtist: true,
-              includeTrackAlbumImages: true,
-              includeTrackArtist: true,
-            },
-            config: {
-              cancelToken: new axios.CancelToken((func) => {
-                cancelFormerRequest = func;
-              }),
-            },
-          })
-          .then((response) => {
-            cancelFormerRequest = null;
-
-            const responsePlaylist = response as PlaylistForPlayback;
-
-            loading.value = false;
-            playlist.value = responsePlaylist;
-            tracks.value = responsePlaylist.tracks;
-
-            context.emit('load-playlist', responsePlaylist);
-            context.emit('load-tracks', responsePlaylist.tracks);
-          });
+        fetchPlaylistForPlayback(newPlaylistId).then((response) => {
+          if (response.id !== playlistId.value) {
+            return;
+          }
+          loading.value = false;
+          playlist.value = response;
+          tracks.value = response.tracks;
+        });
       },
       {
         immediate: true,
@@ -134,7 +92,9 @@ export default defineComponent({
             >
               <div>
                 <template v-if="!loading$$q && playlist$$q">
-                  <template v-if="!linkExcludes.includes(playlistId)">
+                  <template
+                    v-if="playlistId && !linkExcludes?.includes(playlistId)"
+                  >
                     <router-link :to="`/playlists/${playlistId}`">{{
                       playlist$$q.title
                     }}</router-link>
@@ -155,7 +115,7 @@ export default defineComponent({
                 @click="play$$q(false)"
               >
                 <v-icon left>mdi-play</v-icon>
-                <span>{{ t('playlist/Play') }}</span>
+                <span>{{ t('playlist.Play') }}</span>
               </v-btn>
             </div>
             <div class="mx-4"></div>
@@ -167,7 +127,7 @@ export default defineComponent({
                 @click="play$$q(true)"
               >
                 <v-icon left>mdi-shuffle</v-icon>
-                <span>{{ t('playlist/Shuffle') }}</span>
+                <span>{{ t('playlist.Shuffle') }}</span>
               </v-btn>
             </div>
           </div>
@@ -181,7 +141,7 @@ export default defineComponent({
             >
               <div v-show="!loading$$q">
                 <span>{{
-                  tracks$$q && t('playlist/{n} tracks', tracks$$q.length)
+                  tracks$$q && t('playlist.n_tracks', tracks$$q.length)
                 }}</span>
                 <span v-show="duration$$q">, {{ duration$$q }}</span>
               </div>
@@ -199,11 +159,11 @@ export default defineComponent({
       index-content="index"
       :loading="loading$$q"
       :set-list="tracks$$q"
-    ></track-list>
+    />
   </div>
 </template>
 
-<style lang="postcss" scoped>
+<style scoped>
 .playlist-title {
   font-weight: 600;
 }

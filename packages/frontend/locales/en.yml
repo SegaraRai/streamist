@@ -12,3 +12,38 @@ intro:
   aka: Also known as
   whats-your-name: What's your name?
 not-found: Not found
+sidebar:
+  Home: Home
+  Albums: Albums
+  Artists: Artists
+  Tracks: Tracks
+  Playlists: Playlists
+  Tags: Tags
+  Queue: Queue
+  Downloads: Downloads
+  Uploads: Uploads
+  Settings: Settings
+header:
+  Search: Search
+queue:
+  PlayQueue: Play Queue
+album:
+  Play: Play
+  Shuffle: Shuffle
+  n_tracks: 'no tracks | one track | {n} tracks'
+albums:
+  Albums: Albums
+artists:
+  Artists: Artists
+playlist:
+  Play: Play
+  Shuffle: Shuffle
+  n_tracks: 'no tracks | one track | {n} tracks'
+playlists:
+  Playlists: Playlists
+  n_tracks: 'no tracks | one track | {n} tracks'
+trackList:
+  Album: Album
+  Title: Title
+tracks:
+  Tracks: Tracks

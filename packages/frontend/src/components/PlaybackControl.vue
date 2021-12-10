@@ -21,8 +21,6 @@ export default defineComponent({
       () => currentTrack.value && getDefaultAlbumImage(currentTrack.value.album)
     );
 
-    //
-
     const positionDisplay = computed((): string | undefined => {
       return playbackStore.position$$q.value != null &&
         playbackStore.duration$$q.value != null
@@ -38,15 +36,6 @@ export default defineComponent({
         ? formatTime(playbackStore.duration$$q.value)
         : undefined;
     });
-
-    const positionRate = computed((): number | undefined => {
-      return playbackStore.position$$q.value != null &&
-        playbackStore.duration$$q.value != null
-        ? playbackStore.position$$q.value / playbackStore.duration$$q.value
-        : undefined;
-    });
-
-    //
 
     const repeatIcon = computed((): string => {
       switch (playbackStore.repeat$$q.value) {
@@ -93,10 +82,14 @@ export default defineComponent({
       repeatIcon$$q: repeatIcon,
       positionDisplay$$q: positionDisplay,
       durationDisplay$$q: durationDisplay,
-      positionRate$$q: positionRate,
+      position$$q: playbackStore.position$$q,
+      duration$$q: playbackStore.duration$$q,
       blurButton$$q: blurButton,
       switchRepeat$$q: switchRepeat,
       switchShuffle$$q: switchShuffle,
+      seekTo$$q: (position: number): void => {
+        console.log(position);
+      },
       play$$q: (): void => {
         playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
       },
@@ -131,9 +124,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container
-    fluid
-    class="container d-flex flex-row px-3 py-0"
+  <v-sheet
+    class="w-full flex flex-row px-8 py-0"
     @click="preventXButton$$q"
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
@@ -167,18 +159,19 @@ export default defineComponent({
         <v-btn
           class="mx-5"
           :class="shuffleEnabled$$q ? 'active-button' : ''"
+          flat
           icon
           :ripple="false"
-          :color="shuffleEnabled$$q ? 'primary' : ''"
           @click="switchShuffle$$q"
           @mouseup="blurButton$$q"
         >
-          <v-icon>{{
+          <v-icon :color="shuffleEnabled$$q ? 'primary' : ''">{{
             shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled'
           }}</v-icon>
         </v-btn>
         <v-btn
           class="mx-5"
+          flat
           icon
           @click="skipPrevious$$q"
           @mouseup="blurButton$$q"
@@ -188,19 +181,27 @@ export default defineComponent({
         <v-btn class="mx-3" icon @click="play$$q" @mouseup="blurButton$$q">
           <v-icon>{{ playing$$q ? 'mdi-pause' : 'mdi-play' }}</v-icon>
         </v-btn>
-        <v-btn class="mx-5" icon @click="skipNext$$q" @mouseup="blurButton$$q">
+        <v-btn
+          flat
+          class="mx-5"
+          icon
+          @click="skipNext$$q"
+          @mouseup="blurButton$$q"
+        >
           <v-icon>mdi-skip-next</v-icon>
         </v-btn>
         <v-btn
           class="mx-5"
           :class="repeatEnabled$$q ? 'active-button' : ''"
+          flat
           icon
           :ripple="false"
-          :color="repeatEnabled$$q ? 'primary' : ''"
           @click="switchRepeat$$q"
           @mouseup="blurButton$$q"
         >
-          <v-icon>{{ repeatIcon$$q }}</v-icon>
+          <v-icon :color="repeatEnabled$$q ? 'primary' : ''">{{
+            repeatIcon$$q
+          }}</v-icon>
         </v-btn>
       </div>
       <div class="seekbar-container pt-3 d-flex flex-row justify-center">
@@ -210,11 +211,7 @@ export default defineComponent({
           {{ positionDisplay$$q }}
         </div>
         <div class="seekbar px-4 flex-grow-1 d-flex flex-column justify-center">
-          <v-progress-linear
-            rounded
-            class="seekbar-progress"
-            :value="positionRate$$q || 0"
-          />
+          <s-seek-bar :current-time="position$$q" :duration="duration$$q" />
         </div>
         <div
           class="duration-right body-2 flex-grow-0 d-flex flex-column justify-center"
@@ -224,14 +221,10 @@ export default defineComponent({
       </div>
     </div>
     <div class="right-pane flex-grow-0"></div>
-  </v-container>
+  </v-sheet>
 </template>
 
 <style scoped>
-.container {
-  height: 90px;
-}
-
 .left-pane,
 .right-pane {
   width: 20vw;

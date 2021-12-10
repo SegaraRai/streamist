@@ -144,14 +144,14 @@ export default defineComponent({
             <div>
               <v-btn color="primary" @click="play$$q(false)">
                 <v-icon left>mdi-play</v-icon>
-                <span>{{ t('album/Play') }}</span>
+                <span>{{ t('album.Play') }}</span>
               </v-btn>
             </div>
             <div class="mx-4"></div>
             <div>
               <v-btn color="accent" outlined @click="play$$q(true)">
                 <v-icon left>mdi-shuffle</v-icon>
-                <span>{{ t('album/Shuffle') }}</span>
+                <span>{{ t('album.Shuffle') }}</span>
               </v-btn>
             </div>
           </div>
@@ -160,7 +160,7 @@ export default defineComponent({
             <v-skeleton-loader type="text" width="18em" tile>
               <div>
                 <span>{{
-                  tracks$$q && t('album/{n} tracks', tracks$$q.length)
+                  tracks$$q && t('album.n_tracks', tracks$$q.length)
                 }}</span>
                 <span v-show="duration$$q">, {{ duration$$q }}</span>
                 <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
@@ -183,7 +183,7 @@ export default defineComponent({
         show-disc-number
         index-content="trackNumber"
         :set-list="setList"
-      ></track-list>
+      />
     </v-lazy>
   </div>
 </template>

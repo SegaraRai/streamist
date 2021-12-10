@@ -1,13 +1,10 @@
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
-import Playlist from '@/components/Playlist.vue';
-
 export default defineComponent({
-  components: {
-    Playlist,
+  props: {
+    id: String,
   },
-  setup(_props: unknown, context) {
-    const playlistId = computed(() => context.root.$route.params.id);
+  setup(props) {
+    const playlistId = computed(() => props.id);
 
     return {
       playlistId$$q: playlistId,
@@ -21,9 +18,3 @@ export default defineComponent({
     <playlist :playlist-id="playlistId$$q" :link-excludes="[playlistId$$q]" />
   </v-container>
 </template>
-
-<style lang="postcss" scoped>
-.album-title {
-  font-weight: 600;
-}
-</style>

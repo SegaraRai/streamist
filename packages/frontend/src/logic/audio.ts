@@ -18,13 +18,13 @@ export function calcTrackFileScore(trackFile: TrackFile): number {
   const addition = trackFile.extension === '.weba' ? 1_000_000_000 : 0;
 
   // TODO: ユーザーの音質設定に応じて適切なスコアを出す
-  return trackFile.fileSize + addition;
+  return 1 / trackFile.fileSize + addition;
 }
 
-export const audio = new Audio();
-
 export async function loadAudio(
-  trackFiles: readonly TrackFile[]
+  audio: HTMLAudioElement,
+  trackFiles: readonly TrackFile[],
+  play = false
 ): Promise<void> {
   // スコア降順でTrackFileDTOとスコアの配列を用意
   let trackFilesWithScore = trackFiles
@@ -53,7 +53,11 @@ export async function loadAudio(
   const url = await getTrackFileURL(trackFile.trackId, trackFile.id);
 
   // Audioにsrcを設定
-  audio.pause();
   audio.src = url;
-  audio.src = trackFile.id;
+  audio.currentTime = 0;
+  if (play) {
+    audio.play();
+  } else {
+    audio.pause();
+  }
 }

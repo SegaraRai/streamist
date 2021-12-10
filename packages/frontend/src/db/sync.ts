@@ -1,11 +1,35 @@
+import type { Table } from 'dexie';
 import api from '~/logic/api';
 import { db } from '.';
 
+async function clearAndAdd<T, U>(
+  table: Table<T, U>,
+  items: readonly T[]
+): Promise<void> {
+  await table.clear();
+  if (items.length === 0) {
+    return;
+  }
+  // bulkAdd is faster than bulkPut
+  await table.bulkAdd(items);
+}
+
+async function update<T, U>(
+  table: Table<T, U>,
+  items: readonly T[]
+): Promise<void> {
+  /*
+  if (items.length === 0) {
+    return;
+  }
+  //*/
+  await table.bulkPut(items);
+}
+
 export async function syncDB(reconstruct = false): Promise<void> {
-  let since: number | undefined = parseInt(
-    localStorage.getItem('db.lastUpdate') || '0',
-    10
-  );
+  let since: number | undefined = reconstruct
+    ? 0
+    : parseInt(localStorage.getItem('db.lastUpdate') || '0', 10);
   localStorage.setItem('db.updating', '1');
 
   if (!since || !isFinite(since) || since <= 0) {
@@ -19,6 +43,8 @@ export async function syncDB(reconstruct = false): Promise<void> {
         since,
       },
     });
+
+    console.log(since, resources);
 
     await db.transaction(
       'rw',
@@ -38,31 +64,31 @@ export async function syncDB(reconstruct = false): Promise<void> {
         if (reconstruct) {
           localStorage.removeItem('db.lastUpdate');
           await Promise.all([
-            db.albumCoArtists.clear(),
-            db.albums.clear(),
-            db.artists.clear(),
-            db.images.clear(),
-            db.playlists.clear(),
-            db.sourceFiles.clear(),
-            db.sources.clear(),
-            db.tags.clear(),
-            db.trackCoArtists.clear(),
-            db.tracks.clear(),
+            clearAndAdd(db.albumCoArtists, resources.albumCoArtists),
+            clearAndAdd(db.albums, resources.albums),
+            clearAndAdd(db.artists, resources.artists),
+            clearAndAdd(db.images, resources.images),
+            clearAndAdd(db.playlists, resources.playlists),
+            clearAndAdd(db.sourceFiles, resources.sourceFiles),
+            clearAndAdd(db.sources, resources.sources),
+            clearAndAdd(db.tags, resources.tags),
+            clearAndAdd(db.trackCoArtists, resources.trackCoArtists),
+            clearAndAdd(db.tracks, resources.tracks),
+          ]);
+        } else {
+          await Promise.all([
+            update(db.albumCoArtists, resources.albumCoArtists),
+            update(db.albums, resources.albums),
+            update(db.artists, resources.artists),
+            update(db.images, resources.images),
+            update(db.playlists, resources.playlists),
+            update(db.sourceFiles, resources.sourceFiles),
+            update(db.sources, resources.sources),
+            update(db.tags, resources.tags),
+            update(db.trackCoArtists, resources.trackCoArtists),
+            update(db.tracks, resources.tracks),
           ]);
         }
-
-        await Promise.all([
-          db.albumCoArtists.bulkPut(resources.albumCoArtists),
-          db.albums.bulkPut(resources.albums),
-          db.artists.bulkPut(resources.artists),
-          db.images.bulkPut(resources.images),
-          db.playlists.bulkPut(resources.playlists),
-          db.sourceFiles.bulkPut(resources.sourceFiles),
-          db.sources.bulkPut(resources.sources),
-          db.tags.bulkPut(resources.tags),
-          db.trackCoArtists.bulkPut(resources.trackCoArtists),
-          db.tracks.bulkPut(resources.tracks),
-        ]);
       }
     );
 
@@ -71,3 +97,5 @@ export async function syncDB(reconstruct = false): Promise<void> {
     localStorage.removeItem('db.updating');
   }
 }
+
+(window as any).syncDB = syncDB;

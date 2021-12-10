@@ -1,27 +1,10 @@
 <script lang="ts">
-import { computed, defineComponent, ref } from '@vue/composition-api';
-import {
-  /*type*/
-  MutablePlaylistDTO,
-  MutableTagDTO,
-  MutableTrackDTO,
-} from '@streamist/shared/lib/dto/db.dto';
-import { /*type*/ ImmutableDTO } from '@streamist/shared/lib/dto/immutable';
-import { calcTracksTotalDuration, formatTotalDuration } from '@/lib/duration';
-import { sortPlaylists } from '@/lib/sort';
-import { RepositoryFactory } from '@/repositories/RepositoryFactory';
-import { useStyleStore } from '@/stores/style';
-
-interface MutableResponsePlaylistDTO extends MutablePlaylistDTO {
-  tags: MutableTagDTO[];
-  tracks: MutableTrackDTO[];
-}
-
-//
-
-type ResponsePlaylistDTO = ImmutableDTO<MutableResponsePlaylistDTO>;
-
-//
+import { calcTracksTotalDuration, formatTotalDuration } from '@/logic/duration';
+import { useThemeStore } from '@/stores/theme';
+import { syncDB } from '~/db/sync';
+import apiInstance from '~/logic/api';
+import { fetchPlaylistsForPlayback } from '~/resources/playlist';
+import { PlaylistForPlayback } from '~/types/playback';
 
 interface Item {
   id$$q: string;
@@ -35,39 +18,30 @@ interface Item {
 
 export default defineComponent({
   setup() {
-    const styleStore = useStyleStore();
+    const { t } = useI18n();
 
-    const playlists = ref([] as ResponsePlaylistDTO[]);
+    const themeStore = useThemeStore();
 
-    const playlistRepository = RepositoryFactory.get('playlist');
+    const playlists = ref<PlaylistForPlayback[]>([]);
 
-    const fetchPlaylists = async () => {
-      const response = await playlistRepository.fetchPlaylists$$q({}, [
-        'tags',
-        'tracks',
-      ]);
-      playlists.value = sortPlaylists(
-        response.data as MutableResponsePlaylistDTO[],
-        true
-      );
+    const refreshPlaylists = async () => {
+      playlists.value = await fetchPlaylistsForPlayback();
     };
-    fetchPlaylists();
+    refreshPlaylists();
 
     const items = computed(() => {
-      return playlists.value.map(
-        (playlist, index): Item => {
-          const duration = calcTracksTotalDuration(playlist.tracks);
-          return {
-            id$$q: playlist.id,
-            title$$q: playlist.title,
-            description$$q: playlist.description,
-            trackCount$$q: playlist.tracks.length,
-            duration$$q: duration,
-            formattedDuration$$q: formatTotalDuration(duration),
-            isLast$$q: index === playlists.value.length - 1,
-          };
-        }
-      );
+      return playlists.value.map((playlist, index): Item => {
+        const duration = calcTracksTotalDuration(playlist.tracks);
+        return {
+          id$$q: playlist.id,
+          title$$q: playlist.title,
+          description$$q: playlist.notes,
+          trackCount$$q: playlist.tracks.length,
+          duration$$q: duration,
+          formattedDuration$$q: formatTotalDuration(duration),
+          isLast$$q: index === playlists.value.length - 1,
+        };
+      });
     });
 
     const createPlaylistDialogLoading = ref(false);
@@ -76,10 +50,11 @@ export default defineComponent({
     const createPlaylistDialogDescription = ref('');
 
     return {
-      styleStore$$q: styleStore,
+      t,
+      themeStore$$q: themeStore,
       items$$q: items,
       d: createPlaylistDialog,
-      t: createPlaylistDialogTitle,
+      i: createPlaylistDialogTitle,
       e: createPlaylistDialogDescription,
       createPlaylistDialogLoading$$q: createPlaylistDialogLoading,
       openCreatePlaylistDialog$$q: (): void => {
@@ -93,13 +68,15 @@ export default defineComponent({
           return;
         }
         createPlaylistDialogLoading.value = true;
-        playlistRepository
-          .createPlaylist$$q({
-            title: createPlaylistDialogTitle.value,
-            description: createPlaylistDialogDescription.value,
-            trackIds: [],
+        apiInstance.my.playlists
+          .$post({
+            body: {
+              title: createPlaylistDialogTitle.value,
+              notes: createPlaylistDialogDescription.value,
+            },
           })
-          .then(() => fetchPlaylists())
+          .then(() => syncDB())
+          .then(() => refreshPlaylists())
           .then(() => {
             createPlaylistDialog.value = false;
           })
@@ -116,7 +93,7 @@ export default defineComponent({
   <v-container fluid class="pt-3 px-8">
     <header class="mb-6">
       <div class="display-1 font-weight-medium">
-        {{ $t('playlists/Playlists') }}
+        {{ t('playlists.Playlists') }}
       </div>
     </header>
 
@@ -127,7 +104,7 @@ export default defineComponent({
       <v-dialog
         v-model="d"
         max-width="600px"
-        :dark="styleStore$$q.dialogDark$$q"
+        :theme="themeStore$$q.dialogTheme"
       >
         <v-card>
           <v-card-title class="headline" primary-title>
@@ -136,7 +113,7 @@ export default defineComponent({
           <v-card-text>
             <div>
               <v-text-field
-                v-model="t"
+                v-model="i"
                 label="Title"
                 required
                 :readonly="createPlaylistDialogLoading$$q"
@@ -177,22 +154,21 @@ export default defineComponent({
       <template v-if="items$$q.length">
         <v-list flat>
           <v-list-item-group>
-            <template v-for="(item, index) in items$$q">
+            <template v-for="(item, index) in items$$q" :key="index">
               <v-list-item
-                :key="index"
                 class="hover-container"
                 :to="`/playlists/${item.id$$q}`"
               >
                 <v-list-item-content>
                   <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
                   <v-list-item-subtitle>
-                    {{ $tc('playlists/{n} tracks', item.trackCount$$q) }},
+                    {{ t('playlists.n_tracks', item.trackCount$$q) }},
                     {{ item.formattedDuration$$q }}
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
               <template v-if="!item.isLast$$q">
-                <v-divider :key="'d-' + index"></v-divider>
+                <v-divider />
               </template>
             </template>
           </v-list-item-group>

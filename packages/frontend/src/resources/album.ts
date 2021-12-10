@@ -1,7 +1,7 @@
 import { db } from '~/db';
 import { createMultiMap } from '~/logic/multiMap';
 import { compareAlbum, compareTrack } from '~/logic/sort';
-import type { AlbumWithArImTr, AlbumWithImageFile } from '~/types/album';
+import type { AlbumWithImageFile } from '~/types/album';
 import type { ImageWithFile } from '~/types/image';
 import type {
   AlbumForPlayback,
@@ -125,7 +125,9 @@ export async function fetchAlbumForPlaybackWithTracks(
   };
 }
 
-export async function fetchAlbumsWithArImTr(): Promise<AlbumWithArImTr[]> {
+export async function fetchAlbumsForPlaybackWithTracks(): Promise<
+  AlbumForPlaybackWithTracks[]
+> {
   const { albums, artists, images, tracks } = await db.transaction(
     'r',
     [db.albums, db.artists, db.images, db.tracks],
@@ -175,7 +177,7 @@ export async function fetchAlbumsWithArImTr(): Promise<AlbumWithArImTr[]> {
       const tracks = trackMultiMap
         .get(album.id)!
         .map((track) => {
-          const trackArtist = artistsMap.get(album.artistId);
+          const trackArtist = artistsMap.get(track.artistId);
           if (!trackArtist) {
             throw new Error(
               `Track artist ${track.artistId} not found. (database corrupted)`

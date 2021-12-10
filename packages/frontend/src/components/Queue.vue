@@ -46,8 +46,9 @@ export default defineComponent({
 
     return {
       t,
-      imageSize$$q: 32,
+      imageSize$$q: 36,
       playing$$q: playbackStore.playing$$q,
+      repeatOne$$q: computed(() => playbackStore.repeat$$q.value === 'one'),
       items$$q: items,
       currentPlayingTrackId$$q: currentPlayingTrackId,
       play$$q: (index: number): void => {
@@ -126,12 +127,12 @@ export default defineComponent({
       <v-sheet tile class="queue-header-sheet">
         <div class="px-2 py-1 title">
           <v-icon>mdi-playlist-play</v-icon>
-          <span class="pl-2">{{ t('queue/Play Queue') }}</span>
+          <span class="pl-2">{{ t('queue.PlayQueue') }}</span>
         </div>
         <v-divider />
       </v-sheet>
     </div>
-    <v-list flat dense>
+    <v-list flat dense :class="repeatOne$$q ? 'opacity-50' : ''">
       <v-list-item-group>
         <template v-for="(item, index) in items$$q" :key="index">
           <template v-if="index !== 0">
@@ -140,7 +141,7 @@ export default defineComponent({
           <v-list-item class="hover-container">
             <div class="list-column-icon">
               <div class="icon-container">
-                <v-btn icon text @click.stop="play$$q(index)">
+                <v-btn flat icon text @click.stop="play$$q(index)">
                   <!-- div class="track-index numeric hover-hidden">{{ index + 1 }}</div -->
                   <nullable-image
                     class="hover-hidden"
@@ -157,24 +158,26 @@ export default defineComponent({
             </div>
             <v-list-item-content
               two-line
-              class="list-column-content d-flex flex-row"
+              class="list-column-content flex flex-col"
             >
               <v-list-item-title
-                class="track-title"
+                class="track-title whitespace-nowrap overflow-hidden"
                 @mouseenter="startMarquee$$q"
                 @mouseleave="finishMarquee$$q"
               >
                 <v-tooltip bottom>
                   <template #activator="{ on }">
                     <span class="marquee-target" v-on="on">
-                      {{ item.track$$q.title }}
+                      <router-link :to="`/albums/${item.album$$q.id}`">
+                        {{ item.track$$q.title }}
+                      </router-link>
                     </span>
                   </template>
                   <span>{{ item.track$$q.title }}</span>
                 </v-tooltip>
               </v-list-item-title>
               <v-list-item-subtitle
-                class="track-artist"
+                class="track-artist whitespace-nowrap overflow-hidden"
                 @mouseenter="startMarquee$$q"
                 @mouseleave="finishMarquee$$q"
               >

@@ -1,5 +1,7 @@
 import { db } from '~/db';
+import { compareTrack } from '~/logic/sort';
 import type { TrackForPlayback } from '~/types/playback';
+import { fetchAlbumsForPlaybackWithTracks } from './album';
 import { fetchAlbumImages } from './utils';
 
 export async function fetchTrackForPlayback(
@@ -55,4 +57,10 @@ export async function fetchTrackForPlayback(
       images,
     },
   };
+}
+
+export async function fetchTracksForPlayback(): Promise<TrackForPlayback[]> {
+  return (await fetchAlbumsForPlaybackWithTracks())
+    .flatMap((album) => album.tracks)
+    .sort(compareTrack);
 }

@@ -1,45 +1,29 @@
 <script lang="ts">
 import { getDefaultAlbumImage } from '@/logic/albumImage';
-import { comapreArtist } from '@/logic/sort';
-import api from '~/logic/api';
+import { fetchArtistsForPlayback } from '~/resources/artist';
 import type { ImageWithFile } from '~/types/image';
-import type { Artist } from '$prisma/client';
-
-//
+import type { ArtistForPlayback } from '~/types/playback';
 
 interface ArtistItem {
   id$$q: string;
-  artist$$q: Artist | undefined;
+  artist$$q: ArtistForPlayback;
   image$$q: ImageWithFile | undefined;
 }
 
 export default defineComponent({
   setup() {
-    const artists = ref<Artist[]>([]);
+    const { t } = useI18n();
 
-    api.my.artists.$get();
+    const artists = ref<ArtistForPlayback[]>([]);
 
-    artistNameRepository
-      .fetchArtistNames$$q({}, [
-        'albums',
-        'albums.images',
-        'albums.images.imageFiles',
-        'artists',
-        'artists.images',
-        'artists.images.imageFiles',
-      ])
-      .then((response) => {
-        artistNames.value = sortArtistNames(
-          response.data as MutableResponseArtistNameDTO[],
-          null,
-          true
-        );
-      });
+    fetchArtistsForPlayback().then((response) => {
+      artists.value = response;
+    });
 
     const artistItems = computed(() => {
       return artists.value.map((artist): ArtistItem => {
         const image = artist.albums
-          .map((album) => getDefaultImage(album.images, album.imageOrder))
+          .map((album) => getDefaultAlbumImage(album))
           .find((x) => x);
 
         return {
@@ -51,6 +35,7 @@ export default defineComponent({
     });
 
     return {
+      t,
       artistItems$$q: artistItems,
       imageSize$$q: 180,
     };
@@ -62,7 +47,7 @@ export default defineComponent({
   <v-container fluid class="pt-3 px-8">
     <header class="mb-6">
       <div class="display-1 font-weight-medium">
-        {{ $t('artists/Artists') }}
+        {{ t('artists.Artists') }}
       </div>
     </header>
 
@@ -93,11 +78,6 @@ export default defineComponent({
                 <span class="subtitle-1 font-weight-medium">{{
                   item.artist$$q.name
                 }}</span>
-                <template v-if="item.differentName$$q">
-                  <span class="subtitle-2">
-                    ({{ item.artistName$$q.name }})
-                  </span>
-                </template>
               </router-link>
             </v-card-title>
           </v-card>
@@ -107,7 +87,7 @@ export default defineComponent({
   </v-container>
 </template>
 
-<style lang="postcss" scoped>
+<style scoped>
 .item {
   background: transparent !important;
 }

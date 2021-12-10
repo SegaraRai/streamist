@@ -2,14 +2,13 @@
 import { computed, defineComponent, ref } from 'vue';
 import NullableImage from '@/components/NullableImage.vue';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
-import { compareAlbum } from '@/logic/sort';
-import { fetchAlbumsWithArImTr } from '~/resources/album';
-import type { AlbumWithArImTr } from '~/types/album';
+import { fetchAlbumsForPlaybackWithTracks } from '~/resources/album';
 import type { ImageWithFile } from '~/types/image';
+import type { AlbumForPlaybackWithTracks } from '~/types/playback';
 import type { Artist } from '$prisma/client';
 
 interface Item {
-  album$$q: AlbumWithArImTr;
+  album$$q: AlbumForPlaybackWithTracks;
   artist$$q: Artist;
   image$$q: ImageWithFile | undefined;
   releaseYear$$q: string | undefined;
@@ -22,12 +21,11 @@ export default defineComponent({
   setup() {
     const { t } = useI18n();
 
-    const albums = ref([] as AlbumWithArImTr[]);
+    const albums = ref([] as AlbumForPlaybackWithTracks[]);
 
-    fetchAlbumsWithArImTr()
-      .then((response) => {
-        albums.value = response.sort(compareAlbum);
-      });
+    fetchAlbumsForPlaybackWithTracks().then((response) => {
+      albums.value = response;
+    });
 
     const items = computed(() => {
       return albums.value.map((album): Item => {
@@ -61,7 +59,7 @@ export default defineComponent({
 <template>
   <v-container fluid class="pt-3 px-8">
     <header class="mb-6">
-      <div class="display-1 font-weight-medium">{{ t('albums/Albums') }}</div>
+      <div class="display-1 font-weight-medium">{{ t('albums.Albums') }}</div>
     </header>
 
     <v-row>
@@ -83,22 +81,20 @@ export default defineComponent({
             />
           </router-link>
           <v-card-title class="px-0 pt-1 subtitle-1 font-weight-medium">
-            <router-link :to="`/albums/${item.album$$q.id}`">
-              {{ item.album$$q.title }}
-            </router-link>
+            <router-link :to="`/albums/${item.album$$q.id}`">{{
+              item.album$$q.title
+            }}</router-link>
           </v-card-title>
           <v-card-subtitle
             class="px-0 subtitle-2 font-weight-regular d-flex justify-between"
           >
             <div class="flex-grow-1 artist">
-              <router-link :to="`/artists/${item.artist$$q.id}`">
-                {{ item.artist$$q.name }}
-              </router-link>
+              <router-link :to="`/artists/${item.artist$$q.id}`">{{
+                item.artist$$q.name
+              }}</router-link>
             </div>
             <template v-if="item.releaseYear$$q">
-              <div class="flex-grow-0 pl-2">
-                {{ item.releaseYear$$q }}
-              </div>
+              <div class="flex-grow-0 pl-2">{{ item.releaseYear$$q }}</div>
             </template>
           </v-card-subtitle>
         </v-card>

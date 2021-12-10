@@ -11,3 +11,16 @@ intro:
   hi: こんにちは、{name}!
   whats-your-name: 君の名は。
 not-found: 見つかりませんでした
+sidebar:
+  Home: ホーム
+  Albums: アルバム
+  Artists: アーティスト
+  Tracks: トラック
+  Playlists: プレイリスト
+  Tags: タグ
+  Queue: キュー
+  Downloads: ダウンロード
+  Uploads: アップロード
+  Settings: 設定
+header:
+  Search: 検索
