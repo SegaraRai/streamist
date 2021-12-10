@@ -1,6 +1,31 @@
+import { dbArrayDeserializeItemIds } from '$shared/dbArray';
+import type { Album, Playlist } from '$prisma/client';
 import { client } from '$/db/lib/client';
+import type { ResourceAlbum, ResourcePlaylist } from '$/types';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
+
+function convertAlbum(album: Album): ResourceAlbum {
+  return {
+    ...album,
+    imageIds: dbArrayDeserializeItemIds(album.imageOrder),
+  };
+}
+
+function convertAlbums(albums: readonly Album[]): ResourceAlbum[] {
+  return albums.map(convertAlbum);
+}
+
+function convertPlaylist(playlist: Playlist): ResourcePlaylist {
+  return {
+    ...playlist,
+    trackIds: dbArrayDeserializeItemIds(playlist.trackOrder),
+  };
+}
+
+function convertPlaylists(playlists: readonly Playlist[]): ResourcePlaylist[] {
+  return playlists.map(convertPlaylist);
+}
 
 export default defineController(() => ({
   get: async ({ query, user }) => {
@@ -32,16 +57,29 @@ export default defineController(() => ({
         albumCoArtists: await txClient.albumCoArtist.findMany({
           where,
         }),
-        albums: await txClient.album.findMany({
-          where,
-        }),
+        albums: convertAlbums(
+          await txClient.album.findMany({
+            where,
+          })
+        ),
         artists: await txClient.artist.findMany({
           where,
         }),
         images: await txClient.image.findMany({
           where,
+          include: {
+            files: true,
+          },
         }),
-        playlists: await txClient.playlist.findMany({
+        playlists: convertPlaylists(
+          await txClient.playlist.findMany({
+            where,
+          })
+        ),
+        sourceFiles: await txClient.sourceFile.findMany({
+          where,
+        }),
+        sources: await txClient.source.findMany({
           where,
         }),
         tags: await txClient.tag.findMany({
@@ -79,6 +117,9 @@ export default defineController(() => ({
         }),
         tracks: await txClient.track.findMany({
           where,
+          include: {
+            files: true,
+          },
         }),
       };
     });

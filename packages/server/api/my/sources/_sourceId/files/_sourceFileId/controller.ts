@@ -8,7 +8,12 @@ export default defineController(() => ({
       throw new HTTPError(400, 'uploaded must be true');
     }
 
-    await onSourceFileUploaded(user.id, params.sourceId, params.sourceFileId);
+    await onSourceFileUploaded(
+      user.id,
+      params.sourceId,
+      params.sourceFileId,
+      body.parts
+    );
 
     return { status: 202 };
   },

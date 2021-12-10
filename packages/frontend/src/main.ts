@@ -13,6 +13,7 @@ import './styles/main.css';
 import 'virtual:windi-utilities.css';
 // windicss devtools support (dev only)
 import 'virtual:windi-devtools';
+import { activateTokenInterceptor } from './logic/api';
 
 const routes = setupLayouts(generatedRoutes);
 
@@ -22,4 +23,6 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
   for (const mod of Object.values(import.meta.globEager('./modules/*.ts'))) {
     mod.install?.(ctx);
   }
+
+  activateTokenInterceptor();
 });

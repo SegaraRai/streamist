@@ -32,6 +32,8 @@ export default defineComponent({
     },
   },
   setup(_props: unknown, context) {
+    const { t } = useI18n();
+
     const props = _props as UnwrapRef<Props>;
 
     const playbackStore = usePlaybackStore();
@@ -98,6 +100,7 @@ export default defineComponent({
     );
 
     return {
+      t,
       loading$$q: loading,
       playlist$$q: playlist,
       tracks$$q: tracks,
@@ -152,7 +155,7 @@ export default defineComponent({
                 @click="play$$q(false)"
               >
                 <v-icon left>mdi-play</v-icon>
-                <span>{{ $t('playlist/Play') }}</span>
+                <span>{{ t('playlist/Play') }}</span>
               </v-btn>
             </div>
             <div class="mx-4"></div>
@@ -164,7 +167,7 @@ export default defineComponent({
                 @click="play$$q(true)"
               >
                 <v-icon left>mdi-shuffle</v-icon>
-                <span>{{ $t('playlist/Shuffle') }}</span>
+                <span>{{ t('playlist/Shuffle') }}</span>
               </v-btn>
             </div>
           </div>
@@ -178,7 +181,7 @@ export default defineComponent({
             >
               <div v-show="!loading$$q">
                 <span>{{
-                  tracks$$q && $tc('playlist/{n} tracks', tracks$$q.length)
+                  tracks$$q && t('playlist/{n} tracks', tracks$$q.length)
                 }}</span>
                 <span v-show="duration$$q">, {{ duration$$q }}</span>
               </div>

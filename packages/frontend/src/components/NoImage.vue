@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api';
+import { defineComponent } from 'vue';
 
 export default defineComponent({
   setup() {
@@ -9,7 +9,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="no-image-root d-flex justify-center">
+  <div class="no-image-root flex justify-center items-center">
     <v-icon class="no-image-icon" light>mdi-image-off-outline</v-icon>
   </div>
 </template>

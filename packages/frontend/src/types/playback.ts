@@ -9,5 +9,8 @@ export interface AlbumForPlayback extends Album {
 export interface TrackForPlayback extends Track {
   album: AlbumForPlayback;
   artist: Artist;
-  lyric: string;
+}
+
+export interface AlbumForPlaybackWithTracks extends AlbumForPlayback {
+  tracks: TrackForPlayback[];
 }

@@ -1,7 +1,6 @@
 # TODOs
 
 - [ ] sanity check
-  - check if the sentinel nodes are in the database
   - check if the transcoder is running (especially for devenv)
 - [ ] use track's artist for album artist
 - [ ] use track's title for album title

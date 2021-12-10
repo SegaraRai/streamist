@@ -291,7 +291,7 @@ export class TrackProvider<
    * また、現在のトラックを変更しない場合に、変更されたセットリストに元の現在のトラックが含まれない場合は、現在のトラックには新しく`undefined`が設定される
    * この関数を呼び出すと現在のトラックが切り替わったかどうかによらず常に'trackChange'イベントが発火する
    */
-  setSetList$$q(setList: T[], currentTrack?: T | null): void {
+  setSetList$$q(setList: readonly T[], currentTrack?: T | null): void {
     currentTrack =
       currentTrack === undefined
         ? this._currentTrack$$q

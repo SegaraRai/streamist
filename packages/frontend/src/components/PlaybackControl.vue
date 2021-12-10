@@ -1,17 +1,13 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
-import NullableImage from '@/components/NullableImage.vue';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { findAncestor } from '@/logic/findAncestor';
 import { formatTime } from '@/logic/formatTime';
 import { usePlaybackStore } from '@/stores/playback';
-import { ImageWithFile } from '~/types/image';
+import type { ImageWithFile } from '~/types/image';
 
 export default defineComponent({
-  components: {
-    NullableImage,
-  },
   setup() {
     const playbackStore = usePlaybackStore();
 
@@ -150,7 +146,7 @@ export default defineComponent({
             :width="imageSize$$q"
             :height="imageSize$$q"
             :aspect-ratio="1"
-          ></nullable-image>
+          />
         </div>
         <!-- pb-1で気持ち上に持ち上げる -->
         <div
@@ -171,9 +167,7 @@ export default defineComponent({
         <v-btn
           class="mx-5"
           :class="shuffleEnabled$$q ? 'active-button' : ''"
-          x-small
-          fab
-          text
+          icon
           :ripple="false"
           :color="shuffleEnabled$$q ? 'primary' : ''"
           @click="switchShuffle$$q"
@@ -185,40 +179,22 @@ export default defineComponent({
         </v-btn>
         <v-btn
           class="mx-5"
-          x-small
-          fab
-          text
+          icon
           @click="skipPrevious$$q"
           @mouseup="blurButton$$q"
         >
           <v-icon>mdi-skip-previous</v-icon>
         </v-btn>
-        <v-btn
-          class="mx-3"
-          x-small
-          fab
-          outlined
-          @click="play$$q"
-          @mouseup="blurButton$$q"
-        >
+        <v-btn class="mx-3" icon @click="play$$q" @mouseup="blurButton$$q">
           <v-icon>{{ playing$$q ? 'mdi-pause' : 'mdi-play' }}</v-icon>
         </v-btn>
-        <v-btn
-          class="mx-5"
-          x-small
-          fab
-          text
-          @click="skipNext$$q"
-          @mouseup="blurButton$$q"
-        >
+        <v-btn class="mx-5" icon @click="skipNext$$q" @mouseup="blurButton$$q">
           <v-icon>mdi-skip-next</v-icon>
         </v-btn>
         <v-btn
           class="mx-5"
           :class="repeatEnabled$$q ? 'active-button' : ''"
-          x-small
-          fab
-          text
+          icon
           :ripple="false"
           :color="repeatEnabled$$q ? 'primary' : ''"
           @click="switchRepeat$$q"
@@ -238,7 +214,7 @@ export default defineComponent({
             rounded
             class="seekbar-progress"
             :value="positionRate$$q || 0"
-          ></v-progress-linear>
+          />
         </div>
         <div
           class="duration-right body-2 flex-grow-0 d-flex flex-column justify-center"

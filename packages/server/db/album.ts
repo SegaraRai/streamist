@@ -33,6 +33,7 @@ export async function dbAlbumGetOrCreateByNameTx(
   const newAlbumId = await newAlbumIdPromise;
 
   // TODO(db): manually set createdAt and updatedAt?
+  // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
     INSERT INTO Album (id, title, artistId, userId)
     SELECT ${newAlbumId}, ${albumTitle}, ${artistId}, ${userId}

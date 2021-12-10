@@ -42,6 +42,7 @@ model Tag {
   tracks    Track[]
   playlists Playlist[]
 
+  @@unique([userId, name])
   @@index([userId])
 }
 
@@ -234,6 +235,7 @@ model AlbumCoArtist {
   album     Album    @relation(fields: [albumId], references: [id])
   albumId   String
 
+  @@unique([role, albumId, artistId])
   @@index([userId])
   @@index([artistId])
   @@index([albumId])
@@ -251,6 +253,7 @@ model TrackCoArtist {
   track     Track    @relation(fields: [trackId], references: [id])
   trackId   String
 
+  @@unique([role, trackId, artistId])
   @@index([userId])
   @@index([artistId])
   @@index([trackId])

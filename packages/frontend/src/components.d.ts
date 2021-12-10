@@ -4,6 +4,7 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    Album: typeof import('./components/Album.vue')['default']
     CarbonCampsite: typeof import('~icons/carbon/campsite')['default']
     CarbonDicomOverlay: typeof import('~icons/carbon/dicom-overlay')['default']
     CarbonLanguage: typeof import('~icons/carbon/language')['default']
@@ -11,9 +12,19 @@ declare module 'vue' {
     CarbonMoon: typeof import('~icons/carbon/moon')['default']
     CarbonPedestrian: typeof import('~icons/carbon/pedestrian')['default']
     CarbonSun: typeof import('~icons/carbon/sun')['default']
-    CarbonWarning: typeof import('~icons/carbon/warning')['default'];
+    CarbonWarning: typeof import('~icons/carbon/warning')['default']
+    ConditionalLink: typeof import('./components/ConditionalLink.vue')['default']
+    EllipsisTooltip: typeof import('./components/EllipsisTooltip.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
+    NoImage: typeof import('./components/NoImage.vue')['default']
+    NullableImage: typeof import('./components/NullableImage.vue')['default']
+    PlaybackControl: typeof import('./components/PlaybackControl.vue')['default']
+    Playlist: typeof import('./components/Playlist.vue')['default']
+    Queue: typeof import('./components/Queue.vue')['default']
     README: typeof import('./components/README.md')['default']
+    TrackList: typeof import('./components/TrackList.vue')['default']
+    TrackTable: typeof import('./components/TrackTable.vue')['default']
+    Uploader: typeof import('./components/Uploader.vue')['default']
   }
 }
 

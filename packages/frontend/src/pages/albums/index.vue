@@ -2,19 +2,14 @@
 import { computed, defineComponent, ref } from 'vue';
 import NullableImage from '@/components/NullableImage.vue';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
-import api from '@/logic/api';
 import { compareAlbum } from '@/logic/sort';
+import { fetchAlbumsWithArImTr } from '~/resources/album';
+import type { AlbumWithArImTr } from '~/types/album';
 import type { ImageWithFile } from '~/types/image';
-import type { Album, Artist, Track } from '$prisma/client';
-
-interface ResponseAlbum extends Album {
-  artist: Artist;
-  images: ImageWithFile[];
-  tracks: Track[];
-}
+import type { Artist } from '$prisma/client';
 
 interface Item {
-  album$$q: ResponseAlbum;
+  album$$q: AlbumWithArImTr;
   artist$$q: Artist;
   image$$q: ImageWithFile | undefined;
   releaseYear$$q: string | undefined;
@@ -25,11 +20,14 @@ export default defineComponent({
     NullableImage,
   },
   setup() {
-    const albums = ref([] as ResponseAlbum[]);
+    const { t } = useI18n();
 
-    api.my.albums.$get().then((response) => {
-      albums.value = (response as ResponseAlbum[]).sort(compareAlbum);
-    });
+    const albums = ref([] as AlbumWithArImTr[]);
+
+    fetchAlbumsWithArImTr()
+      .then((response) => {
+        albums.value = response.sort(compareAlbum);
+      });
 
     const items = computed(() => {
       return albums.value.map((album): Item => {
@@ -52,6 +50,7 @@ export default defineComponent({
     });
 
     return {
+      t,
       items$$q: items,
       imageSize$$q: 180,
     };
@@ -62,7 +61,7 @@ export default defineComponent({
 <template>
   <v-container fluid class="pt-3 px-8">
     <header class="mb-6">
-      <div class="display-1 font-weight-medium">{{ $t('albums/Albums') }}</div>
+      <div class="display-1 font-weight-medium">{{ t('albums/Albums') }}</div>
     </header>
 
     <v-row>

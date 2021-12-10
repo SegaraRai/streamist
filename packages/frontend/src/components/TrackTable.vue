@@ -1,7 +1,10 @@
 <script lang="ts">
-import Vue from 'vue';
-import { DataTableHeader } from 'vuetify';
 import {
+  /* type*/ AlbumDTO,
+  ArtistDTO,
+  ArtistNameDTO,
+} from '@streamist/shared/lib/dto/db.dto';
+import Vue, {
   Ref,
   computed,
   defineComponent,
@@ -9,14 +12,10 @@ import {
   reactive,
   ref,
   watch,
-} from '@vue/composition-api';
-import {
-  /*type*/ AlbumDTO,
-  ArtistDTO,
-  ArtistNameDTO,
-} from '@streamist/shared/lib/dto/db.dto';
+} from 'vue';
+import { DataTableHeader } from 'vuetify';
 import { getArtist } from '@/lib/artist';
-import { /*type*/ TrackDTOForPlayback } from '@/lib/dto';
+import { /* type*/ TrackDTOForPlayback } from '@/lib/dto';
 import { formatTime } from '@/lib/formatTime';
 import { usePlaybackStore } from '@/stores/playback';
 
@@ -133,18 +132,18 @@ export default defineComponent({
     },
     loading: Boolean,
     setList: {
-      type: Array,
-      required: false,
+      type: Array as PropType<TrackForPlayback[] | null | undefined>,
+      default: undefined,
     },
   },
   setup(_props) {
-    const props = (_props as unknown) as Props;
+    const props = _props as unknown as Props;
 
     const playbackStore = usePlaybackStore();
 
     //
 
-    const tables = (ref(null) as unknown) as Ref<Vue[]>;
+    const tables = ref(null) as unknown as Ref<Vue[]>;
 
     const tableScrollX = ref(0);
 
@@ -190,27 +189,25 @@ export default defineComponent({
 
     const items = computed(() => {
       return (
-        props.tracks?.map(
-          (track, index): ListItem => {
-            const artist = getArtist(track.artistName!);
+        props.tracks?.map((track, index): ListItem => {
+          const artist = getArtist(track.artistName!);
 
-            return {
-              index,
-              track,
-              album: track.album!,
-              artistName: track.artistName!,
-              artist,
-              artistOrArtistName: artist || track.artistName!,
-              albumArtist: track.album!.artistName!,
-              colTitle: track.titleSort || track.title,
-              colArtist: track.artistName!.nameSort || track.artistName!.name,
-              colAlbum: track.album!.titleSort || track.album!.title,
-              colDiscNumber: track.discNumber,
-              colDuration: track.duration,
-              colActions: '',
-            };
-          }
-        ) || []
+          return {
+            index,
+            track,
+            album: track.album!,
+            artistName: track.artistName!,
+            artist,
+            artistOrArtistName: artist || track.artistName!,
+            albumArtist: track.album!.artistName!,
+            colTitle: track.titleSort || track.title,
+            colArtist: track.artistName!.nameSort || track.artistName!.name,
+            colAlbum: track.album!.titleSort || track.album!.title,
+            colDiscNumber: track.discNumber,
+            colDuration: track.duration,
+            colActions: '',
+          };
+        }) || []
       );
     });
 

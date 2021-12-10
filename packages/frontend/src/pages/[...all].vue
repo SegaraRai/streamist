@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t } = useI18n()
+const { t } = useI18n();
 </script>
 
 <template>
@@ -7,8 +7,3 @@ const { t } = useI18n()
     {{ t('not-found') }}
   </div>
 </template>
-
-<route lang="yaml">
-meta:
-  layout: 404
-</route>

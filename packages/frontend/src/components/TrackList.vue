@@ -1,49 +1,27 @@
 <script lang="ts">
-import { computed, defineComponent, reactive } from '@vue/composition-api';
-import {
-  /*type*/ ArtistDTO,
-  ArtistNameDTO,
-} from '@streamist/shared/lib/dto/db.dto';
-import NullableImage from '@/components/NullableImage.vue';
-import { getArtist } from '@/lib/artist';
-import {
-  /*type*/ AlbumDTOForPlayback,
-  ArtistNameDTOWithArtists,
-  ImageDTOWithImageFiles,
-  TrackDTOForPlayback,
-} from '@/lib/dto';
-import { formatTime } from '@/lib/formatTime';
-import { getDefaultImage } from '@/lib/image';
+import type { PropType } from 'vue';
+import { getDefaultAlbumImage } from '@/logic/albumImage';
+import { formatTime } from '@/logic/formatTime';
 import { usePlaybackStore } from '@/stores/playback';
-import { useStyleStore } from '@/stores/style';
+import { useThemeStore } from '@/stores/theme';
+import type { ImageWithFile } from '@/types/image';
+import type { AlbumForPlayback, TrackForPlayback } from '@/types/playback';
+import type { Artist } from '$prisma/client';
 
 /**
  * インデックスのところに表示する内容
  */
 export type IndexContent = 'none' | 'index' | 'trackNumber' | 'albumArtwork';
 
-interface Props {
-  tracks?: TrackDTOForPlayback[] | null;
-  showDiscNumber: boolean;
-  indexContent: IndexContent;
-  linkExcludes: string[];
-  loading: boolean;
-  setList?: TrackDTOForPlayback[] | null;
-  showAlbum: boolean;
-  showArtist: boolean;
-}
-
 interface ListItemTrack {
   type$$q: 'track';
   index$$q: number;
-  track$$q: TrackDTOForPlayback;
-  artistName$$q: ArtistNameDTOWithArtists;
-  artistOrArtistName$$q: ArtistDTO | ArtistNameDTO;
-  album$$q: AlbumDTOForPlayback;
-  albumArtistName$$q: ArtistNameDTOWithArtists;
-  albumArtistOrArtistName$$q: ArtistDTO | ArtistNameDTO;
+  track$$q: TrackForPlayback;
+  artist$$q: Artist;
+  album$$q: AlbumForPlayback;
+  albumArtist$$q: Artist;
   formattedDuration$$q: string;
-  image$$q: ImageDTOWithImageFiles | undefined;
+  image$$q: ImageWithFile | undefined;
   isLast$$q: boolean;
 }
 
@@ -55,13 +33,10 @@ interface ListItemDiscNumberHeader {
 type ListItem = ListItemTrack | ListItemDiscNumberHeader;
 
 export default defineComponent({
-  components: {
-    NullableImage,
-  },
   props: {
     tracks: {
-      type: Array,
-      required: false,
+      type: Array as PropType<readonly TrackForPlayback[] | null | undefined>,
+      default: (): string[] => [],
     },
     showDiscNumber: Boolean,
     indexContent: {
@@ -69,22 +44,22 @@ export default defineComponent({
       default: 'trackNumber',
     },
     linkExcludes: {
-      type: Array,
+      type: Array as PropType<readonly string[]>,
       default: (): string[] => [],
     },
     loading: Boolean,
     setList: {
-      type: Array,
-      required: false,
+      type: Array as PropType<readonly TrackForPlayback[] | null | undefined>,
+      default: undefined,
     },
     showAlbum: Boolean,
     showArtist: Boolean,
   },
-  setup(_props) {
-    const props = (_props as unknown) as Props;
+  setup(props) {
+    const { t } = useI18n();
 
     const playbackStore = usePlaybackStore();
-    const styleStore = useStyleStore();
+    const themeStore = useThemeStore();
 
     //
 
@@ -103,26 +78,17 @@ export default defineComponent({
       }
 
       let array: ListItemTrack[] | ListItem[] = tracks.map(
-        (track, index): ListItemTrack => {
-          const { album, artistName } = track;
-          const albumArtistName = album.artistName;
-          const artist = getArtist(artistName);
-          const albumArtist = getArtist(albumArtistName);
-
-          return {
-            type$$q: 'track',
-            index$$q: index,
-            track$$q: track,
-            album$$q: album,
-            artistName$$q: artistName,
-            artistOrArtistName$$q: artist || artistName,
-            albumArtistName$$q: albumArtistName,
-            albumArtistOrArtistName$$q: albumArtist || albumArtistName,
-            formattedDuration$$q: formatTime(track.duration),
-            image$$q: getDefaultImage(album.images, album.imageOrder),
-            isLast$$q: index === tracks.length - 1,
-          };
-        }
+        (track, index): ListItemTrack => ({
+          type$$q: 'track',
+          index$$q: index,
+          track$$q: track,
+          album$$q: track.album,
+          artist$$q: track.artist,
+          albumArtist$$q: track.album.artist,
+          formattedDuration$$q: formatTime(track.duration),
+          image$$q: getDefaultAlbumImage(track.album),
+          isLast$$q: index === tracks.length - 1,
+        })
       );
 
       if (useDiscNumber.value) {
@@ -158,14 +124,15 @@ export default defineComponent({
     //
 
     return {
+      t,
       imageSize$$q: 32,
-      styleStore$$q: styleStore,
+      themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       s: selected, // v-modelに対してはマングリングできない
       items$$q: items,
       currentPlayingTrackId$$q: currentPlayingTrackId,
       useDiscNumber$$q: useDiscNumber,
-      play$$q: (track: TrackDTOForPlayback): void => {
+      play$$q: (track: TrackForPlayback): void => {
         if (!props.setList) {
           return;
         }
@@ -181,12 +148,12 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-list flat :class="styleStore$$q.backgroundClassContent$$q.value">
+  <v-list flat :class="themeStore$$q.bgClass">
     <v-list-item-group v-model="s" multiple>
       <v-sheet
         tile
         class="sheet-header"
-        :class="styleStore$$q.backgroundClassContent$$q.value"
+        :class="themeStore$$q.bgClass"
       >
         <v-subheader class="list-header">
           <div class="list-header-column list-column-icon subtitle-2 mr-4 py-2">
@@ -200,7 +167,7 @@ export default defineComponent({
             class="list-header-column list-column-content d-flex flex-row flex-nowrap mr-6 py-2"
           >
             <v-list-item-title class="track-title subtitle-2">{{
-              $t('tracklist/Title')
+              t('tracklist/Title')
             }}</v-list-item-title>
           </v-list-item-content>
           <template v-if="showAlbum">
@@ -208,7 +175,7 @@ export default defineComponent({
               class="list-header-column list-column-content d-flex flex-row flex-nowrap mr-6 py-2"
             >
               <v-list-item-title class="track-album-title subtitle-2">{{
-                $t('tracklist/Album')
+                t('tracklist/Album')
               }}</v-list-item-title>
             </v-list-item-content>
           </template>
@@ -218,13 +185,12 @@ export default defineComponent({
         </v-subheader>
         <v-divider />
       </v-sheet>
-      <template v-for="(item, index) in items$$q">
+      <template v-for="(item, index) in items$$q" :key="index">
         <template v-if="item.type$$q === 'discNumberHeader'">
           <v-sheet
-            :key="index"
             tile
             class="sheet-discnumber-header"
-            :class="styleStore$$q.backgroundClassContent$$q.value"
+            :class="themeStore$$q.bgClass"
           >
             <v-subheader class="list-discnumber-header">
               <div class="list-column-discnumber d-flex align-center">
@@ -238,7 +204,7 @@ export default defineComponent({
           </v-sheet>
         </template>
         <template v-else>
-          <v-list-item :key="index" class="hover-container" :ripple="false">
+          <v-list-item class="hover-container" :ripple="false">
             <div class="list-column-icon mr-4">
               <!-- hiddenを切り替えるのとv-ifとどっちがいいか -->
               <div
@@ -306,25 +272,16 @@ export default defineComponent({
               }}</v-list-item-title>
               <template
                 v-if="
-                  // eslint-disable vue/html-indent
-                  showArtist ||
-                  item.artistName$$q.id !== item.albumArtistName$$q.id
-                  // eslint-enable vue/html-indent
+                  showArtist || item.artist$$q.id !== item.albumArtist$$q.id
                 "
               >
                 <v-list-item-subtitle class="track-artist pl-4">
-                  <template
-                    v-if="!linkExcludes.includes(item.artistOrArtistName$$q.id)"
+                  <conditional-link
+                    :to="`/artists/${item.artist$$q.id}`"
+                    :disabled="linkExcludes.includes(item.artist$$q.id)"
                   >
-                    <router-link
-                      :to="`/artists/${item.artistOrArtistName$$q.id}`"
-                    >
-                      {{ item.artistName$$q.name }}
-                    </router-link>
-                  </template>
-                  <template v-else>
-                    <span>{{ item.artistName$$q.name }}</span>
-                  </template>
+                    {{ item.artist$$q.name }}
+                  </conditional-link>
                 </v-list-item-subtitle>
               </template>
             </v-list-item-content>
@@ -333,30 +290,20 @@ export default defineComponent({
                 class="list-column-content d-flex flex-row flex-nowrap mr-6"
               >
                 <v-list-item-title class="track-album-title">
-                  <template v-if="!linkExcludes.includes(item.album$$q.id)">
-                    <router-link :to="`/albums/${item.album$$q.id}`">{{
-                      item.album$$q.title
-                    }}</router-link>
-                  </template>
-                  <template v-else>
-                    <span>{{ item.album$$q.title }}</span>
-                  </template>
+                  <conditional-link
+                    :to="`/albums/${item.album$$q.id}`"
+                    :disabled="linkExcludes.includes(item.album$$q.id)"
+                  >
+                    {{ item.album$$q.title }}
+                  </conditional-link>
                 </v-list-item-title>
                 <v-list-item-subtitle class="track-album-artist pl-4">
-                  <template
-                    v-if="
-                      !linkExcludes.includes(item.albumArtistOrArtistName$$q.id)
-                    "
+                  <conditional-link
+                    :to="`/artists/${item.albumArtist$$q.id}`"
+                    :disabled="linkExcludes.includes(item.albumArtist$$q.id)"
                   >
-                    <router-link
-                      :to="`/artists/${item.albumArtistOrArtistName$$q.id}`"
-                    >
-                      {{ item.albumArtistName$$q.name }}
-                    </router-link>
-                  </template>
-                  <template v-else>
-                    <span>{{ item.albumArtistName$$q.name }}</span>
-                  </template>
+                    {{ item.albumArtist$$q.name }}
+                  </conditional-link>
                 </v-list-item-subtitle>
               </v-list-item-content>
             </template>
@@ -365,7 +312,7 @@ export default defineComponent({
             </div>
           </v-list-item>
           <template v-if="!item.isLast$$q">
-            <v-divider :key="'d-' + index"></v-divider>
+            <v-divider />
           </template>
         </template>
       </template>

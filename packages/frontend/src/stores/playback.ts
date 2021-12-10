@@ -28,7 +28,7 @@ export interface PlaybackState {
    * 同一のトラックが重複してはならない
    */
   setSetListAndPlay$$q(
-    tracks: TrackForPlayback[],
+    tracks: readonly TrackForPlayback[],
     track: TrackForPlayback
   ): void;
   /**
@@ -36,7 +36,7 @@ export interface PlaybackState {
    * 再生するトラックは現在のシャッフルの設定によって自動で設定される \
    * （シャッフルが有効なら`tracks`の中からランダムで選択され、無効なら`tracks`の先頭の要素が選択される）
    */
-  setSetListAndPlayAuto$$q(tracks: TrackForPlayback[]): void;
+  setSetListAndPlayAuto$$q(tracks: readonly TrackForPlayback[]): void;
   /** リピート再生 */
   repeat$$q: RefOrValue<RepeatType>;
   /** シャッフル再生 */
@@ -114,7 +114,7 @@ export function usePlaybackStore(): typeof refState {
     });
 
     const setSetListAndPlay = (
-      tracks: TrackForPlayback[],
+      tracks: readonly TrackForPlayback[],
       track?: TrackForPlayback | null
     ): void => {
       playing.value = false;
@@ -141,12 +141,12 @@ export function usePlaybackStore(): typeof refState {
       }),
       seeking$$q: seeking,
       setSetListAndPlay$$q: (
-        tracks: TrackForPlayback[],
+        tracks: readonly TrackForPlayback[],
         track: TrackForPlayback
       ): void => {
         setSetListAndPlay(tracks, track);
       },
-      setSetListAndPlayAuto$$q: (tracks: TrackForPlayback[]): void => {
+      setSetListAndPlayAuto$$q: (tracks: readonly TrackForPlayback[]): void => {
         const trackIndex = shuffle.value
           ? Math.floor(Math.random() * tracks.length)
           : 0;

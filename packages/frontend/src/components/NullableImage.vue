@@ -1,11 +1,12 @@
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api';
+import { asyncComputed } from '@vueuse/core';
+import { PropType, defineComponent } from 'vue';
 import NoImage from '@/components/NoImage.vue';
-import { /*type*/ ImageDTOWithImageFiles } from '@/lib/dto';
-import { SrcObject, createSrc } from '@/lib/srcSet';
+import { SrcObject, createSrc } from '@/logic/srcSet';
+import type { ImageWithFile } from '~/types/image';
 
 interface Props {
-  image?: ImageDTOWithImageFiles;
+  image?: ImageWithFile | null;
   width: number;
   height: number;
   aspectRatio?: number | string;
@@ -17,23 +18,26 @@ export default defineComponent({
   },
   props: {
     image: {
-      type: Object,
-      required: false,
+      type: Object as PropType<ImageWithFile | null | undefined>,
+      default: undefined,
     },
     width: Number,
     height: Number,
     aspectRatio: {
       type: [Number, String],
-      required: false,
+      default: undefined,
     },
   },
   setup(_props: unknown) {
     const props = _props as Props;
 
-    const srcObject = computed<SrcObject | undefined>(
-      () =>
+    const srcObject = asyncComputed<SrcObject | null | undefined>(
+      async () =>
         props.image &&
-        createSrc(props.image.imageFiles, Math.max(props.width, props.height))
+        (await createSrc(
+          props.image.files,
+          Math.max(props.width, props.height)
+        ))
     );
 
     return {
@@ -56,9 +60,7 @@ export default defineComponent({
       ></v-img>
     </template>
     <template v-else>
-      <no-image
-        :style="{ width: `${width}px`, height: `${height}px` }"
-      ></no-image>
+      <no-image :style="{ width: `${width}px`, height: `${height}px` }" />
     </template>
   </div>
 </template>

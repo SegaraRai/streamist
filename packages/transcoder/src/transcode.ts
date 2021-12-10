@@ -52,6 +52,8 @@ export async function transcode(
     }
   }
 
+  // TODO(prod): store request and response to S3 for logging
+
   return {
     request,
     artifacts,

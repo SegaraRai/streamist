@@ -19,7 +19,8 @@ export async function dbArtistGetOrCreateByNameTx(
   const newArtistId = await newArtistIdPromise;
 
   // TODO(db)): manually set createdAt and updatedAt (for SQLite)?
-  const inserted = await txClient.$executeRaw`
+  // NOTE: DO NOT check inserted row count. it's ok if it's 0.
+  await txClient.$executeRaw`
     INSERT INTO Artist (id, name, userId)
     SELECT ${newArtistId}, ${artistName}, ${userId}
       WHERE NOT EXISTS (
@@ -29,11 +30,6 @@ export async function dbArtistGetOrCreateByNameTx(
       )
       LIMIT 1
     `;
-  if (inserted !== 1) {
-    throw new Error(
-      `dbArtistGetOrCreateByNameTx: failed to INSERT (userId=${userId}, artistName=${artistName})`
-    );
-  }
 
   const artist = await txClient.artist.findFirst({
     where: {

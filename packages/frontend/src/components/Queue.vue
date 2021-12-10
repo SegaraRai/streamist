@@ -1,7 +1,4 @@
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
-import EllipsisTooltip from '@/components/EllipsisTooltip.vue';
-import NullableImage from '@/components/NullableImage.vue';
 import { minQueueSize } from '@/config/queue';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { formatTime } from '@/logic/formatTime';
@@ -20,11 +17,9 @@ interface ListItem {
 }
 
 export default defineComponent({
-  components: {
-    EllipsisTooltip,
-    NullableImage,
-  },
   setup() {
+    const { t } = useI18n();
+
     const playbackStore = usePlaybackStore();
 
     const items = computed<ListItem[]>(() =>
@@ -50,6 +45,7 @@ export default defineComponent({
     });
 
     return {
+      t,
       imageSize$$q: 32,
       playing$$q: playbackStore.playing$$q,
       items$$q: items,
@@ -130,16 +126,16 @@ export default defineComponent({
       <v-sheet tile class="queue-header-sheet">
         <div class="px-2 py-1 title">
           <v-icon>mdi-playlist-play</v-icon>
-          <span class="pl-2">{{ $t('queue/Play Queue') }}</span>
+          <span class="pl-2">{{ t('queue/Play Queue') }}</span>
         </div>
-        <v-divider></v-divider>
+        <v-divider />
       </v-sheet>
     </div>
     <v-list flat dense>
       <v-list-item-group>
         <template v-for="(item, index) in items$$q" :key="index">
           <template v-if="index !== 0">
-            <v-divider></v-divider>
+            <v-divider />
           </template>
           <v-list-item class="hover-container">
             <div class="list-column-icon">
@@ -152,7 +148,7 @@ export default defineComponent({
                     :width="imageSize$$q"
                     :height="imageSize$$q"
                     :aspect-ratio="1"
-                  ></nullable-image>
+                  />
                   <v-icon class="play-icon hover-display">
                     mdi-play-circle-outline
                   </v-icon>
@@ -168,21 +164,21 @@ export default defineComponent({
                 @mouseenter="startMarquee$$q"
                 @mouseleave="finishMarquee$$q"
               >
-                <ellipsis-tooltip bottom>
+                <v-tooltip bottom>
                   <template #activator="{ on }">
                     <span class="marquee-target" v-on="on">
                       {{ item.track$$q.title }}
                     </span>
                   </template>
                   <span>{{ item.track$$q.title }}</span>
-                </ellipsis-tooltip>
+                </v-tooltip>
               </v-list-item-title>
               <v-list-item-subtitle
                 class="track-artist"
                 @mouseenter="startMarquee$$q"
                 @mouseleave="finishMarquee$$q"
               >
-                <ellipsis-tooltip bottom>
+                <v-tooltip bottom>
                   <template #activator="{ on }">
                     <span class="marquee-target" v-on="on">
                       <router-link :to="`/artists/${item.artist$$q.id}`">
@@ -191,7 +187,7 @@ export default defineComponent({
                     </span>
                   </template>
                   <span>{{ item.artist$$q.name }}</span>
-                </ellipsis-tooltip>
+                </v-tooltip>
               </v-list-item-subtitle>
             </v-list-item-content>
             <div class="list-column-duration numeric body-2 pl-4">
