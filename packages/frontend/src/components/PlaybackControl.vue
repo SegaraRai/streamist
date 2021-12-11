@@ -3,7 +3,6 @@ import { computed, defineComponent } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { findAncestor } from '@/logic/findAncestor';
-import { formatTime } from '@/logic/formatTime';
 import { usePlaybackStore } from '@/stores/playback';
 import type { ImageWithFile } from '~/types/image';
 
@@ -20,22 +19,6 @@ export default defineComponent({
     const image = computed<ImageWithFile | null | undefined>(
       () => currentTrack.value && getDefaultAlbumImage(currentTrack.value.album)
     );
-
-    const positionDisplay = computed((): string | undefined => {
-      return playbackStore.position$$q.value != null &&
-        playbackStore.duration$$q.value != null
-        ? formatTime(
-            playbackStore.position$$q.value,
-            playbackStore.duration$$q.value
-          )
-        : undefined;
-    });
-
-    const durationDisplay = computed((): string | undefined => {
-      return playbackStore.duration$$q.value != null
-        ? formatTime(playbackStore.duration$$q.value)
-        : undefined;
-    });
 
     const repeatIcon = computed((): string => {
       switch (playbackStore.repeat$$q.value) {
@@ -80,15 +63,13 @@ export default defineComponent({
       image$$q: image,
       imageSize$$q: 70,
       repeatIcon$$q: repeatIcon,
-      positionDisplay$$q: positionDisplay,
-      durationDisplay$$q: durationDisplay,
       position$$q: playbackStore.position$$q,
       duration$$q: playbackStore.duration$$q,
       blurButton$$q: blurButton,
       switchRepeat$$q: switchRepeat,
       switchShuffle$$q: switchShuffle,
       seekTo$$q: (position: number): void => {
-        console.log(position);
+        playbackStore.position$$q.value = position;
       },
       play$$q: (): void => {
         playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
@@ -132,24 +113,29 @@ export default defineComponent({
   >
     <div class="left-pane flex-grow-0 d-flex flex-row align-center">
       <template v-if="currentTrack$$q">
-        <div class="albumart-container flex-grow-0">
+        <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
           <nullable-image
+            icon-size="40px"
             :image="image$$q"
             :width="imageSize$$q"
             :height="imageSize$$q"
             :aspect-ratio="1"
           />
-        </div>
+        </router-link>
         <!-- pb-1で気持ち上に持ち上げる -->
-        <div
-          class="album-info-container flex-grow-1 pl-4 pb-1 d-flex flex-column"
-        >
-          <div class="album-title flex-grow-0 subtitle-1">
+        <div class="overflow-hidden flex-grow-1 pl-4 pb-1 d-flex flex-column">
+          <router-link
+            class="block whitespace-pre overflow-hidden overflow-ellipsis subtitle-1"
+            :to="`/albums/${currentTrack$$q.albumId}`"
+          >
             {{ currentTrack$$q.title }}
-          </div>
-          <div class="album-artist flex-grow-0 subtitle-2">
+          </router-link>
+          <router-link
+            class="block whitespace-pre overflow-hidden overflow-ellipsis subtitle-2"
+            :to="`/artists/${currentTrack$$q.artistId}`"
+          >
             {{ currentTrack$$q.artist.name }}
-          </div>
+          </router-link>
         </div>
       </template>
     </div>
@@ -165,9 +151,9 @@ export default defineComponent({
           @click="switchShuffle$$q"
           @mouseup="blurButton$$q"
         >
-          <v-icon :color="shuffleEnabled$$q ? 'primary' : ''">{{
-            shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled'
-          }}</v-icon>
+          <v-icon :color="shuffleEnabled$$q ? 'primary' : ''">
+            {{ shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled' }}
+          </v-icon>
         </v-btn>
         <v-btn
           class="mx-5"
@@ -179,7 +165,9 @@ export default defineComponent({
           <v-icon>mdi-skip-previous</v-icon>
         </v-btn>
         <v-btn class="mx-3" icon @click="play$$q" @mouseup="blurButton$$q">
-          <v-icon>{{ playing$$q ? 'mdi-pause' : 'mdi-play' }}</v-icon>
+          <v-icon>
+            {{ playing$$q ? 'mdi-pause' : 'mdi-play' }}
+          </v-icon>
         </v-btn>
         <v-btn
           flat
@@ -199,26 +187,17 @@ export default defineComponent({
           @click="switchRepeat$$q"
           @mouseup="blurButton$$q"
         >
-          <v-icon :color="repeatEnabled$$q ? 'primary' : ''">{{
-            repeatIcon$$q
-          }}</v-icon>
+          <v-icon :color="repeatEnabled$$q ? 'primary' : ''">
+            {{ repeatIcon$$q }}
+          </v-icon>
         </v-btn>
       </div>
-      <div class="seekbar-container pt-3 d-flex flex-row justify-center">
-        <div
-          class="duration-left body-2 flex-grow-0 d-flex flex-column justify-center"
-        >
-          {{ positionDisplay$$q }}
-        </div>
-        <div class="seekbar px-4 flex-grow-1 d-flex flex-column justify-center">
-          <s-seek-bar :current-time="position$$q" :duration="duration$$q" />
-        </div>
-        <div
-          class="duration-right body-2 flex-grow-0 d-flex flex-column justify-center"
-        >
-          {{ durationDisplay$$q }}
-        </div>
-      </div>
+      <s-seek-bar
+        class="pt-2"
+        :current-time="position$$q"
+        :duration="duration$$q"
+        @update="seekTo$$q"
+      />
     </div>
     <div class="right-pane flex-grow-0"></div>
   </v-sheet>
@@ -229,27 +208,6 @@ export default defineComponent({
 .right-pane {
   width: 20vw;
   min-width: 200px;
-}
-
-.album-info-container {
-  overflow: hidden;
-}
-
-.album-title,
-.album-artist {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.duration-left,
-.duration-right {
-  font-family: 'Open Sans', monospace !important;
-  font-variant-numeric: slashed-zero lining-nums tabular-nums;
-  width: 4em;
-  height: 1em;
-  line-height: 1;
-  user-select: none;
 }
 
 .duration-left {

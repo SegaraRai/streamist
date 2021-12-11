@@ -71,6 +71,7 @@ export default defineComponent({
         >
           <nullable-image
             class="align-end"
+            icon-size="64px"
             :image="loading$$q ? undefined : image$$q"
             :width="200"
             :height="200"

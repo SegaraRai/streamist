@@ -153,25 +153,23 @@ export default defineComponent({
     <div class="playlists">
       <template v-if="items$$q.length">
         <v-list flat>
-          <v-list-item-group>
-            <template v-for="(item, index) in items$$q" :key="index">
-              <v-list-item
-                class="hover-container"
-                :to="`/playlists/${item.id$$q}`"
-              >
-                <v-list-item-content>
-                  <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
-                  <v-list-item-subtitle>
-                    {{ t('playlists.n_tracks', item.trackCount$$q) }},
-                    {{ item.formattedDuration$$q }}
-                  </v-list-item-subtitle>
-                </v-list-item-content>
-              </v-list-item>
-              <template v-if="!item.isLast$$q">
-                <v-divider />
-              </template>
+          <template v-for="(item, index) in items$$q" :key="index">
+            <v-list-item
+              class="hover-container"
+              :to="`/playlists/${item.id$$q}`"
+            >
+              <v-list-item-header>
+                <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
+                <v-list-item-subtitle>
+                  {{ t('playlists.n_tracks', item.trackCount$$q) }},
+                  {{ item.formattedDuration$$q }}
+                </v-list-item-subtitle>
+              </v-list-item-header>
+            </v-list-item>
+            <template v-if="!item.isLast$$q">
+              <v-divider />
             </template>
-          </v-list-item-group>
+          </template>
         </v-list>
       </template>
       <template v-else>

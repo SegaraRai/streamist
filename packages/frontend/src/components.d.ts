@@ -5,14 +5,14 @@
 declare module 'vue' {
   export interface GlobalComponents {
     Album: typeof import('./components/Album.vue')['default']
-    CarbonCampsite: typeof import('~icons/carbon/campsite')['default']
-    CarbonDicomOverlay: typeof import('~icons/carbon/dicom-overlay')['default']
-    CarbonLanguage: typeof import('~icons/carbon/language')['default']
-    CarbonLogoGithub: typeof import('~icons/carbon/logo-github')['default']
-    CarbonMoon: typeof import('~icons/carbon/moon')['default']
-    CarbonPedestrian: typeof import('~icons/carbon/pedestrian')['default']
-    CarbonSun: typeof import('~icons/carbon/sun')['default']
-    CarbonWarning: typeof import('~icons/carbon/warning')['default']
+    CarbonCampsite: typeof import('~icons/carbon/campsite')['default'];
+    CarbonDicomOverlay: typeof import('~icons/carbon/dicom-overlay')['default'];
+    CarbonLanguage: typeof import('~icons/carbon/language')['default'];
+    CarbonLogoGithub: typeof import('~icons/carbon/logo-github')['default'];
+    CarbonMoon: typeof import('~icons/carbon/moon')['default'];
+    CarbonPedestrian: typeof import('~icons/carbon/pedestrian')['default'];
+    CarbonSun: typeof import('~icons/carbon/sun')['default'];
+    CarbonWarning: typeof import('~icons/carbon/warning')['default'];
     ConditionalLink: typeof import('./components/ConditionalLink.vue')['default']
     EllipsisTooltip: typeof import('./components/EllipsisTooltip.vue')['default']
     Footer: typeof import('./components/Footer.vue')['default']
@@ -22,10 +22,9 @@ declare module 'vue' {
     Playlist: typeof import('./components/Playlist.vue')['default']
     Queue: typeof import('./components/Queue.vue')['default']
     README: typeof import('./components/README.md')['default']
-    SSeekbar: typeof import('./components/SSeekbar.vue')['default']
     SSeekBar: typeof import('./components/SSeekBar.vue')['default']
     TrackList: typeof import('./components/TrackList.vue')['default']
-    TrackTable: typeof import('./components/TrackTable.vue')['default']
+    TrackTable: typeof import('./components/TrackTable.vue')['default'];
     Uploader: typeof import('./components/Uploader.vue')['default']
   }
 }

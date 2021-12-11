@@ -1,4 +1,4 @@
-import { Ref, UnwrapRef, computed, reactive, ref, toRefs, watch } from 'vue';
+import { Ref, UnwrapRef } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
 import { TrackProvider } from '@/logic/trackProvider';
 import type { TrackForPlayback } from '@/types/playback';
@@ -17,13 +17,15 @@ export interface PlaybackState {
   readonly duration$$q: RefOrValue<number | undefined>;
   /** 再生位置（0～1、getterのみ） */
   readonly positionRate$$q: RefOrValue<number | undefined>;
+  readonly defaultSetListAvailable$$q: RefOrValue<boolean>;
   /**
-   * ユーザーが再生位置を更新しようとしているか \
-   * 普通に再生しているだけでもpositionは更新されるため、positionを監視してシークを行う場合、
-   * ユーザーによってpositionが更新されたのかを確認する必要がある \
-   * そのためのフラグ
+   * 規定のトラックリストを設定する
    */
-  seeking$$q: RefOrValue<boolean>;
+  setDefaultSetList$$q(tracks?: readonly TrackForPlayback[]): void;
+  /**
+   * 規定のトラックリストを元に再生する
+   */
+  playFromDefaultSetList$$q(): void;
   /**
    * トラックリストを設定して再生する \
    * 同一のトラックが重複してはならない
@@ -78,12 +80,55 @@ export function usePlaybackStore(): typeof refState {
     const trackProvider = new TrackProvider();
 
     const playing = ref<boolean>(false);
-    const position = ref<number | undefined>();
-    const seeking = ref<boolean>(false);
+    const internalPosition = ref<number | undefined>();
+    const position = computed<number | undefined>({
+      get: () => {
+        return internalPosition.value;
+      },
+      set: (value: number | undefined) => {
+        if (value == null) {
+          return;
+        }
+        audio.currentTime = value;
+      },
+    });
     const repeat = ref<RepeatType>('off');
     const shuffle = ref<boolean>(false);
     const currentTrack = ref<TrackForPlayback | undefined>();
     const queue = ref<TrackForPlayback[]>([]);
+    const defaultSetList = ref<TrackForPlayback[] | undefined>();
+
+    const setSetListAndPlay = (
+      tracks: readonly TrackForPlayback[],
+      track?: TrackForPlayback | null
+    ): void => {
+      playing.value = false;
+      // NOTE: `setSetList$$q`に渡す`currentTrack`（第2引数）は`null`と`undefined`で挙動が異なる
+      trackProvider.setSetList$$q(tracks, tracks.length ? track : null);
+      if (tracks.length) {
+        internalPosition.value = 0;
+        playing.value = true;
+      } else {
+        internalPosition.value = undefined;
+      }
+    };
+
+    const setSetListAndPlayAuto = (
+      tracks: readonly TrackForPlayback[]
+    ): void => {
+      const trackIndex = shuffle.value
+        ? Math.floor(Math.random() * tracks.length)
+        : 0;
+      // NOTE: `setSetListAndPlay`に渡す`track`（第2引数）は`null`と`undefined`で挙動が異なる
+      const track = tracks[trackIndex] || null;
+      setSetListAndPlay(tracks, track);
+    };
+
+    const playFromDefaultSetList = (): void => {
+      if (defaultSetList.value && defaultSetList.value.length > 0) {
+        setSetListAndPlayAuto(defaultSetList.value);
+      }
+    };
 
     trackProvider.addEventListener('trackChange', () => {
       const track = trackProvider.currentTrack$$q;
@@ -97,7 +142,7 @@ export function usePlaybackStore(): typeof refState {
       } else {
         audio.pause();
         playing.value = false;
-        position.value = undefined;
+        internalPosition.value = undefined;
       }
     });
 
@@ -114,7 +159,7 @@ export function usePlaybackStore(): typeof refState {
     });
 
     audio.addEventListener('timeupdate', () => {
-      position.value = audio.currentTime;
+      internalPosition.value = audio.currentTime;
     });
 
     audio.addEventListener('ended', () => {
@@ -136,6 +181,11 @@ export function usePlaybackStore(): typeof refState {
 
       if (!currentTrack.value) {
         playing.value = false;
+        if (trackProvider.queue$$q.length === 0) {
+          // このときTrackProviderのsetListが空とは限らない（前へが使える場合がある）が、次へが無効であることには変わりない
+          // 再生できるようにしたほうが利便性高いので再生する
+          playFromDefaultSetList();
+        }
         return;
       }
 
@@ -146,21 +196,6 @@ export function usePlaybackStore(): typeof refState {
       }
     });
 
-    const setSetListAndPlay = (
-      tracks: readonly TrackForPlayback[],
-      track?: TrackForPlayback | null
-    ): void => {
-      playing.value = false;
-      // NOTE: `setSetList$$q`に渡す`currentTrack`（第2引数）は`null`と`undefined`で挙動が異なる
-      trackProvider.setSetList$$q(tracks, tracks.length ? track : null);
-      if (tracks.length) {
-        position.value = 0;
-        playing.value = true;
-      } else {
-        position.value = undefined;
-      }
-    };
-
     state = reactive<PlaybackState>({
       playing$$q: playing,
       position$$q: position,
@@ -168,11 +203,19 @@ export function usePlaybackStore(): typeof refState {
         return currentTrack.value?.duration;
       }),
       positionRate$$q: computed((): number | undefined => {
-        return currentTrack.value && position.value != null
-          ? position.value / currentTrack.value.duration
+        return currentTrack.value && internalPosition.value != null
+          ? internalPosition.value / currentTrack.value.duration
           : undefined;
       }),
-      seeking$$q: seeking,
+      defaultSetListAvailable$$q: computed((): boolean => {
+        return defaultSetList.value != null && defaultSetList.value.length > 0;
+      }),
+      setDefaultSetList$$q(tracks?: readonly TrackForPlayback[]) {
+        defaultSetList.value = tracks && [...tracks];
+      },
+      playFromDefaultSetList$$q() {
+        playFromDefaultSetList();
+      },
       setSetListAndPlay$$q: (
         tracks: readonly TrackForPlayback[],
         track: TrackForPlayback
@@ -180,12 +223,7 @@ export function usePlaybackStore(): typeof refState {
         setSetListAndPlay(tracks, track);
       },
       setSetListAndPlayAuto$$q: (tracks: readonly TrackForPlayback[]): void => {
-        const trackIndex = shuffle.value
-          ? Math.floor(Math.random() * tracks.length)
-          : 0;
-        // NOTE: `setSetListAndPlay`に渡す`track`（第2引数）は`null`と`undefined`で挙動が異なる
-        const track = tracks[trackIndex] || null;
-        setSetListAndPlay(tracks, track);
+        setSetListAndPlayAuto(tracks);
       },
       repeat$$q: repeat,
       shuffle$$q: shuffle,

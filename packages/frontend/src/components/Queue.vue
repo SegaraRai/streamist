@@ -122,85 +122,70 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
-    <div class="queue-header">
-      <v-sheet tile class="queue-header-sheet">
-        <div class="px-2 py-1 title">
-          <v-icon>mdi-playlist-play</v-icon>
-          <span class="pl-2">{{ t('queue.PlayQueue') }}</span>
-        </div>
+  <v-list flat dense :class="repeatOne$$q ? 'opacity-50' : ''">
+    <template v-for="(item, index) in items$$q" :key="index">
+      <template v-if="index !== 0">
         <v-divider />
-      </v-sheet>
-    </div>
-    <v-list flat dense :class="repeatOne$$q ? 'opacity-50' : ''">
-      <v-list-item-group>
-        <template v-for="(item, index) in items$$q" :key="index">
-          <template v-if="index !== 0">
-            <v-divider />
-          </template>
-          <v-list-item class="hover-container">
-            <div class="list-column-icon">
-              <div class="icon-container">
-                <v-btn flat icon text @click.stop="play$$q(index)">
-                  <!-- div class="track-index numeric hover-hidden">{{ index + 1 }}</div -->
-                  <nullable-image
-                    class="hover-hidden"
-                    :image="item.image$$q"
-                    :width="imageSize$$q"
-                    :height="imageSize$$q"
-                    :aspect-ratio="1"
-                  />
-                  <v-icon class="play-icon hover-display">
-                    mdi-play-circle-outline
-                  </v-icon>
-                </v-btn>
-              </div>
-            </div>
-            <v-list-item-content
-              two-line
-              class="list-column-content flex flex-col"
-            >
-              <v-list-item-title
-                class="track-title whitespace-nowrap overflow-hidden"
-                @mouseenter="startMarquee$$q"
-                @mouseleave="finishMarquee$$q"
-              >
-                <v-tooltip bottom>
-                  <template #activator="{ on }">
-                    <span class="marquee-target" v-on="on">
-                      <router-link :to="`/albums/${item.album$$q.id}`">
-                        {{ item.track$$q.title }}
-                      </router-link>
-                    </span>
-                  </template>
-                  <span>{{ item.track$$q.title }}</span>
-                </v-tooltip>
-              </v-list-item-title>
-              <v-list-item-subtitle
-                class="track-artist whitespace-nowrap overflow-hidden"
-                @mouseenter="startMarquee$$q"
-                @mouseleave="finishMarquee$$q"
-              >
-                <v-tooltip bottom>
-                  <template #activator="{ on }">
-                    <span class="marquee-target" v-on="on">
-                      <router-link :to="`/artists/${item.artist$$q.id}`">
-                        {{ item.artist$$q.name }}
-                      </router-link>
-                    </span>
-                  </template>
-                  <span>{{ item.artist$$q.name }}</span>
-                </v-tooltip>
-              </v-list-item-subtitle>
-            </v-list-item-content>
-            <div class="list-column-duration numeric body-2 pl-4">
-              {{ item.formattedDuration$$q }}
-            </div>
-          </v-list-item>
-        </template>
-      </v-list-item-group>
-    </v-list>
-  </div>
+      </template>
+      <v-list-item class="hover-container">
+        <div class="list-column-icon">
+          <div class="icon-container">
+            <v-btn flat icon text @click.stop="play$$q(index)">
+              <!-- div class="track-index numeric hover-hidden">{{ index + 1 }}</div -->
+              <nullable-image
+                class="hover-hidden"
+                icon-size="24px"
+                :image="item.image$$q"
+                :width="imageSize$$q"
+                :height="imageSize$$q"
+                :aspect-ratio="1"
+              />
+              <v-icon class="play-icon hover-display">
+                mdi-play-circle-outline
+              </v-icon>
+            </v-btn>
+          </div>
+        </div>
+        <v-list-item-header two-line class="list-column-content flex flex-col">
+          <v-list-item-title
+            class="track-title whitespace-nowrap overflow-hidden"
+            @mouseenter="startMarquee$$q"
+            @mouseleave="finishMarquee$$q"
+          >
+            <v-tooltip bottom>
+              <template #activator="{ on }">
+                <span class="marquee-target" v-on="on">
+                  <router-link :to="`/albums/${item.album$$q.id}`">
+                    {{ item.track$$q.title }}
+                  </router-link>
+                </span>
+              </template>
+              <span>{{ item.track$$q.title }}</span>
+            </v-tooltip>
+          </v-list-item-title>
+          <v-list-item-subtitle
+            class="track-artist whitespace-nowrap overflow-hidden"
+            @mouseenter="startMarquee$$q"
+            @mouseleave="finishMarquee$$q"
+          >
+            <v-tooltip bottom>
+              <template #activator="{ on }">
+                <span class="marquee-target" v-on="on">
+                  <router-link :to="`/artists/${item.artist$$q.id}`">
+                    {{ item.artist$$q.name }}
+                  </router-link>
+                </span>
+              </template>
+              <span>{{ item.artist$$q.name }}</span>
+            </v-tooltip>
+          </v-list-item-subtitle>
+        </v-list-item-header>
+        <div class="list-column-duration numeric body-2 pl-4">
+          {{ item.formattedDuration$$q }}
+        </div>
+      </v-list-item>
+    </template>
+  </v-list>
 </template>
 
 <style scoped>

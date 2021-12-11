@@ -46,11 +46,12 @@ async function upload(
     });
   } else {
     // multipart upload
-    const etags: string[] = [];
+    const eTagPromises: Promise<string>[] = [];
     const queue = new PQueue({ concurrency: 4 });
     let offset = 0;
     for (const part of uploadURL.parts) {
-      const etag = await queue.add(async (): Promise<string> => {
+      const currentOffset = offset;
+      const eTagPromise = queue.add(async (): Promise<string> => {
         const response = await fetch(part.url, {
           method: 'PUT',
           headers: {
@@ -59,14 +60,14 @@ async function upload(
             'Content-Length': `${part.size}`,
             'Content-Type': SOURCE_FILE_CONTENT_TYPE,
           },
-          body: file.slice(offset, offset + part.size),
+          body: file.slice(currentOffset, currentOffset + part.size),
         });
         return response.headers.get('ETag')!;
       });
       offset += part.size;
-      etags.push(etag);
+      eTagPromises.push(eTagPromise);
     }
-    return etags;
+    return Promise.all(eTagPromises);
   }
 }
 
@@ -114,126 +115,136 @@ watchEffect(() => {
     uploadFile(file);
   }
 });
+
+interface NavItemLink {
+  type: 'link';
+  path: string;
+  icon: string;
+  text: string;
+}
+
+interface NavItemDivider {
+  type: 'divider';
+}
+
+type NavItem = NavItemLink | NavItemDivider;
+
+const navItems = computed<readonly NavItem[]>(() => [
+  {
+    type: 'link',
+    icon: 'mdi-home',
+    path: '/',
+    text: t('sidebar.Home'),
+  },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'link',
+    icon: 'mdi-album',
+    path: '/albums',
+    text: t('sidebar.Albums'),
+  },
+  {
+    type: 'link',
+    icon: 'mdi-account-music',
+    path: '/artists',
+    text: t('sidebar.Artists'),
+  },
+  {
+    type: 'link',
+    icon: 'mdi-music',
+    path: '/tracks',
+    text: t('sidebar.Tracks'),
+  },
+  {
+    type: 'link',
+    icon: 'mdi-playlist-music',
+    path: '/playlists',
+    text: t('sidebar.Playlists'),
+  },
+  {
+    type: 'link',
+    icon: 'mdi-pound',
+    path: '/tags',
+    text: t('sidebar.Tags'),
+  },
+  {
+    type: 'divider',
+  },
+  {
+    type: 'link',
+    icon: 'mdi-playlist-play',
+    path: '/queue',
+    text: t('sidebar.Queue'),
+  },
+  {
+    type: 'link',
+    icon: 'mdi-cloud-download',
+    path: '/downloads',
+    text: t('sidebar.Downloads'),
+  },
+  {
+    type: 'link',
+    icon: 'mdi-cloud-upload',
+    path: '/uploads',
+    text: t('sidebar.Uploads'),
+  },
+]);
+
+const railedNavigation = computed(() => display.xs.value);
+
+const rightSidebar = ref(false);
 </script>
 
 <template>
   <v-app>
-    <v-navigation-drawer app permanent clipped mini-variant>
-      <v-list dense>
-        <v-list-item link to="/home">
-          <v-list-item-action>
-            <v-icon>mdi-home</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Home') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-divider></v-divider>
-        <v-list-item link to="/albums">
-          <v-list-item-action>
-            <v-icon>mdi-album</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Albums') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link to="/artists">
-          <v-list-item-action>
-            <v-icon>mdi-account-music</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Artists') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link to="/tracks">
-          <v-list-item-action>
-            <v-icon>mdi-music</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Tracks') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link to="/playlists">
-          <v-list-item-action>
-            <v-icon>mdi-playlist-music</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Playlists') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link to="/tags">
-          <v-list-item-action>
-            <v-icon>mdi-pound</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Tags') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-divider></v-divider>
-        <v-list-item link to="/queue">
-          <v-list-item-action>
-            <v-icon>mdi-playlist-play</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Queue') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link to="/downloads">
-          <v-list-item-action>
-            <v-icon>mdi-cloud-download</v-icon>
-            <v-progress-linear
-              rounded
-              class="download-progress"
-              :value="20"
-            ></v-progress-linear>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Downloads') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link to="/uploads">
-          <v-list-item-action>
-            <v-icon>mdi-cloud-upload</v-icon>
-            <v-progress-linear
-              rounded
-              class="upload-progress"
-              :value="30"
-            ></v-progress-linear>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Uploads') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-divider></v-divider>
-        <v-list-item link to="/settings">
-          <v-list-item-action>
-            <v-icon>mdi-settings</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>{{ t('sidebar.Settings') }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
+    <v-navigation-drawer permanent :rail="railedNavigation" rail-width="56">
+      <v-list dense class="overflow-x-hidden">
+        <template v-for="(item, index) in navItems" :key="index">
+          <template v-if="item.type === 'link'">
+            <v-list-item link :to="item.path">
+              <v-list-item-avatar icon class="flex items-center justify-center">
+                <v-icon>{{ item.icon }}</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-header v-show="!railedNavigation" class="px-4">
+                {{ item.text }}
+              </v-list-item-header>
+            </v-list-item>
+          </template>
+          <template v-else-if="item.type === 'divider'">
+            <v-divider />
+          </template>
+        </template>
       </v-list>
       <div class="h-24" />
     </v-navigation-drawer>
 
-    <template v-if="display.mdAndUp">
-      <v-navigation-drawer
-        app
-        permanent
-        clipped
-        position="right"
-        :theme="theme.rightSidebarTheme"
-        :hidden="!display.mdAndUp"
-      >
-        <div class="flex flex-col h-full">
-          <div class="flex-1 overflow-y-auto overflow-x-hidden">
-            <Queue />
+    <v-navigation-drawer
+      :model-value="rightSidebar"
+      temporary
+      position="right"
+      :theme="theme.rightSidebarTheme"
+      :width="400"
+      hide-overlay
+    >
+      <div class="flex flex-col h-full">
+        <v-sheet tile class="queue-header-sheet">
+          <div class="title flex items-center py-1">
+            <v-icon class="mx-4">mdi-playlist-play</v-icon>
+            <span class="flex-1">{{ t('queue.PlayQueue') }}</span>
+            <v-btn flat icon @click="rightSidebar = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
           </div>
-          <div class="h-24 flex-none" />
+          <v-divider />
+        </v-sheet>
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
+          <Queue />
         </div>
-      </v-navigation-drawer>
-    </template>
+        <div class="h-24" />
+      </div>
+    </v-navigation-drawer>
 
     <v-app-bar
       app
@@ -243,27 +254,27 @@ watchEffect(() => {
       clipped-right
       :theme="theme.headerTheme"
     >
-      <v-app-bar-nav-icon></v-app-bar-nav-icon>
       <v-toolbar-title class="ml-0 pl-4 pr-12 hidden-xs-only">
-        <span class="app-title">
-          streamist<span class="subtitle-2">.app</span>
+        <span class="leading-tight">
+          <span class="text-xl">streamist</span>
+          <span class="text-sm">.app</span>
         </span>
       </v-toolbar-title>
       <v-text-field
-        dense
-        flat
-        solo-inverted
-        hide-details
+        density="compact"
         prepend-inner-icon="mdi-magnify"
+        hide-details
         :label="t('header.Search')"
-        class="textfield"
       />
-      <v-spacer></v-spacer>
+      <v-spacer />
       <v-btn icon @click="syncDB">
         <v-icon>mdi-sync</v-icon>
       </v-btn>
       <v-btn icon @click="uploadDialog = true">
         <v-icon>mdi-cloud-upload</v-icon>
+      </v-btn>
+      <v-btn icon @click="rightSidebar = true">
+        <v-icon>mdi-playlist-play</v-icon>
       </v-btn>
     </v-app-bar>
 
@@ -288,39 +299,37 @@ watchEffect(() => {
               <v-list-subheader class="uppercase">In progress</v-list-subheader>
               <v-list-item-group color="primary">
                 <v-list-item>
-                  <v-list-item-content>
+                  <v-list-item-header>
                     <v-list-item-title>example1.mp3</v-list-item-title>
-                  </v-list-item-content>
+                  </v-list-item-header>
                 </v-list-item>
                 <v-list-item>
-                  <v-list-item-content>
+                  <v-list-item-header>
                     <v-list-item-title>example2.mp3</v-list-item-title>
-                  </v-list-item-content>
+                  </v-list-item-header>
                 </v-list-item>
                 <v-list-item>
-                  <v-list-item-content>
+                  <v-list-item-header>
                     <v-list-item-title>example3.wav</v-list-item-title>
                     <v-list-item-subtitle>example3.cue</v-list-item-subtitle>
-                  </v-list-item-content>
+                  </v-list-item-header>
                 </v-list-item>
               </v-list-item-group>
             </v-list>
           </div>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" text @click="uploadDialog = false"
-            >Close</v-btn
-          >
+          <v-btn color="primary" text @click="uploadDialog = false">
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <div
-      class="playback-sheet position-fixed bottom-0 z-200 w-full ma-0 pa-0 h-24"
-    >
-      <v-sheet class="m-0 p-0 w-full h-full">
+    <div class="playback-sheet fixed bottom-0 z-200 w-full m-0 p-0 h-24">
+      <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
         <v-divider />
-        <div class="pa-1">
+        <div class="px-1 flex-1 flex items-center">
           <playback-control />
         </div>
       </v-sheet>

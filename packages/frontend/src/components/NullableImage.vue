@@ -27,17 +27,22 @@ export default defineComponent({
       type: [Number, String],
       default: undefined,
     },
+    iconSize: {
+      type: [Number, String],
+      default: '48px',
+    },
   },
   setup(_props: unknown) {
     const props = _props as Props;
 
-    const srcObject = asyncComputed<SrcObject | null | undefined>(
+    const srcObject = asyncComputed<SrcObject | null | undefined | false>(
       async () =>
         props.image &&
         (await createSrc(
           props.image.files,
           Math.max(props.width, props.height)
-        ))
+        )),
+      false
     );
 
     return {
@@ -49,7 +54,15 @@ export default defineComponent({
 
 <template>
   <div>
-    <template v-if="srcObject$$q">
+    <template v-if="srcObject$$q === false">
+      <div
+        class="flex items-center justify-center"
+        :style="{ width: `${width}px`, height: `${height}px` }"
+      >
+        <v-progress-circular indeterminate />
+      </div>
+    </template>
+    <template v-else-if="srcObject$$q">
       <v-img
         :width="`${width}px`"
         :height="`${height}px`"
@@ -57,10 +70,13 @@ export default defineComponent({
         :srcset="srcObject$$q.srcSet$$q"
         :sizes="`${width}px`"
         :aspect-ratio="aspectRatio"
-      ></v-img>
+      />
     </template>
     <template v-else>
-      <no-image :style="{ width: `${width}px`, height: `${height}px` }" />
+      <no-image
+        :style="{ width: `${width}px`, height: `${height}px` }"
+        :icon-size="iconSize"
+      />
     </template>
   </div>
 </template>

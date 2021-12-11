@@ -67,17 +67,18 @@ export default defineComponent({
               <nullable-image
                 v-ripple
                 class="align-end image white--text"
+                icon-size="64px"
                 :image="item.image$$q"
                 :width="imageSize$$q"
                 :height="imageSize$$q"
                 aspect-ratio="1"
-              ></nullable-image>
+              />
             </router-link>
             <v-card-title class="px-0 pt-1">
               <router-link :to="`/artists/${item.artist$$q.id}`">
-                <span class="subtitle-1 font-weight-medium">{{
-                  item.artist$$q.name
-                }}</span>
+                <span class="subtitle-1 font-weight-medium">
+                  {{ item.artist$$q.name }}
+                </span>
               </router-link>
             </v-card-title>
           </v-card>

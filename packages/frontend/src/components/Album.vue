@@ -89,6 +89,7 @@ export default defineComponent({
           >
             <nullable-image
               class="align-end"
+              icon-size="64px"
               :image="image$$q"
               :width="imageSize$$q"
               :height="imageSize$$q"
@@ -96,7 +97,7 @@ export default defineComponent({
             />
           </v-skeleton-loader>
         </div>
-        <div class="flex-grow-1 pl-8 d-flex flex-column">
+        <div class="flex-grow flex-shrink pl-8 flex flex-col">
           <div class="flex-grow-0 album-title display-1">
             <v-skeleton-loader
               :loading="loading"
@@ -106,19 +107,17 @@ export default defineComponent({
             >
               <div>
                 <template v-if="!loading && album">
-                  <template v-if="!linkExcludes.includes(album.id)">
-                    <router-link :to="`/albums/${album.id}`">{{
-                      album.title
-                    }}</router-link>
-                  </template>
-                  <template v-else>
-                    <span>{{ album.title }}</span>
-                  </template>
+                  <conditional-link
+                    :to="`/albums/${album.id}`"
+                    :disabled="linkExcludes.includes(album.id)"
+                  >
+                    {{ album.title }}
+                  </conditional-link>
                 </template>
               </div>
             </v-skeleton-loader>
           </div>
-          <div class="flex-grow-0 album-artist-name title">
+          <div class="flex-none album-artist-name title">
             <v-skeleton-loader
               :loading="loading"
               type="heading"
@@ -127,41 +126,42 @@ export default defineComponent({
             >
               <div>
                 <template v-if="!loading && album">
-                  <template v-if="!linkExcludes.includes(album.artist.id)">
-                    <router-link :to="`/artists/${album.artist.id}`">
-                      {{ album.artist.name }}
-                    </router-link>
-                  </template>
-                  <template v-else>
-                    <span>{{ album.artist.name }}</span>
-                  </template>
+                  <conditional-link
+                    :to="`/artists/${album.artist.id}`"
+                    :disabled="linkExcludes.includes(album.artist.id)"
+                  >
+                    {{ album.artist.name }}
+                  </conditional-link>
                 </template>
               </div>
             </v-skeleton-loader>
           </div>
-          <div class="flex-grow-1"></div>
-          <div class="flex-grow-0 album-actions d-flex flex-row">
+          <div class="flex-grow flex-shrink" />
+          <div class="flex-none album-actions flex flex-row gap-x-8">
             <div>
               <v-btn color="primary" @click="play$$q(false)">
                 <v-icon left>mdi-play</v-icon>
-                <span>{{ t('album.Play') }}</span>
+                <span>
+                  {{ t('album.Play') }}
+                </span>
               </v-btn>
             </div>
-            <div class="mx-4"></div>
             <div>
               <v-btn color="accent" outlined @click="play$$q(true)">
                 <v-icon left>mdi-shuffle</v-icon>
-                <span>{{ t('album.Shuffle') }}</span>
+                <span>
+                  {{ t('album.Shuffle') }}
+                </span>
               </v-btn>
             </div>
           </div>
-          <div class="flex-grow-1"></div>
-          <div class="flex-grow-0 album-misc subtitle-2">
+          <div class="h-4" />
+          <div class="flex-none album-misc subtitle-2">
             <v-skeleton-loader type="text" width="18em" tile>
               <div>
-                <span>{{
-                  tracks$$q && t('album.n_tracks', tracks$$q.length)
-                }}</span>
+                <span>
+                  {{ tracks$$q && t('album.n_tracks', tracks$$q.length) }}
+                </span>
                 <span v-show="duration$$q">, {{ duration$$q }}</span>
                 <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
               </div>
@@ -170,21 +170,15 @@ export default defineComponent({
         </div>
       </div>
     </div>
-    <v-lazy
-      v-model="a"
-      :options="{ threshold: 0, rootMargin: '100px' }"
-      :min-height="trackListHeight$$q"
-    >
-      <track-list
-        :show-album="false"
-        :show-artist="false"
-        :tracks="tracks$$q"
-        :link-excludes="linkExcludes"
-        show-disc-number
-        index-content="trackNumber"
-        :set-list="setList"
-      />
-    </v-lazy>
+    <track-list
+      :show-album="false"
+      :show-artist="false"
+      :tracks="tracks$$q"
+      :link-excludes="linkExcludes"
+      show-disc-number
+      index-content="trackNumber"
+      :set-list="setList"
+    />
   </div>
 </template>
 

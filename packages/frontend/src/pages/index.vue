@@ -13,5 +13,9 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div>foo</div>
+  <v-container fluid class="pt-3 px-8">
+    <header class="mb-6">
+      <div class="display-1 font-weight-medium">{{ t('tracks.Tracks') }}</div>
+    </header>
+  </v-container>
 </template>

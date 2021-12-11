@@ -40,7 +40,7 @@ export default defineComponent({
     },
     showDiscNumber: Boolean,
     indexContent: {
-      type: String,
+      type: String as PropType<IndexContent>,
       default: 'trackNumber',
     },
     linkExcludes: {
@@ -125,7 +125,7 @@ export default defineComponent({
 
     return {
       t,
-      imageSize$$q: 32,
+      imageSize$$q: 36,
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       s: selected, // v-modelに対してはマングリングできない
@@ -155,21 +155,21 @@ export default defineComponent({
           indexContent === 'index' || indexContent === 'trackNumber' ? '#' : ''
         }}
       </div>
-      <v-list-item-content
-        class="list-header-column list-column-content flex flex-row flex-nowrap items-center mr-6 py-2"
+      <v-list-item-header
+        class="list-header-column list-column-content flex flex-row flex-nowrap items-center py-2"
       >
-        <v-list-item-title class="track-title subtitle-2">{{
-          t('trackList.Title')
-        }}</v-list-item-title>
-      </v-list-item-content>
+        <v-list-item-title class="track-title subtitle-2">
+          {{ t('trackList.Title') }}
+        </v-list-item-title>
+      </v-list-item-header>
       <template v-if="showAlbum">
-        <v-list-item-content
-          class="list-header-column list-column-content flex flex-row flex-nowrap items-center mr-6 py-2"
+        <v-list-item-header
+          class="list-header-column list-column-content flex flex-row flex-nowrap items-center ml-6 py-2"
         >
-          <v-list-item-title class="track-album-title subtitle-2">{{
-            t('trackList.Album')
-          }}</v-list-item-title>
-        </v-list-item-content>
+          <v-list-item-title class="track-album-title subtitle-2">
+            {{ t('trackList.Album') }}
+          </v-list-item-title>
+        </v-list-item-header>
       </template>
       <div class="list-header-column list-column-duration py-1">
         <v-icon>mdi-clock-outline</v-icon>
@@ -186,9 +186,9 @@ export default defineComponent({
           <v-list-subheader class="list-disc-number-header">
             <div class="list-column-disc-number flex align-center">
               <v-icon>mdi-disc</v-icon>
-              <span class="disc-number-text numeric">{{
-                item.discNumber$$q
-              }}</span>
+              <span class="disc-number-text numeric">
+                {{ item.discNumber$$q }}
+              </span>
             </div>
           </v-list-subheader>
           <v-divider />
@@ -210,14 +210,16 @@ export default defineComponent({
                 :disabled="!setList"
                 @click.stop="play$$q(item.track$$q)"
               >
-                <v-icon class="play-icon hover-display">{{
-                  playing$$q
-                    ? 'mdi-pause-circle-outline'
-                    : 'mdi-play-circle-outline'
-                }}</v-icon>
-                <v-icon class="play-icon hover-hidden">{{
-                  playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle'
-                }}</v-icon>
+                <v-icon class="play-icon hover-display">
+                  {{
+                    playing$$q
+                      ? 'mdi-pause-circle-outline'
+                      : 'mdi-play-circle-outline'
+                  }}
+                </v-icon>
+                <v-icon class="play-icon hover-hidden">
+                  {{ playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle' }}
+                </v-icon>
               </v-btn>
             </div>
             <div
@@ -245,6 +247,7 @@ export default defineComponent({
                 <template v-if="indexContent === 'albumArtwork'">
                   <nullable-image
                     class="track-index hover-hidden"
+                    icon-size="24px"
                     :image="item.image$$q"
                     :width="imageSize$$q"
                     :height="imageSize$$q"
@@ -257,12 +260,12 @@ export default defineComponent({
               </v-btn>
             </div>
           </div>
-          <v-list-item-content
-            class="list-column-content flex flex-col flex-nowrap justify-center mr-6"
+          <v-list-item-header
+            class="list-column-content flex flex-col flex-nowrap justify-center"
           >
-            <v-list-item-title class="track-title">{{
-              item.track$$q.title
-            }}</v-list-item-title>
+            <v-list-item-title class="track-title">
+              {{ item.track$$q.title }}
+            </v-list-item-title>
             <template
               v-if="showArtist || item.artist$$q.id !== item.albumArtist$$q.id"
             >
@@ -275,10 +278,10 @@ export default defineComponent({
                 </conditional-link>
               </v-list-item-subtitle>
             </template>
-          </v-list-item-content>
+          </v-list-item-header>
           <template v-if="showAlbum">
-            <v-list-item-content
-              class="list-column-content flex flex-col flex-nowrap justify-center mr-6"
+            <v-list-item-header
+              class="list-column-content flex flex-col flex-nowrap justify-center ml-6"
             >
               <v-list-item-title class="track-album-title">
                 <conditional-link
@@ -296,7 +299,7 @@ export default defineComponent({
                   {{ item.albumArtist$$q.name }}
                 </conditional-link>
               </v-list-item-subtitle>
-            </v-list-item-content>
+            </v-list-item-header>
           </template>
           <div class="list-column-duration numeric body-2">
             {{ item.formattedDuration$$q }}
@@ -375,7 +378,7 @@ export default defineComponent({
 }
 
 .list-column-duration {
-  width: 120px;
+  width: 72px;
   text-align: right;
 }
 

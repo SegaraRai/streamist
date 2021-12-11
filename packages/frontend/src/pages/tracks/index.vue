@@ -30,7 +30,7 @@ export default defineComponent({
       :tracks="tracks$$q"
       :loading="!tracks$$q"
       :set-list="tracks$$q"
-      index-content="albumArt"
+      index-content="albumArtwork"
       show-album
       show-artist
     />
