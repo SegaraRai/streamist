@@ -12,6 +12,7 @@ importers:
       cross-env: ^7.0.3
       eslint: ^8.4.1
       eslint-config-prettier: ^8.3.0
+      eslint-define-config: ^1.2.0
       eslint-plugin-cypress: ^2.12.1
       husky: ^7.0.4
       jest: ^27.4.4
@@ -30,6 +31,7 @@ importers:
       cross-env: 7.0.3
       eslint: 8.4.1
       eslint-config-prettier: 8.3.0_eslint@8.4.1
+      eslint-define-config: 1.2.0
       eslint-plugin-cypress: 2.12.1_eslint@8.4.1
       husky: 7.0.4
       jest: 27.4.4
@@ -96,6 +98,7 @@ importers:
       vue-router: ^4.0.12
       vue-tsc: ^0.29.8
       vuetify: ^3.0.0-alpha.12
+      windicss: ^3.2.1
     dependencies:
       '@aspida/axios': 1.7.1
       '@mdi/font': 6.5.95
@@ -152,6 +155,7 @@ importers:
       vite-plugin-windicss: 1.5.4_vite@2.7.1
       vite-ssg: 0.16.2_5343fad22e19d2462bb6168c50a9fb36
       vue-tsc: 0.29.8_typescript@4.5.3
+      windicss: 3.2.1
 
   packages/server:
     specifiers:
@@ -4100,7 +4104,7 @@ packages:
   /axios/0.24.0:
     resolution: {integrity: sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==}
     dependencies:
-      follow-redirects: 1.14.5_debug@4.3.3
+      follow-redirects: 1.14.5
     transitivePeerDependencies:
       - debug
     dev: false
@@ -5765,6 +5769,11 @@ packages:
       eslint-plugin-promise: 5.2.0_eslint@8.4.1
     dev: true
 
+  /eslint-define-config/1.2.0:
+    resolution: {integrity: sha512-EQ8d9F9LmJVRfkZW9WgSa5VBAVZialrLZKy0k1062zlhM8KFUyFoAC8xRI+mdp5m81FNMPnpKZfyq0AfJDyNTg==}
+    engines: {node: '>= 16.9.0', npm: '>= 7.0.0', pnpm: '>= 6.17.0'}
+    dev: true
+
   /eslint-formatter-pretty/4.1.0:
     resolution: {integrity: sha512-IsUTtGxF1hrH6lMWiSl1WbGaiP01eT6kzywdY1U+zLc0MP+nwEnUiS9UI8IaOTUhTeQJLlCEWIbXINBH4YJbBQ==}
     engines: {node: '>=10'}
@@ -6664,6 +6673,16 @@ packages:
   /flatted/3.2.4:
     resolution: {integrity: sha512-8/sOawo8tJ4QOBX8YlQBMxL8+RLZfxMQOif9o0KUKTNTjMYElWPE0r/m5VNFxTRd0NSw8qSy8dajrwX4RYI1Hw==}
     dev: true
+
+  /follow-redirects/1.14.5:
+    resolution: {integrity: sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==}
+    engines: {node: '>=4.0'}
+    peerDependencies:
+      debug: '*'
+    peerDependenciesMeta:
+      debug:
+        optional: true
+    dev: false
 
   /follow-redirects/1.14.5_debug@4.3.3:
     resolution: {integrity: sha512-wtphSXy7d4/OR+MvIFbCVBDzZ5520qV8XfPklSN5QtxuMUJZ+b0Wnst1e1lCDocfzuCkHqj8k0FpZqO+UIaKNA==}

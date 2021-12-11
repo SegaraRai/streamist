@@ -19,7 +19,7 @@ import {
 } from '$shared-server/objectStorages.js';
 import { CueSheet, parseCueSheet } from '$shared/cueParser.js';
 import { decodeText } from '$shared/decodeText.js';
-import { calcFileHash } from 'src/fileHash.js';
+import { calcFileHash } from '../fileHash.js';
 import logger from '../logger.js';
 import {
   cleanAudio,

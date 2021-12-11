@@ -83,7 +83,7 @@ export interface FFprobeStreamBase {
   tags?: FFprobeTags;
 
   // with -count_frames enabled
-  //nb_read_frames: string;
+  // nb_read_frames: string;
 }
 
 export interface FFprobeStreamAudio extends FFprobeStreamBase {

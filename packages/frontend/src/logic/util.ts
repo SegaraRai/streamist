@@ -1,7 +1,7 @@
-import { /*type*/ TrackDTO } from '@streamist/shared/lib/dto/db.dto';
+import type { Track } from '$prisma/client';
 
 export function calcTrackListHeight(
-  tracks: readonly Readonly<TrackDTO>[],
+  tracks: readonly Readonly<Track>[],
   showDiscNumber: boolean
 ): number {
   const useDiscNumber =
@@ -15,7 +15,7 @@ export function calcTrackListHeight(
 }
 
 export function calcTrackTableHeight(
-  tracks: readonly Readonly<TrackDTO>[],
+  tracks: readonly Readonly<Track>[],
   showDiscNumber: boolean
 ): number {
   const useDiscNumber =

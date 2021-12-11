@@ -1,4 +1,7 @@
-module.exports = {
+// @ts-check
+const { defineConfig } = require('eslint-define-config');
+
+module.exports = defineConfig({
   root: true,
   env: {
     browser: true,
@@ -7,6 +10,7 @@ module.exports = {
   extends: ['@nuxtjs/eslint-config-typescript', 'prettier'],
   rules: {
     'vue/multi-word-component-names': 'off',
+    'vue/no-multiple-template-root': 'off',
     'vue/no-v-for-template-key': 'off',
     'import/named': 'off',
     'no-redeclare': 'off',
@@ -38,8 +42,7 @@ module.exports = {
           caseInsensitive: false,
         },
         groups: [
-          'builtin',
-          'external',
+          ['builtin', 'external'],
           'unknown',
           'internal',
           'parent',
@@ -64,4 +67,4 @@ module.exports = {
       },
     ],
   },
-};
+});
