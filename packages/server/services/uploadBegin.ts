@@ -18,12 +18,16 @@ import {
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
 } from '$shared/sourceFileConfig.js';
 import {
+  SourceFileType,
+  SourceState,
+  toSourceFileAttachToType,
+} from '$shared/types/db';
+import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE,
   MAX_SOURCE_IMAGE_FILE_SIZE,
 } from '$shared/uploadConfig.js';
 import { client } from '$/db/lib/client.js';
-import { SourceFileType, SourceState } from '$/db/lib/types.js';
 import type {
   CreateSourceRequestAudio,
   CreateSourceRequestImage,
@@ -220,7 +224,9 @@ export async function createAudioSource(
             fileSize: Number(request.audioFile.fileSize),
             sha256: null,
             cueSheetFileId,
-            albumId: null,
+            attachToType: null,
+            attachToId: null,
+            entityExists: false,
             uploaded: false,
             uploadId,
             user: { connect: { id: userId } },
@@ -235,7 +241,9 @@ export async function createAudioSource(
                   fileSize: Number(request.cueSheetFile.fileSize),
                   sha256: null,
                   cueSheetFileId: null,
-                  albumId: null,
+                  attachToType: null,
+                  attachToId: null,
+                  entityExists: false,
                   uploaded: false,
                   uploadId: null,
                   user: { connect: { id: userId } },
@@ -294,15 +302,22 @@ export async function createImageSource(
     );
   }
 
-  if (
-    (await client.album.count({
-      where: {
-        id: request.albumId,
-        userId,
-      },
-    })) === 0
-  ) {
-    throw new HTTPError(404, `album ${request.albumId} not found`);
+  switch (request.attachToType) {
+    case 'album':
+      if (
+        (await client.album.count({
+          where: {
+            id: request.attachToId,
+            userId,
+          },
+        })) === 0
+      ) {
+        throw new HTTPError(404, `album ${request.attachToId} not found`);
+      }
+      break;
+
+    default:
+      throw new HTTPError(400, `invalid attachToType ${request.attachToType}`);
   }
 
   const sourceId = await generateSourceId();
@@ -331,7 +346,9 @@ export async function createImageSource(
             fileSize: Number(request.imageFile.fileSize),
             sha256: null,
             cueSheetFileId: null,
-            albumId: request.albumId,
+            attachToType: toSourceFileAttachToType(request.attachToType),
+            attachToId: String(request.attachToId),
+            entityExists: false,
             uploaded: false,
             uploadId,
             user: { connect: { id: userId } },

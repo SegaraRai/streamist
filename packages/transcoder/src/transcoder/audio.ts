@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
 import { Stats } from 'node:fs';
 import { rename, stat, unlink } from 'node:fs/promises';
-import { generateTranscodedAudioFileId } from '$shared-server/generateId.js';
+import {
+  generateSourceFileId,
+  generateTranscodedAudioFileId,
+} from '$shared-server/generateId.js';
 import {
   osDelete,
   osGetData,
@@ -16,6 +19,7 @@ import {
 } from '$shared-server/objectStorages.js';
 import { CueSheet, parseCueSheet } from '$shared/cueParser.js';
 import { decodeText } from '$shared/decodeText.js';
+import { calcFileHash } from 'src/fileHash.js';
 import logger from '../logger.js';
 import {
   cleanAudio,
@@ -441,6 +445,8 @@ export async function processAudioRequest(
 
       // TODO(ximg): S3に抽出した画像ファイルをアップロードするならここで
 
+      const sha256 = await calcFileHash(imageFilepath, 'sha256');
+
       // ジョブ追加
       extractedImageFiles.push({
         type: 'image',
@@ -448,14 +454,11 @@ export async function processAudioRequest(
         sourceId,
         options,
         extracted: true,
-        // TODO(ximg): 抽出した画像ファイルを別のsourceFileとして扱うならIDを生成してここを変更する
-        // このIDがサーバー側で参照され、トランスコード後のファイル群の親sourceFileとして扱われる
-        sourceFileId,
+        sourceFileId: await generateSourceFileId(),
         region,
         fileSize: imageFileStat.size,
         filename: '',
-        sha256: '',
-        albumId: '',
+        sha256,
         audioSourceFileId: sourceFileId,
         filePath: imageFilepath,
         streamIndex: imageStream.index,

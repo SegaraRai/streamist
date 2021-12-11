@@ -27,7 +27,8 @@
     "pretypecheck": "npm run generate",
     "typecheck": "run-p typecheck:*",
     "typecheck:client": "npm run typecheck --prefix packages/frontend",
-    "typecheck:server": "npm run typecheck --prefix packages/server"
+    "typecheck:server": "npm run typecheck --prefix packages/server",
+    "typecheck:transcoder": "npm run typecheck --prefix packages/transcoder"
   },
   "lint-staged": {
     "*.{js,ts,vue}": "eslint",

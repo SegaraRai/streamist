@@ -18,7 +18,7 @@ export async function dbArtistGetOrCreateByNameTx(
 ): Promise<Artist> {
   const newArtistId = await newArtistIdPromise;
 
-  // TODO(db)): manually set createdAt and updatedAt (for SQLite)?
+  // TODO(db): manually set createdAt and updatedAt (for SQLite)?
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
     INSERT INTO Artist (id, name, userId)

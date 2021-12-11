@@ -63,7 +63,7 @@ model Source {
 }
 
 model SourceFile {
-  id             String    @id
+  id             String      @id
   // 'audio' | 'cueSheet' | 'image'
   type           String
   region         String
@@ -73,17 +73,25 @@ model SourceFile {
   // only for audio files (optional)
   cueSheetFileId String?
   // only for image files (required)
-  albumId        String?
-  uploaded       Boolean   @default(false)
+  attachToType   String? // 'album' | 'artist' | 'playlist'
+  attachToId     String?
+  // only for extracted image files
+  sourceFile     SourceFile? @relation("SourceFileToExtractedSourceFile", fields: [sourceFileId], references: [id])
+  sourceFileId   String?
+  // whether the original file exists in S3. false for extracted image files
+  entityExists   Boolean
+  uploaded       Boolean
   // UploadId for multipart uploads
   uploadId       String?
   uploadedAt     DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @default(now()) @updatedAt
-  source         Source    @relation(fields: [sourceId], references: [id])
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @default(now()) @updatedAt
+  source         Source      @relation(fields: [sourceId], references: [id])
   sourceId       String
-  user           User      @relation(fields: [userId], references: [id])
+  user           User        @relation(fields: [userId], references: [id])
   userId         String
+
+  extractedFiles SourceFile[] @relation("SourceFileToExtractedSourceFile")
 
   @@index([userId])
   @@index([sourceId])

@@ -3,6 +3,11 @@ import { generateImageId } from '$shared-server/generateId.js';
 import { is } from '$shared/is';
 import { parseDate } from '$shared/parseDate';
 import type { Region } from '$shared/regions';
+import type {
+  SourceFileAttachToType,
+  SourceFileType,
+  SourceState,
+} from '$shared/types/db';
 import type { FFprobeTags } from '$transcoder/types/ffprobe';
 import type {
   TranscoderResponse,
@@ -11,7 +16,7 @@ import type {
 } from '$transcoder/types/transcoder.js';
 import { dbAlbumAddImageTx } from '$/db/album.js';
 import { client } from '$/db/lib/client.js';
-import type { SourceState, TransactionalPrismaClient } from '$/db/lib/types.js';
+import type { TransactionalPrismaClient } from '$/db/lib/types.js';
 import { dbTrackCreateTx } from '$/db/track.js';
 import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
 
@@ -77,11 +82,12 @@ async function registerImage(
   region: Region,
   userId: string,
   sourceId: string,
-  albumId: string,
-  imageId: string
+  imageId: string,
+  attachToType: SourceFileAttachToType,
+  attachToId: string
 ): Promise<void> {
   // register image
-  // DO NOT connect to albums here, as it will be connected in dbAlbumAddImageTx
+  // DO NOT connect to target here, as it will be connected later
   await txClient.image.create({
     data: {
       id: imageId,
@@ -111,8 +117,12 @@ async function registerImage(
     },
   });
 
-  // add image to album
-  await dbAlbumAddImageTx(txClient, userId, albumId, imageId);
+  // add image to target
+  switch (attachToType) {
+    case 'album':
+      await dbAlbumAddImageTx(txClient, userId, attachToId, imageId);
+      break;
+  }
 }
 
 async function markSourceIdAsTranscodedTx(
@@ -303,30 +313,53 @@ async function handleTranscoderResponse(
       const { source } = artifact;
       const { extracted, region, sourceId, userId } = source;
 
-      let albumId;
+      let attachToType: SourceFileAttachToType;
+      let attachToId: string | undefined;
 
       if (extracted) {
-        albumId = sourceFileIdToAlbumIdMap.get(source.audioSourceFileId);
-        if (!albumId) {
+        attachToType = 'album';
+
+        attachToId = sourceFileIdToAlbumIdMap.get(source.audioSourceFileId);
+        if (!attachToId) {
           // something went wrong with transcoding audio
           // this will not happen because the image file is not extracted when the audio transcoding fails
           continue;
         }
 
-        // TODO(ximg)?: 抽出した画像ファイルをS3に上げる場合、DBに登録するならここ
+        // register extracted images as source files
+        await txClient.sourceFile.create({
+          data: {
+            id: source.sourceFileId,
+            type: is<SourceFileType>('image'),
+            region,
+            filename: source.filename,
+            fileSize: source.fileSize,
+            sha256: source.sha256,
+            cueSheetFileId: null,
+            attachToType,
+            attachToId,
+            entityExists: false,
+            uploaded: true,
+            uploadId: null,
+            sourceId,
+            userId,
+          },
+        });
       } else {
-        albumId = source.albumId;
+        ({ attachToType, attachToId } = source);
       }
 
       const imageId = await generateImageId();
+
       await registerImage(
         txClient,
         artifact,
         region,
         userId,
         sourceId,
-        albumId,
-        imageId
+        imageId,
+        attachToType,
+        attachToId
       );
 
       await markSourceIdAsTranscodedCached(userId, sourceId);

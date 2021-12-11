@@ -1,4 +1,5 @@
 import type { Region } from '$shared/regions.js';
+import type { SourceFileAttachToType } from '$shared/types/db.js';
 import type {
   FFprobeFormat,
   FFprobeResult,
@@ -43,13 +44,16 @@ export interface TranscoderRequestFileImage {
   region: Region;
   filename: string;
   fileSize: number;
-  /** empty for extracted file */
-  albumId: string;
+  attachToType: SourceFileAttachToType;
+  attachToId: string;
   extracted: false;
 }
 
 export interface TranscoderRequestFileImageExtracted
-  extends Omit<TranscoderRequestFileImage, 'extracted'> {
+  extends Omit<
+    TranscoderRequestFileImage,
+    'extracted' | 'attachToType' | 'attachToId'
+  > {
   extracted: true;
   audioSourceFileId: string;
   filePath: string;

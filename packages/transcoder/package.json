@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "run-p dev:*",
     "dev:build": "node ./build.dev.js",
-    "dev:start": "node-dev --respawn ./index.js"
+    "dev:start": "node-dev --respawn ./index.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.44.0",

@@ -1,4 +1,5 @@
 import type { Region } from '$shared/regions';
+import type { SourceFileAttachToType } from '$shared/types/db';
 import type { UploadURL } from './upload';
 
 export interface CreateSourceRequestFileAudio {
@@ -29,7 +30,8 @@ export interface CreateSourceRequestAudio {
 export interface CreateSourceRequestImage {
   type: 'image';
   region: Region;
-  albumId: string;
+  attachToType: SourceFileAttachToType;
+  attachToId: string;
   imageFile: CreateSourceRequestFileImage;
 }
 

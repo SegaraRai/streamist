@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { is } from '$shared/is.js';
+import type { SourceState } from '$shared/types/db.js';
 import { client } from './client.js';
-import type { SourceState } from './types.js';
 
 function prng(seed: string): () => number {
   let ctr: Buffer = Buffer.from(seed);

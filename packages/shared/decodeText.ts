@@ -9,5 +9,7 @@ export function decodeText(buffer: Uint8Array): string {
   if (!encodingExists(encoding)) {
     throw new Error(`unsupported encoding: ${encoding}`);
   }
+  // TODO: remove @ts-ignore comment when new version of iconv-lite is released
+  // @ts-ignore
   return decode(buffer, encoding);
 }

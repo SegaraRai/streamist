@@ -4,7 +4,8 @@ import {
   getSourceFileOS,
 } from '$shared-server/objectStorages.js';
 import { is } from '$shared/is.js';
-import { Region } from '$shared/regions.js';
+import type { Region } from '$shared/regions.js';
+import type { SourceFileAttachToType, SourceState } from '$shared/types/db.js';
 import { TRANSCODER_API_ENDPOINT } from '$transcoder/devConfig.js';
 import {
   TranscoderRequest,
@@ -13,7 +14,6 @@ import {
 } from '$transcoder/types/transcoder.js';
 import { Source, SourceFile } from '$prisma/client';
 import { client } from '$/db/lib/client.js';
-import { SourceState } from '$/db/lib/types.js';
 import { HTTPError } from '$/utils/httpError.js';
 import {
   TRANSCODER_CALLBACK_API_ENDPOINT,
@@ -43,8 +43,11 @@ function createTranscoderRequestFiles(
           };
 
         case 'image':
-          if (!file.albumId) {
-            throw new HTTPError(500, 'image file must have albumId');
+          if (!file.attachToType || !file.attachToId) {
+            throw new HTTPError(
+              500,
+              'image file must have attachToType and attachToId'
+            );
           }
           return {
             type: 'image',
@@ -55,7 +58,8 @@ function createTranscoderRequestFiles(
             sourceId: source.id,
             userId: file.userId,
             options,
-            albumId: file.albumId,
+            attachToType: file.attachToType as SourceFileAttachToType,
+            attachToId: file.attachToId,
             extracted: false,
           };
       }
