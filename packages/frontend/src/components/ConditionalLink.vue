@@ -13,12 +13,12 @@ export default defineComponent({
 <template>
   <template v-if="disabled || to == null">
     <span>
-      <slot />
+      <slot></slot>
     </span>
   </template>
   <template v-else>
     <router-link :to="to">
-      <slot />
+      <slot></slot>
     </router-link>
   </template>
 </template>

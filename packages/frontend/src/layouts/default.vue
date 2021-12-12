@@ -230,7 +230,7 @@ const rightSidebar = ref(false);
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
           <Queue />
         </div>
-        <div class="h-24" />
+        <div class="h-24"></div>
       </div>
     </v-navigation-drawer>
 
@@ -284,14 +284,14 @@ const rightSidebar = ref(false);
           </template>
         </template>
       </v-list>
-      <div class="h-24" />
+      <div class="h-24"></div>
     </v-navigation-drawer>
 
     <v-main :class="theme.bgClass">
       <v-sheet tile :theme="theme.contentTheme" :class="theme.bgClass">
         <router-view />
       </v-sheet>
-      <div class="h-24" />
+      <div class="h-24"></div>
     </v-main>
 
     <v-dialog v-model="uploadDialog">

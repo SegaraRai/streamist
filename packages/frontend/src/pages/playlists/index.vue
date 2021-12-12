@@ -127,19 +127,19 @@ export default defineComponent({
                 label="Title"
                 required
                 :readonly="createPlaylistDialogLoading$$q"
-              ></v-text-field>
+              />
             </div>
             <div>
               <v-textarea
                 v-model="e"
                 label="Description"
                 :readonly="createPlaylistDialogLoading$$q"
-              ></v-textarea>
+              />
             </div>
           </v-card-text>
-          <v-divider></v-divider>
+          <v-divider />
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn
               text
               :disabled="createPlaylistDialogLoading$$q"

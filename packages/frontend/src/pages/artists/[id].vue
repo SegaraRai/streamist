@@ -103,7 +103,7 @@ export default defineComponent({
         </div>
       </div>
     </div>
-    <v-divider class="mt-8"></v-divider>
+    <v-divider class="mt-8" />
     <template v-if="!loading$$q && artist$$q">
       <div class="my-12"></div>
       <div class="mb-6">

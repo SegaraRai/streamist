@@ -116,12 +116,12 @@ export default defineComponent({
             ref="e"
             class="absolute top-0 w-full h-full flex items-center mx-1"
           >
-            <div class="w-full h-1 bg-gray-100 rounded-full" />
+            <div class="w-full h-1 bg-gray-100 rounded-full"></div>
           </div>
           <div
             class="absolute top-0 h-full flex items-center pc-track-played mx-1"
           >
-            <div class="w-full h-1 bg-gray-500 rounded-full" />
+            <div class="w-full h-1 bg-gray-500 rounded-full"></div>
           </div>
           <div
             v-show="valid"
@@ -130,7 +130,7 @@ export default defineComponent({
           >
             <div
               class="w-3 -ml-1.5 h-3 bg-gray-200 border-1 border-gray-300 rounded-full"
-            />
+            ></div>
           </div>
         </div>
       </div>

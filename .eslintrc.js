@@ -12,6 +12,18 @@ module.exports = defineConfig({
     'vue/multi-word-component-names': 'off',
     'vue/no-multiple-template-root': 'off',
     'vue/no-v-for-template-key': 'off',
+    'vue/html-self-closing': [
+      'error',
+      {
+        html: {
+          void: 'never',
+          normal: 'never',
+          component: 'always',
+        },
+        svg: 'always',
+        math: 'always',
+      },
+    ],
     'import/named': 'off',
     'no-redeclare': 'off',
     '@typescript-eslint/no-redeclare': ['error'],

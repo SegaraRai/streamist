@@ -136,7 +136,7 @@ export default defineComponent({
               </div>
             </v-skeleton-loader>
           </div>
-          <div class="flex-grow flex-shrink" />
+          <div class="flex-grow flex-shrink"></div>
           <div class="flex-none album-actions flex flex-row gap-x-8">
             <div>
               <v-btn color="primary" @click="play$$q(false)">
@@ -155,7 +155,7 @@ export default defineComponent({
               </v-btn>
             </div>
           </div>
-          <div class="h-4" />
+          <div class="h-4"></div>
           <div class="flex-none album-misc subtitle-2">
             <v-skeleton-loader type="text" width="18em" tile>
               <div>
