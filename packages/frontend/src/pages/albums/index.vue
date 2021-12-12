@@ -20,18 +20,11 @@ export default defineComponent({
 
     const albums = ref([] as AlbumForPlaybackWithTracks[]);
 
-    const albumsPromise = fetchAlbumsForPlaybackWithTracks();
+    fetchAlbumsForPlaybackWithTracks().then((response) => {
+      const responseSetList = response.flatMap((album) => album.tracks);
 
-    albumsPromise.then((response) => {
       albums.value = response;
-    });
-
-    onMounted(() => {
-      albumsPromise.then((response) => {
-        playbackStore.setDefaultSetList$$q.value(
-          response.flatMap((album) => album.tracks)
-        );
-      });
+      playbackStore.setDefaultSetList$$q.value(responseSetList);
     });
 
     onBeforeUnmount(() => {

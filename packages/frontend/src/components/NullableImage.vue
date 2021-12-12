@@ -53,30 +53,28 @@ export default defineComponent({
 </script>
 
 <template>
-  <div>
-    <template v-if="srcObject$$q === false">
-      <div
-        class="flex items-center justify-center"
-        :style="{ width: `${width}px`, height: `${height}px` }"
-      >
-        <v-progress-circular indeterminate />
-      </div>
-    </template>
-    <template v-else-if="srcObject$$q">
-      <v-img
-        :width="`${width}px`"
-        :height="`${height}px`"
-        :src="srcObject$$q.src$$q"
-        :srcset="srcObject$$q.srcSet$$q"
-        :sizes="`${width}px`"
-        :aspect-ratio="aspectRatio"
-      />
-    </template>
-    <template v-else>
-      <no-image
-        :style="{ width: `${width}px`, height: `${height}px` }"
-        :icon-size="iconSize"
-      />
-    </template>
-  </div>
+  <template v-if="srcObject$$q === false">
+    <div
+      class="flex align-center justify-center"
+      :style="{ width: `${width}px`, height: `${height}px` }"
+    >
+      <v-progress-circular indeterminate />
+    </div>
+  </template>
+  <template v-else-if="srcObject$$q">
+    <v-img
+      :width="`${width}px`"
+      :height="`${height}px`"
+      :src="srcObject$$q.src$$q"
+      :srcset="srcObject$$q.srcSet$$q"
+      :sizes="`${width}px`"
+      :aspect-ratio="aspectRatio"
+    />
+  </template>
+  <template v-else>
+    <no-image
+      :style="{ width: `${width}px`, height: `${height}px` }"
+      :icon-size="iconSize"
+    />
+  </template>
 </template>

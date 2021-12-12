@@ -23,7 +23,9 @@
     "pm2:logs": "pm2 logs",
     "pm2:monit": "pm2 monit",
     "start": "cross-env NODE_ENV=production node index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "pretest": "pnpm run generate",
+    "test": "jest"
   },
   "dependencies": {
     "@aws-sdk/client-lambda": "^3.43.0",

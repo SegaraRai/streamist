@@ -26,7 +26,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="no-image-root flex justify-center items-center">
+  <div class="no-image-root flex align-center justify-center">
     <template v-if="s">
       <v-icon class="no-image-icon" light>mdi-image-off-outline</v-icon>
     </template>

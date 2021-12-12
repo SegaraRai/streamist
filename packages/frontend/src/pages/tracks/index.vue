@@ -1,15 +1,22 @@
 <script lang="ts">
 import { fetchTracksForPlayback } from '~/resources/track';
+import { usePlaybackStore } from '~/stores/playback';
 import type { TrackForPlayback } from '~/types/playback';
 
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+    const playbackStore = usePlaybackStore();
 
     const tracks = ref<TrackForPlayback[] | undefined>();
 
+    onBeforeUnmount(() => {
+      playbackStore.setDefaultSetList$$q.value();
+    });
+
     fetchTracksForPlayback().then((response) => {
       tracks.value = response;
+      playbackStore.setDefaultSetList$$q.value(response);
     });
 
     return {

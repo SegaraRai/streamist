@@ -29,58 +29,40 @@ export default defineComponent({
 
     const e = ref<HTMLDivElement | undefined>();
     const dragging = ref(false);
-    /** 0 ~ 1 */
-    const draggingPosition = ref<number | undefined>();
 
-    const onMouseMove = (event: MouseEvent | TouchEvent) => {
-      if (!dragging.value || !e.value) {
-        return;
+    const { pressed } = useMousePressed();
+    const { x, elementPositionX, elementWidth } = useMouseInElement(e);
+
+    const mousePosition = computed<number>(() =>
+      Math.min(
+        Math.max((x.value - elementPositionX.value) / elementWidth.value, 0),
+        1
+      )
+    );
+
+    watch(mousePosition, (newPosition) => {
+      if (dragging.value && props.duration) {
+        context.emit('dragging', newPosition * props.duration);
       }
-
-      const bBox = e.value.getBoundingClientRect();
-      const position = Math.max(
-        Math.min((event.clientX - bBox.x) / bBox.width, 1),
-        0
-      );
-      draggingPosition.value = position;
-      context.emit('dragging', position * props.duration);
-    };
-
-    const onMouseUp = (event: MouseEvent | TouchEvent) => {
-      if (!dragging.value || !e.value) {
-        return;
-      }
-
-      onMouseMove(event);
-      const finalPosition = draggingPosition.value;
-      context.emit('dragging', undefined);
-      context.emit('update', finalPosition! * props.duration);
-
-      setTimeout(() => {
-        dragging.value = false;
-        draggingPosition.value = undefined;
-      }, 10);
-    };
-
-    onMounted(() => {
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('touchmove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
-      document.addEventListener('touchend', onMouseUp);
     });
 
-    onBeforeUnmount(() => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('touchmove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-      document.removeEventListener('touchend', onMouseUp);
+    watch(pressed, (newPressed, oldPressed) => {
+      if (newPressed === oldPressed || newPressed || !dragging.value) {
+        return;
+      }
+
+      dragging.value = false;
+
+      if (valid.value && props.duration) {
+        context.emit('update', mousePosition.value * props.duration);
+      }
     });
 
     const positionDisplay = computed<string | undefined>(() =>
       valid.value && props.currentTime != null && props.duration != null
         ? formatTime(
-            dragging.value && draggingPosition.value != null
-              ? draggingPosition.value * props.duration
+            dragging.value
+              ? mousePosition.value * props.duration
               : props.currentTime,
             props.duration
           )
@@ -98,21 +80,20 @@ export default defineComponent({
       e,
       p: computed(() =>
         valid.value
-          ? dragging.value && draggingPosition.value != null
-            ? `${100 * draggingPosition.value}%`
+          ? dragging.value
+            ? `${100 * mousePosition.value}%`
             : `${100 * rate.value}%`
           : '0%'
       ),
       dragging,
       positionDisplay$$q: positionDisplay,
       durationDisplay$$q: durationDisplay,
-      onMouseDown(event) {
+      onMouseDown() {
         if (!valid.value || !e.value) {
           return;
         }
 
         dragging.value = true;
-        onMouseMove(event);
       },
     };
   },
@@ -126,7 +107,7 @@ export default defineComponent({
     </div>
     <div class="seek-bar px-4 flex-grow-1 d-flex flex-column justify-center">
       <div
-        class="pc-container py-2"
+        class="pc-container py-2 cursor-pointer"
         @mousedown.prevent="onMouseDown"
         @touchstart.prevent="onMouseDown"
       >

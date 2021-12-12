@@ -2,7 +2,9 @@ import { Ref, UnwrapRef } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
 import { TrackProvider } from '@/logic/trackProvider';
 import type { TrackForPlayback } from '@/types/playback';
+import { getDefaultAlbumImage } from '~/logic/albumImage';
 import { loadAudio } from '~/logic/audio';
+import { getImageFileURL } from '~/logic/fileURL';
 
 // TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる
 
@@ -22,10 +24,6 @@ export interface PlaybackState {
    * 規定のトラックリストを設定する
    */
   setDefaultSetList$$q(tracks?: readonly TrackForPlayback[]): void;
-  /**
-   * 規定のトラックリストを元に再生する
-   */
-  playFromDefaultSetList$$q(): void;
   /**
    * トラックリストを設定して再生する \
    * 同一のトラックが重複してはならない
@@ -73,20 +71,46 @@ async function loadRemote() {
 }
 //*/
 
+const audioContainer = document.body;
+
 export function usePlaybackStore(): typeof refState {
   if (!state) {
-    const audio = new Audio();
+    let audio: HTMLAudioElement | undefined;
 
     const trackProvider = new TrackProvider();
 
-    const playing = ref<boolean>(false);
+    const internalPlaying = ref<boolean>(false);
+    const playing = computed<boolean>({
+      get: () => {
+        return internalPlaying.value;
+      },
+      set: (value: boolean) => {
+        if (value === internalPlaying.value) {
+          return;
+        }
+
+        if (value && !currentTrack.value) {
+          playNext();
+          return;
+        }
+
+        internalPlaying.value = value;
+
+        if (value) {
+          audio?.play();
+        } else {
+          audio?.pause();
+        }
+      },
+    });
+
     const internalPosition = ref<number | undefined>();
     const position = computed<number | undefined>({
       get: () => {
         return internalPosition.value;
       },
       set: (value: number | undefined) => {
-        if (value == null) {
+        if (value == null || !audio) {
           return;
         }
         audio.currentTime = value;
@@ -97,6 +121,44 @@ export function usePlaybackStore(): typeof refState {
     const currentTrack = ref<TrackForPlayback | undefined>();
     const queue = ref<TrackForPlayback[]>([]);
     const defaultSetList = ref<TrackForPlayback[] | undefined>();
+
+    const createAudio = (): HTMLAudioElement => {
+      const audio = document.createElement('audio');
+
+      audio.addEventListener('play', () => {
+        internalPlaying.value = true;
+      });
+
+      audio.addEventListener('pause', () => {
+        internalPlaying.value = false;
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        internalPosition.value = audio.currentTime;
+
+        if ('mediaSession' in navigator) {
+          if (
+            audio.readyState !== audio.HAVE_NOTHING &&
+            isFinite(audio.duration)
+          ) {
+            /*
+            navigator.mediaSession.setPositionState({
+              duration: audio.duration,
+              playbackRate: audio.playbackRate,
+              position: audio.currentTime,
+            });
+            console.log('mediaSession updated E');
+            //*/
+          }
+        }
+      });
+
+      audio.addEventListener('ended', () => {
+        trackProvider.next$$q();
+      });
+
+      return audio;
+    };
 
     const setSetListAndPlay = (
       tracks: readonly TrackForPlayback[],
@@ -124,9 +186,19 @@ export function usePlaybackStore(): typeof refState {
       setSetListAndPlay(tracks, track);
     };
 
-    const playFromDefaultSetList = (): void => {
-      if (defaultSetList.value && defaultSetList.value.length > 0) {
-        setSetListAndPlayAuto(defaultSetList.value);
+    const playNext = (): void => {
+      if (currentTrack.value) {
+        return;
+      }
+
+      if (trackProvider.queue$$q.length === 0) {
+        // TrackProviderのsetListが空とは限らない（前へが使える場合がある）が、次へが無効であることには変わりない
+        // 再生できるようにしたほうが利便性高いので再生する
+        if (defaultSetList.value && defaultSetList.value.length > 0) {
+          setSetListAndPlayAuto(defaultSetList.value);
+        }
+      } else {
+        trackProvider.skipNext$$q();
       }
     };
 
@@ -135,13 +207,50 @@ export function usePlaybackStore(): typeof refState {
       currentTrack.value = track;
 
       // load audio here because watching currentTrack does not trigger if the previous track is the same
-      audio.src = '';
       if (track) {
-        loadAudio(audio, track.files, true);
-        playing.value = true;
+        const oldAudio = audio;
+        oldAudio?.pause();
+        oldAudio?.remove();
+
+        const newAudio = createAudio();
+        audio = newAudio;
+
+        const image = getDefaultAlbumImage(track.album);
+        const artworkPromise: Promise<MediaImage[] | undefined> = image
+          ? Promise.all(
+              image.files.map(async (imageFile) => ({
+                src: await getImageFileURL(imageFile.imageId, imageFile.id),
+                sizes: `${imageFile.width}x${imageFile.height}`,
+                type: imageFile.mimeType,
+              }))
+            )
+          : Promise.resolve(undefined);
+
+        audioContainer.appendChild(newAudio);
+        loadAudio(newAudio, track.files);
+        newAudio.play().then(async () => {
+          if (!('mediaSession' in navigator)) {
+            return;
+          }
+
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: track.title,
+            artist: track.artist.name,
+            album: track.album.title,
+            artwork: await artworkPromise,
+          });
+          navigator.mediaSession.setPositionState({
+            duration: track.duration,
+            playbackRate: 1,
+            position: 0,
+          });
+          console.log('mediaSession updated A', navigator.mediaSession);
+        });
       } else {
-        audio.pause();
-        playing.value = false;
+        audio?.pause();
+        audio?.remove();
+        audio = undefined;
+        internalPlaying.value = false;
         internalPosition.value = undefined;
       }
     });
@@ -158,14 +267,6 @@ export function usePlaybackStore(): typeof refState {
       shuffle.value = trackProvider.shuffle$$q;
     });
 
-    audio.addEventListener('timeupdate', () => {
-      internalPosition.value = audio.currentTime;
-    });
-
-    audio.addEventListener('ended', () => {
-      trackProvider.next$$q();
-    });
-
     watch(repeat, (newRepeat) => {
       trackProvider.repeat$$q = newRepeat;
     });
@@ -174,27 +275,72 @@ export function usePlaybackStore(): typeof refState {
       trackProvider.shuffle$$q = newShuffle;
     });
 
-    watch(playing, (newPlaying) => {
-      if (audio.paused === !newPlaying) {
-        return;
-      }
+    //
 
-      if (!currentTrack.value) {
-        playing.value = false;
-        if (trackProvider.queue$$q.length === 0) {
-          // このときTrackProviderのsetListが空とは限らない（前へが使える場合がある）が、次へが無効であることには変わりない
-          // 再生できるようにしたほうが利便性高いので再生する
-          playFromDefaultSetList();
+    if ('mediaSession' in navigator) {
+      watch(currentTrack, (newTrack) => {
+        if (!newTrack) {
+          navigator.mediaSession.metadata = null;
+          navigator.mediaSession.playbackState = 'none';
+          console.log('mediaSession updated B');
         }
-        return;
-      }
+      });
 
-      if (newPlaying) {
-        audio.play();
-      } else {
-        audio.pause();
+      /*
+      watch(playing, (newPlaying) => {
+        console.log('mediaSession updated C');
+        navigator.mediaSession.playbackState = newPlaying
+          ? 'playing'
+          : 'paused';
+        });
+      //*/
+
+      navigator.mediaSession.setActionHandler('play', () => {
+        playing.value = true;
+      });
+
+      navigator.mediaSession.setActionHandler('pause', () => {
+        playing.value = false;
+      });
+
+      navigator.mediaSession.setActionHandler('stop', () => {
+        playing.value = false;
+        position.value = 0;
+      });
+
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        trackProvider.skipPrevious$$q();
+      });
+
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        trackProvider.skipNext$$q();
+      });
+
+      try {
+        navigator.mediaSession.setActionHandler('seekto', function (event) {
+          if (!audio || event.seekTime == null) {
+            return;
+          }
+          if (event.fastSeek && 'fastSeek' in audio) {
+            audio.fastSeek(event.seekTime);
+            return;
+          }
+          audio.currentTime = event.seekTime;
+          navigator.mediaSession.setPositionState({
+            duration: audio.duration,
+            playbackRate: audio.playbackRate,
+            position: audio.currentTime,
+          });
+          console.log('mediaSession updated D');
+        });
+      } catch (error) {
+        console.warn(
+          'Warning! The "seekto" media session action is not supported.'
+        );
       }
-    });
+    }
+
+    //
 
     state = reactive<PlaybackState>({
       playing$$q: playing,
@@ -212,9 +358,6 @@ export function usePlaybackStore(): typeof refState {
       }),
       setDefaultSetList$$q(tracks?: readonly TrackForPlayback[]) {
         defaultSetList.value = tracks && [...tracks];
-      },
-      playFromDefaultSetList$$q() {
-        playFromDefaultSetList();
       },
       setSetListAndPlay$$q: (
         tracks: readonly TrackForPlayback[],

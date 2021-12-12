@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { fetchArtistForPlayback } from '~/resources/artist';
+import { usePlaybackStore } from '~/stores/playback';
 import type { ImageWithFile } from '~/types/image';
 import type { ArtistForPlayback, TrackForPlayback } from '~/types/playback';
 
@@ -9,6 +10,8 @@ export default defineComponent({
     id: String,
   },
   setup(props) {
+    const playbackStore = usePlaybackStore();
+
     const id = computed(() => props.id);
 
     const artist = ref<ArtistForPlayback | undefined>();
@@ -20,6 +23,10 @@ export default defineComponent({
     const loading = computed<boolean>(
       (): boolean => artist.value?.id !== id.value
     );
+
+    onBeforeUnmount(() => {
+      playbackStore.setDefaultSetList$$q.value();
+    });
 
     watch(
       id,
@@ -33,11 +40,16 @@ export default defineComponent({
             return;
           }
 
+          const responseSetList = response.albums.flatMap(
+            (album) => album.tracks
+          );
+
           artist.value = response;
           image.value = response.albums
             .map((album) => getDefaultAlbumImage(album))
             .find((x) => x);
-          setList.value = response.albums.flatMap((album) => album.tracks);
+          setList.value = responseSetList;
+          playbackStore.setDefaultSetList$$q.value(responseSetList);
         });
       },
       {
@@ -70,7 +82,7 @@ export default defineComponent({
           tile
         >
           <nullable-image
-            class="align-end"
+            class="align-end rounded-full"
             icon-size="64px"
             :image="loading$$q ? undefined : image$$q"
             :width="200"

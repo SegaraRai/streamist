@@ -28,7 +28,8 @@
     "typecheck": "run-p typecheck:*",
     "typecheck:client": "pnpm run typecheck --prefix packages/frontend",
     "typecheck:server": "pnpm run typecheck --prefix packages/server",
-    "typecheck:transcoder": "pnpm run typecheck --prefix packages/transcoder"
+    "typecheck:transcoder": "pnpm run typecheck --prefix packages/transcoder",
+    "prepare": "husky install"
   },
   "lint-staged": {
     "*.{js,ts,vue}": "eslint",

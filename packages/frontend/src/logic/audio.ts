@@ -23,8 +23,7 @@ export function calcTrackFileScore(trackFile: TrackFile): number {
 
 export async function loadAudio(
   audio: HTMLAudioElement,
-  trackFiles: readonly TrackFile[],
-  play = false
+  trackFiles: readonly TrackFile[]
 ): Promise<void> {
   // スコア降順でTrackFileDTOとスコアの配列を用意
   let trackFilesWithScore = trackFiles
@@ -55,9 +54,4 @@ export async function loadAudio(
   // Audioにsrcを設定
   audio.src = url;
   audio.currentTime = 0;
-  if (play) {
-    audio.play();
-  } else {
-    audio.pause();
-  }
 }

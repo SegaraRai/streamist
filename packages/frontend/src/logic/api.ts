@@ -14,7 +14,6 @@ export function activateTokenInterceptor() {
 
   axiosInstance.interceptors.request.use(
     async (config) => {
-      console.log(config);
       const token = await tokenStore.tokenPromise;
       if (!config.headers) {
         config.headers = {};

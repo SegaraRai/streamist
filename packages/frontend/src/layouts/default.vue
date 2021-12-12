@@ -199,7 +199,74 @@ const rightSidebar = ref(false);
 
 <template>
   <v-app>
-    <v-navigation-drawer permanent :rail="railedNavigation" rail-width="56">
+    <v-footer class="playback-sheet fixed bottom-0 z-200 w-full m-0 p-0 h-24">
+      <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
+        <v-divider />
+        <div class="px-1 flex-1 flex items-center">
+          <playback-control />
+        </div>
+      </v-sheet>
+    </v-footer>
+
+    <v-navigation-drawer
+      :model-value="rightSidebar"
+      temporary
+      position="right"
+      :theme="theme.rightSidebarTheme"
+      :width="400"
+      hide-overlay
+    >
+      <div class="flex flex-col h-full">
+        <v-sheet tile>
+          <div class="title flex items-center py-1">
+            <v-icon class="mx-4">mdi-playlist-play</v-icon>
+            <span class="flex-1">{{ t('queue.PlayQueue') }}</span>
+            <v-btn flat icon size="small" @click="rightSidebar = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+          <v-divider />
+        </v-sheet>
+        <div class="flex-1 overflow-y-auto overflow-x-hidden">
+          <Queue />
+        </div>
+        <div class="h-24" />
+      </div>
+    </v-navigation-drawer>
+
+    <v-app-bar flat :border="1" density="compact" :theme="theme.headerTheme">
+      <v-toolbar-title class="ml-0 pl-4 pr-12 hidden-xs-only">
+        <span class="leading-tight">
+          <span class="text-xl">streamist</span>
+          <span class="text-sm">.app</span>
+        </span>
+      </v-toolbar-title>
+      <v-text-field
+        density="compact"
+        prepend-inner-icon="mdi-magnify"
+        hide-details
+        :label="t('header.Search')"
+      />
+      <v-spacer />
+      <div class="flex gap-x-2">
+        <v-btn icon size="small" @click="syncDB">
+          <v-icon>mdi-sync</v-icon>
+        </v-btn>
+        <v-btn icon size="small" @click="uploadDialog = true">
+          <v-icon>mdi-cloud-upload</v-icon>
+        </v-btn>
+        <v-btn icon size="small" @click="rightSidebar = true">
+          <v-icon>mdi-playlist-play</v-icon>
+        </v-btn>
+      </div>
+    </v-app-bar>
+
+    <v-navigation-drawer
+      permanent
+      position="left"
+      :rail="railedNavigation"
+      rail-width="56"
+    >
       <v-list dense class="overflow-x-hidden">
         <template v-for="(item, index) in navItems" :key="index">
           <template v-if="item.type === 'link'">
@@ -219,64 +286,6 @@ const rightSidebar = ref(false);
       </v-list>
       <div class="h-24" />
     </v-navigation-drawer>
-
-    <v-navigation-drawer
-      :model-value="rightSidebar"
-      temporary
-      position="right"
-      :theme="theme.rightSidebarTheme"
-      :width="400"
-      hide-overlay
-    >
-      <div class="flex flex-col h-full">
-        <v-sheet tile class="queue-header-sheet">
-          <div class="title flex items-center py-1">
-            <v-icon class="mx-4">mdi-playlist-play</v-icon>
-            <span class="flex-1">{{ t('queue.PlayQueue') }}</span>
-            <v-btn flat icon @click="rightSidebar = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </div>
-          <v-divider />
-        </v-sheet>
-        <div class="flex-1 overflow-y-auto overflow-x-hidden">
-          <Queue />
-        </div>
-        <div class="h-24" />
-      </div>
-    </v-navigation-drawer>
-
-    <v-app-bar
-      app
-      dense
-      flat
-      clipped-left
-      clipped-right
-      :theme="theme.headerTheme"
-    >
-      <v-toolbar-title class="ml-0 pl-4 pr-12 hidden-xs-only">
-        <span class="leading-tight">
-          <span class="text-xl">streamist</span>
-          <span class="text-sm">.app</span>
-        </span>
-      </v-toolbar-title>
-      <v-text-field
-        density="compact"
-        prepend-inner-icon="mdi-magnify"
-        hide-details
-        :label="t('header.Search')"
-      />
-      <v-spacer />
-      <v-btn icon @click="syncDB">
-        <v-icon>mdi-sync</v-icon>
-      </v-btn>
-      <v-btn icon @click="uploadDialog = true">
-        <v-icon>mdi-cloud-upload</v-icon>
-      </v-btn>
-      <v-btn icon @click="rightSidebar = true">
-        <v-icon>mdi-playlist-play</v-icon>
-      </v-btn>
-    </v-app-bar>
 
     <v-main :class="theme.bgClass">
       <v-sheet tile :theme="theme.contentTheme" :class="theme.bgClass">
@@ -325,14 +334,5 @@ const rightSidebar = ref(false);
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <div class="playback-sheet fixed bottom-0 z-200 w-full m-0 p-0 h-24">
-      <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
-        <v-divider />
-        <div class="px-1 flex-1 flex items-center">
-          <playback-control />
-        </div>
-      </v-sheet>
-    </div>
   </v-app>
 </template>

@@ -4,6 +4,7 @@ import { useThemeStore } from '@/stores/theme';
 import { syncDB } from '~/db/sync';
 import apiInstance from '~/logic/api';
 import { fetchPlaylistsForPlayback } from '~/resources/playlist';
+import { usePlaybackStore } from '~/stores/playback';
 import { PlaylistForPlayback } from '~/types/playback';
 
 interface Item {
@@ -19,13 +20,22 @@ interface Item {
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+    const playbackStore = usePlaybackStore();
 
     const themeStore = useThemeStore();
 
     const playlists = ref<PlaylistForPlayback[]>([]);
 
+    onBeforeUnmount(() => {
+      playbackStore.setDefaultSetList$$q.value();
+    });
+
     const refreshPlaylists = async () => {
-      playlists.value = await fetchPlaylistsForPlayback();
+      const response = await fetchPlaylistsForPlayback();
+      const responseSetList = response.flatMap((playlist) => playlist.tracks);
+
+      playlists.value = response;
+      playbackStore.setDefaultSetList$$q.value(responseSetList);
     };
     refreshPlaylists();
 

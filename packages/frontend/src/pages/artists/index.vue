@@ -1,6 +1,7 @@
 <script lang="ts">
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { fetchArtistsForPlayback } from '~/resources/artist';
+import { usePlaybackStore } from '~/stores/playback';
 import type { ImageWithFile } from '~/types/image';
 import type { ArtistForPlayback } from '~/types/playback';
 
@@ -13,11 +14,22 @@ interface ArtistItem {
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+    const playbackStore = usePlaybackStore();
+
+    onBeforeUnmount(() => {
+      playbackStore.setDefaultSetList$$q.value();
+    });
 
     const artists = ref<ArtistForPlayback[]>([]);
 
     fetchArtistsForPlayback().then((response) => {
+      const responseSetList = response.flatMap((artist) => [
+        ...artist.albums.flatMap((album) => album.tracks),
+        ...artist.tracks,
+      ]);
+
       artists.value = response;
+      playbackStore.setDefaultSetList$$q.value(responseSetList);
     });
 
     const artistItems = computed(() => {
@@ -66,7 +78,7 @@ export default defineComponent({
             >
               <nullable-image
                 v-ripple
-                class="align-end image white--text"
+                class="align-end image white--text rounded-full"
                 icon-size="64px"
                 :image="item.image$$q"
                 :width="imageSize$$q"

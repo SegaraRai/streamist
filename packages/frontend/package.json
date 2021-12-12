@@ -15,7 +15,7 @@
     "lint:fix": "eslint --ext .ts,.js,.vue . --fix && prettier --write \"./**/*.ts\" && pnpm run lint:style -- --fix",
     "start": "nuxt serve",
     "pretest": "pnpm run generate",
-    "test": "jest",
+    "test": "cypress open",
     "pretypecheck": "pnpm run generate",
     "typecheck": "vue-tsc --noEmit"
   },

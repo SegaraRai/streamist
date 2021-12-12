@@ -1,5 +1,6 @@
 <script lang="ts">
 import { fetchAlbumForPlaybackWithTracks } from '~/resources/album';
+import { usePlaybackStore } from '~/stores/playback';
 import type {
   AlbumForPlaybackWithTracks,
   TrackForPlayback,
@@ -13,12 +14,18 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const playbackStore = usePlaybackStore();
+
     const albumId = computed(() => props.id);
 
     const album = ref<AlbumForPlaybackWithTracks | undefined>();
     const setList = ref<TrackForPlayback[] | undefined>();
 
     const loading = computed(() => album.value?.id !== albumId.value);
+
+    onBeforeUnmount(() => {
+      playbackStore.setDefaultSetList$$q.value();
+    });
 
     watch(
       albumId,
@@ -28,8 +35,11 @@ export default defineComponent({
             return;
           }
 
+          const responseSetList = newAlbum.tracks;
+
           album.value = newAlbum;
-          setList.value = newAlbum.tracks;
+          setList.value = responseSetList;
+          playbackStore.setDefaultSetList$$q.value(responseSetList);
         });
       },
       {
