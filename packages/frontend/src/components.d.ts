@@ -15,6 +15,7 @@ declare module 'vue' {
     Queue: typeof import('./components/Queue.vue')['default']
     README: typeof import('./components/README.md')['default']
     SSeekBar: typeof import('./components/SSeekBar.vue')['default']
+    SSlider: typeof import('./components/SSlider.vue')['default']
     TrackList: typeof import('./components/TrackList.vue')['default']
     Uploader: typeof import('./components/Uploader.vue')['default']
   }

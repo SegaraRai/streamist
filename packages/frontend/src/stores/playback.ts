@@ -124,6 +124,7 @@ export function usePlaybackStore(): typeof refState {
 
     const createAudio = (): HTMLAudioElement => {
       const audio = document.createElement('audio');
+      audio.classList.add('currentTrack');
 
       audio.addEventListener('play', () => {
         internalPlaying.value = true;
@@ -139,16 +140,17 @@ export function usePlaybackStore(): typeof refState {
         if ('mediaSession' in navigator) {
           if (
             audio.readyState !== audio.HAVE_NOTHING &&
-            isFinite(audio.duration)
+            isFinite(audio.duration) &&
+            isFinite(audio.playbackRate) &&
+            isFinite(audio.currentTime) &&
+            audio.duration > 0
           ) {
-            /*
             navigator.mediaSession.setPositionState({
               duration: audio.duration,
               playbackRate: audio.playbackRate,
               position: audio.currentTime,
             });
             console.log('mediaSession updated E');
-            //*/
           }
         }
       });
@@ -206,12 +208,12 @@ export function usePlaybackStore(): typeof refState {
       const track = trackProvider.currentTrack$$q;
       currentTrack.value = track;
 
+      audio?.pause();
+      audio?.remove();
+      audio = undefined;
+
       // load audio here because watching currentTrack does not trigger if the previous track is the same
       if (track) {
-        const oldAudio = audio;
-        oldAudio?.pause();
-        oldAudio?.remove();
-
         const newAudio = createAudio();
         audio = newAudio;
 
@@ -244,12 +246,12 @@ export function usePlaybackStore(): typeof refState {
             playbackRate: 1,
             position: 0,
           });
+          navigator.mediaSession.playbackState = 'playing';
           console.log('mediaSession updated A', navigator.mediaSession);
         });
+
+        internalPosition.value = 0;
       } else {
-        audio?.pause();
-        audio?.remove();
-        audio = undefined;
         internalPlaying.value = false;
         internalPosition.value = undefined;
       }
@@ -286,14 +288,12 @@ export function usePlaybackStore(): typeof refState {
         }
       });
 
-      /*
       watch(playing, (newPlaying) => {
         console.log('mediaSession updated C');
         navigator.mediaSession.playbackState = newPlaying
           ? 'playing'
           : 'paused';
-        });
-      //*/
+      });
 
       navigator.mediaSession.setActionHandler('play', () => {
         playing.value = true;
@@ -384,6 +384,27 @@ export function usePlaybackStore(): typeof refState {
     });
 
     refState = toRefs(state);
+
+    if (import.meta.hot) {
+      const cleanup = () => {
+        audio?.pause();
+        audio?.remove();
+        audio = undefined;
+
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = null;
+          navigator.mediaSession.playbackState = 'none';
+        }
+      };
+
+      import.meta.hot.accept(() => {
+        cleanup();
+      });
+
+      import.meta.hot.dispose(() => {
+        cleanup();
+      });
+    }
   }
 
   return refState;

@@ -199,7 +199,13 @@ const rightSidebar = ref(false);
 
 <template>
   <v-app>
-    <v-footer class="playback-sheet fixed bottom-0 z-200 w-full m-0 p-0 h-24">
+    <div
+      class="bg-black z-30 fixed top-0 left-0 w-full h-full transition-all"
+      :class="rightSidebar ? 'opacity-25' : 'opacity-0 invisible'"
+      @click="rightSidebar = false"
+    ></div>
+
+    <v-footer class="playback-sheet fixed bottom-0 z-50 w-full m-0 p-0 h-24">
       <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
         <v-divider />
         <div class="px-1 flex-1 flex items-center">
@@ -215,6 +221,7 @@ const rightSidebar = ref(false);
       :theme="theme.rightSidebarTheme"
       :width="400"
       hide-overlay
+      class="!z-40"
     >
       <div class="flex flex-col h-full">
         <v-sheet tile>
@@ -235,12 +242,10 @@ const rightSidebar = ref(false);
     </v-navigation-drawer>
 
     <v-app-bar flat :border="1" density="compact" :theme="theme.headerTheme">
-      <v-toolbar-title class="ml-0 pl-4 pr-12 hidden-xs-only">
-        <span class="leading-tight">
-          <span class="text-xl">streamist</span>
-          <span class="text-sm">.app</span>
-        </span>
-      </v-toolbar-title>
+      <div class="ml-0 pl-4 pr-12 hidden-xs-only leading-tight">
+        <span class="text-xl">streamist</span>
+        <span class="text-sm">.app</span>
+      </div>
       <v-text-field
         density="compact"
         prepend-inner-icon="mdi-magnify"
@@ -306,24 +311,22 @@ const rightSidebar = ref(false);
             <h3>Files</h3>
             <v-list dense>
               <v-list-subheader class="uppercase">In progress</v-list-subheader>
-              <v-list-item-group color="primary">
-                <v-list-item>
-                  <v-list-item-header>
-                    <v-list-item-title>example1.mp3</v-list-item-title>
-                  </v-list-item-header>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-header>
-                    <v-list-item-title>example2.mp3</v-list-item-title>
-                  </v-list-item-header>
-                </v-list-item>
-                <v-list-item>
-                  <v-list-item-header>
-                    <v-list-item-title>example3.wav</v-list-item-title>
-                    <v-list-item-subtitle>example3.cue</v-list-item-subtitle>
-                  </v-list-item-header>
-                </v-list-item>
-              </v-list-item-group>
+              <v-list-item>
+                <v-list-item-header>
+                  <v-list-item-title>example1.mp3</v-list-item-title>
+                </v-list-item-header>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-header>
+                  <v-list-item-title>example2.mp3</v-list-item-title>
+                </v-list-item-header>
+              </v-list-item>
+              <v-list-item>
+                <v-list-item-header>
+                  <v-list-item-title>example3.wav</v-list-item-title>
+                  <v-list-item-subtitle>example3.cue</v-list-item-subtitle>
+                </v-list-item-header>
+              </v-list-item>
             </v-list>
           </div>
         </v-card-text>

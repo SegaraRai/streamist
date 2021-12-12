@@ -153,8 +153,8 @@ export default defineComponent({
             @mouseleave="finishMarquee$$q"
           >
             <v-tooltip bottom>
-              <template #activator="{ on }">
-                <span class="marquee-target" v-on="on">
+              <template #activator>
+                <span class="marquee-target">
                   <router-link :to="`/albums/${item.album$$q.id}`">
                     {{ item.track$$q.title }}
                   </router-link>
@@ -169,8 +169,8 @@ export default defineComponent({
             @mouseleave="finishMarquee$$q"
           >
             <v-tooltip bottom>
-              <template #activator="{ on }">
-                <span class="marquee-target" v-on="on">
+              <template #activator>
+                <span class="marquee-target">
                   <router-link :to="`/artists/${item.artist$$q.id}`">
                     {{ item.artist$$q.name }}
                   </router-link>
