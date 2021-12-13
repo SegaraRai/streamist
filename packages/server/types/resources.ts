@@ -2,6 +2,7 @@ import type {
   Album,
   AlbumCoArtist,
   Artist,
+  Deletion,
   Image,
   ImageFile,
   Playlist,
@@ -32,6 +33,8 @@ export interface ResourceTrack extends Track {
 
 export type ResourceUser = Omit<User, ''>;
 
+export type ResourceDeletion = Deletion;
+
 export interface Resources {
   timestamp: number;
   user: ResourceUser;
@@ -45,4 +48,5 @@ export interface Resources {
   tags: Tag[];
   trackCoArtists: TrackCoArtist[];
   tracks: ResourceTrack[];
+  deletions: ResourceDeletion[];
 }

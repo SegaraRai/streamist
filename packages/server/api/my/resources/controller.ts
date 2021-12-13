@@ -121,6 +121,14 @@ export default defineController(() => ({
             files: true,
           },
         }),
+        deletions: await txClient.deletion.findMany({
+          where: {
+            userId: user.id,
+            deletedAt: {
+              gte: since,
+            },
+          },
+        }),
       };
     });
 
