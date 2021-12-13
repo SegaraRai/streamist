@@ -10,7 +10,7 @@ import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
 
 export type CreateTrackData = Omit<
-  Prisma.TrackCreateInput,
+  Prisma.TrackUncheckedCreateInput,
   | 'id'
   | 'createdAt'
   | 'updatedAt'
@@ -20,13 +20,10 @@ export type CreateTrackData = Omit<
   | 'artistId'
   | 'album'
   | 'albumId'
-  | 'source'
-  | 'sourceId'
   | 'files'
   | 'playlists'
   | 'tags'
   | 'coArtists'
-  | 'sourceFileId'
 >;
 
 export async function dbTrackCreateTx(
@@ -86,7 +83,6 @@ export async function dbTrackCreateTx(
 
 export function dbTrackCreate(
   userId: string,
-  sourceId: string,
   albumTitle: string,
   albumArtistName: string,
   trackArtistName: string,
@@ -99,7 +95,6 @@ export function dbTrackCreate(
       dbTrackCreateTx(
         txClient,
         userId,
-        sourceId,
         albumTitle,
         albumArtistName,
         trackArtistName,

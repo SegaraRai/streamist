@@ -1,8 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import { generateImageId } from '$shared-server/generateId.js';
+import { osDelete } from '$shared-server/objectStorage';
+import {
+  getTranscodedImageFileKey,
+  getTranscodedImageFileOS,
+} from '$shared-server/objectStorages';
 import { is } from '$shared/is';
 import { parseDate } from '$shared/parseDate';
-import type { Region } from '$shared/regions';
 import type {
   SourceFileAttachToType,
   SourceFileType,
@@ -79,13 +83,12 @@ function parseDiscAndTrackNumber(
 async function registerImage(
   txClient: TransactionalPrismaClient,
   artifact: TranscoderResponseArtifactImage,
-  region: Region,
-  userId: string,
-  sourceId: string,
   imageId: string,
   attachToType: SourceFileAttachToType,
   attachToId: string
 ): Promise<void> {
+  const { sourceFileId, region, userId } = artifact.source;
+
   // register image
   // DO NOT connect to target here, as it will be connected later
   await txClient.image.create({
@@ -95,9 +98,9 @@ async function registerImage(
       sourceHeight: artifact.probe.height,
       dHash: artifact.dHash,
       user: { connect: { id: userId } },
-      source: {
+      sourceFile: {
         connect: {
-          id: sourceId,
+          id: sourceFileId,
         },
       },
       files: {
@@ -158,17 +161,7 @@ async function handleTranscoderResponse(
   );
 
   await client.$transaction(async (txClient) => {
-    const markedSourceIdSet = new Set<string>();
-    const markSourceIdAsTranscodedCached = async (
-      userId: string,
-      sourceId: string
-    ) => {
-      if (markedSourceIdSet.has(sourceId)) {
-        return;
-      }
-      markedSourceIdSet.add(sourceId);
-      await markSourceIdAsTranscodedTx(txClient, userId, sourceId);
-    };
+    const processedSourceIds = new Map<string, string>();
 
     // register album
     const sourceFileIdToAlbumIdMap = new Map<string, string>();
@@ -176,6 +169,8 @@ async function handleTranscoderResponse(
       const {
         source: { filename, options, region, sourceFileId, sourceId, userId },
       } = artifact;
+
+      processedSourceIds.set(sourceId, userId);
 
       for (const artifactTrack of artifact.tracks) {
         const { duration, files, tags } = artifactTrack;
@@ -208,7 +203,6 @@ async function handleTranscoderResponse(
         const [track, trackArtist, album, albumArtist] = await dbTrackCreateTx(
           txClient,
           userId,
-          sourceId,
           tagAlbumTitle || options.defaultUnknownAlbumTitle,
           tagAlbumArtist || options.defaultUnknownAlbumArtist,
           tagTrackArtist || options.defaultUnknownTrackArtist,
@@ -225,6 +219,7 @@ async function handleTranscoderResponse(
             releaseDateText: date?.text$$q,
             replayGainGain: floatOr(tags.replaygain_track_gain, null),
             replayGainPeak: floatOr(tags.replaygain_track_peak, null),
+            sourceFileId: artifact.source.sourceFileId,
           }
         );
 
@@ -304,8 +299,6 @@ async function handleTranscoderResponse(
           });
         }
       }
-
-      await markSourceIdAsTranscodedCached(userId, sourceId);
     }
 
     // register images
@@ -313,16 +306,60 @@ async function handleTranscoderResponse(
       const { source } = artifact;
       const { extracted, region, sourceId, userId } = source;
 
+      processedSourceIds.set(sourceId, userId);
+
       let attachToType: SourceFileAttachToType;
       let attachToId: string | undefined;
 
       if (extracted) {
+        const deleteTranscodedFiles = async () => {
+          const os = getTranscodedImageFileOS(artifact.source.region);
+          await Promise.allSettled(
+            artifact.files.map((file) =>
+              osDelete(
+                os,
+                getTranscodedImageFileKey(userId, file.fileId, file.extension)
+              )
+            )
+          );
+        };
+
         attachToType = 'album';
 
         attachToId = sourceFileIdToAlbumIdMap.get(source.audioSourceFileId);
         if (!attachToId) {
           // something went wrong with transcoding audio
           // this will not happen because the image file is not extracted when the audio transcoding fails
+          await deleteTranscodedFiles();
+          continue;
+        }
+
+        const album = await txClient.album.findFirst({
+          where: { id: attachToId, userId },
+          select: {
+            images: {
+              select: {
+                id: true,
+                sourceFile: {
+                  select: {
+                    id: true,
+                    sha256: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        // NOTE: we can use dHash here
+        if (
+          !album ||
+          album.images
+            .flatMap((image) => image.sourceFile)
+            .some((file) => file.sha256 === source.sha256)
+        ) {
+          // album not found or image already exists
+          await deleteTranscodedFiles();
           continue;
         }
 
@@ -354,15 +391,14 @@ async function handleTranscoderResponse(
       await registerImage(
         txClient,
         artifact,
-        region,
-        userId,
-        sourceId,
         imageId,
         attachToType,
         attachToId
       );
+    }
 
-      await markSourceIdAsTranscodedCached(userId, sourceId);
+    for (const [sourceId, userId] of processedSourceIds) {
+      await markSourceIdAsTranscodedTx(txClient, userId, sourceId);
     }
   });
 }

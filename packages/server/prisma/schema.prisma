@@ -67,7 +67,8 @@ model SourceFile {
   region         String
   filename       String
   fileSize       Int
-  sha256         String
+  // sha256 is NULL until the file is uploaded
+  sha256         String?
   // only for audio files (optional)
   cueSheetFileId String?
   // only for image files (required)
