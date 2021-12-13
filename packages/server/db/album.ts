@@ -12,6 +12,7 @@ import {
   dbArrayReorder,
 } from './lib/array';
 import { client } from './lib/client';
+import { dbFormatDateTime } from './lib/dateTime';
 import type { TransactionalPrismaClient } from './lib/types';
 
 export type ImageSortableAlbum = { imageOrder: string; images: Image[] };
@@ -22,6 +23,8 @@ export type ImageSortableAlbum = { imageOrder: string; images: Image[] };
 /* #__PURE__ */ expectType<'title'>(Prisma.AlbumScalarFieldEnum.title);
 /* #__PURE__ */ expectType<'artistId'>(Prisma.AlbumScalarFieldEnum.artistId);
 /* #__PURE__ */ expectType<'userId'>(Prisma.AlbumScalarFieldEnum.userId);
+/* #__PURE__ */ expectType<'createdAt'>(Prisma.AlbumScalarFieldEnum.createdAt);
+/* #__PURE__ */ expectType<'updatedAt'>(Prisma.AlbumScalarFieldEnum.updatedAt);
 
 export async function dbAlbumGetOrCreateByNameTx(
   txClient: TransactionalPrismaClient,
@@ -32,11 +35,12 @@ export async function dbAlbumGetOrCreateByNameTx(
 ): Promise<Album> {
   const newAlbumId = await newAlbumIdPromise;
 
-  // TODO(db): manually set createdAt and updatedAt?
+  const createdAt = dbFormatDateTime();
+
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
-    INSERT INTO Album (id, title, artistId, userId)
-    SELECT ${newAlbumId}, ${albumTitle}, ${artistId}, ${userId}
+    INSERT INTO Album (id, title, artistId, userId, createdAt, updatedAt)
+    SELECT ${newAlbumId}, ${albumTitle}, ${artistId}, ${userId}, ${createdAt}, ${createdAt}
       WHERE NOT EXISTS (
         SELECT 1
           FROM Album

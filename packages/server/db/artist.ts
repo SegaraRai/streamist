@@ -2,6 +2,7 @@ import { expectType } from 'tsd';
 import { generateArtistId } from '$shared-server/generateId';
 import { Artist, Prisma } from '$prisma/client';
 import { client } from './lib/client';
+import { dbFormatDateTime } from './lib/dateTime';
 import type { TransactionalPrismaClient } from './lib/types';
 
 // check types for `dbArtistGetOrCreateByNameTx`
@@ -9,6 +10,8 @@ import type { TransactionalPrismaClient } from './lib/types';
 /* #__PURE__ */ expectType<'id'>(Prisma.ArtistScalarFieldEnum.id);
 /* #__PURE__ */ expectType<'name'>(Prisma.ArtistScalarFieldEnum.name);
 /* #__PURE__ */ expectType<'userId'>(Prisma.ArtistScalarFieldEnum.userId);
+/* #__PURE__ */ expectType<'createdAt'>(Prisma.ArtistScalarFieldEnum.createdAt);
+/* #__PURE__ */ expectType<'updatedAt'>(Prisma.ArtistScalarFieldEnum.updatedAt);
 
 export async function dbArtistGetOrCreateByNameTx(
   txClient: TransactionalPrismaClient,
@@ -18,11 +21,12 @@ export async function dbArtistGetOrCreateByNameTx(
 ): Promise<Artist> {
   const newArtistId = await newArtistIdPromise;
 
-  // TODO(db): manually set createdAt and updatedAt (for SQLite)?
+  const createdAt = dbFormatDateTime();
+
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
-    INSERT INTO Artist (id, name, userId)
-    SELECT ${newArtistId}, ${artistName}, ${userId}
+    INSERT INTO Artist (id, name, userId, createdAt, updatedAt)
+    SELECT ${newArtistId}, ${artistName}, ${userId}, ${createdAt}, ${createdAt}
       WHERE NOT EXISTS (
         SELECT 1
           FROM Artist

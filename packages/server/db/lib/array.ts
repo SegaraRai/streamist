@@ -5,6 +5,8 @@ import {
 import type { Prisma, PrismaClient } from '$prisma/client';
 import { HTTPError } from '$/utils/httpError';
 import { client } from './client';
+import { dbFormatDateTime } from './dateTime';
+import { dbCreatePlaceholders } from './placeholder';
 import type { TransactionalPrismaClient } from './types';
 
 /**
@@ -29,10 +31,12 @@ export class DBArrayOptimisticLockAbortError extends HTTPError {
 
 const idColumn = 'id' as const;
 const userIdColumn = 'userId' as const;
+const updatedAtColumn = 'updatedAt' as const;
 
 interface ArrayMainTable {
   [idColumn]: typeof idColumn;
   [userIdColumn]: typeof userIdColumn;
+  [updatedAtColumn]: typeof updatedAtColumn;
 }
 
 function isSameItems(a: readonly string[], b: readonly string[]): boolean {
@@ -115,11 +119,12 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
   const inserted = await txClient.$executeRawUnsafe(
     `
     INSERT INTO \`${junctionTable}\` (\`${jtMainTableColumn}\`, \`${jtItemTableColumn}\`)
-    SELECT ?, \`${idColumn}\`
+    SELECT $1, \`${idColumn}\`
       FROM \`${itemTable}\`
-      WHERE \`${userIdColumn}\` = ? AND \`${idColumn}\` IN (${itemIds
-      .map(() => '?')
-      .join(', ')})
+      WHERE \`${userIdColumn}\` = $2 AND \`${idColumn}\` IN (${dbCreatePlaceholders(
+      itemIds,
+      3
+    )})
     `,
     groupId,
     userId,
@@ -136,15 +141,16 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
   // NOTE(security): ここでgroupIdのユーザーIDを確認している
   // NOTE: CONCAT is not supported by SQLite
   const expression = prepend
-    ? `(? || \`${itemOrderColumn}\`)`
-    : `(\`${itemOrderColumn}\` || ?)`;
+    ? `($1 || \`${itemOrderColumn}\`)`
+    : `(\`${itemOrderColumn}\` || $1)`;
   const updated = await txClient.$executeRawUnsafe(
     `
     UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = ${expression}
-      WHERE \`${userIdColumn}\` = ? AND \`${idColumn}\` = ?
+      SET \`${itemOrderColumn}\` = ${expression}, \`${updatedAtColumn}\` = $2
+      WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4
     `,
     dbArraySerializeItemIds(itemIds),
+    dbFormatDateTime(),
     userId,
     groupId
   );
@@ -257,9 +263,10 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
     `
     DELETE
       FROM \`${junctionTable}\`
-      WHERE \`${jtMainTableColumn}\` = ? AND \`${jtItemTableColumn}\` IN (${removeItemIds
-      .map(() => '?')
-      .join(', ')})
+      WHERE \`${jtMainTableColumn}\` = $1 AND \`${jtItemTableColumn}\` IN (${dbCreatePlaceholders(
+      removeItemIds,
+      2
+    )})
     `,
     groupId,
     ...removeItemIds
@@ -275,10 +282,11 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
   const updated = await txClient.$executeRawUnsafe(
     `
     UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = ?
-      WHERE \`${userIdColumn}\` = ? AND \`${idColumn}\` = ? AND \`${itemOrderColumn}\` = ?
+      SET \`${itemOrderColumn}\` = $1, \`${updatedAtColumn}\` = $2
+      WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4 AND \`${itemOrderColumn}\` = $5
     `,
     newItemOrder,
+    dbFormatDateTime(),
     userId,
     groupId,
     oldItemOrder
@@ -511,10 +519,11 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
   const updated = await txClient.$executeRawUnsafe(
     `
     UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = ?
-      WHERE \`${userIdColumn}\` = ? AND \`${idColumn}\` = ? AND \`${itemOrderColumn}\` = ?
+      SET \`${itemOrderColumn}\` = $1, \`${updatedAtColumn}\` = $2
+      WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4 AND \`${itemOrderColumn}\` = $5
     `,
     newItemOrder,
+    dbFormatDateTime(),
     userId,
     groupId,
     oldItemOrder
