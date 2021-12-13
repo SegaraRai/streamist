@@ -1,13 +1,16 @@
 import { db } from '~/db';
-import type { ImageWithFile } from '~/types/image';
-import { TrackWithFile } from '~/types/track';
-import type { ResourceAlbum, ResourcePlaylist } from '$/types';
+import type {
+  ResourceAlbum,
+  ResourceImage,
+  ResourcePlaylist,
+  ResourceTrack,
+} from '$/types';
 
 export async function fetchAlbumImages(
   album: ResourceAlbum
-): Promise<ImageWithFile[]> {
+): Promise<ResourceImage[]> {
   return (await db.images.bulkGet(album.imageIds)).filter(
-    (item, index): item is ImageWithFile => {
+    (item, index): item is ResourceImage => {
       if (!item) {
         throw new Error(
           `Image ${album.imageIds[index]} not found. (database corrupted)`
@@ -20,9 +23,9 @@ export async function fetchAlbumImages(
 
 export async function fetchPlaylistTracks(
   playlist: ResourcePlaylist
-): Promise<TrackWithFile[]> {
+): Promise<ResourceTrack[]> {
   return (await db.tracks.bulkGet(playlist.trackIds)).filter(
-    (item, index): item is TrackWithFile => {
+    (item, index): item is ResourceTrack => {
       if (!item) {
         throw new Error(
           `Track ${playlist.trackIds[index]} not found. (database corrupted)`

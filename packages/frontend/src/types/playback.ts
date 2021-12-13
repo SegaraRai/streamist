@@ -1,23 +1,26 @@
-import type { Artist } from '$prisma/client';
-import type { ResourceAlbum, ResourcePlaylist } from '$/types';
-import type { ImageWithFile } from './image';
-import type { TrackWithFile } from './track';
+import type {
+  ResourceAlbum,
+  ResourceArtist,
+  ResourceImage,
+  ResourcePlaylist,
+  ResourceTrack,
+} from '$/types';
 
 export interface AlbumForPlayback extends ResourceAlbum {
-  artist: Artist;
-  images: ImageWithFile[];
+  artist: ResourceArtist;
+  images: ResourceImage[];
 }
 
-export interface TrackForPlayback extends TrackWithFile {
+export interface TrackForPlayback extends ResourceTrack {
   album: AlbumForPlayback;
-  artist: Artist;
+  artist: ResourceArtist;
 }
 
 export interface AlbumForPlaybackWithTracks extends AlbumForPlayback {
   tracks: TrackForPlayback[];
 }
 
-export interface ArtistForPlayback extends Artist {
+export interface ArtistForPlayback extends ResourceArtist {
   albums: AlbumForPlaybackWithTracks[];
   tracks: TrackForPlayback[];
 }

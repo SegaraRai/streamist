@@ -2,14 +2,13 @@
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { fetchAlbumsForPlaybackWithTracks } from '~/resources/album';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ImageWithFile } from '~/types/image';
 import type { AlbumForPlaybackWithTracks } from '~/types/playback';
-import type { Artist } from '$prisma/client';
+import type { ResourceArtist, ResourceImage } from '$/types';
 
 interface Item {
   album$$q: AlbumForPlaybackWithTracks;
-  artist$$q: Artist;
-  image$$q: ImageWithFile | undefined;
+  artist$$q: ResourceArtist;
+  image$$q: ResourceImage | undefined;
   releaseYear$$q: string | undefined;
 }
 

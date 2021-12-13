@@ -2,8 +2,8 @@
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { fetchArtistForPlayback } from '~/resources/artist';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ImageWithFile } from '~/types/image';
 import type { ArtistForPlayback, TrackForPlayback } from '~/types/playback';
+import type { ResourceImage } from '$/types';
 
 export default defineComponent({
   props: {
@@ -15,7 +15,7 @@ export default defineComponent({
     const id = computed(() => props.id);
 
     const artist = ref<ArtistForPlayback | undefined>();
-    const image = ref<ImageWithFile | undefined>();
+    const image = ref<ResourceImage | undefined>();
     const setList = ref<TrackForPlayback[]>([]);
     const albumTracksObject = ref<Record<string, TrackForPlayback[]>>({});
     const isActive = ref({});

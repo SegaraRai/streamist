@@ -2,13 +2,13 @@
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { fetchArtistsForPlayback } from '~/resources/artist';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ImageWithFile } from '~/types/image';
 import type { ArtistForPlayback } from '~/types/playback';
+import type { ResourceImage } from '$/types';
 
 interface ArtistItem {
   id$$q: string;
   artist$$q: ArtistForPlayback;
-  image$$q: ImageWithFile | undefined;
+  image$$q: ResourceImage | undefined;
 }
 
 export default defineComponent({

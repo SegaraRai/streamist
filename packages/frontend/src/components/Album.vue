@@ -8,7 +8,7 @@ import type {
   AlbumForPlaybackWithTracks,
   TrackForPlayback,
 } from '@/types/playback';
-import type { ImageWithFile } from '~/types/image';
+import type { ResourceImage } from '$/types';
 
 export default defineComponent({
   props: {
@@ -32,7 +32,7 @@ export default defineComponent({
     const tracks = computed<TrackForPlayback[] | undefined>(
       () => props.album?.tracks
     );
-    const image = computed<ImageWithFile | null | undefined>(() => {
+    const image = computed<ResourceImage | null | undefined>(() => {
       return props.album && getDefaultAlbumImage(props.album);
     });
 

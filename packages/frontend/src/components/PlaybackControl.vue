@@ -4,7 +4,7 @@ import type { RepeatType } from '$shared/types/playback';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { findAncestor } from '@/logic/findAncestor';
 import { usePlaybackStore } from '@/stores/playback';
-import type { ImageWithFile } from '~/types/image';
+import type { ResourceImage } from '$/types';
 
 export default defineComponent({
   setup() {
@@ -16,7 +16,7 @@ export default defineComponent({
     );
     const shuffleEnabled = playbackStore.shuffle$$q;
 
-    const image = computed<ImageWithFile | null | undefined>(
+    const image = computed<ResourceImage | null | undefined>(
       () => currentTrack.value && getDefaultAlbumImage(currentTrack.value.album)
     );
 

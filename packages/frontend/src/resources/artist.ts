@@ -1,16 +1,19 @@
 import { db } from '~/db';
 import { createMultiMap } from '~/logic/multiMap';
 import { compareAlbum, compareArtist, compareTrack } from '~/logic/sort';
-import { ImageWithFile } from '~/types/image';
 import {
   AlbumForPlayback,
   AlbumForPlaybackWithTracks,
   ArtistForPlayback,
 } from '~/types/playback';
-import type { Artist } from '$prisma/client';
-import { ResourceAlbum, ResourceTrack } from '$/types';
+import {
+  ResourceAlbum,
+  ResourceArtist,
+  ResourceImage,
+  ResourceTrack,
+} from '$/types';
 
-export async function fetchArtist(artistId: string): Promise<Artist> {
+export async function fetchArtist(artistId: string): Promise<ResourceArtist> {
   const artist = await db.artists.get(artistId);
   if (!artist) {
     throw new Error(`Artist ${artistId} not found`);
@@ -39,12 +42,13 @@ export async function fetchArtistsForPlayback(): Promise<ArtistForPlayback[]> {
     string,
     ResourceAlbum
   >(albums.map((item) => [item.id, item]));
-  const artistMap: ReadonlyMap<string, Artist> = new Map<string, Artist>(
-    artists.map((item) => [item.id, item])
-  );
-  const imageMap: ReadonlyMap<string, ImageWithFile> = new Map<
+  const artistMap: ReadonlyMap<string, ResourceArtist> = new Map<
     string,
-    ImageWithFile
+    ResourceArtist
+  >(artists.map((item) => [item.id, item]));
+  const imageMap: ReadonlyMap<string, ResourceImage> = new Map<
+    string,
+    ResourceImage
   >(images.map((item) => [item.id, item]));
   const albumMultiMap: ReadonlyMap<string, ResourceAlbum[]> = createMultiMap(
     albums,
@@ -61,7 +65,7 @@ export async function fetchArtistsForPlayback(): Promise<ArtistForPlayback[]> {
 
   const createAlbumForPlaybackWithTracks = (
     album: ResourceAlbum,
-    artist: Artist
+    artist: ResourceArtist
   ): AlbumForPlaybackWithTracks => {
     const images = album.imageIds.map((imageId) => {
       const image = imageMap.get(imageId);

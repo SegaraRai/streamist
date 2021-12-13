@@ -4,9 +4,8 @@ import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { formatTime } from '@/logic/formatTime';
 import { usePlaybackStore } from '@/stores/playback';
 import { useThemeStore } from '@/stores/theme';
-import type { ImageWithFile } from '@/types/image';
 import type { AlbumForPlayback, TrackForPlayback } from '@/types/playback';
-import type { Artist } from '$prisma/client';
+import type { ResourceArtist, ResourceImage } from '$/types';
 
 /**
  * インデックスのところに表示する内容
@@ -17,11 +16,11 @@ interface ListItemTrack {
   type$$q: 'track';
   index$$q: number;
   track$$q: TrackForPlayback;
-  artist$$q: Artist;
+  artist$$q: ResourceArtist;
   album$$q: AlbumForPlayback;
-  albumArtist$$q: Artist;
+  albumArtist$$q: ResourceArtist;
   formattedDuration$$q: string;
-  image$$q: ImageWithFile | undefined;
+  image$$q: ResourceImage | undefined;
   isLast$$q: boolean;
 }
 

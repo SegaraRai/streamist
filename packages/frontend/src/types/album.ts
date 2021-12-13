@@ -1,6 +1,5 @@
-import type { ResourceAlbum } from '$/types';
-import type { ImageWithFile } from './image';
+import type { ResourceAlbum, ResourceImage } from '$/types';
 
-export interface AlbumWithImageFile extends ResourceAlbum {
-  images: ImageWithFile[];
+export interface AlbumWithImage extends ResourceAlbum {
+  images: ResourceImage[];
 }

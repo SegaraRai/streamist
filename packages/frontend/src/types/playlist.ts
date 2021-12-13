@@ -1,6 +1,5 @@
-import type { ResourcePlaylist } from '$/types';
-import type { TrackWithFile } from './track';
+import type { ResourcePlaylist, ResourceTrack } from '$/types';
 
 export interface PlaylistWithTrackFile extends ResourcePlaylist {
-  tracks: TrackWithFile[];
+  tracks: ResourceTrack[];
 }

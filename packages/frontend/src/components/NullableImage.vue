@@ -3,10 +3,10 @@ import { asyncComputed } from '@vueuse/core';
 import { PropType, defineComponent } from 'vue';
 import NoImage from '@/components/NoImage.vue';
 import { SrcObject, createSrc } from '@/logic/srcSet';
-import type { ImageWithFile } from '~/types/image';
+import type { ResourceImage } from '$/types';
 
 interface Props {
-  image?: ImageWithFile | null;
+  image?: ResourceImage | null;
   width: number;
   height: number;
   aspectRatio?: number | string;
@@ -18,7 +18,7 @@ export default defineComponent({
   },
   props: {
     image: {
-      type: Object as PropType<ImageWithFile | null | undefined>,
+      type: Object as PropType<ResourceImage | null | undefined>,
       default: undefined,
     },
     width: Number,

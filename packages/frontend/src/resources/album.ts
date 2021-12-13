@@ -1,20 +1,19 @@
 import { db } from '~/db';
 import { createMultiMap } from '~/logic/multiMap';
 import { compareAlbum, compareTrack } from '~/logic/sort';
-import type { AlbumWithImageFile } from '~/types/album';
-import type { ImageWithFile } from '~/types/image';
+import type { AlbumWithImage } from '~/types/album';
 import type {
   AlbumForPlayback,
   AlbumForPlaybackWithTracks,
   TrackForPlayback,
 } from '~/types/playback';
 import type { Artist } from '$prisma/client';
-import type { ResourceTrack } from '$/types';
+import type { ResourceImage, ResourceTrack } from '$/types';
 import { fetchAlbumImages } from './utils';
 
 export async function fetchAlbumWithImages(
   albumId: string
-): Promise<AlbumWithImageFile> {
+): Promise<AlbumWithImage> {
   const { album, images } = await db.transaction(
     'r',
     [db.albums, db.images],
@@ -144,9 +143,9 @@ export async function fetchAlbumsForPlaybackWithTracks(): Promise<
   const artistsMap: ReadonlyMap<string, Artist> = new Map<string, Artist>(
     artists.map((item) => [item.id, item])
   );
-  const imageMap: ReadonlyMap<string, ImageWithFile> = new Map<
+  const imageMap: ReadonlyMap<string, ResourceImage> = new Map<
     string,
-    ImageWithFile
+    ResourceImage
   >(images.map((item) => [item.id, item]));
   const trackMultiMap: ReadonlyMap<string, ResourceTrack[]> = createMultiMap(
     tracks,

@@ -3,16 +3,15 @@ import { minQueueSize } from '@/config/queue';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { formatTime } from '@/logic/formatTime';
 import { usePlaybackStore } from '@/stores/playback';
-import type { ImageWithFile } from '@/types/image';
 import type { TrackForPlayback } from '@/types/playback';
-import type { Album, Artist } from '$prisma/client';
+import type { ResourceAlbum, ResourceArtist, ResourceImage } from '$/types';
 
 interface ListItem {
-  album$$q: Album;
-  albumArtist$$q: Artist;
-  artist$$q: Artist;
+  album$$q: ResourceAlbum;
+  albumArtist$$q: ResourceArtist;
+  artist$$q: ResourceArtist;
   formattedDuration$$q: string;
-  image$$q: ImageWithFile | undefined;
+  image$$q: ResourceImage | undefined;
   track$$q: TrackForPlayback;
 }
 
