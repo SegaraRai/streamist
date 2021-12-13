@@ -26,12 +26,12 @@ export type CreateTrackData = Omit<
   | 'playlists'
   | 'tags'
   | 'coArtists'
+  | 'sourceFileId'
 >;
 
 export async function dbTrackCreateTx(
   txClient: TransactionalPrismaClient,
   userId: string,
-  sourceId: string,
   albumTitle: string,
   albumArtistName: string,
   trackArtistName: string,
@@ -77,7 +77,6 @@ export async function dbTrackCreateTx(
       id: newTrackId,
       artistId: trackArtist.id,
       albumId: album.id,
-      sourceId,
       userId,
     },
   });
