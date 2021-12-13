@@ -28,6 +28,7 @@ model User {
   sourceFiles    SourceFile[]
   albumCoArtists AlbumCoArtist[]
   trackCoArtist  TrackCoArtist[]
+  deletions      Deletion[]
 }
 
 model Tag {
@@ -279,5 +280,17 @@ model Playlist {
   trackOrder String   @default("")
   tags       Tag[]
 
+  @@index([userId])
+}
+
+model Deletion {
+  // 'album', 'albumCoArtist', 'artist', 'image', 'imageFile', 'playlist', 'source', 'sourceFile', 'tag', 'track', 'trackCoArtist', 'trackFile'
+  entityType String
+  entityId   String
+  deletedAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+
+  @@id([entityType, entityId, userId])
   @@index([userId])
 }
