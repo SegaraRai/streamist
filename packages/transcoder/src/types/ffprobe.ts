@@ -135,19 +135,18 @@ export interface FFprobeResult {
  * - キーを小文字にし、英数字以外を除去する
  * - 値の両端の空白を除去する
  * - 空値（空白だけのものを含む）を削除する
+ * - 同じキーのものは値が長いものを採用する
  * @param tags タグ
  * @returns ノーマライズしたタグ
  */
 export function normalizeFFprobeTags(tags: FFprobeTags): FFprobeTags {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const newTags: Record<string, string> = {};
-  for (const [key, value] of Object.entries(tags)) {
-    const trimmedValue = value?.trim();
-    if (!trimmedValue) {
-      continue;
-    }
-    const normalizedKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
-    newTags[normalizedKey] = trimmedValue;
-  }
-  return newTags as FFprobeTags;
+  return Object.fromEntries(
+    Object.entries(tags)
+      .map(([key, value]) => [
+        key.toLowerCase().replace(/[^a-z\d]/g, ''),
+        value?.trim(),
+      ])
+      .filter((e): e is [string, string] => !!e[1])
+      .sort((a, b) => a[1].length - b[1].length)
+  );
 }

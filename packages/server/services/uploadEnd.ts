@@ -235,6 +235,7 @@ export async function onSourceFileUploaded(
       uploaded: false,
     },
     data: {
+      entityExists: true,
       uploaded: true,
       uploadedAt: new Date(),
     },

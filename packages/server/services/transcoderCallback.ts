@@ -313,6 +313,7 @@ async function handleTranscoderResponse(
 
       if (extracted) {
         const deleteTranscodedFiles = async () => {
+          // NOTE(ximg): currently we don't upload raw extracted images to S3. Delete them if we do.
           const os = getTranscodedImageFileOS(artifact.source.region);
           await Promise.allSettled(
             artifact.files.map((file) =>
@@ -358,7 +359,7 @@ async function handleTranscoderResponse(
             .flatMap((image) => image.sourceFile)
             .some((file) => file.sha256 === source.sha256)
         ) {
-          // album not found or image already exists
+          // album not found (= deleted during transcoding) or image already exists
           await deleteTranscodedFiles();
           continue;
         }

@@ -443,7 +443,7 @@ export async function processAudioRequest(
         continue;
       }
 
-      // TODO(ximg): S3に抽出した画像ファイルをアップロードするならここで
+      // NOTE(ximg): S3に抽出した画像ファイルをアップロードするならここで
 
       const sha256 = await calcFileHash(imageFilepath, 'sha256');
 

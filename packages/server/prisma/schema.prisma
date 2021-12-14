@@ -78,11 +78,9 @@ model SourceFile {
   // only for extracted image files
   sourceFile     SourceFile?  @relation("SourceFileToExtractedSourceFile", fields: [sourceFileId], references: [id])
   sourceFileId   String?
-  // whether the original file exists in S3. false for extracted image files
-  entityExists   Boolean
-  uploaded       Boolean
-  // UploadId for multipart uploads
-  uploadId       String?
+  entityExists   Boolean // whether the original file exists in S3. `false` for unuploaded files and extracted image files
+  uploaded       Boolean // an atomic flag to avoid duplicate processing on upload completion. `true` for uploaded files and extracted image files
+  uploadId       String? // S3 UploadId for multipart uploads
   uploadedAt     DateTime?
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @default(now()) @updatedAt

@@ -195,6 +195,10 @@ const navItems = computed<readonly NavItem[]>(() => [
 const railedNavigation = computed(() => display.xs.value);
 
 const rightSidebar = ref(false);
+
+const devSync = (event: MouseEvent) => {
+  syncDB(event.shiftKey);
+};
 </script>
 
 <template>
@@ -254,7 +258,7 @@ const rightSidebar = ref(false);
       />
       <v-spacer />
       <div class="flex gap-x-2">
-        <v-btn icon size="small" @click="syncDB">
+        <v-btn icon size="small" @click="devSync">
           <v-icon>mdi-sync</v-icon>
         </v-btn>
         <v-btn icon size="small" @click="uploadDialog = true">

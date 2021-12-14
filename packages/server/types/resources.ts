@@ -1,3 +1,4 @@
+import type { DeletionEntityType } from '$shared/types/db';
 import type {
   Album,
   AlbumCoArtist,
@@ -46,7 +47,9 @@ export type ResourceTrackCoArtist = TrackCoArtist;
 
 export type ResourceUser = Omit<User, ''>;
 
-export type ResourceDeletion = Deletion;
+export type ResourceDeletion = Omit<Deletion, 'entityType'> & {
+  entityType: DeletionEntityType;
+};
 
 export interface Resources {
   timestamp: number;

@@ -1,3 +1,5 @@
+import { is } from '$shared/is';
+import type { DeletionEntityType } from '$shared/types/db';
 import { ImageSortableAlbum, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { dbPlaylistSortTracks } from '$/db/playlist';
@@ -66,15 +68,24 @@ export default defineController(() => ({
     return { status: 204 };
   },
   delete: async ({ params, user }) => {
-    const deleted = await client.playlist.deleteMany({
-      where: {
-        id: params.playlistId,
-        userId: user.id,
-      },
+    await client.$transaction(async (txClient) => {
+      const deleted = await txClient.playlist.deleteMany({
+        where: {
+          id: params.playlistId,
+          userId: user.id,
+        },
+      });
+      if (deleted.count === 0) {
+        throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
+      }
+      await txClient.deletion.create({
+        data: {
+          entityType: is<DeletionEntityType>('playlist'),
+          entityId: params.playlistId,
+          userId: user.id,
+        },
+      });
     });
-    if (deleted.count === 0) {
-      throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
-    }
     return { status: 204 };
   },
 }));

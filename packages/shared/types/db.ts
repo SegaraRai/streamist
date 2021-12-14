@@ -22,6 +22,18 @@ export type SourceFileType = 'audio' | 'cueSheet' | 'image';
 
 export type SourceFileAttachToType = 'album';
 
+export type DeletionEntityType =
+  | 'albumCoArtist'
+  | 'album'
+  | 'artist'
+  | 'image'
+  | 'playlist'
+  | 'sourceFile'
+  | 'source'
+  | 'tag'
+  | 'trackCoArtist'
+  | 'track';
+
 export function toSourceFileType(sourceFileType: string): SourceFileType {
   switch (sourceFileType) {
     case 'audio':

@@ -2,6 +2,8 @@ import { generateAlbumId } from '$shared-server/generateId';
 import type { Album } from '$prisma/client';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
+import { is } from '../is';
+import { DeletionEntityType } from '../types/db';
 
 export function getAlbums(userId: string, artistId?: string): Promise<Album[]> {
   return client.album.findMany({
@@ -52,12 +54,25 @@ export function updateAlbum(userId: string, albumId: string, title: string) {
   });
 }
 
-export function deleteAlbum(userId: string, albumId: string) {
-  // fails if album has images or tracks
-  return client.album.deleteMany({
-    where: {
-      id: albumId,
-      userId,
-    },
+export function deleteAlbum(userId: string, albumId: string): Promise<void> {
+  // fails if album has coArtists, (images?) or tracks
+  // TODO: delete images (and tracks?)
+  return client.$transaction(async (txClient) => {
+    const deleted = await txClient.album.deleteMany({
+      where: {
+        id: albumId,
+        userId,
+      },
+    });
+    if (deleted.count === 0) {
+      throw new HTTPError(404, `Album ${albumId} not found`);
+    }
+    await txClient.deletion.create({
+      data: {
+        entityType: is<DeletionEntityType>('album'),
+        entityId: albumId,
+        userId,
+      },
+    });
   });
 }

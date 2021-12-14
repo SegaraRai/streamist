@@ -1,5 +1,7 @@
 import type { Table } from 'dexie';
+import type { DeletionEntityType } from '$shared/types/db';
 import api from '~/logic/api';
+import type { ResourceDeletion } from '$/types';
 import { db } from '.';
 
 async function clearAndAdd<T, U>(
@@ -7,23 +9,26 @@ async function clearAndAdd<T, U>(
   items: readonly T[]
 ): Promise<void> {
   await table.clear();
-  if (items.length === 0) {
-    return;
-  }
   // bulkAdd is faster than bulkPut
   await table.bulkAdd(items);
 }
 
 async function update<T, U>(
   table: Table<T, U>,
-  items: readonly T[]
+  items: readonly T[],
+  deletedItemIds: U[]
 ): Promise<void> {
-  /*
-  if (items.length === 0) {
-    return;
-  }
-  //*/
+  await table.bulkDelete(deletedItemIds);
   await table.bulkPut(items);
+}
+
+function getDeletionIds(
+  deletions: readonly ResourceDeletion[],
+  type: DeletionEntityType
+): string[] {
+  return deletions
+    .filter((item) => item.entityType === type)
+    .map((item) => item.entityId);
 }
 
 export async function syncDB(reconstruct = false): Promise<void> {
@@ -38,13 +43,26 @@ export async function syncDB(reconstruct = false): Promise<void> {
   }
 
   try {
-    const resources = await api.my.resources.$get({
+    const r = await api.my.resources.$get({
       query: {
         since,
       },
     });
 
-    console.log(since, resources);
+    console.log(since, r);
+
+    const d = {
+      albumCoArtists: getDeletionIds(r.deletions, 'albumCoArtist'),
+      albums: getDeletionIds(r.deletions, 'album'),
+      artists: getDeletionIds(r.deletions, 'artist'),
+      images: getDeletionIds(r.deletions, 'image'),
+      playlists: getDeletionIds(r.deletions, 'playlist'),
+      sourceFiles: getDeletionIds(r.deletions, 'sourceFile'),
+      sources: getDeletionIds(r.deletions, 'source'),
+      tags: getDeletionIds(r.deletions, 'tag'),
+      trackCoArtists: getDeletionIds(r.deletions, 'trackCoArtist'),
+      tracks: getDeletionIds(r.deletions, 'track'),
+    };
 
     await db.transaction(
       'rw',
@@ -64,35 +82,35 @@ export async function syncDB(reconstruct = false): Promise<void> {
         if (reconstruct) {
           localStorage.removeItem('db.lastUpdate');
           await Promise.all([
-            clearAndAdd(db.albumCoArtists, resources.albumCoArtists),
-            clearAndAdd(db.albums, resources.albums),
-            clearAndAdd(db.artists, resources.artists),
-            clearAndAdd(db.images, resources.images),
-            clearAndAdd(db.playlists, resources.playlists),
-            clearAndAdd(db.sourceFiles, resources.sourceFiles),
-            clearAndAdd(db.sources, resources.sources),
-            clearAndAdd(db.tags, resources.tags),
-            clearAndAdd(db.trackCoArtists, resources.trackCoArtists),
-            clearAndAdd(db.tracks, resources.tracks),
+            clearAndAdd(db.albumCoArtists, r.albumCoArtists),
+            clearAndAdd(db.albums, r.albums),
+            clearAndAdd(db.artists, r.artists),
+            clearAndAdd(db.images, r.images),
+            clearAndAdd(db.playlists, r.playlists),
+            clearAndAdd(db.sourceFiles, r.sourceFiles),
+            clearAndAdd(db.sources, r.sources),
+            clearAndAdd(db.tags, r.tags),
+            clearAndAdd(db.trackCoArtists, r.trackCoArtists),
+            clearAndAdd(db.tracks, r.tracks),
           ]);
         } else {
           await Promise.all([
-            update(db.albumCoArtists, resources.albumCoArtists),
-            update(db.albums, resources.albums),
-            update(db.artists, resources.artists),
-            update(db.images, resources.images),
-            update(db.playlists, resources.playlists),
-            update(db.sourceFiles, resources.sourceFiles),
-            update(db.sources, resources.sources),
-            update(db.tags, resources.tags),
-            update(db.trackCoArtists, resources.trackCoArtists),
-            update(db.tracks, resources.tracks),
+            update(db.albumCoArtists, r.albumCoArtists, d.albumCoArtists),
+            update(db.albums, r.albums, d.albums),
+            update(db.artists, r.artists, d.artists),
+            update(db.images, r.images, d.images),
+            update(db.playlists, r.playlists, d.playlists),
+            update(db.sourceFiles, r.sourceFiles, d.sourceFiles),
+            update(db.sources, r.sources, d.sources),
+            update(db.tags, r.tags, d.tags),
+            update(db.trackCoArtists, r.trackCoArtists, d.trackCoArtists),
+            update(db.tracks, r.tracks, d.tracks),
           ]);
         }
       }
     );
 
-    localStorage.setItem('db.lastUpdate', resources.timestamp.toString());
+    localStorage.setItem('db.lastUpdate', r.timestamp.toString());
   } finally {
     localStorage.removeItem('db.updating');
   }

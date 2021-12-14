@@ -1,7 +1,11 @@
 import { dbArrayDeserializeItemIds } from '$shared/dbArray';
 import type { Album, Playlist } from '$prisma/client';
 import { client } from '$/db/lib/client';
-import type { ResourceAlbum, ResourcePlaylist } from '$/types';
+import type {
+  ResourceAlbum,
+  ResourceDeletion,
+  ResourcePlaylist,
+} from '$/types';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -121,14 +125,14 @@ export default defineController(() => ({
             files: true,
           },
         }),
-        deletions: await txClient.deletion.findMany({
+        deletions: (await txClient.deletion.findMany({
           where: {
             userId: user.id,
             deletedAt: {
               gte: since,
             },
           },
-        }),
+        })) as ResourceDeletion[],
       };
     });
 
