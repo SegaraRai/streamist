@@ -95,7 +95,7 @@ async function uploadFile(file: File) {
     .files._sourceFileId(audioFile.sourceFileId)
     .$patch({
       body: {
-        uploaded: true,
+        state: 'uploaded',
         parts: etags,
       },
     });

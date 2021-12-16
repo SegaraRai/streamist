@@ -9,7 +9,7 @@
  * getFilename('example.tar.xz');       // => 'example.tar.xz'
  * getFilename('.gitignore');           // => '.gitignore'
  * getFilename('/path/to/file.dat');    // => 'file.dat'
- * getFilename('/this/is/a/dir/');      // => ''
+ * getFilename('/this/is/a/.dir/');     // => ''
  * getFilename('/');                    // => ''
  * getFilename('');                     // => ''
  */
@@ -36,7 +36,7 @@ export function getFilename(filepath: string): string {
  * getStem('example.dat.');         // => 'example.dat'
  * getStem('.gitignore');           // => ''
  * getStem('/path/to/file.dat');    // => 'file'
- * getStem('/this/is/a/dir/');      // => ''
+ * getStem('/this/is/a/.dir/');     // => ''
  * getStem('/');                    // => ''
  * getStem('');                     // => ''
  */
@@ -56,7 +56,7 @@ export function getStem(filepath: string): string {
  * getExtension('example.tar.xz');      // => '.xz'
  * getExtension('.gitignore');          // => '.gitignore'
  * getExtension('/path/to/file.dat');   // => '.dat'
- * getExtension('/this/is/a/dir/');     // => ''
+ * getExtension('/this/is/a/.dir/');    // => ''
  * getExtension('/');                   // => ''
  * getExtension('');                    // => ''
  */
@@ -66,5 +66,5 @@ export function getExtension(filepath: string): string {
   if (lastPeriod < 0) {
     return '';
   }
-  return filename.substr(lastPeriod);
+  return filename.slice(lastPeriod);
 }

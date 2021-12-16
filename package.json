@@ -25,7 +25,7 @@
     "pretest": "pnpm run generate",
     "test": "jest",
     "pretypecheck": "pnpm run generate",
-    "typecheck": "run-p typecheck:*",
+    "typecheck": "run-s typecheck:*",
     "typecheck:client": "pnpm run typecheck --prefix packages/frontend",
     "typecheck:server": "pnpm run typecheck --prefix packages/server",
     "typecheck:transcoder": "pnpm run typecheck --prefix packages/transcoder",

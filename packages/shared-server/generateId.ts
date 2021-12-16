@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { encodeBase32 } from './base32.js';
 
-export const enum IdTypeCode {
+const enum IdTypeCode {
   Album = 'al',
   Artist = 'ar',
   Track = 'tr',
@@ -33,7 +33,7 @@ function randomBytesPromise(size: number): Promise<Buffer> {
 }
 
 async function generateRandomPart(): Promise<string> {
-  return encodeBase32(await randomBytesPromise(10)).substr(-16);
+  return encodeBase32(await randomBytesPromise(10)).slice(-16);
 }
 
 let gCounter = 0;
@@ -42,7 +42,7 @@ function generateTimestampPart(): string {
   return (Date.now() * 1000 + gCounter)
     .toString(32)
     .padStart(12, '0')
-    .substr(-12);
+    .slice(-12);
 }
 
 async function generateId(type: IdTypeCode): Promise<string> {

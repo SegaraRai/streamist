@@ -2,6 +2,7 @@ import { Ref, UnwrapRef } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
 import { TrackProvider } from '@/logic/trackProvider';
 import type { TrackForPlayback } from '@/types/playback';
+import defaultAlbumArt from '~/assets/default_album_art_256x256.png';
 import { getDefaultAlbumImage } from '~/logic/albumImage';
 import { loadAudio } from '~/logic/audio';
 import { getImageFileURL } from '~/logic/fileURL';
@@ -226,7 +227,13 @@ export function usePlaybackStore(): typeof refState {
                 type: imageFile.mimeType,
               }))
             )
-          : Promise.resolve(undefined);
+          : Promise.resolve([
+              {
+                src: defaultAlbumArt,
+                sizes: '256x256',
+                type: 'image/png',
+              },
+            ]);
 
         audioContainer.appendChild(newAudio);
         loadAudio(newAudio, track.files);

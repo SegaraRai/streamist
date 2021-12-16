@@ -49,7 +49,7 @@ model Tag {
 
 model Source {
   id                  String       @id
-  state               String
+  state               String // SourceState
   transcodeStartedAt  DateTime?
   transcodeFinishedAt DateTime?
   createdAt           DateTime     @default(now())
@@ -63,6 +63,7 @@ model Source {
 
 model SourceFile {
   id             String       @id
+  state          String // SourceFileState
   // 'audio' | 'cueSheet' | 'image'
   type           String
   region         String
@@ -79,7 +80,6 @@ model SourceFile {
   sourceFile     SourceFile?  @relation("SourceFileToExtractedSourceFile", fields: [sourceFileId], references: [id])
   sourceFileId   String?
   entityExists   Boolean // whether the original file exists in S3. `false` for unuploaded files and extracted image files
-  uploaded       Boolean // an atomic flag to avoid duplicate processing on upload completion. `true` for uploaded files and extracted image files
   uploadId       String? // S3 UploadId for multipart uploads
   uploadedAt     DateTime?
   createdAt      DateTime     @default(now())

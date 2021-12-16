@@ -1,9 +1,9 @@
 import { generateAlbumId } from '$shared-server/generateId';
+import { is } from '$shared/is';
+import type { DeletionEntityType } from '$shared/types/db';
 import type { Album } from '$prisma/client';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
-import { is } from '../is';
-import { DeletionEntityType } from '../types/db';
 
 export function getAlbums(userId: string, artistId?: string): Promise<Album[]> {
   return client.album.findMany({

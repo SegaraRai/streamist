@@ -18,6 +18,7 @@ import {
   getTranscodedAudioFileOS,
 } from '$shared-server/objectStorages.js';
 import { CueSheet, parseCueSheet } from '$shared/cueParser.js';
+import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText.js';
 import { calcFileHash } from '../fileHash.js';
 import logger from '../logger.js';
@@ -53,33 +54,11 @@ function createTracksFromCueSheet(
   duration: number,
   tags: FFprobeTags = {}
 ): TranscoderResponseArtifactAudioTrack[] {
-  // TODO: 以下のチェック処理をsharedに移動し、クライアント側で同じチェックを行う
-
-  // FILEコマンドがなければエラー
-  if (cueSheet.files.length === 0) {
+  try {
+    validateCueSheet(cueSheet);
+  } catch (error: unknown) {
     throw new TranscodeError(
-      'invalid cue sheet. the cue sheet has no FILE command.'
-    );
-  }
-
-  // FILEコマンドが2つ以上存在すればエラー
-  if (cueSheet.files.length !== 1) {
-    throw new TranscodeError(
-      'unsupported cue sheet. the cue sheet has too many FILE commands.'
-    );
-  }
-
-  const cueSheetTracks = cueSheet.files.flatMap((file) => file.tracks);
-
-  // TRACKが存在しなければエラー
-  if (cueSheetTracks.length === 0) {
-    throw new TranscodeError('unsupported cue sheet. no TRACK found.');
-  }
-
-  if (cueSheetTracks.some((track) => !track.offsetMap.has(1))) {
-    // INDEX 01がないTRACKが存在すればエラー
-    throw new TranscodeError(
-      'unsupported cue sheet. INDEX 01 is missing in TRACK.'
+      error instanceof Error ? error.message : String(error)
     );
   }
 
@@ -93,6 +72,7 @@ function createTracksFromCueSheet(
     (track, index): TranscoderResponseArtifactAudioTrack => {
       const index01Offset = track.offsetMap.get(1);
       if (index01Offset === undefined) {
+        // 事前にチェックしているので起こらないはず
         throw new TranscodeError(
           'invalid cue sheet. TRACK has no INDEX 01 offset.'
         );

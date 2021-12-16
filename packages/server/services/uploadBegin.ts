@@ -11,6 +11,9 @@ import {
 import { is } from '$shared/is.js';
 import { Region, toRegion } from '$shared/regions.js';
 import {
+  MAX_SOURCE_AUDIO_FILE_SIZE,
+  MAX_SOURCE_CUE_SHEET_FILE_SIZE,
+  MAX_SOURCE_IMAGE_FILE_SIZE,
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
@@ -18,15 +21,11 @@ import {
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
 } from '$shared/sourceFileConfig.js';
 import {
+  SourceFileState,
   SourceFileType,
   SourceState,
   toSourceFileAttachToType,
-} from '$shared/types/db';
-import {
-  MAX_SOURCE_AUDIO_FILE_SIZE,
-  MAX_SOURCE_CUE_SHEET_FILE_SIZE,
-  MAX_SOURCE_IMAGE_FILE_SIZE,
-} from '$shared/uploadConfig.js';
+} from '$shared/types/db.js';
 import { client } from '$/db/lib/client.js';
 import type {
   CreateSourceRequestAudio,
@@ -218,6 +217,7 @@ export async function createAudioSource(
         create: [
           {
             id: audioFileId,
+            state: is<SourceFileState>('uploading'),
             type: is<SourceFileType>('audio'),
             region,
             filename: String(request.audioFile.filename),
@@ -227,7 +227,6 @@ export async function createAudioSource(
             attachToType: null,
             attachToId: null,
             entityExists: false,
-            uploaded: false,
             uploadId,
             user: { connect: { id: userId } },
           },
@@ -235,6 +234,7 @@ export async function createAudioSource(
             ? [
                 {
                   id: cueSheetFileId!,
+                  state: is<SourceFileState>('uploading'),
                   type: is<SourceFileType>('cueSheet'),
                   region,
                   filename: String(request.cueSheetFile.filename),
@@ -244,7 +244,6 @@ export async function createAudioSource(
                   attachToType: null,
                   attachToId: null,
                   entityExists: false,
-                  uploaded: false,
                   uploadId: null,
                   user: { connect: { id: userId } },
                 },
@@ -340,6 +339,7 @@ export async function createImageSource(
         create: [
           {
             id: imageFileId,
+            state: is<SourceFileState>('uploading'),
             type: is<SourceFileType>('image'),
             region,
             filename: String(request.imageFile.filename),
@@ -349,7 +349,6 @@ export async function createImageSource(
             attachToType: toSourceFileAttachToType(request.attachToType),
             attachToId: String(request.attachToId),
             entityExists: false,
-            uploaded: false,
             uploadId,
             user: { connect: { id: userId } },
           },
@@ -397,7 +396,7 @@ export async function getUploadURLForSourceFile(
   }
 
   if (
-    sourceFile.uploaded ||
+    sourceFile.state !== is<SourceFileState>('uploading') ||
     sourceFile.source.state !== is<SourceState>('uploading')
   ) {
     throw new HTTPError(409, `source file ${sourceFileId} already uploaded`);

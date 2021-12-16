@@ -1,5 +1,3 @@
-export const defaultOffsetNumber = 1;
-
 interface Rem {
   remMap: Map<string, string>;
   rems: string[];
@@ -41,6 +39,13 @@ const escapeMap = /* #__PURE__ */ new Map<string, string>([
   ['\\', '\\'],
 ]);
 
+export class CueSheetParseError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'CueSheetParseError';
+  }
+}
+
 /**
  * 二重引用符で囲われた文字列のエスケープを解除する \
  * 二重引用符で囲われていない文字列はなにも処理せずに返す
@@ -54,10 +59,10 @@ function unescapeValue(str: string): string {
   }
 
   // "A "test" string" のようなものもパースできるようにしておく（"A \"test\" string"として扱う）
-  str = str.substr(1, str.length - 2);
+  str = str.slice(1, str.length - 2);
   str = str.replace(
     /\\./g,
-    (sequence) => escapeMap.get(sequence.substr(1)) || sequence.substr(1)
+    (sequence) => escapeMap.get(sequence.slice(1)) || sequence.slice(1)
   );
   return str;
 }
@@ -71,14 +76,14 @@ function unescapeValue(str: string): string {
 function parseTime(strTime: string): number {
   const match = strTime.match(/^(\d\d):(\d\d):(\d\d)$/);
   if (!match) {
-    throw new Error('invalid offset');
+    throw new CueSheetParseError('invalid offset');
   }
   const [, minutes, seconds, frames] = match;
   const value =
     (parseInt(minutes, 10) * 60 + parseInt(seconds, 10)) * 75 +
     parseInt(frames, 10);
   if (!isFinite(value)) {
-    throw new TypeError('invalid offset');
+    throw new CueSheetParseError('invalid offset');
   }
   return value;
 }
@@ -114,7 +119,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
 
   // 念の為BOM除去
   if (strCueSheet.startsWith('\uFEFF')) {
-    strCueSheet = strCueSheet.substr(1);
+    strCueSheet = strCueSheet.slice(1);
   }
 
   for (const [lineIndex, orgLine] of strCueSheet.split(/\r?\n/).entries()) {
@@ -127,8 +132,8 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
 
       const lineMatch = line.match(/^(\S+)(?:\s+(.+))?$/);
       if (!lineMatch) {
-        // 起こらないはず
-        throw new Error('failed to parse command');
+        // 起こらない（正規表現が失敗しない）はず
+        throw new CueSheetParseError('failed to parse command');
       }
 
       const [, command, args] = lineMatch;
@@ -148,7 +153,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
           // eg. FILE "COCC-16718.flac" WAVE
           const match = args.match(/^("(?:.|\\.)+"|\S+)\s+("(?:.|\\.)+"|\S+)$/);
           if (!match) {
-            throw new Error('invalid FILE arguments');
+            throw new CueSheetParseError('invalid FILE arguments');
           }
           const [, filename, type] = match;
           lastFile = {
@@ -163,7 +168,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
         case 'FLAGS':
           // eg. FLAGS DCP
           if (!lastTrack) {
-            throw new Error('no TRACK specified for FLAGS');
+            throw new CueSheetParseError('no TRACK specified for FLAGS');
           }
           lastTrack.flags = unescapeValue(args);
           break;
@@ -173,7 +178,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
           //     INDEX 01 04:07:15
           // NOTE: MM:SS:FF の FF は 0 ~ 74
           if (!lastTrack) {
-            throw new Error('no TRACK specified for INDEX');
+            throw new CueSheetParseError('no TRACK specified for INDEX');
           }
           const [strIndex, strOffset] = args.split(/\s+/);
           const index = parseInt(strIndex, 10);
@@ -186,7 +191,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
         case 'ISRC':
           // eg. ISRC JPCO01306800
           if (!lastTrack) {
-            throw new Error('no TRACK specified for ISRC');
+            throw new CueSheetParseError('no TRACK specified for ISRC');
           }
           lastTrack.isrc = unescapeValue(args);
           break;
@@ -199,7 +204,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
         case 'POSTGAP':
           // eg. POSTGAP 00:05:00
           if (!lastTrack) {
-            throw new Error('no TRACK specified for POSTGAP');
+            throw new CueSheetParseError('no TRACK specified for POSTGAP');
           }
           lastTrack.postGap = parseTime(args);
           break;
@@ -207,7 +212,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
         case 'PREGAP':
           // eg. PREGAP 00:05:00
           if (!lastTrack) {
-            throw new Error('no TRACK specified for PREGAP');
+            throw new CueSheetParseError('no TRACK specified for PREGAP');
           }
           lastTrack.preGap = parseTime(args);
           break;
@@ -236,11 +241,11 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
         case 'TRACK': {
           // eg. TRACK 01 AUDIO
           if (!lastFile) {
-            throw new Error('no FILE specified for TRACK');
+            throw new CueSheetParseError('no FILE specified for TRACK');
           }
           const match = args.match(/^(\d+)\s+(.+)/);
           if (!match) {
-            throw new Error('invalid TRACK arguments');
+            throw new CueSheetParseError('invalid TRACK arguments');
           }
           const trackNumber = parseInt(match[1], 10);
           const type = match[2];
@@ -262,7 +267,7 @@ export function parseCueSheet(strCueSheet: string): CueSheet {
         }
 
         default:
-          throw new Error(`unknown command: ${command}`);
+          throw new CueSheetParseError(`unknown command: ${command}`);
       }
     } catch (error: unknown) {
       if (error instanceof Error) {

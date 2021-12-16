@@ -5,7 +5,11 @@ import {
 } from '$shared-server/objectStorages.js';
 import { is } from '$shared/is.js';
 import type { Region } from '$shared/regions.js';
-import type { SourceFileAttachToType, SourceState } from '$shared/types/db.js';
+import type {
+  SourceFileAttachToType,
+  SourceFileState,
+  SourceState,
+} from '$shared/types/db.js';
 import { TRANSCODER_API_ENDPOINT } from '$transcoder/devConfig.js';
 import {
   TranscoderRequest,
@@ -175,11 +179,7 @@ export async function onSourceFileUploaded(
       userId,
     },
     include: {
-      source: {
-        include: {
-          files: true,
-        },
-      },
+      source: true,
     },
   });
 
@@ -187,7 +187,7 @@ export async function onSourceFileUploaded(
     throw new HTTPError(404, `source file ${sourceFileId} not found`);
   }
 
-  if (sourceFile.uploaded) {
+  if (sourceFile.state !== is<SourceFileState>('uploading')) {
     throw new HTTPError(409, `source file ${sourceFileId} already uploaded`);
   }
 
@@ -232,11 +232,11 @@ export async function onSourceFileUploaded(
       id: sourceFileId,
       sourceId,
       userId,
-      uploaded: false,
+      state: is<SourceFileState>('uploading'),
     },
     data: {
+      state: is<SourceFileState>('uploaded'),
       entityExists: true,
-      uploaded: true,
       uploadedAt: new Date(),
     },
   });
@@ -247,8 +247,16 @@ export async function onSourceFileUploaded(
 
   // TODO(prod): lock object
 
-  const allFilesUploaded = sourceFile.source.files.every(
-    (file) => file.id === sourceFileId || file.uploaded
+  // NOTE: `uploaded`を更新した後に改めて取得しないと検出漏れする場合がある
+  const sourceFiles = await client.sourceFile.findMany({
+    where: {
+      sourceId,
+      userId,
+    },
+  });
+
+  const allFilesUploaded = sourceFiles.every(
+    (file) => file.state === is<SourceFileState>('uploaded')
   );
   if (!allFilesUploaded) {
     // upload in progress

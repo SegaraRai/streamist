@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import type { FastifyInstance } from 'fastify';
 import { generateImageId } from '$shared-server/generateId.js';
 import { osDelete } from '$shared-server/objectStorage';
@@ -9,6 +10,7 @@ import { is } from '$shared/is';
 import { parseDate } from '$shared/parseDate';
 import type {
   SourceFileAttachToType,
+  SourceFileState,
   SourceFileType,
   SourceState,
 } from '$shared/types/db';
@@ -16,6 +18,7 @@ import type { FFprobeTags } from '$transcoder/types/ffprobe';
 import type {
   TranscoderResponse,
   TranscoderResponseArtifactAudio,
+  TranscoderResponseArtifactError,
   TranscoderResponseArtifactImage,
 } from '$transcoder/types/transcoder.js';
 import { dbAlbumAddImageTx } from '$/db/album.js';
@@ -129,7 +132,7 @@ async function registerImage(
 }
 
 async function markSourceIdAsTranscodedTx(
-  txClient: TransactionalPrismaClient,
+  txClient: TransactionalPrismaClient | PrismaClient,
   userId: string,
   sourceId: string
 ): Promise<void> {
@@ -142,6 +145,26 @@ async function markSourceIdAsTranscodedTx(
     data: {
       state: is<SourceState>('transcoded'),
       transcodeFinishedAt: new Date(),
+    },
+  });
+}
+
+async function markSourceFileIdAsTx(
+  txClient: TransactionalPrismaClient | PrismaClient,
+  userId: string,
+  sourceId: string,
+  sourceFileId: string,
+  newState: SourceFileState & ('transcoded' | 'failed')
+): Promise<void> {
+  await txClient.sourceFile.updateMany({
+    where: {
+      id: sourceFileId,
+      userId,
+      sourceId,
+      state: is<SourceFileState>('transcoding'),
+    },
+    data: {
+      state: newState,
     },
   });
 }
@@ -159,18 +182,65 @@ async function handleTranscoderResponse(
     (artifact): artifact is TranscoderResponseArtifactImage =>
       artifact.type === 'image'
   );
+  const errorArtifacts = artifacts.filter(
+    (artifact): artifact is TranscoderResponseArtifactError =>
+      artifact.type === 'error'
+  );
 
   await client.$transaction(async (txClient) => {
     const processedSourceIds = new Map<string, string>();
+
+    // handle errors
+    for (const artifact of errorArtifacts) {
+      const {
+        source: { sourceFileId, sourceId, userId },
+      } = artifact;
+
+      await markSourceFileIdAsTx(
+        txClient,
+        userId,
+        sourceId,
+        sourceFileId,
+        'failed'
+      );
+
+      processedSourceIds.set(sourceId, userId);
+    }
 
     // register album
     const sourceFileIdToAlbumIdMap = new Map<string, string>();
     for (const artifact of audioArtifacts) {
       const {
-        source: { filename, options, region, sourceFileId, sourceId, userId },
+        source: {
+          cueSheetSourceFileId,
+          filename,
+          options,
+          region,
+          sourceFileId,
+          sourceId,
+          userId,
+        },
       } = artifact;
 
       processedSourceIds.set(sourceId, userId);
+
+      await markSourceFileIdAsTx(
+        txClient,
+        userId,
+        sourceId,
+        sourceFileId,
+        'transcoded'
+      );
+
+      if (cueSheetSourceFileId) {
+        await markSourceFileIdAsTx(
+          txClient,
+          userId,
+          sourceId,
+          cueSheetSourceFileId,
+          'transcoded'
+        );
+      }
 
       for (const artifactTrack of artifact.tracks) {
         const { duration, files, tags } = artifactTrack;
@@ -368,6 +438,7 @@ async function handleTranscoderResponse(
         await txClient.sourceFile.create({
           data: {
             id: source.sourceFileId,
+            state: is<SourceFileState>('transcoded'),
             type: is<SourceFileType>('image'),
             region,
             filename: source.filename,
@@ -377,14 +448,22 @@ async function handleTranscoderResponse(
             attachToType,
             attachToId,
             entityExists: false,
-            uploaded: true,
             uploadId: null,
             sourceId,
             userId,
           },
         });
       } else {
+        const { sourceFileId } = source;
         ({ attachToType, attachToId } = source);
+
+        await markSourceFileIdAsTx(
+          txClient,
+          userId,
+          sourceId,
+          sourceFileId,
+          'transcoded'
+        );
       }
 
       const imageId = await generateImageId();

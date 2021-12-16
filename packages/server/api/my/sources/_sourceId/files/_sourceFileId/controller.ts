@@ -4,8 +4,8 @@ import { defineController } from './$relay.js';
 
 export default defineController(() => ({
   patch: async ({ params, user, body }) => {
-    if (!body.uploaded) {
-      throw new HTTPError(400, 'uploaded must be true');
+    if (body.state !== 'uploaded') {
+      throw new HTTPError(400, 'state must be uploaded');
     }
 
     await onSourceFileUploaded(
