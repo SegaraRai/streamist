@@ -93,18 +93,18 @@ export default defineComponent({
     @touchstart.prevent="onMouseDown$$q"
   >
     <div class="relative w-full h-full">
-      <div ref="e" class="absolute top-0 w-full h-full flex items-center mx-1">
+      <div ref="e" class="absolute top-0 w-full h-full flex items-center">
         <div class="w-full h-1 bg-gray-100 rounded-full"></div>
       </div>
       <div
-        class="absolute top-0 h-full flex items-center mx-1"
+        class="absolute top-0 h-full flex items-center"
         :class="$style.progress"
       >
         <div class="w-full h-1 bg-gray-500 rounded-full"></div>
       </div>
       <div
         v-show="valid$$q"
-        class="absolute top-0 h-full flex items-center mx-1"
+        class="absolute top-0 h-full flex items-center"
         :class="[dragging$$q ? '' : 'opacity-0', $style.thumb]"
       >
         <div

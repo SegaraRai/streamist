@@ -16,6 +16,7 @@ export default defineComponent({
     update: (_newTime: number) => true,
   },
   setup(props, context) {
+    const showRemaining = ref(false);
     const draggingTime = ref<number | undefined>();
 
     const positionDisplay = computed<string | undefined>(() =>
@@ -26,7 +27,11 @@ export default defineComponent({
 
     const durationDisplay = computed<string | undefined>(() =>
       props.currentTime != null && props.duration != null
-        ? formatTime(props.duration)
+        ? showRemaining.value
+          ? `-${formatTime(
+              props.duration - (draggingTime.value ?? props.currentTime)
+            )}`
+          : formatTime(props.duration)
         : undefined
     );
 
@@ -40,17 +45,20 @@ export default defineComponent({
         draggingTime.value = undefined;
         context.emit('update', value);
       },
+      toggleRemaining$$q() {
+        showRemaining.value = !showRemaining.value;
+      },
     };
   },
 });
 </script>
 
 <template>
-  <div class="flex flex-row justify-center h-6">
-    <div :class="$style.time">
+  <div class="flex flex-row justify-center h-6 gap-x-2">
+    <div :class="$style.time" class="text-right">
       {{ positionDisplay$$q }}
     </div>
-    <div class="seek-bar px-4 flex-grow-1 d-flex flex-column justify-center">
+    <div class="seek-bar flex-1 flex flex-col justify-center">
       <s-slider
         :value="currentTime"
         :max="duration"
@@ -58,7 +66,7 @@ export default defineComponent({
         @update="onUpdate$$q"
       />
     </div>
-    <div :class="$style.time">
+    <div :class="$style.time" @click="toggleRemaining$$q">
       {{ durationDisplay$$q }}
     </div>
   </div>
@@ -70,7 +78,8 @@ export default defineComponent({
   @apply lining-nums;
   @apply leading-none;
   @apply select-none;
-  @apply w-4;
+  @apply w-12;
+  @apply flex-none;
   @apply flex;
   @apply flex-col;
   @apply justify-center;
