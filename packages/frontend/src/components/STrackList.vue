@@ -185,7 +185,7 @@ export default defineComponent({
           <v-list-subheader class="list-disc-number-header">
             <div class="list-column-disc-number flex align-center">
               <v-icon>mdi-disc</v-icon>
-              <span class="disc-number-text numeric">
+              <span class="disc-number-text s-numeric">
                 {{ item.discNumber$$q }}
               </span>
             </div>
@@ -194,7 +194,7 @@ export default defineComponent({
         </v-sheet>
       </template>
       <template v-else>
-        <v-list-item class="hover-container w-full" :ripple="false">
+        <v-list-item class="s-hover-container w-full" :ripple="false">
           <div class="list-column-icon mr-4">
             <!-- hiddenを切り替えるのとv-ifとどっちがいいか -->
             <div
@@ -209,14 +209,14 @@ export default defineComponent({
                 :disabled="!setList"
                 @click.stop="play$$q(item.track$$q)"
               >
-                <v-icon class="play-icon hover-display">
+                <v-icon class="play-icon s-hover-display">
                   {{
                     playing$$q
                       ? 'mdi-pause-circle-outline'
                       : 'mdi-play-circle-outline'
                   }}
                 </v-icon>
-                <v-icon class="play-icon hover-hidden">
+                <v-icon class="play-icon s-hover-hidden">
                   {{ playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle' }}
                 </v-icon>
               </v-btn>
@@ -234,18 +234,18 @@ export default defineComponent({
                 @click.stop="play$$q(item.track$$q)"
               >
                 <template v-if="indexContent === 'index'">
-                  <div class="track-index numeric hover-hidden">
+                  <div class="track-index s-numeric s-hover-hidden">
                     {{ index + 1 }}
                   </div>
                 </template>
                 <template v-if="indexContent === 'trackNumber'">
-                  <div class="track-index numeric hover-hidden">
+                  <div class="track-index s-numeric s-hover-hidden">
                     {{ item.track$$q.trackNumber }}
                   </div>
                 </template>
                 <template v-if="indexContent === 'albumArtwork'">
                   <s-nullable-image
-                    class="track-index hover-hidden"
+                    class="track-index s-hover-hidden"
                     icon-size="24px"
                     :image="item.image$$q"
                     :width="imageSize$$q"
@@ -253,7 +253,7 @@ export default defineComponent({
                     :aspect-ratio="1"
                   />
                 </template>
-                <v-icon class="play-icon hover-display">
+                <v-icon class="play-icon s-hover-display">
                   mdi-play-circle-outline
                 </v-icon>
               </v-btn>
@@ -300,7 +300,7 @@ export default defineComponent({
               </v-list-item-subtitle>
             </v-list-item-header>
           </template>
-          <div class="list-column-duration numeric body-2">
+          <div class="list-column-duration s-duration body-2">
             {{ item.formattedDuration$$q }}
           </div>
         </v-list-item>
@@ -313,22 +313,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.numeric {
-  font-family: 'Open Sans', monospace !important;
-  font-variant-numeric: slashed-zero lining-nums tabular-nums;
-  line-height: 1 !important;
-  white-space: nowrap;
-  user-select: none;
-}
-
-.hover-container:not(:hover) .hover-display {
-  display: none;
-}
-
-.hover-container:hover .hover-hidden {
-  display: none;
-}
-
 .sheet-header {
   position: sticky;
   top: 48px;

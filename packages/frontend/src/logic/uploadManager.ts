@@ -4,6 +4,7 @@ import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText';
 import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
+  MAX_SOURCE_CUE_SHEET_FILE_SIZE,
   MAX_SOURCE_IMAGE_FILE_SIZE,
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
@@ -18,7 +19,7 @@ import type {
   ResourceSourceFile,
   UploadURL,
 } from '$/types';
-import { ResolvedUploadFile } from './uploadResolver';
+import type { ResolvedFileId, ResolvedUploadFile } from './uploadResolver';
 
 const SYNC_INTERVAL = 20 * 1000;
 
@@ -121,7 +122,7 @@ function createAudioUploadFile(audioFile: File): UploadFile {
 function createAudioWithCueSheetUploadFile(
   audioFile: File,
   cueSheetFile: File
-): [UploadFile, UploadFile] {
+): [audioUploadFile: UploadFile, cueSheetUploadFile: UploadFile] {
   const audioFileId = generateFileId();
   const cueSheetFileId = generateFileId();
   return [
@@ -202,14 +203,14 @@ function createUploadFilesFromResolvedFiles(
   files: readonly ResolvedUploadFile[]
 ): UploadFile[] {
   const uploadFiles: UploadFile[] = [];
-  const audioFileToFileIdMap = new Map<ResolvedUploadFile, FileId>();
+  const audioFileIdToFileIdMap = new Map<ResolvedFileId, FileId>();
 
   for (const file of files) {
     switch (file.type) {
       case 'audio': {
         const uploadFile = createAudioUploadFile(file.file);
         uploadFiles.push(uploadFile);
-        audioFileToFileIdMap.set(file, uploadFile.id);
+        audioFileIdToFileIdMap.set(file.id, uploadFile.id);
         break;
       }
 
@@ -217,7 +218,7 @@ function createUploadFilesFromResolvedFiles(
         const [audioUploadFile, cueSheetUploadFile] =
           createAudioWithCueSheetUploadFile(file.file, file.cueSheetFile);
         uploadFiles.push(audioUploadFile, cueSheetUploadFile);
-        audioFileToFileIdMap.set(file, audioUploadFile.id);
+        audioFileIdToFileIdMap.set(file.id, audioUploadFile.id);
         break;
       }
 
@@ -232,9 +233,12 @@ function createUploadFilesFromResolvedFiles(
       continue;
     }
 
-    const targetAudioFileId = audioFileToFileIdMap.get(file.dependsOn);
+    const targetAudioFileId = audioFileIdToFileIdMap.get(file.dependsOn);
     if (!targetAudioFileId) {
       // should not occur
+      console.error(
+        'logic error: image file depends on unknown audio file @createUploadFilesFromResolvedFiles'
+      );
       uploadFiles.push(createUnknownUploadFile(file.file));
     } else {
       uploadFiles.push(createImageUploadFile(file.file, targetAudioFileId));
@@ -265,7 +269,7 @@ function isValidAudioFile(audioFile: File): Promise<boolean> {
 }
 
 async function isValidCueSheetFile(cueSheetFile: File): Promise<boolean> {
-  if (cueSheetFile.size > MAX_SOURCE_AUDIO_FILE_SIZE) {
+  if (cueSheetFile.size > MAX_SOURCE_CUE_SHEET_FILE_SIZE) {
     return false;
   }
 
@@ -295,13 +299,22 @@ function doUpload(
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', url);
     xhr.onload = () => {
+      xhr.onload = null;
+      xhr.onerror = null;
+      xhr.upload.onprogress = null;
+
       if (xhr.status >= 200 && xhr.status < 300) {
+        onProgress(blob.size);
         resolve(xhr.getResponseHeader('ETag') || '');
       } else {
         reject(new Error(`Failed to upload file: ${xhr.status}`));
       }
     };
     xhr.onerror = (error) => {
+      xhr.onload = null;
+      xhr.onerror = null;
+      xhr.upload.onprogress = null;
+
       reject(new Error(`Failed to upload file: ${xhr.status} ${error}`));
     };
     xhr.upload.onprogress = (event) => {
@@ -377,6 +390,9 @@ export class UploadManager extends EventTarget {
       const sourceFile = sourceFileMap.get(sourceFileId);
       if (!sourceFile) {
         // should not occur
+        console.error(
+          'logic error: sourceFile does not exist on database @_sync'
+        );
         continue;
       }
 
@@ -413,22 +429,31 @@ export class UploadManager extends EventTarget {
     if (url.parts) {
       const uploadedSizes = new Array(url.parts.length).fill(0);
       const eTagPromises: Promise<string>[] = [];
-      const failed = false;
+      let failed = false;
       let offset = 0;
       for (const [partIndex, part] of url.parts.entries()) {
         const partBlob = file.slice(offset, offset + part.size);
         offset += part.size;
 
         eTagPromises.push(
-          this.uploadQueue.add(() => {
+          this.uploadQueue.add(async () => {
             if (failed) {
-              return Promise.resolve('');
+              return '';
             }
 
-            return doUpload(part.url, partBlob, (size: number): void => {
-              uploadedSizes[partIndex] = size;
-              onProgress(uploadedSizes.reduce((acc, cur) => acc + cur, 0));
-            });
+            try {
+              return await doUpload(
+                part.url,
+                partBlob,
+                (size: number): void => {
+                  uploadedSizes[partIndex] = size;
+                  onProgress(uploadedSizes.reduce((acc, cur) => acc + cur, 0));
+                }
+              );
+            } catch (error: unknown) {
+              failed = true;
+              throw error;
+            }
           })
         );
       }

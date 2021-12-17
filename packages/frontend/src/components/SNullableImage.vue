@@ -65,6 +65,7 @@ export default defineComponent({
       :srcset="srcObject$$q.srcSet$$q"
       :sizes="`${width}px`"
       :aspect-ratio="aspectRatio"
+      cover
     />
   </template>
   <template v-else>

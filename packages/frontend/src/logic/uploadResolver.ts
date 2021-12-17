@@ -2,24 +2,30 @@ import { getExtension, getStem } from '$shared/path';
 import { getSourceFileType } from '$shared/sourceFileConfig';
 import { compareString } from './sort';
 
+export type ResolvedFileId = symbol;
+
 export interface ResolvedUploadFileAudio {
+  id: symbol;
   type: 'audio';
   file: File;
 }
 
 export interface ResolvedUploadFileAudioWithCueSheet {
+  id: symbol;
   type: 'audioWithCueSheet';
   file: File;
   cueSheetFile: File;
 }
 
 export interface ResolvedUploadFileImage {
+  id: symbol;
   type: 'image';
   file: File;
-  dependsOn: ResolvedUploadFileAudio | ResolvedUploadFileAudioWithCueSheet;
+  dependsOn: ResolvedFileId;
 }
 
 export interface ResolvedUploadFileUnsupported {
+  id: symbol;
   type: 'unknown';
   file: File;
 }
@@ -42,6 +48,54 @@ const LOSSLESS_AUDIO_FILE_EXTENSION_SET: ReadonlySet<string> =
     '.wma', // WMA Lossless, in case
     '.wv',
   ]);
+
+function generateFileId(): ResolvedFileId {
+  return Symbol('resolvedFileId');
+}
+
+function calcImageAndAudioRelationScore(
+  imageFile: File,
+  audioFile: ResolvedUploadFileAudio | ResolvedUploadFileAudioWithCueSheet
+): number {
+  const imageFileStem = getStem(imageFile.name)
+    .toLowerCase()
+    .replace(/[^a-z\d]/g, '');
+  const audioFileStem = getStem(audioFile.file.name)
+    .toLowerCase()
+    .replace(/[^a-z\d]/g, '');
+  if (imageFileStem === audioFileStem) {
+    // foo.jpg and foo.mp3
+    return 100;
+  }
+  if (audioFileStem.includes(imageFileStem)) {
+    // foo01.jpg and foo.mp3
+    return 90;
+  }
+  if (imageFileStem.includes(audioFileStem)) {
+    // foo.jpg and foo01.mp3
+    return 80;
+  }
+  return 0;
+}
+
+function compareAudioForImage(
+  imageFile: File,
+  audioFile1: ResolvedUploadFileAudio | ResolvedUploadFileAudioWithCueSheet,
+  audioFile2: ResolvedUploadFileAudio | ResolvedUploadFileAudioWithCueSheet
+): number {
+  const score1 = calcImageAndAudioRelationScore(imageFile, audioFile1);
+  const score2 = calcImageAndAudioRelationScore(imageFile, audioFile2);
+  if (score1 !== score2) {
+    return score2 - score1;
+  }
+
+  const typeScore1 = audioFile1.type === 'audioWithCueSheet' ? 1 : 0;
+  const typeScore2 = audioFile2.type === 'audioWithCueSheet' ? 1 : 0;
+  return (
+    typeScore2 - typeScore1 ||
+    compareString(audioFile1.file.name, audioFile2.file.name)
+  );
+}
 
 function resolveUploadFilesImpl(files: readonly File[]): ResolvedUploadFile[] {
   const typeAndFiles = files.map(
@@ -82,6 +136,7 @@ function resolveUploadFilesImpl(files: readonly File[]): ResolvedUploadFile[] {
     }
 
     resAudioWithCueSheetFiles.push({
+      id: generateFileId(),
       type: 'audioWithCueSheet',
       file: audioFile[1],
       cueSheetFile: cueSheetFile[1],
@@ -97,6 +152,7 @@ function resolveUploadFilesImpl(files: readonly File[]): ResolvedUploadFile[] {
   const resAudioFiles: ResolvedUploadFileAudio[] = [];
   for (const audioFile of audioFileSet) {
     resAudioFiles.push({
+      id: generateFileId(),
       type: 'audio',
       file: audioFile[1],
     });
@@ -106,27 +162,24 @@ function resolveUploadFilesImpl(files: readonly File[]): ResolvedUploadFile[] {
 
   // 画像ファイルを音声ファイルに対応付ける
   const resImageFiles: ResolvedUploadFileImage[] = [];
-  const imageTargetAudioFile = [
-    ...resAudioWithCueSheetFiles,
-    ...resAudioFiles,
-  ].sort((a, b) => {
-    const ta = a.type === 'audioWithCueSheet' ? 0 : 1;
-    const tb = b.type === 'audioWithCueSheet' ? 0 : 1;
-    return ta - tb || compareString(a.file.name, b.file.name);
-  })[0];
-  if (imageTargetAudioFile) {
-    for (const imageFile of imageFileSet) {
-      resImageFiles.push({
-        type: 'image',
-        file: imageFile[1],
-        dependsOn: {
-          type: 'audio',
-          file: imageTargetAudioFile.file,
-        },
-      });
+  for (const imageFile of imageFileSet) {
+    const imageTargetAudioFile = [
+      ...resAudioWithCueSheetFiles,
+      ...resAudioFiles,
+    ].sort((a, b) => compareAudioForImage(imageFile[1], a, b))[0];
 
-      imageFileSet.delete(imageFile);
+    if (!imageTargetAudioFile) {
+      continue;
     }
+
+    resImageFiles.push({
+      id: generateFileId(),
+      type: 'image',
+      file: imageFile[1],
+      dependsOn: imageTargetAudioFile.id,
+    });
+
+    imageFileSet.delete(imageFile);
   }
 
   // その他のファイルを追加
@@ -138,6 +191,7 @@ function resolveUploadFilesImpl(files: readonly File[]): ResolvedUploadFile[] {
     ...unknownFileSet,
   ]) {
     resUnknownFiles.push({
+      id: generateFileId(),
       type: 'unknown',
       file: file[1],
     });
@@ -160,12 +214,12 @@ export function resolveUploadFiles(
 
 export function removeUploadFile(
   originalFiles: readonly ResolvedUploadFile[],
-  file: File
+  fileId: ResolvedFileId
 ): ResolvedUploadFile[] {
   return originalFiles
-    .filter((uploadFile) => uploadFile.file !== file)
+    .filter((uploadFile) => uploadFile.id !== fileId)
     .map((uploadFile) => {
-      if (uploadFile.type === 'image' && uploadFile.dependsOn?.file === file) {
+      if (uploadFile.type === 'image' && uploadFile.dependsOn === fileId) {
         return {
           ...uploadFile,
           type: 'unknown',

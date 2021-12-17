@@ -196,18 +196,35 @@ const devSync = (event: MouseEvent) => {
       <div class="h-24"></div>
     </v-main>
 
-    <v-dialog v-model="uploadDialog">
-      <v-card class="min-w-xl">
-        <v-card-title>Upload</v-card-title>
+    <v-dialog v-model="uploadDialog" class="s-upload-dialog">
+      <v-card class="w-full">
+        <v-card-title class="flex">
+          <div class="flex-1">Upload</div>
+          <div class="flex-none">
+            <v-btn
+              flat
+              icon
+              size="x-small"
+              class="text-red-500"
+              @click="uploadDialog = false"
+            >
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </div>
+        </v-card-title>
         <v-card-text class="opacity-100">
           <s-uploader />
         </v-card-text>
-        <v-card-actions>
-          <v-btn color="primary" text @click="uploadDialog = false">
-            Close
-          </v-btn>
-        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-app>
 </template>
+
+<style>
+.v-dialog.s-upload-dialog .v-overlay__content {
+  @apply max-w-full;
+  @apply max-h-full;
+  @apply w-2xl;
+  @apply px-8;
+}
+</style>

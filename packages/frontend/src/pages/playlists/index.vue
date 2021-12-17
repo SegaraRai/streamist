@@ -164,10 +164,7 @@ export default defineComponent({
       <template v-if="items$$q.length">
         <v-list flat>
           <template v-for="(item, _index) in items$$q" :key="_index">
-            <v-list-item
-              class="hover-container"
-              :to="`/playlists/${item.id$$q}`"
-            >
+            <v-list-item :to="`/playlists/${item.id$$q}`">
               <v-list-item-header>
                 <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
                 <v-list-item-subtitle>

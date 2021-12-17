@@ -16,7 +16,7 @@ module.exports = defineConfig({
       'error',
       {
         html: {
-          void: 'never',
+          void: 'always',
           normal: 'never',
           component: 'always',
         },

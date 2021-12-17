@@ -126,20 +126,20 @@ export default defineComponent({
       <template v-if="index !== 0">
         <v-divider />
       </template>
-      <v-list-item class="hover-container">
+      <v-list-item class="s-hover-container">
         <div class="list-column-icon">
           <div class="icon-container">
             <v-btn flat icon text @click.stop="play$$q(index)">
-              <!-- div class="track-index numeric hover-hidden">{{ index + 1 }}</div -->
+              <!-- div class="track-index s-numeric s-hover-hidden">{{ index + 1 }}</div -->
               <s-nullable-image
-                class="hover-hidden"
+                class="s-hover-hidden"
                 icon-size="24px"
                 :image="item.image$$q"
                 :width="imageSize$$q"
                 :height="imageSize$$q"
                 :aspect-ratio="1"
               />
-              <v-icon class="play-icon hover-display">
+              <v-icon class="play-icon s-hover-display">
                 mdi-play-circle-outline
               </v-icon>
             </v-btn>
@@ -179,7 +179,7 @@ export default defineComponent({
             </v-tooltip>
           </v-list-item-subtitle>
         </v-list-item-header>
-        <div class="list-column-duration numeric body-2 pl-4">
+        <div class="list-column-duration s-duration body-2 pl-4">
           {{ item.formattedDuration$$q }}
         </div>
       </v-list-item>
@@ -188,22 +188,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.numeric {
-  font-family: 'Open Sans', monospace !important;
-  font-variant-numeric: slashed-zero lining-nums tabular-nums;
-  line-height: 1 !important;
-  white-space: nowrap;
-  user-select: none;
-}
-
-.hover-container:not(:hover) .hover-display {
-  display: none;
-}
-
-.hover-container:hover .hover-hidden {
-  display: none;
-}
-
 .queue-header {
   position: sticky;
   top: 0;
