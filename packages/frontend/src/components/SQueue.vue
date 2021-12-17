@@ -131,7 +131,7 @@ export default defineComponent({
           <div class="icon-container">
             <v-btn flat icon text @click.stop="play$$q(index)">
               <!-- div class="track-index numeric hover-hidden">{{ index + 1 }}</div -->
-              <nullable-image
+              <s-nullable-image
                 class="hover-hidden"
                 icon-size="24px"
                 :image="item.image$$q"

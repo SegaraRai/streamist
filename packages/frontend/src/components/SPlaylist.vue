@@ -150,7 +150,7 @@ export default defineComponent({
         </div>
       </div>
     </div>
-    <track-list
+    <s-track-list
       :show-album="false"
       :show-artist="false"
       :show-disc-number="false"

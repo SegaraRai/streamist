@@ -81,7 +81,7 @@ export default defineComponent({
           :height="200"
           tile
         >
-          <nullable-image
+          <s-nullable-image
             class="align-end rounded-full"
             icon-size="64px"
             :image="loading$$q ? undefined : image$$q"
@@ -109,7 +109,7 @@ export default defineComponent({
       <div class="mb-6">
         <template v-for="album in artist$$q.albums" :key="album.id">
           <div class="my-12">
-            <album
+            <s-album
               :album="album"
               :link-excludes="id$$q ? [id$$q] : []"
               :set-list="setList$$q"

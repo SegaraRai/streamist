@@ -5,7 +5,7 @@ import { syncDB } from '~/db/sync';
 import apiInstance from '~/logic/api';
 import { fetchPlaylistsForPlayback } from '~/resources/playlist';
 import { usePlaybackStore } from '~/stores/playback';
-import { PlaylistForPlayback } from '~/types/playback';
+import type { PlaylistForPlayback } from '~/types/playback';
 
 interface Item {
   id$$q: string;

@@ -74,15 +74,20 @@ function createTranscoderRequestFiles(
 
 async function invokeTranscoder(request: TranscoderRequest): Promise<void> {
   if (process.env.NODE_ENV === 'development') {
-    await fetch(TRANSCODER_API_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(request),
-    }).catch((error) => {
-      console.error(error);
-    });
+    try {
+      const response = await fetch(TRANSCODER_API_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+      if (!response.ok) {
+        console.error('failed to invoke transcoder', response.status);
+      }
+    } catch (error: unknown) {
+      console.error('failed to invoke transcoder', error);
+    }
   } else {
     // TODO(prod): call AWS Lambda
   }
@@ -130,6 +135,17 @@ async function invokeTranscoderBySource(
     return;
   }
 
+  await client.sourceFile.updateMany({
+    where: {
+      userId,
+      sourceId,
+      state: is<SourceFileState>('uploaded'),
+    },
+    data: {
+      state: is<SourceFileState>('transcoding'),
+    },
+  });
+
   const request: TranscoderRequest = {
     callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
     callbackToken: TRANSCODER_CALLBACK_API_TOKEN,
@@ -163,14 +179,14 @@ function invokeTranscodeBySourceSync(userId: string, sourceId: string): void {
  * @param userId
  * @param sourceId
  * @param sourceFileId
- * @param etags
+ * @param eTags
  * @returns
  */
 export async function onSourceFileUploaded(
   userId: string,
   sourceId: string,
   sourceFileId: string,
-  etags?: string[]
+  eTags?: string[]
 ): Promise<void> {
   const sourceFile = await client.sourceFile.findFirst({
     where: {
@@ -196,15 +212,15 @@ export async function onSourceFileUploaded(
   }
 
   if (sourceFile.uploadId) {
-    if (!etags) {
-      throw new HTTPError(400, `etags must be specified for multipart upload`);
+    if (!eTags) {
+      throw new HTTPError(400, `ETags must be specified for multipart upload`);
     }
 
     const partLength = splitIntoParts(sourceFile.fileSize).length;
-    if (etags.length !== partLength) {
+    if (eTags.length !== partLength) {
       throw new HTTPError(
         400,
-        `etag count of the source file ${sourceFileId} is inconsistent`
+        `ETag count of the source file ${sourceFileId} is inconsistent`
       );
     }
 
@@ -219,9 +235,9 @@ export async function onSourceFileUploaded(
       Key: key,
       UploadId: sourceFile.uploadId,
       MultipartUpload: {
-        Parts: etags!.map((etag, index) => ({
+        Parts: eTags!.map((eTag, index) => ({
           PartNumber: index + 1,
-          ETag: etag,
+          ETag: eTag,
         })),
       },
     });

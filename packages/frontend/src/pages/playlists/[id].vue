@@ -15,6 +15,6 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-8 px-6">
-    <playlist :playlist-id="playlistId$$q" :link-excludes="[playlistId$$q]" />
+    <s-playlist :playlist-id="playlistId$$q" :link-excludes="[playlistId$$q]" />
   </v-container>
 </template>

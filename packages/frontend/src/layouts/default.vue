@@ -1,120 +1,13 @@
 <script lang="ts" setup>
-import PQueue from 'p-queue';
 import { useDisplay } from 'vuetify';
-import {
-  SOURCE_FILE_CACHE_CONTROL,
-  SOURCE_FILE_CONTENT_ENCODING,
-  SOURCE_FILE_CONTENT_TYPE,
-} from '$shared/sourceFileConfig';
 import { useThemeStore } from '@/stores/theme';
 import { syncDB } from '~/db/sync';
-import api from '~/logic/api';
-import { UploadURL } from '$/types';
-
-/*
-type UploadFileState =
-  | 'pending'
-  | 'invalid'
-  | 'uploading'
-  | 'transcoding'
-  | 'finished'
-  | 'failed';
-
-interface UploadFile {
-  state: UploadFileState;
-  name: string;
-  size: number;
-  file: File;
-}
-//*/
-
-async function upload(
-  uploadURL: UploadURL,
-  file: File
-): Promise<string[] | undefined> {
-  if (uploadURL.url != null) {
-    // normal upload
-    await fetch(uploadURL.url, {
-      method: 'PUT',
-      headers: {
-        'Cache-Control': SOURCE_FILE_CACHE_CONTROL,
-        'Content-Encoding': SOURCE_FILE_CONTENT_ENCODING,
-        'Content-Length': `${file.size}`,
-        'Content-Type': SOURCE_FILE_CONTENT_TYPE,
-      },
-      body: file,
-    });
-  } else {
-    // multipart upload
-    const eTagPromises: Promise<string>[] = [];
-    const queue = new PQueue({ concurrency: 4 });
-    let offset = 0;
-    for (const part of uploadURL.parts) {
-      const currentOffset = offset;
-      const eTagPromise = queue.add(async (): Promise<string> => {
-        const response = await fetch(part.url, {
-          method: 'PUT',
-          headers: {
-            'Cache-Control': SOURCE_FILE_CACHE_CONTROL,
-            'Content-Encoding': SOURCE_FILE_CONTENT_ENCODING,
-            'Content-Length': `${part.size}`,
-            'Content-Type': SOURCE_FILE_CONTENT_TYPE,
-          },
-          body: file.slice(currentOffset, currentOffset + part.size),
-        });
-        return response.headers.get('ETag')!;
-      });
-      offset += part.size;
-      eTagPromises.push(eTagPromise);
-    }
-    return Promise.all(eTagPromises);
-  }
-}
-
-async function uploadFile(file: File) {
-  const result = await api.my.sources.$post({
-    body: {
-      type: 'audio',
-      region: 'ap-northeast-1',
-      audioFile: {
-        type: 'audio',
-        filename: file.name,
-        fileSize: file.size,
-      },
-      cueSheetFile: null,
-    },
-  });
-
-  const { sourceId } = result;
-  const audioFile = result.files.find((f) => f.requestFile.type === 'audio')!;
-
-  const etags = await upload(audioFile.uploadURL, file);
-
-  await api.my.sources
-    ._sourceId(sourceId)
-    .files._sourceFileId(audioFile.sourceFileId)
-    .$patch({
-      body: {
-        state: 'uploaded',
-        parts: etags,
-      },
-    });
-}
 
 const { t } = useI18n();
 const theme = useThemeStore();
 const display = useDisplay();
 
 const uploadDialog = ref(false);
-
-const files = ref<File[] | undefined>();
-
-watchEffect(() => {
-  if (files.value && files.value.length > 0) {
-    const file = files.value[0];
-    uploadFile(file);
-  }
-});
 
 interface NavItemLink {
   type: 'link';
@@ -213,7 +106,7 @@ const devSync = (event: MouseEvent) => {
       <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
         <v-divider />
         <div class="px-1 flex-1 flex items-center">
-          <playback-control />
+          <s-playback-control />
         </div>
       </v-sheet>
     </v-footer>
@@ -239,7 +132,7 @@ const devSync = (event: MouseEvent) => {
           <v-divider />
         </v-sheet>
         <div class="flex-1 overflow-y-auto overflow-x-hidden">
-          <Queue />
+          <s-queue />
         </div>
         <div class="h-24"></div>
       </div>
@@ -307,32 +200,7 @@ const devSync = (event: MouseEvent) => {
       <v-card class="min-w-xl">
         <v-card-title>Upload</v-card-title>
         <v-card-text class="opacity-100">
-          <div>
-            <h3>Add file</h3>
-            <v-file-input v-model="files" />
-          </div>
-          <div>
-            <h3>Files</h3>
-            <v-list dense>
-              <v-list-subheader class="uppercase">In progress</v-list-subheader>
-              <v-list-item>
-                <v-list-item-header>
-                  <v-list-item-title>example1.mp3</v-list-item-title>
-                </v-list-item-header>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-header>
-                  <v-list-item-title>example2.mp3</v-list-item-title>
-                </v-list-item-header>
-              </v-list-item>
-              <v-list-item>
-                <v-list-item-header>
-                  <v-list-item-title>example3.wav</v-list-item-title>
-                  <v-list-item-subtitle>example3.cue</v-list-item-subtitle>
-                </v-list-item-header>
-              </v-list-item>
-            </v-list>
-          </div>
+          <s-uploader />
         </v-card-text>
         <v-card-actions>
           <v-btn color="primary" text @click="uploadDialog = false">

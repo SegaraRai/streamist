@@ -59,7 +59,7 @@ function unescapeValue(str: string): string {
   }
 
   // "A "test" string" のようなものもパースできるようにしておく（"A \"test\" string"として扱う）
-  str = str.slice(1, str.length - 2);
+  str = str.slice(1, str.length - 1);
   str = str.replace(
     /\\./g,
     (sequence) => escapeMap.get(sequence.slice(1)) || sequence.slice(1)

@@ -76,7 +76,7 @@ export default defineComponent({
               class="no-underline"
               :to="`/artists/${item.artist$$q.id}`"
             >
-              <nullable-image
+              <s-nullable-image
                 v-ripple
                 class="align-end image white--text rounded-full"
                 icon-size="64px"

@@ -74,7 +74,7 @@ export default defineComponent({
       >
         <v-card flat tile :width="`${imageSize$$q}px`" class="item">
           <router-link class="no-underline" :to="`/albums/${item.album$$q.id}`">
-            <nullable-image
+            <s-nullable-image
               v-ripple
               class="align-end image white--text"
               icon-size="64px"

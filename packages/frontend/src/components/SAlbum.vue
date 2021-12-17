@@ -87,7 +87,7 @@ export default defineComponent({
             :height="imageSize$$q"
             tile
           >
-            <nullable-image
+            <s-nullable-image
               class="align-end"
               icon-size="64px"
               :image="image$$q"
@@ -107,12 +107,12 @@ export default defineComponent({
             >
               <div>
                 <template v-if="!loading && album">
-                  <conditional-link
+                  <s-conditional-link
                     :to="`/albums/${album.id}`"
                     :disabled="linkExcludes.includes(album.id)"
                   >
                     {{ album.title }}
-                  </conditional-link>
+                  </s-conditional-link>
                 </template>
               </div>
             </v-skeleton-loader>
@@ -126,12 +126,12 @@ export default defineComponent({
             >
               <div>
                 <template v-if="!loading && album">
-                  <conditional-link
+                  <s-conditional-link
                     :to="`/artists/${album.artist.id}`"
                     :disabled="linkExcludes.includes(album.artist.id)"
                   >
                     {{ album.artist.name }}
-                  </conditional-link>
+                  </s-conditional-link>
                 </template>
               </div>
             </v-skeleton-loader>
@@ -170,7 +170,7 @@ export default defineComponent({
         </div>
       </div>
     </div>
-    <track-list
+    <s-track-list
       :show-album="false"
       :show-artist="false"
       :tracks="tracks$$q"

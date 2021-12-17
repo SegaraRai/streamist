@@ -1,7 +1,6 @@
 <script lang="ts">
 import { asyncComputed } from '@vueuse/core';
-import { PropType, defineComponent } from 'vue';
-import NoImage from '@/components/NoImage.vue';
+import type { PropType } from 'vue';
 import { SrcObject, createSrc } from '@/logic/srcSet';
 import type { ResourceImage } from '$/types';
 
@@ -13,9 +12,6 @@ interface Props {
 }
 
 export default defineComponent({
-  components: {
-    NoImage,
-  },
   props: {
     image: {
       type: Object as PropType<ResourceImage | null | undefined>,
@@ -72,7 +68,7 @@ export default defineComponent({
     />
   </template>
   <template v-else>
-    <no-image
+    <s-no-image
       :style="{ width: `${width}px`, height: `${height}px` }"
       :icon-size="iconSize"
     />

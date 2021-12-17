@@ -1,13 +1,26 @@
+import PQueue from 'p-queue';
 import { parseCueSheet } from '$shared/cueParser';
 import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText';
 import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_IMAGE_FILE_SIZE,
+  SOURCE_FILE_CACHE_CONTROL,
+  SOURCE_FILE_CONTENT_ENCODING,
+  SOURCE_FILE_CONTENT_TYPE,
 } from '$shared/sourceFileConfig';
-import type { SourceFileType } from '$shared/types/db';
+import type { SourceFileState, SourceFileType } from '$shared/types/db';
 import api from '@/logic/api';
-import type { UploadURL } from '$/types';
+import { db } from '~/db';
+import { syncDB } from '~/db/sync';
+import type {
+  CreateSourceResponse,
+  ResourceSourceFile,
+  UploadURL,
+} from '$/types';
+import { ResolvedUploadFile } from './uploadResolver';
+
+const SYNC_INTERVAL = 20 * 1000;
 
 // CUE+WAV等の場合: CUEシートチェック→CUE&WAVアップロード
 // MP3+JPG等の場合: MP3アップロード→（成功時）JPGアップロード
@@ -32,39 +45,216 @@ export type UploadStatus =
   // 最終状態: 事前チェックに失敗した
   | 'error_invalid'
   // 最終状態: アップロードは完了したがトランスコードに失敗した
-  | 'error_failed'
+  | 'error_upload_failed'
+  // 最終状態: アップロードは完了したがトランスコードに失敗した
+  | 'error_transcode_failed'
   // 最終状態: 依存先ファイルがトランスコードに失敗したのでスキップされた（未対応ファイルはそもそも追加されない）
   // または、CUEシートが不正or未対応の形式であったため音声ファイルのアップロードがスキップされた
   | 'skipped';
 
-interface UploadInfo {
+export type FileId = symbol;
+
+export interface UploadInfo {
   sourceId: string;
   sourceFileId: string;
   url: UploadURL;
 }
 
-interface UploadFile {
-  id: symbol;
+export interface UploadFile {
+  id: FileId;
   /** 先にアップロード及びトランスコードしないといけないファイルのID */
-  dependsOn: symbol | null;
+  dependsOn: FileId | null;
   /**
    * 同じグループのファイルID \
    * いずれかのファイルの検証に失敗した場合、このグループのファイルは全てスキップされる
    */
-  groups: symbol[];
+  groups: FileId[];
   status: UploadStatus;
   file: File;
   filename: string;
   fileSize: number;
-  fileType: SourceFileType;
+  fileType: SourceFileType | 'unknown';
   createdAt: number;
   uploadBeginAt: number | null;
   uploadEndAt: number | null;
   uploadInfo: UploadInfo | null;
+  uploadedSize: number | null;
+  createSourcePromise: Promise<CreateSourceResponse> | null;
 }
 
-function generateFileId(): symbol {
+export class UploadError extends Error {
+  constructor(
+    message: string,
+    readonly newStatus: UploadStatus = 'error_upload_failed'
+  ) {
+    super(message);
+    this.name = 'UploadError';
+  }
+}
+
+function generateFileId(): FileId {
   return Symbol('upload-file-id');
+}
+
+function createAudioUploadFile(audioFile: File): UploadFile {
+  return {
+    id: generateFileId(),
+    dependsOn: null,
+    groups: [],
+    status: 'pending',
+    file: audioFile,
+    filename: audioFile.name,
+    fileSize: audioFile.size,
+    fileType: 'audio',
+    createdAt: Date.now(),
+    uploadBeginAt: null,
+    uploadEndAt: null,
+    uploadInfo: null,
+    uploadedSize: null,
+    createSourcePromise: null,
+  };
+}
+
+function createAudioWithCueSheetUploadFile(
+  audioFile: File,
+  cueSheetFile: File
+): [UploadFile, UploadFile] {
+  const audioFileId = generateFileId();
+  const cueSheetFileId = generateFileId();
+  return [
+    {
+      id: audioFileId,
+      dependsOn: null,
+      groups: [cueSheetFileId],
+      status: 'pending',
+      file: audioFile,
+      filename: audioFile.name,
+      fileSize: audioFile.size,
+      fileType: 'audio',
+      createdAt: Date.now(),
+      uploadBeginAt: null,
+      uploadEndAt: null,
+      uploadInfo: null,
+      uploadedSize: null,
+      createSourcePromise: null,
+    },
+    {
+      id: cueSheetFileId,
+      dependsOn: null,
+      groups: [audioFileId],
+      status: 'pending',
+      file: cueSheetFile,
+      filename: cueSheetFile.name,
+      fileSize: cueSheetFile.size,
+      fileType: 'cueSheet',
+      createdAt: Date.now(),
+      uploadBeginAt: null,
+      uploadEndAt: null,
+      uploadInfo: null,
+      uploadedSize: null,
+      createSourcePromise: null,
+    },
+  ];
+}
+
+function createImageUploadFile(imageFile: File, dependsOn: FileId): UploadFile {
+  return {
+    id: generateFileId(),
+    dependsOn,
+    groups: [],
+    status: 'pending',
+    file: imageFile,
+    filename: imageFile.name,
+    fileSize: imageFile.size,
+    fileType: 'image',
+    createdAt: Date.now(),
+    uploadBeginAt: null,
+    uploadEndAt: null,
+    uploadInfo: null,
+    uploadedSize: null,
+    createSourcePromise: null,
+  };
+}
+
+function createUnknownUploadFile(file: File): UploadFile {
+  return {
+    id: generateFileId(),
+    dependsOn: null,
+    groups: [],
+    status: 'pending',
+    file,
+    filename: file.name,
+    fileSize: file.size,
+    fileType: 'unknown',
+    createdAt: Date.now(),
+    uploadBeginAt: null,
+    uploadEndAt: null,
+    uploadInfo: null,
+    uploadedSize: null,
+    createSourcePromise: null,
+  };
+}
+
+function createUploadFilesFromResolvedFiles(
+  files: readonly ResolvedUploadFile[]
+): UploadFile[] {
+  const uploadFiles: UploadFile[] = [];
+  const audioFileToFileIdMap = new Map<ResolvedUploadFile, FileId>();
+
+  for (const file of files) {
+    switch (file.type) {
+      case 'audio': {
+        const uploadFile = createAudioUploadFile(file.file);
+        uploadFiles.push(uploadFile);
+        audioFileToFileIdMap.set(file, uploadFile.id);
+        break;
+      }
+
+      case 'audioWithCueSheet': {
+        const [audioUploadFile, cueSheetUploadFile] =
+          createAudioWithCueSheetUploadFile(file.file, file.cueSheetFile);
+        uploadFiles.push(audioUploadFile, cueSheetUploadFile);
+        audioFileToFileIdMap.set(file, audioUploadFile.id);
+        break;
+      }
+
+      case 'unknown':
+        uploadFiles.push(createUnknownUploadFile(file.file));
+        break;
+    }
+  }
+
+  for (const file of files) {
+    if (file.type !== 'image') {
+      continue;
+    }
+
+    const targetAudioFileId = audioFileToFileIdMap.get(file.dependsOn);
+    if (!targetAudioFileId) {
+      // should not occur
+      uploadFiles.push(createUnknownUploadFile(file.file));
+    } else {
+      uploadFiles.push(createImageUploadFile(file.file, targetAudioFileId));
+    }
+  }
+
+  // sort
+  const fileToIndexMap: ReadonlyMap<File, number> = new Map(
+    files.flatMap((file, index) =>
+      file.type === 'audioWithCueSheet'
+        ? [
+            [file.file, index],
+            [file.cueSheetFile, index + 0.5],
+          ]
+        : [[file.file, index]]
+    )
+  );
+  uploadFiles.sort(
+    (a, b) =>
+      (fileToIndexMap.get(a.file) ?? 1e7) - (fileToIndexMap.get(b.file) ?? 1e7)
+  );
+
+  return uploadFiles;
 }
 
 function isValidAudioFile(audioFile: File): Promise<boolean> {
@@ -93,11 +283,47 @@ function isValidImageFile(imageFile: File): Promise<boolean> {
   return Promise.resolve(imageFile.size <= MAX_SOURCE_IMAGE_FILE_SIZE);
 }
 
+function doUpload(
+  url: string,
+  blob: Blob,
+  onProgress: (size: number) => void
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', url);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(xhr.getResponseHeader('ETag') || '');
+      } else {
+        reject(new Error(`Failed to upload file: ${xhr.status}`));
+      }
+    };
+    xhr.onerror = (error) => {
+      reject(new Error(`Failed to upload file: ${xhr.status} ${error}`));
+    };
+    xhr.upload.onprogress = (event) => {
+      onProgress(event.loaded);
+    };
+    xhr.setRequestHeader('Cache-Control', SOURCE_FILE_CACHE_CONTROL);
+    xhr.setRequestHeader('Content-Encoding', SOURCE_FILE_CONTENT_ENCODING);
+    xhr.setRequestHeader('Content-Type', SOURCE_FILE_CONTENT_TYPE);
+    xhr.send(blob);
+  });
+}
+
 export class UploadManager extends EventTarget {
-  private files: UploadFile[] = [];
+  private _files: UploadFile[] = [];
+
+  private _beginUploadQueue = new PQueue({
+    concurrency: 4,
+  });
+
+  private uploadQueue = new PQueue({
+    concurrency: 4,
+  });
 
   private _dispatchUpdatedEvent(): void {
-    this.dispatchEvent(new CustomEvent('updated', { detail: this.files }));
+    this.dispatchEvent(new CustomEvent('update', { detail: this._files }));
   }
 
   private _checkFile(file: UploadFile): void {
@@ -114,12 +340,101 @@ export class UploadManager extends EventTarget {
       case 'image':
         checkPromise = isValidImageFile(file.file);
         break;
+
+      case 'unknown':
+        checkPromise = Promise.resolve(false);
+        break;
     }
 
     checkPromise.then((isValid) => {
       file.status = isValid ? 'validated' : 'error_invalid';
+      this._dispatchUpdatedEvent();
       this._tick();
     });
+  }
+
+  private async _sync(force = false): Promise<void> {
+    if (!force && this._files.every((file) => file.status !== 'transcoding')) {
+      return;
+    }
+
+    await syncDB();
+
+    const sourceFiles = await db.sourceFiles.toArray();
+    const sourceFileMap = new Map<string, ResourceSourceFile>(
+      sourceFiles.map((sourceFile) => [sourceFile.id, sourceFile])
+    );
+
+    let changed = false;
+    for (const file of this._files) {
+      const sourceFileId = file.uploadInfo?.sourceFileId;
+      if (!sourceFileId) {
+        continue;
+      }
+      const sourceFile = sourceFileMap.get(sourceFileId);
+      if (!sourceFile) {
+        // should not occur
+        continue;
+      }
+
+      let newStatus: UploadStatus | undefined;
+      switch (sourceFile.state as SourceFileState) {
+        case 'transcoded':
+          newStatus = 'transcoded';
+          break;
+
+        case 'failed':
+          newStatus = 'error_transcode_failed';
+          break;
+      }
+
+      if (!newStatus || file.status === newStatus) {
+        continue;
+      }
+
+      file.status = newStatus;
+      changed = true;
+    }
+
+    if (changed) {
+      this._dispatchUpdatedEvent();
+      this._tick();
+    }
+  }
+
+  private _upload(
+    url: UploadURL,
+    file: Blob,
+    onProgress: (size: number) => void
+  ): Promise<string[] | void> {
+    if (url.parts) {
+      const uploadedSizes = new Array(url.parts.length).fill(0);
+      const eTagPromises: Promise<string>[] = [];
+      const failed = false;
+      let offset = 0;
+      for (const [partIndex, part] of url.parts.entries()) {
+        const partBlob = file.slice(offset, offset + part.size);
+        offset += part.size;
+
+        eTagPromises.push(
+          this.uploadQueue.add(() => {
+            if (failed) {
+              return Promise.resolve('');
+            }
+
+            return doUpload(part.url, partBlob, (size: number): void => {
+              uploadedSizes[partIndex] = size;
+              onProgress(uploadedSizes.reduce((acc, cur) => acc + cur, 0));
+            });
+          })
+        );
+      }
+      return Promise.all(eTagPromises);
+    } else {
+      return this.uploadQueue.add(async () => {
+        await doUpload(url.url, file, onProgress);
+      });
+    }
   }
 
   /**
@@ -127,13 +442,14 @@ export class UploadManager extends EventTarget {
    * - アップロード可能なファイルを探し、アップロードを開始する
    */
   private _tick(): void {
-    const fileMap: ReadonlyMap<symbol, UploadFile> = new Map(
-      this.files.map((file) => [file.id, file])
+    const fileMap: ReadonlyMap<FileId, UploadFile> = new Map(
+      this._files.map((file) => [file.id, file])
     );
 
+    let outerChanged = false;
     while (true) {
       let changed = false;
-      for (const file of this.files) {
+      for (const file of this._files) {
         const dependency = file.dependsOn ? fileMap.get(file.dependsOn)! : null;
         const groups = file.groups.map((fileId) => fileMap.get(fileId)!);
 
@@ -156,7 +472,8 @@ export class UploadManager extends EventTarget {
               // 依存ファイルが失敗したorスキップされた場合はこのファイルをスキップ
               if (
                 dependency.status === 'error_invalid' ||
-                dependency.status === 'error_failed' ||
+                dependency.status === 'error_upload_failed' ||
+                dependency.status === 'error_transcode_failed' ||
                 dependency.status === 'skipped'
               ) {
                 file.status = 'skipped';
@@ -173,21 +490,175 @@ export class UploadManager extends EventTarget {
             }
 
             // 構成するファイルのチェックが終わっていない場合はまだ
-            if (groups.some((group) => group.status !== 'validated')) {
+            if (
+              groups.some(
+                (group) =>
+                  group.status === 'pending' ||
+                  group.status === 'validating' ||
+                  group.status === 'error_invalid' ||
+                  group.status === 'error_upload_failed' ||
+                  group.status === 'error_transcode_failed' ||
+                  group.status === 'skipped'
+              )
+            ) {
               break;
             }
+
+            // アップロードを開始（キューに貯める）
 
             file.status = 'queued';
             changed = true;
 
-            break;
+            this._beginUploadQueue.add(async () => {
+              try {
+                file.status = 'uploading';
+                file.uploadBeginAt = Date.now();
+                this._dispatchUpdatedEvent();
 
-          case 'queued':
-            file.status = 'uploading';
-            file.uploadBeginAt = Date.now();
-            // TODO: uploadURL取得、アップロード開始
-            changed = true;
-            // uploading→uploaded→transcoding→transcodedへの遷移はPromise内で行う
+                let createSourcePromise:
+                  | Promise<CreateSourceResponse>
+                  | undefined;
+
+                if (file.groups.length > 0) {
+                  // CUE+WAV
+                  createSourcePromise =
+                    file.groups
+                      .map((fileId) => fileMap.get(fileId)!.createSourcePromise)
+                      .find((x) => x) ?? undefined;
+                  if (!createSourcePromise) {
+                    const otherFile = fileMap.get(file.groups[0])!;
+                    const audioFile =
+                      file.fileType === 'audio' ? file : otherFile;
+                    const cueSheetFile =
+                      file.fileType === 'cueSheet' ? file : otherFile;
+                    createSourcePromise = api.my.sources.$post({
+                      body: {
+                        type: 'audio',
+                        // TODO(prod): set region
+                        region: 'ap-northeast-1',
+                        audioFile: {
+                          type: 'audio',
+                          filename: audioFile.filename,
+                          fileSize: audioFile.fileSize,
+                        },
+                        cueSheetFile: {
+                          type: 'cueSheet',
+                          filename: cueSheetFile.filename,
+                          fileSize: cueSheetFile.fileSize,
+                        },
+                      },
+                    });
+                    file.createSourcePromise = createSourcePromise;
+                  }
+                } else if (file.fileType === 'audio') {
+                  createSourcePromise = api.my.sources.$post({
+                    body: {
+                      type: 'audio',
+                      // TODO(prod): set region
+                      region: 'ap-northeast-1',
+                      audioFile: {
+                        type: 'audio',
+                        filename: file.filename,
+                        fileSize: file.fileSize,
+                      },
+                      cueSheetFile: null,
+                    },
+                  });
+                } else if (file.fileType === 'image') {
+                  const targetAudioFileSourceFileId = fileMap.get(
+                    file.dependsOn!
+                  )?.uploadInfo?.sourceFileId;
+                  if (!targetAudioFileSourceFileId) {
+                    throw new UploadError(
+                      'targetAudioFileSourceFileId not found',
+                      'skipped'
+                    );
+                  }
+
+                  const targetTrack = await db.tracks
+                    .filter(
+                      (x) => x.sourceFileId === targetAudioFileSourceFileId
+                    )
+                    .first();
+                  const targetAlbumId = targetTrack?.albumId;
+                  if (!targetAlbumId) {
+                    throw new UploadError('targetTrack not found', 'skipped');
+                  }
+
+                  createSourcePromise = api.my.sources.$post({
+                    body: {
+                      type: 'image',
+                      // TODO(prod): set region
+                      region: 'ap-northeast-1',
+                      imageFile: {
+                        type: 'image',
+                        filename: file.filename,
+                        fileSize: file.fileSize,
+                      },
+                      attachToType: 'album',
+                      attachToId: targetAlbumId,
+                    },
+                  });
+                }
+
+                if (!createSourcePromise) {
+                  // should not occur
+                  throw new UploadError('cannot create createSourcePromise');
+                }
+
+                const createSourceResponse = await createSourcePromise;
+
+                const responseFile = createSourceResponse.files.find(
+                  (resFile) => resFile.requestFile.type === file.fileType
+                );
+                if (!responseFile) {
+                  // should not occur
+                  throw new UploadError('cannot create createSourcePromise');
+                }
+
+                const { sourceId } = createSourceResponse;
+                const { sourceFileId, uploadURL } = responseFile;
+
+                file.uploadInfo = {
+                  sourceId,
+                  sourceFileId,
+                  url: uploadURL,
+                };
+
+                const eTags = await this._upload(
+                  uploadURL,
+                  file.file,
+                  (size: number) => {
+                    file.uploadedSize = size;
+                    this._dispatchUpdatedEvent();
+                  }
+                );
+
+                file.status = 'uploaded';
+                file.uploadEndAt = Date.now();
+                this._dispatchUpdatedEvent();
+
+                await api.my.sources
+                  ._sourceId(sourceId)
+                  .files._sourceFileId(sourceFileId)
+                  .$patch({
+                    body: {
+                      state: 'uploaded',
+                      parts: eTags ?? undefined,
+                    },
+                  });
+
+                file.status = 'transcoding';
+                this._dispatchUpdatedEvent();
+              } catch (error: unknown) {
+                file.status =
+                  error instanceof UploadError
+                    ? error.newStatus
+                    : 'error_upload_failed';
+                this._dispatchUpdatedEvent();
+              }
+            });
+
             break;
         }
       }
@@ -195,100 +666,89 @@ export class UploadManager extends EventTarget {
       if (!changed) {
         break;
       }
+
+      outerChanged = true;
     }
 
-    this._dispatchUpdatedEvent();
+    if (outerChanged) {
+      this._dispatchUpdatedEvent();
+    }
   }
 
-  addAudioFile(audioFile: File): symbol {
-    const audioFileId = generateFileId();
+  constructor() {
+    super();
 
-    this.files.push({
-      id: audioFileId,
-      dependsOn: null,
-      groups: [],
-      status: 'pending',
-      file: audioFile,
-      filename: audioFile.name,
-      fileSize: audioFile.size,
-      fileType: 'audio',
-      createdAt: Date.now(),
-      uploadBeginAt: null,
-      uploadEndAt: null,
-      uploadInfo: null,
-    });
+    const sync = () => {
+      this._sync().finally(() => {
+        setTimeout(sync, SYNC_INTERVAL);
+      });
+    };
+    sync();
+  }
 
+  get files(): readonly UploadFile[] {
+    return this._files;
+  }
+
+  get queuedUploadExists(): boolean {
+    return this._files.some(
+      (file) =>
+        file.status === 'pending' ||
+        file.status === 'validating' ||
+        file.status === 'validated' ||
+        file.status === 'queued'
+    );
+  }
+
+  get ongoingUploadExists(): boolean {
+    return this._files.some(
+      (file) => file.status === 'uploading' || file.status === 'uploaded'
+    );
+  }
+
+  addAudioFile(audioFile: File): FileId {
+    const uploadFile = createAudioUploadFile(audioFile);
+    this._files.unshift(uploadFile);
     this._dispatchUpdatedEvent();
     this._tick();
-
-    return audioFileId;
+    return uploadFile.id;
   }
 
   addAudioFileWithCueSheet(
     audioFile: File,
     cueSheetFile: File
-  ): [symbol, symbol] {
-    const audioFileId = generateFileId();
-    const cueSheetFileId = generateFileId();
-
-    this.files.push(
-      {
-        id: audioFileId,
-        dependsOn: null,
-        groups: [cueSheetFileId],
-        status: 'pending',
-        file: audioFile,
-        filename: audioFile.name,
-        fileSize: audioFile.size,
-        fileType: 'audio',
-        createdAt: Date.now(),
-        uploadBeginAt: null,
-        uploadEndAt: null,
-        uploadInfo: null,
-      },
-      {
-        id: cueSheetFileId!,
-        dependsOn: null,
-        groups: [audioFileId],
-        status: 'pending',
-        file: cueSheetFile,
-        filename: cueSheetFile.name,
-        fileSize: cueSheetFile.size,
-        fileType: 'cueSheet',
-        createdAt: Date.now(),
-        uploadBeginAt: null,
-        uploadEndAt: null,
-        uploadInfo: null,
-      }
-    );
-
+  ): [audioFileId: FileId, cueSheetFileId: FileId] {
+    const [audioUploadFile, cueSheetUploadFile] =
+      createAudioWithCueSheetUploadFile(audioFile, cueSheetFile);
+    this._files.unshift(audioUploadFile, cueSheetUploadFile);
     this._dispatchUpdatedEvent();
     this._tick();
-
-    return [audioFileId, cueSheetFileId];
+    return [audioUploadFile.id, cueSheetUploadFile.id];
   }
 
-  addImageFile(imageFile: File, dependsOn: symbol): symbol {
-    const imageFileId = generateFileId();
-
-    this.files.push({
-      id: imageFileId,
-      dependsOn,
-      groups: [],
-      status: 'pending',
-      file: imageFile,
-      filename: imageFile.name,
-      fileSize: imageFile.size,
-      fileType: 'audio',
-      createdAt: Date.now(),
-      uploadBeginAt: null,
-      uploadEndAt: null,
-      uploadInfo: null,
-    });
-
+  addImageFile(imageFile: File, dependsOn: FileId): FileId {
+    if (this._files.every((file) => file.id !== dependsOn)) {
+      throw new Error('invalid dependsOn');
+    }
+    const uploadFile = createImageUploadFile(imageFile, dependsOn);
+    this._files.unshift(uploadFile);
     this._dispatchUpdatedEvent();
     this._tick();
+    return uploadFile.id;
+  }
 
-    return imageFileId;
+  addUnknownFile(file: File): FileId {
+    const uploadFile = createUnknownUploadFile(file);
+    this._files.unshift(uploadFile);
+    this._dispatchUpdatedEvent();
+    this._tick();
+    return uploadFile.id;
+  }
+
+  addResolvedFiles(files: readonly ResolvedUploadFile[]): void {
+    const uploadFiles = createUploadFilesFromResolvedFiles(files);
+    this._files.unshift(...uploadFiles);
+    this._dispatchUpdatedEvent();
+    this._tick();
   }
 }

@@ -114,7 +114,7 @@ export default defineComponent({
     <div class="left-pane flex-grow-0 d-flex flex-row align-center">
       <template v-if="currentTrack$$q">
         <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
-          <nullable-image
+          <s-nullable-image
             icon-size="40px"
             :image="image$$q"
             :width="imageSize$$q"

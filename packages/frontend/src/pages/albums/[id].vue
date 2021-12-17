@@ -59,7 +59,7 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-8 px-6">
-    <album
+    <s-album
       :album="album$$q"
       :album-id="albumId$$q"
       :loading="loading$$q"

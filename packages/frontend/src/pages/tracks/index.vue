@@ -32,7 +32,7 @@ export default defineComponent({
     <header class="mb-6">
       <div class="display-1 font-weight-medium">{{ t('tracks.Tracks') }}</div>
     </header>
-    <track-list
+    <s-track-list
       :show-disc-number="false"
       :tracks="tracks$$q"
       :loading="!tracks$$q"

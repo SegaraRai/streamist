@@ -1,6 +1,4 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
-
 type EventHandler = (event: Event) => unknown;
 
 /**

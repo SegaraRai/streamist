@@ -4,20 +4,21 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
-    Album: typeof import('./components/Album.vue')['default']
-    ConditionalLink: typeof import('./components/ConditionalLink.vue')['default']
-    EllipsisTooltip: typeof import('./components/EllipsisTooltip.vue')['default']
-    Footer: typeof import('./components/Footer.vue')['default']
-    NoImage: typeof import('./components/NoImage.vue')['default']
-    NullableImage: typeof import('./components/NullableImage.vue')['default']
-    PlaybackControl: typeof import('./components/PlaybackControl.vue')['default']
-    Playlist: typeof import('./components/Playlist.vue')['default']
-    Queue: typeof import('./components/Queue.vue')['default']
     README: typeof import('./components/README.md')['default']
+    SAlbum: typeof import('./components/SAlbum.vue')['default']
+    SConditionalLink: typeof import('./components/SConditionalLink.vue')['default']
+    SEllipsisTooltip: typeof import('./components/SEllipsisTooltip.vue')['default']
+    SNoImage: typeof import('./components/SNoImage.vue')['default']
+    SNullableImage: typeof import('./components/SNullableImage.vue')['default']
+    SPlaybackControl: typeof import('./components/SPlaybackControl.vue')['default']
+    SPlaylist: typeof import('./components/SPlaylist.vue')['default']
+    SQueue: typeof import('./components/SQueue.vue')['default']
     SSeekBar: typeof import('./components/SSeekBar.vue')['default']
     SSlider: typeof import('./components/SSlider.vue')['default']
-    TrackList: typeof import('./components/TrackList.vue')['default']
-    Uploader: typeof import('./components/Uploader.vue')['default']
+    STrackList: typeof import('./components/STrackList.vue')['default']
+    SUploader: typeof import('./components/SUploader.vue')['default']
+    SUploaderList: typeof import('./components/SUploaderList.vue')['default']
+    SUploaderListItem: typeof import('./components/SUploaderListItem.vue')['default']
   }
 }
 

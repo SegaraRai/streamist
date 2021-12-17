@@ -244,7 +244,7 @@ export default defineComponent({
                   </div>
                 </template>
                 <template v-if="indexContent === 'albumArtwork'">
-                  <nullable-image
+                  <s-nullable-image
                     class="track-index hover-hidden"
                     icon-size="24px"
                     :image="item.image$$q"
@@ -269,12 +269,12 @@ export default defineComponent({
               v-if="showArtist || item.artist$$q.id !== item.albumArtist$$q.id"
             >
               <v-list-item-subtitle class="track-artist">
-                <conditional-link
+                <s-conditional-link
                   :to="`/artists/${item.artist$$q.id}`"
                   :disabled="linkExcludes.includes(item.artist$$q.id)"
                 >
                   {{ item.artist$$q.name }}
-                </conditional-link>
+                </s-conditional-link>
               </v-list-item-subtitle>
             </template>
           </v-list-item-header>
@@ -283,20 +283,20 @@ export default defineComponent({
               class="list-column-content flex flex-col flex-nowrap justify-center ml-6"
             >
               <v-list-item-title class="track-album-title">
-                <conditional-link
+                <s-conditional-link
                   :to="`/albums/${item.album$$q.id}`"
                   :disabled="linkExcludes.includes(item.album$$q.id)"
                 >
                   {{ item.album$$q.title }}
-                </conditional-link>
+                </s-conditional-link>
               </v-list-item-title>
               <v-list-item-subtitle class="track-album-artist">
-                <conditional-link
+                <s-conditional-link
                   :to="`/artists/${item.albumArtist$$q.id}`"
                   :disabled="linkExcludes.includes(item.albumArtist$$q.id)"
                 >
                   {{ item.albumArtist$$q.name }}
-                </conditional-link>
+                </s-conditional-link>
               </v-list-item-subtitle>
             </v-list-item-header>
           </template>

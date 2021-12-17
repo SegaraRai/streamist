@@ -29,6 +29,7 @@ export const MAX_SOURCE_IMAGE_FILE_SIZE = 100 * 1024 * 1024; // 100MiB
 export const SOURCE_AUDIO_FILE_EXTENSIONS = [
   '.aac',
   '.aiff',
+  '.ape',
   '.flac',
   '.m4a',
   '.mp3',
@@ -37,7 +38,9 @@ export const SOURCE_AUDIO_FILE_EXTENSIONS = [
   '.tak',
   '.tta',
   '.wav',
+  '.weba',
   '.wma',
+  '.wv',
 ] as const;
 
 export const SOURCE_AUDIO_FILE_EXTENSION_SET: ReadonlySet<string> =
