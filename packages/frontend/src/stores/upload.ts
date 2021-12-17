@@ -1,6 +1,10 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { UploadFile, UploadManager } from '~/logic/uploadManager';
-import { ResolvedUploadFile, resolveUploadFiles } from '~/logic/uploadResolver';
+import { FileId, UploadFile, UploadManager } from '~/logic/uploadManager';
+import {
+  ResolvedUploadFile,
+  removeUploadFile,
+  resolveUploadFiles,
+} from '~/logic/uploadResolver';
 
 export const useUploadStore = defineStore('upload', () => {
   const stagedFiles = ref<ResolvedUploadFile[]>([]);
@@ -30,6 +34,14 @@ export const useUploadStore = defineStore('upload', () => {
     },
     startUpload(): void {
       manager.addResolvedFiles(stagedFiles.value.splice(0));
+    },
+    removeStagingFile(file: File): void {
+      stagedFiles.value.push(
+        ...removeUploadFile(stagedFiles.value.splice(0), file)
+      );
+    },
+    removeFile(fileId: FileId): void {
+      manager.removeFile(fileId);
     },
   };
 });

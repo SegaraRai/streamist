@@ -50,7 +50,10 @@ export type UploadStatus =
   | 'error_transcode_failed'
   // 最終状態: 依存先ファイルがトランスコードに失敗したのでスキップされた（未対応ファイルはそもそも追加されない）
   // または、CUEシートが不正or未対応の形式であったため音声ファイルのアップロードがスキップされた
-  | 'skipped';
+  | 'skipped'
+  // ユーザーがアップロードを取り消した、または処理が完了（成功or失敗）した後ユーザーが削除した
+  // 参照用にファイルリストには残り続けるが、UIでは表示しない
+  | 'removed';
 
 export type FileId = symbol;
 
@@ -461,7 +464,16 @@ export class UploadManager extends EventTarget {
             break;
 
           case 'validated':
-            if (groups.some((group) => group.status === 'error_invalid')) {
+            if (
+              groups.some(
+                (group) =>
+                  group.status === 'error_invalid' ||
+                  group.status === 'error_upload_failed' ||
+                  group.status === 'error_transcode_failed' ||
+                  group.status === 'skipped' ||
+                  group.status === 'removed'
+              )
+            ) {
               // 構成するファイルのうちいずれかが失敗した場合はこのファイルをスキップ
               file.status = 'skipped';
               changed = true;
@@ -474,7 +486,8 @@ export class UploadManager extends EventTarget {
                 dependency.status === 'error_invalid' ||
                 dependency.status === 'error_upload_failed' ||
                 dependency.status === 'error_transcode_failed' ||
-                dependency.status === 'skipped'
+                dependency.status === 'skipped' ||
+                dependency.status === 'removed'
               ) {
                 file.status = 'skipped';
                 changed = true;
@@ -493,12 +506,7 @@ export class UploadManager extends EventTarget {
             if (
               groups.some(
                 (group) =>
-                  group.status === 'pending' ||
-                  group.status === 'validating' ||
-                  group.status === 'error_invalid' ||
-                  group.status === 'error_upload_failed' ||
-                  group.status === 'error_transcode_failed' ||
-                  group.status === 'skipped'
+                  group.status === 'pending' || group.status === 'validating'
               )
             ) {
               break;
@@ -511,6 +519,11 @@ export class UploadManager extends EventTarget {
 
             this._beginUploadQueue.add(async () => {
               try {
+                if (file.status === 'removed') {
+                  // aborted by user
+                  return;
+                }
+
                 file.status = 'uploading';
                 file.uploadBeginAt = Date.now();
                 this._dispatchUpdatedEvent();
@@ -750,5 +763,36 @@ export class UploadManager extends EventTarget {
     this._files.unshift(...uploadFiles);
     this._dispatchUpdatedEvent();
     this._tick();
+  }
+
+  /**
+   * @note `status`がpending, validating, validated, queued, transcoded, error_invalid, error_upload_failed, error_transcode_failed, skippedのいずれかでないといけない
+   */
+  removeFile(fileId: FileId): void {
+    const uploadFileIndex = this._files.findIndex((x) => x.id === fileId);
+    if (uploadFileIndex < 0) {
+      return;
+    }
+
+    const uploadFile = this._files[uploadFileIndex];
+    if (uploadFile.status === 'removed') {
+      return;
+    }
+
+    switch (uploadFile.status) {
+      case 'pending':
+      case 'validating':
+      case 'validated':
+      case 'queued':
+      case 'transcoded':
+      case 'skipped':
+      case 'error_invalid':
+      case 'error_upload_failed':
+      case 'error_transcode_failed':
+        uploadFile.status = 'removed';
+        this._dispatchUpdatedEvent();
+        this._tick();
+        break;
+    }
   }
 }

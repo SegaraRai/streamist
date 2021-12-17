@@ -27,17 +27,22 @@ html.dark {
   height: 2px;
 }
 
-.btn {
-  @apply px-4 py-1 rounded inline-block
-    bg-teal-600 text-white cursor-pointer
-    hover:bg-teal-700
-    disabled:cursor-default disabled:bg-gray-600 disabled:opacity-50;
+.s-duration,
+.s-numeric {
+  @apply tabular-nums;
+  @apply lining-nums;
+  @apply leading-none;
+  @apply select-none;
+  @apply flex;
+  @apply flex-col;
+  @apply justify-center;
+  @apply whitespace-nowrap;
 }
 
-.icon-btn {
-  @apply inline-block cursor-pointer select-none
-    opacity-75 transition duration-200 ease-in-out
-    hover:opacity-100 hover:text-teal-600;
+.s-hover-container:not(:hover) .s-hover-display {
+  display: none;
+}
 
-  font-size: 0.9em;
+.s-hover-container:hover .s-hover-hidden {
+  display: none;
 }

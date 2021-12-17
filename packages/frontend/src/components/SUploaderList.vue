@@ -1,30 +1,5 @@
 <script lang="ts" setup>
-import type { UploadFile } from '~/logic/uploadManager';
 import { useUploadStore } from '~/stores/upload';
-
-function getProgress(file: UploadFile): number | string | undefined {
-  switch (file.status) {
-    case 'pending':
-    case 'queued':
-    case 'uploaded':
-    case 'transcoding':
-      return -1;
-
-    case 'uploading':
-      return ((file.uploadedSize || 0) / file.fileSize) * 100;
-
-    case 'skipped':
-      return 'mdi-skip-next';
-
-    case 'transcoded':
-      return 'mdi-check-circle';
-
-    case 'error_invalid':
-    case 'error_upload_failed':
-    case 'error_transcode_failed':
-      return 'mdi-alert-circle';
-  }
-}
 
 const uploadStore = useUploadStore();
 </script>
@@ -35,23 +10,109 @@ const uploadStore = useUploadStore();
       <s-uploader-list-item
         :file="file.file"
         :file-type="file.type"
-        progress="mdi-delete"
-      />
+        class="s-hover-container"
+      >
+        <v-btn
+          flat
+          icon
+          size="small"
+          class="s-hover-display text-red-500"
+          @click="uploadStore.removeStagingFile(file.file)"
+        >
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+        <template v-if="file.type === 'unknown'">
+          <v-icon class="s-hover-hidden">mdi-alert-circle</v-icon>
+        </template>
+      </s-uploader-list-item>
       <template v-if="file.type === 'audioWithCueSheet'">
         <s-uploader-list-item
           class="ml-6"
           :file="file.cueSheetFile"
           file-type="cueSheet"
-          progress="mdi-delete"
         />
       </template>
     </template>
     <template v-for="(file, _index) in uploadStore.files" :key="_index">
-      <s-uploader-list-item
-        :file="file.file"
-        :file-type="file.fileType"
-        :progress="getProgress(file)"
-      />
+      <template v-if="file.status !== 'removed'">
+        <s-uploader-list-item
+          :file="file.file"
+          :file-type="file.fileType"
+          class="s-hover-container"
+        >
+          <template
+            v-if="
+              file.status === 'validating' ||
+              file.status === 'validated' ||
+              file.status === 'pending' ||
+              file.status === 'queued'
+            "
+          >
+            <v-btn
+              flat
+              icon
+              size="small"
+              class="s-hover-display text-red-500"
+              @click="uploadStore.removeFile(file.id)"
+            >
+              <v-icon>mdi-delete</v-icon>
+            </v-btn>
+            <v-progress-circular
+              class="s-hover-hidden"
+              title="Waiting for upload..."
+              indeterminate
+            />
+          </template>
+          <template v-else-if="file.status === 'uploading'">
+            <v-progress-circular
+              :model-value="((file.uploadedSize || 0) * 100) / file.fileSize"
+              :title="`Uploading... (${(
+                ((file.uploadedSize || 0) * 100) /
+                file.fileSize
+              ).toFixed(2)}% complete)`"
+            />
+          </template>
+          <template
+            v-else-if="
+              file.status === 'uploaded' || file.status === 'transcoding'
+            "
+          >
+            <v-progress-circular
+              title="Waiting for transcode..."
+              indeterminate
+            />
+          </template>
+          <template
+            v-else-if="
+              file.status === 'skipped' ||
+              file.status === 'error_invalid' ||
+              file.status === 'error_upload_failed' ||
+              file.status === 'error_transcode_failed' ||
+              file.status === 'transcoded'
+            "
+          >
+            <v-btn
+              flat
+              icon
+              size="small"
+              class="s-hover-display text-green-500"
+              @click="uploadStore.removeFile(file.id)"
+            >
+              <v-icon>mdi-check</v-icon>
+            </v-btn>
+            <template v-if="file.status === 'transcoded'">
+              <v-icon class="s-hover-hidden" title="Upload complete">
+                mdi-check-circle
+              </v-icon>
+            </template>
+            <template v-else>
+              <v-icon class="s-hover-hidden" title="Upload failed">
+                mdi-alert-circle
+              </v-icon>
+            </template>
+          </template>
+        </s-uploader-list-item>
+      </template>
     </template>
   </v-list>
 </template>
