@@ -56,33 +56,6 @@ const navItems = computed<readonly NavItem[]>(() => [
     path: '/playlists',
     text: t('sidebar.Playlists'),
   },
-  {
-    type: 'link',
-    icon: 'mdi-pound',
-    path: '/tags',
-    text: t('sidebar.Tags'),
-  },
-  {
-    type: 'divider',
-  },
-  {
-    type: 'link',
-    icon: 'mdi-playlist-play',
-    path: '/queue',
-    text: t('sidebar.Queue'),
-  },
-  {
-    type: 'link',
-    icon: 'mdi-cloud-download',
-    path: '/downloads',
-    text: t('sidebar.Downloads'),
-  },
-  {
-    type: 'link',
-    icon: 'mdi-cloud-upload',
-    path: '/uploads',
-    text: t('sidebar.Uploads'),
-  },
 ]);
 
 const railedNavigation = computed(() => display.xs.value);
@@ -191,7 +164,7 @@ const devSync = (event: MouseEvent) => {
 
     <v-main :class="theme.bgClass">
       <v-sheet tile :theme="theme.contentTheme" :class="theme.bgClass">
-        <router-view />
+        <router-view class="px-4" />
       </v-sheet>
       <div class="h-24"></div>
     </v-main>

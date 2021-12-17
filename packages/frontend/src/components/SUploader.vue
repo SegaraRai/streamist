@@ -22,12 +22,12 @@ const inputFileElement = ref<HTMLInputElement | undefined>();
     class="hidden"
     @change="onFileSelected"
   />
-  <div class="flex gap-x-4 mb-4 px-4">
+  <div class="flex mb-4 px-4 justify-between">
     <v-btn color="primary" text @click="inputFileElement?.click()">
-      <v-icon>mdi-file-plus</v-icon>
+      <v-icon>mdi-plus</v-icon>
       <span class="ml-2">Add File</span>
     </v-btn>
-    <v-btn color="primary" text @click="uploadStore.clearAll()">
+    <v-btn color="red" text @click="uploadStore.clearAll()">
       <v-icon>mdi-close</v-icon>
       <span class="ml-2">Clear All</span>
     </v-btn>

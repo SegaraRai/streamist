@@ -1,4 +1,5 @@
 <script lang="ts">
+import { useDisplay } from 'vuetify';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { fetchAlbumsForPlaybackWithTracks } from '~/resources/album';
 import { usePlaybackStore } from '~/stores/playback';
@@ -15,6 +16,7 @@ interface Item {
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+    const display = useDisplay();
     const playbackStore = usePlaybackStore();
 
     const albums = ref([] as AlbumForPlaybackWithTracks[]);
@@ -53,16 +55,18 @@ export default defineComponent({
     return {
       t,
       items$$q: items,
-      imageSize$$q: 180,
+      imageSize$$q: computed(() => (display.smAndDown.value ? 90 : 180)),
     };
   },
 });
 </script>
 
 <template>
-  <v-container fluid class="pt-3 px-8">
+  <v-container fluid>
     <header class="mb-6">
-      <div class="display-1 font-weight-medium">{{ t('albums.Albums') }}</div>
+      <div class="text-h5">
+        {{ t('albums.Albums') }}
+      </div>
     </header>
 
     <v-row>
@@ -84,7 +88,9 @@ export default defineComponent({
               aspect-ratio="1"
             />
           </router-link>
-          <v-card-title class="px-0 pt-1 subtitle-1 font-weight-medium">
+          <v-card-title
+            class="px-0 pt-1 subtitle-1 font-weight-medium line-clamp-2"
+          >
             <router-link :to="`/albums/${item.album$$q.id}`">
               {{ item.album$$q.title }}
             </router-link>

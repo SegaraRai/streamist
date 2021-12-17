@@ -78,63 +78,37 @@ export default defineComponent({
 <template>
   <div>
     <div class="mb-6">
-      <div class="d-flex flex-row">
-        <div class="flex-grow-0">
-          <v-skeleton-loader
-            :loading="loading"
-            type="image"
-            :width="imageSize$$q"
-            :height="imageSize$$q"
-            tile
-          >
-            <s-nullable-image
-              class="align-end"
-              icon-size="64px"
-              :image="image$$q"
-              :width="imageSize$$q"
-              :height="imageSize$$q"
-              :aspect-ratio="1"
-            />
-          </v-skeleton-loader>
-        </div>
-        <div class="flex-grow flex-shrink pl-8 flex flex-col">
-          <div class="flex-grow-0 album-title display-1">
-            <v-skeleton-loader
-              :loading="loading"
-              type="heading@2"
-              tile
-              height="2.2rem"
-            >
-              <div>
-                <template v-if="!loading && album">
-                  <s-conditional-link
-                    :to="`/albums/${album.id}`"
-                    :disabled="linkExcludes.includes(album.id)"
-                  >
-                    {{ album.title }}
-                  </s-conditional-link>
-                </template>
-              </div>
-            </v-skeleton-loader>
+      <div class="flex flex-row">
+        <s-nullable-image
+          class="flex-none"
+          icon-size="64px"
+          :image="image$$q"
+          :width="imageSize$$q"
+          :height="imageSize$$q"
+          :aspect-ratio="1"
+        />
+        <div class="flex-1 pl-8 flex flex-col">
+          <div class="flex-none album-title text-xl">
+            <div>
+              <template v-if="!loading && album">
+                <s-conditional-link
+                  :to="`/albums/${album.id}`"
+                  :disabled="linkExcludes.includes(album.id)"
+                >
+                  {{ album.title }}
+                </s-conditional-link>
+              </template>
+            </div>
           </div>
-          <div class="flex-none album-artist-name title">
-            <v-skeleton-loader
-              :loading="loading"
-              type="heading"
-              tile
-              :class="loading ? 'pt-2' : ''"
-            >
-              <div>
-                <template v-if="!loading && album">
-                  <s-conditional-link
-                    :to="`/artists/${album.artist.id}`"
-                    :disabled="linkExcludes.includes(album.artist.id)"
-                  >
-                    {{ album.artist.name }}
-                  </s-conditional-link>
-                </template>
-              </div>
-            </v-skeleton-loader>
+          <div class="flex-none album-artist-name">
+            <template v-if="!loading && album">
+              <s-conditional-link
+                :to="`/artists/${album.artist.id}`"
+                :disabled="linkExcludes.includes(album.artist.id)"
+              >
+                {{ album.artist.name }}
+              </s-conditional-link>
+            </template>
           </div>
           <div class="flex-grow flex-shrink"></div>
           <div class="flex-none album-actions flex flex-row gap-x-8">
@@ -156,16 +130,14 @@ export default defineComponent({
             </div>
           </div>
           <div class="h-4"></div>
-          <div class="flex-none album-misc subtitle-2">
-            <v-skeleton-loader type="text" width="18em" tile>
-              <div>
-                <span>
-                  {{ tracks$$q && t('album.n_tracks', tracks$$q.length) }}
-                </span>
-                <span v-show="duration$$q">, {{ duration$$q }}</span>
-                <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
-              </div>
-            </v-skeleton-loader>
+          <div class="flex-none album-misc text-sm">
+            <div>
+              <span>
+                {{ tracks$$q && t('album.n_tracks', tracks$$q.length) }}
+              </span>
+              <span v-show="duration$$q">, {{ duration$$q }}</span>
+              <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
+            </div>
           </div>
         </div>
       </div>

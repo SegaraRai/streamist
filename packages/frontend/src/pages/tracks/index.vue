@@ -1,4 +1,5 @@
 <script lang="ts">
+import { useDisplay } from 'vuetify';
 import { fetchTracksForPlayback } from '~/resources/track';
 import { usePlaybackStore } from '~/stores/playback';
 import type { TrackForPlayback } from '~/types/playback';
@@ -6,6 +7,7 @@ import type { TrackForPlayback } from '~/types/playback';
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+    const display = useDisplay();
     const playbackStore = usePlaybackStore();
 
     const tracks = ref<TrackForPlayback[] | undefined>();
@@ -22,15 +24,18 @@ export default defineComponent({
     return {
       t,
       tracks$$q: tracks,
+      isMobile$$q: display.smAndDown,
     };
   },
 });
 </script>
 
 <template>
-  <v-container fluid class="pt-3 px-8">
+  <v-container fluid>
     <header class="mb-6">
-      <div class="display-1 font-weight-medium">{{ t('tracks.Tracks') }}</div>
+      <div class="text-h5">
+        {{ t('tracks.Tracks') }}
+      </div>
     </header>
     <s-track-list
       :show-disc-number="false"
@@ -38,8 +43,9 @@ export default defineComponent({
       :loading="!tracks$$q"
       :set-list="tracks$$q"
       index-content="albumArtwork"
-      show-album
+      :show-album="!isMobile$$q"
       show-artist
+      :hide-duration="isMobile$$q"
     />
   </v-container>
 </template>

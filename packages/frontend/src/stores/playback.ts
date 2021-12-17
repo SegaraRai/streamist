@@ -6,6 +6,7 @@ import defaultAlbumArt from '~/assets/default_album_art_256x256.png';
 import { getDefaultAlbumImage } from '~/logic/albumImage';
 import { loadAudio } from '~/logic/audio';
 import { getImageFileURL } from '~/logic/fileURL';
+import { useVolumeStore } from './volume';
 
 // TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる
 
@@ -76,6 +77,8 @@ const audioContainer = document.body;
 
 export function usePlaybackStore(): typeof refState {
   if (!state) {
+    const volumeStore = useVolumeStore();
+
     let audio: HTMLAudioElement | undefined;
 
     const trackProvider = new TrackProvider();
@@ -124,8 +127,9 @@ export function usePlaybackStore(): typeof refState {
     const defaultSetList = ref<TrackForPlayback[] | undefined>();
 
     const createAudio = (): HTMLAudioElement => {
-      const audio = document.createElement('audio');
+      const audio = new Audio();
       audio.classList.add('currentTrack');
+      audio.volume = volumeStore.volume / 100;
 
       audio.addEventListener('play', () => {
         internalPlaying.value = true;
@@ -158,6 +162,14 @@ export function usePlaybackStore(): typeof refState {
 
       audio.addEventListener('ended', () => {
         trackProvider.next$$q();
+      });
+
+      audio.addEventListener('volumechange', () => {
+        if (volumeStore.volume === Math.round(audio.volume * 100)) {
+          // this is needed to suppress update of unmutedVolume
+          return;
+        }
+        volumeStore.volume = audio.volume * 100;
       });
 
       return audio;
@@ -275,6 +287,15 @@ export function usePlaybackStore(): typeof refState {
     trackProvider.addEventListener('shuffleChange', () => {
       shuffle.value = trackProvider.shuffle$$q;
     });
+
+    watch(
+      computed(() => volumeStore.volume),
+      (newVolume) => {
+        if (audio) {
+          audio.volume = newVolume / 100;
+        }
+      }
+    );
 
     watch(repeat, (newRepeat) => {
       trackProvider.repeat$$q = newRepeat;

@@ -1,5 +1,9 @@
 import colors from 'windicss/colors';
 import { defineConfig } from 'windicss/helpers';
+import aspectRatio from 'windicss/plugin/aspect-ratio';
+import filters from 'windicss/plugin/filters';
+import lineClamp from 'windicss/plugin/line-clamp';
+import scrollSnap from 'windicss/plugin/scroll-snap';
 import typography from 'windicss/plugin/typography';
 
 export default defineConfig({
@@ -7,7 +11,7 @@ export default defineConfig({
   // https://windicss.org/posts/v30.html#attributify-mode
   attributify: true,
 
-  plugins: [typography()],
+  plugins: [aspectRatio, filters, lineClamp, scrollSnap, typography()],
   theme: {
     extend: {
       typography: {

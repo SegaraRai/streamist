@@ -1,4 +1,5 @@
 <script lang="ts">
+import { useDisplay } from 'vuetify';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { fetchArtistsForPlayback } from '~/resources/artist';
 import { usePlaybackStore } from '~/stores/playback';
@@ -14,6 +15,7 @@ interface ArtistItem {
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+    const display = useDisplay();
     const playbackStore = usePlaybackStore();
 
     onBeforeUnmount(() => {
@@ -49,16 +51,16 @@ export default defineComponent({
     return {
       t,
       artistItems$$q: artistItems,
-      imageSize$$q: 180,
+      imageSize$$q: computed(() => (display.smAndDown.value ? 90 : 180)),
     };
   },
 });
 </script>
 
 <template>
-  <v-container fluid class="pt-3 px-8">
+  <v-container fluid>
     <header class="mb-6">
-      <div class="display-1 font-weight-medium">
+      <div class="text-h5">
         {{ t('artists.Artists') }}
       </div>
     </header>
@@ -86,7 +88,7 @@ export default defineComponent({
                 aspect-ratio="1"
               />
             </router-link>
-            <v-card-title class="px-0 pt-1">
+            <v-card-title class="px-0 pt-1 line-clamp-2">
               <router-link :to="`/artists/${item.artist$$q.id}`">
                 <span class="subtitle-1 font-weight-medium">
                   {{ item.artist$$q.name }}

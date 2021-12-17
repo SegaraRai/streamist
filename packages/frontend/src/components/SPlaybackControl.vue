@@ -4,11 +4,13 @@ import type { RepeatType } from '$shared/types/playback';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { findAncestor } from '@/logic/findAncestor';
 import { usePlaybackStore } from '@/stores/playback';
+import { useVolumeStore } from '~/stores/volume';
 import type { ResourceImage } from '$/types';
 
 export default defineComponent({
   setup() {
     const playbackStore = usePlaybackStore();
+    const volumeStore = useVolumeStore();
 
     const currentTrack = playbackStore.currentTrack$$q;
     const repeatEnabled = computed(
@@ -56,6 +58,7 @@ export default defineComponent({
     };
 
     return {
+      volumeStore$$q: volumeStore,
       currentTrack$$q: currentTrack,
       playing$$q: playbackStore.playing$$q,
       repeatEnabled$$q: repeatEnabled,
@@ -111,7 +114,7 @@ export default defineComponent({
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
   >
-    <div class="left-pane flex-grow-0 d-flex flex-row align-center">
+    <div class="left-pane flex-none flex flex-row items-center">
       <template v-if="currentTrack$$q">
         <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
           <s-nullable-image
@@ -139,7 +142,7 @@ export default defineComponent({
         </div>
       </template>
     </div>
-    <div class="center-pane flex-grow-1 d-flex flex-column justify-center">
+    <div class="center-pane flex-1 flex flex-col justify-center">
       <div class="buttons d-flex flex-row justify-center px-12">
         <!-- clickではなくmouseupでblutButtonを呼んでいるのはキーで操作されたときにblurしないようにするため -->
         <v-btn
@@ -199,7 +202,16 @@ export default defineComponent({
         @update="seekTo$$q"
       />
     </div>
-    <div class="right-pane flex-grow-0"></div>
+    <div class="right-pane flex-none flex items-center justify-center">
+      <div class="flex-1 max-w-40">
+        <s-volume-control
+          :volume="volumeStore$$q.volume"
+          @mute="volumeStore$$q.muted = !volumeStore$$q.muted"
+          @update="volumeStore$$q.volume = $event"
+          @dragging="volumeStore$$q.setDraggingVolume($event)"
+        />
+      </div>
+    </div>
   </v-sheet>
 </template>
 

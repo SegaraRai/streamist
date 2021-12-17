@@ -71,35 +71,21 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-3 px-8">
-    <div class="d-flex flex-row">
-      <div class="flex-grow-0">
-        <v-skeleton-loader
-          :loading="loading$$q"
-          type="image"
-          :width="200"
-          :height="200"
-          tile
-        >
-          <s-nullable-image
-            class="align-end rounded-full"
-            icon-size="64px"
-            :image="loading$$q ? undefined : image$$q"
-            :width="200"
-            :height="200"
-            :aspect-ratio="1"
-          />
-        </v-skeleton-loader>
-      </div>
-      <div class="flex-grow-1 pl-8 d-flex flex-column">
-        <div class="flex-grow-0 artist-title display-1">
-          <v-skeleton-loader :loading="loading$$q" type="heading@2" tile>
-            <div>
-              <template v-if="!loading$$q && artist$$q">
-                {{ artist$$q.name }}
-              </template>
-            </div>
-          </v-skeleton-loader>
+  <v-container fluid>
+    <div class="flex flex-row">
+      <s-nullable-image
+        class="flex-none align-end rounded-full"
+        icon-size="64px"
+        :image="loading$$q ? undefined : image$$q"
+        :width="200"
+        :height="200"
+        :aspect-ratio="1"
+      />
+      <div class="flex-1 pl-8 flex flex-column">
+        <div class="flex-none artist-title display-1">
+          <template v-if="!loading$$q && artist$$q">
+            {{ artist$$q.name }}
+          </template>
         </div>
       </div>
     </div>

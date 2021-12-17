@@ -53,6 +53,7 @@ export default defineComponent({
     },
     showAlbum: Boolean,
     showArtist: Boolean,
+    hideDuration: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
@@ -149,7 +150,7 @@ export default defineComponent({
 <template>
   <v-list v-model="s" flat :class="themeStore$$q.bgClass">
     <v-list-item class="list-header w-full flex flex-row">
-      <div class="list-header-column list-column-icon subtitle-2 mr-4 py-2">
+      <div class="list-header-column list-column-icon mr-4 py-2">
         {{
           indexContent === 'index' || indexContent === 'trackNumber' ? '#' : ''
         }}
@@ -157,7 +158,7 @@ export default defineComponent({
       <v-list-item-header
         class="list-header-column list-column-content flex flex-row flex-nowrap items-center py-2"
       >
-        <v-list-item-title class="track-title subtitle-2">
+        <v-list-item-title class="track-title">
           {{ t('trackList.Title') }}
         </v-list-item-title>
       </v-list-item-header>
@@ -165,14 +166,16 @@ export default defineComponent({
         <v-list-item-header
           class="list-header-column list-column-content flex flex-row flex-nowrap items-center ml-6 py-2"
         >
-          <v-list-item-title class="track-album-title subtitle-2">
+          <v-list-item-title class="track-album-title">
             {{ t('trackList.Album') }}
           </v-list-item-title>
         </v-list-item-header>
       </template>
-      <div class="list-header-column list-column-duration py-1">
-        <v-icon>mdi-clock-outline</v-icon>
-      </div>
+      <template v-if="!hideDuration">
+        <div class="list-header-column list-column-duration py-1">
+          <v-icon>mdi-clock-outline</v-icon>
+        </div>
+      </template>
     </v-list-item>
     <v-divider />
     <template v-for="(item, index) in items$$q" :key="index">
@@ -245,7 +248,7 @@ export default defineComponent({
                 </template>
                 <template v-if="indexContent === 'albumArtwork'">
                   <s-nullable-image
-                    class="track-index s-hover-hidden"
+                    class="track-index s-hover-hidden flex-none"
                     icon-size="24px"
                     :image="item.image$$q"
                     :width="imageSize$$q"
@@ -300,9 +303,11 @@ export default defineComponent({
               </v-list-item-subtitle>
             </v-list-item-header>
           </template>
-          <div class="list-column-duration s-duration body-2">
-            {{ item.formattedDuration$$q }}
-          </div>
+          <template v-if="!hideDuration">
+            <div class="list-column-duration s-duration body-2">
+              {{ item.formattedDuration$$q }}
+            </div>
+          </template>
         </v-list-item>
         <template v-if="!item.isLast$$q">
           <v-divider />
@@ -314,26 +319,27 @@ export default defineComponent({
 
 <style scoped>
 .sheet-header {
-  position: sticky;
+  @apply sticky;
   top: 48px;
   z-index: 1;
 }
 
 .list-header {
+  @apply pt-0 !important;
+  @apply pb-0 !important;
+  @apply min-h-0 !important;
+  @apply select-none;
   height: 34px;
-  user-select: none;
-  min-height: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
 }
 
-.list-header-column {
-  align-self: flex-end;
-  line-height: 1 !important;
+.list-header .track-title,
+.list-header .track-album-title {
+  @apply text-sm !important;
+  @apply font-bold !important;
 }
 
 .sheet-disc-number-header {
-  position: sticky;
+  @apply sticky;
   top: calc(48px + 1px + 34px);
   z-index: 1;
 }

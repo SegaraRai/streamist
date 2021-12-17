@@ -84,27 +84,20 @@ export default defineComponent({
       <div class="d-flex flex-row">
         <div class="flex-grow-1 pl-8 d-flex flex-column">
           <div class="flex-grow-0 playlist-title display-1">
-            <v-skeleton-loader
-              :loading="loading$$q"
-              type="heading@2"
-              tile
-              height="2.2rem"
-            >
-              <div>
-                <template v-if="!loading$$q && playlist$$q">
-                  <template
-                    v-if="playlistId && !linkExcludes?.includes(playlistId)"
-                  >
-                    <router-link :to="`/playlists/${playlistId}`">{{
-                      playlist$$q.title
-                    }}</router-link>
-                  </template>
-                  <template v-else>
-                    <span>{{ playlist$$q.title }}</span>
-                  </template>
+            <div>
+              <template v-if="!loading$$q && playlist$$q">
+                <template
+                  v-if="playlistId && !linkExcludes?.includes(playlistId)"
+                >
+                  <router-link :to="`/playlists/${playlistId}`">{{
+                    playlist$$q.title
+                  }}</router-link>
                 </template>
-              </div>
-            </v-skeleton-loader>
+                <template v-else>
+                  <span>{{ playlist$$q.title }}</span>
+                </template>
+              </template>
+            </div>
           </div>
           <div class="flex-grow-1 my-4"></div>
           <div class="flex-grow-0 playlist-actions d-flex flex-row">
@@ -133,19 +126,12 @@ export default defineComponent({
           </div>
           <div class="flex-grow-1"></div>
           <div class="flex-grow-0 playlist-misc subtitle-2">
-            <v-skeleton-loader
-              :loading="loading$$q"
-              type="text"
-              width="18em"
-              tile
-            >
-              <div v-show="!loading$$q">
-                <span>{{
-                  tracks$$q && t('playlist.n_tracks', tracks$$q.length)
-                }}</span>
-                <span v-show="duration$$q">, {{ duration$$q }}</span>
-              </div>
-            </v-skeleton-loader>
+            <div v-show="!loading$$q">
+              <span>{{
+                tracks$$q && t('playlist.n_tracks', tracks$$q.length)
+              }}</span>
+              <span v-show="duration$$q">, {{ duration$$q }}</span>
+            </div>
           </div>
         </div>
       </div>

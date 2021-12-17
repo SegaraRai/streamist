@@ -100,9 +100,9 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-3 px-8">
+  <v-container fluid>
     <header class="mb-6">
-      <div class="display-1 font-weight-medium">
+      <div class="text-h5">
         {{ t('playlists.Playlists') }}
       </div>
     </header>

@@ -304,7 +304,11 @@ function doUpload(
       xhr.upload.onprogress = null;
 
       if (xhr.status >= 200 && xhr.status < 300) {
-        onProgress(blob.size);
+        try {
+          onProgress(blob.size);
+        } catch (_error: unknown) {
+          // ignore
+        }
         resolve(xhr.getResponseHeader('ETag') || '');
       } else {
         reject(new Error(`Failed to upload file: ${xhr.status}`));
@@ -318,7 +322,11 @@ function doUpload(
       reject(new Error(`Failed to upload file: ${xhr.status} ${error}`));
     };
     xhr.upload.onprogress = (event) => {
-      onProgress(event.loaded);
+      try {
+        onProgress(event.loaded);
+      } catch (_error: unknown) {
+        // ignore
+      }
     };
     xhr.setRequestHeader('Cache-Control', SOURCE_FILE_CACHE_CONTROL);
     xhr.setRequestHeader('Content-Encoding', SOURCE_FILE_CONTENT_ENCODING);
@@ -442,7 +450,7 @@ export class UploadManager extends EventTarget {
             }
 
             try {
-              return await doUpload(
+              const eTag = await doUpload(
                 part.url,
                 partBlob,
                 (size: number): void => {
@@ -450,6 +458,10 @@ export class UploadManager extends EventTarget {
                   onProgress(uploadedSizes.reduce((acc, cur) => acc + cur, 0));
                 }
               );
+
+              uploadedSizes[partIndex] = part.size;
+
+              return eTag;
             } catch (error: unknown) {
               failed = true;
               throw error;
