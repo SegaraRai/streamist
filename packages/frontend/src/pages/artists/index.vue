@@ -88,11 +88,11 @@ export default defineComponent({
                 aspect-ratio="1"
               />
             </router-link>
-            <v-card-title class="px-0 pt-1 line-clamp-2">
+            <v-card-title
+              class="px-0 pt-1 line-clamp-2 subtitle-1 font-weight-medium text-center"
+            >
               <router-link :to="`/artists/${item.artist$$q.id}`">
-                <span class="subtitle-1 font-weight-medium">
-                  {{ item.artist$$q.name }}
-                </span>
+                {{ item.artist$$q.name }}
               </router-link>
             </v-card-title>
           </v-card>

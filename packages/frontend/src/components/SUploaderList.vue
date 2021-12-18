@@ -16,7 +16,7 @@ const uploadStore = useUploadStore();
           flat
           icon
           size="small"
-          class="s-hover-display text-red-500"
+          class="s-hover-visible text-red-500"
           @click="uploadStore.removeStagingFile(file.id)"
         >
           <v-icon>mdi-delete</v-icon>
@@ -52,7 +52,7 @@ const uploadStore = useUploadStore();
               flat
               icon
               size="small"
-              class="s-hover-display text-red-500"
+              class="s-hover-visible text-red-500"
               @click="uploadStore.removeFile(file.id)"
             >
               <v-icon>mdi-delete</v-icon>
@@ -95,7 +95,7 @@ const uploadStore = useUploadStore();
               flat
               icon
               size="small"
-              class="s-hover-display text-green-500"
+              class="s-hover-visible text-green-500"
               @click="uploadStore.removeFile(file.id)"
             >
               <v-icon>mdi-check</v-icon>

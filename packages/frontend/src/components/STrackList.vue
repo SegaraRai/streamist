@@ -212,7 +212,7 @@ export default defineComponent({
                 :disabled="!setList"
                 @click.stop="play$$q(item.track$$q)"
               >
-                <v-icon class="play-icon s-hover-display">
+                <v-icon class="play-icon s-hover-visible">
                   {{
                     playing$$q
                       ? 'mdi-pause-circle-outline'
@@ -256,7 +256,7 @@ export default defineComponent({
                     :aspect-ratio="1"
                   />
                 </template>
-                <v-icon class="play-icon s-hover-display">
+                <v-icon class="play-icon s-hover-visible">
                   mdi-play-circle-outline
                 </v-icon>
               </v-btn>

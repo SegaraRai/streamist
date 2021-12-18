@@ -14,6 +14,7 @@ import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE,
   MAX_SOURCE_IMAGE_FILE_SIZE,
+  MIN_SOURCE_FILE_SIZE,
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
@@ -177,10 +178,27 @@ export async function createAudioSource(
 
   // TODO(security): validate request
 
+  if (request.audioFile.fileSize < MIN_SOURCE_FILE_SIZE) {
+    throw new HTTPError(
+      400,
+      `File size ${request.audioFile.fileSize} is too small`
+    );
+  }
+
   if (request.audioFile.fileSize > MAX_SOURCE_AUDIO_FILE_SIZE) {
     throw new HTTPError(
       400,
       `File size ${request.audioFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_AUDIO_FILE_SIZE}`
+    );
+  }
+
+  if (
+    request.cueSheetFile &&
+    request.cueSheetFile.fileSize < MIN_SOURCE_FILE_SIZE
+  ) {
+    throw new HTTPError(
+      400,
+      `File size ${request.cueSheetFile.fileSize} is too small`
     );
   }
 
@@ -207,6 +225,16 @@ export async function createAudioSource(
       region,
       request.audioFile.fileSize
     )) ?? null;
+
+  const cueSheetUploadId =
+    request.cueSheetFile && cueSheetFileId
+      ? await createMultipartUploadId(
+          userId,
+          cueSheetFileId,
+          region,
+          request.cueSheetFile.fileSize
+        )
+      : null;
 
   await client.source.create({
     data: {
@@ -244,7 +272,7 @@ export async function createAudioSource(
                   attachToType: null,
                   attachToId: null,
                   entityExists: false,
-                  uploadId: null,
+                  uploadId: cueSheetUploadId,
                   user: { connect: { id: userId } },
                 },
               ]
@@ -277,7 +305,8 @@ export async function createAudioSource(
                 userId,
                 cueSheetFileId!,
                 region,
-                request.cueSheetFile.fileSize
+                request.cueSheetFile.fileSize,
+                cueSheetUploadId
               ),
             },
           ]
@@ -293,6 +322,13 @@ export async function createImageSource(
   const region = toRegion(request.region);
 
   // TODO(security): validate request
+
+  if (request.imageFile.fileSize < MIN_SOURCE_FILE_SIZE) {
+    throw new HTTPError(
+      400,
+      `File size ${request.imageFile.fileSize} is too small`
+    );
+  }
 
   if (request.imageFile.fileSize > MAX_SOURCE_IMAGE_FILE_SIZE) {
     throw new HTTPError(

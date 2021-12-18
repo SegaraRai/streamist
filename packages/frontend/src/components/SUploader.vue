@@ -8,7 +8,7 @@ const onFileSelected = (event: Event) => {
   if (!fileList) {
     return;
   }
-  uploadStore.addFiles(Array.from(fileList));
+  uploadStore.stageFiles(Array.from(fileList));
 };
 
 const inputFileElement = ref<HTMLInputElement | undefined>();

@@ -22,6 +22,7 @@ export const SOURCE_FILE_TREAT_AS_NOT_UPLOADED_SINCE_CREATE =
   1 * 60 * 60;
 export const SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_SINCE_TRANSCODE = 24 * 60 * 60;
 
+export const MIN_SOURCE_FILE_SIZE = 1; // forbid uploading empty files (due to multipart upload)
 export const MAX_SOURCE_AUDIO_FILE_SIZE = 300 * 1024 * 1024; // 300MiB (will be increased to 800MiB in the future for paid accounts)
 export const MAX_SOURCE_CUE_SHEET_FILE_SIZE = 1 * 1024 * 1024; // 1MiB
 export const MAX_SOURCE_IMAGE_FILE_SIZE = 100 * 1024 * 1024; // 100MiB

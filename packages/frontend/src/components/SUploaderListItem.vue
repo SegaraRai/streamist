@@ -10,6 +10,7 @@ const typeToFileIcon: Record<FileType, string> = {
   audioWithCueSheet: 'mdi-file-music',
   cueSheet: 'mdi-file-table',
   image: 'mdi-file-image',
+  imageWithAttachTarget: 'mdi-file-image',
   unknown: 'mdi-file-question',
 };
 
@@ -50,10 +51,12 @@ export default defineComponent({
     </v-list-item-avatar>
     <v-list-item-header class="px-2">
       <div class="flex-1 flex items-center">
-        <div class="flex-1 text-sm">
+        <div
+          class="flex-1 text-sm whitespace-nowrap overflow-hidden overflow-ellipsis"
+        >
           {{ file?.name ?? '' }}
         </div>
-        <div class="flex-none text-sm w-32 text-right opacity-75">
+        <div class="flex-none text-sm w-24 text-right opacity-75">
           {{ humanizeSize(file?.size ?? 0) }}
         </div>
       </div>

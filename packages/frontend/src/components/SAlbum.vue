@@ -8,6 +8,7 @@ import type {
   AlbumForPlaybackWithTracks,
   TrackForPlayback,
 } from '@/types/playback';
+import { useUploadStore } from '~/stores/upload';
 import type { ResourceImage } from '$/types';
 
 export default defineComponent({
@@ -27,6 +28,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     const playbackStore = usePlaybackStore();
+    const uploadStore = useUploadStore();
 
     const artist = computed(() => props.album?.artist);
     const tracks = computed<TrackForPlayback[] | undefined>(
@@ -51,8 +53,11 @@ export default defineComponent({
       () => tracks.value && calcTrackListHeight(tracks.value, true)
     );
 
+    const inputFileElement = ref<HTMLInputElement | null>(null);
+
     return {
       t,
+      inputFileElement$$q: inputFileElement,
       artist$$q: artist,
       image$$q: image,
       tracks$$q: tracks,
@@ -70,88 +75,126 @@ export default defineComponent({
         }
         playbackStore.setSetListAndPlayAuto$$q.value(tracks.value);
       },
+      onAlbumArtClicked$$q: (): void => {
+        if (image.value) {
+          // TODO: show dialog
+        } else {
+          inputFileElement.value?.click();
+        }
+      },
+      onFileSelected$$q: (event: Event): void => {
+        if (!props.album) {
+          return;
+        }
+
+        const fileList = (event.target as HTMLInputElement).files;
+        if (!fileList) {
+          return;
+        }
+
+        uploadStore.uploadImageFiles(
+          Array.from(fileList),
+          'album',
+          props.album.id
+        );
+      },
     };
   },
 });
 </script>
 
 <template>
-  <div>
-    <div class="mb-6">
-      <div class="flex flex-row">
-        <s-nullable-image
-          class="flex-none"
-          icon-size="64px"
-          :image="image$$q"
-          :width="imageSize$$q"
-          :height="imageSize$$q"
-          :aspect-ratio="1"
-        />
-        <div class="flex-1 pl-8 flex flex-col">
-          <div class="flex-none album-title text-xl">
-            <div>
-              <template v-if="!loading && album">
-                <s-conditional-link
-                  :to="`/albums/${album.id}`"
-                  :disabled="linkExcludes.includes(album.id)"
-                >
-                  {{ album.title }}
-                </s-conditional-link>
-              </template>
-            </div>
-          </div>
-          <div class="flex-none album-artist-name">
-            <template v-if="!loading && album">
-              <s-conditional-link
-                :to="`/artists/${album.artist.id}`"
-                :disabled="linkExcludes.includes(album.artist.id)"
-              >
-                {{ album.artist.name }}
-              </s-conditional-link>
-            </template>
-          </div>
-          <div class="flex-grow flex-shrink"></div>
-          <div class="flex-none album-actions flex flex-row gap-x-8">
-            <div>
-              <v-btn color="primary" @click="play$$q(false)">
-                <v-icon left>mdi-play</v-icon>
-                <span>
-                  {{ t('album.Play') }}
-                </span>
-              </v-btn>
-            </div>
-            <div>
-              <v-btn color="accent" outlined @click="play$$q(true)">
-                <v-icon left>mdi-shuffle</v-icon>
-                <span>
-                  {{ t('album.Shuffle') }}
-                </span>
-              </v-btn>
-            </div>
-          </div>
-          <div class="h-4"></div>
-          <div class="flex-none album-misc text-sm">
-            <div>
-              <span>
-                {{ tracks$$q && t('album.n_tracks', tracks$$q.length) }}
-              </span>
-              <span v-show="duration$$q">, {{ duration$$q }}</span>
-              <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
-            </div>
-          </div>
+  <input
+    ref="inputFileElement$$q"
+    type="file"
+    multiple
+    class="hidden"
+    filter="image/*"
+    @change="onFileSelected$$q"
+  />
+  <div class="mb-6 flex flex-row">
+    <button
+      v-ripple
+      class="active:outline-none s-hover-container relative"
+      @click="onAlbumArtClicked$$q"
+    >
+      <s-nullable-image
+        class="flex-none"
+        icon-size="64px"
+        :image="image$$q"
+        :width="imageSize$$q"
+        :height="imageSize$$q"
+        :aspect-ratio="1"
+      />
+      <div
+        class="s-hover-visible absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl"
+      >
+        <v-icon>mdi-cloud-upload</v-icon>
+      </div>
+    </button>
+    <div class="flex-1 pl-8 flex flex-col">
+      <div class="flex-none album-title text-xl">
+        <div>
+          <template v-if="!loading && album">
+            <s-conditional-link
+              :to="`/albums/${album.id}`"
+              :disabled="linkExcludes.includes(album.id)"
+            >
+              {{ album.title }}
+            </s-conditional-link>
+          </template>
+        </div>
+      </div>
+      <div class="flex-none album-artist-name">
+        <template v-if="!loading && album">
+          <s-conditional-link
+            :to="`/artists/${album.artist.id}`"
+            :disabled="linkExcludes.includes(album.artist.id)"
+          >
+            {{ album.artist.name }}
+          </s-conditional-link>
+        </template>
+      </div>
+      <div class="flex-grow flex-shrink"></div>
+      <div class="flex-none album-actions flex flex-row gap-x-8">
+        <div>
+          <v-btn color="primary" @click="play$$q(false)">
+            <v-icon left>mdi-play</v-icon>
+            <span>
+              {{ t('album.Play') }}
+            </span>
+          </v-btn>
+        </div>
+        <div>
+          <v-btn color="accent" outlined @click="play$$q(true)">
+            <v-icon left>mdi-shuffle</v-icon>
+            <span>
+              {{ t('album.Shuffle') }}
+            </span>
+          </v-btn>
+        </div>
+      </div>
+      <div class="h-4"></div>
+      <div class="flex-none album-misc text-sm">
+        <div>
+          <span>
+            {{ tracks$$q && t('album.n_tracks', tracks$$q.length) }}
+          </span>
+          <span v-show="duration$$q">, {{ duration$$q }}</span>
+          <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
         </div>
       </div>
     </div>
-    <s-track-list
-      :show-album="false"
-      :show-artist="false"
-      :tracks="tracks$$q"
-      :link-excludes="linkExcludes"
-      show-disc-number
-      index-content="trackNumber"
-      :set-list="setList"
-    />
   </div>
+  <s-track-list
+    :show-album="false"
+    :show-artist="false"
+    :tracks="tracks$$q"
+    :link-excludes="linkExcludes"
+    show-disc-number
+    index-content="trackNumber"
+    :set-list="setList"
+  />
 </template>
 
 <style scoped>

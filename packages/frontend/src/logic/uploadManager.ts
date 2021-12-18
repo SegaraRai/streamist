@@ -6,11 +6,16 @@ import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE,
   MAX_SOURCE_IMAGE_FILE_SIZE,
+  MIN_SOURCE_FILE_SIZE,
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
 } from '$shared/sourceFileConfig';
-import type { SourceFileState, SourceFileType } from '$shared/types/db';
+import type {
+  SourceFileAttachToType,
+  SourceFileState,
+  SourceFileType,
+} from '$shared/types/db';
 import api from '@/logic/api';
 import { db } from '~/db';
 import { syncDB } from '~/db/sync';
@@ -19,6 +24,7 @@ import type {
   ResourceSourceFile,
   UploadURL,
 } from '$/types';
+import type { CreateSourceResponseFile } from '$/types/createSource';
 import type { ResolvedFileId, ResolvedUploadFile } from './uploadResolver';
 
 const SYNC_INTERVAL = 20 * 1000;
@@ -77,13 +83,17 @@ export interface UploadFile {
   file: File;
   filename: string;
   fileSize: number;
-  fileType: SourceFileType | 'unknown';
+  fileType: SourceFileType | 'imageWithAttachTarget' | 'unknown';
   createdAt: number;
   uploadBeginAt: number | null;
   uploadEndAt: number | null;
   uploadInfo: UploadInfo | null;
   uploadedSize: number | null;
   createSourcePromise: Promise<CreateSourceResponse> | null;
+  attachTarget: {
+    attachToType: SourceFileAttachToType;
+    attachToId: string;
+  } | null;
 }
 
 export class UploadError extends Error {
@@ -116,6 +126,7 @@ function createAudioUploadFile(audioFile: File): UploadFile {
     uploadInfo: null,
     uploadedSize: null,
     createSourcePromise: null,
+    attachTarget: null,
   };
 }
 
@@ -141,6 +152,7 @@ function createAudioWithCueSheetUploadFile(
       uploadInfo: null,
       uploadedSize: null,
       createSourcePromise: null,
+      attachTarget: null,
     },
     {
       id: cueSheetFileId,
@@ -157,6 +169,7 @@ function createAudioWithCueSheetUploadFile(
       uploadInfo: null,
       uploadedSize: null,
       createSourcePromise: null,
+      attachTarget: null,
     },
   ];
 }
@@ -177,6 +190,34 @@ function createImageUploadFile(imageFile: File, dependsOn: FileId): UploadFile {
     uploadInfo: null,
     uploadedSize: null,
     createSourcePromise: null,
+    attachTarget: null,
+  };
+}
+
+function createImageWithAttachTargetUploadFile(
+  imageFile: File,
+  attachToType: SourceFileAttachToType,
+  attachToId: string
+): UploadFile {
+  return {
+    id: generateFileId(),
+    dependsOn: null,
+    groups: [],
+    status: 'pending',
+    file: imageFile,
+    filename: imageFile.name,
+    fileSize: imageFile.size,
+    fileType: 'imageWithAttachTarget',
+    createdAt: Date.now(),
+    uploadBeginAt: null,
+    uploadEndAt: null,
+    uploadInfo: null,
+    uploadedSize: null,
+    createSourcePromise: null,
+    attachTarget: {
+      attachToType,
+      attachToId,
+    },
   };
 }
 
@@ -196,6 +237,7 @@ function createUnknownUploadFile(file: File): UploadFile {
     uploadInfo: null,
     uploadedSize: null,
     createSourcePromise: null,
+    attachTarget: null,
   };
 }
 
@@ -265,11 +307,17 @@ function createUploadFilesFromResolvedFiles(
 }
 
 function isValidAudioFile(audioFile: File): Promise<boolean> {
-  return Promise.resolve(audioFile.size <= MAX_SOURCE_AUDIO_FILE_SIZE);
+  return Promise.resolve(
+    MIN_SOURCE_FILE_SIZE <= audioFile.size &&
+      audioFile.size <= MAX_SOURCE_AUDIO_FILE_SIZE
+  );
 }
 
 async function isValidCueSheetFile(cueSheetFile: File): Promise<boolean> {
-  if (cueSheetFile.size > MAX_SOURCE_CUE_SHEET_FILE_SIZE) {
+  if (
+    cueSheetFile.size < MIN_SOURCE_FILE_SIZE ||
+    cueSheetFile.size > MAX_SOURCE_CUE_SHEET_FILE_SIZE
+  ) {
     return false;
   }
 
@@ -287,7 +335,10 @@ async function isValidCueSheetFile(cueSheetFile: File): Promise<boolean> {
 }
 
 function isValidImageFile(imageFile: File): Promise<boolean> {
-  return Promise.resolve(imageFile.size <= MAX_SOURCE_IMAGE_FILE_SIZE);
+  return Promise.resolve(
+    MIN_SOURCE_FILE_SIZE <= imageFile.size &&
+      imageFile.size <= MAX_SOURCE_IMAGE_FILE_SIZE
+  );
 }
 
 function doUpload(
@@ -347,6 +398,7 @@ export class UploadManager extends EventTarget {
   });
 
   private _dispatchUpdatedEvent(): void {
+    console.log(this._files);
     this.dispatchEvent(new CustomEvent('update', { detail: this._files }));
   }
 
@@ -362,6 +414,7 @@ export class UploadManager extends EventTarget {
         break;
 
       case 'image':
+      case 'imageWithAttachTarget':
         checkPromise = isValidImageFile(file.file);
         break;
 
@@ -565,12 +618,19 @@ export class UploadManager extends EventTarget {
                 file.uploadBeginAt = Date.now();
                 this._dispatchUpdatedEvent();
 
+                let requestFileType:
+                  | CreateSourceResponseFile['requestFile']['type']
+                  | undefined;
                 let createSourcePromise:
                   | Promise<CreateSourceResponse>
                   | undefined;
 
-                if (file.groups.length > 0) {
+                if (
+                  (file.fileType === 'audio' || file.fileType === 'cueSheet') &&
+                  file.groups.length > 0
+                ) {
                   // CUE+WAV
+                  requestFileType = file.fileType;
                   createSourcePromise =
                     file.groups
                       .map((fileId) => fileMap.get(fileId)!.createSourcePromise)
@@ -601,6 +661,7 @@ export class UploadManager extends EventTarget {
                     file.createSourcePromise = createSourcePromise;
                   }
                 } else if (file.fileType === 'audio') {
+                  requestFileType = 'audio';
                   createSourcePromise = api.my.sources.$post({
                     body: {
                       type: 'audio',
@@ -635,6 +696,7 @@ export class UploadManager extends EventTarget {
                     throw new UploadError('targetTrack not found', 'skipped');
                   }
 
+                  requestFileType = 'image';
                   createSourcePromise = api.my.sources.$post({
                     body: {
                       type: 'image',
@@ -649,21 +711,47 @@ export class UploadManager extends EventTarget {
                       attachToId: targetAlbumId,
                     },
                   });
+                } else if (file.fileType === 'imageWithAttachTarget') {
+                  if (!file.attachTarget) {
+                    throw new UploadError(
+                      'logic error: no attach target specified'
+                    );
+                  }
+
+                  requestFileType = 'image';
+                  createSourcePromise = api.my.sources.$post({
+                    body: {
+                      type: 'image',
+                      // TODO(prod): set region
+                      region: 'ap-northeast-1',
+                      imageFile: {
+                        type: 'image',
+                        filename: file.filename,
+                        fileSize: file.fileSize,
+                      },
+                      attachToType: file.attachTarget.attachToType,
+                      attachToId: file.attachTarget.attachToId,
+                    },
+                  });
                 }
 
-                if (!createSourcePromise) {
+                if (!createSourcePromise || !requestFileType) {
                   // should not occur
-                  throw new UploadError('cannot create createSourcePromise');
+                  throw new UploadError(
+                    'logic error: cannot create createSourcePromise or requestFileType'
+                  );
                 }
 
                 const createSourceResponse = await createSourcePromise;
 
                 const responseFile = createSourceResponse.files.find(
-                  (resFile) => resFile.requestFile.type === file.fileType
+                  (resFile) => resFile.requestFile.type === requestFileType
                 );
                 if (!responseFile) {
                   // should not occur
-                  throw new UploadError('cannot create createSourcePromise');
+                  throw new UploadError(
+                    'cannot create createSourcePromise (cannot associate response file with request file)'
+                  );
                 }
 
                 const { sourceId } = createSourceResponse;
@@ -701,6 +789,7 @@ export class UploadManager extends EventTarget {
                 file.status = 'transcoding';
                 this._dispatchUpdatedEvent();
               } catch (error: unknown) {
+                console.error('failed to upload', file, error);
                 file.status =
                   error instanceof UploadError
                     ? error.newStatus
@@ -781,6 +870,22 @@ export class UploadManager extends EventTarget {
       throw new Error('invalid dependsOn');
     }
     const uploadFile = createImageUploadFile(imageFile, dependsOn);
+    this._files.unshift(uploadFile);
+    this._dispatchUpdatedEvent();
+    this._tick();
+    return uploadFile.id;
+  }
+
+  addImageFileWithAttachTarget(
+    imageFile: File,
+    attachToType: SourceFileAttachToType,
+    attachToId: string
+  ): FileId {
+    const uploadFile = createImageWithAttachTargetUploadFile(
+      imageFile,
+      attachToType,
+      attachToId
+    );
     this._files.unshift(uploadFile);
     this._dispatchUpdatedEvent();
     this._tick();

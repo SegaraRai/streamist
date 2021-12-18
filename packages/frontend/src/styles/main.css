@@ -39,7 +39,7 @@ html.dark {
   @apply whitespace-nowrap;
 }
 
-.s-hover-container:not(:hover) .s-hover-display {
+.s-hover-container:not(:hover) .s-hover-visible {
   display: none;
 }
 

@@ -292,6 +292,9 @@ export class TrackProvider<
    * この関数を呼び出すと現在のトラックが切り替わったかどうかによらず常に'trackChange'イベントが発火する
    */
   setSetList$$q(setList: readonly T[], currentTrack?: T | null): void {
+    // 重複を除去
+    const trackMap = new Map(setList.map((track) => [track.id, track]));
+    const uniqueSetList = Array.from(trackMap.values());
     currentTrack =
       currentTrack === undefined
         ? this._currentTrack$$q
@@ -299,12 +302,9 @@ export class TrackProvider<
     // currentTrackをsetList内にあるTrackに変換する
     // （そうなっていないと後々バグる、が、ここに指定する時点でそうなっているべきでもある）
     // `undefined`が指定されて元のcurrentTrackを維持する場合には割と不整合が起こりそう？（起こらないようにしたいが）
-    currentTrack =
-      currentTrack &&
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      setList.find((track) => track.id === currentTrack!.id);
+    currentTrack = currentTrack && trackMap.get(currentTrack.id);
     this._currentTrack$$q = currentTrack;
-    this._setList$$q = [...setList];
+    this._setList$$q = uniqueSetList;
     this._queue$$q = [];
     this._repeatQueue$$q = [];
     this._history$$q = [];

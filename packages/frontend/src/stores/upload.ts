@@ -1,4 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import type { SourceFileAttachToType } from '$shared/types/db';
 import { FileId, UploadFile, UploadManager } from '~/logic/uploadManager';
 import {
   ResolvedFileId,
@@ -30,11 +31,20 @@ export const useUploadStore = defineStore('upload', () => {
   return {
     stagedFiles,
     files,
-    addFiles(files: readonly File[]): void {
+    stageFiles(files: readonly File[]): void {
       stagedFiles.value.push(...resolveUploadFiles(files));
     },
     startUpload(): void {
       manager.addResolvedFiles(stagedFiles.value.splice(0));
+    },
+    uploadImageFiles(
+      files: readonly File[],
+      attachToType: SourceFileAttachToType,
+      attachToId: string
+    ): FileId[] {
+      return files.map((file) =>
+        manager.addImageFileWithAttachTarget(file, attachToType, attachToId)
+      );
     },
     removeStagingFile(fileId: ResolvedFileId): void {
       stagedFiles.value.push(

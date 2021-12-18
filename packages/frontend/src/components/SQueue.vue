@@ -139,7 +139,7 @@ export default defineComponent({
                 :height="imageSize$$q"
                 :aspect-ratio="1"
               />
-              <v-icon class="play-icon s-hover-display">
+              <v-icon class="play-icon s-hover-visible">
                 mdi-play-circle-outline
               </v-icon>
             </v-btn>

@@ -59,13 +59,14 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-8 px-6">
-    <s-album
-      :album="album$$q"
-      :album-id="albumId$$q"
-      :loading="loading$$q"
-      :link-excludes="[albumId$$q]"
-      :set-list="setList$$q"
-    />
+    <template v-if="album$$q">
+      <s-album
+        :album="album$$q"
+        :loading="loading$$q"
+        :link-excludes="[albumId$$q]"
+        :set-list="setList$$q"
+      />
+    </template>
   </v-container>
 </template>
 
