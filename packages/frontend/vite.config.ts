@@ -114,8 +114,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'robots.txt', 'safari-pinned-tab.svg'],
       manifest: {
-        name: 'Vitesse',
-        short_name: 'Vitesse',
+        name: 'Streamist',
+        short_name: 'Streamist',
         theme_color: '#ffffff',
         icons: [
           {
@@ -171,7 +171,16 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    include: ['vue', 'vue-router', '@vueuse/core', '@vueuse/head'],
-    exclude: ['vue-demi'],
+    include: [
+      'axios',
+      'dexie',
+      'humanize-duration',
+      'p-queue',
+      'vue',
+      'vue-router',
+      '@vueuse/core',
+      '@vueuse/head',
+    ],
+    exclude: ['vue-demi', 'vuetify'],
   },
 });

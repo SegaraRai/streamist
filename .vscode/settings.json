@@ -1,11 +1,11 @@
 {
   "cSpell.words": [
-    "Dexie",
+    "dexie",
     "fastify",
     "ffprobe",
     "magick",
     "mkclean",
-    "vitesse"
+    "streamist"
   ],
   "eslint.run": "onSave",
   "editor.codeActionsOnSave": {
