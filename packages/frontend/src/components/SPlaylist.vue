@@ -81,9 +81,9 @@ export default defineComponent({
 <template>
   <div>
     <div class="mb-6">
-      <div class="d-flex flex-row">
-        <div class="flex-grow-1 pl-8 d-flex flex-column">
-          <div class="flex-grow-0 playlist-title display-1">
+      <div class="flex flex-row">
+        <div class="flex-1 pl-8 flex flex-col">
+          <div class="flex-none playlist-title display-1">
             <div>
               <template v-if="!loading$$q && playlist$$q">
                 <template
@@ -99,8 +99,8 @@ export default defineComponent({
               </template>
             </div>
           </div>
-          <div class="flex-grow-1 my-4"></div>
-          <div class="flex-grow-0 playlist-actions d-flex flex-row">
+          <div class="flex-1 my-4"></div>
+          <div class="flex-none playlist-actions flex flex-row">
             <div>
               <v-btn
                 color="primary"
@@ -124,8 +124,8 @@ export default defineComponent({
               </v-btn>
             </div>
           </div>
-          <div class="flex-grow-1"></div>
-          <div class="flex-grow-0 playlist-misc subtitle-2">
+          <div class="flex-1"></div>
+          <div class="flex-none playlist-misc subtitle-2">
             <div v-show="!loading$$q">
               <span>{{
                 tracks$$q && t('playlist.n_tracks', tracks$$q.length)

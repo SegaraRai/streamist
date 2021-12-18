@@ -54,17 +54,18 @@ export class CueSheetParseError extends Error {
  */
 function unescapeValue(str: string): string {
   // 二重引用符で囲われていなければそのまま返す
-  if (!/^".*"$/.test(str)) {
+  if (str.length < 2 || str[0] !== '"' || str[str.length - 1] !== '"') {
     return str;
   }
 
   // "A "test" string" のようなものもパースできるようにしておく（"A \"test\" string"として扱う）
-  str = str.slice(1, str.length - 1);
-  str = str.replace(
-    /\\./g,
-    (sequence) => escapeMap.get(sequence.slice(1)) || sequence.slice(1)
-  );
-  return str;
+  // 念の為サロゲートペアを考慮して.getでは[1]を、フォールバックには.slice(1)を使用している
+  return str
+    .slice(1, -1)
+    .replace(
+      /\\./gu,
+      (sequence) => escapeMap.get(sequence[1]) || sequence.slice(1)
+    );
 }
 
 /**

@@ -5,8 +5,8 @@ const ARRAY_ITEM_SUFFIX = '>' as const;
 
 const ARRAY_ITEMS_DELIMITER =
   `${ARRAY_ITEM_SUFFIX}${ARRAY_ITEM_PREFIX}` as const;
-const ARRAY_ITEMS_SUBSTR_START = ARRAY_ITEM_PREFIX.length;
-const ARRAY_ITEMS_SUBSTR_END = ARRAY_ITEM_SUFFIX.length;
+const ARRAY_ITEMS_SLICE_START = ARRAY_ITEM_PREFIX.length;
+const ARRAY_ITEMS_SLICE_END = ARRAY_ITEM_SUFFIX.length;
 
 export function dbArraySerializeItemIds(itemIds: readonly string[]): string {
   if (itemIds.length === 0) {
@@ -22,7 +22,7 @@ export function dbArrayDeserializeItemIds(dbItemIds: string): string[] {
     return [];
   }
   return dbItemIds
-    .slice(ARRAY_ITEMS_SUBSTR_START, -ARRAY_ITEMS_SUBSTR_END)
+    .slice(ARRAY_ITEMS_SLICE_START, -ARRAY_ITEMS_SLICE_END)
     .split(ARRAY_ITEMS_DELIMITER);
 }
 

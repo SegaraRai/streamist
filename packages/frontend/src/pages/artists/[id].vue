@@ -1,4 +1,5 @@
 <script lang="ts">
+import { useDisplay } from 'vuetify';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { fetchArtistForPlayback } from '~/resources/artist';
 import { usePlaybackStore } from '~/stores/playback';
@@ -10,6 +11,7 @@ export default defineComponent({
     id: String,
   },
   setup(props) {
+    const display = useDisplay();
     const playbackStore = usePlaybackStore();
 
     const id = computed(() => props.id);
@@ -58,6 +60,7 @@ export default defineComponent({
     );
 
     return {
+      isMobile$$q: computed(() => display.smAndDown.value),
       id$$q: id,
       artist$$q: artist,
       image$$q: image,
@@ -72,23 +75,40 @@ export default defineComponent({
 
 <template>
   <v-container fluid>
-    <div class="flex flex-row">
-      <s-nullable-image
-        class="flex-none align-end rounded-full"
-        icon-size="64px"
-        :image="loading$$q ? undefined : image$$q"
-        :width="200"
-        :height="200"
-        :aspect-ratio="1"
-      />
-      <div class="flex-1 pl-8 flex flex-column">
-        <div class="flex-none artist-title display-1">
+    <template v-if="isMobile$$q">
+      <div class="flex flex-col gap-y-4 items-center">
+        <s-nullable-image
+          class="flex-none align-end rounded-full"
+          icon-size="64px"
+          :image="loading$$q ? undefined : image$$q"
+          :width="200"
+          :height="200"
+          :aspect-ratio="1"
+        />
+        <div class="flex-none text-2xl">
           <template v-if="!loading$$q && artist$$q">
             {{ artist$$q.name }}
           </template>
         </div>
       </div>
-    </div>
+    </template>
+    <template v-else>
+      <div class="flex flex-row gap-x-4">
+        <s-nullable-image
+          class="flex-none align-end rounded-full"
+          icon-size="64px"
+          :image="loading$$q ? undefined : image$$q"
+          :width="200"
+          :height="200"
+          :aspect-ratio="1"
+        />
+        <div class="flex-1">
+          <template v-if="!loading$$q && artist$$q">
+            {{ artist$$q.name }}
+          </template>
+        </div>
+      </div>
+    </template>
     <v-divider class="mt-8" />
     <template v-if="!loading$$q && artist$$q">
       <div class="my-12"></div>

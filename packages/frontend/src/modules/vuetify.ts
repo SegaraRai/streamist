@@ -8,5 +8,11 @@ export const install: UserModule = ({ isClient, app }) => {
     return;
   }
 
-  app.use(createVuetify());
+  app.use(
+    createVuetify({
+      theme: {
+        defaultTheme: 'dark',
+      },
+    })
+  );
 };

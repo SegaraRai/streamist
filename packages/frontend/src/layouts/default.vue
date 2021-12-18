@@ -60,6 +60,8 @@ const navItems = computed<readonly NavItem[]>(() => [
 
 const railedNavigation = computed(() => display.xs.value);
 
+const useMobilePlayback = computed(() => display.smAndDown.value);
+const miniSearchBox = computed(() => display.smAndDown.value);
 const rightSidebar = ref(false);
 
 const devSync = (event: MouseEvent) => {
@@ -68,7 +70,7 @@ const devSync = (event: MouseEvent) => {
 </script>
 
 <template>
-  <v-app>
+  <v-app theme="dark">
     <div
       class="bg-black z-30 fixed top-0 left-0 w-full h-full transition-all"
       :class="rightSidebar ? 'opacity-25' : 'opacity-0 invisible'"
@@ -78,9 +80,12 @@ const devSync = (event: MouseEvent) => {
     <v-footer class="playback-sheet fixed bottom-0 z-50 w-full m-0 p-0 h-24">
       <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
         <v-divider />
-        <div class="px-1 flex-1 flex items-center">
+        <template v-if="useMobilePlayback">
+          <s-mobile-playback-control />
+        </template>
+        <template v-else>
           <s-playback-control />
-        </div>
+        </template>
       </v-sheet>
     </v-footer>
 
@@ -112,19 +117,26 @@ const devSync = (event: MouseEvent) => {
     </v-navigation-drawer>
 
     <v-app-bar flat :border="1" density="compact" :theme="theme.headerTheme">
-      <div class="ml-0 pl-4 pr-12 hidden-xs-only leading-tight">
+      <div class="ml-0 pl-4 pr-12 hidden-xs-only leading-tight select-none">
         <span class="text-xl">streamist</span>
         <span class="text-sm">.app</span>
       </div>
-      <v-text-field
-        class="s-search-box"
-        density="compact"
-        prepend-inner-icon="mdi-magnify"
-        :hide-details="true"
-        :label="t('header.Search')"
-      />
+      <template v-if="!miniSearchBox">
+        <v-text-field
+          class="s-search-box"
+          density="compact"
+          prepend-inner-icon="mdi-magnify"
+          :hide-details="true"
+          :label="t('header.Search')"
+        />
+      </template>
       <v-spacer />
       <div class="flex gap-x-2">
+        <template v-if="miniSearchBox">
+          <v-btn icon size="small">
+            <v-icon>mdi-magnify</v-icon>
+          </v-btn>
+        </template>
         <v-btn icon size="small" @click="devSync">
           <v-icon>mdi-sync</v-icon>
         </v-btn>
@@ -163,10 +175,8 @@ const devSync = (event: MouseEvent) => {
       <div class="h-24"></div>
     </v-navigation-drawer>
 
-    <v-main :class="theme.bgClass">
-      <v-sheet tile :theme="theme.contentTheme" :class="theme.bgClass">
-        <router-view class="px-4" />
-      </v-sheet>
+    <v-main>
+      <router-view class="px-4" />
       <div class="h-24"></div>
     </v-main>
 

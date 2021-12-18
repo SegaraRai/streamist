@@ -1,5 +1,4 @@
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
 import { getDefaultAlbumImage } from '@/logic/albumImage';
 import { findAncestor } from '@/logic/findAncestor';
@@ -109,7 +108,7 @@ export default defineComponent({
 
 <template>
   <v-sheet
-    class="w-full flex flex-row px-8 py-0"
+    class="flex-1 w-full flex flex-row px-8 py-0"
     @click="preventXButton$$q"
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
@@ -126,7 +125,7 @@ export default defineComponent({
           />
         </router-link>
         <!-- pb-1で気持ち上に持ち上げる -->
-        <div class="overflow-hidden flex-grow-1 pl-4 pb-1 d-flex flex-column">
+        <div class="overflow-hidden flex-grow-1 pl-4 pb-1 flex flex-col">
           <router-link
             class="block whitespace-pre overflow-hidden overflow-ellipsis subtitle-1"
             :to="`/albums/${currentTrack$$q.albumId}`"
@@ -142,9 +141,9 @@ export default defineComponent({
         </div>
       </template>
     </div>
-    <div class="center-pane flex-1 flex flex-col justify-center">
-      <div class="buttons d-flex flex-row justify-center px-12">
-        <!-- clickではなくmouseupでblutButtonを呼んでいるのはキーで操作されたときにblurしないようにするため -->
+    <div class="flex-1 flex flex-col justify-center">
+      <div class="flex flex-row justify-center px-12">
+        <!-- clickではなくmouseupでblurButtonを呼んでいるのはキーで操作されたときにblurしないようにするため -->
         <v-btn
           class="mx-5"
           :class="shuffleEnabled$$q ? 'active-button' : ''"

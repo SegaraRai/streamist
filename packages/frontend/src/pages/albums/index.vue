@@ -55,7 +55,9 @@ export default defineComponent({
     return {
       t,
       items$$q: items,
-      imageSize$$q: computed(() => (display.smAndDown.value ? 90 : 180)),
+      imageSize$$q: computed(() =>
+        display.xs.value ? 90 : display.sm.value ? 120 : 180
+      ),
     };
   },
 });
@@ -73,7 +75,7 @@ export default defineComponent({
       <v-col
         v-for="item in items$$q"
         :key="item.album$$q.id"
-        class="d-flex child-flex"
+        class="flex"
         cols="auto"
       >
         <v-card flat tile :width="`${imageSize$$q}px`" class="item">
@@ -96,15 +98,15 @@ export default defineComponent({
             </router-link>
           </v-card-title>
           <v-card-subtitle
-            class="px-0 subtitle-2 font-weight-regular d-flex justify-between"
+            class="px-0 subtitle-2 font-weight-regular flex justify-between"
           >
-            <div class="flex-grow-1 artist">
+            <div class="flex-1 artist">
               <router-link :to="`/artists/${item.artist$$q.id}`">
                 {{ item.artist$$q.name }}
               </router-link>
             </div>
             <template v-if="item.releaseYear$$q">
-              <div class="flex-grow-0 pl-2">
+              <div class="flex-none pl-2">
                 {{ item.releaseYear$$q }}
               </div>
             </template>

@@ -4,7 +4,7 @@ export type Theme = 'light' | 'dark';
 
 export const useThemeStore = defineStore('theme', {
   state: () => ({
-    theme: 'light' as Theme,
+    theme: 'dark' as Theme,
   }),
   getters: {
     bgClass: (state) => {

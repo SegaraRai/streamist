@@ -148,7 +148,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-list v-model="s" flat :class="themeStore$$q.bgClass">
+  <v-list v-model="s" flat>
     <v-list-item class="list-header w-full flex flex-row">
       <div class="list-header-column list-column-icon mr-4 py-2">
         {{
@@ -180,11 +180,7 @@ export default defineComponent({
     <v-divider />
     <template v-for="(item, index) in items$$q" :key="index">
       <template v-if="item.type$$q === 'discNumberHeader'">
-        <v-sheet
-          tile
-          class="sheet-disc-number-header w-full"
-          :class="themeStore$$q.bgClass"
-        >
+        <v-sheet tile class="sheet-disc-number-header w-full">
           <v-list-subheader class="list-disc-number-header">
             <div class="list-column-disc-number flex align-center">
               <v-icon>mdi-disc</v-icon>
@@ -210,6 +206,7 @@ export default defineComponent({
                 flat
                 text
                 :disabled="!setList"
+                class="bg-transparent"
                 @click.stop="play$$q(item.track$$q)"
               >
                 <v-icon class="play-icon s-hover-visible">
@@ -234,6 +231,7 @@ export default defineComponent({
                 flat
                 text
                 :disabled="!setList"
+                class="bg-transparent"
                 @click.stop="play$$q(item.track$$q)"
               >
                 <template v-if="indexContent === 'index'">
@@ -265,7 +263,14 @@ export default defineComponent({
           <v-list-item-header
             class="list-column-content flex flex-col flex-nowrap justify-center"
           >
-            <v-list-item-title class="track-title">
+            <v-list-item-title
+              class="track-title block overflow-hidden overflow-ellipsis"
+              :class="
+                currentPlayingTrackId$$q === item.track$$q.id
+                  ? 'text-primary'
+                  : ''
+              "
+            >
               {{ item.track$$q.title }}
             </v-list-item-title>
             <template
@@ -273,6 +278,7 @@ export default defineComponent({
             >
               <v-list-item-subtitle class="track-artist">
                 <s-conditional-link
+                  class="block overflow-hidden overflow-ellipsis"
                   :to="`/artists/${item.artist$$q.id}`"
                   :disabled="linkExcludes.includes(item.artist$$q.id)"
                 >
@@ -287,6 +293,7 @@ export default defineComponent({
             >
               <v-list-item-title class="track-album-title">
                 <s-conditional-link
+                  class="block overflow-hidden overflow-ellipsis"
                   :to="`/albums/${item.album$$q.id}`"
                   :disabled="linkExcludes.includes(item.album$$q.id)"
                 >
@@ -295,6 +302,7 @@ export default defineComponent({
               </v-list-item-title>
               <v-list-item-subtitle class="track-album-artist">
                 <s-conditional-link
+                  class="block overflow-hidden overflow-ellipsis"
                   :to="`/artists/${item.albumArtist$$q.id}`"
                   :disabled="linkExcludes.includes(item.albumArtist$$q.id)"
                 >
@@ -386,6 +394,8 @@ export default defineComponent({
 
 .track-artist,
 .track-album-artist {
+  @apply flex;
+
   flex: auto 0 0;
   line-height: 1 !important;
   white-space: nowrap;

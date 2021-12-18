@@ -8,6 +8,7 @@ declare module 'vue' {
     SAlbum: typeof import('./components/SAlbum.vue')['default']
     SConditionalLink: typeof import('./components/SConditionalLink.vue')['default']
     SEllipsisTooltip: typeof import('./components/SEllipsisTooltip.vue')['default']
+    SMobilePlaybackControl: typeof import('./components/SMobilePlaybackControl.vue')['default']
     SNoImage: typeof import('./components/SNoImage.vue')['default']
     SNullableImage: typeof import('./components/SNullableImage.vue')['default']
     SPlaybackControl: typeof import('./components/SPlaybackControl.vue')['default']

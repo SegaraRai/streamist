@@ -87,25 +87,35 @@ export default defineComponent({
 
 <template>
   <div
-    class="py-2 cursor-pointer"
-    :class="$style.container"
+    class="py-2 cursor-pointer s-hover-container"
     @mousedown.prevent="onMouseDown$$q"
     @touchstart.prevent="onMouseDown$$q"
   >
     <div class="relative w-full h-full">
+      <!-- track (bg) -->
       <div ref="e" class="absolute top-0 w-full h-full flex items-center">
-        <div class="w-full h-1 bg-gray-100 rounded-full"></div>
+        <div
+          class="w-full h-1 on-background bg-current opacity-25 rounded-full"
+        ></div>
       </div>
+      <!-- track (progress) -->
       <div
         class="absolute top-0 h-full flex items-center"
         :class="$style.progress"
       >
-        <div class="w-full h-1 bg-gray-500 rounded-full"></div>
+        <div
+          class="w-full h-1 rounded-full s-hover-hidden"
+          :class="
+            dragging$$q ? 'bg-primary' : 'on-background bg-current opacity-75'
+          "
+        ></div>
+        <div class="w-full h-1 rounded-full s-hover-visible bg-primary"></div>
       </div>
+      <!-- thumb -->
       <div
         v-show="valid$$q"
         class="absolute top-0 h-full flex items-center"
-        :class="[dragging$$q ? '' : 'opacity-0', $style.thumb]"
+        :class="[$style.thumb, dragging$$q ? '' : 's-hover-visible']"
       >
         <div
           class="w-3 -ml-1.5 h-3 bg-gray-200 border-1 border-gray-300 rounded-full"
@@ -122,9 +132,5 @@ export default defineComponent({
 
 .progress {
   width: v-bind('p');
-}
-
-.container:hover .thumb {
-  opacity: 1;
 }
 </style>

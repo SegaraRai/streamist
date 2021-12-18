@@ -25,12 +25,17 @@ export default defineComponent({
     const artists = ref<ArtistForPlayback[]>([]);
 
     fetchArtistsForPlayback().then((response) => {
-      const responseSetList = response.flatMap((artist) => [
+      const sortedArtists = [
+        ...response.filter((artist) => artist.albums.length),
+        ...response.filter((artist) => !artist.albums.length),
+      ];
+
+      const responseSetList = sortedArtists.flatMap((artist) => [
         ...artist.albums.flatMap((album) => album.tracks),
         ...artist.tracks,
       ]);
 
-      artists.value = response;
+      artists.value = sortedArtists;
       playbackStore.setDefaultSetList$$q.value(responseSetList);
     });
 
@@ -51,7 +56,9 @@ export default defineComponent({
     return {
       t,
       artistItems$$q: artistItems,
-      imageSize$$q: computed(() => (display.smAndDown.value ? 90 : 180)),
+      imageSize$$q: computed(() =>
+        display.xs.value ? 90 : display.sm.value ? 120 : 180
+      ),
     };
   },
 });
@@ -70,7 +77,7 @@ export default defineComponent({
         <v-col
           v-for="item in artistItems$$q"
           :key="item.id$$q"
-          class="d-flex child-flex"
+          class="flex"
           cols="auto"
         >
           <v-card flat tile :width="`${imageSize$$q}px`" class="item">

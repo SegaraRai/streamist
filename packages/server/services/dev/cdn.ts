@@ -11,6 +11,8 @@ import {
 import { toRegion } from '$shared/regions';
 import { createUserDownloadS3Cached } from '../userOS';
 
+const PRESIGNED_URL_EXPIRES_IN = 15 * 60;
+
 export function registerDevCDN(app: FastifyInstance): void {
   if (process.env.NODE_ENV !== 'development') {
     return;
@@ -50,11 +52,13 @@ export function registerDevCDN(app: FastifyInstance): void {
           Key: key,
         }),
         {
-          expiresIn: 15 * 60,
+          expiresIn: PRESIGNED_URL_EXPIRES_IN,
         }
       );
 
-      return reply.redirect(302, url);
+      return reply
+        .header('Cache-Control', `private, max-age=${PRESIGNED_URL_EXPIRES_IN}`)
+        .redirect(302, url);
     },
   });
 }
