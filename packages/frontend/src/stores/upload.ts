@@ -64,6 +64,12 @@ export const useUploadStore = defineStore('upload', () => {
         }
       }
     },
+    canClearAll: computed(() => {
+      if (stagedFiles.value.length > 0) {
+        return true;
+      }
+      return manager.files.some((file) => manager.canRemoveFile(file));
+    }),
   };
 });
 

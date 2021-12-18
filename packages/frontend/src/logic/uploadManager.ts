@@ -907,6 +907,23 @@ export class UploadManager extends EventTarget {
     this._tick();
   }
 
+  canRemoveFile(file: UploadFile): boolean {
+    switch (file.status) {
+      case 'pending':
+      case 'validating':
+      case 'validated':
+      case 'queued':
+      case 'transcoded':
+      case 'skipped':
+      case 'error_invalid':
+      case 'error_upload_failed':
+      case 'error_transcode_failed':
+        return true;
+    }
+
+    return false;
+  }
+
   /**
    * @note `status`がpending, validating, validated, queued, transcoded, error_invalid, error_upload_failed, error_transcode_failed, skippedのいずれかでないといけない
    */
@@ -917,24 +934,12 @@ export class UploadManager extends EventTarget {
     }
 
     const uploadFile = this._files[uploadFileIndex];
-    if (uploadFile.status === 'removed') {
+    if (!this.canRemoveFile(uploadFile)) {
       return;
     }
 
-    switch (uploadFile.status) {
-      case 'pending':
-      case 'validating':
-      case 'validated':
-      case 'queued':
-      case 'transcoded':
-      case 'skipped':
-      case 'error_invalid':
-      case 'error_upload_failed':
-      case 'error_transcode_failed':
-        uploadFile.status = 'removed';
-        this._dispatchUpdatedEvent();
-        this._tick();
-        break;
-    }
+    uploadFile.status = 'removed';
+    this._dispatchUpdatedEvent();
+    this._tick();
   }
 }

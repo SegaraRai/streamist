@@ -231,25 +231,23 @@ export function usePlaybackStore(): typeof refState {
         audio = newAudio;
 
         const image = getDefaultAlbumImage(track.album);
-        const artworkPromise: Promise<MediaImage[] | undefined> = image
-          ? Promise.all(
-              image.files.map(async (imageFile) => ({
-                src: await getImageFileURL(imageFile.imageId, imageFile.id),
-                sizes: `${imageFile.width}x${imageFile.height}`,
-                type: imageFile.mimeType,
-              }))
-            )
-          : Promise.resolve([
+        const artwork: MediaImage[] | undefined = image
+          ? image.files.map((imageFile) => ({
+              src: getImageFileURL(imageFile),
+              sizes: `${imageFile.width}x${imageFile.height}`,
+              type: imageFile.mimeType,
+            }))
+          : [
               {
                 src: defaultAlbumArt,
                 sizes: '256x256',
                 type: 'image/png',
               },
-            ]);
+            ];
 
         audioContainer.appendChild(newAudio);
         loadAudio(newAudio, track.files);
-        newAudio.play().then(async () => {
+        newAudio.play().then(() => {
           if (!('mediaSession' in navigator)) {
             return;
           }
@@ -258,7 +256,7 @@ export function usePlaybackStore(): typeof refState {
             title: track.title,
             artist: track.artist.name,
             album: track.album.title,
-            artwork: await artworkPromise,
+            artwork,
           });
           navigator.mediaSession.setPositionState({
             duration: track.duration,

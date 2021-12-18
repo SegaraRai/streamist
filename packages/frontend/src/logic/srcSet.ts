@@ -13,20 +13,18 @@ export interface SrcObject {
  * @param targetSize 必要な大きさ（px）
  * @returns `SrcObject`または`undefined`（`ImageFileDTO`の配列の大きさが0のとき）
  */
-export async function createSrc(
+export function createSrc(
   imageFiles: readonly Readonly<ImageFile>[],
   targetSize: number
-): Promise<SrcObject | undefined> {
+): SrcObject | undefined {
   if (imageFiles.length === 0) {
     return undefined;
   }
 
-  const imageFileWithURLs = await Promise.all(
-    imageFiles.map(async (imageFile) => ({
-      ...imageFile,
-      url: await getImageFileURL(imageFile.imageId, imageFile.id),
-    }))
-  );
+  const imageFileWithURLs = imageFiles.map((imageFile) => ({
+    ...imageFile,
+    url: getImageFileURL(imageFile),
+  }));
 
   // 小さい順
   const sortedImages = [...imageFileWithURLs].sort((a, b) => a.width - b.width);

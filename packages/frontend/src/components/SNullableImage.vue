@@ -1,5 +1,4 @@
 <script lang="ts">
-import { asyncComputed } from '@vueuse/core';
 import type { PropType } from 'vue';
 import { SrcObject, createSrc } from '@/logic/srcSet';
 import type { ResourceImage } from '$/types';
@@ -31,14 +30,10 @@ export default defineComponent({
   setup(_props: unknown) {
     const props = _props as Props;
 
-    const srcObject = asyncComputed<SrcObject | null | undefined | false>(
-      async () =>
+    const srcObject = computed<SrcObject | null | undefined | false>(
+      () =>
         props.image &&
-        (await createSrc(
-          props.image.files,
-          Math.max(props.width, props.height)
-        )),
-      false
+        createSrc(props.image.files, Math.max(props.width, props.height))
     );
 
     return {

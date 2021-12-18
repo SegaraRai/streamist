@@ -65,6 +65,7 @@ const uploadStore = useUploadStore();
           </template>
           <template v-else-if="file.status === 'uploading'">
             <v-progress-circular
+              color="primary"
               :model-value="((file.uploadedSize || 0) * 100) / file.fileSize"
               :title="`Uploading... (${(
                 ((file.uploadedSize || 0) * 100) /
@@ -78,6 +79,7 @@ const uploadStore = useUploadStore();
             "
           >
             <v-progress-circular
+              color="primary"
               title="Waiting for transcode..."
               indeterminate
             />

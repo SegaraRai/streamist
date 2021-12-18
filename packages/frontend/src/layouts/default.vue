@@ -117,9 +117,10 @@ const devSync = (event: MouseEvent) => {
         <span class="text-sm">.app</span>
       </div>
       <v-text-field
+        class="s-search-box"
         density="compact"
         prepend-inner-icon="mdi-magnify"
-        hide-details
+        :hide-details="true"
         :label="t('header.Search')"
       />
       <v-spacer />
@@ -199,5 +200,10 @@ const devSync = (event: MouseEvent) => {
   @apply max-h-full;
   @apply w-2xl;
   @apply px-8;
+}
+
+/* I don't know why but details appears whatever we set hide-details */
+.s-search-box .v-input__details {
+  @apply hidden;
 }
 </style>
