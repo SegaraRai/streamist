@@ -53,14 +53,18 @@ export default defineComponent({
     </div>
   </template>
   <template v-else-if="srcObject$$q">
-    <v-img
+    <img
       :width="`${width}px`"
       :height="`${height}px`"
-      :src="srcObject$$q.src$$q"
-      :srcset="srcObject$$q.srcSet$$q"
-      :sizes="`${width}px`"
-      :aspect-ratio="aspectRatio"
-      cover
+      data-sizes="auto"
+      :data-src="srcObject$$q.src$$q"
+      :data-srcset="srcObject$$q.srcSet$$q"
+      src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
+      class="lazyload object-cover"
+      :style="{
+        width: `${width}px`,
+        height: `${height}px`,
+      }"
     />
   </template>
   <template v-else>

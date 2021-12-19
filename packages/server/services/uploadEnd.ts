@@ -18,6 +18,7 @@ import {
 } from '$transcoder/types/transcoder.js';
 import { Source, SourceFile } from '$prisma/client';
 import { client } from '$/db/lib/client.js';
+import { updateUserResourceTimestamp } from '$/db/resource.js';
 import { HTTPError } from '$/utils/httpError.js';
 import {
   TRANSCODER_CALLBACK_API_ENDPOINT,
@@ -127,7 +128,8 @@ async function invokeTranscoderBySource(
     },
     data: {
       state: is<SourceState>('transcoding'),
-      transcodeStartedAt: new Date(),
+      transcodeStartedAt: Date.now(),
+      updatedAt: Date.now(),
     },
   });
   if (!updated.count) {
@@ -143,8 +145,11 @@ async function invokeTranscoderBySource(
     },
     data: {
       state: is<SourceFileState>('transcoding'),
+      updatedAt: Date.now(),
     },
   });
+
+  await updateUserResourceTimestamp(userId);
 
   const request: TranscoderRequest = {
     callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
@@ -253,7 +258,8 @@ export async function onSourceFileUploaded(
     data: {
       state: is<SourceFileState>('uploaded'),
       entityExists: true,
-      uploadedAt: new Date(),
+      uploadedAt: Date.now(),
+      updatedAt: Date.now(),
     },
   });
   if (!updated.count) {
@@ -276,6 +282,7 @@ export async function onSourceFileUploaded(
   );
   if (!allFilesUploaded) {
     // upload in progress
+    await updateUserResourceTimestamp(userId);
     return;
   }
 
@@ -288,8 +295,11 @@ export async function onSourceFileUploaded(
     },
     data: {
       state: is<SourceState>('uploaded'),
+      updatedAt: Date.now(),
     },
   });
+
+  await updateUserResourceTimestamp(userId);
 
   // start transcode
   invokeTranscodeBySourceSync(userId, sourceId);

@@ -28,6 +28,7 @@ import {
   toSourceFileAttachToType,
 } from '$shared/types/db.js';
 import { client } from '$/db/lib/client.js';
+import { updateUserResourceTimestamp } from '$/db/resource.js';
 import type {
   CreateSourceRequestAudio,
   CreateSourceRequestImage,
@@ -240,6 +241,8 @@ export async function createAudioSource(
     data: {
       id: sourceId,
       state: is<SourceState>('uploading'),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       user: { connect: { id: userId } },
       files: {
         create: [
@@ -256,6 +259,8 @@ export async function createAudioSource(
             attachToId: null,
             entityExists: false,
             uploadId,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
             user: { connect: { id: userId } },
           },
           ...(request.cueSheetFile
@@ -273,6 +278,8 @@ export async function createAudioSource(
                   attachToId: null,
                   entityExists: false,
                   uploadId: cueSheetUploadId,
+                  createdAt: Date.now(),
+                  updatedAt: Date.now(),
                   user: { connect: { id: userId } },
                 },
               ]
@@ -281,6 +288,8 @@ export async function createAudioSource(
       },
     },
   });
+
+  await updateUserResourceTimestamp(userId);
 
   return {
     sourceId,
@@ -370,6 +379,8 @@ export async function createImageSource(
     data: {
       id: sourceId,
       state: is<SourceState>('uploading'),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       user: { connect: { id: userId } },
       files: {
         create: [
@@ -386,12 +397,16 @@ export async function createImageSource(
             attachToId: String(request.attachToId),
             entityExists: false,
             uploadId,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
             user: { connect: { id: userId } },
           },
         ],
       },
     },
   });
+
+  await updateUserResourceTimestamp(userId);
 
   return {
     sourceId,

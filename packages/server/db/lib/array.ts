@@ -5,7 +5,6 @@ import {
 import type { Prisma, PrismaClient } from '$prisma/client';
 import { HTTPError } from '$/utils/httpError';
 import { client } from './client';
-import { dbFormatDateTime } from './dateTime';
 import { dbCreatePlaceholders } from './placeholder';
 import type { TransactionalPrismaClient } from './types';
 
@@ -150,7 +149,7 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
       WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4
     `,
     dbArraySerializeItemIds(itemIds),
-    dbFormatDateTime(),
+    Date.now(),
     userId,
     groupId
   );
@@ -286,7 +285,7 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
       WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4 AND \`${itemOrderColumn}\` = $5
     `,
     newItemOrder,
-    dbFormatDateTime(),
+    Date.now(),
     userId,
     groupId,
     oldItemOrder
@@ -523,7 +522,7 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
       WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4 AND \`${itemOrderColumn}\` = $5
     `,
     newItemOrder,
-    dbFormatDateTime(),
+    Date.now(),
     userId,
     groupId,
     oldItemOrder

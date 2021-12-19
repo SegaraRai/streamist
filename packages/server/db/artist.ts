@@ -2,7 +2,6 @@ import { expectType } from 'tsd';
 import { generateArtistId } from '$shared-server/generateId';
 import { Artist, Prisma } from '$prisma/client';
 import { client } from './lib/client';
-import { dbFormatDateTime } from './lib/dateTime';
 import type { TransactionalPrismaClient } from './lib/types';
 
 // check types for `dbArtistGetOrCreateByNameTx`
@@ -21,7 +20,7 @@ export async function dbArtistGetOrCreateByNameTx(
 ): Promise<Artist> {
   const newArtistId = await newArtistIdPromise;
 
-  const createdAt = dbFormatDateTime();
+  const createdAt = Date.now();
 
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`

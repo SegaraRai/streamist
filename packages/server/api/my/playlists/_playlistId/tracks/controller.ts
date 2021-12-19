@@ -1,5 +1,6 @@
 import { client } from '$/db/lib/client';
 import { dbPlaylistAddTrack, dbPlaylistSortTracks } from '$/db/playlist';
+import { updateUserResourceTimestamp } from '$/db/resource';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -25,6 +26,7 @@ export default defineController(() => ({
   },
   post: async ({ body, params, user }) => {
     await dbPlaylistAddTrack(user.id, params.playlistId, body.trackId);
+    await updateUserResourceTimestamp(user.id);
     return {
       status: 201,
       headers: {

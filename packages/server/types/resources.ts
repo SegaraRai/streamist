@@ -51,8 +51,10 @@ export type ResourceDeletion = Omit<Deletion, 'entityType'> & {
   entityType: DeletionEntityType;
 };
 
-export interface Resources {
+export interface ResourcesUpdated {
+  updated: true;
   timestamp: number;
+  updatedAt: number;
   user: ResourceUser;
   albumCoArtists: ResourceAlbumCoArtist[];
   albums: ResourceAlbum[];
@@ -65,4 +67,10 @@ export interface Resources {
   trackCoArtists: ResourceTrackCoArtist[];
   tracks: ResourceTrack[];
   deletions: ResourceDeletion[];
+}
+
+export interface ResourcesNotUpdated {
+  updated: false;
+  timestamp: number;
+  updatedAt: number;
 }

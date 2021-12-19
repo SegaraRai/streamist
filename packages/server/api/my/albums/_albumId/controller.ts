@@ -33,10 +33,14 @@ export default defineController(() => ({
     };
   },
   patch: async ({ body, params, user }) => {
+    // NOTE: updateAlbum側でresourcesのタイムスタンプを更新している
+    // 一貫性のためこっちに移すか他を変えるかしたい
     await updateAlbum(user.id, params.albumId, body.title);
     return { status: 204 };
   },
   delete: async ({ params, user }) => {
+    // NOTE: deleteAlbum側でresourcesのタイムスタンプを更新している
+    // 一貫性のためこっちに移すか他を変えるかしたい
     await deleteAlbum(user.id, params.albumId);
     return { status: 204 };
   },

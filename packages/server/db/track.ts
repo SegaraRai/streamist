@@ -75,6 +75,8 @@ export async function dbTrackCreateTx(
       artistId: trackArtist.id,
       albumId: album.id,
       userId,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     },
   });
 

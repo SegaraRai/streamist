@@ -15,6 +15,8 @@ import 'virtual:windi-utilities.css';
 import 'virtual:windi-devtools';
 import { activateTokenInterceptor } from './logic/api';
 
+import 'lazysizes';
+
 const routes = setupLayouts(generatedRoutes);
 
 // https://github.com/antfu/vite-ssg

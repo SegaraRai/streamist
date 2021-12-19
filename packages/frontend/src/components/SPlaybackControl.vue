@@ -113,7 +113,7 @@ export default defineComponent({
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
   >
-    <div class="left-pane flex-none flex flex-row items-center">
+    <div class="left-pane flex-none flex flex-row items-center justify-start">
       <template v-if="currentTrack$$q">
         <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
           <s-nullable-image
@@ -201,7 +201,7 @@ export default defineComponent({
         @update="seekTo$$q"
       />
     </div>
-    <div class="right-pane flex-none flex items-center justify-center">
+    <div class="right-pane flex-none flex items-center justify-end">
       <div class="flex-1 max-w-40">
         <s-volume-control
           :volume="volumeStore$$q.volume"

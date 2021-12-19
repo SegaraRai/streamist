@@ -24,6 +24,7 @@ import type {
 import { dbAlbumAddImageTx } from '$/db/album.js';
 import { client } from '$/db/lib/client.js';
 import type { TransactionalPrismaClient } from '$/db/lib/types.js';
+import { updateUserResourceTimestamp } from '$/db/resource';
 import { dbTrackCreateTx } from '$/db/track.js';
 import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
 
@@ -101,6 +102,8 @@ async function registerImage(
       sourceHeight: artifact.probe.height,
       dHash: artifact.dHash,
       user: { connect: { id: userId } },
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       sourceFile: {
         connect: {
           id: sourceFileId,
@@ -118,6 +121,8 @@ async function registerImage(
           width: file.width,
           height: file.height,
           user: { connect: { id: userId } },
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
         })),
       },
     },
@@ -144,7 +149,8 @@ async function markSourceIdAsTranscodedTx(
     },
     data: {
       state: is<SourceState>('transcoded'),
-      transcodeFinishedAt: new Date(),
+      transcodeFinishedAt: Date.now(),
+      updatedAt: Date.now(),
     },
   });
 }
@@ -165,6 +171,7 @@ async function markSourceFileIdAsTx(
     },
     data: {
       state: newState,
+      updatedAt: Date.now(),
     },
   });
 }
@@ -323,6 +330,7 @@ async function handleTranscoderResponse(
                 ...(newAlbumPeak != null
                   ? { replayGainPeak: newAlbumPeak }
                   : {}),
+                updatedAt: Date.now(),
               },
             });
           }
@@ -334,6 +342,7 @@ async function handleTranscoderResponse(
             where: { id: trackArtist.id, userId },
             data: {
               nameSort: tagTrackArtistSort,
+              updatedAt: Date.now(),
             },
           });
         }
@@ -345,6 +354,7 @@ async function handleTranscoderResponse(
               where: { id: albumArtist.id, userId },
               data: {
                 nameSort: tagAlbumArtistSort,
+                updatedAt: Date.now(),
               },
             });
           }
@@ -365,6 +375,8 @@ async function handleTranscoderResponse(
               duration: file.duration,
               trackId: track.id,
               userId,
+              createdAt: Date.now(),
+              updatedAt: Date.now(),
             },
           });
         }
@@ -451,6 +463,8 @@ async function handleTranscoderResponse(
             uploadId: null,
             sourceId,
             userId,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
           },
         });
       } else {
@@ -481,6 +495,13 @@ async function handleTranscoderResponse(
       await markSourceIdAsTranscodedTx(txClient, userId, sourceId);
     }
   });
+
+  const userIdSet = new Set(
+    artifacts.map((artifact) => artifact.source.userId)
+  );
+  for (const userId of userIdSet) {
+    await updateUserResourceTimestamp(userId);
+  }
 }
 
 function handleTranscoderResponseSync(response: TranscoderResponse): void {

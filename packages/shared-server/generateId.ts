@@ -1,5 +1,5 @@
-import { randomBytes } from 'node:crypto';
 import { encodeBase32 } from './base32.js';
+import { randomBytesAsync } from './randomBytesAsync.js';
 
 const enum IdTypeCode {
   Album = 'al',
@@ -20,20 +20,8 @@ const enum IdTypeCode {
 
 export const idLength = 32;
 
-function randomBytesPromise(size: number): Promise<Buffer> {
-  return new Promise<Buffer>((resolve, reject) => {
-    randomBytes(size, (error, buffer) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-      resolve(buffer);
-    });
-  });
-}
-
 async function generateRandomPart(): Promise<string> {
-  return encodeBase32(await randomBytesPromise(10)).slice(-16);
+  return encodeBase32(await randomBytesAsync(10)).slice(-16);
 }
 
 let gCounter = 0;

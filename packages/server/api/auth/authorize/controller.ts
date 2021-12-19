@@ -1,8 +1,13 @@
 import { client } from '$/db/lib/client';
+import {
+  issueAPIToken,
+  issueCDNToken,
+  issueRefreshToken,
+} from '$/services/tokens';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
-export default defineController((fastify) => ({
+export default defineController(() => ({
   post: async ({ body }) => {
     const user = await client.user.findUnique({
       where: {
@@ -19,12 +24,17 @@ export default defineController((fastify) => ({
       throw new HTTPError(401, 'Invalid password');
     }
 
+    const timestamp = Date.now();
+    const refreshToken = await issueRefreshToken(user.id, timestamp);
+    const apiToken = await issueAPIToken(user.id, timestamp);
+    const cdnToken = await issueCDNToken(user.id, timestamp);
+
     return {
       status: 201,
       body: {
-        token: fastify.jwt.sign({
-          id: user.id,
-        }),
+        refreshToken,
+        apiToken,
+        cdnToken,
       },
     };
   },

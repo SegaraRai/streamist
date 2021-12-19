@@ -51,64 +51,66 @@ export async function syncDB(reconstruct = false): Promise<void> {
 
     console.log(since, r);
 
-    const d = {
-      albumCoArtists: getDeletionIds(r.deletions, 'albumCoArtist'),
-      albums: getDeletionIds(r.deletions, 'album'),
-      artists: getDeletionIds(r.deletions, 'artist'),
-      images: getDeletionIds(r.deletions, 'image'),
-      playlists: getDeletionIds(r.deletions, 'playlist'),
-      sourceFiles: getDeletionIds(r.deletions, 'sourceFile'),
-      sources: getDeletionIds(r.deletions, 'source'),
-      tags: getDeletionIds(r.deletions, 'tag'),
-      trackCoArtists: getDeletionIds(r.deletions, 'trackCoArtist'),
-      tracks: getDeletionIds(r.deletions, 'track'),
-    };
+    if (r.updated) {
+      const d = {
+        albumCoArtists: getDeletionIds(r.deletions, 'albumCoArtist'),
+        albums: getDeletionIds(r.deletions, 'album'),
+        artists: getDeletionIds(r.deletions, 'artist'),
+        images: getDeletionIds(r.deletions, 'image'),
+        playlists: getDeletionIds(r.deletions, 'playlist'),
+        sourceFiles: getDeletionIds(r.deletions, 'sourceFile'),
+        sources: getDeletionIds(r.deletions, 'source'),
+        tags: getDeletionIds(r.deletions, 'tag'),
+        trackCoArtists: getDeletionIds(r.deletions, 'trackCoArtist'),
+        tracks: getDeletionIds(r.deletions, 'track'),
+      };
 
-    await db.transaction(
-      'rw',
-      [
-        db.albumCoArtists,
-        db.albums,
-        db.artists,
-        db.images,
-        db.playlists,
-        db.sourceFiles,
-        db.sources,
-        db.tags,
-        db.trackCoArtists,
-        db.tracks,
-      ],
-      async () => {
-        if (reconstruct) {
-          localStorage.removeItem('db.lastUpdate');
-          await Promise.all([
-            clearAndAdd(db.albumCoArtists, r.albumCoArtists),
-            clearAndAdd(db.albums, r.albums),
-            clearAndAdd(db.artists, r.artists),
-            clearAndAdd(db.images, r.images),
-            clearAndAdd(db.playlists, r.playlists),
-            clearAndAdd(db.sourceFiles, r.sourceFiles),
-            clearAndAdd(db.sources, r.sources),
-            clearAndAdd(db.tags, r.tags),
-            clearAndAdd(db.trackCoArtists, r.trackCoArtists),
-            clearAndAdd(db.tracks, r.tracks),
-          ]);
-        } else {
-          await Promise.all([
-            update(db.albumCoArtists, r.albumCoArtists, d.albumCoArtists),
-            update(db.albums, r.albums, d.albums),
-            update(db.artists, r.artists, d.artists),
-            update(db.images, r.images, d.images),
-            update(db.playlists, r.playlists, d.playlists),
-            update(db.sourceFiles, r.sourceFiles, d.sourceFiles),
-            update(db.sources, r.sources, d.sources),
-            update(db.tags, r.tags, d.tags),
-            update(db.trackCoArtists, r.trackCoArtists, d.trackCoArtists),
-            update(db.tracks, r.tracks, d.tracks),
-          ]);
+      await db.transaction(
+        'rw',
+        [
+          db.albumCoArtists,
+          db.albums,
+          db.artists,
+          db.images,
+          db.playlists,
+          db.sourceFiles,
+          db.sources,
+          db.tags,
+          db.trackCoArtists,
+          db.tracks,
+        ],
+        async () => {
+          if (reconstruct) {
+            localStorage.removeItem('db.lastUpdate');
+            await Promise.all([
+              clearAndAdd(db.albumCoArtists, r.albumCoArtists),
+              clearAndAdd(db.albums, r.albums),
+              clearAndAdd(db.artists, r.artists),
+              clearAndAdd(db.images, r.images),
+              clearAndAdd(db.playlists, r.playlists),
+              clearAndAdd(db.sourceFiles, r.sourceFiles),
+              clearAndAdd(db.sources, r.sources),
+              clearAndAdd(db.tags, r.tags),
+              clearAndAdd(db.trackCoArtists, r.trackCoArtists),
+              clearAndAdd(db.tracks, r.tracks),
+            ]);
+          } else {
+            await Promise.all([
+              update(db.albumCoArtists, r.albumCoArtists, d.albumCoArtists),
+              update(db.albums, r.albums, d.albums),
+              update(db.artists, r.artists, d.artists),
+              update(db.images, r.images, d.images),
+              update(db.playlists, r.playlists, d.playlists),
+              update(db.sourceFiles, r.sourceFiles, d.sourceFiles),
+              update(db.sources, r.sources, d.sources),
+              update(db.tags, r.tags, d.tags),
+              update(db.trackCoArtists, r.trackCoArtists, d.trackCoArtists),
+              update(db.tracks, r.tracks, d.tracks),
+            ]);
+          }
         }
-      }
-    );
+      );
+    }
 
     localStorage.setItem('db.lastUpdate', r.timestamp.toString());
   } finally {

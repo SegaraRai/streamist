@@ -35,9 +35,27 @@ export default defineController(() => ({
   get: async ({ query, user }) => {
     const timestamp = Date.now();
 
-    const since = new Date(query?.since || 0);
+    const since = query?.since || 0;
 
     const data = await client.$transaction(async (txClient) => {
+      const resourceUpdate = await txClient.resourceUpdate.findUnique({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      if (!resourceUpdate) {
+        throw new HTTPError(404, `User ${user.id} not found`);
+      }
+
+      if (resourceUpdate.updatedAt < since) {
+        return {
+          updated: false,
+          timestamp,
+          updatedAt: resourceUpdate.updatedAt,
+        } as const;
+      }
+
       const dbUser = await txClient.user.findUnique({
         where: {
           id: user.id,
@@ -56,7 +74,9 @@ export default defineController(() => ({
       } as const;
 
       return {
+        updated: true,
         timestamp,
+        updatedAt: resourceUpdate.updatedAt,
         user: dbUser,
         albumCoArtists: await txClient.albumCoArtist.findMany({
           where,

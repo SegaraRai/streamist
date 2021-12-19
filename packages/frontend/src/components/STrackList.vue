@@ -125,6 +125,7 @@ export default defineComponent({
 
     return {
       t,
+      showMenu$$q: ref(false),
       imageSize$$q: 36,
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
@@ -148,6 +149,20 @@ export default defineComponent({
 </script>
 
 <template>
+  <!-- TODO -->
+  <!-- v-menu v-model="showMenu$$q">
+    <v-list class="bg-surface border rounded">
+      <v-list-item link>
+        <v-list-item-header>foo</v-list-item-header>
+      </v-list-item>
+      <v-list-item link>
+        <v-list-item-header>bar</v-list-item-header>
+      </v-list-item>
+      <v-list-item link>
+        <v-list-item-header>baz</v-list-item-header>
+      </v-list-item>
+    </v-list>
+  </v-menu -->
   <v-list v-model="s" flat>
     <v-list-item class="list-header w-full flex flex-row">
       <div class="list-header-column list-column-icon mr-4 py-2">
@@ -193,7 +208,11 @@ export default defineComponent({
         </v-sheet>
       </template>
       <template v-else>
-        <v-list-item class="s-hover-container w-full" :ripple="false">
+        <v-list-item
+          class="s-hover-container w-full"
+          :ripple="false"
+          @contextmenu.prevent="showMenu$$q = true"
+        >
           <div class="list-column-icon mr-4">
             <!-- hiddenを切り替えるのとv-ifとどっちがいいか -->
             <div

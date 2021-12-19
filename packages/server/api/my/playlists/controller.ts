@@ -1,5 +1,6 @@
 import { generatePlaylistId } from '$shared-server/generateId';
 import { client } from '$/db/lib/client';
+import { updateUserResourceTimestamp } from '$/db/resource';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
@@ -18,8 +19,12 @@ export default defineController(() => ({
         title: body.title,
         notes: body.notes,
         userId: user.id,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       },
     });
+
+    await updateUserResourceTimestamp(user.id);
 
     return {
       status: 201,

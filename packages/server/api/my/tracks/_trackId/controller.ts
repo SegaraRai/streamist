@@ -6,6 +6,7 @@ import {
 } from '$/db/album';
 import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
+import { updateUserResourceTimestamp } from '$/db/resource';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -80,6 +81,8 @@ export default defineController(() => ({
                 id: tempNewArtistId,
                 name: body.artistName,
                 userId: user.id,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
               },
             })
           : await dbArtistGetOrCreateByNameTx(
@@ -115,6 +118,8 @@ export default defineController(() => ({
                 title: body.albumTitle,
                 artistId: newArtistId,
                 userId: user.id,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
               },
             })
           : await dbAlbumGetOrCreateByNameTx(
@@ -139,6 +144,8 @@ export default defineController(() => ({
         },
       });
     });
+
+    await updateUserResourceTimestamp(user.id);
 
     return { status: 204, body: data };
   },

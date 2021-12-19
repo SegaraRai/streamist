@@ -3,6 +3,7 @@ import type { DeletionEntityType } from '$shared/types/db';
 import { ImageSortableAlbum, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { dbPlaylistSortTracks } from '$/db/playlist';
+import { updateUserResourceTimestamp } from '$/db/resource';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -60,11 +61,13 @@ export default defineController(() => ({
       },
       data: {
         title: body.title,
+        updatedAt: Date.now(),
       },
     });
     if (!newPlaylist) {
       throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
     }
+    await updateUserResourceTimestamp(user.id);
     return { status: 204 };
   },
   delete: async ({ params, user }) => {
@@ -83,9 +86,11 @@ export default defineController(() => ({
           entityType: is<DeletionEntityType>('playlist'),
           entityId: params.playlistId,
           userId: user.id,
+          deletedAt: Date.now(),
         },
       });
     });
+    await updateUserResourceTimestamp(user.id);
     return { status: 204 };
   },
 }));

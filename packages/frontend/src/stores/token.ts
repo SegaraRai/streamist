@@ -16,16 +16,17 @@ export const useTokenStore = defineStore('token', () => {
 
   const forceRenew = async () => {
     try {
-      const res = await api.token.$post({
+      const res = await api.auth.authorize.$post({
         body: {
           id: 'usc1',
           pass: 'password',
         },
       });
+      // TODO: store refresh token, set cdn cookie, etc.
       fetching.value = false;
-      token.value = res.token;
-      tokenPromiseResolve(res.token);
-      tokenPromise.value = Promise.resolve(res.token);
+      token.value = res.apiToken;
+      tokenPromiseResolve(res.apiToken);
+      tokenPromise.value = Promise.resolve(res.apiToken);
     } catch (error) {
       fetching.value = false;
       token.value = undefined;

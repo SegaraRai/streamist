@@ -15,6 +15,15 @@ export function init(): Promise<void> {
             id: userId,
             name: `User.Clean.${userId}`,
             email: `${userId}@example.org`,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          },
+        });
+
+        await txClient.resourceUpdate.create({
+          data: {
+            userId,
+            updatedAt: Date.now(),
           },
         });
       }

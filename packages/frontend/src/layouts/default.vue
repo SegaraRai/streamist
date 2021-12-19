@@ -58,11 +58,12 @@ const navItems = computed<readonly NavItem[]>(() => [
   },
 ]);
 
-const railedNavigation = computed(() => display.xs.value);
+const rightSidebar = ref(false);
 
+const railedNavigation = computed(() => display.xs.value);
 const useMobilePlayback = computed(() => display.smAndDown.value);
 const miniSearchBox = computed(() => display.smAndDown.value);
-const rightSidebar = ref(false);
+const fullscreenDialog = computed(() => display.xs.value);
 
 const devSync = (event: MouseEvent) => {
   syncDB(event.shiftKey);
@@ -180,7 +181,11 @@ const devSync = (event: MouseEvent) => {
       <div class="h-24"></div>
     </v-main>
 
-    <v-dialog v-model="uploadDialog" class="s-upload-dialog">
+    <v-dialog
+      v-model="uploadDialog"
+      class="s-upload-dialog"
+      :fullscreen="fullscreenDialog"
+    >
       <v-card class="w-full">
         <v-card-title class="flex">
           <div class="flex-1">Upload</div>
@@ -205,7 +210,7 @@ const devSync = (event: MouseEvent) => {
 </template>
 
 <style>
-.v-dialog.s-upload-dialog .v-overlay__content {
+.v-dialog.s-upload-dialog:not(.v-dialog--fullscreen) .v-overlay__content {
   @apply max-w-full;
   @apply max-h-full;
   @apply w-2xl;

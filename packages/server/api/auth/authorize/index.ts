@@ -4,7 +4,9 @@ export type Methods = {
   post: {
     reqBody: LoginBody;
     resBody: {
-      token: string;
+      refreshToken: string;
+      apiToken: string;
+      cdnToken: string;
     };
   };
 };
