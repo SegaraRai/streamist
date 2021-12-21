@@ -163,7 +163,7 @@ export default defineComponent({
       </v-list-item>
     </v-list>
   </v-menu -->
-  <v-list v-model="s" flat>
+  <v-list v-model="s" flat class="select-none">
     <v-list-item class="list-header w-full flex flex-row">
       <div class="list-header-column list-column-icon mr-4 py-2">
         {{
@@ -283,21 +283,29 @@ export default defineComponent({
             class="list-column-content flex flex-col flex-nowrap justify-center"
           >
             <v-list-item-title
-              class="track-title block overflow-hidden overflow-ellipsis"
-              :class="
-                currentPlayingTrackId$$q === item.track$$q.id
-                  ? 'text-primary'
-                  : ''
-              "
+              class="track-title"
             >
-              {{ item.track$$q.title }}
+              <span
+                class="block overflow-hidden overflow-ellipsis max-w-max"
+                :class="
+                  currentPlayingTrackId$$q === item.track$$q.id
+                    ? 'text-primary'
+                    : 'cursor-pointer'
+                "
+                @click.stop="
+                  currentPlayingTrackId$$q !== item.track$$q.id &&
+                    play$$q(item.track$$q)
+                "
+              >
+                {{ item.track$$q.title }}
+              </span>
             </v-list-item-title>
             <template
               v-if="showArtist || item.artist$$q.id !== item.albumArtist$$q.id"
             >
               <v-list-item-subtitle class="track-artist">
                 <s-conditional-link
-                  class="block overflow-hidden overflow-ellipsis"
+                  class="block overflow-hidden overflow-ellipsis max-w-max"
                   :to="`/artists/${item.artist$$q.id}`"
                   :disabled="linkExcludes.includes(item.artist$$q.id)"
                 >
@@ -312,7 +320,7 @@ export default defineComponent({
             >
               <v-list-item-title class="track-album-title">
                 <s-conditional-link
-                  class="block overflow-hidden overflow-ellipsis"
+                  class="block overflow-hidden overflow-ellipsis max-w-max"
                   :to="`/albums/${item.album$$q.id}`"
                   :disabled="linkExcludes.includes(item.album$$q.id)"
                 >
@@ -321,7 +329,7 @@ export default defineComponent({
               </v-list-item-title>
               <v-list-item-subtitle class="track-album-artist">
                 <s-conditional-link
-                  class="block overflow-hidden overflow-ellipsis"
+                  class="block overflow-hidden overflow-ellipsis max-w-max"
                   :to="`/artists/${item.albumArtist$$q.id}`"
                   :disabled="linkExcludes.includes(item.albumArtist$$q.id)"
                 >

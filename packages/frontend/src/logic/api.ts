@@ -1,24 +1,22 @@
 import aspida from '@aspida/axios';
 import axios from 'axios';
-import { useTokenStore } from '~/stores/token';
-import api from '$/api/$api';
+import createAPI from '$/api/$api';
+import { tokens } from './tokens';
 
 const axiosInstance = axios.create();
 
-const apiInstance = api(aspida(axiosInstance));
+const api = createAPI(aspida(axiosInstance));
 
-export default apiInstance;
+export default api;
 
 export function activateTokenInterceptor() {
-  const tokenStore = useTokenStore();
-
   axiosInstance.interceptors.request.use(
     async (config) => {
-      const token = await tokenStore.tokenPromise;
+      const { apiToken } = await tokens.valueAsync;
       if (!config.headers) {
         config.headers = {};
       }
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${apiToken}`;
       return config;
     },
     (error) => Promise.reject(error)

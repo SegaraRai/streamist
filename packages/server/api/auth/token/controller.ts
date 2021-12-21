@@ -7,7 +7,7 @@ import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
-  get: async ({ body }) => {
+  post: async ({ body }) => {
     const userId = await extractUserIdFromRefreshToken(body.refreshToken);
     if (!userId) {
       throw new HTTPError(401, 'Invalid refresh token');

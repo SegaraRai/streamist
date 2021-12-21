@@ -3,12 +3,13 @@ import cors from 'fastify-cors';
 import helmet from 'fastify-helmet';
 import fastifyJwt from 'fastify-jwt';
 import server from '$/$server';
-import { registerDevCDN } from '$/services/dev';
+import { devCDN } from '$/services/dev';
 import { API_BASE_PATH, SECRET_API_JWT_SECRET } from '$/services/env';
 import { registerTranscoderCallback } from '$/services/transcoderCallback';
 
 export const init = (serverFactory?: FastifyServerFactory) => {
   const app = Fastify({ serverFactory });
+
   app.register(helmet, {
     contentSecurityPolicy: {
       useDefaults: false,
@@ -18,15 +19,34 @@ export const init = (serverFactory?: FastifyServerFactory) => {
       },
     },
   });
-  // TODO(prod): set allowed origins for production and staging environments
-  app.register(cors);
-  app.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
+
   registerTranscoderCallback(app);
+
   if (process.env.NODE_ENV === 'development') {
-    registerDevCDN(app);
+    app.register(devCDN, {
+      prefix: '/dev/cdn',
+    });
   }
+
   // NOTE: not setting custom error handler as fastify's default one works fine
   // TODO(prod): should be set in production to collect errors and send them to sentry or something
-  server(app, { basePath: API_BASE_PATH });
+  app.register(
+    (fastify, _options, done) => {
+      if (process.env.NODE_ENV === 'development') {
+        fastify.register(cors, {
+          origin: true,
+        });
+      } else {
+        // TODO(prod): set allowed origins for production and staging environments
+        fastify.register(cors);
+      }
+      fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
+      server(fastify);
+      done();
+    },
+    {
+      prefix: API_BASE_PATH,
+    }
+  );
   return app;
 };

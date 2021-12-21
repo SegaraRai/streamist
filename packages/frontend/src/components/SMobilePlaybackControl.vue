@@ -54,7 +54,7 @@ export default defineComponent({
 
 <template>
   <v-sheet
-    class="flex-1 w-full h-full flex flex-col m-0 p-0!"
+    class="flex-1 w-full h-full flex flex-col m-0 p-0! select-none"
     @click="preventXButton$$q"
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
@@ -74,13 +74,13 @@ export default defineComponent({
           <!-- pb-1で気持ち上に持ち上げる -->
           <div class="overflow-hidden flex-grow-1 pl-4 pb-1 flex flex-col">
             <router-link
-              class="max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-1"
+              class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-1"
               :to="`/albums/${currentTrack$$q.albumId}`"
             >
               {{ currentTrack$$q.title }}
             </router-link>
             <router-link
-              class="max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-2"
+              class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-2"
               :to="`/artists/${currentTrack$$q.artistId}`"
             >
               {{ currentTrack$$q.artist.name }}

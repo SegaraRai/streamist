@@ -5,6 +5,7 @@ import type { TrackForPlayback } from '@/types/playback';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png';
 import { getDefaultAlbumImage } from '~/logic/albumImage';
 import { loadAudio } from '~/logic/audio';
+import { setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
 import { useVolumeStore } from './volume';
 
@@ -246,28 +247,31 @@ export function usePlaybackStore(): typeof refState {
             ];
 
         audioContainer.appendChild(newAudio);
-        loadAudio(newAudio, track.files);
-        newAudio.play().then(() => {
-          if (!('mediaSession' in navigator)) {
-            return;
-          }
-
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: track.title,
-            artist: track.artist.name,
-            album: track.album.title,
-            artwork,
-          });
-          navigator.mediaSession.setPositionState({
-            duration: track.duration,
-            playbackRate: 1,
-            position: 0,
-          });
-          navigator.mediaSession.playbackState = 'playing';
-          console.log('mediaSession updated A', navigator.mediaSession);
-        });
 
         internalPosition.value = 0;
+
+        (async () => {
+          await setCDNCookie();
+
+          loadAudio(newAudio, track.files);
+          await newAudio.play();
+
+          if ('mediaSession' in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: track.title,
+              artist: track.artist.name,
+              album: track.album.title,
+              artwork,
+            });
+            navigator.mediaSession.setPositionState({
+              duration: track.duration,
+              playbackRate: 1,
+              position: 0,
+            });
+            navigator.mediaSession.playbackState = 'playing';
+            console.log('mediaSession updated A', navigator.mediaSession);
+          }
+        })();
       } else {
         internalPlaying.value = false;
         internalPosition.value = undefined;

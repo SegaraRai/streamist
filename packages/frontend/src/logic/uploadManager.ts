@@ -398,7 +398,6 @@ export class UploadManager extends EventTarget {
   });
 
   private _dispatchUpdatedEvent(): void {
-    console.log(this._files);
     this.dispatchEvent(new CustomEvent('update', { detail: this._files }));
   }
 

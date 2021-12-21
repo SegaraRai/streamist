@@ -3,7 +3,7 @@ import { randomBytesAsync } from '$shared-server/randomBytesAsync';
 import { SECRET_API_JWT_SECRET } from './env';
 
 export const REFRESH_TOKEN_EXPIRES_IN = 1 * 24 * 60 * 60 * 1000;
-export const API_TOKEN_EXPIRES_IN = 1 * 60 * 60 * 1000;
+export const API_TOKEN_EXPIRES_IN = 60 * 1000;
 export const CDN_TOKEN_EXPIRES_IN = API_TOKEN_EXPIRES_IN;
 
 export async function issueRefreshToken(
@@ -79,4 +79,18 @@ export function issueCDNToken(
       id: userId,
     })
   );
+}
+
+export async function extractPayloadFromCDNToken(
+  token: string
+): Promise<{ id: string; exp: number } | undefined> {
+  const verifier = createVerifier({
+    algorithms: ['HS256'],
+    key: process.env.SECRET_CDN_TOKEN_JWT_SECRET || 'CDN_TOKEN_JWT_SECRET',
+    allowedAud: 'cdn',
+  });
+
+  try {
+    return await verifier(String(token));
+  } catch (_error: unknown) {}
 }

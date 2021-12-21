@@ -78,7 +78,9 @@ const devSync = (event: MouseEvent) => {
       @click="rightSidebar = false"
     ></div>
 
-    <v-footer class="playback-sheet fixed bottom-0 z-50 w-full m-0 p-0 h-24">
+    <v-footer
+      class="select-none playback-sheet fixed bottom-0 z-50 w-full m-0 p-0 h-24"
+    >
       <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
         <v-divider />
         <template v-if="useMobilePlayback">
@@ -97,7 +99,7 @@ const devSync = (event: MouseEvent) => {
       :theme="theme.rightSidebarTheme"
       :width="400"
       hide-overlay
-      class="!z-40"
+      class="select-none !z-40"
     >
       <div class="flex flex-col h-full">
         <v-sheet tile>
@@ -122,16 +124,15 @@ const devSync = (event: MouseEvent) => {
         <span class="text-xl">streamist</span>
         <span class="text-sm">.app</span>
       </div>
+      <v-spacer />
       <template v-if="!miniSearchBox">
         <v-text-field
           class="s-search-box"
           density="compact"
           prepend-inner-icon="mdi-magnify"
           :hide-details="true"
-          :label="t('header.Search')"
         />
       </template>
-      <v-spacer />
       <div class="flex gap-x-2">
         <template v-if="miniSearchBox">
           <v-btn icon size="small">
@@ -155,6 +156,7 @@ const devSync = (event: MouseEvent) => {
       position="left"
       :rail="railedNavigation"
       rail-width="56"
+      class="select-none"
     >
       <v-list dense class="overflow-x-hidden">
         <template v-for="(item, index) in navItems" :key="index">
@@ -183,7 +185,7 @@ const devSync = (event: MouseEvent) => {
 
     <v-dialog
       v-model="uploadDialog"
-      class="s-upload-dialog"
+      class="s-upload-dialog select-none"
       :fullscreen="fullscreenDialog"
     >
       <v-card class="w-full">

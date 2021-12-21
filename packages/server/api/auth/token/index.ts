@@ -1,11 +1,12 @@
 export type Methods = {
-  get: {
+  post: {
     reqBody: {
       refreshToken: string;
     };
     resBody: {
       apiToken: string;
       cdnToken: string;
+      refreshToken?: string;
     };
   };
 };
