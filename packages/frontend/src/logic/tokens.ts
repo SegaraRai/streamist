@@ -1,6 +1,6 @@
-import { createAsyncCache } from './asyncCache';
+import { createAsyncCache } from '$shared/asyncCache';
 import { isJWTNotExpired } from './jwt';
-import unAuthAPI from './unauthAPI';
+import unAuthAPI from './unAuthAPI';
 
 export interface Tokens {
   readonly apiToken: string;

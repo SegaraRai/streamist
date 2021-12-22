@@ -20,32 +20,35 @@ export interface ResourceAlbum extends Album {
   imageIds: string[];
 }
 
-export type ResourceAlbumCoArtist = AlbumCoArtist;
+export interface ResourceAlbumCoArtist extends AlbumCoArtist {}
 
-export type ResourceArtist = Artist;
+export interface ResourceArtist extends Artist {
+  imageIds: string[];
+}
 
 export interface ResourceImage extends Image {
   files: ImageFile[];
 }
 
 export interface ResourcePlaylist extends Playlist {
+  imageIds: string[];
   trackIds: string[];
 }
 
-export type ResourceSource = Source;
+export interface ResourceSource extends Source {}
 
 // sourceFileId単体で索引できるようにするためにSourceの中に入れない
-export type ResourceSourceFile = SourceFile;
+export interface ResourceSourceFile extends SourceFile {}
 
-export type ResourceTag = Tag;
+export interface ResourceTag extends Tag {}
 
 export interface ResourceTrack extends Track {
   files: TrackFile[];
 }
 
-export type ResourceTrackCoArtist = TrackCoArtist;
+export interface ResourceTrackCoArtist extends TrackCoArtist {}
 
-export type ResourceUser = Omit<User, ''>;
+export interface ResourceUser extends Omit<User, ''> {}
 
 export type ResourceDeletion = Omit<Deletion, 'entityType'> & {
   entityType: DeletionEntityType;

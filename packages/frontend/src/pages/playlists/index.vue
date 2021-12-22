@@ -1,10 +1,10 @@
 <script lang="ts">
-import { calcTracksTotalDuration, formatTotalDuration } from '@/logic/duration';
-import { useThemeStore } from '@/stores/theme';
 import { syncDB } from '~/db/sync';
 import apiInstance from '~/logic/api';
+import { calcTracksTotalDuration, formatTotalDuration } from '~/logic/duration';
 import { fetchPlaylistsForPlayback } from '~/resources/playlist';
 import { usePlaybackStore } from '~/stores/playback';
+import { useThemeStore } from '~/stores/theme';
 import type { PlaylistForPlayback } from '~/types/playback';
 
 interface Item {

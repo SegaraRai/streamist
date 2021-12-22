@@ -73,8 +73,12 @@ export default defineComponent({
       e,
       p: position,
       dragging$$q: dragging,
-      onMouseDown$$q() {
+      onMouseDown$$q(event?: MouseEvent) {
         if (!valid.value || !e.value) {
+          return;
+        }
+
+        if (event && event.button !== 0) {
           return;
         }
 
@@ -89,7 +93,7 @@ export default defineComponent({
   <div
     class="py-2 cursor-pointer s-hover-container"
     @mousedown.prevent="onMouseDown$$q"
-    @touchstart.prevent="onMouseDown$$q"
+    @touchstart.prevent="onMouseDown$$q()"
   >
     <div class="relative w-full h-full">
       <!-- track (bg) -->

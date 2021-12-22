@@ -24,7 +24,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="no-image-root flex align-center justify-center">
+  <div class="flex align-center justify-center bg-true-gray-800">
     <template v-if="s">
       <v-icon class="no-image-icon" light>mdi-image-off-outline</v-icon>
     </template>
@@ -32,10 +32,6 @@ export default defineComponent({
 </template>
 
 <style scoped>
-.no-image-root {
-  background-color: rgba(127, 127, 127, 0.1);
-}
-
 .no-image-icon {
   font-size: v-bind('s');
 }

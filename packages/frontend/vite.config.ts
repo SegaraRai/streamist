@@ -22,7 +22,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '~/': `${path.resolve(__dirname, 'src')}/`,
-      '@/': `${path.resolve(__dirname, 'src')}/`,
       '$/': `${path.resolve(__dirname, '../server')}/`,
       '$prisma/': `${path.resolve(
         __dirname,
@@ -54,8 +53,8 @@ export default defineConfig({
         'vue',
         'vue-router',
         'vue-i18n',
-        '@vueuse/head',
         '@vueuse/core',
+        '@vueuse/head',
       ],
       dts: 'src/auto-imports.d.ts',
     }),
@@ -73,7 +72,6 @@ export default defineConfig({
         // auto import icons
         // https://github.com/antfu/unplugin-icons
         IconsResolver({
-          componentPrefix: '',
           // enabledCollections: ['carbon']
         }),
       ],

@@ -1,4 +1,4 @@
-import { createAsyncCache } from './asyncCache';
+import { createAsyncCache } from '$shared/asyncCache';
 import { CDN_ENDPOINT } from './cdn';
 import { isJWTNotExpired } from './jwt';
 import { tokens } from './tokens';
@@ -37,4 +37,8 @@ export function isCDNCookieSet(): boolean {
 
 export async function setCDNCookie(): Promise<void> {
   await cdnCookieAsyncCache.renew();
+}
+
+export function needsCDNCookie(url: string): boolean {
+  return url.startsWith('http');
 }

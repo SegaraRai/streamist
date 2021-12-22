@@ -13,6 +13,23 @@ import type { TransactionalPrismaClient } from './lib/types';
 
 export type TrackSortablePlaylist = { trackOrder: string; tracks: Track[] };
 
+export function dbPlaylistAddImageTx(
+  txClient: TransactionalPrismaClient,
+  userId: string,
+  playlistId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  return dbArrayAddTx<typeof Prisma.PlaylistScalarFieldEnum>(
+    txClient,
+    userId,
+    Prisma.ModelName.Playlist,
+    Prisma.ModelName.Image,
+    Prisma.PlaylistScalarFieldEnum.imageOrder,
+    playlistId,
+    imageIds
+  );
+}
+
 export function dbPlaylistAddTrackTx(
   txClient: TransactionalPrismaClient,
   userId: string,

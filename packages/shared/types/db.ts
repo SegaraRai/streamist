@@ -45,7 +45,7 @@ export type SourceFileState =
 
 export type SourceFileType = 'audio' | 'cueSheet' | 'image';
 
-export type SourceFileAttachToType = 'album';
+export type SourceFileAttachToType = 'album' | 'artist' | 'playlist';
 
 export type DeletionEntityType =
   | 'albumCoArtist'
@@ -75,6 +75,8 @@ export function toSourceFileAttachToType(
 ): SourceFileAttachToType {
   switch (sourceFileAttachToType) {
     case 'album':
+    case 'artist':
+    case 'playlist':
       return sourceFileAttachToType;
   }
 

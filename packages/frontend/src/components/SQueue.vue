@@ -1,9 +1,9 @@
 <script lang="ts">
-import { minQueueSize } from '@/config/queue';
-import { getDefaultAlbumImage } from '@/logic/albumImage';
-import { formatTime } from '@/logic/formatTime';
-import { usePlaybackStore } from '@/stores/playback';
-import type { TrackForPlayback } from '@/types/playback';
+import { minQueueSize } from '~/config/queue';
+import { getDefaultAlbumImage } from '~/logic/albumImage';
+import { formatTime } from '~/logic/formatTime';
+import { usePlaybackStore } from '~/stores/playback';
+import type { TrackForPlayback } from '~/types/playback';
 import type { ResourceAlbum, ResourceArtist, ResourceImage } from '$/types';
 
 interface ListItem {
@@ -45,7 +45,6 @@ export default defineComponent({
 
     return {
       t,
-      imageSize$$q: 36,
       playing$$q: playbackStore.playing$$q,
       repeatOne$$q: computed(() => playbackStore.repeat$$q.value === 'one'),
       items$$q: items,
@@ -131,13 +130,10 @@ export default defineComponent({
           <div class="icon-container">
             <v-btn flat icon text @click.stop="play$$q(index)">
               <!-- div class="track-index s-numeric s-hover-hidden">{{ index + 1 }}</div -->
-              <s-nullable-image
-                class="flex-none s-hover-hidden"
-                icon-size="24px"
-                :image="item.image$$q"
-                :width="imageSize$$q"
-                :height="imageSize$$q"
-                :aspect-ratio="1"
+              <s-album-image
+                class="s-hover-hidden flex-none w-9 h-9"
+                size="36"
+                :album-id="item.track$$q.albumId"
               />
               <v-icon class="play-icon s-hover-visible">
                 mdi-play-circle-outline

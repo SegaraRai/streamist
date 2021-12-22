@@ -16,9 +16,9 @@ import type {
   SourceFileState,
   SourceFileType,
 } from '$shared/types/db';
-import api from '@/logic/api';
 import { db } from '~/db';
 import { syncDB } from '~/db/sync';
+import api from '~/logic/api';
 import type {
   CreateSourceResponse,
   ResourceSourceFile,

@@ -1,12 +1,12 @@
 import { Ref, UnwrapRef } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
-import { TrackProvider } from '@/logic/trackProvider';
-import type { TrackForPlayback } from '@/types/playback';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png';
 import { getDefaultAlbumImage } from '~/logic/albumImage';
-import { loadAudio } from '~/logic/audio';
-import { setCDNCookie } from '~/logic/cdnCookie';
+import { getBestTrackFileURL } from '~/logic/audio';
+import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
+import { TrackProvider } from '~/logic/trackProvider';
+import type { TrackForPlayback } from '~/types/playback';
 import { useVolumeStore } from './volume';
 
 // TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる
@@ -251,9 +251,14 @@ export function usePlaybackStore(): typeof refState {
         internalPosition.value = 0;
 
         (async () => {
-          await setCDNCookie();
+          const url = getBestTrackFileURL(track.files);
 
-          loadAudio(newAudio, track.files);
+          if (needsCDNCookie(url)) {
+            await setCDNCookie();
+          }
+
+          audio.src = url;
+          audio.currentTime = 0;
           await newAudio.play();
 
           if ('mediaSession' in navigator) {

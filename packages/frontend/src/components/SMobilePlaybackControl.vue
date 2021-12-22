@@ -1,7 +1,5 @@
 <script lang="ts">
-import { getDefaultAlbumImage } from '@/logic/albumImage';
-import { usePlaybackStore } from '@/stores/playback';
-import type { ResourceImage } from '$/types';
+import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
   setup() {
@@ -9,15 +7,9 @@ export default defineComponent({
 
     const currentTrack = playbackStore.currentTrack$$q;
 
-    const image = computed<ResourceImage | null | undefined>(
-      () => currentTrack.value && getDefaultAlbumImage(currentTrack.value.album)
-    );
-
     return {
       currentTrack$$q: currentTrack,
       playing$$q: playbackStore.playing$$q,
-      image$$q: image,
-      imageSize$$q: 70,
       progress$$q: computed(() =>
         playbackStore.position$$q.value && playbackStore.duration$$q.value
           ? (playbackStore.position$$q.value /
@@ -63,12 +55,10 @@ export default defineComponent({
       <div class="flex-1 flex flex-row items-center">
         <template v-if="currentTrack$$q">
           <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
-            <s-nullable-image
-              icon-size="40px"
-              :image="image$$q"
-              :width="imageSize$$q"
-              :height="imageSize$$q"
-              :aspect-ratio="1"
+            <s-album-image
+              class="w-18 h-18"
+              :album-id="currentTrack$$q.albumId"
+              size="72"
             />
           </router-link>
           <!-- pb-1で気持ち上に持ち上げる -->

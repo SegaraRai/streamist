@@ -1,10 +1,10 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { getDefaultAlbumImage } from '@/logic/albumImage';
-import { formatTime } from '@/logic/formatTime';
-import { usePlaybackStore } from '@/stores/playback';
-import { useThemeStore } from '@/stores/theme';
-import type { AlbumForPlayback, TrackForPlayback } from '@/types/playback';
+import { getDefaultAlbumImage } from '~/logic/albumImage';
+import { formatTime } from '~/logic/formatTime';
+import { usePlaybackStore } from '~/stores/playback';
+import { useThemeStore } from '~/stores/theme';
+import type { AlbumForPlayback, TrackForPlayback } from '~/types/playback';
 import type { ResourceArtist, ResourceImage } from '$/types';
 
 /**
@@ -126,7 +126,6 @@ export default defineComponent({
     return {
       t,
       showMenu$$q: ref(false),
-      imageSize$$q: 36,
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       s: selected, // v-modelに対してはマングリングできない
@@ -264,13 +263,10 @@ export default defineComponent({
                   </div>
                 </template>
                 <template v-if="indexContent === 'albumArtwork'">
-                  <s-nullable-image
-                    class="track-index s-hover-hidden flex-none"
-                    icon-size="24px"
-                    :image="item.image$$q"
-                    :width="imageSize$$q"
-                    :height="imageSize$$q"
-                    :aspect-ratio="1"
+                  <s-album-image
+                    class="track-index s-hover-hidden flex-none w-9 h-9"
+                    size="36"
+                    :album-id="item.track$$q.albumId"
                   />
                 </template>
                 <v-icon class="play-icon s-hover-visible">
@@ -282,9 +278,7 @@ export default defineComponent({
           <v-list-item-header
             class="list-column-content flex flex-col flex-nowrap justify-center"
           >
-            <v-list-item-title
-              class="track-title"
-            >
+            <v-list-item-title class="track-title">
               <span
                 class="block overflow-hidden overflow-ellipsis max-w-max"
                 :class="
@@ -428,12 +422,6 @@ export default defineComponent({
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.track-artist::before,
-.track-album-artist::before {
-  content: '/';
-  padding-right: 0.2em;
 }
 
 .track-index {

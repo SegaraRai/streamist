@@ -4,15 +4,19 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
-    README: typeof import('./components/README.md')['default']
+    IMdiCloudUpload: typeof import('~icons/mdi/cloud-upload')['default']
     SAlbum: typeof import('./components/SAlbum.vue')['default']
+    SAlbumImage: typeof import('./components/SAlbumImage.vue')['default']
+    SArtistImage: typeof import('./components/SArtistImage.vue')['default']
     SConditionalLink: typeof import('./components/SConditionalLink.vue')['default']
     SEllipsisTooltip: typeof import('./components/SEllipsisTooltip.vue')['default']
+    SImageManager: typeof import('./components/SImageManager.vue')['default']
     SMobilePlaybackControl: typeof import('./components/SMobilePlaybackControl.vue')['default']
     SNoImage: typeof import('./components/SNoImage.vue')['default']
     SNullableImage: typeof import('./components/SNullableImage.vue')['default']
     SPlaybackControl: typeof import('./components/SPlaybackControl.vue')['default']
     SPlaylist: typeof import('./components/SPlaylist.vue')['default']
+    SPlaylistImage: typeof import('./components/SPlaylistImage.vue')['default']
     SQueue: typeof import('./components/SQueue.vue')['default']
     SSeekBar: typeof import('./components/SSeekBar.vue')['default']
     SSlider: typeof import('./components/SSlider.vue')['default']

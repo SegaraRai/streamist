@@ -31,6 +31,18 @@ export const useUploadStore = defineStore('upload', () => {
   return {
     stagedFiles,
     files,
+    badge: computed(
+      () =>
+        stagedFiles.value.length +
+        files.value.filter(
+          (f) =>
+            f.status === 'pending' ||
+            f.status === 'validating' ||
+            f.status === 'validated' ||
+            f.status === 'queued' ||
+            f.status === 'uploading'
+        ).length
+    ),
     stageFiles(files: readonly File[]): void {
       stagedFiles.value.push(...resolveUploadFiles(files));
     },

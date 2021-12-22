@@ -18,7 +18,11 @@ import 'virtual:windi-utilities.css';
 // windicss devtools support (dev only)
 import 'virtual:windi-devtools';
 
-import { isCDNCookieSet, setCDNCookie } from './logic/cdnCookie';
+import {
+  isCDNCookieSet,
+  needsCDNCookie,
+  setCDNCookie,
+} from './logic/cdnCookie';
 
 const routes = setupLayouts(generatedRoutes);
 
@@ -29,7 +33,7 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
     mod.install?.(ctx);
   }
 
-  ctx.app.directive('lazyload', {
+  ctx.app.directive('lazysizes', {
     beforeMount(el) {
       if (el.tagName !== 'IMG') {
         return;
@@ -49,18 +53,28 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
       }
 
       el.classList.remove('lazyloaded');
-      el.classList.add('lazyload');
+      lazySizes.loader?.unveil(el);
     },
   });
 
   document.addEventListener('lazybeforeunveil', (event) => {
+    const el = event.target as HTMLImageElement;
+
+    if (!needsCDNCookie(el.dataset.src!)) {
+      return;
+    }
+
     if (isCDNCookieSet()) {
       return;
     }
 
     event.preventDefault();
+
+    el.classList.add('s-lazyloading');
+
     setCDNCookie().then((): void => {
-      lazySizes.loader?.unveil(event.target as HTMLElement);
+      el.classList.remove('s-lazyloading');
+      lazySizes.loader?.unveil(el);
     });
   });
 

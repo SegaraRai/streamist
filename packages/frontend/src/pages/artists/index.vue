@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useDisplay } from 'vuetify';
-import { getDefaultAlbumImage } from '@/logic/albumImage';
+import { getDefaultAlbumImage } from '~/logic/albumImage';
 import { fetchArtistsForPlayback } from '~/resources/artist';
 import { usePlaybackStore } from '~/stores/playback';
 import type { ArtistForPlayback } from '~/types/playback';
@@ -85,14 +85,15 @@ export default defineComponent({
               class="no-underline"
               :to="`/artists/${item.artist$$q.id}`"
             >
-              <s-nullable-image
+              <s-artist-image
                 v-ripple
-                class="align-end image white--text rounded-full"
-                icon-size="64px"
-                :image="item.image$$q"
-                :width="imageSize$$q"
-                :height="imageSize$$q"
-                aspect-ratio="1"
+                class="flex-none align-end w-50 h-50 image white--text"
+                :style="{
+                  width: `${imageSize$$q}px`,
+                  height: `${imageSize$$q}px`,
+                }"
+                :artist-id="item.artist$$q.id"
+                :size="imageSize$$q"
               />
             </router-link>
             <v-card-title

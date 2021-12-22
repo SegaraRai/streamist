@@ -1,20 +1,20 @@
 import { PrismaClient } from '@prisma/client';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import { generateImageId } from '$shared-server/generateId.js';
-import { osDelete } from '$shared-server/objectStorage';
+import { osDelete } from '$shared-server/objectStorage.js';
 import {
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-} from '$shared-server/objectStorages';
-import { is } from '$shared/is';
-import { parseDate } from '$shared/parseDate';
+} from '$shared-server/objectStorages.js';
+import { is } from '$shared/is.js';
+import { parseDate } from '$shared/parseDate.js';
 import type {
   SourceFileAttachToType,
   SourceFileState,
   SourceFileType,
   SourceState,
-} from '$shared/types/db';
-import type { FFprobeTags } from '$transcoder/types/ffprobe';
+} from '$shared/types/db.js';
+import type { FFprobeTags } from '$transcoder/types/ffprobe.js';
 import type {
   TranscoderResponse,
   TranscoderResponseArtifactAudio,
@@ -22,11 +22,13 @@ import type {
   TranscoderResponseArtifactImage,
 } from '$transcoder/types/transcoder.js';
 import { dbAlbumAddImageTx } from '$/db/album.js';
+import { dbArtistAddImageTx } from '$/db/artist.js';
 import { client } from '$/db/lib/client.js';
 import type { TransactionalPrismaClient } from '$/db/lib/types.js';
-import { updateUserResourceTimestamp } from '$/db/resource';
+import { dbPlaylistAddImageTx } from '$/db/playlist.js';
+import { updateUserResourceTimestamp } from '$/db/resource.js';
 import { dbTrackCreateTx } from '$/db/track.js';
-import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
+import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env.js';
 
 export const TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
 export const TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${TRANSCODER_CALLBACK_API_PATH}`;
@@ -132,6 +134,14 @@ async function registerImage(
   switch (attachToType) {
     case 'album':
       await dbAlbumAddImageTx(txClient, userId, attachToId, imageId);
+      break;
+
+    case 'artist':
+      await dbArtistAddImageTx(txClient, userId, attachToId, imageId);
+      break;
+
+    case 'playlist':
+      await dbPlaylistAddImageTx(txClient, userId, attachToId, imageId);
       break;
   }
 }
@@ -510,8 +520,12 @@ function handleTranscoderResponseSync(response: TranscoderResponse): void {
   });
 }
 
-export function registerTranscoderCallback(app: FastifyInstance): void {
-  app.post(TRANSCODER_CALLBACK_API_PATH, (request, reply) => {
+export const transcoderCallback: FastifyPluginCallback<{}> = (
+  fastify: FastifyInstance,
+  _options: {},
+  done: (err?: Error) => void
+): void => {
+  fastify.post(TRANSCODER_CALLBACK_API_PATH, (request, reply) => {
     if (request.headers.authorization !== TRANSCODER_CALLBACK_API_TOKEN) {
       reply.code(401).send();
       return;
@@ -526,4 +540,6 @@ export function registerTranscoderCallback(app: FastifyInstance): void {
 
     reply.code(204).send();
   });
-}
+
+  done();
+};

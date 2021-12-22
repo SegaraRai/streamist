@@ -1,39 +1,24 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { SrcObject, createSrc } from '@/logic/srcSet';
+import { SrcObject, createSrc } from '~/logic/srcSet';
 import type { ResourceImage } from '$/types';
-
-interface Props {
-  image?: ResourceImage | null;
-  width: number;
-  height: number;
-  aspectRatio?: number | string;
-}
 
 export default defineComponent({
   props: {
     image: {
-      type: Object as PropType<ResourceImage | null | undefined>,
+      type: [Boolean, Object] as PropType<
+        ResourceImage | null | undefined | false
+      >,
       default: undefined,
     },
-    width: Number,
-    height: Number,
-    aspectRatio: {
+    size: {
       type: [Number, String],
-      default: undefined,
-    },
-    iconSize: {
-      type: [Number, String],
-      default: '48px',
+      default: 0,
     },
   },
-  setup(_props: unknown) {
-    const props = _props as Props;
-
+  setup(props) {
     const srcObject = computed<SrcObject | null | undefined | false>(
-      () =>
-        props.image &&
-        createSrc(props.image.files, Math.max(props.width, props.height))
+      () => props.image && createSrc(props.image.files, Number(props.size))
     );
 
     return {
@@ -44,34 +29,33 @@ export default defineComponent({
 </script>
 
 <template>
-  <template v-if="srcObject$$q === false">
-    <div
-      class="flex align-center justify-center"
-      :style="{ width: `${width}px`, height: `${height}px` }"
-    >
-      <v-progress-circular indeterminate />
-    </div>
-  </template>
-  <template v-else-if="srcObject$$q">
-    <img
-      v-lazyload
-      :width="`${width}px`"
-      :height="`${height}px`"
-      data-sizes="auto"
-      :data-src="srcObject$$q.src$$q"
-      :data-srcset="srcObject$$q.srcSet$$q"
-      src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="
-      class="block w-full h-full object-cover"
-      :style="{
-        width: `${width}px`,
-        height: `${height}px`,
-      }"
-    />
+  <template v-if="srcObject$$q == null">
+    <s-no-image />
   </template>
   <template v-else>
-    <s-no-image
-      :style="{ width: `${width}px`, height: `${height}px` }"
-      :icon-size="iconSize"
-    />
+    <div class="overflow-hidden leading-none relative s-lazyload-container">
+      <template v-if="srcObject$$q">
+        <img
+          v-lazysizes
+          data-sizes="auto"
+          :data-src="srcObject$$q.src$$q"
+          :data-srcset="srcObject$$q.srcSet$$q"
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII="
+          class="block object-cover absolute top-0 left-0 w-full h-full z-10 s-lazyload-image"
+        />
+      </template>
+      <template v-else-if="srcObject$$q === false">
+        <div
+          class="block object-cover absolute top-0 left-0 w-full h-full z-10 s-lazyload-image"
+        ></div>
+      </template>
+      <div
+        class="absolute top-0 left-0 w-full h-full z-0 s-lazyload-background flex items-center justify-center"
+      >
+        <!-- template v-if="srcObject$$q === false">
+          <v-progress-circular indeterminate />
+        </template -->
+      </div>
+    </div>
   </template>
 </template>

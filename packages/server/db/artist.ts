@@ -1,6 +1,7 @@
 import { expectType } from 'tsd';
 import { generateArtistId } from '$shared-server/generateId';
 import { Artist, Prisma } from '$prisma/client';
+import { dbArrayAddTx } from './lib/array';
 import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
 
@@ -60,5 +61,22 @@ export async function dbArtistGetOrCreateByName(
   return client.$transaction(
     (txClient): Promise<Artist> =>
       dbArtistGetOrCreateByNameTx(txClient, userId, artistName, newArtistId)
+  );
+}
+
+export function dbArtistAddImageTx(
+  txClient: TransactionalPrismaClient,
+  userId: string,
+  artistId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  return dbArrayAddTx<typeof Prisma.ArtistScalarFieldEnum>(
+    txClient,
+    userId,
+    Prisma.ModelName.Artist,
+    Prisma.ModelName.Image,
+    Prisma.ArtistScalarFieldEnum.imageOrder,
+    artistId,
+    imageIds
   );
 }

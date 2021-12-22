@@ -1,8 +1,9 @@
 import { dbArrayDeserializeItemIds } from '$shared/dbArray';
-import type { Album, Playlist } from '$prisma/client';
+import type { Album, Artist, Playlist } from '$prisma/client';
 import { client } from '$/db/lib/client';
 import type {
   ResourceAlbum,
+  ResourceArtist,
   ResourceDeletion,
   ResourcePlaylist,
 } from '$/types';
@@ -20,9 +21,21 @@ function convertAlbums(albums: readonly Album[]): ResourceAlbum[] {
   return albums.map(convertAlbum);
 }
 
+function convertArtist(artist: Artist): ResourceArtist {
+  return {
+    ...artist,
+    imageIds: dbArrayDeserializeItemIds(artist.imageOrder),
+  };
+}
+
+function convertArtists(artists: readonly Artist[]): ResourceArtist[] {
+  return artists.map(convertArtist);
+}
+
 function convertPlaylist(playlist: Playlist): ResourcePlaylist {
   return {
     ...playlist,
+    imageIds: dbArrayDeserializeItemIds(playlist.imageOrder),
     trackIds: dbArrayDeserializeItemIds(playlist.trackOrder),
   };
 }
@@ -86,9 +99,11 @@ export default defineController(() => ({
             where,
           })
         ),
-        artists: await txClient.artist.findMany({
-          where,
-        }),
+        artists: convertArtists(
+          await txClient.artist.findMany({
+            where,
+          })
+        ),
         images: await txClient.image.findMany({
           where,
           include: {

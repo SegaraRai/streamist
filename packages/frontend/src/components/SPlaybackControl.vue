@@ -1,10 +1,8 @@
 <script lang="ts">
 import type { RepeatType } from '$shared/types/playback';
-import { getDefaultAlbumImage } from '@/logic/albumImage';
-import { findAncestor } from '@/logic/findAncestor';
-import { usePlaybackStore } from '@/stores/playback';
+import { findAncestor } from '~/logic/findAncestor';
+import { usePlaybackStore } from '~/stores/playback';
 import { useVolumeStore } from '~/stores/volume';
-import type { ResourceImage } from '$/types';
 
 export default defineComponent({
   setup() {
@@ -16,10 +14,6 @@ export default defineComponent({
       () => playbackStore.repeat$$q.value !== 'off'
     );
     const shuffleEnabled = playbackStore.shuffle$$q;
-
-    const image = computed<ResourceImage | null | undefined>(
-      () => currentTrack.value && getDefaultAlbumImage(currentTrack.value.album)
-    );
 
     const repeatIcon = computed((): string => {
       switch (playbackStore.repeat$$q.value) {
@@ -62,8 +56,6 @@ export default defineComponent({
       playing$$q: playbackStore.playing$$q,
       repeatEnabled$$q: repeatEnabled,
       shuffleEnabled$$q: shuffleEnabled,
-      image$$q: image,
-      imageSize$$q: 70,
       repeatIcon$$q: repeatIcon,
       position$$q: playbackStore.position$$q,
       duration$$q: playbackStore.duration$$q,
@@ -115,13 +107,14 @@ export default defineComponent({
   >
     <div class="left-pane flex-none flex flex-row items-center justify-start">
       <template v-if="currentTrack$$q">
-        <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
-          <s-nullable-image
-            icon-size="40px"
-            :image="image$$q"
-            :width="imageSize$$q"
-            :height="imageSize$$q"
-            :aspect-ratio="1"
+        <router-link
+          class="block flex-none"
+          :to="`/albums/${currentTrack$$q.albumId}`"
+        >
+          <s-album-image
+            class="w-16 h-16"
+            size="64"
+            :album-id="currentTrack$$q.albumId"
           />
         </router-link>
         <!-- pb-1で気持ち上に持ち上げる -->

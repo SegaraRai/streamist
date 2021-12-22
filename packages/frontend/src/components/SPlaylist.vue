@@ -1,18 +1,19 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { formatTracksTotalDuration } from '@/logic/duration';
-import { calcTrackListHeight } from '@/logic/util';
-import { usePlaybackStore } from '@/stores/playback';
+import { formatTracksTotalDuration } from '~/logic/duration';
+import { calcTrackListHeight } from '~/logic/util';
 import { fetchPlaylistForPlayback } from '~/resources/playlist';
+import { usePlaybackStore } from '~/stores/playback';
 import type { PlaylistForPlayback, TrackForPlayback } from '~/types/playback';
 
 export default defineComponent({
   props: {
     playlistId: {
       type: String,
+      required: true,
     },
     linkExcludes: {
-      type: Array as PropType<readonly string[] | undefined>,
+      type: Array as PropType<readonly string[]>,
       default: (): string[] => [],
     },
   },
@@ -59,6 +60,7 @@ export default defineComponent({
 
     return {
       t,
+      imageIds$$q: ref<readonly string[] | undefined>(),
       loading$$q: loading,
       playlist$$q: playlist,
       tracks$$q: tracks,
@@ -82,6 +84,35 @@ export default defineComponent({
   <div>
     <div class="mb-6">
       <div class="flex flex-row">
+        <div class="p-0 m-0 leading-none">
+          <template v-if="linkExcludes.includes(playlistId)">
+            <s-image-manager
+              attach-to-type="playlist"
+              :attach-to-id="playlistId"
+              :image-ids="imageIds$$q"
+            >
+              <template #title>Album Art of {{ playlist$$q?.title }}</template>
+              <template #default>
+                <s-playlist-image
+                  class="w-50 h-50"
+                  size="200"
+                  :playlist-id="playlistId"
+                  @image-ids="imageIds$$q = $event"
+                />
+              </template>
+            </s-image-manager>
+          </template>
+          <template v-else>
+            <router-link :to="`/playlists/${playlistId}`" class="block">
+              <s-playlist-image
+                class="w-50 h-50"
+                size="200"
+                :playlist-id="playlistId"
+                @image-ids="imageIds$$q = $event"
+              />
+            </router-link>
+          </template>
+        </div>
         <div class="flex-1 pl-8 flex flex-col">
           <div class="flex-none playlist-title display-1">
             <div>
@@ -89,9 +120,9 @@ export default defineComponent({
                 <template
                   v-if="playlistId && !linkExcludes?.includes(playlistId)"
                 >
-                  <router-link :to="`/playlists/${playlistId}`">{{
-                    playlist$$q.title
-                  }}</router-link>
+                  <router-link :to="`/playlists/${playlistId}`">
+                    {{ playlist$$q.title }}
+                  </router-link>
                 </template>
                 <template v-else>
                   <span>{{ playlist$$q.title }}</span>

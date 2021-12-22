@@ -1,5 +1,5 @@
 import { Dexie, Table } from 'dexie';
-import type { Resources } from '$/types';
+import type { ResourcesUpdated } from '$/types';
 
 type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends (
   k: infer I
@@ -15,7 +15,7 @@ type DexieSchema<T extends string> =
   | DexieSchemaDecorated<`[${DexieSchemaCompound<T>}]`>;
 
 type DBResources = Pick<
-  Resources,
+  ResourcesUpdated,
   | 'albumCoArtists'
   | 'albums'
   | 'artists'

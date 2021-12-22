@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { useDisplay } from 'vuetify';
-import { useThemeStore } from '@/stores/theme';
 import { syncDB } from '~/db/sync';
+import { useThemeStore } from '~/stores/theme';
+import { useUploadStore } from '~/stores/upload';
 
 const { t } = useI18n();
 const theme = useThemeStore();
@@ -58,11 +59,11 @@ const navItems = computed<readonly NavItem[]>(() => [
   },
 ]);
 
+const uploadStore = useUploadStore();
+
 const rightSidebar = ref(false);
 
 const railedNavigation = computed(() => display.xs.value);
-const useMobilePlayback = computed(() => display.smAndDown.value);
-const miniSearchBox = computed(() => display.smAndDown.value);
 const fullscreenDialog = computed(() => display.xs.value);
 
 const devSync = (event: MouseEvent) => {
@@ -83,12 +84,8 @@ const devSync = (event: MouseEvent) => {
     >
       <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
         <v-divider />
-        <template v-if="useMobilePlayback">
-          <s-mobile-playback-control />
-        </template>
-        <template v-else>
-          <s-playback-control />
-        </template>
+        <s-playback-control class="<md:hidden" />
+        <s-mobile-playback-control class="md:hidden" />
       </v-sheet>
     </v-footer>
 
@@ -120,34 +117,41 @@ const devSync = (event: MouseEvent) => {
     </v-navigation-drawer>
 
     <v-app-bar flat :border="1" density="compact" :theme="theme.headerTheme">
-      <div class="ml-0 pl-4 pr-12 hidden-xs-only leading-tight select-none">
-        <span class="text-xl">streamist</span>
-        <span class="text-sm">.app</span>
-      </div>
-      <v-spacer />
-      <template v-if="!miniSearchBox">
-        <v-text-field
-          class="s-search-box"
-          density="compact"
-          prepend-inner-icon="mdi-magnify"
-          :hide-details="true"
-        />
-      </template>
-      <div class="flex gap-x-2">
-        <template v-if="miniSearchBox">
-          <v-btn icon size="small">
+      <div class="w-full flex justify-between items-center">
+        <div
+          class="ml-0 pl-4 pr-12 hidden-xs-only leading-tight select-none flex-none"
+        >
+          <span class="text-xl">streamist</span>
+          <span class="text-sm">.app</span>
+        </div>
+        <div class="sm:flex-1 flex gap-x-2 justify-end">
+          <v-text-field
+            class="s-search-box flex-1 max-w-md <sm:hidden"
+            density="compact"
+            prepend-inner-icon="mdi-magnify"
+            :hide-details="true"
+          />
+          <v-btn icon size="small" class="sm:hidden">
             <v-icon>mdi-magnify</v-icon>
           </v-btn>
-        </template>
-        <v-btn icon size="small" @click="devSync">
-          <v-icon>mdi-sync</v-icon>
-        </v-btn>
-        <v-btn icon size="small" @click="uploadDialog = true">
-          <v-icon>mdi-cloud-upload</v-icon>
-        </v-btn>
-        <v-btn icon size="small" @click="rightSidebar = true">
-          <v-icon>mdi-playlist-play</v-icon>
-        </v-btn>
+          <v-btn icon size="small" @click="devSync">
+            <v-icon>mdi-sync</v-icon>
+          </v-btn>
+          <v-btn icon size="small" @click="uploadDialog = true">
+            <v-badge
+              :model-value="!!uploadStore.badge"
+              dot
+              color="primary"
+              text-color="primary"
+              bordered
+            >
+              <v-icon>mdi-cloud-upload</v-icon>
+            </v-badge>
+          </v-btn>
+          <v-btn icon size="small" @click="rightSidebar = true">
+            <v-icon>mdi-playlist-play</v-icon>
+          </v-btn>
+        </div>
       </div>
     </v-app-bar>
 
@@ -159,7 +163,7 @@ const devSync = (event: MouseEvent) => {
       class="select-none"
     >
       <v-list dense class="overflow-x-hidden">
-        <template v-for="(item, index) in navItems" :key="index">
+        <template v-for="(item, _index) in navItems" :key="_index">
           <template v-if="item.type === 'link'">
             <v-list-item link :to="item.path">
               <v-list-item-avatar icon class="flex items-center justify-center">

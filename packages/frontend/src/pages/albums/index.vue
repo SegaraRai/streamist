@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useDisplay } from 'vuetify';
-import { getDefaultAlbumImage } from '@/logic/albumImage';
+import { getDefaultAlbumImage } from '~/logic/albumImage';
 import { fetchAlbumsForPlaybackWithTracks } from '~/resources/album';
 import { usePlaybackStore } from '~/stores/playback';
 import type { AlbumForPlaybackWithTracks } from '~/types/playback';
@@ -24,7 +24,13 @@ export default defineComponent({
     fetchAlbumsForPlaybackWithTracks().then((response) => {
       const responseSetList = response.flatMap((album) => album.tracks);
 
-      albums.value = response;
+      albums.value = [
+        ...response,
+        ...response,
+        ...response,
+        ...response,
+        ...response,
+      ];
       playbackStore.setDefaultSetList$$q.value(responseSetList);
     });
 
@@ -80,14 +86,15 @@ export default defineComponent({
       >
         <v-card flat tile :width="`${imageSize$$q}px`" class="item">
           <router-link class="no-underline" :to="`/albums/${item.album$$q.id}`">
-            <s-nullable-image
+            <s-album-image
               v-ripple
               class="align-end image white--text"
-              icon-size="64px"
-              :image="item.image$$q"
-              :width="imageSize$$q"
-              :height="imageSize$$q"
-              aspect-ratio="1"
+              :style="{
+                width: `${imageSize$$q}px`,
+                height: `${imageSize$$q}px`,
+              }"
+              :album-id="item.album$$q.id"
+              :size="imageSize$$q"
             />
           </router-link>
           <v-card-title

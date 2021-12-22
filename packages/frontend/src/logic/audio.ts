@@ -21,10 +21,7 @@ export function calcTrackFileScore(trackFile: TrackFile): number {
   return 1 / trackFile.fileSize + addition;
 }
 
-export function loadAudio(
-  audio: HTMLAudioElement,
-  trackFiles: readonly TrackFile[]
-): void {
+export function getBestTrackFileURL(trackFiles: readonly TrackFile[]): string {
   // スコア降順でTrackFileDTOとスコアの配列を用意
   let trackFilesWithScore = trackFiles
     .map((item) => ({
@@ -46,12 +43,5 @@ export function loadAudio(
   // 一番いいやつを選択
   const trackFile = trackFilesWithScore[0].trackFile$$q;
 
-  // CDNのCookieを設定
-  // await fetchAndSetCDNAccessToken();
-
-  const url = getTrackFileURL(trackFile);
-
-  // Audioにsrcを設定
-  audio.src = url;
-  audio.currentTime = 0;
+  return getTrackFileURL(trackFile);
 }

@@ -5,7 +5,7 @@ import fastifyJwt from 'fastify-jwt';
 import server from '$/$server';
 import { devCDN } from '$/services/dev';
 import { API_BASE_PATH, SECRET_API_JWT_SECRET } from '$/services/env';
-import { registerTranscoderCallback } from '$/services/transcoderCallback';
+import { transcoderCallback } from '$/services/transcoderCallback';
 
 export const init = (serverFactory?: FastifyServerFactory) => {
   const app = Fastify({ serverFactory });
@@ -20,7 +20,7 @@ export const init = (serverFactory?: FastifyServerFactory) => {
     },
   });
 
-  registerTranscoderCallback(app);
+  app.register(transcoderCallback);
 
   if (process.env.NODE_ENV === 'development') {
     app.register(devCDN, {

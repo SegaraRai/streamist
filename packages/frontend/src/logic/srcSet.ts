@@ -18,7 +18,7 @@ export function createSrc(
   targetSize: number
 ): SrcObject | undefined {
   if (imageFiles.length === 0) {
-    return undefined;
+    return;
   }
 
   const imageFileWithURLs = imageFiles.map((imageFile) => ({

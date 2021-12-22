@@ -1,7 +1,7 @@
 import { shuffleArray } from '$shared/shuffle';
 import type { RepeatType } from '$shared/types/playback';
-import { maxHistorySize, minQueueSize } from '@/config/queue';
-import type { TrackForPlayback } from '@/types/playback';
+import { maxHistorySize, minQueueSize } from '~/config/queue';
+import type { TrackForPlayback } from '~/types/playback';
 
 /*
 ## 用語定義

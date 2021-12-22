@@ -1,5 +1,5 @@
 <script lang="ts">
-import { formatTime } from '@/logic/formatTime';
+import { formatTime } from '~/logic/formatTime';
 
 export default defineComponent({
   props: {
