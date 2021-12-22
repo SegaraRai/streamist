@@ -21,7 +21,10 @@ export default defineComponent({
 
     const positionDisplay = computed<string | undefined>(() =>
       props.currentTime != null && props.duration != null
-        ? formatTime(draggingTime.value ?? props.currentTime, props.duration)
+        ? formatTime(
+            Math.min(draggingTime.value ?? props.currentTime, props.duration),
+            props.duration
+          )
         : undefined
     );
 
@@ -29,7 +32,11 @@ export default defineComponent({
       props.currentTime != null && props.duration != null
         ? showRemaining.value
           ? `-${formatTime(
-              props.duration - (draggingTime.value ?? props.currentTime)
+              Math.max(
+                props.duration - (draggingTime.value ?? props.currentTime),
+                0
+              ),
+              props.duration
             )}`
           : formatTime(props.duration)
         : undefined

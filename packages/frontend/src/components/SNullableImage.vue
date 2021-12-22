@@ -33,7 +33,7 @@ export default defineComponent({
     <s-no-image />
   </template>
   <template v-else>
-    <div class="overflow-hidden leading-none relative s-lazyload-container">
+    <div class="overflow-hidden leading-none relative s-lazyload-container z-0">
       <template v-if="srcObject$$q">
         <img
           v-lazysizes
@@ -41,16 +41,16 @@ export default defineComponent({
           :data-src="srcObject$$q.src$$q"
           :data-srcset="srcObject$$q.srcSet$$q"
           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII="
-          class="block object-cover absolute top-0 left-0 w-full h-full z-10 s-lazyload-image"
+          class="block object-cover absolute top-0 left-0 w-full h-full s-lazyload-image z-1"
         />
       </template>
       <template v-else-if="srcObject$$q === false">
         <div
-          class="block object-cover absolute top-0 left-0 w-full h-full z-10 s-lazyload-image"
+          class="block object-cover absolute top-0 left-0 w-full h-full s-lazyload-image z-1"
         ></div>
       </template>
       <div
-        class="absolute top-0 left-0 w-full h-full z-0 s-lazyload-background flex items-center justify-center"
+        class="absolute top-0 left-0 w-full h-full s-lazyload-background flex items-center justify-center"
       >
         <!-- template v-if="srcObject$$q === false">
           <v-progress-circular indeterminate />

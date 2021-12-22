@@ -4,12 +4,12 @@ import { formatTracksTotalDuration } from '~/logic/duration';
 import { calcTrackListHeight } from '~/logic/util';
 import { fetchPlaylistForPlayback } from '~/resources/playlist';
 import { usePlaybackStore } from '~/stores/playback';
-import type { PlaylistForPlayback, TrackForPlayback } from '~/types/playback';
+import type { ResourcePlaylist, ResourceTrack } from '$/types';
 
 export default defineComponent({
   props: {
-    playlistId: {
-      type: String,
+    playlist: {
+      type: [String, Object] as PropType<string | ResourcePlaylist>,
       required: true,
     },
     linkExcludes: {
@@ -23,10 +23,12 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
 
     const loading = ref<boolean>(true);
-    const playlist = ref<PlaylistForPlayback | null>(null);
-    const tracks = ref<TrackForPlayback[] | null>(null);
+    const playlist = ref<ResourcePlaylist | null>(null);
+    const tracks = ref<readonly ResourceTrack[] | null>(null);
 
-    const playlistId = computed(() => props.playlistId);
+    const playlistId = computed(() =>
+      typeof props.playlist === 'string' ? props.playlist : props.playlist.id
+    );
     const trackListHeight = computed(() =>
       calcTrackListHeight(tracks.value || [], false)
     );
@@ -60,6 +62,7 @@ export default defineComponent({
 
     return {
       t,
+      playlistId$$q: playlistId,
       imageIds$$q: ref<readonly string[] | undefined>(),
       loading$$q: loading,
       playlist$$q: playlist,
@@ -85,10 +88,10 @@ export default defineComponent({
     <div class="mb-6">
       <div class="flex flex-row">
         <div class="p-0 m-0 leading-none">
-          <template v-if="linkExcludes.includes(playlistId)">
+          <template v-if="linkExcludes.includes(playlistId$$q)">
             <s-image-manager
               attach-to-type="playlist"
-              :attach-to-id="playlistId"
+              :attach-to-id="playlistId$$q"
               :image-ids="imageIds$$q"
             >
               <template #title>Album Art of {{ playlist$$q?.title }}</template>
@@ -96,18 +99,18 @@ export default defineComponent({
                 <s-playlist-image
                   class="w-50 h-50"
                   size="200"
-                  :playlist-id="playlistId"
+                  :playlist="playlistId$$q"
                   @image-ids="imageIds$$q = $event"
                 />
               </template>
             </s-image-manager>
           </template>
           <template v-else>
-            <router-link :to="`/playlists/${playlistId}`" class="block">
+            <router-link :to="`/playlists/${playlistId$$q}`" class="block">
               <s-playlist-image
                 class="w-50 h-50"
                 size="200"
-                :playlist-id="playlistId"
+                :playlist="playlistId$$q"
                 @image-ids="imageIds$$q = $event"
               />
             </router-link>
@@ -117,10 +120,8 @@ export default defineComponent({
           <div class="flex-none playlist-title display-1">
             <div>
               <template v-if="!loading$$q && playlist$$q">
-                <template
-                  v-if="playlistId && !linkExcludes?.includes(playlistId)"
-                >
-                  <router-link :to="`/playlists/${playlistId}`">
+                <template v-if="!linkExcludes?.includes(playlistId$$q)">
+                  <router-link :to="`/playlists/${playlistId$$q}`">
                     {{ playlist$$q.title }}
                   </router-link>
                 </template>

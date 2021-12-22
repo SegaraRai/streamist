@@ -1,7 +1,6 @@
 import { shuffleArray } from '$shared/shuffle';
 import type { RepeatType } from '$shared/types/playback';
 import { maxHistorySize, minQueueSize } from '~/config/queue';
-import type { TrackForPlayback } from '~/types/playback';
 
 /*
 ## 用語定義
@@ -61,7 +60,7 @@ import type { TrackForPlayback } from '~/types/playback';
     リピート用のキューからセットリストの要素数分をキューに移動し、リピート用のキューを補充する
 */
 
-type TrackBase = Readonly<TrackForPlayback>;
+type TrackBase = { readonly id: string };
 
 /**
  * トラックリストの管理を行うクラス \

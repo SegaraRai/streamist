@@ -1,4 +1,6 @@
 <script lang="ts">
+import { db } from '~/db';
+import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
@@ -7,8 +9,20 @@ export default defineComponent({
 
     const currentTrack = playbackStore.currentTrack$$q;
 
+    const { value: currentTrackInfo } = useLiveQuery(async () => {
+      const track = currentTrack.value;
+      if (!track) {
+        return {};
+      }
+      const trackArtist$$q = await db.artists.get(track.artistId);
+      return {
+        trackArtist$$q,
+      };
+    }, [currentTrack]);
+
     return {
       currentTrack$$q: currentTrack,
+      currentTrackInfo$$q: currentTrackInfo,
       playing$$q: playbackStore.playing$$q,
       progress$$q: computed(() =>
         playbackStore.position$$q.value && playbackStore.duration$$q.value
@@ -57,7 +71,7 @@ export default defineComponent({
           <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
             <s-album-image
               class="w-18 h-18"
-              :album-id="currentTrack$$q.albumId"
+              :album="currentTrack$$q.albumId"
               size="72"
             />
           </router-link>
@@ -73,7 +87,7 @@ export default defineComponent({
               class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-2"
               :to="`/artists/${currentTrack$$q.artistId}`"
             >
-              {{ currentTrack$$q.artist.name }}
+              {{ currentTrackInfo$$q?.trackArtist$$q?.name }}
             </router-link>
           </div>
         </template>

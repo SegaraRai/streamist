@@ -1,11 +1,11 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { getDefaultAlbumImage } from '~/logic/albumImage';
+import { db } from '~/db';
 import { formatTime } from '~/logic/formatTime';
+import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
-import type { AlbumForPlayback, TrackForPlayback } from '~/types/playback';
-import type { ResourceArtist, ResourceImage } from '$/types';
+import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 
 /**
  * インデックスのところに表示する内容
@@ -15,12 +15,11 @@ export type IndexContent = 'none' | 'index' | 'trackNumber' | 'albumArtwork';
 interface ListItemTrack {
   type$$q: 'track';
   index$$q: number;
-  track$$q: TrackForPlayback;
+  track$$q: ResourceTrack;
   artist$$q: ResourceArtist;
-  album$$q: AlbumForPlayback;
+  album$$q: ResourceAlbum;
   albumArtist$$q: ResourceArtist;
   formattedDuration$$q: string;
-  image$$q: ResourceImage | undefined;
   isLast$$q: boolean;
 }
 
@@ -34,8 +33,10 @@ type ListItem = ListItemTrack | ListItemDiscNumberHeader;
 export default defineComponent({
   props: {
     tracks: {
-      type: Array as PropType<readonly TrackForPlayback[] | null | undefined>,
-      default: (): string[] => [],
+      type: Array as PropType<
+        readonly string[] | readonly ResourceTrack[] | null | undefined
+      >,
+      default: undefined,
     },
     showDiscNumber: Boolean,
     indexContent: {
@@ -48,7 +49,7 @@ export default defineComponent({
     },
     loading: Boolean,
     setList: {
-      type: Array as PropType<readonly TrackForPlayback[] | null | undefined>,
+      type: Array as PropType<readonly ResourceTrack[] | null | undefined>,
       default: undefined,
     },
     showAlbum: Boolean,
@@ -63,31 +64,72 @@ export default defineComponent({
 
     //
 
+    const propTracksRef = computed(() => props.tracks);
+
+    const { value: trackItems } = useLiveQuery(async () => {
+      const propTracks = propTracksRef.value;
+      if (!propTracks) {
+        return;
+      }
+      const tracks = (
+        typeof propTracks[0] === 'string'
+          ? await db.tracks.bulkGet([...(propTracks as readonly string[])])
+          : propTracks
+      ) as readonly ResourceTrack[];
+      const albumMap = new Map<string, ResourceAlbum>(
+        (
+          await db.albums.bulkGet(
+            Array.from(new Set(tracks.map((track) => track.albumId)))
+          )
+        ).map((album) => [album!.id, album!])
+      );
+      const artistMap = new Map<string, ResourceArtist>(
+        (
+          await db.artists.bulkGet(
+            Array.from(
+              new Set([
+                ...tracks.map((track) => track.artistId),
+                ...Array.from(albumMap.values()).map((album) => album.artistId),
+              ])
+            )
+          )
+        ).map((artist) => [artist!.id, artist!])
+      );
+      return tracks.map((track) => {
+        const album = albumMap.get(track.albumId)!;
+        return {
+          track,
+          album,
+          artist: artistMap.get(track.artistId)!,
+          albumArtist: artistMap.get(album.artistId)!,
+        };
+      });
+    }, [propTracksRef]);
+
     const useDiscNumber = computed(
       () =>
         (props.showDiscNumber &&
-          props.tracks?.some((track) => track.discNumber !== 1)) ||
+          trackItems.value?.some(
+            (trackItem) => trackItem.track.discNumber !== 1
+          )) ||
         false
     );
 
     const items = computed(() => {
-      const tracks = props.tracks;
-
-      if (!tracks) {
+      if (!trackItems.value) {
         return [];
       }
 
-      let array: ListItemTrack[] | ListItem[] = tracks.map(
-        (track, index): ListItemTrack => ({
+      let array: ListItemTrack[] | ListItem[] = trackItems.value.map(
+        (track, index, array): ListItemTrack => ({
           type$$q: 'track',
           index$$q: index,
-          track$$q: track,
+          track$$q: track.track,
           album$$q: track.album,
           artist$$q: track.artist,
-          albumArtist$$q: track.album.artist,
-          formattedDuration$$q: formatTime(track.duration),
-          image$$q: getDefaultAlbumImage(track.album),
-          isLast$$q: index === tracks.length - 1,
+          albumArtist$$q: track.albumArtist,
+          formattedDuration$$q: formatTime(track.track.duration),
+          isLast$$q: index === array.length - 1,
         })
       );
 
@@ -132,7 +174,7 @@ export default defineComponent({
       items$$q: items,
       currentPlayingTrackId$$q: currentPlayingTrackId,
       useDiscNumber$$q: useDiscNumber,
-      play$$q: (track: TrackForPlayback): void => {
+      play$$q: (track: ResourceTrack): void => {
         if (!props.setList) {
           return;
         }
@@ -266,7 +308,7 @@ export default defineComponent({
                   <s-album-image
                     class="track-index s-hover-hidden flex-none w-9 h-9"
                     size="36"
-                    :album-id="item.track$$q.albumId"
+                    :album="item.album$$q"
                   />
                 </template>
                 <v-icon class="play-icon s-hover-visible">

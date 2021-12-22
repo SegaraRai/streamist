@@ -1,10 +1,9 @@
 <script lang="ts">
-import { useDisplay } from 'vuetify';
 import { getDefaultAlbumImage } from '~/logic/albumImage';
 import { fetchArtistForPlayback } from '~/resources/artist';
 import { usePlaybackStore } from '~/stores/playback';
 import type { ArtistForPlayback, TrackForPlayback } from '~/types/playback';
-import type { ResourceImage } from '$/types';
+import type { ResourceImage, ResourceTrack } from '$/types';
 
 export default defineComponent({
   props: {
@@ -14,14 +13,18 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const display = useDisplay();
+    const headTitleRef = ref('Artist | Streamist');
+    useHead({
+      title: headTitleRef,
+    });
+
     const playbackStore = usePlaybackStore();
 
     const id = computed(() => props.id);
 
     const artist = ref<ArtistForPlayback | undefined>();
     const image = ref<ResourceImage | undefined>();
-    const setList = ref<TrackForPlayback[]>([]);
+    const setList = ref<readonly ResourceTrack[]>([]);
     const albumTracksObject = ref<Record<string, TrackForPlayback[]>>({});
     const isActive = ref({});
 
@@ -44,6 +47,8 @@ export default defineComponent({
           if (response.id !== id.value) {
             return;
           }
+
+          headTitleRef.value = `${response.name} | Streamist`;
 
           const responseSetList = response.albums.flatMap(
             (album) => album.tracks
@@ -88,7 +93,7 @@ export default defineComponent({
         <s-artist-image
           class="w-50 h-50"
           size="200"
-          :artist-id="id"
+          :artist="id"
           @image-ids="imageIds$$q = $event"
         />
       </s-image-manager>

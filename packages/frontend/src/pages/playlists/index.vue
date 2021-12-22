@@ -19,6 +19,10 @@ interface Item {
 
 export default defineComponent({
   setup() {
+    useHead({
+      title: 'Playlists | Streamist',
+    });
+
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
 

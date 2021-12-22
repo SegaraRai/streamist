@@ -1,54 +1,44 @@
 <script lang="ts">
 import { minQueueSize } from '~/config/queue';
-import { getDefaultAlbumImage } from '~/logic/albumImage';
+import { db } from '~/db';
 import { formatTime } from '~/logic/formatTime';
+import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
-import type { TrackForPlayback } from '~/types/playback';
-import type { ResourceAlbum, ResourceArtist, ResourceImage } from '$/types';
+import type { ResourceArtist, ResourceTrack } from '$/types';
 
 interface ListItem {
-  album$$q: ResourceAlbum;
-  albumArtist$$q: ResourceArtist;
-  artist$$q: ResourceArtist;
   formattedDuration$$q: string;
-  image$$q: ResourceImage | undefined;
-  track$$q: TrackForPlayback;
+  artist$$q: ResourceArtist;
+  track$$q: ResourceTrack;
 }
 
 export default defineComponent({
   setup() {
-    const { t } = useI18n();
-
     const playbackStore = usePlaybackStore();
 
-    const items = computed<ListItem[]>(() =>
-      playbackStore.queue$$q.value
-        .slice(0, minQueueSize)
-        .map((track): ListItem => {
-          const album = track.album;
-          const artist = track.artist;
-          const albumArtist = album.artist;
-          return {
-            album$$q: album,
-            albumArtist$$q: albumArtist,
-            artist$$q: artist,
-            formattedDuration$$q: formatTime(track.duration),
-            image$$q: getDefaultAlbumImage(album),
-            track$$q: track,
-          };
-        })
+    const queueTracksRef = computed(() =>
+      playbackStore.queue$$q.value.slice(0, minQueueSize)
     );
 
-    const currentPlayingTrackId = computed(() => {
-      return playbackStore.currentTrack$$q.value?.id;
-    });
+    const { value: items } = useLiveQuery<readonly ListItem[]>(async () => {
+      const queueTracks = queueTracksRef.value;
+      const artistMap = new Map<string, ResourceArtist>(
+        (
+          await db.artists.bulkGet(
+            Array.from(new Set(queueTracks.map((track) => track.artistId)))
+          )
+        ).map((artist) => [artist!.id, artist!])
+      );
+      return queueTracks.map((track) => ({
+        formattedDuration$$q: formatTime(track.duration),
+        track$$q: track,
+        artist$$q: artistMap.get(track.artistId)!,
+      }));
+    }, [queueTracksRef]);
 
     return {
-      t,
-      playing$$q: playbackStore.playing$$q,
       repeatOne$$q: computed(() => playbackStore.repeat$$q.value === 'one'),
       items$$q: items,
-      currentPlayingTrackId$$q: currentPlayingTrackId,
       play$$q: (index: number): void => {
         playbackStore.skipNext$$q.value(index + 1);
       },
@@ -133,7 +123,7 @@ export default defineComponent({
               <s-album-image
                 class="s-hover-hidden flex-none w-9 h-9"
                 size="36"
-                :album-id="item.track$$q.albumId"
+                :album="item.track$$q.albumId"
               />
               <v-icon class="play-icon s-hover-visible">
                 mdi-play-circle-outline
@@ -150,7 +140,7 @@ export default defineComponent({
             <v-tooltip bottom>
               <template #activator>
                 <span class="marquee-target">
-                  <router-link :to="`/albums/${item.album$$q.id}`">
+                  <router-link :to="`/albums/${item.track$$q.albumId}`">
                     {{ item.track$$q.title }}
                   </router-link>
                 </span>

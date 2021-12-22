@@ -1,12 +1,14 @@
 <script lang="ts">
+import { PropType } from 'vue';
 import { db } from '~/db';
 import { compareAlbum } from '~/logic/sort';
 import { useLiveQuery } from '~/logic/useLiveQuery';
+import { ResourceArtist } from '$/types';
 
 export default defineComponent({
   props: {
-    artistId: {
-      type: String,
+    artist: {
+      type: [String, Object] as PropType<string | ResourceArtist>,
       required: true,
     },
   },
@@ -14,20 +16,23 @@ export default defineComponent({
     imageIds: (_imageIds: readonly string[] | undefined) => true,
   },
   setup(props, context) {
-    const artistId = computed(() => props.artistId);
-    watch(artistId, () => {
+    const propArtistRef = computed(() => props.artist);
+    watch(propArtistRef, () => {
       context.emit('imageIds', undefined);
     });
     const { value: image, valueExists: fetched } = useLiveQuery(async () => {
-      const id = artistId.value;
-      if (!id) {
+      const propArtist = propArtistRef.value;
+      if (!propArtist) {
         return;
       }
-      const artist = await db.artists.get(id);
+      const artist =
+        typeof propArtist === 'string'
+          ? await db.artists.get(propArtist)
+          : propArtist;
       if (!artist) {
         return;
       }
-      if (id !== artistId.value) {
+      if (propArtist !== propArtistRef.value) {
         return;
       }
       context.emit('imageIds', artist.imageIds);
@@ -35,7 +40,7 @@ export default defineComponent({
       if (artist.imageIds[0]) {
         imageId = artist.imageIds[0];
       } else {
-        const albums = await db.albums.where({ artistId: id }).toArray();
+        const albums = await db.albums.where({ artistId: artist.id }).toArray();
         albums.sort(compareAlbum);
         const imageIds = albums.flatMap((album) => album.imageIds);
         imageId = imageIds[0];
@@ -44,11 +49,8 @@ export default defineComponent({
         return;
       }
       const image = db.images.get(imageId);
-      if (id !== artistId.value) {
-        return;
-      }
       return image;
-    }, [artistId]);
+    }, [propArtistRef]);
 
     return {
       image,

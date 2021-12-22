@@ -1,10 +1,7 @@
 <script lang="ts">
 import { fetchAlbumForPlaybackWithTracks } from '~/resources/album';
 import { usePlaybackStore } from '~/stores/playback';
-import type {
-  AlbumForPlaybackWithTracks,
-  TrackForPlayback,
-} from '~/types/playback';
+import { ResourceAlbum, ResourceTrack } from '$/types';
 
 export default defineComponent({
   props: {
@@ -14,12 +11,17 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const headTitleRef = ref('Album | Streamist');
+    useHead({
+      title: headTitleRef,
+    });
+
     const playbackStore = usePlaybackStore();
 
     const albumId = computed(() => props.id);
 
-    const album = ref<AlbumForPlaybackWithTracks | undefined>();
-    const setList = ref<TrackForPlayback[] | undefined>();
+    const album = ref<ResourceAlbum | undefined>();
+    const setList = ref<readonly ResourceTrack[] | undefined>();
 
     const loading = computed(() => album.value?.id !== albumId.value);
 
@@ -34,6 +36,8 @@ export default defineComponent({
           if (newAlbum.id !== albumId.value) {
             return;
           }
+
+          headTitleRef.value = `${newAlbum.title} by ${newAlbum.artist.name} | Streamist`;
 
           const responseSetList = newAlbum.tracks;
 

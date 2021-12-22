@@ -15,6 +15,10 @@ interface Item {
 
 export default defineComponent({
   setup() {
+    useHead({
+      title: 'Albums | Streamist',
+    });
+
     const { t } = useI18n();
     const display = useDisplay();
     const playbackStore = usePlaybackStore();
@@ -93,7 +97,7 @@ export default defineComponent({
                 width: `${imageSize$$q}px`,
                 height: `${imageSize$$q}px`,
               }"
-              :album-id="item.album$$q.id"
+              :album="item.album$$q"
               :size="imageSize$$q"
             />
           </router-link>

@@ -14,6 +14,10 @@ interface ArtistItem {
 
 export default defineComponent({
   setup() {
+    useHead({
+      title: 'Artists | Streamist',
+    });
+
     const { t } = useI18n();
     const display = useDisplay();
     const playbackStore = usePlaybackStore();
@@ -92,7 +96,7 @@ export default defineComponent({
                   width: `${imageSize$$q}px`,
                   height: `${imageSize$$q}px`,
                 }"
-                :artist-id="item.artist$$q.id"
+                :artist="item.artist$$q"
                 :size="imageSize$$q"
               />
             </router-link>

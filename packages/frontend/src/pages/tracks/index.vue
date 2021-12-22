@@ -6,6 +6,10 @@ import type { TrackForPlayback } from '~/types/playback';
 
 export default defineComponent({
   setup() {
+    useHead({
+      title: 'Tracks | Streamist',
+    });
+
     const { t } = useI18n();
     const display = useDisplay();
     const playbackStore = usePlaybackStore();

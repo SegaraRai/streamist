@@ -1,11 +1,13 @@
 <script lang="ts">
+import type { PropType } from 'vue';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
+import type { ResourceAlbum } from '$/types';
 
 export default defineComponent({
   props: {
-    albumId: {
-      type: String,
+    album: {
+      type: [String, Object] as PropType<string | ResourceAlbum>,
       required: true,
     },
   },
@@ -13,20 +15,23 @@ export default defineComponent({
     imageIds: (_imageIds: readonly string[] | undefined) => true,
   },
   setup(props, context) {
-    const albumId = computed(() => props.albumId);
-    watch(albumId, () => {
+    const propAlbumRef = computed(() => props.album);
+    watch(propAlbumRef, () => {
       context.emit('imageIds', undefined);
     });
     const { value: image, valueExists: fetched } = useLiveQuery(async () => {
-      const id = albumId.value;
-      if (!id) {
+      const propAlbum = propAlbumRef.value;
+      if (!propAlbum) {
         return;
       }
-      const album = await db.albums.get(id);
+      const album =
+        typeof propAlbum === 'string'
+          ? await db.albums.get(propAlbum)
+          : propAlbum;
       if (!album) {
         return;
       }
-      if (id !== albumId.value) {
+      if (propAlbum !== propAlbumRef.value) {
         return;
       }
       context.emit('imageIds', album.imageIds);
@@ -35,11 +40,8 @@ export default defineComponent({
         return;
       }
       const image = await db.images.get(imageId);
-      if (id !== albumId.value) {
-        return;
-      }
       return image;
-    }, [albumId]);
+    }, [propAlbumRef]);
 
     return {
       image,

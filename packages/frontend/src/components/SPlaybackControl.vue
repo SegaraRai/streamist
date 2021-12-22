@@ -1,6 +1,8 @@
 <script lang="ts">
 import type { RepeatType } from '$shared/types/playback';
+import { db } from '~/db';
 import { findAncestor } from '~/logic/findAncestor';
+import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { useVolumeStore } from '~/stores/volume';
 
@@ -50,7 +52,22 @@ export default defineComponent({
       playbackStore.shuffle$$q.value = !playbackStore.shuffle$$q.value;
     };
 
+    const { value: currentTrackInfo } = useLiveQuery(async () => {
+      const track = currentTrack.value;
+      if (!track) {
+        return {};
+      }
+      const trackArtist$$q = await db.artists.get(track.artistId);
+      if (track.id !== currentTrack.value?.id) {
+        return {};
+      }
+      return {
+        trackArtist$$q,
+      };
+    }, [currentTrack]);
+
     return {
+      currentTrackInfo$$q: currentTrackInfo,
       volumeStore$$q: volumeStore,
       currentTrack$$q: currentTrack,
       playing$$q: playbackStore.playing$$q,
@@ -114,7 +131,7 @@ export default defineComponent({
           <s-album-image
             class="w-16 h-16"
             size="64"
-            :album-id="currentTrack$$q.albumId"
+            :album="currentTrack$$q.albumId"
           />
         </router-link>
         <!-- pb-1で気持ち上に持ち上げる -->
@@ -129,7 +146,7 @@ export default defineComponent({
             class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-2"
             :to="`/artists/${currentTrack$$q.artistId}`"
           >
-            {{ currentTrack$$q.artist.name }}
+            {{ currentTrackInfo$$q?.trackArtist$$q?.name }}
           </router-link>
         </div>
       </template>

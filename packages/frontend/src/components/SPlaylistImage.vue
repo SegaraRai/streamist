@@ -1,12 +1,13 @@
 <script lang="ts">
+import type { PropType } from 'vue';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
-import { ResourceImage } from '$/types';
+import type { ResourceImage, ResourcePlaylist } from '$/types';
 
 export default defineComponent({
   props: {
-    playlistId: {
-      type: String,
+    playlist: {
+      type: [String, Object] as PropType<string | ResourcePlaylist>,
       required: true,
     },
   },
@@ -14,29 +15,26 @@ export default defineComponent({
     imageIds: (_imageIds: readonly string[] | undefined) => true,
   },
   setup(props, context) {
-    const playlistId = computed(() => props.playlistId);
-    watch(playlistId, () => {
+    const propPlaylistRef = computed(() => props.playlist);
+    watch(propPlaylistRef, () => {
       context.emit('imageIds', undefined);
     });
     const { value: image, valueExists: fetched } = useLiveQuery(async () => {
-      const id = playlistId.value;
-      if (!id) {
-        return;
-      }
-      const playlist = await db.playlists.get(id);
+      const propPlaylist = propPlaylistRef.value;
+      const playlist =
+        typeof propPlaylist === 'string'
+          ? await db.playlists.get(propPlaylist)
+          : propPlaylist;
       if (!playlist) {
         return;
       }
-      if (id !== playlistId.value) {
+      if (propPlaylist !== propPlaylistRef.value) {
         return;
       }
       context.emit('imageIds', playlist.imageIds);
       if (playlist.imageIds[0]) {
         const imageId = playlist.imageIds[0];
         const image = await db.images.get(imageId);
-        if (id !== playlistId.value) {
-          return;
-        }
         return image;
       }
 
@@ -51,11 +49,8 @@ export default defineComponent({
       const images = (await db.images.bulkGet(
         imageIds.slice(0, 4)
       )) as ResourceImage[];
-      if (id !== playlistId.value) {
-        return;
-      }
       return images;
-    }, [playlistId]);
+    }, [propPlaylistRef]);
 
     return {
       image,
