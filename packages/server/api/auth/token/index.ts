@@ -1,12 +1,19 @@
 export type Methods = {
   post: {
-    reqBody: {
-      refreshToken: string;
-    };
+    reqBody:
+      | {
+          grant_type: 'password';
+          username: string;
+          password: string;
+        }
+      | {
+          grant_type: 'refresh_token';
+          refresh_token: string;
+        };
     resBody: {
-      apiToken: string;
-      cdnToken: string;
-      refreshToken?: string;
+      access_token: string;
+      cdn_access_token: string;
+      refresh_token?: string;
     };
   };
 };

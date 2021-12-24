@@ -2,9 +2,11 @@
 import type { PropType } from 'vue';
 import type { SourceFileAttachToType } from '$shared/types/db';
 import { db } from '~/db';
+import { getImageFileURL } from '~/logic/fileURL';
 import type { FileId } from '~/logic/uploadManager';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { useUploadStore } from '~/stores/upload';
+import { ResourceImage } from '$/types';
 
 export default defineComponent({
   props: {
@@ -68,6 +70,20 @@ export default defineComponent({
       hasImage$$q,
       images$$q,
       uploading$$q,
+      getOriginalImageURL$$q: (
+        image: ResourceImage | undefined
+      ): string | undefined => {
+        if (!image) {
+          return;
+        }
+        const imageFile = [...image.files]
+          .sort((a, b) => b.width - a.width)
+          .shift();
+        if (!imageFile) {
+          return;
+        }
+        return getImageFileURL(imageFile);
+      },
       removeImage$$q: (imageId: string) => {
         // TODO: show dialog
       },
@@ -161,11 +177,18 @@ export default defineComponent({
           <div class="flex gap-x-4 h-80 pt-8">
             <template v-for="(imageId, index) in imageIds" :key="index">
               <div class="flex-none flex flex-col gap-y-4 items-center">
-                <s-nullable-image
-                  class="flex-none w-48 h-48"
-                  :image="images$$q?.[index]"
-                  size="200"
-                />
+                <a
+                  class="block"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :href="getOriginalImageURL$$q(images$$q?.[index])"
+                >
+                  <s-nullable-image
+                    class="flex-none w-48 h-48"
+                    :image="images$$q?.[index]"
+                    size="200"
+                  />
+                </a>
                 <div>
                   <v-btn
                     flat
@@ -194,13 +217,3 @@ export default defineComponent({
     </v-card>
   </v-dialog>
 </template>
-
-<style>
-.v-dialog.s-image-manager-dialog:not(.v-dialog--fullscreen)
-  .v-overlay__content {
-  @apply max-w-full;
-  @apply max-h-full;
-  @apply w-2xl;
-  @apply px-8;
-}
-</style>

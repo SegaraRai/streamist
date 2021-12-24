@@ -1,6 +1,6 @@
+import { compareAlbum, compareTrack } from '$shared/sort';
 import { db } from '~/db';
 import { createMultiMap } from '~/logic/multiMap';
-import { compareAlbum, compareTrack } from '~/logic/sort';
 import type { AlbumWithImage } from '~/types/album';
 import type {
   AlbumForPlayback,

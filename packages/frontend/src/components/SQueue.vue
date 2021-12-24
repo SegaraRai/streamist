@@ -16,31 +16,36 @@ export default defineComponent({
   setup() {
     const playbackStore = usePlaybackStore();
 
-    const queueTracksRef = computed(() =>
-      playbackStore.queue$$q.value.slice(0, minQueueSize)
-    );
-
-    const { value: items } = useLiveQuery<readonly ListItem[]>(async () => {
-      const queueTracks = queueTracksRef.value;
+    const { value: temp } = useLiveQuery<
+      [readonly ListItem[], readonly ListItem[]]
+    >(async () => {
+      const playNextQueue = playbackStore.playNextQueue$$q.value;
+      const queue = playbackStore.queue$$q.value.slice(0, minQueueSize);
       const artistMap = new Map<string, ResourceArtist>(
         (
           await db.artists.bulkGet(
-            Array.from(new Set(queueTracks.map((track) => track.artistId)))
+            Array.from(
+              new Set(
+                [...playNextQueue, ...queue].map((track) => track.artistId)
+              )
+            )
           )
         ).map((artist) => [artist!.id, artist!])
       );
-      return queueTracks.map((track) => ({
+      const transformTrack = (track: ResourceTrack): ListItem => ({
         formattedDuration$$q: formatTime(track.duration),
         track$$q: track,
         artist$$q: artistMap.get(track.artistId)!,
-      }));
-    }, [queueTracksRef]);
+      });
+      return [playNextQueue.map(transformTrack), queue.map(transformTrack)];
+    }, [playbackStore.playNextQueue$$q, playbackStore.queue$$q]);
 
     return {
       repeatOne$$q: computed(() => playbackStore.repeat$$q.value === 'one'),
-      items$$q: items,
+      playNextItems$$q: computed(() => temp.value?.[0] || []),
+      items$$q: computed(() => temp.value?.[1] || []),
       play$$q: (index: number): void => {
-        playbackStore.skipNext$$q.value(index + 1);
+        playbackStore.skipNext$$q(index + 1);
       },
       startMarquee$$q(event: MouseEvent): void {
         const target = (
@@ -111,6 +116,66 @@ export default defineComponent({
 
 <template>
   <v-list flat dense :class="repeatOne$$q ? 'opacity-50' : ''">
+    <template v-for="(item, index) in playNextItems$$q" :key="index">
+      <template v-if="index !== 0">
+        <v-divider />
+      </template>
+      <v-list-item class="s-hover-container">
+        <div class="list-column-icon">
+          <div class="icon-container">
+            <v-btn flat icon text @click.stop="play$$q(index)">
+              <!-- div class="track-index s-numeric s-hover-hidden">{{ index + 1 }}</div -->
+              <s-album-image
+                class="s-hover-hidden flex-none w-9 h-9"
+                size="36"
+                :album="item.track$$q.albumId"
+              />
+              <v-icon class="play-icon s-hover-visible">
+                mdi-play-circle-outline
+              </v-icon>
+            </v-btn>
+          </div>
+        </div>
+        <v-list-item-header two-line class="list-column-content flex flex-col">
+          <v-list-item-title
+            class="track-title whitespace-nowrap overflow-hidden"
+            @mouseenter="startMarquee$$q"
+            @mouseleave="finishMarquee$$q"
+          >
+            <v-tooltip bottom>
+              <template #activator>
+                <span class="marquee-target">
+                  <router-link :to="`/albums/${item.track$$q.albumId}`">
+                    {{ item.track$$q.title }}
+                  </router-link>
+                </span>
+              </template>
+              <span>{{ item.track$$q.title }}</span>
+            </v-tooltip>
+          </v-list-item-title>
+          <v-list-item-subtitle
+            class="track-artist whitespace-nowrap overflow-hidden"
+            @mouseenter="startMarquee$$q"
+            @mouseleave="finishMarquee$$q"
+          >
+            <v-tooltip bottom>
+              <template #activator>
+                <span class="marquee-target">
+                  <router-link :to="`/artists/${item.artist$$q.id}`">
+                    {{ item.artist$$q.name }}
+                  </router-link>
+                </span>
+              </template>
+              <span>{{ item.artist$$q.name }}</span>
+            </v-tooltip>
+          </v-list-item-subtitle>
+        </v-list-item-header>
+        <div class="list-column-duration s-duration body-2 pl-4">
+          {{ item.formattedDuration$$q }}
+        </div>
+      </v-list-item>
+    </template>
+    <v-divider />
     <template v-for="(item, index) in items$$q" :key="index">
       <template v-if="index !== 0">
         <v-divider />

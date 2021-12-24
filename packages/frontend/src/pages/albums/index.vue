@@ -1,53 +1,74 @@
 <script lang="ts">
+import GGrid from 'vue-virtual-scroll-grid';
 import { useDisplay } from 'vuetify';
-import { getDefaultAlbumImage } from '~/logic/albumImage';
-import { fetchAlbumsForPlaybackWithTracks } from '~/resources/album';
+import { compareTrack } from '$shared/sort';
+import {
+  useAllAlbums,
+  useAllArtists,
+  useAllImageMap,
+  useAllTracks,
+} from '~/logic/useDB';
 import { usePlaybackStore } from '~/stores/playback';
-import type { AlbumForPlaybackWithTracks } from '~/types/playback';
-import type { ResourceArtist, ResourceImage } from '$/types';
+import type {
+  ResourceAlbum,
+  ResourceArtist,
+  ResourceImage,
+  ResourceTrack,
+} from '$/types';
 
 interface Item {
-  album$$q: AlbumForPlaybackWithTracks;
-  artist$$q: ResourceArtist;
-  image$$q: ResourceImage | undefined;
-  releaseYear$$q: string | undefined;
+  readonly album$$q: ResourceAlbum;
+  readonly artist$$q: ResourceArtist;
+  readonly tracks$$q: readonly ResourceTrack[];
+  readonly image$$q: ResourceImage | undefined;
+  readonly releaseYear$$q: string | undefined;
 }
 
 export default defineComponent({
+  components: {
+    GGrid,
+  },
   setup() {
-    useHead({
-      title: 'Albums | Streamist',
-    });
-
     const { t } = useI18n();
     const display = useDisplay();
     const playbackStore = usePlaybackStore();
 
-    const albums = ref([] as AlbumForPlaybackWithTracks[]);
-
-    fetchAlbumsForPlaybackWithTracks().then((response) => {
-      const responseSetList = response.flatMap((album) => album.tracks);
-
-      albums.value = [
-        ...response,
-        ...response,
-        ...response,
-        ...response,
-        ...response,
-      ];
-      playbackStore.setDefaultSetList$$q.value(responseSetList);
+    useHead({
+      title: t('title.Albums'),
     });
 
+    const allAlbums = useAllAlbums();
+    const allArtists = useAllArtists();
+    const allTracks = useAllTracks();
+    const allImageMap = useAllImageMap();
+
+    let unmounted = false;
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q.value();
+      unmounted = true;
+      playbackStore.setDefaultSetList$$q();
     });
 
-    const items = computed(() => {
-      return albums.value.map((album): Item => {
-        const artist = album.artist;
-        const image = getDefaultAlbumImage(album);
+    const items = asyncComputed(async () => {
+      const albums = await allAlbums.valueAsync.value;
+      const artists = await allArtists.valueAsync.value;
+      const tracks = await allTracks.valueAsync.value;
+      const imageMap = await allImageMap.valueAsync.value;
 
-        const releaseDate = album.tracks.find(
+      const artistMap = new Map<string, ResourceArtist>(
+        artists.map((artist) => [artist.id, artist])
+      );
+
+      const gridItems = albums.map((album): Item => {
+        const artist = artistMap.get(album.artistId)!;
+        const image =
+          album.imageIds.length > 0
+            ? imageMap.get(album.imageIds[0])
+            : undefined;
+        const albumTracks = tracks
+          .filter((track) => track.albumId === album.id)
+          .sort(compareTrack);
+
+        const releaseDate = albumTracks.find(
           (track) => track.releaseDate
         )?.releaseDate;
         const releaseYear =
@@ -57,17 +78,27 @@ export default defineComponent({
           album$$q: album,
           artist$$q: artist,
           image$$q: image,
+          tracks$$q: albumTracks,
           releaseYear$$q: releaseYear,
         };
       });
-    });
+
+      if (!unmounted) {
+        playbackStore.setDefaultSetList$$q(
+          gridItems.flatMap((item) => item.tracks$$q)
+        );
+      }
+
+      return gridItems;
+    }, []);
 
     return {
       t,
       items$$q: items,
-      imageSize$$q: computed(() =>
+      imageSize$$q: eagerComputed(() =>
         display.xs.value ? 90 : display.sm.value ? 120 : 180
       ),
+      pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
     };
   },
 });
@@ -80,42 +111,96 @@ export default defineComponent({
         {{ t('albums.Albums') }}
       </div>
     </header>
-
-    <v-row>
-      <v-col
-        v-for="item in items$$q"
-        :key="item.album$$q.id"
-        class="flex"
-        cols="auto"
-      >
-        <v-card flat tile :width="`${imageSize$$q}px`" class="item">
-          <router-link class="no-underline" :to="`/albums/${item.album$$q.id}`">
-            <s-album-image
-              v-ripple
-              class="align-end image white--text"
-              :style="{
-                width: `${imageSize$$q}px`,
-                height: `${imageSize$$q}px`,
-              }"
-              :album="item.album$$q"
-              :size="imageSize$$q"
-            />
-          </router-link>
+    <g-grid
+      class="s-g-grid grid gap-8"
+      :length="items$$q.length"
+      :page-provider="async () => items$$q"
+      :page-size="pageSize$$q"
+    >
+      <template #probe>
+        <v-card
+          flat
+          tile
+          :width="`${imageSize$$q}px`"
+          class="bg-transparent flex flex-col"
+        >
+          <div
+            :style="{
+              width: `${imageSize$$q}px`,
+              height: `${imageSize$$q}px`,
+            }"
+          ></div>
           <v-card-title
-            class="px-0 pt-1 subtitle-1 font-weight-medium line-clamp-2"
+            class="p-0 my-1 subtitle-1 font-weight-medium !leading-tight flex flex-col items-start"
           >
-            <router-link :to="`/albums/${item.album$$q.id}`">
-              {{ item.album$$q.title }}
-            </router-link>
+            <n-ellipsis :line-clamp="2" :tooltip="{ showArrow: false }">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </n-ellipsis>
           </v-card-title>
           <v-card-subtitle
             class="px-0 subtitle-2 font-weight-regular flex justify-between"
           >
-            <div class="flex-1 artist">
+            <n-ellipsis class="flex-1" :tooltip="{ showArrow: false }">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            </n-ellipsis>
+            <div class="flex-none pl-2">9999</div>
+          </v-card-subtitle>
+        </v-card>
+      </template>
+      <template
+        #default="{
+          item,
+          style,
+        }: {
+          item: (typeof items$$q)[0],
+          style: string,
+        }"
+      >
+        <v-card
+          flat
+          tile
+          :width="`${imageSize$$q}px`"
+          class="bg-transparent flex flex-col"
+          :style="style"
+        >
+          <router-link
+            v-ripple
+            :to="`/albums/${item.album$$q.id}`"
+            class="block"
+          >
+            <s-album-image-x
+              :style="{
+                width: `${imageSize$$q}px`,
+                height: `${imageSize$$q}px`,
+              }"
+              :image="item.image$$q"
+              :size="imageSize$$q"
+            />
+          </router-link>
+          <v-card-title
+            class="p-0 my-1 subtitle-1 font-weight-medium !leading-tight flex flex-col items-start"
+          >
+            <!-- FIXME: leading-tight等でline-heightを縮めると表示しきれていてもoffsetHeightがscrollHeightより小さい値になってツールチップが常に表示されてしまう -->
+            <n-ellipsis
+              :line-clamp="2"
+              :tooltip="{ showArrow: false }"
+              class="flex-1"
+            >
+              <router-link :to="`/albums/${item.album$$q.id}`">
+                {{ item.album$$q.title }}
+              </router-link>
+            </n-ellipsis>
+          </v-card-title>
+          <v-card-subtitle
+            class="px-0 subtitle-2 font-weight-regular flex justify-between"
+          >
+            <n-ellipsis class="flex-1" :tooltip="{ showArrow: false }">
               <router-link :to="`/artists/${item.artist$$q.id}`">
                 {{ item.artist$$q.name }}
               </router-link>
-            </div>
+            </n-ellipsis>
             <template v-if="item.releaseYear$$q">
               <div class="flex-none pl-2">
                 {{ item.releaseYear$$q }}
@@ -123,19 +208,7 @@ export default defineComponent({
             </template>
           </v-card-subtitle>
         </v-card>
-      </v-col>
-    </v-row>
+      </template>
+    </g-grid>
   </v-container>
 </template>
-
-<style scoped>
-.item {
-  background: transparent !important;
-}
-
-.artist {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-</style>

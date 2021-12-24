@@ -1,12 +1,10 @@
 <script lang="ts">
 import type { PropType } from 'vue';
+import { compareTrack } from '$shared/sort';
 import { db } from '~/db';
 import { formatTracksTotalDuration } from '~/logic/duration';
-import { compareTrack } from '~/logic/sort';
 import { useLiveQuery } from '~/logic/useLiveQuery';
-import { calcTrackListHeight } from '~/logic/util';
 import { usePlaybackStore } from '~/stores/playback';
-import { useUploadStore } from '~/stores/upload';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
 
 export default defineComponent({
@@ -27,15 +25,13 @@ export default defineComponent({
   },
   setup(props) {
     const { t } = useI18n();
-
     const playbackStore = usePlaybackStore();
-    const uploadStore = useUploadStore();
 
-    const albumId$$q = computed(() =>
+    const albumId$$q = eagerComputed(() =>
       typeof props.album === 'string' ? props.album : props.album.id
     );
 
-    const propAlbumRef = computed(() => props.album);
+    const propAlbumRef = eagerComputed(() => props.album);
     const { value } = useLiveQuery(
       async () => {
         const propAlbum = propAlbumRef.value;
@@ -64,39 +60,30 @@ export default defineComponent({
       true
     );
 
-    const album = computed(() => value.value?.album);
-    const artist = computed(() => value.value?.artist);
-    const tracks = computed(() => value.value?.tracks);
+    const album = eagerComputed(() => value.value?.album);
+    const artist = eagerComputed(() => value.value?.artist);
+    const tracks = eagerComputed(() => value.value?.tracks);
 
-    const releaseDate = computed(() => {
+    const releaseDate = eagerComputed(() => {
       return (
         tracks.value?.map((track) => track.releaseDateText)?.find((x) => x) ||
         null
       );
     });
 
-    const duration = computed(
+    const duration = eagerComputed(
       () => tracks.value && formatTracksTotalDuration(tracks.value)
     );
-
-    const trackListHeight = computed(
-      () => tracks.value && calcTrackListHeight(tracks.value, true)
-    );
-
-    const inputFileElement = ref<HTMLInputElement | null>(null);
 
     return {
       t,
       albumId$$q,
       imageIds$$q: ref<readonly string[] | undefined>(),
-      inputFileElement$$q: inputFileElement,
       album$$q: album,
       artist$$q: artist,
       tracks$$q: tracks,
       duration$$q: duration,
       releaseDate$$q: releaseDate,
-      trackListHeight$$q: trackListHeight,
-      a: false,
       play$$q: (shuffle?: boolean): void => {
         if (!tracks.value || !tracks.value[0]) {
           return;
@@ -104,34 +91,7 @@ export default defineComponent({
         if (shuffle !== undefined) {
           playbackStore.shuffle$$q.value = shuffle;
         }
-        playbackStore.setSetListAndPlayAuto$$q.value(tracks.value);
-      },
-      onAlbumArtClicked$$q: (): void => {
-        if (!album.value) {
-          return;
-        }
-
-        if (album.value.imageIds.length) {
-          // TODO: show dialog
-        } else {
-          inputFileElement.value?.click();
-        }
-      },
-      onFileSelected$$q: (event: Event): void => {
-        if (!value.value) {
-          return;
-        }
-
-        const fileList = (event.target as HTMLInputElement).files;
-        if (!fileList) {
-          return;
-        }
-
-        uploadStore.uploadImageFiles(
-          Array.from(fileList),
-          'album',
-          albumId$$q.value
-        );
+        playbackStore.setSetListAndPlayAuto$$q(tracks.value);
       },
     };
   },
@@ -140,14 +100,6 @@ export default defineComponent({
 
 <template>
   <template v-if="album$$q">
-    <input
-      ref="inputFileElement$$q"
-      type="file"
-      multiple
-      class="hidden"
-      filter="image/*"
-      @change="onFileSelected$$q"
-    />
     <div
       class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-6 md:gap-y-4"
     >
@@ -163,7 +115,7 @@ export default defineComponent({
               <s-album-image
                 class="w-50 h-50"
                 size="200"
-                :album="albumId$$q"
+                :album="album$$q"
                 @image-ids="imageIds$$q = $event"
               />
             </template>
@@ -174,7 +126,7 @@ export default defineComponent({
             <s-album-image
               class="w-50 h-50"
               size="200"
-              :album="albumId$$q"
+              :album="album$$q"
               @image-ids="imageIds$$q = $event"
             />
           </router-link>
@@ -201,6 +153,7 @@ export default defineComponent({
                 {{ artist$$q.name }}
               </s-conditional-link>
             </template>
+            <s-artist-combobox :model-value="`AR-ID#${artist$$q?.id}`" />
           </div>
         </div>
         <div class="flex-1 <md:hidden"></div>

@@ -19,6 +19,12 @@ export default defineConfig({
       lg: '1280px',
       xl: '1920px',
       '2xl': '2560px',
+      g_2xs_xs: '300px',
+      g_xs_sm: '450px',
+      g_sm_md: '780px',
+      g_md_lg: '1120px',
+      g_lg_xl: '1600px',
+      g_xl_2xl: '2240px',
     },
     extend: {
       typography: {

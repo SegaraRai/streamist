@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "$shared/*": [
+        "../shared/*"
+      ]
+    },
+    "rootDirs": [
+      ".",
+      "../shared"
+    ],
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "target": "ESNext"
+  }
+}

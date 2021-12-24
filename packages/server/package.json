@@ -6,7 +6,6 @@
     "dev": "pnpm run migrate:dev && run-p dev:*",
     "dev:server": "run-p dev_server:*",
     "dev:frourio": "frourio --watch",
-    "dev:prisma": "prisma generate --watch",
     "dev_server:build": "node ./build.dev.js",
     "dev_server:start": "node-dev --respawn ./index.js",
     "prebuild": "pnpm run generate",

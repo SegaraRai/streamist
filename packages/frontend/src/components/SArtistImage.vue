@@ -1,7 +1,7 @@
 <script lang="ts">
 import { PropType } from 'vue';
+import { compareAlbum } from '$shared/sort';
 import { db } from '~/db';
-import { compareAlbum } from '~/logic/sort';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { ResourceArtist } from '$/types';
 
@@ -61,8 +61,5 @@ export default defineComponent({
 </script>
 
 <template>
-  <s-nullable-image
-    class="rounded-full select-none"
-    :image="fetched && image"
-  />
+  <s-artist-image-x :image="fetched && image" />
 </template>

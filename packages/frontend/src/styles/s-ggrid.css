@@ -1,0 +1,13 @@
+.s-g-grid {
+  @apply grid-cols-8;
+  @apply <g_2xs_xs:grid-cols-2;
+  @apply @g_2xs_xs:grid-cols-3;
+  @apply @g_xs_sm:grid-cols-4;
+  @apply @sm:grid-cols-2;
+  @apply @g_sm_md:grid-cols-4;
+  @apply @md:grid-cols-3;
+  @apply @g_md_lg:grid-cols-4;
+  @apply @lg:grid-cols-5;
+  @apply @g_lg_xl:grid-cols-7;
+  @apply @xl:grid-cols-8;
+}

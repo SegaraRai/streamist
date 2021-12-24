@@ -1,9 +1,9 @@
 <script lang="ts">
-import { getDefaultAlbumImage } from '~/logic/albumImage';
-import { fetchArtistForPlayback } from '~/resources/artist';
+import { compareAlbum, compareTrack } from '$shared/sort';
+import { db } from '~/db';
+import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ArtistForPlayback, TrackForPlayback } from '~/types/playback';
-import type { ResourceImage, ResourceTrack } from '$/types';
+import type { ResourceAlbum } from '$/types';
 
 export default defineComponent({
   props: {
@@ -13,69 +13,61 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const headTitleRef = ref('Artist | Streamist');
+    const { t } = useI18n();
+
+    const headTitleRef = ref(t('title.ArtistInit'));
     useHead({
       title: headTitleRef,
     });
 
     const playbackStore = usePlaybackStore();
 
-    const id = computed(() => props.id);
-
-    const artist = ref<ArtistForPlayback | undefined>();
-    const image = ref<ResourceImage | undefined>();
-    const setList = ref<readonly ResourceTrack[]>([]);
-    const albumTracksObject = ref<Record<string, TrackForPlayback[]>>({});
-    const isActive = ref({});
-
-    const loading = computed<boolean>(
-      (): boolean => artist.value?.id !== id.value
-    );
-
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q.value();
+      playbackStore.setDefaultSetList$$q();
     });
 
-    watch(
-      id,
-      (newId, _oldValue) => {
-        if (!newId) {
-          return;
+    const propArtistIdRef = computed(() => props.id);
+    const { value } = useLiveQuery(
+      async () => {
+        const artistId = propArtistIdRef.value;
+        const artist = await db.artists.get(artistId);
+        if (!artist) {
+          throw new Error(`Artist ${artistId} not found`);
         }
-
-        fetchArtistForPlayback(newId).then((response) => {
-          if (response.id !== id.value) {
-            return;
-          }
-
-          headTitleRef.value = `${response.name} | Streamist`;
-
-          const responseSetList = response.albums.flatMap(
-            (album) => album.tracks
-          );
-
-          artist.value = response;
-          image.value = response.albums
-            .map((album) => getDefaultAlbumImage(album))
-            .find((x) => x);
-          setList.value = responseSetList;
-          playbackStore.setDefaultSetList$$q.value(responseSetList);
-        });
+        const albums = await db.albums.where({ artistId }).toArray();
+        const albumMap = new Map<string, ResourceAlbum>(
+          albums.map((album) => [album.id, album])
+        );
+        const albumTracks = (
+          await db.tracks
+            .where({ albumId: albums.map((album) => album.id) })
+            .toArray()
+        ).map((track) => ({ ...track, album: albumMap.get(track.albumId)! }));
+        const tracks = await db.tracks.where({ artistId }).toArray();
+        if (artistId !== propArtistIdRef.value) {
+          throw new Error('operation aborted');
+        }
+        albums.sort(compareAlbum);
+        albumTracks.sort(compareTrack);
+        tracks.sort(compareTrack);
+        const setList = albumTracks;
+        playbackStore.setDefaultSetList$$q(setList);
+        headTitleRef.value = t('title.Artist', [artist.name]);
+        return {
+          artist,
+          albums,
+          albumTracks,
+          tracks,
+          setList,
+        };
       },
-      {
-        immediate: true,
-      }
+      [propArtistIdRef],
+      true
     );
 
     return {
+      value$$q: value,
       imageIds$$q: ref<readonly string[] | undefined>(),
-      id$$q: id,
-      artist$$q: artist,
-      image$$q: image,
-      loading$$q: loading,
-      albumTracksObject$$q: albumTracksObject,
-      setList$$q: setList,
-      a: isActive,
     };
   },
 });
@@ -98,21 +90,21 @@ export default defineComponent({
         />
       </s-image-manager>
       <div class="text-2xl <md:flex-1 max-w-4xl">
-        <template v-if="!loading$$q && artist$$q">
-          {{ artist$$q.name }}
+        <template v-if="value$$q">
+          {{ value$$q.artist.name }}
         </template>
       </div>
     </div>
     <v-divider class="mt-8" />
-    <template v-if="!loading$$q && artist$$q">
+    <template v-if="value$$q">
       <div class="my-12"></div>
       <div class="mb-6">
-        <template v-for="album in artist$$q.albums" :key="album.id">
+        <template v-for="album in value$$q.albums" :key="album.id">
           <div class="my-12">
             <s-album
               :album="album"
-              :link-excludes="id$$q ? [id$$q] : []"
-              :set-list="setList$$q"
+              :link-excludes="[id]"
+              :set-list="value$$q.setList"
             />
           </div>
         </template>

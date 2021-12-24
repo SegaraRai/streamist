@@ -5,7 +5,8 @@
     "ffprobe",
     "magick",
     "mkclean",
-    "streamist"
+    "streamist",
+    "vuetify"
   ],
   "eslint.run": "onSave",
   "editor.codeActionsOnSave": {
@@ -28,5 +29,8 @@
   ],
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "files.exclude": {
+    "**/node_modules": true
   }
 }

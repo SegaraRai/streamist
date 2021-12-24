@@ -1,11 +1,10 @@
-import lazySizes from 'lazysizes';
-
 // register vue composition api globally
 import { setupLayouts } from 'virtual:generated-layouts';
 import generatedRoutes from 'virtual:generated-pages';
 import { ViteSSG } from 'vite-ssg';
 import App from './App.vue';
 
+import { installLazySizes } from './lazyloading';
 import { activateTokenInterceptor } from './logic/api';
 
 // windicss layers
@@ -17,12 +16,7 @@ import './styles/main.css';
 import 'virtual:windi-utilities.css';
 // windicss devtools support (dev only)
 import 'virtual:windi-devtools';
-
-import {
-  isCDNCookieSet,
-  needsCDNCookie,
-  setCDNCookie,
-} from './logic/cdnCookie';
+import { isAuthenticated } from './logic/tokens';
 
 const routes = setupLayouts(generatedRoutes);
 
@@ -33,50 +27,19 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
     mod.install?.(ctx);
   }
 
-  ctx.app.directive('lazysizes', {
-    beforeMount(el) {
-      if (el.tagName !== 'IMG') {
-        return;
+  if (ctx.isClient) {
+    ctx.router.beforeEach(async (to, _from, next) => {
+      const authenticated = await isAuthenticated();
+      const isLoginPage = to.path === '/login';
+      if (authenticated === isLoginPage) {
+        return next(
+          authenticated ? '/' : `/login?to=${encodeURIComponent(to.path)}`
+        );
       }
-      el.classList.add('lazyload');
-    },
-    beforeUpdate(el, _binding, vNode, prevVNode) {
-      if (el.tagName !== 'IMG') {
-        return;
-      }
-
-      if (
-        vNode.props?.['data-src'] === prevVNode.props?.['data-src'] &&
-        vNode.props?.['data-srcset'] === prevVNode.props?.['data-srcset']
-      ) {
-        return;
-      }
-
-      el.classList.remove('lazyloaded');
-      lazySizes.loader?.unveil(el);
-    },
-  });
-
-  document.addEventListener('lazybeforeunveil', (event) => {
-    const el = event.target as HTMLImageElement;
-
-    if (!needsCDNCookie(el.dataset.src!)) {
-      return;
-    }
-
-    if (isCDNCookieSet()) {
-      return;
-    }
-
-    event.preventDefault();
-
-    el.classList.add('s-lazyloading');
-
-    setCDNCookie().then((): void => {
-      el.classList.remove('s-lazyloading');
-      lazySizes.loader?.unveil(el);
+      next();
     });
-  });
 
-  activateTokenInterceptor();
+    activateTokenInterceptor();
+    installLazySizes(ctx.app);
+  }
 });

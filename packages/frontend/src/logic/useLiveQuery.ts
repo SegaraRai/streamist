@@ -44,11 +44,12 @@ export function useLiveQuery<T>(
     subscription = liveQuery<T>(querier).subscribe({
       next: (val): void => {
         value.value = val;
-        valueAsync.value = Promise.resolve(val);
         valueExists.value = true;
         if (initial) {
           initial = false;
           initialResolve?.(val);
+        } else {
+          valueAsync.value = Promise.resolve(val);
         }
       },
       error: (err): void => {

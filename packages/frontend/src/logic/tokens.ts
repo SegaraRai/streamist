@@ -9,39 +9,31 @@ export interface Tokens {
 
 export const tokens = createAsyncCache<Tokens>(
   async (): Promise<Tokens> => {
-    let refreshToken = localStorage.getItem('refreshToken');
+    const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) {
-      /*
-      if (location.pathname !== '/login') {
-        location.href = '/login';
-      }
       throw new Error('refreshToken not found');
-      //*/
+    }
 
-      ({ refreshToken } = await unAuthAPI.auth.authorize.$post({
+    try {
+      const tokens = await unAuthAPI.auth.token.$post({
         body: {
-          id: 'usc1',
-          pass: 'password',
+          grant_type: 'refresh_token',
+          refresh_token: refreshToken,
         },
-      }));
+      });
 
-      localStorage.setItem('refreshToken', refreshToken);
+      if (tokens.refresh_token) {
+        localStorage.setItem('refreshToken', tokens.refresh_token);
+      }
+
+      return {
+        apiToken: tokens.access_token,
+        cdnToken: tokens.cdn_access_token,
+      };
+    } catch (error: unknown) {
+      localStorage.removeItem('refreshToken');
+      throw error;
     }
-
-    const tokens = await unAuthAPI.auth.token.$post({
-      body: {
-        refreshToken,
-      },
-    });
-
-    if (tokens.refreshToken) {
-      localStorage.setItem('refreshToken', tokens.refreshToken);
-    }
-
-    return {
-      apiToken: tokens.apiToken,
-      cdnToken: tokens.cdnToken,
-    };
   },
   (tokens) =>
     isJWTNotExpired(tokens.apiToken) && isJWTNotExpired(tokens.cdnToken),
@@ -49,3 +41,39 @@ export const tokens = createAsyncCache<Tokens>(
     isJWTNotExpired(tokens.apiToken, -5 * 60) &&
     isJWTNotExpired(tokens.cdnToken, -5 * 60)
 );
+
+export async function authenticate(
+  username: string,
+  password: string
+): Promise<boolean> {
+  try {
+    const {
+      access_token: apiToken,
+      cdn_access_token: cdnToken,
+      refresh_token: refreshToken,
+    } = await unAuthAPI.auth.token.$post({
+      body: {
+        grant_type: 'password',
+        username,
+        password,
+      },
+    });
+
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
+    }
+
+    tokens.value = {
+      apiToken,
+      cdnToken,
+    };
+
+    return true;
+  } catch (error: unknown) {
+    return false;
+  }
+}
+
+export function isAuthenticated(): Promise<boolean> {
+  return tokens.valueAsync.then(() => true).catch(() => false);
+}

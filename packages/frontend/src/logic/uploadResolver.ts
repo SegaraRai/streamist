@@ -1,6 +1,6 @@
 import { getExtension, getStem } from '$shared/path';
+import { compareString } from '$shared/sort';
 import { getSourceFileType } from '$shared/sourceFileConfig';
-import { compareString } from './sort';
 
 export type ResolvedFileId = symbol;
 
@@ -78,6 +78,31 @@ function calcImageAndAudioRelationScore(
   return 0;
 }
 
+function calcCueSheetAndAudioRelationScore(
+  cueSheetFilename: string,
+  audioFilename: string
+): number {
+  const cueSheetFileStem = getStem(cueSheetFilename)
+    .toLowerCase()
+    .replace(/[^a-z\d]/g, '');
+  const audioFileStem = getStem(audioFilename)
+    .toLowerCase()
+    .replace(/[^a-z\d]/g, '');
+  if (cueSheetFileStem === audioFileStem) {
+    // foo.cue and foo.mp3
+    return 100;
+  }
+  if (audioFileStem.includes(cueSheetFileStem)) {
+    // foo01.cue and foo.mp3
+    return 90;
+  }
+  if (cueSheetFileStem.includes(audioFileStem)) {
+    // foo.cue and foo01.mp3
+    return 80;
+  }
+  return 0;
+}
+
 function compareAudioForImage(
   imageFile: File,
   audioFile1: ResolvedUploadFileAudio | ResolvedUploadFileAudioWithCueSheet,
@@ -127,10 +152,17 @@ function resolveUploadFilesImpl(files: readonly File[]): ResolvedUploadFile[] {
     }
 
     // 本当はCUEシートに記載されているファイル名を探すべきだが、面倒なのでファイル名を直接比較する
-    const stem = getStem(audioFile[1].name).toLowerCase();
-    const cueSheetFile = Array.from(cueSheetFileSet).find(
-      ([, file]) => getStem(file.name).toLowerCase() === stem
-    );
+    const cueSheetFiles = Array.from(cueSheetFileSet)
+      .map(
+        (item) =>
+          [
+            item,
+            calcCueSheetAndAudioRelationScore(item[1].name, audioFile[1].name),
+          ] as const
+      )
+      .filter(([, score]) => score > 0)
+      .sort(([, score1], [, score2]) => score2 - score1);
+    const cueSheetFile = cueSheetFiles[0]?.[0];
     if (!cueSheetFile) {
       continue;
     }

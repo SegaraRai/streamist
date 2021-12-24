@@ -60,16 +60,14 @@ import { maxHistorySize, minQueueSize } from '~/config/queue';
     リピート用のキューからセットリストの要素数分をキューに移動し、リピート用のキューを補充する
 */
 
-type TrackBase = { readonly id: string };
+export type TrackBase = { readonly id: string };
 
 /**
  * トラックリストの管理を行うクラス \
  * 与えられたセットリストと、リピートやシャッフルの設定から、再生すべきトラックを提供する \
  * スキップや前の曲に戻るといった操作も提供する
  */
-export class TrackProvider<
-  T extends TrackBase = TrackBase
-> extends EventTarget {
+export class TrackProvider<T extends TrackBase> extends EventTarget {
   /**
    * 現在のリピートの設定 \
    * 内部用 \
@@ -102,14 +100,18 @@ export class TrackProvider<
    * 再生キュー \
    * 各要素は必ず`_setList$$q`の要素の1つ（同一の参照）である \
    * 内部用 \
-   * 外部からは`queue$$q`のgetterを用いる（ただしそれで取得されるのは実際には`_queueCache$$q`）
+   * 外部からは`queue$$q`のgetterを用いる（ただしそれで取得されるのは実際には`_queueCache$$q`） \
+   * `_queue$$q`に`_repeatQueue$$q`を結合したものが`_queueCache$$q`になる \
+   * リピートを勘案しない、セットリストの残りトラックのみで構成される
+   * （シャッフル有効時はセットリストから現在のトラックのみを除いてシャッフルしたもので、シャッフル無効時はセットリストから現在のトラック以前を除いたもの） \
    */
   private _queue$$q: T[] = [];
 
   /**
    * リピート用の再生キュー \
    * リピートが有効なときのみ要素を入れる \
-   * 要素数は、`_setList$$q`の要素数の倍数で、かつ`minQueueSize`以上になるようにする \
+   * `_queue$$q`に`_repeatQueue$$q`を結合したものが`_queueCache$$q`になる \
+   * 要素数は`_setList$$q`の要素数の倍数でかつ`minQueueSize`以上になるようにする \
    * 各要素は必ず`_setList$$q`の要素の1つ（同一の参照）である \
    * 内部用
    */
@@ -135,6 +137,8 @@ export class TrackProvider<
    * 各要素は必ず`_setList$$q`の要素の1つ（同一の参照）である \
    * 内部用 \
    * 外部からは`queue$$q`のgetterを用いる
+   * こちらはリピートの設定に応じてトラックが補充されているものになる（すなわち、`[..._queue$$q, ..._repeatQueue$$q]`） \
+   * リピートが無効な場合は`_queue$$q`と同じ内容
    */
   private _queueCache$$q: T[] = [];
 
@@ -158,22 +162,15 @@ export class TrackProvider<
    * `'trackChange'`イベントを発火する \
    * 必ずしも本当に変更がされているとは限らない
    */
-  private emitTrackChangeEvent$$q(): void {
+  protected emitTrackChangeEvent$$q(): void {
     this.dispatchEvent(new Event('trackChange'));
   }
 
   /**
    * `'repeatChange'`イベントを発火する
    */
-  private emitRepeatChangeEvent$$q(): void {
+  protected emitRepeatChangeEvent$$q(): void {
     this.dispatchEvent(new Event('repeatChange'));
-  }
-
-  /**
-   * `'shuffleChange'`イベントを発火する
-   */
-  private emitShuffleChangeEvent$$q(): void {
-    this.dispatchEvent(new Event('shuffleChange'));
   }
 
   /**
@@ -189,6 +186,7 @@ export class TrackProvider<
       if (this._shuffle$$q) {
         shuffleArray(array);
         // セットリストの要素数が2以上ならばトラックが連続しないようにする
+        // これいる？
         if (
           array.length > 1 &&
           this._repeatQueue$$q.length > 0 &&
@@ -337,11 +335,10 @@ export class TrackProvider<
 
   /**
    * 次のトラックに進む（スキップ） \
-   * 自動で次のトラックに遷移するときの処理を行う場合は、`next$$q`を用いること \
-   * （リピートの設定が「1曲のみ」に指定されている場合に、その設定を変更して遷移するか、スキップせずに同じ曲のままでいるかが異なる）
+   * オーバーライド対策
    * @param n スキップする曲数
    */
-  skipNext$$q(n = 1): void {
+  private _skipNext$$q(n = 1): void {
     // nを正規化し、値を検証する
     n = Math.round(n);
 
@@ -357,7 +354,7 @@ export class TrackProvider<
       this.repeat$$q = 'all';
       // 変更を通知
       this.emitRepeatChangeEvent$$q();
-      this.skipNext$$q(n);
+      this._skipNext$$q(n);
       return;
     }
 
@@ -379,9 +376,7 @@ export class TrackProvider<
       // トラックを履歴に追加
       if (this._currentTrack$$q) {
         this._history$$q.push(this._currentTrack$$q);
-        if (this._history$$q.length > maxHistorySize) {
-          this._history$$q = this._history$$q.slice(-maxHistorySize);
-        }
+        this._history$$q.splice(0, this._history$$q.length - maxHistorySize);
       }
 
       // キューからトラックを1つ取り出す
@@ -394,11 +389,26 @@ export class TrackProvider<
   }
 
   /**
-   * 前のトラックに戻る
+   * 次のトラックに進む（スキップ） \
+   * 自動で次のトラックに遷移するときの処理を行う場合は、`next$$q`を用いること \
+   * （リピートの設定が「1曲のみ」に指定されている場合に、その設定を変更して遷移するか、スキップせずに同じ曲のままでいるかが異なる）
    * @param n スキップする曲数
    */
-  skipPrevious$$q(n = 1): void {
+  skipNext$$q(n = 1): void {
+    this._skipNext$$q(n);
+  }
+
+  /**
+   * 前のトラックに戻る \
+   * オーバーライド対策
+   * @param n スキップする曲数
+   */
+  private _skipPrevious$$q(n = 1): void {
+    // nを正規化し、値を検証する
     n = Math.round(n);
+
+    // 値が不正な場合は何もしない
+    // `n !== 0`の場合は例外を投げても良いが
     if (!isFinite(n) || n < 1) {
       return;
     }
@@ -409,10 +419,11 @@ export class TrackProvider<
       this.repeat$$q = 'all';
       // 変更を通知
       this.emitRepeatChangeEvent$$q();
-      this.skipPrevious$$q();
+      this._skipPrevious$$q(n);
       return;
     }
 
+    // 指定された回数だけスキップ処理を行う
     for (let i = 0; i < n; i++) {
       // 履歴がない場合は履歴を生成する
       // リピートが有効な場合はシャッフルの設定によらず生成する
@@ -486,6 +497,14 @@ export class TrackProvider<
   }
 
   /**
+   * 前のトラックに戻る
+   * @param n スキップする曲数
+   */
+  skipPrevious$$q(n = 1): void {
+    this._skipPrevious$$q(n);
+  }
+
+  /**
    * 次のトラックに進む（自動再生） \
    * ユーザーによる「次のトラックに進む」を行う場合は、`skipNext$$q`を用いること \
    * （リピートの設定が「1曲のみ」に指定されている場合に、スキップせずに同じ曲のままでいるか、その設定を変更して遷移するかが異なる） \
@@ -500,6 +519,7 @@ export class TrackProvider<
       return;
     }
 
+    // あえてオーバーライドされているかもしれない方を呼び出す
     this.skipNext$$q();
   }
 
@@ -558,7 +578,8 @@ export class TrackProvider<
 
 // `TrackProvider`の`addEventListener`メソッドのオーバーロードの定義
 // class内には実装を記述しない限り記述できない
-export interface TrackProvider {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export interface TrackProvider<T extends TrackBase> {
   /**
    * `currentTrack$$q`が変更された際のイベント
    */

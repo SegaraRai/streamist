@@ -1,16 +1,3 @@
-button:
-  about: About
-  back: Back
-  go: GO
-  home: Home
-  toggle_dark: Toggle dark mode
-  toggle_langs: Change languages
-intro:
-  desc: Opinionated Vite Starter Template
-  dynamic-route: Demo of dynamic route
-  hi: Hi, {name}!
-  aka: Also known as
-  whats-your-name: What's your name?
 not-found: Not found
 sidebar:
   Home: Home
@@ -26,7 +13,7 @@ sidebar:
 header:
   Search: Search
 queue:
-  PlayQueue: Play Queue
+  PlayQueue: Queue
 album:
   Play: Play
   Shuffle: Shuffle
@@ -47,3 +34,28 @@ trackList:
   Title: Title
 tracks:
   Tracks: Tracks
+title:
+  Home: 'Streamist'
+  Login: "Login {'|'} Streamist"
+  Logout: "Logout {'|'} Streamist"
+  Albums: "Albums {'|'} Streamist"
+  Album: "{0} by {1} {'|'} Streamist"
+  AlbumInit: "Album by {1} {'|'} Streamist"
+  Artists: "Artists {'|'} Streamist"
+  Artist: "{0} {'|'} Streamist"
+  ArtistInit: "Artist {'|'} Streamist"
+  Tracks: "Tracks {'|'} Streamist"
+  Playlists: "Playlists {'|'} Streamist"
+  Playlist: "{0} {'|'} Streamist"
+  PlaylistInit: "Playlist {'|'} Streamist"
+track-list-dropdown:
+  Play: Play
+  Pause: Pause
+  AddToPlayNextQueue: Add to queue
+  RemoveFromPlayNextQueue: Remove from queue
+  AddToQueue: Add to queue
+  RemoveFromQueue: Remove from queue
+  AddToPlaylist: Add to playlist
+  RemoveFromPlaylist: Remove from playlist
+  Edit: Edit
+  Delete: Delete

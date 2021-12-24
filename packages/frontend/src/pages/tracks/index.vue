@@ -6,23 +6,23 @@ import type { TrackForPlayback } from '~/types/playback';
 
 export default defineComponent({
   setup() {
-    useHead({
-      title: 'Tracks | Streamist',
-    });
-
     const { t } = useI18n();
     const display = useDisplay();
     const playbackStore = usePlaybackStore();
 
+    useHead({
+      title: t('title.Tracks'),
+    });
+
     const tracks = ref<TrackForPlayback[] | undefined>();
 
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q.value();
+      playbackStore.setDefaultSetList$$q();
     });
 
     fetchTracksForPlayback().then((response) => {
       tracks.value = response;
-      playbackStore.setDefaultSetList$$q.value(response);
+      playbackStore.setDefaultSetList$$q(response);
     });
 
     return {

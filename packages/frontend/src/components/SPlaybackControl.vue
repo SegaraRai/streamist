@@ -86,10 +86,10 @@ export default defineComponent({
         playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
       },
       skipNext$$q: (): void => {
-        playbackStore.skipNext$$q.value();
+        playbackStore.skipNext$$q();
       },
       skipPrevious$$q: (): void => {
-        playbackStore.skipPrevious$$q.value();
+        playbackStore.skipPrevious$$q();
       },
       preventXButton$$q: (event: MouseEvent): void => {
         if (event.button === 3 || event.button === 4) {
@@ -101,12 +101,12 @@ export default defineComponent({
         switch (event.button) {
           // browser back
           case 3:
-            playbackStore.skipPrevious$$q.value();
+            playbackStore.skipPrevious$$q();
             break;
 
           // browser forward
           case 4:
-            playbackStore.skipNext$$q.value();
+            playbackStore.skipNext$$q();
             break;
         }
       },

@@ -19,19 +19,18 @@ interface Item {
 
 export default defineComponent({
   setup() {
-    useHead({
-      title: 'Playlists | Streamist',
-    });
-
     const { t } = useI18n();
+    const themeStore = useThemeStore();
     const playbackStore = usePlaybackStore();
 
-    const themeStore = useThemeStore();
+    useHead({
+      title: t('title.Playlists'),
+    });
 
     const playlists = ref<PlaylistForPlayback[]>([]);
 
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q.value();
+      playbackStore.setDefaultSetList$$q();
     });
 
     const refreshPlaylists = async () => {
@@ -39,7 +38,7 @@ export default defineComponent({
       const responseSetList = response.flatMap((playlist) => playlist.tracks);
 
       playlists.value = response;
-      playbackStore.setDefaultSetList$$q.value(responseSetList);
+      playbackStore.setDefaultSetList$$q(responseSetList);
     };
     refreshPlaylists();
 

@@ -44,12 +44,12 @@ export default defineComponent({
         switch (event.button) {
           // browser back
           case 3:
-            playbackStore.skipPrevious$$q.value();
+            playbackStore.skipPrevious$$q();
             break;
 
           // browser forward
           case 4:
-            playbackStore.skipNext$$q.value();
+            playbackStore.skipNext$$q();
             break;
         }
       },

@@ -1,0 +1,36 @@
+.s-lazyload-background {
+  background-color: #ddd;
+  background-image: linear-gradient(100deg, #fff0 30%, #fffb, #fff0 70%);
+  background-position: 200% 0;
+  background-size: 400% 400%;
+  animation: s-skeleton-animation 1.9s linear infinite;
+  visibility: visible;
+}
+
+.s-lazyload-image.s-lazyloaded + .s-lazyload-background,
+.s-lazyload-image.lazyloaded:not(.s-lazyloading) + .s-lazyload-background {
+  animation: none;
+  visibility: hidden;
+  transition: visibility 0.3s;
+}
+
+.s-lazyload-image.lazyload,
+.s-lazyload-image.lazyloading,
+.s-lazyload-image.s-lazyloading {
+  opacity: 0;
+}
+
+.s-lazyload-image.lazyloaded:not(.s-lazyloading) {
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+
+@keyframes s-skeleton-animation {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}

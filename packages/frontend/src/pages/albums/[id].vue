@@ -1,7 +1,8 @@
 <script lang="ts">
-import { fetchAlbumForPlaybackWithTracks } from '~/resources/album';
+import { compareTrack } from '$shared/sort';
+import { db } from '~/db';
+import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
-import { ResourceAlbum, ResourceTrack } from '$/types';
 
 export default defineComponent({
   props: {
@@ -11,51 +12,52 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const headTitleRef = ref('Album | Streamist');
+    const { t } = useI18n();
+    const playbackStore = usePlaybackStore();
+
+    const headTitleRef = ref(t('title.AlbumInit'));
     useHead({
       title: headTitleRef,
     });
 
-    const playbackStore = usePlaybackStore();
-
-    const albumId = computed(() => props.id);
-
-    const album = ref<ResourceAlbum | undefined>();
-    const setList = ref<readonly ResourceTrack[] | undefined>();
-
-    const loading = computed(() => album.value?.id !== albumId.value);
-
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q.value();
+      playbackStore.setDefaultSetList$$q();
     });
 
-    watch(
-      albumId,
-      (newAlbumId, _oldValue) => {
-        fetchAlbumForPlaybackWithTracks(newAlbumId).then((newAlbum) => {
-          if (newAlbum.id !== albumId.value) {
-            return;
-          }
-
-          headTitleRef.value = `${newAlbum.title} by ${newAlbum.artist.name} | Streamist`;
-
-          const responseSetList = newAlbum.tracks;
-
-          album.value = newAlbum;
-          setList.value = responseSetList;
-          playbackStore.setDefaultSetList$$q.value(responseSetList);
-        });
+    const propAlbumIdRef = computed(() => props.id);
+    const { value } = useLiveQuery(
+      async () => {
+        const albumId = propAlbumIdRef.value;
+        const album = await db.albums.get(albumId);
+        if (!album) {
+          throw new Error(`Album ${albumId} not found`);
+        }
+        const artist = await db.artists.get(album.artistId);
+        if (!artist) {
+          throw new Error(`Artist ${album.artistId} not found`);
+        }
+        const tracks = await db.tracks.where({ albumId }).toArray();
+        if (albumId !== propAlbumIdRef.value) {
+          throw new Error('operation aborted');
+        }
+        tracks.sort(compareTrack);
+        const setList = tracks;
+        playbackStore.setDefaultSetList$$q(setList);
+        tracks.sort(compareTrack);
+        headTitleRef.value = t('title.Album', [album.title, artist.name]);
+        return {
+          album,
+          artist,
+          tracks,
+          setList,
+        };
       },
-      {
-        immediate: true,
-      }
+      [propAlbumIdRef],
+      true
     );
 
     return {
-      album$$q: album,
-      albumId$$q: albumId,
-      loading$$q: loading,
-      setList$$q: setList,
+      value$$q: value,
     };
   },
 });
@@ -63,19 +65,12 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-8 px-6">
-    <template v-if="album$$q">
+    <template v-if="value$$q">
       <s-album
-        :album="album$$q"
-        :loading="loading$$q"
-        :link-excludes="[albumId$$q]"
-        :set-list="setList$$q"
+        :album="value$$q.album"
+        :link-excludes="[id]"
+        :set-list="value$$q.setList"
       />
     </template>
   </v-container>
 </template>
-
-<style scoped>
-.album-title {
-  font-weight: 600;
-}
-</style>

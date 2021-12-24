@@ -11,7 +11,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <template v-if="disabled || to == null">
+  <template v-if="disabled || !to">
     <span>
       <slot></slot>
     </span>

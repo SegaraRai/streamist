@@ -1,0 +1,17 @@
+/* stylelint-disable-next-line selector-class-pattern */
+.s-v-dialog.v-dialog:not(.v-dialog--fullscreen) .v-overlay__content {
+  @apply max-w-full;
+  @apply max-h-full;
+  @apply w-2xl;
+  @apply px-8;
+}
+
+/* for content */
+.s-v-theme-background {
+  background: var(--v-theme-background);
+}
+
+/* for headers, footers, sidebars, etc. */
+.s-v-theme-surface {
+  background: var(--v-theme-surface);
+}

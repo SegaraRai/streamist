@@ -52,5 +52,5 @@ export default defineComponent({
 </script>
 
 <template>
-  <s-nullable-image class="select-none" :image="fetched && image" />
+  <s-album-image-x :image="fetched && image" />
 </template>

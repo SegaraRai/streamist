@@ -9,6 +9,7 @@ module.exports = defineConfig({
   },
   extends: ['@nuxtjs/eslint-config-typescript', 'prettier'],
   rules: {
+    'vue/no-v-model-argument': 'off',
     'vue/multi-word-component-names': 'off',
     'vue/no-multiple-template-root': 'off',
     'vue/no-v-for-template-key': 'off',

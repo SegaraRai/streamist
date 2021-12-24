@@ -1,5 +1,5 @@
+import { compareTrack } from '$shared/sort';
 import { db } from '~/db';
-import { compareTrack } from '~/logic/sort';
 import type { TrackForPlayback } from '~/types/playback';
 import { fetchAlbumsForPlaybackWithTracks } from './album';
 import { fetchAlbumImages } from './utils';
