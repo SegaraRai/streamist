@@ -23,7 +23,10 @@ export default defineComponent({
       default: undefined,
     },
   },
-  setup(props) {
+  emits: {
+    trackLoad: (_tracks: readonly ResourceTrack[]) => true,
+  },
+  setup(props, { emit }) {
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
 
@@ -50,6 +53,10 @@ export default defineComponent({
         }
         const tracks = await db.tracks.where({ albumId: album.id }).toArray();
         tracks.sort(compareTrack);
+        if (propAlbumRef.value !== propAlbum) {
+          throw new Error('operation aborted');
+        }
+        emit('trackLoad', tracks);
         return {
           album,
           artist,

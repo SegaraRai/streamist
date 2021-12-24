@@ -4,9 +4,6 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
-    IMdiAccountPlus: typeof import('~icons/mdi/account-plus')['default']
-    IMdiCloudUpload: typeof import('~icons/mdi/cloud-upload')['default']
-    NAutoComplete: typeof import('naive-ui')['NAutoComplete']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NDropdown: typeof import('naive-ui')['NDropdown']
@@ -14,7 +11,6 @@ declare module 'vue' {
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
-    NTooltip: typeof import('naive-ui')['NTooltip']
     SAlbum: typeof import('./components/SAlbum.vue')['default']
     SAlbumEditDialog: typeof import('./components/SAlbumEditDialog.vue')['default']
     SAlbumImage: typeof import('./components/SAlbumImage.vue')['default']
@@ -23,7 +19,6 @@ declare module 'vue' {
     SArtistImage: typeof import('./components/SArtistImage.vue')['default']
     SArtistImageX: typeof import('./components/SArtistImageX.vue')['default']
     SConditionalLink: typeof import('./components/SConditionalLink.vue')['default']
-    SEllipsisTooltip: typeof import('./components/SEllipsisTooltip.vue')['default']
     SImageManager: typeof import('./components/SImageManager.vue')['default']
     SMobilePlaybackControl: typeof import('./components/SMobilePlaybackControl.vue')['default']
     SNoImage: typeof import('./components/SNoImage.vue')['default']

@@ -38,7 +38,7 @@ export default defineComponent({
         return image;
       }
 
-      const tracks = await db.tracks.bulkGet(playlist.trackIds);
+      const tracks = await db.tracks.bulkGet(playlist.trackIds as string[]);
       const albumIds = Array.from(
         new Set(tracks.map((track) => track!.albumId))
       );

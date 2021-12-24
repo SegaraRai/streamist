@@ -54,6 +54,9 @@ export default defineComponent({
       if (!imageIds$$q.value) {
         return;
       }
+      if (imageIds$$q.value.length === 0) {
+        return [];
+      }
       return await db.images.bulkGet([...imageIds$$q.value]);
     }, [imageIds$$q]);
 

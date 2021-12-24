@@ -1,12 +1,3 @@
-<script lang="ts" setup>
-import { useDisplay } from 'vuetify';
-import { useThemeStore } from '~/stores/theme';
-
-const { t } = useI18n();
-const theme = useThemeStore();
-const display = useDisplay();
-</script>
-
 <template>
   <v-app theme="dark">
     <v-main>

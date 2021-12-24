@@ -2,19 +2,21 @@
 import { syncDB } from '~/db/sync';
 import apiInstance from '~/logic/api';
 import { calcTracksTotalDuration, formatTotalDuration } from '~/logic/duration';
-import { fetchPlaylistsForPlayback } from '~/resources/playlist';
+import { useAllPlaylists, useAllTrackMap } from '~/logic/useDB';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
-import type { PlaylistForPlayback } from '~/types/playback';
+import type { ResourcePlaylist, ResourceTrack } from '$/types';
 
 interface Item {
-  id$$q: string;
-  title$$q: string;
-  description$$q: string;
-  trackCount$$q: number;
-  duration$$q: number;
-  formattedDuration$$q: string;
-  isLast$$q: boolean;
+  readonly playlist$$q: ResourcePlaylist;
+  readonly tracks$$q: readonly ResourceTrack[];
+  readonly id$$q: string;
+  readonly title$$q: string;
+  readonly description$$q: string;
+  readonly trackCount$$q: number;
+  readonly duration$$q: number;
+  readonly formattedDuration$$q: string;
+  readonly isLast$$q: boolean;
 }
 
 export default defineComponent({
@@ -27,32 +29,32 @@ export default defineComponent({
       title: t('title.Playlists'),
     });
 
-    const playlists = ref<PlaylistForPlayback[]>([]);
-
     onBeforeUnmount(() => {
       playbackStore.setDefaultSetList$$q();
     });
 
-    const refreshPlaylists = async () => {
-      const response = await fetchPlaylistsForPlayback();
-      const responseSetList = response.flatMap((playlist) => playlist.tracks);
+    const allPlaylists = useAllPlaylists();
+    const allTrackMap = useAllTrackMap();
 
-      playlists.value = response;
-      playbackStore.setDefaultSetList$$q(responseSetList);
-    };
-    refreshPlaylists();
+    const items = asyncComputed(async () => {
+      const playlists = await allPlaylists.valueAsync.value;
+      const trackMap = await allTrackMap.valueAsync.value;
 
-    const items = computed(() => {
-      return playlists.value.map((playlist, index): Item => {
-        const duration = calcTracksTotalDuration(playlist.tracks);
+      return playlists.map((playlist, index, arr): Item => {
+        const tracks = playlist.trackIds.map(
+          (trackId) => trackMap.get(trackId)!
+        );
+        const duration = calcTracksTotalDuration(tracks);
         return {
+          playlist$$q: playlist,
+          tracks$$q: tracks,
           id$$q: playlist.id,
           title$$q: playlist.title,
           description$$q: playlist.notes,
-          trackCount$$q: playlist.tracks.length,
+          trackCount$$q: tracks.length,
           duration$$q: duration,
           formattedDuration$$q: formatTotalDuration(duration),
-          isLast$$q: index === playlists.value.length - 1,
+          isLast$$q: index === arr.length - 1,
         };
       });
     });
@@ -89,7 +91,6 @@ export default defineComponent({
             },
           })
           .then(() => syncDB())
-          .then(() => refreshPlaylists())
           .then(() => {
             createPlaylistDialog.value = false;
           })
@@ -167,8 +168,13 @@ export default defineComponent({
       <template v-if="items$$q.length">
         <v-list flat>
           <template v-for="(item, _index) in items$$q" :key="_index">
-            <v-list-item :to="`/playlists/${item.id$$q}`">
-              <v-list-item-header>
+            <v-list-item :to="`/playlists/${item.id$$q}`" class="flex">
+              <s-playlist-image
+                class="flex-none w-9 h-9"
+                size="36"
+                :playlist="item.playlist$$q"
+              />
+              <v-list-item-header class="flex-1">
                 <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
                 <v-list-item-subtitle>
                   {{ t('playlists.n_tracks', item.trackCount$$q) }},

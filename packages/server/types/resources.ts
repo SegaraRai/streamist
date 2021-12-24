@@ -16,64 +16,64 @@ import type {
   User,
 } from '$prisma/client';
 
-export interface ResourceAlbum extends Album {
-  imageIds: string[];
+export interface ResourceAlbum extends Readonly<Album> {
+  readonly imageIds: readonly string[];
 }
 
-export interface ResourceAlbumCoArtist extends AlbumCoArtist {}
+export interface ResourceAlbumCoArtist extends Readonly<AlbumCoArtist> {}
 
-export interface ResourceArtist extends Artist {
-  imageIds: string[];
+export interface ResourceArtist extends Readonly<Artist> {
+  readonly imageIds: readonly string[];
 }
 
-export interface ResourceImage extends Image {
-  files: ImageFile[];
+export interface ResourceImage extends Readonly<Image> {
+  readonly files: readonly Readonly<ImageFile>[];
 }
 
-export interface ResourcePlaylist extends Playlist {
-  imageIds: string[];
-  trackIds: string[];
+export interface ResourcePlaylist extends Readonly<Playlist> {
+  readonly imageIds: readonly string[];
+  readonly trackIds: readonly string[];
 }
 
-export interface ResourceSource extends Source {}
+export interface ResourceSource extends Readonly<Source> {}
 
 // sourceFileId単体で索引できるようにするためにSourceの中に入れない
-export interface ResourceSourceFile extends SourceFile {}
+export interface ResourceSourceFile extends Readonly<SourceFile> {}
 
-export interface ResourceTag extends Tag {}
+export interface ResourceTag extends Readonly<Tag> {}
 
-export interface ResourceTrack extends Track {
-  files: TrackFile[];
+export interface ResourceTrack extends Readonly<Track> {
+  readonly files: readonly Readonly<TrackFile>[];
 }
 
-export interface ResourceTrackCoArtist extends TrackCoArtist {}
+export interface ResourceTrackCoArtist extends Readonly<TrackCoArtist> {}
 
-export interface ResourceUser extends Omit<User, ''> {}
+export interface ResourceUser extends Omit<Readonly<User>, ''> {}
 
-export type ResourceDeletion = Omit<Deletion, 'entityType'> & {
-  entityType: DeletionEntityType;
+export type ResourceDeletion = Omit<Readonly<Deletion>, 'entityType'> & {
+  readonly entityType: DeletionEntityType;
 };
 
 export interface ResourcesUpdated {
-  updated: true;
-  timestamp: number;
-  updatedAt: number;
-  user: ResourceUser;
-  albumCoArtists: ResourceAlbumCoArtist[];
-  albums: ResourceAlbum[];
-  artists: ResourceArtist[];
-  images: ResourceImage[];
-  playlists: ResourcePlaylist[];
-  sourceFiles: ResourceSourceFile[];
-  sources: ResourceSource[];
-  tags: ResourceTag[];
-  trackCoArtists: ResourceTrackCoArtist[];
-  tracks: ResourceTrack[];
-  deletions: ResourceDeletion[];
+  readonly updated: true;
+  readonly timestamp: number;
+  readonly updatedAt: number;
+  readonly user: ResourceUser;
+  readonly albumCoArtists: readonly ResourceAlbumCoArtist[];
+  readonly albums: readonly ResourceAlbum[];
+  readonly artists: readonly ResourceArtist[];
+  readonly images: readonly ResourceImage[];
+  readonly playlists: readonly ResourcePlaylist[];
+  readonly sourceFiles: readonly ResourceSourceFile[];
+  readonly sources: readonly ResourceSource[];
+  readonly tags: readonly ResourceTag[];
+  readonly trackCoArtists: readonly ResourceTrackCoArtist[];
+  readonly tracks: readonly ResourceTrack[];
+  readonly deletions: readonly ResourceDeletion[];
 }
 
 export interface ResourcesNotUpdated {
-  updated: false;
-  timestamp: number;
-  updatedAt: number;
+  readonly updated: false;
+  readonly timestamp: number;
+  readonly updatedAt: number;
 }

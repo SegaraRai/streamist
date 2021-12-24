@@ -94,6 +94,9 @@ export default defineComponent({
       if (!propTracks) {
         return;
       }
+      if (propTracks.length === 0) {
+        return [];
+      }
       const tracks = (
         typeof propTracks[0] === 'string'
           ? await db.tracks.bulkGet([...(propTracks as readonly string[])])

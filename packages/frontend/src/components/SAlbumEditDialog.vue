@@ -1,8 +1,6 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import { useDisplay } from 'vuetify';
-import { db } from '~/db';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 import type { ResourceAlbum } from '$/types';
 
 export default defineComponent({

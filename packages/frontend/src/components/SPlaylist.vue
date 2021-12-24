@@ -1,10 +1,8 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { compareTrack } from '$shared/sort';
 import { db } from '~/db';
 import { formatTracksTotalDuration } from '~/logic/duration';
 import { useLiveQuery } from '~/logic/useLiveQuery';
-import { calcTrackListHeight } from '~/logic/util';
 import { usePlaybackStore } from '~/stores/playback';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 
@@ -24,7 +22,10 @@ export default defineComponent({
       default: undefined,
     },
   },
-  setup(props) {
+  emits: {
+    trackLoad: (_tracks: readonly ResourceTrack[]) => true,
+  },
+  setup(props, { emit }) {
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
 
@@ -44,8 +45,12 @@ export default defineComponent({
           throw new Error(`Playlist ${propPlaylist} not found`);
         }
         const tracks = (await db.tracks.bulkGet(
-          playlist.trackIds
+          playlist.trackIds as string[]
         )) as readonly ResourceTrack[];
+        if (propPlaylistRef.value !== propPlaylist) {
+          throw new Error('operation aborted');
+        }
+        emit('trackLoad', tracks);
         return {
           playlist,
           tracks,

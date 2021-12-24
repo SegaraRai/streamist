@@ -26,6 +26,8 @@ export function useLiveQuery<T>(
     if (subscription) {
       subscription.unsubscribe();
 
+      console.log('useLiveQuery: unsubscribed', querier, watchSources, initial);
+
       if (initial) {
         initialReject(new Error('operation aborted'));
       }
@@ -82,5 +84,33 @@ export function useLiveQuery<T>(
     value,
     valueAsync,
     valueExists,
+  };
+}
+
+export function transformObservableComputed<T, U>(
+  itemsRef: ObservableComputed<T>,
+  transform: (item: T) => U,
+  eager = false
+): ObservableComputed<U> {
+  const comp = eager ? eagerComputed : computed;
+
+  let transformCache: [T, U] | undefined;
+  const memoizedTransform = (item: T): U => {
+    if (!transformCache || transformCache[0] !== item) {
+      transformCache = [item, transform(item)];
+    }
+    return transformCache[1];
+  };
+
+  return {
+    value: comp((): U | undefined =>
+      itemsRef.value.value !== undefined
+        ? memoizedTransform(itemsRef.value.value)
+        : undefined
+    ),
+    valueAsync: comp(
+      (): Promise<U> => itemsRef.valueAsync.value.then(memoizedTransform)
+    ),
+    valueExists: itemsRef.valueExists,
   };
 }

@@ -5,12 +5,18 @@ import {
   compareTrack,
 } from '$shared/sort';
 import { db } from '~/db';
-import type { ResourceImage } from '$/types';
-import { useLiveQuery } from './useLiveQuery';
+import type {
+  ResourceAlbum,
+  ResourceArtist,
+  ResourceImage,
+  ResourcePlaylist,
+  ResourceTrack,
+} from '$/types';
+import { transformObservableComputed, useLiveQuery } from './useLiveQuery';
 
 function _useAllAlbums() {
   console.log('useDB: _useAllAlbums called');
-  return useLiveQuery(async () => {
+  return useLiveQuery(async (): Promise<readonly ResourceAlbum[]> => {
     console.log('useDB: _useAllAlbums: liveQuery callback called');
     return (await db.albums.toArray()).sort(compareAlbum);
   });
@@ -18,7 +24,7 @@ function _useAllAlbums() {
 
 function _useAllArtists() {
   console.log('useDB: _useAllArtists called');
-  return useLiveQuery(async () => {
+  return useLiveQuery(async (): Promise<readonly ResourceArtist[]> => {
     console.log('useDB: _useAllArtists: liveQuery callback called');
     return (await db.artists.toArray()).sort(compareArtist);
   });
@@ -26,7 +32,7 @@ function _useAllArtists() {
 
 function _useAllPlaylists() {
   console.log('useDB: _useAllPlaylists called');
-  return useLiveQuery(async () => {
+  return useLiveQuery(async (): Promise<readonly ResourcePlaylist[]> => {
     console.log('useDB: _useAllPlaylists: liveQuery callback called');
     return (await db.playlists.toArray()).sort(comparePlaylist);
   });
@@ -34,24 +40,44 @@ function _useAllPlaylists() {
 
 function _useAllTracks() {
   console.log('useDB: _useAllTracks called');
-  return useLiveQuery(async () => {
+  return useLiveQuery(async (): Promise<readonly ResourceTrack[]> => {
     console.log('useDB: _useAllTracks: liveQuery callback called');
     return (await db.tracks.toArray()).sort(compareTrack);
   });
 }
 
-function _useAllImageMap() {
+function _useAllImages() {
   console.log('useDB: _useAllImageMap called');
-  return useLiveQuery(async (): Promise<ReadonlyMap<string, ResourceImage>> => {
+  return useLiveQuery(async (): Promise<readonly ResourceImage[]> => {
     console.log('useDB: _useAllImageMap: liveQuery callback called');
-    return new Map(
-      (await db.images.toArray()).map((image) => [image.id, image])
-    );
+    return await db.images.toArray();
   });
+}
+
+function _createMap<T extends { readonly id: string }>(
+  items: readonly T[]
+): ReadonlyMap<string, T> {
+  return new Map<string, T>(items.map((item): [string, T] => [item.id, item]));
 }
 
 export const useAllAlbums = createSharedComposable(_useAllAlbums);
 export const useAllArtists = createSharedComposable(_useAllArtists);
+export const useAllImages = createSharedComposable(_useAllImages);
 export const useAllPlaylists = createSharedComposable(_useAllPlaylists);
 export const useAllTracks = createSharedComposable(_useAllTracks);
-export const useAllImageMap = createSharedComposable(_useAllImageMap);
+
+export const useAllAlbumMap = createSharedComposable(() =>
+  transformObservableComputed(useAllAlbums(), _createMap)
+);
+export const useAllArtistMap = createSharedComposable(() =>
+  transformObservableComputed(useAllArtists(), _createMap)
+);
+export const useAllImageMap = createSharedComposable(() =>
+  transformObservableComputed(useAllImages(), _createMap)
+);
+export const useAllPlaylistMap = createSharedComposable(() =>
+  transformObservableComputed(useAllPlaylists(), _createMap)
+);
+export const useAllTrackMap = createSharedComposable(() =>
+  transformObservableComputed(useAllTracks(), _createMap)
+);
