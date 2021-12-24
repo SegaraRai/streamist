@@ -1,12 +1,13 @@
 import type { ComputedRef, Ref } from 'vue';
-import type { ResourceArtist } from '$/types';
 import { useAllArtists } from './useDB';
 
-function createSearch<T, U extends { key: string; item: T }>(
-  items: Readonly<Ref<readonly U[]>>
+type SearchItem<T> = { readonly key: string; readonly item: T };
+
+function createSearch<T>(
+  items: Readonly<Ref<readonly SearchItem<T>[]>>
 ): ComputedRef<(term: string) => T[]> {
   return computed((): ((term: string) => T[]) => {
-    const index = items.value.map((item: U) => ({
+    const index = items.value.map((item: SearchItem<T>) => ({
       key: item.key.toLowerCase(),
       item: item.item,
     }));
@@ -23,7 +24,7 @@ function _useArtistSearch() {
   const artists = useAllArtists();
   const items = computed(
     () =>
-      artists.value.value?.map((artist: ResourceArtist) => ({
+      artists.value.value?.map((artist) => ({
         key: artist.name,
         item: artist,
       })) || []

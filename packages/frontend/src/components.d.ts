@@ -4,6 +4,7 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    IMdiCloudUpload: typeof import('~icons/mdi/cloud-upload')['default']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NDropdown: typeof import('naive-ui')['NDropdown']

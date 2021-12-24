@@ -37,23 +37,23 @@ export default defineComponent({
     const { value } = useLiveQuery(
       async () => {
         const propPlaylist = propPlaylistRef.value;
-        const playlist =
+        const playlist$$q =
           typeof propPlaylist === 'string'
             ? await db.playlists.get(propPlaylist)
             : propPlaylist;
-        if (!playlist) {
+        if (!playlist$$q) {
           throw new Error(`Playlist ${propPlaylist} not found`);
         }
-        const tracks = (await db.tracks.bulkGet(
-          playlist.trackIds as string[]
+        const tracks$$q = (await db.tracks.bulkGet(
+          playlist$$q.trackIds as string[]
         )) as readonly ResourceTrack[];
         if (propPlaylistRef.value !== propPlaylist) {
           throw new Error('operation aborted');
         }
-        emit('trackLoad', tracks);
+        emit('trackLoad', tracks$$q);
         return {
-          playlist,
-          tracks,
+          playlist$$q,
+          tracks$$q,
         };
       },
       [propPlaylistRef],
@@ -61,7 +61,7 @@ export default defineComponent({
     );
 
     const duration = eagerComputed(
-      () => value.value?.tracks && formatTracksTotalDuration(value.value.tracks)
+      () => value.value && formatTracksTotalDuration(value.value.tracks$$q)
     );
 
     return {
@@ -71,13 +71,13 @@ export default defineComponent({
       value$$q: value,
       duration$$q: duration,
       play$$q: (shuffle?: boolean): void => {
-        if (!value.value?.tracks.length) {
+        if (!value.value?.tracks$$q.length) {
           return;
         }
         if (shuffle !== undefined) {
           playbackStore.shuffle$$q.value = shuffle;
         }
-        playbackStore.setSetListAndPlayAuto$$q(value.value.tracks);
+        playbackStore.setSetListAndPlayAuto$$q(value.value.tracks$$q);
       },
     };
   },
@@ -97,13 +97,13 @@ export default defineComponent({
             :image-ids="imageIds$$q"
           >
             <template #title>
-              Artwork of Playlist {{ value$$q.playlist.title }}
+              Artwork of Playlist {{ value$$q.playlist$$q.title }}
             </template>
             <template #default>
               <s-playlist-image
                 class="w-50 h-50"
                 size="200"
-                :playlist="value$$q.playlist"
+                :playlist="value$$q.playlist$$q"
                 @image-ids="imageIds$$q = $event"
               />
             </template>
@@ -114,7 +114,7 @@ export default defineComponent({
             <s-playlist-image
               class="w-50 h-50"
               size="200"
-              :playlist="value$$q.playlist"
+              :playlist="value$$q.playlist$$q"
               @image-ids="imageIds$$q = $event"
             />
           </router-link>
@@ -126,18 +126,27 @@ export default defineComponent({
             :to="`/playlists/${playlistId$$q}`"
             :disabled="linkExcludes.includes(playlistId$$q)"
           >
-            {{ value$$q.playlist.title }}
+            {{ value$$q?.playlist$$q.title }}
           </s-conditional-link>
         </div>
         <div class="flex-1 <md:hidden"></div>
         <div class="flex-none album-actions flex flex-row gap-x-8">
-          <v-btn color="primary" @click="play$$q(false)">
+          <v-btn
+            color="primary"
+            :disabled="!value$$q?.tracks$$q.length"
+            @click="play$$q(false)"
+          >
             <v-icon left>mdi-play</v-icon>
             <span>
               {{ t('album.Play') }}
             </span>
           </v-btn>
-          <v-btn color="accent" outlined @click="play$$q(true)">
+          <v-btn
+            color="accent"
+            outlined
+            :disabled="!value$$q?.tracks$$q.length"
+            @click="play$$q(true)"
+          >
             <v-icon left>mdi-shuffle</v-icon>
             <span>
               {{ t('album.Shuffle') }}
@@ -146,7 +155,7 @@ export default defineComponent({
         </div>
         <div class="flex-none album-misc text-sm">
           <span>
-            {{ t('playlist.n_tracks', value$$q.tracks.length) }}
+            {{ t('playlist.n_tracks', value$$q.tracks$$q.length) }}
           </span>
           <span v-show="duration$$q">, {{ duration$$q }}</span>
         </div>
@@ -154,13 +163,13 @@ export default defineComponent({
     </div>
   </template>
   <s-track-list
-    :show-album="false"
-    :show-artist="false"
-    :show-disc-number="false"
-    :tracks="value$$q?.tracks"
+    show-album
+    show-artist
+    :tracks="value$$q?.tracks$$q"
     :link-excludes="linkExcludes"
     index-content="index"
-    :set-list="value$$q?.tracks"
+    :set-list="value$$q?.tracks$$q"
+    :playlist-id="playlistId$$q"
   />
 </template>
 

@@ -504,6 +504,7 @@ let gState: PlaybackState | undefined;
 
 export function usePlaybackStore(): PlaybackState {
   if (!gState) {
+    console.log('create playback store');
     gState = _usePlaybackStore();
   }
   return gState;

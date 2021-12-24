@@ -59,3 +59,8 @@ track-list-dropdown:
   RemoveFromPlaylist: Remove from playlist
   Edit: Edit
   Delete: Delete
+message:
+  AddedToPlaylist: "Added '{1}' to '{0}'"
+  FailedToAddToPlaylist: "Failed to add '{1}' to '{0}'\n{2}"
+  RemovedFromPlaylist: "Removed '{1}' from '{0}'"
+  FailedToRemoveFromPlaylist: "Failed to remove '{1}' from '{0}'\n{2}"

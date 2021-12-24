@@ -12,60 +12,10 @@ const display = useDisplay();
 
 const uploadDialog = ref(false);
 
-interface NavItemLink {
-  type: 'link';
-  path: string;
-  icon: string;
-  text: string;
-}
-
-interface NavItemDivider {
-  type: 'divider';
-}
-
-type NavItem = NavItemLink | NavItemDivider;
-
-const navItems = computed<readonly NavItem[]>(() => [
-  {
-    type: 'link',
-    icon: 'mdi-home',
-    path: '/',
-    text: t('sidebar.Home'),
-  },
-  {
-    type: 'divider',
-  },
-  {
-    type: 'link',
-    icon: 'mdi-album',
-    path: '/albums',
-    text: t('sidebar.Albums'),
-  },
-  {
-    type: 'link',
-    icon: 'mdi-account-music',
-    path: '/artists',
-    text: t('sidebar.Artists'),
-  },
-  {
-    type: 'link',
-    icon: 'mdi-music',
-    path: '/tracks',
-    text: t('sidebar.Tracks'),
-  },
-  {
-    type: 'link',
-    icon: 'mdi-playlist-music',
-    path: '/playlists',
-    text: t('sidebar.Playlists'),
-  },
-]);
-
 const uploadStore = useUploadStore();
 
 const rightSidebar = ref(false);
 
-const railedNavigation = computed(() => display.xs.value);
 const fullscreenDialog = computed(() => display.xs.value);
 
 const devSync = (event: MouseEvent) => {
@@ -99,17 +49,6 @@ const onScroll$$q = (e: Event): void => {
                 @contextmenu.prevent
               ></div>
 
-              <v-footer
-                class="select-none playback-sheet fixed bottom-0 !z-2150 w-full m-0 p-0 h-24"
-                @contextmenu.prevent
-              >
-                <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
-                  <v-divider />
-                  <s-playback-control class="<md:hidden" />
-                  <s-mobile-playback-control class="md:hidden" />
-                </v-sheet>
-              </v-footer>
-
               <v-navigation-drawer
                 :model-value="rightSidebar"
                 temporary
@@ -138,7 +77,6 @@ const onScroll$$q = (e: Event): void => {
                   <n-scrollbar class="flex-1">
                     <s-queue />
                   </n-scrollbar>
-                  <div class="h-24"></div>
                   <div class="s-offline-mod-h"></div>
                 </div>
               </v-navigation-drawer>
@@ -154,10 +92,8 @@ const onScroll$$q = (e: Event): void => {
                   <div
                     class="ml-0 pl-4 pr-12 hidden-xs-only select-none flex-none"
                   >
-                    <router-link to="/">
-                      <span class="text-xl leading-none">streamist</span>
-                      <span class="text-sm leading-none">.app</span>
-                    </router-link>
+                    <span class="text-xl leading-none">streamist</span>
+                    <span class="text-sm leading-none">.app</span>
                   </div>
                   <div class="sm:flex-1 flex gap-x-2 justify-end">
                     <v-text-field
@@ -190,41 +126,6 @@ const onScroll$$q = (e: Event): void => {
                 </div>
               </v-app-bar>
 
-              <!-- not setting !z-2120 because it makes tooltips hidden -->
-              <v-navigation-drawer
-                permanent
-                position="left"
-                :rail="railedNavigation"
-                rail-width="56"
-                class="s-offline-mod-mt select-none"
-              >
-                <v-list dense class="overflow-x-hidden">
-                  <template v-for="(item, _index) in navItems" :key="_index">
-                    <template v-if="item.type === 'link'">
-                      <v-list-item link :to="item.path">
-                        <v-list-item-avatar
-                          icon
-                          class="flex items-center justify-center"
-                        >
-                          <v-icon>{{ item.icon }}</v-icon>
-                        </v-list-item-avatar>
-                        <v-list-item-header
-                          v-show="!railedNavigation"
-                          class="px-4"
-                        >
-                          {{ item.text }}
-                        </v-list-item-header>
-                      </v-list-item>
-                    </template>
-                    <template v-else-if="item.type === 'divider'">
-                      <v-divider />
-                    </template>
-                  </template>
-                </v-list>
-                <div class="h-24"></div>
-                <div class="s-offline-mod-h"></div>
-              </v-navigation-drawer>
-
               <v-main class="s-v-main !absolute w-full h-full">
                 <n-scrollbar
                   class="s-scroll-target flex-1 !h-auto"
@@ -232,7 +133,6 @@ const onScroll$$q = (e: Event): void => {
                 >
                   <router-view class="px-4" />
                 </n-scrollbar>
-                <div class="flex-none h-24"></div>
               </v-main>
 
               <v-dialog

@@ -117,7 +117,7 @@ export default defineComponent({
       </v-btn>
       <v-dialog
         v-model="d"
-        max-width="600px"
+        class="s-v-dialog"
         :theme="themeStore$$q.dialogTheme"
       >
         <v-card>
@@ -165,10 +165,10 @@ export default defineComponent({
     </div>
 
     <div class="playlists">
-      <template v-if="items$$q.length">
+      <template v-if="items$$q?.length">
         <v-list flat>
           <template v-for="(item, _index) in items$$q" :key="_index">
-            <v-list-item :to="`/playlists/${item.id$$q}`" class="flex">
+            <v-list-item :to="`/playlists/${item.id$$q}`" class="flex gap-x-4">
               <s-playlist-image
                 class="flex-none w-9 h-9"
                 size="36"

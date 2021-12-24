@@ -66,7 +66,7 @@ export default defineComponent({
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
   >
     <div class="flex-1 flex flex-row px-4 items-center">
-      <div class="flex-1 flex flex-row items-center">
+      <router-link class="flex-1 flex flex-row items-center" to="/playing">
         <template v-if="currentTrack$$q">
           <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
             <s-album-image
@@ -91,7 +91,7 @@ export default defineComponent({
             </router-link>
           </div>
         </template>
-      </div>
+      </router-link>
       <div class="flex-none items-center">
         <!-- TODO: implement vertical volume control -->
         <v-btn flat icon @click="play$$q">

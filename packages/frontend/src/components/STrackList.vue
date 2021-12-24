@@ -1,9 +1,11 @@
 <script lang="ts">
-import type { MenuOption } from 'naive-ui';
+import { MenuOption, useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import GGrid from 'vue-virtual-scroll-grid';
 import { useTheme } from 'vuetify';
 import { db } from '~/db';
+import { syncDB } from '~/db/sync';
+import api from '~/logic/api';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
 import {
@@ -76,12 +78,15 @@ export default defineComponent({
     showAlbum: Boolean,
     showArtist: Boolean,
     hideDuration: Boolean,
+    playlistId: {
+      type: String as PropType<string | null | undefined>,
+      default: undefined,
+    },
   },
   setup(props) {
     const { t } = useI18n();
-
     const theme = useTheme({});
-
+    const message = useMessage();
     const playbackStore = usePlaybackStore();
     const themeStore = useThemeStore();
 
@@ -224,6 +229,11 @@ export default defineComponent({
         playbackStore.playing$$q.value &&
         selectedTrack.id === currentPlayingTrackId;
 
+      const playlists = allPlaylist.value.value || [];
+      const removeFromPlaylist = props.playlistId
+        ? playlists.find((p) => p.id === props.playlistId)
+        : undefined;
+
       return [
         {
           key: 'play',
@@ -265,6 +275,97 @@ export default defineComponent({
           },
         },
         {
+          key: 'div1',
+          type: 'divider',
+        },
+        {
+          key: 'addToPlaylist',
+          label: t('track-list-dropdown.AddToPlaylist'),
+          icon: nCreateDropdownIcon('mdi-playlist-plus'),
+          disabled: !playlists.length,
+          children: playlists.map((playlist) => {
+            const disabled = playlist.trackIds.includes(selectedTrack.id);
+            return {
+              key: `addToPlaylist.${playlist.id}`,
+              label: playlist.title,
+              disabled,
+              props: {
+                onClick: () => {
+                  closeMenu$$q();
+
+                  if (disabled) {
+                    return;
+                  }
+
+                  api.my.playlists
+                    ._playlistId(playlist.id)
+                    .tracks.$post({
+                      body: {
+                        trackId: selectedTrack.id,
+                      },
+                    })
+                    .then(() => {
+                      message.success(
+                        t('message.AddedToPlaylist', [
+                          playlist.title,
+                          selectedTrack.title,
+                        ])
+                      );
+                      syncDB();
+                    })
+                    .catch((error) => {
+                      message.error(
+                        t('message.FailedToAddToPlaylist', [
+                          playlist.title,
+                          selectedTrack.title,
+                          String(error),
+                        ])
+                      );
+                      console.error(error);
+                    });
+                },
+              },
+            };
+          }),
+        },
+        ...(removeFromPlaylist
+          ? [
+              {
+                key: `removeFromPlaylist.${removeFromPlaylist.id}`,
+                label: t('track-list-dropdown.RemoveFromPlaylist'),
+                icon: nCreateDropdownIcon('mdi-playlist-remove'),
+                props: {
+                  onClick: () => {
+                    closeMenu$$q();
+                    api.my.playlists
+                      ._playlistId(removeFromPlaylist.id)
+                      .tracks._trackId(selectedTrack.id)
+                      .$delete()
+                      .then(() => {
+                        message.success(
+                          t('message.RemovedFromPlaylist', [
+                            removeFromPlaylist.title,
+                            selectedTrack.title,
+                          ])
+                        );
+                        syncDB();
+                      })
+                      .catch((error) => {
+                        message.error(
+                          t('message.FailedToRemoveFromPlaylist', [
+                            removeFromPlaylist.title,
+                            selectedTrack.title,
+                            String(error),
+                          ])
+                        );
+                        console.error(error);
+                      });
+                  },
+                },
+              },
+            ]
+          : []),
+        {
           key: 'edit',
           label: t('track-list-dropdown.Edit'),
           icon: nCreateDropdownIcon('mdi-pencil'),
@@ -276,21 +377,8 @@ export default defineComponent({
           },
         },
         {
-          key: 'addToPlaylist',
-          label: t('track-list-dropdown.AddToPlaylist'),
-          icon: nCreateDropdownIcon('mdi-playlist-plus'),
-          disabled: !allPlaylist.value.value?.length,
-          children: allPlaylist.value.value?.map((playlist) => ({
-            key: `playlist.${playlist.id}`,
-            label: playlist.title,
-            disabled: playlist.trackIds.includes(selectedTrack.id),
-            props: {
-              onClick: () => {
-                // add to playlist
-                closeMenu$$q();
-              },
-            },
-          })),
+          key: 'div2',
+          type: 'divider',
         },
         {
           key: 'delete',
@@ -337,6 +425,18 @@ export default defineComponent({
           showMenu$$q.value = true;
         });
       },
+      onMenu$$q: (event: MouseEvent, track: ResourceTrack): void => {
+        showMenu$$q.value = false;
+        const element = event.target as HTMLElement;
+        const rect = element.getBoundingClientRect();
+        nextTick().then(() => {
+          selectedTrack$$q.value = track;
+          menuX$$q.value = (rect.left + rect.right) / 2;
+          menuOffsetY$$q.value =
+            (rect.top + rect.bottom) / 2 + currentScrollRef.value;
+          showMenu$$q.value = true;
+        });
+      },
       closeMenu$$q,
       selectedTrack$$q,
       menuOptions$$q,
@@ -359,7 +459,7 @@ export default defineComponent({
       class="s-track-list select-none"
       @contextmenu.prevent
     >
-      <v-list-item class="list-header w-full flex flex-row">
+      <v-list-item class="list-header w-full flex flex-row !<sm:px-2">
         <div class="list-header-column list-column-icon mr-4 py-2">
           {{
             indexContent === 'index' || indexContent === 'trackNumber'
@@ -384,10 +484,11 @@ export default defineComponent({
           </v-list-item-header>
         </template>
         <template v-if="!hideDuration">
-          <div class="list-header-column list-column-duration py-1">
+          <div class="list-header-column list-column-duration py-1 !<sm:hidden">
             <v-icon>mdi-clock-outline</v-icon>
           </div>
         </template>
+        <div class="list-header-column list-column-menu py-1"></div>
       </v-list-item>
       <v-divider />
       <g-grid
@@ -430,7 +531,7 @@ export default defineComponent({
             <!-- Track Item -->
             <div :style="style">
               <v-list-item
-                class="s-hover-container s-track-list-item w-full py-1 h-14"
+                class="s-hover-container s-track-list-item w-full py-1 h-14 !<sm:px-2"
                 :class="
                   selectedTrack$$q?.id === item.track$$q.id
                     ? 's-track-list-item--selected'
@@ -570,10 +671,26 @@ export default defineComponent({
                 </template>
                 <!-- Duration -->
                 <template v-if="!hideDuration">
-                  <div class="list-column-duration s-duration body-2">
+                  <div
+                    class="list-column-duration s-duration body-2 !<sm:hidden"
+                  >
                     {{ item.formattedDuration$$q }}
                   </div>
                 </template>
+                <!-- Menu -->
+                <div class="list-header-column list-column-menu py-1">
+                  <v-btn
+                    icon
+                    flat
+                    text
+                    size="small"
+                    :disabled="!setList"
+                    class="bg-transparent"
+                    @click.stop="onMenu$$q($event, item.track$$q)"
+                  >
+                    <v-icon class="s-hover-visible"> mdi-dots-vertical </v-icon>
+                  </v-btn>
+                </div>
               </v-list-item>
               <!-- Divider -->
               <template v-if="!item.isLast$$q">
@@ -663,6 +780,11 @@ export default defineComponent({
 
 .list-column-duration {
   width: 72px;
+  text-align: right;
+}
+
+.list-column-menu {
+  width: 50px;
   text-align: right;
 }
 

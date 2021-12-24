@@ -38,67 +38,64 @@ export default defineComponent({
     const { value } = useLiveQuery(
       async () => {
         const propAlbum = propAlbumRef.value;
-        const album =
+        const album$$q =
           typeof propAlbum === 'string'
             ? await db.albums.get(propAlbum)
             : propAlbum;
-        if (!album) {
+        if (!album$$q) {
           throw new Error(`Album ${propAlbum} not found`);
         }
-        const artist = await db.artists.get(album.artistId);
-        if (!artist) {
+        const artist$$q = await db.artists.get(album$$q.artistId);
+        if (!artist$$q) {
           throw new Error(
-            `Artist ${album.artistId} not found. (database corrupted)`
+            `Artist ${album$$q.artistId} not found. (database corrupted)`
           );
         }
-        const tracks = await db.tracks.where({ albumId: album.id }).toArray();
-        tracks.sort(compareTrack);
+        const tracks$$q = await db.tracks
+          .where({ albumId: album$$q.id })
+          .toArray();
+        tracks$$q.sort(compareTrack);
         if (propAlbumRef.value !== propAlbum) {
           throw new Error('operation aborted');
         }
-        emit('trackLoad', tracks);
+        emit('trackLoad', tracks$$q);
         return {
-          album,
-          artist,
-          tracks,
+          album$$q,
+          artist$$q,
+          tracks$$q,
         };
       },
       [propAlbumRef],
       true
     );
 
-    const album = eagerComputed(() => value.value?.album);
-    const artist = eagerComputed(() => value.value?.artist);
-    const tracks = eagerComputed(() => value.value?.tracks);
-
     const releaseDate = eagerComputed(() => {
       return (
-        tracks.value?.map((track) => track.releaseDateText)?.find((x) => x) ||
-        null
+        value.value?.tracks$$q
+          .map((track) => track.releaseDateText)
+          ?.find((x) => x) || null
       );
     });
 
     const duration = eagerComputed(
-      () => tracks.value && formatTracksTotalDuration(tracks.value)
+      () => value.value && formatTracksTotalDuration(value.value?.tracks$$q)
     );
 
     return {
       t,
       albumId$$q,
       imageIds$$q: ref<readonly string[] | undefined>(),
-      album$$q: album,
-      artist$$q: artist,
-      tracks$$q: tracks,
+      value$$q: value,
       duration$$q: duration,
       releaseDate$$q: releaseDate,
       play$$q: (shuffle?: boolean): void => {
-        if (!tracks.value || !tracks.value[0]) {
+        if (!value.value?.tracks$$q.length) {
           return;
         }
         if (shuffle !== undefined) {
           playbackStore.shuffle$$q.value = shuffle;
         }
-        playbackStore.setSetListAndPlayAuto$$q(tracks.value);
+        playbackStore.setSetListAndPlayAuto$$q(value.value.tracks$$q);
       },
     };
   },
@@ -106,7 +103,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <template v-if="album$$q">
+  <template v-if="value$$q">
     <div
       class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-6 md:gap-y-4"
     >
@@ -117,12 +114,14 @@ export default defineComponent({
             :attach-to-id="albumId$$q"
             :image-ids="imageIds$$q"
           >
-            <template #title>Album Art of {{ album$$q?.title }}</template>
+            <template #title
+              >Album Art of {{ value$$q.album$$q.title }}</template
+            >
             <template #default>
               <s-album-image
                 class="w-50 h-50"
                 size="200"
-                :album="album$$q"
+                :album="value$$q.album$$q"
                 @image-ids="imageIds$$q = $event"
               />
             </template>
@@ -133,7 +132,7 @@ export default defineComponent({
             <s-album-image
               class="w-50 h-50"
               size="200"
-              :album="album$$q"
+              :album="value$$q.album$$q"
               @image-ids="imageIds$$q = $event"
             />
           </router-link>
@@ -142,36 +141,40 @@ export default defineComponent({
       <div class="flex flex-col gap-y-6 md:gap-y-4 <md:text-center">
         <div>
           <div class="flex-none album-title text-xl">
-            <template v-if="!loading && album$$q">
-              <s-conditional-link
-                :to="`/albums/${albumId$$q}`"
-                :disabled="linkExcludes.includes(albumId$$q)"
-              >
-                {{ album$$q.title }}
-              </s-conditional-link>
-            </template>
+            <s-conditional-link
+              :to="`/albums/${albumId$$q}`"
+              :disabled="linkExcludes.includes(albumId$$q)"
+            >
+              {{ value$$q.album$$q.title }}
+            </s-conditional-link>
           </div>
           <div class="flex-none album-artist-name">
-            <template v-if="!loading && album$$q && artist$$q">
-              <s-conditional-link
-                :to="`/artists/${artist$$q.id}`"
-                :disabled="linkExcludes.includes(artist$$q.id)"
-              >
-                {{ artist$$q.name }}
-              </s-conditional-link>
-            </template>
-            <s-artist-combobox :model-value="`AR-ID#${artist$$q?.id}`" />
+            <s-conditional-link
+              :to="`/artists/${value$$q.artist$$q.id}`"
+              :disabled="linkExcludes.includes(value$$q.artist$$q.id)"
+            >
+              {{ value$$q.artist$$q.name }}
+            </s-conditional-link>
           </div>
         </div>
         <div class="flex-1 <md:hidden"></div>
         <div class="flex-none album-actions flex flex-row gap-x-8">
-          <v-btn color="primary" @click="play$$q(false)">
+          <v-btn
+            color="primary"
+            :disabled="!value$$q.tracks$$q.length"
+            @click="play$$q(false)"
+          >
             <v-icon left>mdi-play</v-icon>
             <span>
               {{ t('album.Play') }}
             </span>
           </v-btn>
-          <v-btn color="accent" outlined @click="play$$q(true)">
+          <v-btn
+            color="accent"
+            outlined
+            :disabled="!value$$q.tracks$$q.length"
+            @click="play$$q(true)"
+          >
             <v-icon left>mdi-shuffle</v-icon>
             <span>
               {{ t('album.Shuffle') }}
@@ -180,7 +183,7 @@ export default defineComponent({
         </div>
         <div class="flex-none album-misc text-sm">
           <span>
-            {{ tracks$$q && t('album.n_tracks', tracks$$q.length) }}
+            {{ t('album.n_tracks', value$$q.tracks$$q.length) }}
           </span>
           <span v-show="duration$$q">, {{ duration$$q }}</span>
           <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
@@ -191,7 +194,7 @@ export default defineComponent({
   <s-track-list
     :show-album="false"
     :show-artist="false"
-    :tracks="tracks$$q"
+    :tracks="value$$q?.tracks$$q"
     :link-excludes="linkExcludes"
     show-disc-number
     index-content="trackNumber"

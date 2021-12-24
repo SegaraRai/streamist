@@ -21,7 +21,6 @@ model User {
   image           Image[]
   imageFile       ImageFile[]
   playlists       Playlist[]
-  tags            Tag[]
   tracks          Track[]
   trackFiles      TrackFile[]
   sources         Source[]
@@ -30,22 +29,6 @@ model User {
   trackCoArtist   TrackCoArtist[]
   deletions       Deletion[]
   resourceUpdates ResourceUpdate[] // though this is an one-to-one relation
-}
-
-model Tag {
-  id        String     @id
-  name      String
-  createdAt Int //@db.BigInt
-  updatedAt Int //@db.BigInt
-  user      User       @relation(fields: [userId], references: [id])
-  userId    String
-  albums    Album[]
-  artists   Artist[]
-  tracks    Track[]
-  playlists Playlist[]
-
-  @@unique([userId, name])
-  @@index([userId])
 }
 
 model Source {
@@ -109,7 +92,6 @@ model Artist {
   imageOrder     String          @default("")
   tracks         Track[]
   albums         Album[]
-  tags           Tag[]
   albumCoArtists AlbumCoArtist[]
   trackCoArtists TrackCoArtist[]
 
@@ -132,7 +114,6 @@ model Album {
   images         Image[]
   imageOrder     String          @default("")
   tracks         Track[]
-  tags           Tag[]
   coArtists      AlbumCoArtist[]
 
   @@index([userId])
@@ -167,7 +148,6 @@ model Track {
   sourceFileId         String
   files                TrackFile[]
   playlists            Playlist[]
-  tags                 Tag[]
   coArtists            TrackCoArtist[]
 
   @@index([userId])
@@ -283,7 +263,6 @@ model Playlist {
   imageOrder String  @default("")
   tracks     Track[]
   trackOrder String  @default("")
-  tags       Tag[]
 
   @@index([userId])
 }

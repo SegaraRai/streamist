@@ -73,8 +73,8 @@ export default defineComponent({
     </template>
     <template v-else-if="image.length === 2">
       <div class="flex flex-wrap select-none">
-        <div class="w-1/2 h-1/2"></div>
         <s-nullable-image class="w-1/2 h-1/2" :image="image[0]" />
+        <div class="w-1/2 h-1/2"></div>
         <div class="w-1/2 h-1/2"></div>
         <s-nullable-image class="w-1/2 h-1/2" :image="image[1]" />
       </div>

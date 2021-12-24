@@ -1,8 +1,8 @@
 <script lang="ts">
-import { compareTrack } from '$shared/sort';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
+import type { ResourceTrack } from '$/types';
 
 export default defineComponent({
   props: {
@@ -28,36 +28,35 @@ export default defineComponent({
     const { value } = useLiveQuery(
       async () => {
         const albumId = propAlbumIdRef.value;
-        const album = await db.albums.get(albumId);
-        if (!album) {
+        const album$$q = await db.albums.get(albumId);
+        if (!album$$q) {
           throw new Error(`Album ${albumId} not found`);
         }
-        const artist = await db.artists.get(album.artistId);
-        if (!artist) {
-          throw new Error(`Artist ${album.artistId} not found`);
+        const artist$$q = await db.artists.get(album$$q.artistId);
+        if (!artist$$q) {
+          throw new Error(`Artist ${album$$q.artistId} not found`);
         }
-        const tracks = await db.tracks.where({ albumId }).toArray();
         if (albumId !== propAlbumIdRef.value) {
           throw new Error('operation aborted');
         }
-        tracks.sort(compareTrack);
-        const setList = tracks;
-        playbackStore.setDefaultSetList$$q(setList);
-        tracks.sort(compareTrack);
-        headTitleRef.value = t('title.Album', [album.title, artist.name]);
+        headTitleRef.value = t('title.Album', [album$$q.title, artist$$q.name]);
         return {
-          album,
-          artist,
-          tracks,
-          setList,
+          album$$q,
         };
       },
       [propAlbumIdRef],
       true
     );
 
+    const setList$$q = ref<readonly ResourceTrack[]>([]);
+
     return {
       value$$q: value,
+      setList$$q,
+      onTrackLoad$$q: (tracks: readonly ResourceTrack[]) => {
+        playbackStore.setDefaultSetList$$q(tracks);
+        setList$$q.value = tracks;
+      },
     };
   },
 });
@@ -67,9 +66,10 @@ export default defineComponent({
   <v-container fluid class="pt-8 px-6">
     <template v-if="value$$q">
       <s-album
-        :album="value$$q.album"
+        :album="value$$q.album$$q"
         :link-excludes="[id]"
-        :set-list="value$$q.setList"
+        :set-list="setList$$q"
+        @track-load="onTrackLoad$$q"
       />
     </template>
   </v-container>
