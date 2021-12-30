@@ -121,36 +121,6 @@ export default defineController(() => ({
         sources: await txClient.source.findMany({
           where,
         }),
-        tags: await txClient.tag.findMany({
-          where,
-          select: {
-            id: true,
-            name: true,
-            userId: true,
-            createdAt: true,
-            updatedAt: true,
-            albums: {
-              select: {
-                id: true,
-              },
-            },
-            artists: {
-              select: {
-                id: true,
-              },
-            },
-            playlists: {
-              select: {
-                id: true,
-              },
-            },
-            tracks: {
-              select: {
-                id: true,
-              },
-            },
-          },
-        }),
         trackCoArtists: await txClient.trackCoArtist.findMany({
           where,
         }),

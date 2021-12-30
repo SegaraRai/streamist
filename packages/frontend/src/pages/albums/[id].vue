@@ -69,6 +69,7 @@ export default defineComponent({
         :album="value$$q.album$$q"
         :link-excludes="[id]"
         :set-list="setList$$q"
+        visit-artist
         @track-load="onTrackLoad$$q"
       />
     </template>

@@ -22,7 +22,6 @@ export type CreateTrackData = Omit<
   | 'albumId'
   | 'files'
   | 'playlists'
-  | 'tags'
   | 'coArtists'
 >;
 

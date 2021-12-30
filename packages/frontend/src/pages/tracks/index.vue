@@ -85,6 +85,8 @@ export default defineComponent({
       :show-album="!isMobile$$q"
       show-artist
       :hide-duration="isMobile$$q"
+      visit-album
+      visit-artist
     />
   </v-container>
 </template>

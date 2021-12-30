@@ -23,7 +23,6 @@ type DBResources = Pick<
   | 'playlists'
   | 'sourceFiles'
   | 'sources'
-  | 'tags'
   | 'trackCoArtists'
   | 'tracks'
 >;
@@ -59,7 +58,6 @@ export class ResourcesDexie extends Dexie {
   readonly playlists!: Table<DBResources['playlists'][0]>;
   readonly sourceFiles!: Table<DBResources['sourceFiles'][0]>;
   readonly sources!: Table<DBResources['sources'][0]>;
-  readonly tags!: Table<DBResources['tags'][0]>;
   readonly trackCoArtists!: Table<DBResources['trackCoArtists'][0]>;
   readonly tracks!: Table<DBResources['tracks'][0]>;
 
@@ -75,7 +73,6 @@ export class ResourcesDexie extends Dexie {
         playlists: ['&id', '*trackIds'],
         sourceFiles: ['&id', 'sourceId'],
         sources: ['&id'],
-        tags: ['&id', 'name'],
         trackCoArtists: ['&[role+trackId+artistId]', 'trackId', 'artistId'],
         tracks: ['&id', 'albumId', 'artistId'],
       })

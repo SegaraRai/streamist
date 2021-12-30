@@ -66,7 +66,6 @@ export interface ResourcesUpdated {
   readonly playlists: readonly ResourcePlaylist[];
   readonly sourceFiles: readonly ResourceSourceFile[];
   readonly sources: readonly ResourceSource[];
-  readonly tags: readonly ResourceTag[];
   readonly trackCoArtists: readonly ResourceTrackCoArtist[];
   readonly tracks: readonly ResourceTrack[];
   readonly deletions: readonly ResourceDeletion[];

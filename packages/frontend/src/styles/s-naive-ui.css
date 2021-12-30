@@ -1,0 +1,8 @@
+.s-n-scrollbar-min-h-full > .n-scrollbar-container > .n-scrollbar-content {
+  @apply min-h-full;
+}
+
+.s-n-scrollbar-flex-col > .n-scrollbar-container > .n-scrollbar-content {
+  @apply flex;
+  @apply flex-col;
+}

@@ -22,6 +22,8 @@ export default defineComponent({
       type: Array as PropType<readonly ResourceTrack[] | null | undefined>,
       default: undefined,
     },
+    visitAlbum: Boolean,
+    visitArtist: Boolean,
   },
   emits: {
     trackLoad: (_tracks: readonly ResourceTrack[]) => true,
@@ -199,6 +201,8 @@ export default defineComponent({
     show-disc-number
     index-content="trackNumber"
     :set-list="setList"
+    :visit-album="visitAlbum"
+    :visit-artist="visitArtist"
   />
 </template>
 

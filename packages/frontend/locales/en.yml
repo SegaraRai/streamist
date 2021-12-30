@@ -51,6 +51,8 @@ title:
 track-list-dropdown:
   Play: Play
   Pause: Pause
+  GoToAlbum: 'Visit album'
+  GoToArtist: 'Visit artist'
   AddToPlayNextQueue: Add to queue
   RemoveFromPlayNextQueue: Remove from queue
   AddToQueue: Add to queue
@@ -60,6 +62,7 @@ track-list-dropdown:
   Edit: Edit
   Delete: Delete
 message:
+  AddedToPlayNextQueue: 'Added to queue'
   AddedToPlaylist: "Added '{1}' to '{0}'"
   FailedToAddToPlaylist: "Failed to add '{1}' to '{0}'\n{2}"
   RemovedFromPlaylist: "Removed '{1}' from '{0}'"

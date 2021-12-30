@@ -133,28 +133,34 @@ export default defineComponent({
     </div>
     <v-divider class="mt-8" />
     <template v-if="value$$q">
-      <div class="my-12"></div>
-      <div class="mb-6">
-        <template v-for="album in value$$q.albums$$q" :key="album.id">
-          <div class="my-12">
-            <s-album
-              :album="album"
-              :link-excludes="[id]"
-              :set-list="setList$$q"
-              @track-load="onTrackLoad$$q(album.id, $event)"
-            />
-          </div>
-        </template>
-      </div>
+      <div class="h-12"></div>
+      <template v-if="value$$q.albums$$q.length">
+        <div class="mb-6">
+          <template v-for="album in value$$q.albums$$q" :key="album.id">
+            <div class="my-12">
+              <s-album
+                :album="album"
+                :link-excludes="[id]"
+                :set-list="setList$$q"
+                visit-album
+                @track-load="onTrackLoad$$q(album.id, $event)"
+              />
+            </div>
+          </template>
+        </div>
+      </template>
       <template v-if="additionalTracks$$q.length">
-        <v-divider />
-        <div class="h-12"></div>
+        <template v-if="value$$q.albums$$q.length">
+          <v-divider />
+          <div class="h-12"></div>
+        </template>
         <s-track-list
           :link-excludes="[id]"
           :tracks="additionalTracks$$q"
           :set-list="setList$$q"
           show-album
           index-content="albumArtwork"
+          visit-album
         />
       </template>
     </template>

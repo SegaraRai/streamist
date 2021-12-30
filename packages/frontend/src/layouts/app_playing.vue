@@ -190,7 +190,7 @@ const onScroll$$q = (e: Event): void => {
 }
 
 .s-scroll-target > .n-scrollbar-container > .n-scrollbar-content {
-  @apply h-full;
+  @apply min-h-full;
 }
 
 html {

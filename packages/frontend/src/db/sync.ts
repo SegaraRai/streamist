@@ -60,7 +60,6 @@ export async function syncDB(reconstruct = false): Promise<void> {
         playlists: getDeletionIds(r.deletions, 'playlist'),
         sourceFiles: getDeletionIds(r.deletions, 'sourceFile'),
         sources: getDeletionIds(r.deletions, 'source'),
-        tags: getDeletionIds(r.deletions, 'tag'),
         trackCoArtists: getDeletionIds(r.deletions, 'trackCoArtist'),
         tracks: getDeletionIds(r.deletions, 'track'),
       };
@@ -75,7 +74,6 @@ export async function syncDB(reconstruct = false): Promise<void> {
           db.playlists,
           db.sourceFiles,
           db.sources,
-          db.tags,
           db.trackCoArtists,
           db.tracks,
         ],
@@ -90,7 +88,6 @@ export async function syncDB(reconstruct = false): Promise<void> {
               clearAndAdd(db.playlists, r.playlists),
               clearAndAdd(db.sourceFiles, r.sourceFiles),
               clearAndAdd(db.sources, r.sources),
-              clearAndAdd(db.tags, r.tags),
               clearAndAdd(db.trackCoArtists, r.trackCoArtists),
               clearAndAdd(db.tracks, r.tracks),
             ]);
@@ -103,7 +100,6 @@ export async function syncDB(reconstruct = false): Promise<void> {
               update(db.playlists, r.playlists, d.playlists),
               update(db.sourceFiles, r.sourceFiles, d.sourceFiles),
               update(db.sources, r.sources, d.sources),
-              update(db.tags, r.tags, d.tags),
               update(db.trackCoArtists, r.trackCoArtists, d.trackCoArtists),
               update(db.tracks, r.tracks, d.tracks),
             ]);

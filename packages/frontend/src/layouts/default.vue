@@ -85,30 +85,23 @@ const onScroll$$q = (e: Event): void => {
     <n-message-provider>
       <n-notification-provider>
         <n-dialog-provider>
-          <div :class="isOnline ? 's-offline--online' : 's-offline--offline'">
+          <div
+            :class="isOnline ? 's-offline--online' : 's-offline--offline'"
+            class="min-h-screen flex flex-col"
+          >
             <div
               class="s-offline-bar bg-yellow-400 h-0 text-white font-weight-bold text-md flex items-center px-4 leading-none z-2200 overflow-hidden"
             >
               No Internet connection.
             </div>
-            <v-app theme="dark">
+
+            <v-app theme="dark" class="flex-1 !h-auto">
               <div
                 class="bg-black z-2135 fixed top-0 left-0 w-full h-full transition-all"
                 :class="rightSidebar ? 'opacity-25' : 'opacity-0 invisible'"
                 @click="rightSidebar = false"
                 @contextmenu.prevent
               ></div>
-
-              <v-footer
-                class="select-none playback-sheet fixed bottom-0 !z-2150 w-full m-0 p-0 h-24"
-                @contextmenu.prevent
-              >
-                <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
-                  <v-divider />
-                  <s-playback-control class="<md:hidden" />
-                  <s-mobile-playback-control class="md:hidden" />
-                </v-sheet>
-              </v-footer>
 
               <v-navigation-drawer
                 :model-value="rightSidebar"
@@ -135,10 +128,10 @@ const onScroll$$q = (e: Event): void => {
                     </div>
                     <v-divider />
                   </v-sheet>
-                  <n-scrollbar class="flex-1">
+                  <n-scrollbar class="flex-1 s-n-scrollbar-min-h-full">
                     <s-queue />
                   </n-scrollbar>
-                  <div class="h-24"></div>
+                  <!-- div class="h-24"></div -->
                   <div class="s-offline-mod-h"></div>
                 </div>
               </v-navigation-drawer>
@@ -198,36 +191,50 @@ const onScroll$$q = (e: Event): void => {
                 rail-width="56"
                 class="s-offline-mod-mt select-none"
               >
-                <v-list dense class="overflow-x-hidden">
-                  <template v-for="(item, _index) in navItems" :key="_index">
-                    <template v-if="item.type === 'link'">
-                      <v-list-item link :to="item.path">
-                        <v-list-item-avatar
-                          icon
-                          class="flex items-center justify-center"
-                        >
-                          <v-icon>{{ item.icon }}</v-icon>
-                        </v-list-item-avatar>
-                        <v-list-item-header
-                          v-show="!railedNavigation"
-                          class="px-4"
-                        >
-                          {{ item.text }}
-                        </v-list-item-header>
-                      </v-list-item>
-                    </template>
-                    <template v-else-if="item.type === 'divider'">
-                      <v-divider />
-                    </template>
-                  </template>
-                </v-list>
-                <div class="h-24"></div>
-                <div class="s-offline-mod-h"></div>
+                <n-scrollbar
+                  class="h-full s-n-scrollbar-min-h-full s-n-scrollbar-flex-col"
+                >
+                  <div class="flex-1 flex flex-col h-full">
+                    <v-list dense class="overflow-x-hidden">
+                      <template
+                        v-for="(item, _index) in navItems"
+                        :key="_index"
+                      >
+                        <template v-if="item.type === 'link'">
+                          <v-list-item link :to="item.path">
+                            <v-list-item-avatar
+                              icon
+                              class="flex items-center justify-center"
+                            >
+                              <v-icon>{{ item.icon }}</v-icon>
+                            </v-list-item-avatar>
+                            <v-list-item-header
+                              v-show="!railedNavigation"
+                              class="px-4"
+                            >
+                              {{ item.text }}
+                            </v-list-item-header>
+                          </v-list-item>
+                        </template>
+                        <template v-else-if="item.type === 'divider'">
+                          <v-divider />
+                        </template>
+                      </template>
+                    </v-list>
+                    <div class="flex-1"></div>
+                    <div class="text-xs ml-2 text-right text-red-400 p-2">
+                      ALPHA VERSION<br />
+                      no warranty / use with caution
+                    </div>
+                    <div class="h-24"></div>
+                    <div class="s-offline-mod-h"></div>
+                  </div>
+                </n-scrollbar>
               </v-navigation-drawer>
 
-              <v-main class="s-v-main !absolute w-full h-full">
+              <v-main class="s-v-main w-full">
                 <n-scrollbar
-                  class="s-scroll-target flex-1 !h-auto"
+                  class="s-scroll-target s-n-scrollbar-min-h-full flex-1 !h-auto"
                   @scroll="onScroll$$q"
                 >
                   <router-view class="px-4" />
@@ -261,6 +268,18 @@ const onScroll$$q = (e: Event): void => {
                 </v-card>
               </v-dialog>
             </v-app>
+
+            <!-- !z-2150 -->
+            <footer
+              class="select-none playback-sheet fixed bottom-0 !z-1900 w-full m-0 p-0 h-24"
+              @contextmenu.prevent
+            >
+              <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
+                <v-divider />
+                <s-playback-control class="<md:hidden" />
+                <s-mobile-playback-control class="md:hidden" />
+              </v-sheet>
+            </footer>
           </div>
         </n-dialog-provider>
       </n-notification-provider>
@@ -289,11 +308,12 @@ const onScroll$$q = (e: Event): void => {
   @apply h-full;
 }
 
-.s-scroll-target > .n-scrollbar-container > .n-scrollbar-content {
-  @apply h-full;
+html.s-static-layout {
+  overflow: hidden;
 }
 
-html {
-  overflow: hidden;
+html.s-static-layout .s-v-main.v-main {
+  @apply !absolute;
+  @apply h-full;
 }
 </style>

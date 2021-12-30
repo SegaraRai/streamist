@@ -170,6 +170,8 @@ export default defineComponent({
     index-content="index"
     :set-list="value$$q?.tracks$$q"
     :playlist-id="playlistId$$q"
+    visit-album
+    visit-artist
   />
 </template>
 

@@ -1,18 +1,10 @@
 <script lang="ts">
-import { MenuOption, useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import GGrid from 'vue-virtual-scroll-grid';
-import { useTheme } from 'vuetify';
 import { db } from '~/db';
-import { syncDB } from '~/db/sync';
-import api from '~/logic/api';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
-import {
-  nCreateDropdownIcon,
-  nCreateDropdownTextColorStyle,
-} from '~/logic/naive-ui/dropdown';
-import { useAllPlaylists } from '~/logic/useDB';
+import { createTrackListDropdown } from '~/logic/naive-ui/trackListDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { currentScrollRef } from '~/stores/scroll';
@@ -82,11 +74,11 @@ export default defineComponent({
       type: String as PropType<string | null | undefined>,
       default: undefined,
     },
+    visitAlbum: Boolean,
+    visitArtist: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
-    const theme = useTheme({});
-    const message = useMessage();
     const playbackStore = usePlaybackStore();
     const themeStore = useThemeStore();
 
@@ -201,10 +193,6 @@ export default defineComponent({
 
     //
 
-    const allPlaylist = useAllPlaylists();
-
-    //
-
     const showMenu$$q = ref(false);
     const menuX$$q = ref(0);
     const menuOffsetY$$q = ref(0);
@@ -218,181 +206,13 @@ export default defineComponent({
       selectedTrack$$q.value = undefined;
     };
 
-    const menuOptions$$q = computed<MenuOption[]>((): MenuOption[] => {
-      const selectedTrack = selectedTrack$$q.value;
-      if (!selectedTrack) {
-        return [];
-      }
-
-      const currentPlayingTrackId = playbackStore.currentTrack$$q.value?.id;
-      const isPlayingThisTrack =
-        playbackStore.playing$$q.value &&
-        selectedTrack.id === currentPlayingTrackId;
-
-      const playlists = allPlaylist.value.value || [];
-      const removeFromPlaylist = props.playlistId
-        ? playlists.find((p) => p.id === props.playlistId)
-        : undefined;
-
-      return [
-        {
-          key: 'play',
-          label: isPlayingThisTrack
-            ? t('track-list-dropdown.Pause')
-            : t('track-list-dropdown.Play'),
-          icon: nCreateDropdownIcon(() =>
-            playbackStore.playing$$q.value &&
-            selectedTrack.id === playbackStore.currentTrack$$q.value?.id
-              ? 'mdi-pause'
-              : 'mdi-play'
-          ),
-          props: {
-            onClick: () => {
-              if (
-                playbackStore.currentTrack$$q.value?.id === selectedTrack.id
-              ) {
-                playbackStore.playing$$q.value =
-                  !playbackStore.playing$$q.value;
-              } else if (props.setList) {
-                playbackStore.setSetListAndPlay$$q(
-                  props.setList,
-                  selectedTrack
-                );
-              }
-              closeMenu$$q();
-            },
-          },
-        },
-        {
-          key: 'addToPNQueue',
-          label: t('track-list-dropdown.AddToPlayNextQueue'),
-          icon: nCreateDropdownIcon('mdi-playlist-play'),
-          props: {
-            onClick: () => {
-              playbackStore.appendTracksToPlayNextQueue$$q([selectedTrack]);
-              closeMenu$$q();
-            },
-          },
-        },
-        {
-          key: 'div1',
-          type: 'divider',
-        },
-        {
-          key: 'addToPlaylist',
-          label: t('track-list-dropdown.AddToPlaylist'),
-          icon: nCreateDropdownIcon('mdi-playlist-plus'),
-          disabled: !playlists.length,
-          children: playlists.map((playlist) => {
-            const disabled = playlist.trackIds.includes(selectedTrack.id);
-            return {
-              key: `addToPlaylist.${playlist.id}`,
-              label: playlist.title,
-              disabled,
-              props: {
-                onClick: () => {
-                  closeMenu$$q();
-
-                  if (disabled) {
-                    return;
-                  }
-
-                  api.my.playlists
-                    ._playlistId(playlist.id)
-                    .tracks.$post({
-                      body: {
-                        trackId: selectedTrack.id,
-                      },
-                    })
-                    .then(() => {
-                      message.success(
-                        t('message.AddedToPlaylist', [
-                          playlist.title,
-                          selectedTrack.title,
-                        ])
-                      );
-                      syncDB();
-                    })
-                    .catch((error) => {
-                      message.error(
-                        t('message.FailedToAddToPlaylist', [
-                          playlist.title,
-                          selectedTrack.title,
-                          String(error),
-                        ])
-                      );
-                      console.error(error);
-                    });
-                },
-              },
-            };
-          }),
-        },
-        ...(removeFromPlaylist
-          ? [
-              {
-                key: `removeFromPlaylist.${removeFromPlaylist.id}`,
-                label: t('track-list-dropdown.RemoveFromPlaylist'),
-                icon: nCreateDropdownIcon('mdi-playlist-remove'),
-                props: {
-                  onClick: () => {
-                    closeMenu$$q();
-                    api.my.playlists
-                      ._playlistId(removeFromPlaylist.id)
-                      .tracks._trackId(selectedTrack.id)
-                      .$delete()
-                      .then(() => {
-                        message.success(
-                          t('message.RemovedFromPlaylist', [
-                            removeFromPlaylist.title,
-                            selectedTrack.title,
-                          ])
-                        );
-                        syncDB();
-                      })
-                      .catch((error) => {
-                        message.error(
-                          t('message.FailedToRemoveFromPlaylist', [
-                            removeFromPlaylist.title,
-                            selectedTrack.title,
-                            String(error),
-                          ])
-                        );
-                        console.error(error);
-                      });
-                  },
-                },
-              },
-            ]
-          : []),
-        {
-          key: 'edit',
-          label: t('track-list-dropdown.Edit'),
-          icon: nCreateDropdownIcon('mdi-pencil'),
-          props: {
-            onClick: () => {
-              // open edit track dialog
-              closeMenu$$q();
-            },
-          },
-        },
-        {
-          key: 'div2',
-          type: 'divider',
-        },
-        {
-          key: 'delete',
-          label: t('track-list-dropdown.Delete'),
-          icon: nCreateDropdownIcon('mdi-delete'),
-          props: {
-            style: nCreateDropdownTextColorStyle(theme, 'error'),
-            onClick: () => {
-              // open edit track dialog
-              closeMenu$$q();
-            },
-          },
-        },
-      ];
+    const menuOptions$$q = createTrackListDropdown({
+      closeMenu$$q,
+      selectedTrack$$q,
+      setList$$q: eagerComputed(() => props.setList),
+      playlistId$$q: eagerComputed(() => props.playlistId),
+      showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
+      showVisitArtist$$q: eagerComputed(() => props.visitArtist),
     });
 
     return {
@@ -440,7 +260,6 @@ export default defineComponent({
       closeMenu$$q,
       selectedTrack$$q,
       menuOptions$$q,
-      cError: theme.getTheme('dark').colors.error,
       pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
     };
   },
