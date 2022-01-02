@@ -1,9 +1,17 @@
 import { expectType } from 'tsd';
 import { generateArtistId } from '$shared-server/generateId';
-import { Artist, Prisma } from '$prisma/client';
-import { dbArrayAddTx } from './lib/array';
+import { Artist, Image, ImageFile, Prisma } from '$prisma/client';
+import { dbArraySort } from '../dbArray';
+import {
+  dbArrayAddTx,
+  dbArrayCreateMoveBeforeReorderCallback,
+  dbArrayRemoveTx,
+  dbArrayReorder,
+} from './lib/array';
 import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
+
+export type ImageSortableArtist = { imageOrder: string; images: Image[] };
 
 // check types for `dbArtistGetOrCreateByNameTx`
 /* #__PURE__ */ expectType<'Artist'>(Prisma.ModelName.Artist);
@@ -79,4 +87,69 @@ export function dbArtistAddImageTx(
     artistId,
     imageIds
   );
+}
+
+export function dbArtistRemoveImageTx(
+  txClient: TransactionalPrismaClient,
+  userId: string,
+  artistId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  return dbArrayRemoveTx<typeof Prisma.ArtistScalarFieldEnum>(
+    txClient,
+    userId,
+    Prisma.ModelName.Artist,
+    Prisma.ModelName.Image,
+    Prisma.ArtistScalarFieldEnum.imageOrder,
+    artistId,
+    imageIds
+  );
+}
+
+export function dbArtistMoveImageBefore(
+  userId: string,
+  artistId: string,
+  imageId: string,
+  referenceImageId?: string | null
+): Promise<void> {
+  return dbArrayReorder<typeof Prisma.ArtistScalarFieldEnum>(
+    userId,
+    Prisma.ModelName.Artist,
+    Prisma.ArtistScalarFieldEnum.imageOrder,
+    artistId,
+    dbArrayCreateMoveBeforeReorderCallback(imageId, referenceImageId ?? null)
+  );
+}
+
+export function dbArtistSortImages<T extends ImageSortableArtist>(
+  artist: T
+): T {
+  dbArraySort(artist.images, artist.imageOrder);
+  return artist;
+}
+
+export async function dbArtistGetImages(
+  userId: string,
+  artistId: string
+): Promise<(Image & { files: ImageFile[] })[]> {
+  const artist = await client.artist.findFirst({
+    where: {
+      id: artistId,
+      userId,
+    },
+    select: {
+      imageOrder: true,
+      images: {
+        include: {
+          files: true,
+        },
+      },
+    },
+  });
+  if (!artist) {
+    throw new Error(
+      `dbArtistGetImages: artist not found (userId=${userId}, artistId=${artistId})`
+    );
+  }
+  return dbArtistSortImages(artist).images;
 }

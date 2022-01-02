@@ -3,11 +3,8 @@ import { generateAlbumId } from '$shared-server/generateId';
 import { dbArraySort } from '$shared/dbArray';
 import { Album, Image, ImageFile, Prisma } from '$prisma/client';
 import {
-  dbArrayAdd,
   dbArrayAddTx,
   dbArrayCreateMoveBeforeReorderCallback,
-  dbArrayRemove,
-  dbArrayRemoveAll,
   dbArrayRemoveTx,
   dbArrayReorder,
 } from './lib/array';
@@ -102,21 +99,6 @@ export function dbAlbumAddImageTx(
   );
 }
 
-export function dbAlbumAddImage(
-  userId: string,
-  albumId: string,
-  imageIds: string | readonly string[]
-): Promise<void> {
-  return dbArrayAdd<typeof Prisma.AlbumScalarFieldEnum>(
-    userId,
-    Prisma.ModelName.Album,
-    Prisma.ModelName.Image,
-    Prisma.AlbumScalarFieldEnum.imageOrder,
-    albumId,
-    imageIds
-  );
-}
-
 export function dbAlbumRemoveImageTx(
   txClient: TransactionalPrismaClient,
   userId: string,
@@ -131,34 +113,6 @@ export function dbAlbumRemoveImageTx(
     Prisma.AlbumScalarFieldEnum.imageOrder,
     albumId,
     imageIds
-  );
-}
-
-export function dbAlbumRemoveImage(
-  userId: string,
-  albumId: string,
-  imageIds: string | readonly string[]
-): Promise<void> {
-  return dbArrayRemove<typeof Prisma.AlbumScalarFieldEnum>(
-    userId,
-    Prisma.ModelName.Album,
-    Prisma.ModelName.Image,
-    Prisma.AlbumScalarFieldEnum.imageOrder,
-    albumId,
-    imageIds
-  );
-}
-
-export function dbAlbumRemoveAllImages(
-  userId: string,
-  albumId: string
-): Promise<void> {
-  return dbArrayRemoveAll<typeof Prisma.AlbumScalarFieldEnum>(
-    userId,
-    Prisma.ModelName.Album,
-    Prisma.ModelName.Image,
-    Prisma.AlbumScalarFieldEnum.imageOrder,
-    albumId
   );
 }
 
@@ -184,21 +138,8 @@ export function dbAlbumSortImages<T extends ImageSortableAlbum>(album: T): T {
 
 export async function dbAlbumGetImages(
   userId: string,
-  albumId: string,
-  includeFiles?: false
-): Promise<Image[]>;
-
-export async function dbAlbumGetImages(
-  userId: string,
-  albumId: string,
-  includeFiles: true
-): Promise<(Image & { files: ImageFile[] })[]>;
-
-export async function dbAlbumGetImages(
-  userId: string,
-  albumId: string,
-  includeFiles = false
-) {
+  albumId: string
+): Promise<(Image & { files: ImageFile[] })[]> {
   const album = await client.album.findFirst({
     where: {
       id: albumId,
@@ -208,7 +149,7 @@ export async function dbAlbumGetImages(
       imageOrder: true,
       images: {
         include: {
-          files: includeFiles || false,
+          files: true,
         },
       },
     },

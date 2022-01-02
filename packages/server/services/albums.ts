@@ -1,10 +1,11 @@
 import { generateAlbumId } from '$shared-server/generateId';
 import type { Album } from '$prisma/client';
+import { dbAlbumRemoveImageTx } from '$/db/album';
 import { client } from '$/db/lib/client';
-import { dbImageDeleteByImageOrderTx } from '$/db/lib/image';
+import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
-import { osDeleteImageFiles } from '$/os/imageFile';
 import { HTTPError } from '$/utils/httpError';
+import { imageDeleteFilesAndSourceFiles } from './images';
 
 export function getAlbums(userId: string, artistId?: string): Promise<Album[]> {
   return client.album.findMany({
@@ -68,6 +69,19 @@ export async function updateAlbum(
   await dbResourceUpdateTimestamp(userId);
 }
 
+export async function albumRemoveImages(
+  userId: string,
+  albumId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  const images = await client.$transaction(async (txClient) => {
+    await dbAlbumRemoveImageTx(txClient, userId, albumId, imageIds);
+    return dbImageDeleteTx(txClient, userId, imageIds);
+  });
+  await imageDeleteFilesAndSourceFiles(userId, images, true);
+  await dbResourceUpdateTimestamp(userId);
+}
+
 /**
  * 指定されたアルバムが参照されていない場合に削除する
  *
@@ -94,7 +108,7 @@ export async function albumDeleteIfUnreferenced(
     }
   }
 
-  const [artistId, imageFiles] = await client.$transaction(async (txClient) => {
+  const [artistId, images] = await client.$transaction(async (txClient) => {
     // delete images
     const album = await txClient.album.findFirst({
       where: {
@@ -110,7 +124,7 @@ export async function albumDeleteIfUnreferenced(
       throw new HTTPError(404, `Album ${albumId} not found`);
     }
 
-    const imageFiles = await dbImageDeleteByImageOrderTx(
+    const images = await dbImageDeleteByImageOrderTx(
       txClient,
       userId,
       album.imageOrder
@@ -134,17 +148,18 @@ export async function albumDeleteIfUnreferenced(
         `Images are modified during deletion of album ${albumId}`
       );
     }
+
     await dbDeletionAddTx(txClient, userId, 'album', albumId);
 
-    return [album.artistId, imageFiles] as const;
+    return [album.artistId, images] as const;
   });
 
+  await imageDeleteFilesAndSourceFiles(userId, images, true);
+
+  // update resource timestamp
   if (!skipUpdateTimestamp) {
     await dbResourceUpdateTimestamp(userId);
   }
-
-  // delete image files from S3
-  await osDeleteImageFiles(userId, imageFiles);
 
   return artistId;
 }

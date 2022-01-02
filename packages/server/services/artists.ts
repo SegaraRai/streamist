@@ -1,8 +1,22 @@
+import { dbArtistRemoveImageTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
-import { dbImageDeleteByImageOrderTx } from '$/db/lib/image';
+import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
-import { osDeleteImageFiles } from '$/os/imageFile';
 import { HTTPError } from '$/utils/httpError';
+import { imageDeleteFilesAndSourceFiles } from './images';
+
+export async function artistRemoveImages(
+  userId: string,
+  artistId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  const images = await client.$transaction(async (txClient) => {
+    await dbArtistRemoveImageTx(txClient, userId, artistId, imageIds);
+    return dbImageDeleteTx(txClient, userId, imageIds);
+  });
+  await imageDeleteFilesAndSourceFiles(userId, images, true);
+  await dbResourceUpdateTimestamp(userId);
+}
 
 /**
  * 指定されたアーティストが参照されていない場合に削除する
@@ -35,7 +49,7 @@ export async function artistDeleteIfUnreferenced(
     }
   }
 
-  const imageFiles = await client.$transaction(async (txClient) => {
+  const images = await client.$transaction(async (txClient) => {
     // delete images
     const artist = await txClient.artist.findFirst({
       where: {
@@ -50,7 +64,7 @@ export async function artistDeleteIfUnreferenced(
       throw new HTTPError(404, `Artist ${artistId} not found`);
     }
 
-    const imageFiles = await dbImageDeleteByImageOrderTx(
+    const images = await dbImageDeleteByImageOrderTx(
       txClient,
       userId,
       artist.imageOrder
@@ -74,15 +88,15 @@ export async function artistDeleteIfUnreferenced(
     }
     await dbDeletionAddTx(txClient, userId, 'artist', artistId);
 
-    return imageFiles;
+    return images;
   });
 
+  await imageDeleteFilesAndSourceFiles(userId, images, true);
+
+  // update resource timestamp
   if (!skipUpdateTimestamp) {
     await dbResourceUpdateTimestamp(userId);
   }
-
-  // delete image files from S3
-  await osDeleteImageFiles(userId, imageFiles);
 
   return true;
 }

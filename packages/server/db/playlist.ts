@@ -1,5 +1,5 @@
 import { dbArraySort } from '$shared/dbArray';
-import { Prisma, Track } from '$prisma/client';
+import { Image, ImageFile, Prisma, Track } from '$prisma/client';
 import {
   dbArrayAdd,
   dbArrayAddTx,
@@ -9,26 +9,11 @@ import {
   dbArrayRemoveTx,
   dbArrayReorder,
 } from './lib/array';
+import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
 
+export type ImageSortablePlaylist = { imageOrder: string; images: Image[] };
 export type TrackSortablePlaylist = { trackOrder: string; tracks: Track[] };
-
-export function dbPlaylistAddImageTx(
-  txClient: TransactionalPrismaClient,
-  userId: string,
-  playlistId: string,
-  imageIds: string | readonly string[]
-): Promise<void> {
-  return dbArrayAddTx<typeof Prisma.PlaylistScalarFieldEnum>(
-    txClient,
-    userId,
-    Prisma.ModelName.Playlist,
-    Prisma.ModelName.Image,
-    Prisma.PlaylistScalarFieldEnum.imageOrder,
-    playlistId,
-    imageIds
-  );
-}
 
 export function dbPlaylistAddTrackTx(
   txClient: TransactionalPrismaClient,
@@ -127,4 +112,86 @@ export function dbPlaylistSortTracks<T extends TrackSortablePlaylist>(
 ): T {
   dbArraySort(playlist.tracks, playlist.trackOrder);
   return playlist;
+}
+
+export function dbPlaylistAddImageTx(
+  txClient: TransactionalPrismaClient,
+  userId: string,
+  playlistId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  return dbArrayAddTx<typeof Prisma.PlaylistScalarFieldEnum>(
+    txClient,
+    userId,
+    Prisma.ModelName.Playlist,
+    Prisma.ModelName.Image,
+    Prisma.PlaylistScalarFieldEnum.imageOrder,
+    playlistId,
+    imageIds
+  );
+}
+
+export function dbPlaylistRemoveImageTx(
+  txClient: TransactionalPrismaClient,
+  userId: string,
+  playlistId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  return dbArrayRemoveTx<typeof Prisma.PlaylistScalarFieldEnum>(
+    txClient,
+    userId,
+    Prisma.ModelName.Playlist,
+    Prisma.ModelName.Image,
+    Prisma.PlaylistScalarFieldEnum.imageOrder,
+    playlistId,
+    imageIds
+  );
+}
+
+export function dbPlaylistMoveImageBefore(
+  userId: string,
+  playlistId: string,
+  imageId: string,
+  referenceImageId?: string | null
+): Promise<void> {
+  return dbArrayReorder<typeof Prisma.PlaylistScalarFieldEnum>(
+    userId,
+    Prisma.ModelName.Playlist,
+    Prisma.PlaylistScalarFieldEnum.imageOrder,
+    playlistId,
+    dbArrayCreateMoveBeforeReorderCallback(imageId, referenceImageId ?? null)
+  );
+}
+
+export function dbPlaylistSortImages<T extends ImageSortablePlaylist>(
+  playlist: T
+): T {
+  dbArraySort(playlist.images, playlist.imageOrder);
+  return playlist;
+}
+
+export async function dbPlaylistGetImages(
+  userId: string,
+  playlistId: string
+): Promise<(Image & { files: ImageFile[] })[]> {
+  const playlist = await client.playlist.findFirst({
+    where: {
+      id: playlistId,
+      userId,
+    },
+    select: {
+      imageOrder: true,
+      images: {
+        include: {
+          files: true,
+        },
+      },
+    },
+  });
+  if (!playlist) {
+    throw new Error(
+      `dbPlaylistGetImages: playlist not found (userId=${userId}, playlistId=${playlistId})`
+    );
+  }
+  return dbPlaylistSortImages(playlist).images;
 }

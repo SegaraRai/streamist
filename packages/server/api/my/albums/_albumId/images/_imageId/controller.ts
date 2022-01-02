@@ -1,5 +1,6 @@
-import { dbAlbumMoveImageBefore, dbAlbumRemoveImage } from '$/db/album';
+import { dbAlbumMoveImageBefore } from '$/db/album';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { albumRemoveImages } from '$/services/albums';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -15,10 +16,7 @@ export default defineController(() => ({
     return { status: 204 };
   },
   delete: async ({ params, user }) => {
-    await dbAlbumRemoveImage(user.id, params.albumId, params.imageId).catch(
-      (error) => Promise.reject(new HTTPError(404, String(error)))
-    );
-    await dbResourceUpdateTimestamp(user.id);
+    await albumRemoveImages(user.id, params.albumId, params.imageId);
     return { status: 204 };
   },
 }));

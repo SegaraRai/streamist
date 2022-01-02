@@ -11,12 +11,12 @@ export async function osDeleteImageFiles(
   userId: string,
   imageFiles: readonly Pick<ImageFile, 'region' | 'id' | 'extension'>[]
 ): Promise<void> {
-  const regionToImageFilesMap = createMultiMap(imageFiles, 'region');
-  for (const [region, regionImageFiles] of regionToImageFilesMap) {
+  const regionToFilesMap = createMultiMap(imageFiles, 'region');
+  for (const [region, regionFiles] of regionToFilesMap) {
     const os = getTranscodedImageFileOS(region as Region);
     await osDelete(
       os,
-      regionImageFiles.map((file) =>
+      regionFiles.map((file): string =>
         getTranscodedImageFileKey(userId, file.id, file.extension)
       )
     );
