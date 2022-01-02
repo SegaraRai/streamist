@@ -38,7 +38,7 @@ model Source {
   transcodeFinishedAt Int? //@db.BigInt
   createdAt           Int //@db.BigInt
   updatedAt           Int //@db.BigInt
-  user                User         @relation(fields: [userId], references: [id])
+  user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              String
   files               SourceFile[]
 
@@ -61,16 +61,16 @@ model SourceFile {
   attachToType   String? // 'album' | 'artist' | 'playlist'
   attachToId     String?
   // only for extracted image files
-  sourceFile     SourceFile?  @relation("SourceFileToExtractedSourceFile", fields: [sourceFileId], references: [id])
+  sourceFile     SourceFile?  @relation("SourceFileToExtractedSourceFile", fields: [sourceFileId], references: [id], onDelete: Restrict)
   sourceFileId   String?
   entityExists   Boolean // whether the original file exists in S3. `false` for unuploaded files and extracted image files
   uploadId       String? // S3 UploadId for multipart uploads
   uploadedAt     Int? //@db.BigInt
   createdAt      Int //@db.BigInt
   updatedAt      Int //@db.BigInt
-  source         Source       @relation(fields: [sourceId], references: [id])
+  source         Source       @relation(fields: [sourceId], references: [id], onDelete: Restrict)
   sourceId       String
-  user           User         @relation(fields: [userId], references: [id])
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
   images         Image[]
   tracks         Track[]
@@ -86,9 +86,9 @@ model Artist {
   nameSort       String?
   createdAt      Int //@db.BigInt
   updatedAt      Int //@db.BigInt
-  user           User            @relation(fields: [userId], references: [id])
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-  images         Image[]
+  images         Image[]         @relation(onDelete: Restrict)
   imageOrder     String          @default("")
   tracks         Track[]
   albums         Album[]
@@ -107,11 +107,11 @@ model Album {
   replayGainPeak Float?
   createdAt      Int //@db.BigInt
   updatedAt      Int //@db.BigInt
-  user           User            @relation(fields: [userId], references: [id])
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-  artist         Artist          @relation(fields: [artistId], references: [id])
+  artist         Artist          @relation(fields: [artistId], references: [id], onDelete: Restrict)
   artistId       String
-  images         Image[]
+  images         Image[]         @relation(onDelete: Restrict)
   imageOrder     String          @default("")
   tracks         Track[]
   coArtists      AlbumCoArtist[]
@@ -138,16 +138,16 @@ model Track {
   replayGainPeak       Float?
   createdAt            Int //@db.BigInt
   updatedAt            Int //@db.BigInt
-  user                 User            @relation(fields: [userId], references: [id])
+  user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId               String
-  artist               Artist          @relation(fields: [artistId], references: [id])
+  artist               Artist          @relation(fields: [artistId], references: [id], onDelete: Restrict)
   artistId             String
-  album                Album           @relation(fields: [albumId], references: [id])
+  album                Album           @relation(fields: [albumId], references: [id], onDelete: Restrict)
   albumId              String
-  sourceFile           SourceFile      @relation(fields: [sourceFileId], references: [id])
+  sourceFile           SourceFile      @relation(fields: [sourceFileId], references: [id], onDelete: Restrict)
   sourceFileId         String
   files                TrackFile[]
-  playlists            Playlist[]
+  playlists            Playlist[]      @relation(onDelete: Cascade)
   coArtists            TrackCoArtist[]
 
   @@index([userId])
@@ -166,9 +166,9 @@ model TrackFile {
   duration  Float
   createdAt Int //@db.BigInt
   updatedAt Int //@db.BigInt
-  track     Track  @relation(fields: [trackId], references: [id])
+  track     Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
   trackId   String
-  user      User   @relation(fields: [userId], references: [id])
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
 
   @@index([userId])
@@ -182,14 +182,14 @@ model Image {
   dHash        String
   createdAt    Int //@db.BigInt
   updatedAt    Int //@db.BigInt
-  user         User        @relation(fields: [userId], references: [id])
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
-  sourceFile   SourceFile  @relation(fields: [sourceFileId], references: [id])
+  sourceFile   SourceFile  @relation(fields: [sourceFileId], references: [id], onDelete: Restrict)
   sourceFileId String
   files        ImageFile[]
-  albums       Album[]
-  artists      Artist[]
-  playlists    Playlist[]
+  albums       Album[]     @relation(onDelete: Restrict)
+  artists      Artist[]    @relation(onDelete: Restrict)
+  playlists    Playlist[]  @relation(onDelete: Restrict)
 
   @@index([userId])
 }
@@ -206,9 +206,9 @@ model ImageFile {
   height    Int
   createdAt Int //@db.BigInt
   updatedAt Int //@db.BigInt
-  image     Image  @relation(fields: [imageId], references: [id])
+  image     Image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
   imageId   String
-  user      User   @relation(fields: [userId], references: [id])
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
 
   @@index([userId])
@@ -220,11 +220,11 @@ model AlbumCoArtist {
   role      String
   createdAt Int //@db.BigInt
   updatedAt Int //@db.BigInt
-  user      User   @relation(fields: [userId], references: [id])
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  artist    Artist @relation(fields: [artistId], references: [id])
+  artist    Artist @relation(fields: [artistId], references: [id], onDelete: Restrict)
   artistId  String
-  album     Album  @relation(fields: [albumId], references: [id])
+  album     Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
   albumId   String
 
   @@unique([role, albumId, artistId])
@@ -238,11 +238,11 @@ model TrackCoArtist {
   role      String
   createdAt Int //@db.BigInt
   updatedAt Int //@db.BigInt
-  user      User   @relation(fields: [userId], references: [id])
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
-  artist    Artist @relation(fields: [artistId], references: [id])
+  artist    Artist @relation(fields: [artistId], references: [id], onDelete: Restrict)
   artistId  String
-  track     Track  @relation(fields: [trackId], references: [id])
+  track     Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
   trackId   String
 
   @@unique([role, trackId, artistId])
@@ -257,11 +257,11 @@ model Playlist {
   notes      String  @default("")
   createdAt  Int //@db.BigInt
   updatedAt  Int //@db.BigInt
-  user       User    @relation(fields: [userId], references: [id])
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
-  images     Image[]
+  images     Image[] @relation(onDelete: Restrict)
   imageOrder String  @default("")
-  tracks     Track[]
+  tracks     Track[] @relation(onDelete: Restrict)
   trackOrder String  @default("")
 
   @@index([userId])
@@ -272,7 +272,7 @@ model Deletion {
   entityType String
   entityId   String
   deletedAt  Int //@db.BigInt
-  user       User   @relation(fields: [userId], references: [id])
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
 
   @@id([entityType, entityId, userId])
@@ -280,7 +280,7 @@ model Deletion {
 }
 
 model ResourceUpdate {
-  user      User   @relation(fields: [userId], references: [id])
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String @id
   updatedAt Int //@db.BigInt
 }
