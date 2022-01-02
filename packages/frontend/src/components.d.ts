@@ -4,8 +4,11 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    IMdiCloudUpload: typeof import('~icons/mdi/cloud-upload')['default']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
+    NDropdown: typeof import('naive-ui')['NDropdown']
+    NEllipsis: typeof import('naive-ui')['NEllipsis']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
@@ -17,6 +20,7 @@ declare module 'vue' {
     SArtistImage: typeof import('./components/SArtistImage.vue')['default']
     SArtistImageX: typeof import('./components/SArtistImageX.vue')['default']
     SConditionalLink: typeof import('./components/SConditionalLink.vue')['default']
+    SDialogTrackEdit: typeof import('./components/SDialogTrackEdit.vue')['default']
     SImageManager: typeof import('./components/SImageManager.vue')['default']
     SMobilePlaybackControl: typeof import('./components/SMobilePlaybackControl.vue')['default']
     SNoImage: typeof import('./components/SNoImage.vue')['default']

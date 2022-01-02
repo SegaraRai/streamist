@@ -51,8 +51,8 @@ title:
 track-list-dropdown:
   Play: Play
   Pause: Pause
-  GoToAlbum: 'Visit album'
-  GoToArtist: 'Visit artist'
+  GoToAlbum: Go to album
+  GoToArtist: Go to artist
   AddToPlayNextQueue: Add to queue
   RemoveFromPlayNextQueue: Remove from queue
   AddToQueue: Add to queue
@@ -61,8 +61,16 @@ track-list-dropdown:
   RemoveFromPlaylist: Remove from playlist
   Edit: Edit
   Delete: Delete
+dialog:
+  deleteTrack:
+    title: Delete Track
+    content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
+    buttonDelete: Delete
+    buttonCancel: Cancel
 message:
-  AddedToPlayNextQueue: 'Added to queue'
+  DeletedTrack: "Deleted track '{0}'"
+  FailedToDeleteTrack: "Failed to delete track '{0}'"
+  AddedToPlayNextQueue: Added to queue
   AddedToPlaylist: "Added '{1}' to '{0}'"
   FailedToAddToPlaylist: "Failed to add '{1}' to '{0}'\n{2}"
   RemovedFromPlaylist: "Removed '{1}' from '{0}'"

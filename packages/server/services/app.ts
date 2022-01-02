@@ -1,3 +1,5 @@
+import '$/services/initCredentials';
+
 import Fastify, { FastifyServerFactory } from 'fastify';
 import cors from 'fastify-cors';
 import helmet from 'fastify-helmet';

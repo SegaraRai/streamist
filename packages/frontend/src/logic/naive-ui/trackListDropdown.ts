@@ -1,4 +1,4 @@
-import { MenuOption, useMessage } from 'naive-ui';
+import { MenuOption, useDialog, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import { useTheme } from 'vuetify';
 import { syncDB } from '~/db/sync';
@@ -16,6 +16,7 @@ interface TrackListDropdownCreateOptions {
   >;
   readonly showVisitAlbum$$q: Readonly<Ref<boolean>>;
   readonly showVisitArtist$$q: Readonly<Ref<boolean>>;
+  readonly openEditTrackDialog$$q: (track: ResourceTrack) => void;
   readonly closeMenu$$q: () => void;
 }
 
@@ -25,11 +26,13 @@ export function createTrackListDropdown({
   setList$$q,
   showVisitAlbum$$q,
   showVisitArtist$$q,
+  openEditTrackDialog$$q,
   closeMenu$$q,
 }: TrackListDropdownCreateOptions): ComputedRef<MenuOption[]> {
   const router = useRouter();
   const { t } = useI18n();
   const theme = useTheme({});
+  const dialog = useDialog();
   const message = useMessage();
   const playbackStore = usePlaybackStore();
   const allPlaylist = useAllPlaylists();
@@ -232,7 +235,7 @@ export function createTrackListDropdown({
       icon: nCreateDropdownIcon('mdi-pencil'),
       props: {
         onClick: () => {
-          // open edit track dialog
+          openEditTrackDialog$$q(track);
           closeMenu$$q();
         },
       },
@@ -252,7 +255,30 @@ export function createTrackListDropdown({
       props: {
         style: nCreateDropdownTextColorStyle(theme, 'error'),
         onClick: () => {
-          // open edit track dialog
+          dialog.warning({
+            title: t('dialog.deleteTrack.title'),
+            content: t('dialog.deleteTrack.content', [track.title]),
+            positiveText: t('dialog.deleteTrack.buttonDelete'),
+            negativeText: t('dialog.deleteTrack.buttonCancel'),
+            onPositiveClick: () => {
+              api.my.tracks
+                ._trackId(trackId)
+                .$delete()
+                .then(() => {
+                  message.success(t('message.DeletedTrack', [track.title]));
+                  syncDB();
+                })
+                .catch((error) => {
+                  message.error(
+                    t('message.FailedToDeleteTrack', [
+                      track.title,
+                      String(error),
+                    ])
+                  );
+                  console.error(error);
+                });
+            },
+          });
           closeMenu$$q();
         },
       },

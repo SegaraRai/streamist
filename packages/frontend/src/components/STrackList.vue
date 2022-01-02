@@ -213,6 +213,9 @@ export default defineComponent({
       playlistId$$q: eagerComputed(() => props.playlistId),
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
+      openEditTrackDialog$$q: (track: ResourceTrack) => {
+
+      },
     });
 
     return {

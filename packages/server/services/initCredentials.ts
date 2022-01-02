@@ -1,0 +1,10 @@
+import { setOSCredentials } from '$shared-server/objectStorage';
+import {
+  SECRET_SERVER_WASABI_ACCESS_KEY_ID,
+  SECRET_SERVER_WASABI_SECRET_ACCESS_KEY,
+} from './env';
+
+setOSCredentials({
+  WASABI_ACCESS_KEY_ID: SECRET_SERVER_WASABI_ACCESS_KEY_ID,
+  WASABI_SECRET_ACCESS_KEY: SECRET_SERVER_WASABI_SECRET_ACCESS_KEY,
+});

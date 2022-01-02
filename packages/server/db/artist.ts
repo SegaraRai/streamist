@@ -1,7 +1,7 @@
 import { expectType } from 'tsd';
 import { generateArtistId } from '$shared-server/generateId';
+import { dbArraySort } from '$shared/dbArray';
 import { Artist, Image, ImageFile, Prisma } from '$prisma/client';
-import { dbArraySort } from '../dbArray';
 import {
   dbArrayAddTx,
   dbArrayCreateMoveBeforeReorderCallback,
