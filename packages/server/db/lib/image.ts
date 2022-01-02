@@ -41,6 +41,9 @@ export async function dbImageDeleteTx(
     },
   });
 
+  // delete image
+  // * Image id is referenced from: ImageFile, Album (implicit m:n), Artist (implicit m:n), Playlist (implicit m:n)
+  // * ImageFile id is referenced from: (none)
   // ImageFiles will be cascade deleted here
   const imageDeleteResult = await txClient.image.deleteMany({
     where: {

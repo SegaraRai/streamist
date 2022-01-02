@@ -1,6 +1,6 @@
 import { dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
-import { updateAlbum } from '$/services/albums';
+import { albumUpdate } from '$/services/albums';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -33,9 +33,7 @@ export default defineController(() => ({
     };
   },
   patch: async ({ body, params, user }) => {
-    // NOTE: updateAlbum側でresourcesのタイムスタンプを更新している
-    // 一貫性のためこっちに移すか他を変えるかしたい
-    await updateAlbum(user.id, params.albumId, body.title);
+    await albumUpdate(user.id, params.albumId, body.title);
     return { status: 204 };
   },
 }));

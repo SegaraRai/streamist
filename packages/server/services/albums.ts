@@ -1,5 +1,3 @@
-import { generateAlbumId } from '$shared-server/generateId';
-import type { Album } from '$prisma/client';
 import { dbAlbumRemoveImageTx } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
@@ -7,50 +5,7 @@ import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
-export function getAlbums(userId: string, artistId?: string): Promise<Album[]> {
-  return client.album.findMany({
-    where: {
-      userId,
-      artistId,
-    },
-    include: {
-      images: true,
-    },
-  });
-}
-
-export async function createAlbum(
-  userId: string,
-  title: string,
-  artistId: string
-): Promise<Album> {
-  const artist = await client.artist.findFirst({
-    where: {
-      id: artistId,
-      userId,
-    },
-  });
-  if (!artist) {
-    throw new HTTPError(400, `Artist ${artistId} not found`);
-  }
-
-  const album = await client.album.create({
-    data: {
-      id: await generateAlbumId(),
-      title,
-      userId,
-      artistId,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    },
-  });
-
-  await dbResourceUpdateTimestamp(userId);
-
-  return album;
-}
-
-export async function updateAlbum(
+export async function albumUpdate(
   userId: string,
   albumId: string,
   title: string
@@ -131,7 +86,7 @@ export async function albumDeleteIfUnreferenced(
     );
 
     // delete album
-    // * Album is referenced from: Track, AlbumCoArtist, Image (implicit m:n)
+    // * Album id is referenced from: Track, AlbumCoArtist, Image (implicit m:n)
     // AlbumCoArtist will be cascade deleted (Deletion of AlbumCoArtist is not recorded, therefore the client must synchronize AlbumCoArtist based on the Deletion of Album)
     // TODO(db): set ON DELETE RESTRICT for Track and Image (implicit m:n) table
     const result = await txClient.album.deleteMany({

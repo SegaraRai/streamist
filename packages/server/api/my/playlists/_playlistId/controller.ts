@@ -1,9 +1,8 @@
-import { is } from '$shared/is';
-import type { DeletionEntityType } from '$shared/types/db';
 import { ImageSortableAlbum, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { dbPlaylistSortTracks } from '$/db/playlist';
+import { playlistDelete } from '$/services/playlists';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -71,26 +70,7 @@ export default defineController(() => ({
     return { status: 204 };
   },
   delete: async ({ params, user }) => {
-    await client.$transaction(async (txClient) => {
-      const deleted = await txClient.playlist.deleteMany({
-        where: {
-          id: params.playlistId,
-          userId: user.id,
-        },
-      });
-      if (deleted.count === 0) {
-        throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
-      }
-      await txClient.deletion.create({
-        data: {
-          entityType: is<DeletionEntityType>('playlist'),
-          entityId: params.playlistId,
-          userId: user.id,
-          deletedAt: Date.now(),
-        },
-      });
-    });
-    await dbResourceUpdateTimestamp(user.id);
+    await playlistDelete(user.id, params.playlistId);
     return { status: 204 };
   },
 }));

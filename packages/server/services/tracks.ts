@@ -50,6 +50,7 @@ export async function trackDelete(
     );
 
     // delete track files
+    // * TrackFile id is referenced from: (none)
     const trackFiles = await txClient.trackFile.findMany({
       where: {
         trackId,
@@ -79,7 +80,7 @@ export async function trackDelete(
     }
 
     // delete track
-    // * Track is referenced from: TrackCoArtist, Playlist (implicit m:n)
+    // * Track id is referenced from: TrackCoArtist, Playlist (implicit m:n)
     // TrackCoArtist will be cascade deleted (Deletion of TrackCoArtist is not recorded, therefore the client must synchronize TrackCoArtist based on the Deletion of Track)
     // TODO(db): set ON DELETE RESTRICT for Playlist (implicit m:n) table
     const deleted = await txClient.track.deleteMany({
