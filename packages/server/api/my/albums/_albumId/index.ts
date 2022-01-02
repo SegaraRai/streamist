@@ -13,5 +13,5 @@ export type Methods = {
   patch: {
     reqBody: Pick<Album, 'title'>;
   };
-  delete: {};
+  // NOTE: DELETEはとりあえずは作成しない、アルバムはトラックをすべて削除すると削除される
 };

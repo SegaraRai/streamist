@@ -24,9 +24,9 @@ import type {
 import { dbAlbumAddImageTx } from '$/db/album.js';
 import { dbArtistAddImageTx } from '$/db/artist.js';
 import { client } from '$/db/lib/client.js';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource.js';
 import type { TransactionalPrismaClient } from '$/db/lib/types.js';
 import { dbPlaylistAddImageTx } from '$/db/playlist.js';
-import { updateUserResourceTimestamp } from '$/db/resource.js';
 import { dbTrackCreateTx } from '$/db/track.js';
 import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env.js';
 
@@ -407,12 +407,10 @@ async function handleTranscoderResponse(
         const deleteTranscodedFiles = async () => {
           // NOTE(ximg): currently we don't upload raw extracted images to S3. Delete them if we do.
           const os = getTranscodedImageFileOS(artifact.source.region);
-          await Promise.allSettled(
+          await osDelete(
+            os,
             artifact.files.map((file) =>
-              osDelete(
-                os,
-                getTranscodedImageFileKey(userId, file.fileId, file.extension)
-              )
+              getTranscodedImageFileKey(userId, file.fileId, file.extension)
             )
           );
         };
@@ -510,7 +508,7 @@ async function handleTranscoderResponse(
     artifacts.map((artifact) => artifact.source.userId)
   );
   for (const userId of userIdSet) {
-    await updateUserResourceTimestamp(userId);
+    await dbResourceUpdateTimestamp(userId);
   }
 }
 

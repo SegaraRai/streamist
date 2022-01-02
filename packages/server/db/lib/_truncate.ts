@@ -13,7 +13,6 @@ export function truncate(): Promise<void> {
     await txClient.artist.deleteMany();
     await txClient.sourceFile.deleteMany();
     await txClient.source.deleteMany();
-    await txClient.tag.deleteMany();
     await txClient.user.deleteMany();
   });
 }

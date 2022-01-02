@@ -1,8 +1,8 @@
 <script lang="ts">
 import GGrid from 'vue-virtual-scroll-grid';
 import { useDisplay } from 'vuetify';
+import { createMultiMap } from '$shared/multiMap';
 import { getDefaultArtistImage } from '~/logic/image';
-import { createMultiMap } from '~/logic/multiMap';
 import {
   useAllAlbums,
   useAllArtists,

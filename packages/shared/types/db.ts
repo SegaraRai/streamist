@@ -47,6 +47,9 @@ export type SourceFileType = 'audio' | 'cueSheet' | 'image';
 
 export type SourceFileAttachToType = 'album' | 'artist' | 'playlist';
 
+/**
+ * 'sourceFile' and 'source' will not be used (deleted) in the current implementation
+ */
 export type DeletionEntityType =
   | 'albumCoArtist'
   | 'album'
@@ -55,7 +58,6 @@ export type DeletionEntityType =
   | 'playlist'
   | 'sourceFile'
   | 'source'
-  | 'tag'
   | 'trackCoArtist'
   | 'track';
 

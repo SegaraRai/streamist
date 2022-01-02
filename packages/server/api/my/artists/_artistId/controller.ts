@@ -1,6 +1,6 @@
 import { ImageSortableAlbum, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
-import { updateUserResourceTimestamp } from '$/db/resource';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -75,7 +75,7 @@ export default defineController(() => ({
     if (!newArtist) {
       throw new HTTPError(404, `Artist ${params.artistId} not found`);
     }
-    await updateUserResourceTimestamp(user.id);
+    await dbResourceUpdateTimestamp(user.id);
     return { status: 204 };
   },
 }));

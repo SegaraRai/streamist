@@ -1,7 +1,7 @@
 import { generateArtistId } from '$shared-server/generateId';
 import { dbArtistGetOrCreateByName } from '$/db/artist';
 import { client } from '$/db/lib/client';
-import { updateUserResourceTimestamp } from '$/db/resource';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
@@ -29,7 +29,7 @@ export default defineController(() => ({
 
     const created = artist.id === newArtistId;
     if (created) {
-      await updateUserResourceTimestamp(user.id);
+      await dbResourceUpdateTimestamp(user.id);
     }
 
     return {

@@ -6,7 +6,10 @@ import {
 } from '$/db/album';
 import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
-import { updateUserResourceTimestamp } from '$/db/resource';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { albumDeleteIfUnreferenced } from '$/services/albums';
+import { artistDeleteIfUnreferenced } from '$/services/artists';
+import { trackDelete } from '$/services/tracks';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -47,7 +50,7 @@ export default defineController(() => ({
     const tempNewAlbumId = await generateAlbumId();
     const tempNewArtistId = await generateArtistId();
 
-    const data = await client.$transaction(async (txClient) => {
+    const [oldTrack, newTrack] = await client.$transaction(async (txClient) => {
       const track = await txClient.track.findFirst({
         where: {
           id: params.trackId,
@@ -133,7 +136,7 @@ export default defineController(() => ({
       }
 
       // update track
-      return txClient.track.update({
+      const newTrack = await txClient.track.update({
         data: {
           title: body.title,
           albumId,
@@ -143,10 +146,45 @@ export default defineController(() => ({
           id: track.id,
         },
       });
+
+      return [track, newTrack];
     });
 
-    await updateUserResourceTimestamp(user.id);
+    let checkedArtistId: string | undefined;
+    if (newTrack.albumId !== oldTrack.albumId) {
+      const albumArtistId = await albumDeleteIfUnreferenced(
+        user.id,
+        oldTrack.albumId,
+        true
+      );
 
-    return { status: 204, body: data };
+      // check if albumArtistId is in use
+      if (
+        // album was deleted and,
+        albumArtistId &&
+        // albumArtistId is not referenced (by newTrack)
+        albumArtistId !== newTrack.artistId
+      ) {
+        await artistDeleteIfUnreferenced(user.id, albumArtistId, true);
+        checkedArtistId = albumArtistId;
+      }
+    }
+
+    if (
+      newTrack.artistId !== oldTrack.artistId &&
+      oldTrack.artistId !== checkedArtistId
+    ) {
+      await artistDeleteIfUnreferenced(user.id, oldTrack.artistId, true);
+    }
+
+    await dbResourceUpdateTimestamp(user.id);
+
+    return { status: 204, body: newTrack };
+  },
+  delete: async ({ params, user }) => {
+    await trackDelete(user.id, params.trackId, true);
+    return {
+      status: 204,
+    };
   },
 }));

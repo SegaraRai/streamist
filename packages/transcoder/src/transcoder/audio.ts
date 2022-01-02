@@ -466,9 +466,7 @@ export async function processAudioRequest(
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));
-      await Promise.allSettled(
-        uploadedTranscodedAudioKeys.map((key) => osDelete(os, key))
-      );
+      await osDelete(os, uploadedTranscodedAudioKeys);
     } catch (_error: unknown) {
       // エラーになっても良い
     }

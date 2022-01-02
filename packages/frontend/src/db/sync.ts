@@ -1,11 +1,11 @@
-import type { Table } from 'dexie';
+import type { IndexableType, Table } from 'dexie';
 import type { DeletionEntityType } from '$shared/types/db';
 import api from '~/logic/api';
 import type { ResourceDeletion } from '$/types';
 import { db } from '.';
 
-async function clearAndAdd<T, U>(
-  table: Table<T, U>,
+async function clearAndAdd<T>(
+  table: Table<T, IndexableType>,
   items: readonly T[]
 ): Promise<void> {
   await table.clear();
@@ -13,13 +13,24 @@ async function clearAndAdd<T, U>(
   await table.bulkAdd(items);
 }
 
-async function update<T, U>(
-  table: Table<T, U>,
+async function update<T>(
+  table: Table<T, IndexableType>,
   items: readonly T[],
-  deletedItemIds: U[]
+  deletedItemIds: IndexableType[]
 ): Promise<void> {
   await table.bulkDelete(deletedItemIds);
   await table.bulkPut(items);
+}
+
+async function deleteByParent<T>(
+  table: Table<T, IndexableType>,
+  key: keyof T,
+  deletedItemIds: readonly string[]
+): Promise<void> {
+  await table
+    .where(key as string)
+    .anyOf(deletedItemIds)
+    .delete();
 }
 
 function getDeletionIds(
@@ -93,6 +104,7 @@ export async function syncDB(reconstruct = false): Promise<void> {
             ]);
           } else {
             await Promise.all([
+              deleteByParent(db.albumCoArtists, 'albumId', d.albums),
               update(db.albumCoArtists, r.albumCoArtists, d.albumCoArtists),
               update(db.albums, r.albums, d.albums),
               update(db.artists, r.artists, d.artists),
@@ -100,6 +112,7 @@ export async function syncDB(reconstruct = false): Promise<void> {
               update(db.playlists, r.playlists, d.playlists),
               update(db.sourceFiles, r.sourceFiles, d.sourceFiles),
               update(db.sources, r.sources, d.sources),
+              deleteByParent(db.trackCoArtists, 'trackId', d.tracks),
               update(db.trackCoArtists, r.trackCoArtists, d.trackCoArtists),
               update(db.tracks, r.tracks, d.tracks),
             ]);

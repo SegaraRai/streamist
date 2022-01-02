@@ -18,7 +18,7 @@ import {
 } from '$transcoder/types/transcoder.js';
 import { Source, SourceFile } from '$prisma/client';
 import { client } from '$/db/lib/client.js';
-import { updateUserResourceTimestamp } from '$/db/resource.js';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource.js';
 import { HTTPError } from '$/utils/httpError.js';
 import {
   TRANSCODER_CALLBACK_API_ENDPOINT,
@@ -149,7 +149,7 @@ async function invokeTranscoderBySource(
     },
   });
 
-  await updateUserResourceTimestamp(userId);
+  await dbResourceUpdateTimestamp(userId);
 
   const request: TranscoderRequest = {
     callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
@@ -282,7 +282,7 @@ export async function onSourceFileUploaded(
   );
   if (!allFilesUploaded) {
     // upload in progress
-    await updateUserResourceTimestamp(userId);
+    await dbResourceUpdateTimestamp(userId);
     return;
   }
 
@@ -299,7 +299,7 @@ export async function onSourceFileUploaded(
     },
   });
 
-  await updateUserResourceTimestamp(userId);
+  await dbResourceUpdateTimestamp(userId);
 
   // start transcode
   invokeTranscodeBySourceSync(userId, sourceId);

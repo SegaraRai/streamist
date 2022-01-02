@@ -196,12 +196,18 @@ export async function osGetFile(
 
 export async function osDelete(
   objectStorage: ObjectStorage,
-  key: string
+  keys: string | readonly string[]
 ): Promise<void> {
-  // compression is not currently supported
+  if (typeof keys === 'string') {
+    keys = [keys];
+  }
   const s3 = createS3Cached(objectStorage);
-  await s3.deleteObject({
+  await s3.deleteObjects({
     Bucket: objectStorage.bucket,
-    Key: key,
+    Delete: {
+      Objects: keys.map((key) => ({
+        Key: key,
+      })),
+    },
   });
 }

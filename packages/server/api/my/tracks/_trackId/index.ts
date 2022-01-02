@@ -22,10 +22,7 @@ export type Methods = {
     };
     resBody: Track;
   };
-  /*
-  // TODO(feat): implement delete
   delete: {
     status: 204;
   };
-  //*/
 };

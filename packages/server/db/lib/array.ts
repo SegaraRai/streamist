@@ -163,7 +163,7 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
 }
 
 /**
- * 配列に新規レコードを作成する（概ねアトミック）
+ * 配列に新規レコードを作成する（多分アトミック）
  * @param userId ユーザーID
  * @param mainTable 主となるテーブル（配列を持つ）
  * @param itemTable 配列の要素となるテーブル
@@ -654,4 +654,90 @@ export function dbArrayCreateMoveAfterReorderCallback(
 
     return newItemIds;
   };
+}
+
+/**
+ * あるレコードをすべての配列から削除する（アトミック） \
+ * ジャンクションテーブルも操作する \
+ * これ自体はアトミックだが、使用者はこの処理以降に新たに作成される場合に備えておく必要がある
+ * @param txClient transactional prisma client
+ * @param userId ユーザーID
+ * @param mainTable 主となるテーブル（配列を持つ）
+ * @param itemTable 配列の要素となるテーブル
+ * @param itemOrderColumn 配列の順序を保持するカラム
+ * @param itemId 削除するアイテムID（例えばプレイリストならトラックID）
+ */
+export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
+  txClient: TransactionalPrismaClient,
+  userId: string,
+  mainTable: Prisma.ModelName,
+  itemTable: Prisma.ModelName,
+  itemOrderColumn: T[keyof T],
+  itemId: string
+): Promise<void> {
+  if (/[%_]/.test(itemId)) {
+    return;
+  }
+
+  const itemIdBlock = dbArraySerializeItemIds([itemId]);
+  const searchQuery = `%${itemIdBlock}%`;
+
+  // get the junction table info
+  const {
+    junctionTable,
+    jtTable1Column: jtMainTableColumn,
+    jtTable2Column: jtItemTableColumn,
+  } = getManyToManyTableInfo(mainTable, itemTable);
+
+  const groupIds = (
+    await txClient.$queryRawUnsafe<
+      { readonly A: string; readonly B: string }[]
+    >(
+      `
+      SELECT \`${jtMainTableColumn}\`
+        FROM \`${junctionTable}\`
+        WHERE \`${jtItemTableColumn}\` = $1
+      `,
+      itemId
+    )
+  ).map((junctionRow): string => junctionRow[jtMainTableColumn]);
+
+  const deleted = await txClient.$executeRawUnsafe(
+    `
+    DELETE
+      FROM \`${junctionTable}\`
+      WHERE \`${jtItemTableColumn}\` = $1 AND \`${jtMainTableColumn}\` IN (${dbCreatePlaceholders(
+      groupIds,
+      2
+    )})
+    `,
+    itemId,
+    ...groupIds
+  );
+  if (deleted !== groupIds.length) {
+    throw new DBArrayOptimisticLockAbortError(
+      `dbArrayRemoveFromAllTx: failed to DELETE some rows (at ${junctionTable}, userId: ${userId}, itemId: ${itemId}, groupIds: ${groupIds})`
+    );
+  }
+
+  const updated = await txClient.$executeRawUnsafe(
+    `
+    UPDATE \`${mainTable}\`
+      SET \`${itemOrderColumn}\` = REPLACE(\`${itemOrderColumn}\`, $1, ''), \`${updatedAtColumn}\` = $2
+      WHERE \`${userIdColumn}\` = $3 AND \`${itemOrderColumn}\` LIKE $4 AND \`${idColumn}\` IN (${dbCreatePlaceholders(
+      groupIds,
+      5
+    )})
+    `,
+    itemIdBlock,
+    Date.now(),
+    userId,
+    searchQuery,
+    ...groupIds
+  );
+  if (updated !== groupIds.length) {
+    throw new DBArrayOptimisticLockAbortError(
+      `dbArrayRemoveFromAllTx: failed to UPDATE some rows (at ${junctionTable}, userId: ${userId}, itemId: ${itemId}, groupIds: ${groupIds})`
+    );
+  }
 }

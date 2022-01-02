@@ -42,7 +42,7 @@ export async function dbArtistGetOrCreateByNameTx(
     },
   });
   if (!artist) {
-    // should not occur
+    // should rarely happen
     throw new Error(
       `dbArtistGetOrCreateByNameTx: failed to get (userId=${userId}, artistName=${artistName})`
     );

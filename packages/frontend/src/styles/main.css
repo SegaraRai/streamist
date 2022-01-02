@@ -24,3 +24,10 @@
 .s-hover-container:hover .s-hover-hidden {
   display: none;
 }
+
+.s-autofill-color input:-webkit-autofill,
+.s-autofill-color textarea:-webkit-autofill {
+  background-color: var(--s-autofill-bg) !important;
+  background-image: none;
+  color: var(--s-autofill-text);
+}

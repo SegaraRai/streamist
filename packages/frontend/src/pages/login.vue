@@ -35,32 +35,30 @@ export default defineComponent({
 
 <template>
   <div class="flex items-center justify-center h-full">
-    <v-card class="elevation-12 max-w-xl flex-1">
+    <v-card class="elevation-4 max-w-xl flex-1">
       <v-card-header>
         <v-card-header-text class="text-2xl">Login</v-card-header-text>
       </v-card-header>
       <v-card-text>
-        <v-form>
+        <v-form
+          class="s-autofill-color"
+          style="--s-autofill-bg: #0003; --s-autofill-text: inherit"
+        >
           <v-text-field
             v-model="username$$q"
-            prepend-icon="person"
-            name="login"
-            label="Login"
+            prepend-inner-icon="mdi-account"
             type="text"
           />
           <v-text-field
-            id="password"
             v-model="password$$q"
-            prepend-icon="lock"
-            name="password"
-            label="Password"
             type="password"
+            prepend-inner-icon="mdi-lock"
           />
         </v-form>
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn color="primary" @click="login$$q">Login</v-btn>
+        <v-btn flat text color="transparent" @click="login$$q">Login</v-btn>
       </v-card-actions>
     </v-card>
   </div>

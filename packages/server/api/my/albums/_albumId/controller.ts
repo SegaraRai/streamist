@@ -1,6 +1,6 @@
 import { dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
-import { deleteAlbum, updateAlbum } from '$/services/albums';
+import { updateAlbum } from '$/services/albums';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -36,12 +36,6 @@ export default defineController(() => ({
     // NOTE: updateAlbum側でresourcesのタイムスタンプを更新している
     // 一貫性のためこっちに移すか他を変えるかしたい
     await updateAlbum(user.id, params.albumId, body.title);
-    return { status: 204 };
-  },
-  delete: async ({ params, user }) => {
-    // NOTE: deleteAlbum側でresourcesのタイムスタンプを更新している
-    // 一貫性のためこっちに移すか他を変えるかしたい
-    await deleteAlbum(user.id, params.albumId);
     return { status: 204 };
   },
 }));

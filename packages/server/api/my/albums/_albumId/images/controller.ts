@@ -1,5 +1,5 @@
 import { dbAlbumAddImage, dbAlbumGetImages } from '$/db/album';
-import { updateUserResourceTimestamp } from '$/db/resource';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
@@ -12,7 +12,7 @@ export default defineController(() => ({
   },
   post: async ({ body, params, user }) => {
     await dbAlbumAddImage(user.id, params.albumId, body.imageId);
-    await updateUserResourceTimestamp(user.id);
+    await dbResourceUpdateTimestamp(user.id);
     return {
       status: 201,
       headers: {

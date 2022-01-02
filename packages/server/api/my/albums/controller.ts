@@ -1,7 +1,7 @@
 import { generateAlbumId } from '$shared-server/generateId';
 import { dbAlbumGetOrCreateByName, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
-import { updateUserResourceTimestamp } from '$/db/resource';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -61,7 +61,7 @@ export default defineController(() => ({
 
     const created = album.id === newAlbumId;
     if (created) {
-      await updateUserResourceTimestamp(user.id);
+      await dbResourceUpdateTimestamp(user.id);
     }
 
     return {

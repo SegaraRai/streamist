@@ -9,7 +9,6 @@ import type {
   Playlist,
   Source,
   SourceFile,
-  Tag,
   Track,
   TrackCoArtist,
   TrackFile,
@@ -39,8 +38,6 @@ export interface ResourceSource extends Readonly<Source> {}
 
 // sourceFileId単体で索引できるようにするためにSourceの中に入れない
 export interface ResourceSourceFile extends Readonly<SourceFile> {}
-
-export interface ResourceTag extends Readonly<Tag> {}
 
 export interface ResourceTrack extends Readonly<Track> {
   readonly files: readonly Readonly<TrackFile>[];

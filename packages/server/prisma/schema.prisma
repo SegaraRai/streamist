@@ -268,7 +268,7 @@ model Playlist {
 }
 
 model Deletion {
-  // 'album', 'albumCoArtist', 'artist', 'image', 'imageFile', 'playlist', 'source', 'sourceFile', 'tag', 'track', 'trackCoArtist', 'trackFile'
+  // 'album', 'albumCoArtist', 'artist', 'image', 'imageFile', 'playlist', 'source', 'sourceFile', 'track', 'trackCoArtist', 'trackFile'
   entityType String
   entityId   String
   deletedAt  Int //@db.BigInt

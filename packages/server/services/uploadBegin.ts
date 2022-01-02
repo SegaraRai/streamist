@@ -28,7 +28,7 @@ import {
   toSourceFileAttachToType,
 } from '$shared/types/db.js';
 import { client } from '$/db/lib/client.js';
-import { updateUserResourceTimestamp } from '$/db/resource.js';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource.js';
 import type {
   CreateSourceRequestAudio,
   CreateSourceRequestImage,
@@ -289,7 +289,7 @@ export async function createAudioSource(
     },
   });
 
-  await updateUserResourceTimestamp(userId);
+  await dbResourceUpdateTimestamp(userId);
 
   return {
     sourceId,
@@ -406,7 +406,7 @@ export async function createImageSource(
     },
   });
 
-  await updateUserResourceTimestamp(userId);
+  await dbResourceUpdateTimestamp(userId);
 
   return {
     sourceId,

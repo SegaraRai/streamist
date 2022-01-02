@@ -14,7 +14,6 @@ const enum IdTypeCode {
   TrackCoArtist = 'ct',
   TranscodedAudioFile = 'fa',
   TranscodedImageFile = 'fi',
-  Tag = 'ta',
   User = 'us',
 }
 
@@ -62,10 +61,6 @@ export function generateSourceId(): Promise<string> {
 
 export function generateSourceFileId(): Promise<string> {
   return generateId(IdTypeCode.SourceFile);
-}
-
-export function generateTagId(): Promise<string> {
-  return generateId(IdTypeCode.Tag);
 }
 
 export function generateTextId(): Promise<string> {

@@ -175,9 +175,7 @@ export async function processImageRequest(
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));
-      await Promise.allSettled(
-        uploadedTranscodedImageKeys.map((key) => osDelete(os, key))
-      );
+      await osDelete(os, uploadedTranscodedImageKeys);
     } catch (_error: unknown) {
       // エラーになっても良い
     }

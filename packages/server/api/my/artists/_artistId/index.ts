@@ -14,4 +14,5 @@ export type Methods = {
   patch: {
     reqBody: Pick<Artist, 'name'>;
   };
+  // NOTE: DELETEはとりあえずは作成しない、アーティストは参照されなくなると削除される
 };

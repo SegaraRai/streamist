@@ -56,7 +56,7 @@ export async function dbAlbumGetOrCreateByNameTx(
     },
   });
   if (!album) {
-    // should not occur
+    // should rarely happen
     throw new Error(
       `dbAlbumGetOrCreateByNameTx: failed to get (userId=${userId}, artistId=${artistId}, albumTitle=${albumTitle})`
     );
