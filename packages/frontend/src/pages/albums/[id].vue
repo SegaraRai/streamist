@@ -64,14 +64,12 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-8 px-6">
-    <template v-if="value$$q">
-      <s-album
-        :album="value$$q.album$$q"
-        :link-excludes="[id]"
-        :set-list="setList$$q"
-        visit-artist
-        @track-load="onTrackLoad$$q"
-      />
-    </template>
+    <s-album
+      :album="id"
+      :link-excludes="[id]"
+      :set-list="setList$$q"
+      visit-artist
+      @track-load="onTrackLoad$$q"
+    />
   </v-container>
 </template>

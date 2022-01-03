@@ -26,7 +26,7 @@ export function useLiveQuery<T>(
     if (subscription) {
       subscription.unsubscribe();
 
-      console.log('useLiveQuery: unsubscribed', querier, watchSources, initial);
+      // console.log('useLiveQuery: unsubscribed', querier, watchSources, initial);
 
       if (initial) {
         initialReject(new Error('operation aborted'));

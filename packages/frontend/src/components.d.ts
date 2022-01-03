@@ -4,10 +4,18 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
+    GDraggable: typeof import('vuedraggable')['default']
+    GGrid: typeof import('vue-virtual-scroll-grid')['default']
+    IMdiCloudUpload: typeof import('~icons/mdi/cloud-upload')['default']
+    NButton: typeof import('naive-ui')['NButton']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
+    NDropdown: typeof import('naive-ui')['NDropdown']
+    NEllipsis: typeof import('naive-ui')['NEllipsis']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
+    NModal: typeof import('naive-ui')['NModal']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
+    NPopconfirm: typeof import('naive-ui')['NPopconfirm']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     SAlbum: typeof import('./components/SAlbum.vue')['default']
     SAlbumEditDialog: typeof import('./components/SAlbumEditDialog.vue')['default']
@@ -29,6 +37,8 @@ declare module 'vue' {
     SSeekBar: typeof import('./components/SSeekBar.vue')['default']
     SSlider: typeof import('./components/SSlider.vue')['default']
     STrackList: typeof import('./components/STrackList.vue')['default']
+    STrackListDiscHeaderItem: typeof import('./components/STrackListDiscHeaderItem.vue')['default']
+    STrackListTrackItem: typeof import('./components/STrackListTrackItem.vue')['default']
     SUploader: typeof import('./components/SUploader.vue')['default']
     SUploaderList: typeof import('./components/SUploaderList.vue')['default']
     SUploaderListItem: typeof import('./components/SUploaderListItem.vue')['default']

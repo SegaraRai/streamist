@@ -77,9 +77,9 @@ export default defineComponent({
 
     const inputFileElement$$q = ref<HTMLInputElement | null>(null);
     const dialog$$q = ref(false);
-    const loaded$$q = computed(() => !!props.imageIds);
-    const hasImage$$q = computed(() => props.imageIds?.length !== 0);
-    const imageIds$$q = computed(() => props.imageIds);
+    const loaded$$q = eagerComputed(() => !!props.imageIds);
+    const hasImage$$q = eagerComputed(() => props.imageIds?.length !== 0);
+    const imageIds$$q = eagerComputed(() => props.imageIds);
     const { value: images$$q } = useLiveQuery(async () => {
       if (!imageIds$$q.value) {
         return;
@@ -143,7 +143,6 @@ export default defineComponent({
         }
 
         const { newIndex, oldIndex, element } = moved;
-
         if (newIndex === oldIndex) {
           return;
         }
@@ -244,7 +243,7 @@ export default defineComponent({
   />
   <n-modal :show="dialog$$q" transform-origin="center">
     <div
-      class="pt-12 w-screen h-screen !sm:pt-0 sm:w-auto sm:h-auto sm:min-w-xl md:min-w-180 lg:min-w-220"
+      class="pt-12 w-screen h-screen !sm:pt-0 sm:w-auto sm:h-auto sm:min-w-xl sm:max-w-180 md:min-w-180 md:max-w-220 lg:min-w-220 lg:max-w-260"
     >
       <v-card class="w-full h-full">
         <v-card-title class="flex">

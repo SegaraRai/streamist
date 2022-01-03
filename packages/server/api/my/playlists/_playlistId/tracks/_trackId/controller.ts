@@ -12,7 +12,7 @@ export default defineController(() => ({
       user.id,
       params.playlistId,
       params.trackId,
-      body.previousTrackId || undefined
+      body.nextTrackId || undefined
     ).catch((error) => Promise.reject(new HTTPError(400, String(error))));
     await dbResourceUpdateTimestamp(user.id);
     return { status: 204 };

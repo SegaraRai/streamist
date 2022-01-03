@@ -1,7 +1,10 @@
 <script lang="ts">
+import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { db } from '~/db';
+import { useSyncDB } from '~/db/sync';
+import api from '~/logic/api';
 import { formatTracksTotalDuration } from '~/logic/duration';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
@@ -27,6 +30,8 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { t } = useI18n();
+    const message = useMessage();
+    const syncDB = useSyncDB();
     const playbackStore = usePlaybackStore();
 
     const playlistId$$q = eagerComputed(() =>
@@ -78,6 +83,26 @@ export default defineComponent({
           playbackStore.shuffle$$q.value = shuffle;
         }
         playbackStore.setSetListAndPlayAuto$$q(value.value.tracks$$q);
+      },
+      onMove$$q: (
+        track: ResourceTrack,
+        nextTrack: ResourceTrack | undefined
+      ): void => {
+        api.my.playlists
+          ._playlistId(playlistId$$q.value)
+          .tracks._trackId(track.id)
+          .patch({
+            body: {
+              nextTrackId: nextTrack?.id ?? null,
+            },
+          })
+          .then(() => {
+            message.success(t('message.ReorderedTrack'));
+            syncDB();
+          })
+          .catch((error) => {
+            message.error(t('message.FailedToReorderTrack', [String(error)]));
+          });
       },
     };
   },
@@ -164,6 +189,7 @@ export default defineComponent({
     </div>
   </template>
   <s-track-list
+    render-mode="draggable"
     show-album
     show-artist
     :tracks="value$$q?.tracks$$q"
@@ -173,6 +199,7 @@ export default defineComponent({
     :playlist-id="playlistId$$q"
     visit-album
     visit-artist
+    @move="onMove$$q"
   />
 </template>
 

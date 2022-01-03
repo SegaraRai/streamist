@@ -7,6 +7,7 @@ import type {
   ResourceTrack,
 } from '$/types';
 import { db } from '~/db';
+import { VueDraggableChangeEvent } from '~/logic/draggable/types';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
 import { createTrackListDropdown } from '~/logic/naive-ui/trackListDropdown';
@@ -14,35 +15,22 @@ import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { currentScrollRef } from '~/stores/scroll';
 import { useThemeStore } from '~/stores/theme';
+import type { ListItemDiscNumberHeader } from './STrackListDiscHeaderItem.vue';
+import type { ListItemTrack } from './STrackListTrackItem.vue';
+
+type ListItem = ListItemDiscNumberHeader | ListItemTrack;
 
 /**
  * インデックスのところに表示する内容
  */
 export type IndexContent = 'none' | 'index' | 'trackNumber' | 'albumArtwork';
 
-interface ListItemTrack {
-  type$$q: 'track';
-  index$$q: number;
-  track$$q: ResourceTrack;
-  artist$$q: ResourceArtist;
-  album$$q: ResourceAlbum;
-  albumArtist$$q: ResourceArtist;
-  image$$q: ResourceImage | undefined;
-  formattedDuration$$q: string;
-  isLast$$q: boolean;
-  height$$q: number;
-}
-
-interface ListItemDiscNumberHeader {
-  type$$q: 'discNumberHeader';
-  discNumber$$q: number;
-  height$$q: number;
-}
-
-type ListItem = ListItemTrack | ListItemDiscNumberHeader;
-
 export default defineComponent({
   props: {
+    renderMode: {
+      type: String as PropType<'plain' | 'virtual' | 'draggable'>,
+      default: 'virtual',
+    },
     tracks: {
       type: Array as PropType<
         readonly string[] | readonly ResourceTrack[] | null | undefined
@@ -73,15 +61,16 @@ export default defineComponent({
     visitAlbum: Boolean,
     visitArtist: Boolean,
   },
-  setup(props) {
+  emits: {
+    move: (_track: ResourceTrack, _nextTrack: ResourceTrack | undefined) =>
+      true,
+  },
+  setup(props, { emit }) {
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const themeStore = useThemeStore();
-
     //
-
     const propTracksRef = computed(() => props.tracks);
-
     const { value: trackItems } = useLiveQuery(async () => {
       const propTracks = propTracksRef.value;
       if (!propTracks) {
@@ -128,7 +117,6 @@ export default defineComponent({
         };
       });
     }, [propTracksRef]);
-
     const useDiscNumber = eagerComputed(
       () =>
         (props.showDiscNumber &&
@@ -137,12 +125,10 @@ export default defineComponent({
           )) ||
         false
     );
-
     const items = eagerComputed(() => {
       if (!trackItems.value) {
         return [];
       }
-
       let array: ListItemTrack[] | ListItem[] = trackItems.value.map(
         (track, index, array): ListItemTrack => ({
           type$$q: 'track',
@@ -157,7 +143,6 @@ export default defineComponent({
           height$$q: 57,
         })
       );
-
       if (useDiscNumber.value) {
         const oldArray = array as ListItemTrack[];
         array = [] as ListItem[];
@@ -175,20 +160,14 @@ export default defineComponent({
           array.push(item);
         }
       }
-
       console.log(array);
-
       return array;
     });
-
     //
-
     const currentPlayingTrackId = eagerComputed(
       () => playbackStore.currentTrack$$q.value?.id
     );
-
     //
-
     const showMenu$$q = ref(false);
     const menuX$$q = ref(0);
     const menuOffsetY$$q = ref(0);
@@ -196,12 +175,10 @@ export default defineComponent({
       () => menuOffsetY$$q.value - currentScrollRef.value
     );
     const selectedTrack$$q = ref<ResourceTrack | undefined>();
-
     const closeMenu$$q = () => {
       showMenu$$q.value = false;
       selectedTrack$$q.value = undefined;
     };
-
     const menuOptions$$q = createTrackListDropdown({
       closeMenu$$q,
       selectedTrack$$q,
@@ -211,7 +188,6 @@ export default defineComponent({
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
       openEditTrackDialog$$q: (_track: ResourceTrack) => {},
     });
-
     return {
       t,
       showMenu$$q,
@@ -258,6 +234,33 @@ export default defineComponent({
       selectedTrack$$q,
       menuOptions$$q,
       pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
+      dragging$$q: ref<boolean>(false),
+      onTrackOrderChanged$$q: (
+        event: VueDraggableChangeEvent<ListItem>
+      ): void => {
+        const { moved } = event;
+        if (!moved) {
+          return;
+        }
+
+        const { newIndex, oldIndex, element } = moved;
+        if (newIndex === oldIndex) {
+          return;
+        }
+        if (element.type$$q === 'discNumberHeader') {
+          return;
+        }
+
+        const referenceItemIndex = newIndex + (newIndex > oldIndex ? 1 : 0);
+        const referenceItem = items.value[referenceItemIndex] as
+          | ListItem
+          | undefined;
+        if (referenceItem?.type$$q === 'discNumberHeader') {
+          return;
+        }
+
+        emit('move', element.track$$q, referenceItem?.track$$q);
+      },
     };
   },
 });
@@ -266,7 +269,9 @@ export default defineComponent({
 <template>
   <div
     :class="
-      selectedTrack$$q ? 's-track-list--selected' : 's-track-list--unselected'
+      dragging$$q || selectedTrack$$q
+        ? 's-track-list--selected'
+        : 's-track-list--unselected'
     "
   >
     <v-list
@@ -307,215 +312,98 @@ export default defineComponent({
         <div class="list-header-column list-column-menu py-1"></div>
       </v-list-item>
       <v-divider />
-      <g-grid
-        class="grid grid-cols-1"
-        :length="items$$q.length"
-        :page-provider="async () => items$$q"
-        :page-size="pageSize$$q"
-      >
-        <template #probe>
-          <div class="h-57px"></div>
-        </template>
-        <template
-          #default="{
-            item,
-            style,
-          }: {
-            item: (typeof items$$q)[0],
-            style: string,
-          }"
+      <template v-if="renderMode === 'plain'">
+        <div class="flex flex-col">
+          <template v-for="(item, _index) in items$$q" :key="_index">
+            <template v-if="item.type$$q === 'discNumberHeader'">
+              <s-track-list-disc-header-item :item="item" />
+            </template>
+            <template v-else>
+              <s-track-list-track-item
+                :item="item"
+                :index-content="indexContent"
+                :link-excludes="linkExcludes"
+                :set-list="setList"
+                :show-album="showAlbum"
+                :show-artist="showArtist"
+                :hide-duration="hideDuration"
+                :selected="selectedTrack$$q?.id === item.track$$q.id"
+                @menu="onMenu$$q($event, item.track$$q)"
+                @ctx-menu="onContextMenu$$q($event, item.track$$q)"
+              />
+            </template>
+          </template>
+        </div>
+      </template>
+      <template v-else-if="renderMode === 'draggable'">
+        <g-draggable
+          :model-value="items$$q"
+          item-key="id"
+          class="flex flex-col"
+          ghost-class="s-track-list--ghost"
+          @change="onTrackOrderChanged$$q"
+          @start="dragging$$q = true"
+          @end="dragging$$q = false"
         >
-          <template v-if="item.type$$q === 'discNumberHeader'">
-            <!-- Disc Number Header -->
-            <v-sheet
-              tile
-              class="sheet-disc-number-header w-full h-6"
-              :style="style"
-            >
-              <v-list-subheader class="list-disc-number-header">
-                <div class="list-column-disc-number flex align-center">
-                  <v-icon>mdi-disc</v-icon>
-                  <span class="disc-number-text s-numeric">
-                    {{ item.discNumber$$q }}
-                  </span>
-                </div>
-              </v-list-subheader>
-              <v-divider />
-            </v-sheet>
+          <!-- discNumberHeader is not supported with 'draggable' render mode -->
+          <template #item="{ element }">
+            <template v-if="element.type$$q === 'track'">
+              <s-track-list-track-item
+                :item="element"
+                :index-content="indexContent"
+                :link-excludes="linkExcludes"
+                :set-list="setList"
+                :show-album="showAlbum"
+                :show-artist="showArtist"
+                :hide-duration="hideDuration"
+                :selected="selectedTrack$$q?.id === element.track$$q.id"
+                @menu="onMenu$$q($event, element.track$$q)"
+                @ctx-menu="onContextMenu$$q($event, element.track$$q)"
+              />
+            </template>
           </template>
-          <template v-else>
-            <!-- Track Item -->
-            <div :style="style">
-              <v-list-item
-                class="s-hover-container s-track-list-item w-full py-1 h-14 !<sm:px-2"
-                :class="
-                  selectedTrack$$q?.id === item.track$$q.id
-                    ? 's-track-list-item--selected'
-                    : 's-track-list-item--unselected'
-                "
-                :ripple="false"
-                @contextmenu.prevent="onContextMenu$$q($event, item.track$$q)"
-              >
-                <!-- Track Number -->
-                <div class="list-column-icon mr-4">
-                  <!-- hiddenを切り替えるのとv-ifとどっちがいいか -->
-                  <div
-                    v-show="currentPlayingTrackId$$q === item.track$$q.id"
-                    class="icon-container"
-                  >
-                    <!-- 再生中（または一時停止中）の曲 -->
-                    <v-btn
-                      icon
-                      flat
-                      text
-                      :disabled="!setList"
-                      class="bg-transparent"
-                      @click.stop="play$$q(item.track$$q)"
-                    >
-                      <v-icon class="play-icon s-hover-visible">
-                        {{
-                          playing$$q
-                            ? 'mdi-pause-circle-outline'
-                            : 'mdi-play-circle-outline'
-                        }}
-                      </v-icon>
-                      <v-icon class="play-icon s-hover-hidden">
-                        {{
-                          playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle'
-                        }}
-                      </v-icon>
-                    </v-btn>
-                  </div>
-                  <div
-                    v-show="currentPlayingTrackId$$q !== item.track$$q.id"
-                    class="icon-container"
-                  >
-                    <!-- それ以外の曲 -->
-                    <v-btn
-                      icon
-                      flat
-                      text
-                      :disabled="!setList"
-                      class="bg-transparent"
-                      @click.stop="play$$q(item.track$$q)"
-                    >
-                      <template v-if="indexContent === 'index'">
-                        <div class="track-index s-numeric s-hover-hidden">
-                          {{ item.index$$q + 1 }}
-                        </div>
-                      </template>
-                      <template v-if="indexContent === 'trackNumber'">
-                        <div class="track-index s-numeric s-hover-hidden">
-                          {{ item.track$$q.trackNumber }}
-                        </div>
-                      </template>
-                      <template v-if="indexContent === 'albumArtwork'">
-                        <s-album-image-x
-                          class="track-index s-hover-hidden flex-none w-9 h-9"
-                          size="36"
-                          :image="item.image$$q"
-                        />
-                      </template>
-                      <v-icon class="play-icon s-hover-visible">
-                        mdi-play-circle-outline
-                      </v-icon>
-                    </v-btn>
-                  </div>
-                </div>
-                <!-- Track Title -->
-                <v-list-item-header
-                  class="list-column-content flex flex-col flex-nowrap justify-center gap-y-1"
-                >
-                  <v-list-item-title class="track-title">
-                    <span
-                      class="block overflow-hidden overflow-ellipsis max-w-max"
-                      :class="
-                        currentPlayingTrackId$$q === item.track$$q.id
-                          ? 'text-primary'
-                          : 'cursor-pointer'
-                      "
-                      @click.stop="
-                        currentPlayingTrackId$$q !== item.track$$q.id &&
-                          play$$q(item.track$$q)
-                      "
-                    >
-                      {{ item.track$$q.title }}
-                    </span>
-                  </v-list-item-title>
-                  <template
-                    v-if="
-                      showArtist || item.artist$$q.id !== item.albumArtist$$q.id
-                    "
-                  >
-                    <v-list-item-subtitle class="track-artist">
-                      <s-conditional-link
-                        class="block overflow-hidden overflow-ellipsis max-w-max"
-                        :to="`/artists/${item.artist$$q.id}`"
-                        :disabled="linkExcludes.includes(item.artist$$q.id)"
-                      >
-                        {{ item.artist$$q.name }}
-                      </s-conditional-link>
-                    </v-list-item-subtitle>
-                  </template>
-                </v-list-item-header>
-                <!-- Album Title -->
-                <template v-if="showAlbum">
-                  <v-list-item-header
-                    class="list-column-content flex flex-col flex-nowrap justify-center ml-6 gap-y-1"
-                  >
-                    <v-list-item-title class="track-album-title">
-                      <s-conditional-link
-                        class="block overflow-hidden overflow-ellipsis max-w-max"
-                        :to="`/albums/${item.album$$q.id}`"
-                        :disabled="linkExcludes.includes(item.album$$q.id)"
-                      >
-                        {{ item.album$$q.title }}
-                      </s-conditional-link>
-                    </v-list-item-title>
-                    <v-list-item-subtitle class="track-album-artist">
-                      <s-conditional-link
-                        class="block overflow-hidden overflow-ellipsis max-w-max"
-                        :to="`/artists/${item.albumArtist$$q.id}`"
-                        :disabled="
-                          linkExcludes.includes(item.albumArtist$$q.id)
-                        "
-                      >
-                        {{ item.albumArtist$$q.name }}
-                      </s-conditional-link>
-                    </v-list-item-subtitle>
-                  </v-list-item-header>
-                </template>
-                <!-- Duration -->
-                <template v-if="!hideDuration">
-                  <div
-                    class="list-column-duration s-duration body-2 !<sm:hidden"
-                  >
-                    {{ item.formattedDuration$$q }}
-                  </div>
-                </template>
-                <!-- Menu -->
-                <div class="list-header-column list-column-menu py-1">
-                  <v-btn
-                    icon
-                    flat
-                    text
-                    size="small"
-                    :disabled="!setList"
-                    class="bg-transparent"
-                    @click.stop="onMenu$$q($event, item.track$$q)"
-                  >
-                    <v-icon class="s-hover-visible"> mdi-dots-vertical </v-icon>
-                  </v-btn>
-                </div>
-              </v-list-item>
-              <!-- Divider -->
-              <template v-if="!item.isLast$$q">
-                <v-divider />
-              </template>
-            </div>
+        </g-draggable>
+      </template>
+      <template v-else-if="renderMode === 'virtual'">
+        <g-grid
+          class="grid grid-cols-1"
+          :length="items$$q.length"
+          :page-provider="async () => items$$q"
+          :page-size="pageSize$$q"
+        >
+          <template #probe>
+            <div class="h-57px"></div>
           </template>
-        </template>
-      </g-grid>
+          <template
+            #default="{
+              item,
+              style,
+            }: {
+              item: (typeof items$$q)[0],
+              style: string,
+            }"
+          >
+            <template v-if="item.type$$q === 'discNumberHeader'">
+              <s-track-list-disc-header-item :style="style" :item="item" />
+            </template>
+            <template v-else>
+              <s-track-list-track-item
+                :style="style"
+                :item="item"
+                :index-content="indexContent"
+                :link-excludes="linkExcludes"
+                :set-list="setList"
+                :show-album="showAlbum"
+                :show-artist="showArtist"
+                :hide-duration="hideDuration"
+                :selected="selectedTrack$$q?.id === item.track$$q.id"
+                @menu="onMenu$$q($event, item.track$$q)"
+                @ctx-menu="onContextMenu$$q($event, item.track$$q)"
+              />
+            </template>
+          </template>
+        </g-grid>
+      </template>
     </v-list>
   </div>
   <n-dropdown
@@ -541,6 +429,7 @@ export default defineComponent({
   display: flex;
 }
 
+.s-track-list--ghost .s-track-list-item,
 .s-track-list--unselected .s-track-list-item:hover,
 .s-track-list-item--selected {
   @apply bg-true-gray-400/25;
