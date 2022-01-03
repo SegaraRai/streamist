@@ -188,6 +188,14 @@ export default defineComponent({
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
       openEditTrackDialog$$q: (_track: ResourceTrack) => {},
     });
+
+    const dragging$$q = ref(false);
+    watchEffect(() => {
+      if (props.renderMode !== 'draggable') {
+        dragging$$q.value = false;
+      }
+    });
+
     return {
       t,
       showMenu$$q,
@@ -234,7 +242,7 @@ export default defineComponent({
       selectedTrack$$q,
       menuOptions$$q,
       pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
-      dragging$$q: ref<boolean>(false),
+      dragging$$q,
       onTrackOrderChanged$$q: (
         event: VueDraggableChangeEvent<ListItem>
       ): void => {
