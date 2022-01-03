@@ -216,8 +216,9 @@ export default defineComponent({
         eventOrElement: MouseEvent | HTMLElement,
         track: ResourceTrack
       ): void => {
-        selectedTrack$$q.value = track;
-        openMenu$$q(eventOrElement);
+        openMenu$$q(eventOrElement, () => {
+          selectedTrack$$q.value = track;
+        });
       },
       selectedTrack$$q,
       menuOptions$$q,

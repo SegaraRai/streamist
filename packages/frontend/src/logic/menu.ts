@@ -19,6 +19,7 @@ export function useMenu(onCloseCallback?: () => void) {
     y$$q: y$$q as Readonly<Ref<number>>,
     open$$q: (
       eventOrElement: MouseEvent | HTMLElement,
+      initCallback?: () => void,
       noPrevent = false
     ): void => {
       if (!noPrevent && eventOrElement instanceof MouseEvent) {
@@ -33,7 +34,9 @@ export function useMenu(onCloseCallback?: () => void) {
 
       isOpen$$q.value = false;
 
-      nextTick().then(() => {
+      initCallback?.();
+
+      nextTick().then((): void => {
         x$$q.value = x;
         yOffset$$q.value = y + scroll;
         isOpen$$q.value = true;
