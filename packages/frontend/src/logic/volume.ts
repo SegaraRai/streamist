@@ -1,4 +1,4 @@
-const K = 2;
+const K = 1.5;
 const R = 100;
 
 const K_INV = 1 / K;
