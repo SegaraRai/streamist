@@ -212,6 +212,7 @@ export default defineComponent({
 <template>
   <button
     v-ripple
+    v-bind="$attrs"
     class="active:outline-none s-hover-container relative"
     :class="rounded && 'rounded-full'"
     @click="onImageClicked$$q"

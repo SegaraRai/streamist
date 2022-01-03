@@ -2,8 +2,10 @@
 import { useMessage } from 'naive-ui';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
-import apiInstance from '~/logic/api';
+import api from '~/logic/api';
 import { calcTracksTotalDuration, formatTotalDuration } from '~/logic/duration';
+import { useMenu } from '~/logic/menu';
+import { createPlaylistDropdown } from '~/logic/naive-ui/playlistDropdown';
 import { useAllPlaylists, useAllTrackMap } from '~/logic/useDB';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
@@ -67,6 +69,35 @@ export default defineComponent({
     const createPlaylistDialogTitle = ref('');
     const createPlaylistDialogDescription = ref('');
 
+    const openCreatePlaylistDialog$$q = (): void => {
+      createPlaylistDialogTitle.value = '';
+      createPlaylistDialogDescription.value = '';
+      createPlaylistDialog.value = true;
+    };
+
+    const selectedPlaylist$$q = ref<ResourcePlaylist | undefined>();
+    const selectedPlaylistTracks$$q = ref<
+      readonly ResourceTrack[] | undefined
+    >();
+    const dialog$$q = ref(false);
+    const {
+      x$$q: menuX$$q,
+      y$$q: menuY$$q,
+      isOpen$$q: menuIsOpen$$q,
+      close$$q: closeMenu$$q,
+      open$$q: openMenu$$q,
+    } = useMenu();
+    const menuOptions$$q = createPlaylistDropdown({
+      playlist$$q: selectedPlaylist$$q,
+      playlistTracks$$q: selectedPlaylistTracks$$q,
+      moveWhenDelete$$q: ref(true),
+      openEditPlaylistDialog$$q: () => {
+        dialog$$q.value = true;
+      },
+      openCreatePlaylistDialog$$q,
+      closeMenu$$q,
+    });
+
     return {
       t,
       themeStore$$q: themeStore,
@@ -75,11 +106,7 @@ export default defineComponent({
       i: createPlaylistDialogTitle,
       e: createPlaylistDialogDescription,
       createPlaylistDialogLoading$$q: createPlaylistDialogLoading,
-      openCreatePlaylistDialog$$q: (): void => {
-        createPlaylistDialogTitle.value = '';
-        createPlaylistDialogDescription.value = '';
-        createPlaylistDialog.value = true;
-      },
+      openCreatePlaylistDialog$$q,
       closeCreatePlaylistDialog$$q: (create: boolean): void => {
         if (!create) {
           createPlaylistDialog.value = false;
@@ -87,7 +114,7 @@ export default defineComponent({
         }
         createPlaylistDialogLoading.value = true;
         const title = createPlaylistDialogTitle.value;
-        apiInstance.my.playlists
+        api.my.playlists
           .$post({
             body: {
               title,
@@ -105,6 +132,19 @@ export default defineComponent({
             );
             createPlaylistDialogLoading.value = false;
           });
+      },
+      selectedPlaylist$$q,
+      dialog$$q,
+      menuOptions$$q,
+      menuIsOpen$$q,
+      menuX$$q,
+      menuY$$q,
+      closeMenu$$q,
+      showMenu$$q: (eventOrElement: MouseEvent | HTMLElement, item: Item) => {
+        openMenu$$q(eventOrElement, () => {
+          selectedPlaylist$$q.value = item.playlist$$q;
+          selectedPlaylistTracks$$q.value = item.tracks$$q;
+        });
       },
     };
   },
@@ -176,7 +216,11 @@ export default defineComponent({
       <template v-if="items$$q?.length">
         <v-list flat>
           <template v-for="(item, _index) in items$$q" :key="_index">
-            <v-list-item :to="`/playlists/${item.id$$q}`" class="flex gap-x-4">
+            <v-list-item
+              :to="`/playlists/${item.id$$q}`"
+              class="flex gap-x-4 s-hover-container"
+              @contextmenu.prevent="showMenu$$q($event, item)"
+            >
               <s-playlist-image
                 class="flex-none w-9 h-9"
                 size="36"
@@ -189,9 +233,19 @@ export default defineComponent({
                   {{ item.formattedDuration$$q }}
                 </v-list-item-subtitle>
               </v-list-item-header>
+              <v-btn
+                icon
+                flat
+                text
+                size="small"
+                class="bg-transparent"
+                @click.stop="showMenu$$q($event.target as HTMLElement, item)"
+              >
+                <v-icon class="s-hover-visible"> mdi-dots-vertical </v-icon>
+              </v-btn>
             </v-list-item>
             <template v-if="!item.isLast$$q">
-              <v-divider />
+              <v-divider @contextmenu.prevent />
             </template>
           </template>
         </v-list>
@@ -200,5 +254,21 @@ export default defineComponent({
         <div>No playlists here</div>
       </template>
     </div>
+    <n-dropdown
+      placement="bottom-start"
+      trigger="manual"
+      :x="menuX$$q"
+      :y="menuY$$q"
+      :options="menuOptions$$q"
+      :show="menuIsOpen$$q"
+      :on-clickoutside="closeMenu$$q"
+      @contextmenu.prevent
+    />
+    <template v-if="selectedPlaylist$$q">
+      <s-dialog-playlist-edit
+        v-model="dialog$$q"
+        :playlist="selectedPlaylist$$q"
+      />
+    </template>
   </v-container>
 </template>

@@ -6,6 +6,8 @@ import { db } from '~/db';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import { formatTracksTotalDuration } from '~/logic/duration';
+import { useMenu } from '~/logic/menu';
+import { createPlaylistDropdown } from '~/logic/naive-ui/playlistDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 
@@ -69,6 +71,25 @@ export default defineComponent({
       () => value.value && formatTracksTotalDuration(value.value.tracks$$q)
     );
 
+    const dialog$$q = ref(false);
+
+    const {
+      x$$q: menuX$$q,
+      y$$q: menuY$$q,
+      isOpen$$q: menuIsOpen$$q,
+      close$$q: closeMenu$$q,
+      open$$q: openMenu$$q,
+    } = useMenu();
+    const menuOptions$$q = createPlaylistDropdown({
+      playlist$$q: eagerComputed(() => value.value?.playlist$$q),
+      playlistTracks$$q: eagerComputed(() => value.value?.tracks$$q),
+      moveWhenDelete$$q: ref(true),
+      openEditPlaylistDialog$$q: () => {
+        dialog$$q.value = true;
+      },
+      closeMenu$$q,
+    });
+
     return {
       t,
       playlistId$$q,
@@ -104,6 +125,13 @@ export default defineComponent({
             message.error(t('message.FailedToReorderTrack', [String(error)]));
           });
       },
+      dialog$$q,
+      menuOptions$$q,
+      menuIsOpen$$q,
+      menuX$$q,
+      menuY$$q,
+      openMenu$$q,
+      closeMenu$$q,
     };
   },
 });
@@ -121,18 +149,17 @@ export default defineComponent({
             :attach-to-id="playlistId$$q"
             :attach-to-title="value$$q.playlist$$q.title"
             :image-ids="imageIds$$q"
+            @contextmenu.prevent="openMenu$$q($event)"
           >
             <template #title>
               Artwork of Playlist {{ value$$q.playlist$$q.title }}
             </template>
-            <template #default>
-              <s-playlist-image
-                class="w-50 h-50"
-                size="200"
-                :playlist="value$$q.playlist$$q"
-                @image-ids="imageIds$$q = $event"
-              />
-            </template>
+            <s-playlist-image
+              class="w-50 h-50"
+              size="200"
+              :playlist="value$$q.playlist$$q"
+              @image-ids="imageIds$$q = $event"
+            />
           </s-image-manager>
         </template>
         <template v-else>
@@ -142,6 +169,7 @@ export default defineComponent({
               size="200"
               :playlist="value$$q.playlist$$q"
               @image-ids="imageIds$$q = $event"
+              @contextmenu.prevent="openMenu$$q($event)"
             />
           </router-link>
         </template>
@@ -151,34 +179,13 @@ export default defineComponent({
           <s-conditional-link
             :to="`/playlists/${playlistId$$q}`"
             :disabled="linkExcludes.includes(playlistId$$q)"
+            @contextmenu.prevent="openMenu$$q($event)"
           >
             {{ value$$q?.playlist$$q.title }}
           </s-conditional-link>
         </div>
+        <div>{{ value$$q?.playlist$$q.notes }}</div>
         <div class="flex-1 <md:hidden"></div>
-        <div class="flex-none album-actions flex flex-row gap-x-8">
-          <v-btn
-            color="primary"
-            :disabled="!value$$q?.tracks$$q.length"
-            @click="play$$q(false)"
-          >
-            <v-icon left>mdi-play</v-icon>
-            <span>
-              {{ t('album.Play') }}
-            </span>
-          </v-btn>
-          <v-btn
-            color="accent"
-            outlined
-            :disabled="!value$$q?.tracks$$q.length"
-            @click="play$$q(true)"
-          >
-            <v-icon left>mdi-shuffle</v-icon>
-            <span>
-              {{ t('album.Shuffle') }}
-            </span>
-          </v-btn>
-        </div>
         <div class="flex-none album-misc text-sm">
           <span>
             {{ t('playlist.n_tracks', value$$q.tracks$$q.length) }}
@@ -186,6 +193,36 @@ export default defineComponent({
           <span v-show="duration$$q">, {{ duration$$q }}</span>
         </div>
       </div>
+    </div>
+    <div
+      class="flex-none album-actions flex flex-row items-center gap-x-8 my-8"
+    >
+      <v-btn
+        color="primary"
+        flat
+        icon
+        :disabled="!value$$q?.tracks$$q.length"
+        @click="play$$q(false)"
+      >
+        <v-icon>mdi-play</v-icon>
+      </v-btn>
+      <v-btn
+        color="accent"
+        outlined
+        :disabled="!value$$q?.tracks$$q.length"
+        @click="play$$q(true)"
+      >
+        <v-icon left>mdi-shuffle</v-icon>
+        <span>
+          {{ t('album.Shuffle') }}
+        </span>
+      </v-btn>
+      <button
+        class="rounded-full"
+        @click="openMenu$$q($event.target as HTMLElement)"
+      >
+        <v-icon>mdi-dots-vertical</v-icon>
+      </button>
     </div>
   </template>
   <s-track-list
@@ -201,6 +238,22 @@ export default defineComponent({
     visit-artist
     @move="onMove$$q"
   />
+  <template v-if="value$$q">
+    <n-dropdown
+      placement="bottom-start"
+      trigger="manual"
+      :x="menuX$$q"
+      :y="menuY$$q"
+      :options="menuOptions$$q"
+      :show="menuIsOpen$$q"
+      :on-clickoutside="closeMenu$$q"
+      @contextmenu.prevent
+    />
+    <s-dialog-playlist-edit
+      v-model="dialog$$q"
+      :playlist="value$$q.playlist$$q"
+    />
+  </template>
 </template>
 
 <style scoped>

@@ -3,8 +3,8 @@ import type { ComputedRef, Ref } from 'vue';
 import { useTheme } from 'vuetify';
 import type { ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
+import api from '~/logic/api';
 import { usePlaybackStore } from '~/stores/playback';
-import api from '../api';
 import { useAllPlaylists } from '../useDB';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
@@ -61,8 +61,8 @@ export function createTrackListDropdown({
     menuItems.push({
       key: 'play',
       label: isPlayingThisTrack
-        ? t('track-list-dropdown.Pause')
-        : t('track-list-dropdown.Play'),
+        ? t('dropdown.trackList.Pause')
+        : t('dropdown.trackList.Play'),
       icon: nCreateDropdownIcon(() =>
         // NOTE: we have to access to ref directly in the render function to make icon reactive
         playbackStore.playing$$q.value &&
@@ -85,7 +85,7 @@ export function createTrackListDropdown({
     // Add To Play Next Queue
     menuItems.push({
       key: 'addToPNQueue',
-      label: t('track-list-dropdown.AddToPlayNextQueue'),
+      label: t('dropdown.trackList.AddToPlayNextQueue'),
       icon: nCreateDropdownIcon('mdi-playlist-play'),
       props: {
         onClick: () => {
@@ -109,7 +109,7 @@ export function createTrackListDropdown({
     if (showVisitAlbum$$q.value) {
       menuItems.push({
         key: 'goToAlbum',
-        label: t('track-list-dropdown.GoToAlbum'),
+        label: t('dropdown.trackList.GoToAlbum'),
         icon: nCreateDropdownIcon('mdi-album'),
         props: {
           onClick: () => {
@@ -124,7 +124,7 @@ export function createTrackListDropdown({
     if (showVisitArtist$$q.value) {
       menuItems.push({
         key: 'goToArtist',
-        label: t('track-list-dropdown.GoToArtist'),
+        label: t('dropdown.trackList.GoToArtist'),
         icon: nCreateDropdownIcon('mdi-account-music'),
         props: {
           onClick: () => {
@@ -146,13 +146,13 @@ export function createTrackListDropdown({
     // Add to Playlist
     menuItems.push({
       key: 'addToPlaylist',
-      label: t('track-list-dropdown.AddToPlaylist'),
+      label: t('dropdown.trackList.AddToPlaylist'),
       icon: nCreateDropdownIcon('mdi-playlist-plus'),
       disabled: !playlists.length,
       children: [
         {
           key: 'addToPlaylist.createNew',
-          label: t('track-list-dropdown.AddToNewPlaylist'),
+          label: t('dropdown.trackList.AddToNewPlaylist'),
           props: {
             onClick: () => {
               closeMenu$$q();
@@ -234,7 +234,7 @@ export function createTrackListDropdown({
     if (removeFromPlaylist) {
       menuItems.push({
         key: `removeFromPlaylist.${removeFromPlaylist.id}`,
-        label: t('track-list-dropdown.RemoveFromPlaylist'),
+        label: t('dropdown.trackList.RemoveFromPlaylist'),
         icon: nCreateDropdownIcon('mdi-playlist-remove'),
         props: {
           onClick: () => {
@@ -275,7 +275,7 @@ export function createTrackListDropdown({
     // Edit
     menuItems.push({
       key: 'edit',
-      label: t('track-list-dropdown.Edit'),
+      label: t('dropdown.trackList.Edit'),
       icon: nCreateDropdownIcon('mdi-pencil'),
       props: {
         onClick: () => {
@@ -288,7 +288,7 @@ export function createTrackListDropdown({
     // Delete
     menuItems.push({
       key: 'delete',
-      label: t('track-list-dropdown.Delete'),
+      label: t('dropdown.trackList.Delete'),
       icon: nCreateDropdownIcon('mdi-delete'),
       props: {
         style: nCreateDropdownTextColorStyle(theme, 'error'),
@@ -313,7 +313,6 @@ export function createTrackListDropdown({
                       String(error),
                     ])
                   );
-                  console.error(error);
                 });
             },
           });

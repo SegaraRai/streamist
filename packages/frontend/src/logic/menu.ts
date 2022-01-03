@@ -19,13 +19,8 @@ export function useMenu(onCloseCallback?: () => void) {
     y$$q: y$$q as Readonly<Ref<number>>,
     open$$q: (
       eventOrElement: MouseEvent | HTMLElement,
-      initCallback?: () => void,
-      noPrevent = false
+      initCallback?: () => void
     ): void => {
-      if (!noPrevent && eventOrElement instanceof MouseEvent) {
-        eventOrElement.preventDefault();
-      }
-
       const [x, y] =
         eventOrElement instanceof MouseEvent
           ? calcMenuPositionByEvent(eventOrElement)

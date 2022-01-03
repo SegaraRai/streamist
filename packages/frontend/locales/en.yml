@@ -48,21 +48,32 @@ title:
   Playlists: "Playlists {'|'} Streamist"
   Playlist: "{0} {'|'} Streamist"
   PlaylistInit: "Playlist {'|'} Streamist"
-track-list-dropdown:
-  Play: Play
-  Pause: Pause
-  GoToAlbum: Go to album
-  GoToArtist: Go to artist
-  AddToPlayNextQueue: Add to queue
-  RemoveFromPlayNextQueue: Remove from queue
-  AddToQueue: Add to queue
-  RemoveFromQueue: Remove from queue
-  AddToPlaylist: Add to playlist
-  AddToNewPlaylist: Add to new playlist
-  RemoveFromPlaylist: Remove from playlist
-  Edit: Edit
-  Delete: Delete
+dropdown:
+  playlist:
+    AddToPlayNextQueue: Add to queue
+    Edit: Edit
+    Delete: Delete
+    Create: Create playlist
+  trackList:
+    Play: Play
+    Pause: Pause
+    GoToAlbum: Go to album
+    GoToArtist: Go to artist
+    AddToPlayNextQueue: Add to queue
+    RemoveFromPlayNextQueue: Remove from queue
+    AddToQueue: Add to queue
+    RemoveFromQueue: Remove from queue
+    AddToPlaylist: Add to playlist
+    AddToNewPlaylist: Add to new playlist
+    RemoveFromPlaylist: Remove from playlist
+    Edit: Edit
+    Delete: Delete
 dialog:
+  deletePlaylist:
+    title: Delete Playlist
+    content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
+    buttonDelete: Delete
+    buttonCancel: Cancel
   deleteTrack:
     title: Delete Track
     content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
@@ -78,9 +89,14 @@ message:
   FailedToSyncDatabase: "Failed to synchronize database\n{0}"
   CreatedPlaylist: "Created playlist '{0}'"
   FailedToCreatePlaylist: "Failed to create playlist '{0}'\n{1}"
+  ModifiedPlaylist: "Modified playlist '{0}'"
+  FailedToModifyPlaylist: "Failed to modify playlist '{0}'\n{1}"
+  DeletedPlaylist: "Deleted playlist '{0}'"
+  FailedToDeletePlaylist: "Failed to delete playlist '{0}'\n{1}"
   DeletedTrack: "Deleted track '{0}'"
   FailedToDeleteTrack: "Failed to delete track '{0}'\n{1}"
   AddedToPlayNextQueue: Added to queue
+  AddedToPlayNextQueueMany: 'Added to queue | Added one track to queue | Added {n} tracks to queue'
   AddedToPlaylist: "Added '{1}' to '{0}'"
   FailedToAddToPlaylist: "Failed to add '{1}' to '{0}'\n{2}"
   RemovedFromPlaylist: "Removed '{1}' from '{0}'"

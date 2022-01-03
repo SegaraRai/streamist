@@ -12,7 +12,7 @@ export type Methods = {
     resBody: Playlist;
   };
   patch: {
-    reqBody: Pick<Playlist, 'title'>;
+    reqBody: Partial<Pick<Playlist, 'title' | 'notes'>>;
   };
   delete: {};
 };

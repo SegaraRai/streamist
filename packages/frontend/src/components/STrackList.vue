@@ -380,19 +380,20 @@ export default defineComponent({
               <s-track-list-disc-header-item :style="style" :item="item" />
             </template>
             <template v-else>
-              <s-track-list-track-item
-                :style="style"
-                :item="item"
-                :index-content="indexContent"
-                :link-excludes="linkExcludes"
-                :set-list="setList"
-                :show-album="showAlbum"
-                :show-artist="showArtist"
-                :hide-duration="hideDuration"
-                :selected="selectedTrack$$q?.id === item.track$$q.id"
-                @menu="showMenu$$q($event.target as HTMLElement, item.track$$q)"
-                @ctx-menu="showMenu$$q($event, item.track$$q)"
-              />
+              <div :style="style">
+                <s-track-list-track-item
+                  :item="item"
+                  :index-content="indexContent"
+                  :link-excludes="linkExcludes"
+                  :set-list="setList"
+                  :show-album="showAlbum"
+                  :show-artist="showArtist"
+                  :hide-duration="hideDuration"
+                  :selected="selectedTrack$$q?.id === item.track$$q.id"
+                  @menu="showMenu$$q($event.target as HTMLElement, item.track$$q)"
+                  @ctx-menu="showMenu$$q($event, item.track$$q)"
+                />
+              </div>
             </template>
           </template>
         </g-grid>
@@ -425,7 +426,7 @@ export default defineComponent({
 .s-track-list--ghost .s-track-list-item,
 .s-track-list--unselected .s-track-list-item:hover,
 .s-track-list-item--selected {
-  @apply bg-true-gray-400/25;
+  @apply bg-true-gray-400/10;
 }
 
 .sheet-header {

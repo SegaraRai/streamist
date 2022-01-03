@@ -53,13 +53,22 @@ export default defineController(() => ({
     };
   },
   patch: async ({ body, params, user }) => {
+    if (body.title == null && body.notes == null) {
+      return { status: 204 };
+    }
+
+    if (body.title != null && !body.title.trim()) {
+      throw new HTTPError(400, 'title must not be empty');
+    }
+
     const newPlaylist = await client.playlist.updateMany({
       where: {
         id: params.playlistId,
         userId: user.id,
       },
       data: {
-        title: body.title,
+        title: body.title?.trim(),
+        notes: body.notes?.trim(),
         updatedAt: Date.now(),
       },
     });
