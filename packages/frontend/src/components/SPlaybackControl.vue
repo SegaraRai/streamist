@@ -154,19 +154,29 @@ export default defineComponent({
     <div class="flex-1 flex flex-col justify-center">
       <div class="flex flex-row justify-center px-12">
         <!-- clickではなくmouseupでblurButtonを呼んでいるのはキーで操作されたときにblurしないようにするため -->
-        <v-btn
-          class="mx-5"
-          :class="shuffleEnabled$$q ? 'active-button' : ''"
-          flat
-          icon
-          :ripple="false"
-          @click="switchShuffle$$q"
-          @mouseup="blurButton$$q"
+        <!-- TODO: クリックされたらpopoverを隠す -->
+        <n-popover
+          placement="top"
+          trigger="hover"
+          :delay="1000"
+          :show-arrow="false"
         >
-          <v-icon :color="shuffleEnabled$$q ? 'primary' : ''">
-            {{ shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled' }}
-          </v-icon>
-        </v-btn>
+          <template #trigger>
+            <button
+              class="mx-5 rounded-full"
+              :class="shuffleEnabled$$q ? 'active-button' : ''"
+              @click="switchShuffle$$q"
+              @mouseup="blurButton$$q"
+            >
+              <v-icon :color="shuffleEnabled$$q ? 'primary' : ''">
+                {{ shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled' }}
+              </v-icon>
+            </button>
+          </template>
+          <span>
+            {{ shuffleEnabled$$q ? 'Disable shuffle' : 'Enable shuffle' }}
+          </span>
+        </n-popover>
         <v-btn
           class="mx-5"
           flat
@@ -190,19 +200,35 @@ export default defineComponent({
         >
           <v-icon>mdi-skip-next</v-icon>
         </v-btn>
-        <v-btn
-          class="mx-5"
-          :class="repeatEnabled$$q ? 'active-button' : ''"
-          flat
-          icon
-          :ripple="false"
-          @click="switchRepeat$$q"
-          @mouseup="blurButton$$q"
+        <!-- TODO: クリックされたらpopoverを隠す -->
+        <n-popover
+          placement="top"
+          trigger="hover"
+          :delay="1000"
+          :show-arrow="false"
         >
-          <v-icon :color="repeatEnabled$$q ? 'primary' : ''">
-            {{ repeatIcon$$q }}
-          </v-icon>
-        </v-btn>
+          <template #trigger>
+            <button
+              class="mx-5 rounded-full"
+              :class="repeatEnabled$$q ? 'active-button' : ''"
+              @click="switchRepeat$$q"
+              @mouseup="blurButton$$q"
+            >
+              <v-icon :color="repeatEnabled$$q ? 'primary' : ''">
+                {{ repeatIcon$$q }}
+              </v-icon>
+            </button>
+          </template>
+          <span>
+            {{
+              repeatEnabled$$q
+                ? repeatIcon$$q === 'mdi-repeat-once'
+                  ? 'Disable repeat'
+                  : 'Enable repeat one'
+                : 'Enable repeat'
+            }}
+          </span>
+        </n-popover>
       </div>
       <s-seek-bar
         class="pt-2"
