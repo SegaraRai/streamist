@@ -104,6 +104,7 @@ export default defineComponent({
       hasImage$$q,
       images$$q,
       uploading$$q,
+      dragging$$q: ref(false),
       getOriginalImageURL$$q: (
         image: ResourceImage | undefined
       ): string | undefined => {
@@ -241,7 +242,7 @@ export default defineComponent({
     filter="image/*"
     @change="onFileSelected$$q"
   />
-  <n-modal :show="dialog$$q" transform-origin="center">
+  <n-modal v-model:show="dialog$$q" transform-origin="center">
     <div
       class="pt-12 w-screen h-screen !sm:pt-0 sm:w-auto sm:h-auto sm:min-w-xl sm:max-w-180 md:min-w-180 md:max-w-220 lg:min-w-220 lg:max-w-260"
     >
@@ -275,7 +276,11 @@ export default defineComponent({
                 @change="onImageOrderChanged$$q"
               >
                 <template #item="{ element }">
-                  <div class="flex-none flex flex-col gap-y-4 items-center">
+                  <div
+                    class="flex-none flex flex-col gap-y-4 items-center"
+                    @dragstart="dragging$$q = true"
+                    @dragend="dragging$$q = false"
+                  >
                     <a
                       class="block"
                       target="_blank"
@@ -294,7 +299,13 @@ export default defineComponent({
                       @positive-click="removeImage$$q(element.id)"
                     >
                       <template #trigger>
-                        <n-button tag="div" text>
+                        <n-button
+                          tag="div"
+                          text
+                          class="select-none"
+                          :class="dragging$$q ? 'invisible' : ''"
+                          @dragstart.stop.prevent
+                        >
                           <v-btn flat icon size="small" class="text-red-500">
                             <v-icon>mdi-delete</v-icon>
                           </v-btn>
