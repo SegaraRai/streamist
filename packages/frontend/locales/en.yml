@@ -67,9 +67,16 @@ dialog:
     content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
     buttonDelete: Delete
     buttonCancel: Cancel
+confirm:
+  deleteImage:
+    text: "Are you sure you want to delete image of '{0}'?\nThis action cannot be undone."
+    buttonDelete: Delete
+    buttonCancel: Cancel
 message:
   SyncedDatabase: Synchronized database
   FailedToSyncDatabase: "Failed to synchronize database\n{0}"
+  CreatedPlaylist: "Created playlist '{0}'"
+  FailedToCreatePlaylist: "Failed to create playlist '{0}'\n{1}"
   DeletedTrack: "Deleted track '{0}'"
   FailedToDeleteTrack: "Failed to delete track '{0}'\n{1}"
   AddedToPlayNextQueue: Added to queue
