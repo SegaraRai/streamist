@@ -6,6 +6,7 @@
     "magick",
     "mkclean",
     "streamist",
+    "vuedraggable",
     "vuetify"
   ],
   "eslint.packageManager": "pnpm",

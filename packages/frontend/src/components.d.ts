@@ -6,7 +6,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
-    NDropdown: typeof import('naive-ui')['NDropdown']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NScrollbar: typeof import('naive-ui')['NScrollbar']

@@ -1,6 +1,6 @@
 export type Methods = {
   patch: {
-    reqBody: { previousImageId: string | null };
+    reqBody: { nextImageId: string | null };
   };
   delete: {};
 };

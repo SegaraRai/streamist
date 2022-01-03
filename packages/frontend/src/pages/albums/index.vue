@@ -1,5 +1,4 @@
 <script lang="ts">
-import GGrid from 'vue-virtual-scroll-grid';
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$shared/sort';
 import type {
@@ -25,9 +24,6 @@ interface Item {
 }
 
 export default defineComponent({
-  components: {
-    GGrid,
-  },
   setup() {
     const { t } = useI18n();
     const display = useDisplay();

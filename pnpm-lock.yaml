@@ -135,6 +135,7 @@ importers:
       vue-router: ^4.0.12
       vue-tsc: ^0.30.1
       vue-virtual-scroll-grid: ^1.2.4
+      vuedraggable: ^4.1.0
       vuetify: ^3.0.0-alpha.12
       windicss: ^3.4.2
     dependencies:
@@ -162,6 +163,7 @@ importers:
       vue-i18n: 9.2.0-beta.23_vue@3.2.26
       vue-router: 4.0.12_vue@3.2.26
       vue-virtual-scroll-grid: 1.2.4_vue@3.2.26
+      vuedraggable: 4.1.0_vue@3.2.26
       vuetify: 3.0.0-alpha.12_vue@3.2.26
     devDependencies:
       '@iconify-json/carbon': 1.0.12
@@ -1872,7 +1874,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-async-generators/7.8.4_@babel+core@7.16.7:
@@ -1899,7 +1901,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-class-properties/7.12.13_@babel+core@7.16.7:
@@ -1954,7 +1956,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-json-strings/7.8.3_@babel+core@7.16.7:
@@ -1972,7 +1974,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-logical-assignment-operators/7.10.4_@babel+core@7.16.7:
@@ -1990,7 +1992,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-nullish-coalescing-operator/7.8.3_@babel+core@7.16.7:
@@ -2008,7 +2010,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-numeric-separator/7.10.4_@babel+core@7.16.7:
@@ -2026,7 +2028,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-object-rest-spread/7.8.3_@babel+core@7.16.7:
@@ -2044,7 +2046,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-optional-catch-binding/7.8.3_@babel+core@7.16.7:
@@ -2062,7 +2064,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-optional-chaining/7.8.3_@babel+core@7.16.7:
@@ -2091,7 +2093,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.16.5
-      '@babel/helper-plugin-utils': 7.16.5
+      '@babel/helper-plugin-utils': 7.16.7
     dev: true
 
   /@babel/plugin-syntax-top-level-await/7.14.5_@babel+core@7.16.7:
@@ -11113,6 +11115,10 @@ packages:
       flatstr: 1.0.12
     dev: false
 
+  /sortablejs/1.14.0:
+    resolution: {integrity: sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==}
+    dev: false
+
   /source-map-js/1.0.1:
     resolution: {integrity: sha512-4+TN2b3tqOCd/kaGRJ/sTYA0tR0mdXx26ipdolxcwtJVqEnqNYvlCAt1q3ypy4QMlYus+Zh34RNtYLoq2oQ4IA==}
     engines: {node: '>=0.10.0'}
@@ -12664,6 +12670,15 @@ packages:
       '@vue/runtime-dom': 3.2.26
       '@vue/server-renderer': 3.2.26_vue@3.2.26
       '@vue/shared': 3.2.26
+    dev: false
+
+  /vuedraggable/4.1.0_vue@3.2.26:
+    resolution: {integrity: sha512-FU5HCWBmsf20GpP3eudURW3WdWTKIbEIQxh9/8GE806hydR9qZqRRxRE3RjqX7PkuLuMQG/A7n3cfj9rCEchww==}
+    peerDependencies:
+      vue: ^3.0.1
+    dependencies:
+      sortablejs: 1.14.0
+      vue: 3.2.26
     dev: false
 
   /vuetify/3.0.0-alpha.12_vue@3.2.26:

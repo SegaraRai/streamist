@@ -6,6 +6,7 @@ import type { ResourceImage } from '$/types';
 import { db } from '~/db';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
+import { VueDraggableChangeEvent } from '~/logic/draggable/types';
 import { getImageFileURL } from '~/logic/fileURL';
 import type { FileId } from '~/logic/uploadManager';
 import { useLiveQuery } from '~/logic/useLiveQuery';
@@ -36,6 +37,25 @@ export default defineComponent({
     const message = useMessage();
     const syncDB = useSyncDB();
     const uploadStore = useUploadStore();
+
+    const getAPIRoot = () => {
+      switch (props.attachToType) {
+        case 'album':
+          return api.my.albums._albumId(props.attachToId);
+
+        case 'artist':
+          return api.my.artists._artistId(props.attachToId);
+
+        case 'playlist':
+          return api.my.playlists._playlistId(props.attachToId);
+
+        default:
+      }
+    };
+
+    const getAPIImageRoot = (imageId: string) => {
+      return getAPIRoot()?.images._imageId(imageId);
+    };
 
     const uploadingFileIds$$q = ref<readonly FileId[]>([]);
     const uploadingFiles$$q = computed(() => {
@@ -99,27 +119,8 @@ export default defineComponent({
         return getImageFileURL(imageFile);
       },
       removeImage$$q: (imageId: string) => {
-        let root;
-        switch (props.attachToType) {
-          case 'album':
-            root = api.my.albums._albumId(props.attachToId);
-            break;
-
-          case 'artist':
-            root = api.my.artists._artistId(props.attachToId);
-            break;
-
-          case 'playlist':
-            root = api.my.playlists._playlistId(props.attachToId);
-            break;
-
-          default:
-            return;
-        }
-
-        root.images
-          ._imageId(imageId)
-          .$delete()
+        getAPIImageRoot(imageId)
+          ?.$delete()
           .then(() => {
             message.success(t('message.DeletedImage', [props.attachToTitle]));
             syncDB();
@@ -127,6 +128,47 @@ export default defineComponent({
           .catch((error) => {
             message.error(
               t('message.FailedToDeleteImage', [
+                props.attachToTitle,
+                String(error),
+              ])
+            );
+          });
+      },
+      onImageOrderChanged$$q: (
+        event: VueDraggableChangeEvent<ResourceImage>
+      ): void => {
+        const { moved } = event;
+        if (!moved) {
+          return;
+        }
+
+        const { newIndex, oldIndex, element } = moved;
+
+        if (newIndex === oldIndex) {
+          return;
+        }
+
+        const images = images$$q.value;
+        if (!images) {
+          return;
+        }
+
+        const referenceImageIndex = newIndex + (newIndex > oldIndex ? 1 : 0);
+        const referenceImageId = images[referenceImageIndex]?.id;
+
+        getAPIImageRoot(element.id)
+          ?.$patch({
+            body: {
+              nextImageId: referenceImageId ?? null,
+            },
+          })
+          .then(() => {
+            message.success(t('message.ReorderedImage', [props.attachToTitle]));
+            syncDB();
+          })
+          .catch((error) => {
+            message.error(
+              t('message.FailedToReorderImage', [
                 props.attachToTitle,
                 String(error),
               ])
@@ -227,25 +269,30 @@ export default defineComponent({
             x-scrollable
           >
             <template v-if="images$$q">
-              <div class="flex gap-x-4 h-64 sm:h-80 pt-8">
-                <template v-for="(imageId, index) in imageIds" :key="index">
+              <g-draggable
+                :model-value="images$$q"
+                item-key="id"
+                class="flex gap-x-4 h-64 sm:h-80 pt-8"
+                @change="onImageOrderChanged$$q"
+              >
+                <template #item="{ element }">
                   <div class="flex-none flex flex-col gap-y-4 items-center">
                     <a
                       class="block"
                       target="_blank"
                       rel="noopener noreferrer"
-                      :href="getOriginalImageURL$$q(images$$q?.[index])"
+                      :href="getOriginalImageURL$$q(element)"
                     >
                       <s-nullable-image
                         class="flex-none w-32 h-32 sm:w-48 sm:h-48"
-                        :image="images$$q?.[index]"
+                        :image="element"
                         size="200"
                       />
                     </a>
                     <n-popconfirm
                       :positive-text="t('confirm.deleteImage.buttonDelete')"
                       :negative-text="t('confirm.deleteImage.buttonCancel')"
-                      @positive-click="removeImage$$q(imageId)"
+                      @positive-click="removeImage$$q(element.id)"
                     >
                       <template #trigger>
                         <n-button tag="div" text>
@@ -258,16 +305,18 @@ export default defineComponent({
                     </n-popconfirm>
                   </div>
                 </template>
-                <div class="flex-none flex flex-col gap-y-4 items-center">
-                  <v-btn
-                    flat
-                    class="!w-32 !h-32 !sm:w-48 !sm:h-48 flex items-center justify-center border"
-                    @click="inputFileElement$$q?.click()"
-                  >
-                    <v-icon size="48">mdi-plus</v-icon>
-                  </v-btn>
-                </div>
-              </div>
+                <template #footer>
+                  <div class="flex-none flex flex-col gap-y-4 items-center">
+                    <v-btn
+                      flat
+                      class="!w-32 !h-32 !sm:w-48 !sm:h-48 flex items-center justify-center border"
+                      @click="inputFileElement$$q?.click()"
+                    >
+                      <v-icon size="48">mdi-plus</v-icon>
+                    </v-btn>
+                  </div>
+                </template>
+              </g-draggable>
             </template>
           </n-scrollbar>
         </v-card-text>

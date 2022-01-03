@@ -22,7 +22,7 @@ export function useLiveQuery<T>(
   const valueAsync = ref<Promise<T>>(initialPromise);
   const valueExists = ref<boolean>(false);
 
-  const update = (): void => {
+  const onSourceUpdate = (): void => {
     if (subscription) {
       subscription.unsubscribe();
 
@@ -69,10 +69,10 @@ export function useLiveQuery<T>(
     });
   };
 
-  update();
+  onSourceUpdate();
 
   if (watchSources.length) {
-    watch(watchSources, update);
+    watch(watchSources, onSourceUpdate);
   }
 
   tryOnScopeDispose((): void => {

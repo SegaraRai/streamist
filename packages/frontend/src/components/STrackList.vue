@@ -1,6 +1,5 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import GGrid from 'vue-virtual-scroll-grid';
 import type {
   ResourceAlbum,
   ResourceArtist,
@@ -43,9 +42,6 @@ interface ListItemDiscNumberHeader {
 type ListItem = ListItemTrack | ListItemDiscNumberHeader;
 
 export default defineComponent({
-  components: {
-    GGrid,
-  },
   props: {
     tracks: {
       type: Array as PropType<

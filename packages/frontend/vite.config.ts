@@ -8,6 +8,10 @@ import Prism from 'markdown-it-prism';
 import AutoImport from 'unplugin-auto-import/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
+import {
+  ComponentResolveResult,
+  ComponentResolver,
+} from 'unplugin-vue-components/dist/types';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 import Inspect from 'vite-plugin-inspect';
@@ -72,6 +76,16 @@ function NativeUIResolver() {
   } as const;
 }
 
+function CustomResolver(
+  type: 'component' | 'directive',
+  components: Record<string, ComponentResolveResult>
+): ComponentResolver {
+  return {
+    type,
+    resolve: (name: string) => components[name],
+  };
+}
+
 createVuetifyDTS();
 
 export default defineConfig({
@@ -131,6 +145,14 @@ export default defineConfig({
           // enabledCollections: ['carbon']
         }),
         NativeUIResolver(),
+        CustomResolver('component', {
+          GDraggable: {
+            path: 'vuedraggable',
+          },
+          GGrid: {
+            path: 'vue-virtual-scroll-grid',
+          },
+        }),
       ],
 
       dts: 'src/components.d.ts',
@@ -228,11 +250,14 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       'axios',
+      '@aspida/axios',
       'dexie',
       'humanize-duration',
       'p-queue',
       'vue',
+      'vuedraggable',
       'vue-router',
+      'vue-virtual-scroll-grid',
       '@vueuse/core',
       '@vueuse/head',
     ],

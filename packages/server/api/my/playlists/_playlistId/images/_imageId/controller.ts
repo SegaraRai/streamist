@@ -10,7 +10,7 @@ export default defineController(() => ({
       user.id,
       params.playlistId,
       params.imageId,
-      body.previousImageId || undefined
+      body.nextImageId || undefined
     );
     return { status: 204 };
   },
