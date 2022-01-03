@@ -213,7 +213,7 @@ export default defineComponent({
       playlistId$$q: eagerComputed(() => props.playlistId),
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
-      openEditTrackDialog$$q: (track: ResourceTrack) => {},
+      openEditTrackDialog$$q: (_track: ResourceTrack) => {},
     });
 
     return {
@@ -552,26 +552,14 @@ export default defineComponent({
 
 .sheet-header {
   @apply sticky;
+
   top: 48px;
   z-index: 1;
 }
 
-.list-header {
-  @apply pt-0 !important;
-  @apply pb-0 !important;
-  @apply min-h-0 !important;
-  @apply select-none;
-  height: 34px;
-}
-
-.list-header .track-title,
-.list-header .track-album-title {
-  @apply text-sm !important;
-  @apply font-bold !important;
-}
-
 .sheet-disc-number-header {
   @apply sticky;
+
   top: calc(48px + 1px + 34px);
   z-index: 1;
 }
@@ -648,5 +636,20 @@ export default defineComponent({
 .play-icon:hover {
   font-size: 36px !important;
   opacity: 1;
+}
+
+.list-header {
+  @apply pt-0 !important;
+  @apply pb-0 !important;
+  @apply min-h-0 !important;
+  @apply select-none;
+
+  height: 34px;
+}
+
+.list-header .track-title,
+.list-header .track-album-title {
+  @apply text-sm !important;
+  @apply font-bold !important;
 }
 </style>
