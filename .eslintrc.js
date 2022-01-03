@@ -55,7 +55,8 @@ module.exports = defineConfig({
           caseInsensitive: false,
         },
         groups: [
-          ['builtin', 'external'],
+          'builtin',
+          'external',
           'unknown',
           'internal',
           'parent',
@@ -77,6 +78,7 @@ module.exports = defineConfig({
             group: 'unknown',
           },
         ],
+        pathGroupsExcludedImportTypes: ['builtin', 'external'],
       },
     ],
   },

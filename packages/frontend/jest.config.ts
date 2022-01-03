@@ -1,5 +1,5 @@
-import type { Config } from '@jest/types';
 import { readFileSync } from 'node:fs';
+import type { Config } from '@jest/types';
 import { pathsToModuleNameMapper } from 'ts-jest/utils';
 import { parseConfigFileTextToJson } from 'typescript';
 

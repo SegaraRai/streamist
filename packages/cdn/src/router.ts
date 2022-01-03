@@ -11,17 +11,19 @@ type Handler = (req: Request) => Response | Promise<Response>;
 
 type PathCondition = string | RegExp;
 
-const Method = (method: string): Condition => (req: Request): boolean =>
-  req.method.toUpperCase() === method;
-const Connect: Condition = /*@__PURE__*/ Method('CONNECT');
-const Delete: Condition = /*@__PURE__*/ Method('DELETE');
-const Get: Condition = /*@__PURE__*/ Method('GET');
-const Head: Condition = /*@__PURE__*/ Method('HEAD');
-const Options: Condition = /*@__PURE__*/ Method('OPTIONS');
-const Patch: Condition = /*@__PURE__*/ Method('PATCH');
-const Post: Condition = /*@__PURE__*/ Method('POST');
-const Put: Condition = /*@__PURE__*/ Method('PUT');
-const Trace: Condition = /*@__PURE__*/ Method('TRACE');
+const Method =
+  (method: string): Condition =>
+  (req: Request): boolean =>
+    req.method.toUpperCase() === method;
+const Connect: Condition = /* @__PURE__*/ Method('CONNECT');
+const Delete: Condition = /* @__PURE__*/ Method('DELETE');
+const Get: Condition = /* @__PURE__*/ Method('GET');
+const Head: Condition = /* @__PURE__*/ Method('HEAD');
+const Options: Condition = /* @__PURE__*/ Method('OPTIONS');
+const Patch: Condition = /* @__PURE__*/ Method('PATCH');
+const Post: Condition = /* @__PURE__*/ Method('POST');
+const Put: Condition = /* @__PURE__*/ Method('PUT');
+const Trace: Condition = /* @__PURE__*/ Method('TRACE');
 
 /*
 const Header = (header: string, val: string): Condition =>
@@ -29,17 +31,19 @@ const Header = (header: string, val: string): Condition =>
 const Host = (host: string): Condition => Header('host', host.toLowerCase());
 //*/
 
-const Path = (target: PathCondition) => (req: Request): boolean => {
-  const url = new URL(req.url);
+const Path =
+  (target: PathCondition) =>
+  (req: Request): boolean => {
+    const url = new URL(req.url);
 
-  const pathname = url.pathname;
+    const pathname = url.pathname;
 
-  if (typeof target === 'string') {
-    return pathname === target;
-  }
+    if (typeof target === 'string') {
+      return pathname === target;
+    }
 
-  return target.test(pathname);
-};
+    return target.test(pathname);
+  };
 
 interface Route {
   conditions$$q: Condition[] | null | undefined;

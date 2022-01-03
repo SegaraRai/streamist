@@ -4,7 +4,7 @@ import { Router } from '../router';
 import { handleAPICookie } from './api/cookie';
 import { handleData } from './data';
 
-const router = /*@__PURE__*/ new Router()
+const router = /* @__PURE__*/ new Router()
   .options$$q(cookieAPI, handleAPICookie)
   .post$$q(cookieAPI, handleAPICookie)
   .get$$q(/^\/data\//, handleData)

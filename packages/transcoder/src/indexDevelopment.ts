@@ -1,8 +1,8 @@
 import './checkEnv.js';
 import './initCredentials.js';
 
-import fetch from 'node-fetch';
 import { createServer } from 'node:http';
+import fetch from 'node-fetch';
 import { nodeReadableStreamToBuffer } from '$shared-server/stream.js';
 import { TRANSCODER_API_PATH, TRANSCODER_PORT } from './devConfig.js';
 import logger from './logger.js';

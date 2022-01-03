@@ -1,4 +1,4 @@
-/*! @streamist/cdn-cfw */
+/* ! @streamist/cdn-cfw */
 
 import './checkEnv';
 

@@ -9,7 +9,7 @@ import { getImageFileURL } from '~/logic/fileURL';
 import type { FileId } from '~/logic/uploadManager';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { useUploadStore } from '~/stores/upload';
-import { ResourceImage } from '$/types';
+import type { ResourceImage } from '$/types';
 
 export default defineComponent({
   props: {

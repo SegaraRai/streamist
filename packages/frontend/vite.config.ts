@@ -1,10 +1,10 @@
+import { writeFileSync } from 'node:fs';
+import path from 'node:path';
 import VueI18n from '@intlify/vite-plugin-vue-i18n';
 import Vue from '@vitejs/plugin-vue';
 import Vuetify from '@vuetify/vite-plugin';
 import LinkAttributes from 'markdown-it-link-attributes';
 import Prism from 'markdown-it-prism';
-import { writeFileSync } from 'node:fs';
-import path from 'node:path';
 import AutoImport from 'unplugin-auto-import/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';

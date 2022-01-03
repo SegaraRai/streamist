@@ -23,7 +23,7 @@ export function convertToMutableResponse(originalResponse: Response): Response {
   return new Response(originalResponse.body, originalResponse);
 }
 
-const errorResponseHeaders = /*@__PURE__*/ sortHeaders([
+const errorResponseHeaders = /* @__PURE__*/ sortHeaders([
   ...corsHeaders,
   ['Cache-Control', 'no-store'],
   ['Content-Type', 'text/plain; charset=UTF-8'],
