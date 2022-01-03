@@ -7,7 +7,12 @@ module.exports = defineConfig({
     browser: true,
     node: true,
   },
-  extends: ['@nuxtjs/eslint-config-typescript', 'prettier'],
+  extends: [
+    '@nuxtjs/eslint-config-typescript',
+    'prettier',
+    'plugin:import/recommended',
+    'plugin:import/typescript',
+  ],
   rules: {
     'vue/no-v-model-argument': 'off',
     'vue/multi-word-component-names': 'off',
@@ -25,7 +30,6 @@ module.exports = defineConfig({
         math: 'always',
       },
     ],
-    'import/named': 'off',
     'no-redeclare': 'off',
     '@typescript-eslint/no-redeclare': ['error'],
     'spaced-comment': [
@@ -47,6 +51,8 @@ module.exports = defineConfig({
         allowSeparatedGroups: true,
       },
     ],
+    'import/named': 'off',
+    'import/no-unresolved': 'off',
     'import/order': [
       'error',
       {
