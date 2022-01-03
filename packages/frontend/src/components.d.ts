@@ -18,7 +18,6 @@ declare module 'vue' {
     NPopconfirm: typeof import('naive-ui')['NPopconfirm']
     NPopover: typeof import('naive-ui')['NPopover']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
-    NTooltip: typeof import('naive-ui')['NTooltip']
     SAlbum: typeof import('./components/SAlbum.vue')['default']
     SAlbumEditDialog: typeof import('./components/SAlbumEditDialog.vue')['default']
     SAlbumImage: typeof import('./components/SAlbumImage.vue')['default']

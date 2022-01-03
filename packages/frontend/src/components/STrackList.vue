@@ -10,10 +10,10 @@ import { db } from '~/db';
 import { VueDraggableChangeEvent } from '~/logic/draggable/types';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
+import { useMenu } from '~/logic/menu';
 import { createTrackListDropdown } from '~/logic/naive-ui/trackListDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
-import { currentScrollRef } from '~/stores/scroll';
 import { useThemeStore } from '~/stores/theme';
 import type { ListItemDiscNumberHeader } from './STrackListDiscHeaderItem.vue';
 import type { ListItemTrack } from './STrackListTrackItem.vue';
@@ -168,17 +168,16 @@ export default defineComponent({
       () => playbackStore.currentTrack$$q.value?.id
     );
     //
-    const showMenu$$q = ref(false);
-    const menuX$$q = ref(0);
-    const menuOffsetY$$q = ref(0);
-    const menuY$$q = computed(
-      () => menuOffsetY$$q.value - currentScrollRef.value
-    );
     const selectedTrack$$q = ref<ResourceTrack | undefined>();
-    const closeMenu$$q = () => {
-      showMenu$$q.value = false;
+    const {
+      x$$q: menuX$$q,
+      y$$q: menuY$$q,
+      isOpen$$q: menuIsOpen$$q,
+      close$$q: closeMenu$$q,
+      open$$q: openMenu$$q,
+    } = useMenu(() => {
       selectedTrack$$q.value = undefined;
-    };
+    });
     const menuOptions$$q = createTrackListDropdown({
       closeMenu$$q,
       selectedTrack$$q,
@@ -198,9 +197,6 @@ export default defineComponent({
 
     return {
       t,
-      showMenu$$q,
-      menuX$$q,
-      menuY$$q,
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       items$$q: items,
@@ -216,31 +212,19 @@ export default defineComponent({
         }
         playbackStore.setSetListAndPlay$$q(props.setList, track);
       },
-      onContextMenu$$q: (event: MouseEvent, track: ResourceTrack): void => {
-        event.preventDefault();
-        showMenu$$q.value = false;
-        nextTick().then(() => {
-          selectedTrack$$q.value = track;
-          menuX$$q.value = event.clientX;
-          menuOffsetY$$q.value = event.clientY + currentScrollRef.value;
-          showMenu$$q.value = true;
-        });
+      showMenu$$q: (
+        eventOrElement: MouseEvent | HTMLElement,
+        track: ResourceTrack
+      ): void => {
+        selectedTrack$$q.value = track;
+        openMenu$$q(eventOrElement);
       },
-      onMenu$$q: (event: MouseEvent, track: ResourceTrack): void => {
-        showMenu$$q.value = false;
-        const element = event.target as HTMLElement;
-        const rect = element.getBoundingClientRect();
-        nextTick().then(() => {
-          selectedTrack$$q.value = track;
-          menuX$$q.value = (rect.left + rect.right) / 2;
-          menuOffsetY$$q.value =
-            (rect.top + rect.bottom) / 2 + currentScrollRef.value;
-          showMenu$$q.value = true;
-        });
-      },
-      closeMenu$$q,
       selectedTrack$$q,
       menuOptions$$q,
+      menuIsOpen$$q,
+      menuX$$q,
+      menuY$$q,
+      closeMenu$$q,
       pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
       dragging$$q,
       onTrackOrderChanged$$q: (
@@ -336,8 +320,8 @@ export default defineComponent({
                 :show-artist="showArtist"
                 :hide-duration="hideDuration"
                 :selected="selectedTrack$$q?.id === item.track$$q.id"
-                @menu="onMenu$$q($event, item.track$$q)"
-                @ctx-menu="onContextMenu$$q($event, item.track$$q)"
+                @menu="showMenu$$q($event.target as HTMLElement, item.track$$q)"
+                @ctx-menu="showMenu$$q($event, item.track$$q)"
               />
             </template>
           </template>
@@ -365,8 +349,8 @@ export default defineComponent({
                 :show-artist="showArtist"
                 :hide-duration="hideDuration"
                 :selected="selectedTrack$$q?.id === element.track$$q.id"
-                @menu="onMenu$$q($event, element.track$$q)"
-                @ctx-menu="onContextMenu$$q($event, element.track$$q)"
+                @menu="showMenu$$q($event.target as HTMLElement, element.track$$q)"
+                @ctx-menu="showMenu$$q($event, element.track$$q)"
               />
             </template>
           </template>
@@ -405,8 +389,8 @@ export default defineComponent({
                 :show-artist="showArtist"
                 :hide-duration="hideDuration"
                 :selected="selectedTrack$$q?.id === item.track$$q.id"
-                @menu="onMenu$$q($event, item.track$$q)"
-                @ctx-menu="onContextMenu$$q($event, item.track$$q)"
+                @menu="showMenu$$q($event.target as HTMLElement, item.track$$q)"
+                @ctx-menu="showMenu$$q($event, item.track$$q)"
               />
             </template>
           </template>
@@ -420,7 +404,7 @@ export default defineComponent({
     :x="menuX$$q"
     :y="menuY$$q"
     :options="menuOptions$$q"
-    :show="showMenu$$q"
+    :show="menuIsOpen$$q"
     :on-clickoutside="closeMenu$$q"
     @contextmenu.prevent
   />
