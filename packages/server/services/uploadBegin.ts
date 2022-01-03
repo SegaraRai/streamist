@@ -257,6 +257,7 @@ export async function createAudioSource(
             cueSheetFileId,
             attachToType: null,
             attachToId: null,
+            attachPrepend: null,
             entityExists: false,
             uploadId,
             createdAt: Date.now(),
@@ -276,6 +277,7 @@ export async function createAudioSource(
                   cueSheetFileId: null,
                   attachToType: null,
                   attachToId: null,
+                  attachPrepend: null,
                   entityExists: false,
                   uploadId: cueSheetUploadId,
                   createdAt: Date.now(),
@@ -360,6 +362,32 @@ export async function createImageSource(
       }
       break;
 
+    case 'artist':
+      if (
+        (await client.artist.count({
+          where: {
+            id: request.attachToId,
+            userId,
+          },
+        })) === 0
+      ) {
+        throw new HTTPError(404, `artist ${request.attachToId} not found`);
+      }
+      break;
+
+    case 'playlist':
+      if (
+        (await client.playlist.count({
+          where: {
+            id: request.attachToId,
+            userId,
+          },
+        })) === 0
+      ) {
+        throw new HTTPError(404, `playlist ${request.attachToId} not found`);
+      }
+      break;
+
     default:
       throw new HTTPError(400, `invalid attachToType ${request.attachToType}`);
   }
@@ -395,6 +423,7 @@ export async function createImageSource(
             cueSheetFileId: null,
             attachToType: toSourceFileAttachToType(request.attachToType),
             attachToId: String(request.attachToId),
+            attachPrepend: !!request.attachPrepend,
             entityExists: false,
             uploadId,
             createdAt: Date.now(),

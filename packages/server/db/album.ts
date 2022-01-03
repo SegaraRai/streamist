@@ -86,7 +86,8 @@ export function dbAlbumAddImageTx(
   txClient: TransactionalPrismaClient,
   userId: string,
   albumId: string,
-  imageIds: string | readonly string[]
+  imageIds: string | readonly string[],
+  prepend = false
 ): Promise<void> {
   return dbArrayAddTx<typeof Prisma.AlbumScalarFieldEnum>(
     txClient,
@@ -95,7 +96,8 @@ export function dbAlbumAddImageTx(
     Prisma.ModelName.Image,
     Prisma.AlbumScalarFieldEnum.imageOrder,
     albumId,
-    imageIds
+    imageIds,
+    prepend
   );
 }
 

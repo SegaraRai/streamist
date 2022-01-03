@@ -65,6 +65,7 @@ function createTranscoderRequestFiles(
             options,
             attachToType: file.attachToType as SourceFileAttachToType,
             attachToId: file.attachToId,
+            attachPrepend: !!file.attachPrepend,
             extracted: false,
           };
       }

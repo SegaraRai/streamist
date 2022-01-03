@@ -118,7 +118,8 @@ export function dbPlaylistAddImageTx(
   txClient: TransactionalPrismaClient,
   userId: string,
   playlistId: string,
-  imageIds: string | readonly string[]
+  imageIds: string | readonly string[],
+  prepend = false
 ): Promise<void> {
   return dbArrayAddTx<typeof Prisma.PlaylistScalarFieldEnum>(
     txClient,
@@ -127,7 +128,8 @@ export function dbPlaylistAddImageTx(
     Prisma.ModelName.Image,
     Prisma.PlaylistScalarFieldEnum.imageOrder,
     playlistId,
-    imageIds
+    imageIds,
+    prepend
   );
 }
 

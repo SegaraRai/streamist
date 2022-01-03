@@ -92,6 +92,7 @@ export interface UploadFile {
   attachTarget: {
     attachToType: SourceFileAttachToType;
     attachToId: string;
+    attachPrepend: boolean;
   } | null;
 }
 
@@ -196,7 +197,8 @@ function createImageUploadFile(imageFile: File, dependsOn: FileId): UploadFile {
 function createImageWithAttachTargetUploadFile(
   imageFile: File,
   attachToType: SourceFileAttachToType,
-  attachToId: string
+  attachToId: string,
+  attachPrepend = false
 ): UploadFile {
   return {
     id: generateFileId(),
@@ -216,6 +218,7 @@ function createImageWithAttachTargetUploadFile(
     attachTarget: {
       attachToType,
       attachToId,
+      attachPrepend,
     },
   };
 }
@@ -710,6 +713,7 @@ export class UploadManager extends EventTarget {
                       },
                       attachToType: 'album',
                       attachToId: targetAlbumId,
+                      attachPrepend: false,
                     },
                   });
                 } else if (file.fileType === 'imageWithAttachTarget') {
@@ -732,6 +736,7 @@ export class UploadManager extends EventTarget {
                       },
                       attachToType: file.attachTarget.attachToType,
                       attachToId: file.attachTarget.attachToId,
+                      attachPrepend: file.attachTarget.attachPrepend,
                     },
                   });
                 }
@@ -880,12 +885,14 @@ export class UploadManager extends EventTarget {
   addImageFileWithAttachTarget(
     imageFile: File,
     attachToType: SourceFileAttachToType,
-    attachToId: string
+    attachToId: string,
+    attachPrepend = false
   ): FileId {
     const uploadFile = createImageWithAttachTargetUploadFile(
       imageFile,
       attachToType,
-      attachToId
+      attachToId,
+      attachPrepend
     );
     this._files.unshift(uploadFile);
     this._dispatchUpdatedEvent();

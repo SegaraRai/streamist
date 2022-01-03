@@ -55,10 +55,16 @@ export const useUploadStore = defineStore('upload', () => {
     uploadImageFiles(
       files: readonly File[],
       attachToType: SourceFileAttachToType,
-      attachToId: string
+      attachToId: string,
+      attachPrepend = false
     ): FileId[] {
       return files.map((file) =>
-        manager.addImageFileWithAttachTarget(file, attachToType, attachToId)
+        manager.addImageFileWithAttachTarget(
+          file,
+          attachToType,
+          attachToId,
+          attachPrepend
+        )
       );
     },
     removeStagingFile(fileId: ResolvedFileId): void {

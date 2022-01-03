@@ -32,6 +32,7 @@ export interface CreateSourceRequestImage {
   region: Region;
   attachToType: SourceFileAttachToType;
   attachToId: string;
+  attachPrepend: boolean;
   imageFile: CreateSourceRequestFileImage;
 }
 

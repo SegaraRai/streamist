@@ -60,6 +60,7 @@ model SourceFile {
   // only for image files (required)
   attachToType   String? // 'album' | 'artist' | 'playlist'
   attachToId     String?
+  attachPrepend  Boolean?
   // only for extracted image files
   sourceFile     SourceFile?  @relation("SourceFileToExtractedSourceFile", fields: [sourceFileId], references: [id], onDelete: Restrict)
   sourceFileId   String?

@@ -91,7 +91,8 @@ async function registerImage(
   artifact: TranscoderResponseArtifactImage,
   imageId: string,
   attachToType: SourceFileAttachToType,
-  attachToId: string
+  attachToId: string,
+  attachPrepend: boolean
 ): Promise<void> {
   const { sourceFileId, region, userId } = artifact.source;
 
@@ -133,15 +134,33 @@ async function registerImage(
   // add image to target
   switch (attachToType) {
     case 'album':
-      await dbAlbumAddImageTx(txClient, userId, attachToId, imageId);
+      await dbAlbumAddImageTx(
+        txClient,
+        userId,
+        attachToId,
+        imageId,
+        attachPrepend
+      );
       break;
 
     case 'artist':
-      await dbArtistAddImageTx(txClient, userId, attachToId, imageId);
+      await dbArtistAddImageTx(
+        txClient,
+        userId,
+        attachToId,
+        imageId,
+        attachPrepend
+      );
       break;
 
     case 'playlist':
-      await dbPlaylistAddImageTx(txClient, userId, attachToId, imageId);
+      await dbPlaylistAddImageTx(
+        txClient,
+        userId,
+        attachToId,
+        imageId,
+        attachPrepend
+      );
       break;
   }
 }
@@ -402,6 +421,7 @@ async function handleTranscoderResponse(
 
       let attachToType: SourceFileAttachToType;
       let attachToId: string | undefined;
+      let attachPrepend: boolean;
 
       if (extracted) {
         const deleteTranscodedFiles = async () => {
@@ -416,6 +436,7 @@ async function handleTranscoderResponse(
         };
 
         attachToType = 'album';
+        attachPrepend = false;
 
         attachToId = sourceFileIdToAlbumIdMap.get(source.audioSourceFileId);
         if (!attachToId) {
@@ -467,6 +488,7 @@ async function handleTranscoderResponse(
             cueSheetFileId: null,
             attachToType,
             attachToId,
+            attachPrepend,
             entityExists: false,
             uploadId: null,
             sourceId,
@@ -477,7 +499,7 @@ async function handleTranscoderResponse(
         });
       } else {
         const { sourceFileId } = source;
-        ({ attachToType, attachToId } = source);
+        ({ attachToType, attachToId, attachPrepend } = source);
 
         await markSourceFileIdAsTx(
           txClient,
@@ -495,7 +517,8 @@ async function handleTranscoderResponse(
         artifact,
         imageId,
         attachToType,
-        attachToId
+        attachToId,
+        attachPrepend
       );
     }
 

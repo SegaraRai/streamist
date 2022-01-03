@@ -31,6 +31,7 @@ export default defineComponent({
       default: undefined,
     },
     rounded: Boolean,
+    disableDialog: Boolean,
   },
   setup(props) {
     const { t } = useI18n();
@@ -90,8 +91,8 @@ export default defineComponent({
       return await db.images.bulkGet([...imageIds$$q.value]);
     }, [imageIds$$q]);
 
-    watch(imageIds$$q, (newImageIds) => {
-      if (!newImageIds || newImageIds.length === 0) {
+    watchEffect(() => {
+      if (props.disableDialog || !imageIds$$q.value?.length) {
         dialog$$q.value = false;
       }
     });
@@ -180,7 +181,7 @@ export default defineComponent({
           return;
         }
 
-        if (hasImage$$q.value) {
+        if (hasImage$$q.value && !props.disableDialog) {
           dialog$$q.value = true;
         } else {
           inputFileElement$$q.value?.click();
@@ -199,7 +200,8 @@ export default defineComponent({
         uploadingFileIds$$q.value = uploadStore.uploadImageFiles(
           Array.from(fileList),
           props.attachToType,
-          props.attachToId
+          props.attachToId,
+          props.disableDialog
         );
       },
     };
@@ -215,7 +217,7 @@ export default defineComponent({
     @click="onImageClicked$$q"
   >
     <slot></slot>
-    <template v-if="loaded$$q && !hasImage$$q">
+    <template v-if="loaded$$q && (!hasImage$$q || disableDialog)">
       <template v-if="uploading$$q">
         <div
           class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl bg-black/50"

@@ -76,7 +76,8 @@ export function dbArtistAddImageTx(
   txClient: TransactionalPrismaClient,
   userId: string,
   artistId: string,
-  imageIds: string | readonly string[]
+  imageIds: string | readonly string[],
+  prepend = false
 ): Promise<void> {
   return dbArrayAddTx<typeof Prisma.ArtistScalarFieldEnum>(
     txClient,
@@ -85,7 +86,8 @@ export function dbArtistAddImageTx(
     Prisma.ModelName.Image,
     Prisma.ArtistScalarFieldEnum.imageOrder,
     artistId,
-    imageIds
+    imageIds,
+    prepend
   );
 }
 

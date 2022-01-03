@@ -46,6 +46,7 @@ export interface TranscoderRequestFileImage {
   fileSize: number;
   attachToType: SourceFileAttachToType;
   attachToId: string;
+  attachPrepend: boolean;
   extracted: false;
 }
 
