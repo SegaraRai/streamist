@@ -5,12 +5,14 @@
 declare module 'vue' {
   export interface GlobalComponents {
     IMdiCloudUpload: typeof import('~icons/mdi/cloud-upload')['default']
+    NButton: typeof import('naive-ui')['NButton']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NDropdown: typeof import('naive-ui')['NDropdown']
     NEllipsis: typeof import('naive-ui')['NEllipsis']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
+    NPopconfirm: typeof import('naive-ui')['NPopconfirm']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     SAlbum: typeof import('./components/SAlbum.vue')['default']
     SAlbumEditDialog: typeof import('./components/SAlbumEditDialog.vue')['default']

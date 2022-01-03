@@ -17,7 +17,6 @@ import type {
   SourceFileType,
 } from '$shared/types/db';
 import { db } from '~/db';
-import { syncDB } from '~/db/sync';
 import api from '~/logic/api';
 import type {
   CreateSourceResponse,
@@ -429,7 +428,10 @@ export class UploadManager extends EventTarget {
     });
   }
 
-  private async _sync(force = false): Promise<void> {
+  private async _sync(
+    syncDB: (reconstruct?: boolean) => Promise<void>,
+    force = false
+  ): Promise<void> {
     if (!force && this._files.every((file) => file.status !== 'transcoding')) {
       return;
     }
@@ -813,11 +815,11 @@ export class UploadManager extends EventTarget {
     }
   }
 
-  constructor() {
+  constructor(syncDB: (reconstruct?: boolean) => Promise<void>) {
     super();
 
     const sync = () => {
-      this._sync().finally(() => {
+      this._sync(syncDB).finally(() => {
         setTimeout(sync, SYNC_INTERVAL);
       });
     };

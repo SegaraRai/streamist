@@ -6,3 +6,9 @@
   @apply flex;
   @apply flex-col;
 }
+
+.s-n-scrollbar-flex-col-center > .n-scrollbar-container > .n-scrollbar-content {
+  @apply flex;
+  @apply flex-col;
+  @apply items-center;
+}

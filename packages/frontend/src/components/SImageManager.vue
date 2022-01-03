@@ -1,7 +1,9 @@
 <script lang="ts">
+import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import type { SourceFileAttachToType } from '$shared/types/db';
 import { db } from '~/db';
+import api from '~/logic/api';
 import { getImageFileURL } from '~/logic/fileURL';
 import type { FileId } from '~/logic/uploadManager';
 import { useLiveQuery } from '~/logic/useLiveQuery';
@@ -18,6 +20,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    attachToTitle: {
+      type: String,
+      default: '',
+    },
     imageIds: {
       type: Array as PropType<readonly string[] | undefined>,
       default: undefined,
@@ -25,6 +31,8 @@ export default defineComponent({
     rounded: Boolean,
   },
   setup(props) {
+    const { t } = useI18n();
+    const message = useMessage();
     const uploadStore = useUploadStore();
 
     const uploadingFileIds$$q = ref<readonly FileId[]>([]);
@@ -88,7 +96,38 @@ export default defineComponent({
         return getImageFileURL(imageFile);
       },
       removeImage$$q: (imageId: string) => {
-        // TODO: show dialog
+        let root;
+        switch (props.attachToType) {
+          case 'album':
+            root = api.my.albums._albumId(props.attachToId);
+            break;
+
+          case 'artist':
+            root = api.my.artists._artistId(props.attachToId);
+            break;
+
+          case 'playlist':
+            root = api.my.playlists._playlistId(props.attachToId);
+            break;
+
+          default:
+            return;
+        }
+
+        root.images
+          ._imageId(imageId)
+          .$delete()
+          .then(() => {
+            message.success(t('message.DeletedImage', [props.attachToTitle]));
+          })
+          .catch((error) => {
+            message.error(
+              t('message.FailedToDeleteImage', [
+                props.attachToTitle,
+                String(error),
+              ])
+            );
+          });
       },
       onImageClicked$$q: (): void => {
         if (!loaded$$q.value) {
@@ -158,7 +197,7 @@ export default defineComponent({
     @change="onFileSelected$$q"
   />
   <v-dialog class="s-image-manager-dialog" :model-value="dialog$$q">
-    <v-card class="w-full">
+    <v-card class="w-full md:min-w-xl">
       <v-card-title class="flex">
         <div class="flex-1">
           <slot name="title"></slot>
@@ -175,47 +214,47 @@ export default defineComponent({
           </v-btn>
         </div>
       </v-card-title>
-      <v-card-text class="opacity-100 flex flex-col overflow-auto items-center">
-        <template v-if="images$$q">
-          <div class="flex gap-x-4 h-80 pt-8">
-            <template v-for="(imageId, index) in imageIds" :key="index">
-              <div class="flex-none flex flex-col gap-y-4 items-center">
-                <a
-                  class="block"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  :href="getOriginalImageURL$$q(images$$q?.[index])"
-                >
-                  <s-nullable-image
-                    class="flex-none w-48 h-48"
-                    :image="images$$q?.[index]"
-                    size="200"
-                  />
-                </a>
-                <div>
-                  <v-btn
-                    flat
-                    icon
-                    size="small"
-                    class="text-red-500"
-                    @click="removeImage$$q(imageId)"
+      <v-card-text class="opacity-100 flex flex-col items-center">
+        <n-scrollbar class="flex-1 s-n-scrollbar-flex-col-center" x-scrollable>
+          <template v-if="images$$q">
+            <div class="flex gap-x-4 h-80 pt-8">
+              <template v-for="(imageId, index) in imageIds" :key="index">
+                <div class="flex-none flex flex-col gap-y-4 items-center">
+                  <a
+                    class="block"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :href="getOriginalImageURL$$q(images$$q?.[index])"
                   >
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
+                    <s-nullable-image
+                      class="flex-none w-48 h-48"
+                      :image="images$$q?.[index]"
+                      size="200"
+                    />
+                  </a>
+                  <n-popconfirm @positive-click="removeImage$$q(imageId)">
+                    <template #trigger>
+                      <n-button tag="div" text>
+                        <v-btn flat icon size="small" class="text-red-500">
+                          <v-icon>mdi-delete</v-icon>
+                        </v-btn>
+                      </n-button>
+                    </template>
+                  </n-popconfirm>
                 </div>
+              </template>
+              <div class="flex-none flex flex-col gap-y-4 items-center">
+                <v-btn
+                  flat
+                  class="!w-48 !h-48 flex items-center justify-center border"
+                  @click="inputFileElement$$q?.click()"
+                >
+                  <v-icon size="48">mdi-plus</v-icon>
+                </v-btn>
               </div>
-            </template>
-            <div class="flex-none flex flex-col gap-y-4 items-center">
-              <v-btn
-                flat
-                class="!w-48 !h-48 flex items-center justify-center border"
-                @click="inputFileElement$$q?.click()"
-              >
-                <v-icon size="48">mdi-plus</v-icon>
-              </v-btn>
             </div>
-          </div>
-        </template>
+          </template>
+        </n-scrollbar>
       </v-card-text>
     </v-card>
   </v-dialog>

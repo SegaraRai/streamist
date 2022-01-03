@@ -1,18 +1,18 @@
-import { albumImageDelete, albumImageMoveBefore } from '$/services/albums';
+import { artistImageDelete, artistImageMoveBefore } from '$/services/artists';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
   patch: async ({ body, params, user }) => {
-    await albumImageMoveBefore(
+    await artistImageMoveBefore(
       user.id,
-      params.albumId,
+      params.artistId,
       params.imageId,
       body.previousImageId || undefined
     );
     return { status: 204 };
   },
   delete: async ({ params, user }) => {
-    await albumImageDelete(user.id, params.albumId, params.imageId);
+    await artistImageDelete(user.id, params.artistId, params.imageId);
     return { status: 204 };
   },
 }));

@@ -117,6 +117,7 @@ export default defineComponent({
       <s-image-manager
         attach-to-type="artist"
         :attach-to-id="id"
+        :attach-to-title="value$$q?.artist$$q.name"
         :image-ids="imageIds$$q"
         rounded
       >

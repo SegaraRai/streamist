@@ -1,7 +1,10 @@
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
-import { dbPlaylistRemoveImageTx } from '$/db/playlist';
+import {
+  dbPlaylistMoveImageBefore,
+  dbPlaylistRemoveImageTx,
+} from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
@@ -61,7 +64,22 @@ export async function playlistDelete(
   }
 }
 
-export async function playlistRemoveImages(
+export async function playlistImageMoveBefore(
+  userId: string,
+  playlistId: string,
+  imageId: string,
+  referenceImageId: string | undefined
+): Promise<void> {
+  await dbPlaylistMoveImageBefore(
+    userId,
+    playlistId,
+    imageId,
+    referenceImageId
+  );
+  await dbResourceUpdateTimestamp(userId);
+}
+
+export async function playlistImageDelete(
   userId: string,
   playlistId: string,
   imageIds: string | readonly string[]

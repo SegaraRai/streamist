@@ -94,6 +94,7 @@ export default defineComponent({
           <s-image-manager
             attach-to-type="playlist"
             :attach-to-id="playlistId$$q"
+            :attach-to-title="value$$q.playlist$$q.title"
             :image-ids="imageIds$$q"
           >
             <template #title>

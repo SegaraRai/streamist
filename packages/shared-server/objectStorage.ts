@@ -25,9 +25,9 @@ export interface ObjectStorageUploadOptions {
 
 let gCredentials: ObjectStorageCredentials | undefined;
 
-export function setOSCredentials(credentials: ObjectStorageCredentials) {
+export function setOSCredentials(credentials: ObjectStorageCredentials): void {
   if (gCredentials) {
-    throw new Error('credentials already set');
+    throw new Error('setOSCredentials: credentials already set');
   }
 
   gCredentials = { ...credentials };
@@ -37,7 +37,7 @@ const gS3CacheMap = new Map<string, S3>();
 
 function createS3Cached(objectStorage: ObjectStorage): S3 {
   if (!gCredentials) {
-    throw new Error('credentials not set');
+    throw new Error('createS3Cached: credentials not set');
   }
 
   const key = `os://${objectStorage.provider}/${objectStorage.region}`;
@@ -46,7 +46,7 @@ function createS3Cached(objectStorage: ObjectStorage): S3 {
   if (!s3) {
     switch (objectStorage.provider) {
       case 'r2':
-        throw new Error('Cloudflare R2 is not GA yet');
+        throw new Error('createS3Cached: Cloudflare R2 is not GA yet');
 
       case 'wasabi':
         s3 = new S3({

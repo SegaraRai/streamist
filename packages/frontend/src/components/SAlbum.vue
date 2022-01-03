@@ -114,6 +114,7 @@ export default defineComponent({
           <s-image-manager
             attach-to-type="album"
             :attach-to-id="albumId$$q"
+            :attach-to-title="value$$q.album$$q.title"
             :image-ids="imageIds$$q"
           >
             <template #title

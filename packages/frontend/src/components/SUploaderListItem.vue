@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { PropType } from 'vue';
+import { humanizeSize } from '~/logic/humanizeSize';
 import type { UploadFile } from '~/logic/uploadManager';
 import type { ResolvedUploadFile } from '~/logic/uploadResolver';
 
@@ -13,22 +14,6 @@ const typeToFileIcon: Record<FileType, string> = {
   imageWithAttachTarget: 'mdi-file-image',
   unknown: 'mdi-file-question',
 };
-
-function humanizeSize(size: number): string {
-  if (size < 1024) {
-    return `${size} B`;
-  }
-
-  if (size < 1024 * 1024) {
-    return `${(size / 1024).toFixed(2)} KiB`;
-  }
-
-  if (size < 1024 * 1024 * 1024) {
-    return `${(size / 1024 / 1024).toFixed(2)} MiB`;
-  }
-
-  return `${(size / 1024 / 1024 / 1024).toFixed(2)} GiB`;
-}
 
 export default defineComponent({
   props: {

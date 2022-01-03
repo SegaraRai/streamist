@@ -1,7 +1,7 @@
 import { MenuOption, useDialog, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import { useTheme } from 'vuetify';
-import { syncDB } from '~/db/sync';
+import { useSyncDB } from '~/db/sync';
 import { usePlaybackStore } from '~/stores/playback';
 import type { ResourceTrack } from '$/types';
 import api from '../api';
@@ -34,6 +34,7 @@ export function createTrackListDropdown({
   const theme = useTheme({});
   const dialog = useDialog();
   const message = useMessage();
+  const syncDB = useSyncDB();
   const playbackStore = usePlaybackStore();
   const allPlaylist = useAllPlaylists();
 

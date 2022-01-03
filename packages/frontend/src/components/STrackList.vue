@@ -213,9 +213,7 @@ export default defineComponent({
       playlistId$$q: eagerComputed(() => props.playlistId),
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
-      openEditTrackDialog$$q: (track: ResourceTrack) => {
-
-      },
+      openEditTrackDialog$$q: (track: ResourceTrack) => {},
     });
 
     return {
@@ -643,12 +641,12 @@ export default defineComponent({
 
 .play-icon {
   font-size: 32px !important;
-  transition: font-size 0s;
-  opacity: 0.8;
+  transition: all 0.1s ease-in-out;
+  opacity: 0.9;
 }
 
 .play-icon:hover {
   font-size: 36px !important;
-  opacity: initial;
+  opacity: 1;
 }
 </style>

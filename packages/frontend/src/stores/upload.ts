@@ -1,5 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { SourceFileAttachToType } from '$shared/types/db';
+import { useSyncDB } from '~/db/sync';
 import { FileId, UploadFile, UploadManager } from '~/logic/uploadManager';
 import {
   ResolvedFileId,
@@ -9,10 +10,12 @@ import {
 } from '~/logic/uploadResolver';
 
 export const useUploadStore = defineStore('upload', () => {
+  const syncDB = useSyncDB();
+
   const stagedFiles = ref<ResolvedUploadFile[]>([]);
   const files = ref<readonly UploadFile[]>([]);
 
-  const manager = new UploadManager();
+  const manager = new UploadManager(syncDB);
   const syncFiles = () => {
     files.value = manager.files.map((file) => ({ ...file }));
   };

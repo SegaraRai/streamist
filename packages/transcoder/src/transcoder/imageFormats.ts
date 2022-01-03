@@ -31,6 +31,18 @@ export const transcodeImageFormats: GetImageFormat[] = [
     _imageMagickResult: ImageMagickResult,
     _imageInfo: ImageMagickImage
   ): ImageFormat => ({
+    name: 'v1-jpeg-80',
+    format: 'jpg',
+    extension: '.jpg',
+    mimeType: 'image/jpeg',
+    quality: 90,
+    maxWidth: 80,
+    maxHeight: 80,
+  }),
+  (
+    _imageMagickResult: ImageMagickResult,
+    _imageInfo: ImageMagickImage
+  ): ImageFormat => ({
     name: 'v1-jpeg-160',
     format: 'jpg',
     extension: '.jpg',

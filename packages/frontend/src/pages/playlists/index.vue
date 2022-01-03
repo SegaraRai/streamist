@@ -1,5 +1,5 @@
 <script lang="ts">
-import { syncDB } from '~/db/sync';
+import { useSyncDB } from '~/db/sync';
 import apiInstance from '~/logic/api';
 import { calcTracksTotalDuration, formatTotalDuration } from '~/logic/duration';
 import { useAllPlaylists, useAllTrackMap } from '~/logic/useDB';
@@ -23,6 +23,7 @@ export default defineComponent({
   setup() {
     const { t } = useI18n();
     const themeStore = useThemeStore();
+    const syncDB = useSyncDB();
     const playbackStore = usePlaybackStore();
 
     useHead({

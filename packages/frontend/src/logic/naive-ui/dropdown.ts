@@ -8,7 +8,7 @@ export function nCreateDropdownIcon(
   icon: string | (() => string)
 ): () => VNode {
   return typeof icon === 'string'
-    ? (): VNode => h(VIcon, null, () => icon)
+    ? (): VNode => h(VIcon, null, (): string => icon) // wrap in a function to suppress the warning from vue
     : (): VNode => h(VIcon, null, icon);
 }
 

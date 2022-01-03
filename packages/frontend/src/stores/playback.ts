@@ -6,6 +6,10 @@ import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
 import { TrackProvider2 } from '~/logic/trackProvider2';
+import {
+  realVolumeToVisualVolume,
+  visualVolumeToRealVolume,
+} from '~/logic/volume';
 import type { ResourceTrack } from '$/types';
 import { useVolumeStore } from './volume';
 
@@ -154,7 +158,7 @@ function _usePlaybackStore(): PlaybackState {
   const createAudio = (): HTMLAudioElement => {
     const audio = new Audio();
     audio.classList.add('currentTrack');
-    audio.volume = volumeStore.volume / 100;
+    audio.volume = visualVolumeToRealVolume(volumeStore.volume);
 
     audio.onplay = () => {
       if (currentAudio !== audio) {
@@ -219,11 +223,13 @@ function _usePlaybackStore(): PlaybackState {
         return;
       }
 
-      if (volumeStore.volume === Math.round(audio.volume * 100)) {
+      const vol = realVolumeToVisualVolume(audio.volume);
+
+      if (volumeStore.volume === vol) {
         // this is needed to suppress update of unmutedVolume
         return;
       }
-      volumeStore.volume = audio.volume * 100;
+      volumeStore.volume = vol;
     };
 
     return audio;
@@ -352,7 +358,7 @@ function _usePlaybackStore(): PlaybackState {
     computed(() => volumeStore.volume),
     (newVolume) => {
       if (currentAudio) {
-        currentAudio.volume = newVolume / 100;
+        currentAudio.volume = visualVolumeToRealVolume(newVolume);
       }
     }
   );

@@ -1,22 +1,9 @@
-import { dbArtistRemoveImageTx } from '$/db/artist';
+import { dbArtistMoveImageBefore, dbArtistRemoveImageTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
-
-export async function artistRemoveImages(
-  userId: string,
-  artistId: string,
-  imageIds: string | readonly string[]
-): Promise<void> {
-  const images = await client.$transaction(async (txClient) => {
-    await dbArtistRemoveImageTx(txClient, userId, artistId, imageIds);
-    return dbImageDeleteTx(txClient, userId, imageIds);
-  });
-  await imageDeleteFilesAndSourceFiles(userId, images, true);
-  await dbResourceUpdateTimestamp(userId);
-}
 
 /**
  * 指定されたアーティストが参照されていない場合に削除する
@@ -99,4 +86,27 @@ export async function artistDeleteIfUnreferenced(
   }
 
   return true;
+}
+
+export async function artistImageMoveBefore(
+  userId: string,
+  artistId: string,
+  imageId: string,
+  referenceImageId: string | undefined
+): Promise<void> {
+  await dbArtistMoveImageBefore(userId, artistId, imageId, referenceImageId);
+  await dbResourceUpdateTimestamp(userId);
+}
+
+export async function artistImageDelete(
+  userId: string,
+  artistId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  const images = await client.$transaction(async (txClient) => {
+    await dbArtistRemoveImageTx(txClient, userId, artistId, imageIds);
+    return dbImageDeleteTx(txClient, userId, imageIds);
+  });
+  await imageDeleteFilesAndSourceFiles(userId, images, true);
+  await dbResourceUpdateTimestamp(userId);
 }

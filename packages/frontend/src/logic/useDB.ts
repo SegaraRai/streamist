@@ -10,6 +10,8 @@ import type {
   ResourceArtist,
   ResourceImage,
   ResourcePlaylist,
+  ResourceSource,
+  ResourceSourceFile,
   ResourceTrack,
 } from '$/types';
 import { transformObservableComputed, useLiveQuery } from './useLiveQuery';
@@ -30,11 +32,35 @@ function _useAllArtists() {
   });
 }
 
+function _useAllImages() {
+  console.log('useDB: _useAllImages called');
+  return useLiveQuery(async (): Promise<readonly ResourceImage[]> => {
+    console.log('useDB: _useAllImages: liveQuery callback called');
+    return await db.images.toArray();
+  });
+}
+
 function _useAllPlaylists() {
   console.log('useDB: _useAllPlaylists called');
   return useLiveQuery(async (): Promise<readonly ResourcePlaylist[]> => {
     console.log('useDB: _useAllPlaylists: liveQuery callback called');
     return (await db.playlists.toArray()).sort(comparePlaylist);
+  });
+}
+
+function _useAllSourceFiles() {
+  console.log('useDB: _useAllSourceFiles called');
+  return useLiveQuery(async (): Promise<readonly ResourceSourceFile[]> => {
+    console.log('useDB: _useAllSourceFiles: liveQuery callback called');
+    return await db.sourceFiles.toArray();
+  });
+}
+
+function _useAllSources() {
+  console.log('useDB: _useAllSources called');
+  return useLiveQuery(async (): Promise<readonly ResourceSource[]> => {
+    console.log('useDB: _useAllSources: liveQuery callback called');
+    return await db.sources.toArray();
   });
 }
 
@@ -46,13 +72,7 @@ function _useAllTracks() {
   });
 }
 
-function _useAllImages() {
-  console.log('useDB: _useAllImageMap called');
-  return useLiveQuery(async (): Promise<readonly ResourceImage[]> => {
-    console.log('useDB: _useAllImageMap: liveQuery callback called');
-    return await db.images.toArray();
-  });
-}
+//
 
 function _createMap<T extends { readonly id: string }>(
   items: readonly T[]
@@ -64,6 +84,8 @@ export const useAllAlbums = createSharedComposable(_useAllAlbums);
 export const useAllArtists = createSharedComposable(_useAllArtists);
 export const useAllImages = createSharedComposable(_useAllImages);
 export const useAllPlaylists = createSharedComposable(_useAllPlaylists);
+export const useAllSourceFiles = createSharedComposable(_useAllSourceFiles);
+export const useAllSources = createSharedComposable(_useAllSources);
 export const useAllTracks = createSharedComposable(_useAllTracks);
 
 export const useAllAlbumMap = createSharedComposable(() =>
@@ -77,6 +99,12 @@ export const useAllImageMap = createSharedComposable(() =>
 );
 export const useAllPlaylistMap = createSharedComposable(() =>
   transformObservableComputed(useAllPlaylists(), _createMap)
+);
+export const useAllSourceMap = createSharedComposable(() =>
+  transformObservableComputed(useAllSources(), _createMap)
+);
+export const useAllSourceFileMap = createSharedComposable(() =>
+  transformObservableComputed(useAllSourceFiles(), _createMap)
 );
 export const useAllTrackMap = createSharedComposable(() =>
   transformObservableComputed(useAllTracks(), _createMap)

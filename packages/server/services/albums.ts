@@ -1,4 +1,4 @@
-import { dbAlbumRemoveImageTx } from '$/db/album';
+import { dbAlbumMoveImageBefore, dbAlbumRemoveImageTx } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
@@ -21,19 +21,6 @@ export async function albumUpdate(
     },
   });
 
-  await dbResourceUpdateTimestamp(userId);
-}
-
-export async function albumRemoveImages(
-  userId: string,
-  albumId: string,
-  imageIds: string | readonly string[]
-): Promise<void> {
-  const images = await client.$transaction(async (txClient) => {
-    await dbAlbumRemoveImageTx(txClient, userId, albumId, imageIds);
-    return dbImageDeleteTx(txClient, userId, imageIds);
-  });
-  await imageDeleteFilesAndSourceFiles(userId, images, true);
   await dbResourceUpdateTimestamp(userId);
 }
 
@@ -117,4 +104,27 @@ export async function albumDeleteIfUnreferenced(
   }
 
   return artistId;
+}
+
+export async function albumImageMoveBefore(
+  userId: string,
+  albumId: string,
+  imageId: string,
+  referenceImageId: string | undefined
+): Promise<void> {
+  await dbAlbumMoveImageBefore(userId, albumId, imageId, referenceImageId);
+  await dbResourceUpdateTimestamp(userId);
+}
+
+export async function albumImageDelete(
+  userId: string,
+  albumId: string,
+  imageIds: string | readonly string[]
+): Promise<void> {
+  const images = await client.$transaction(async (txClient) => {
+    await dbAlbumRemoveImageTx(txClient, userId, albumId, imageIds);
+    return dbImageDeleteTx(txClient, userId, imageIds);
+  });
+  await imageDeleteFilesAndSourceFiles(userId, images, true);
+  await dbResourceUpdateTimestamp(userId);
 }

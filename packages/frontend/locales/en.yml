@@ -68,10 +68,14 @@ dialog:
     buttonDelete: Delete
     buttonCancel: Cancel
 message:
+  SyncedDatabase: Synchronized database
+  FailedToSyncDatabase: "Failed to synchronize database\n{0}"
   DeletedTrack: "Deleted track '{0}'"
-  FailedToDeleteTrack: "Failed to delete track '{0}'"
+  FailedToDeleteTrack: "Failed to delete track '{0}'\n{1}"
   AddedToPlayNextQueue: Added to queue
   AddedToPlaylist: "Added '{1}' to '{0}'"
   FailedToAddToPlaylist: "Failed to add '{1}' to '{0}'\n{2}"
   RemovedFromPlaylist: "Removed '{1}' from '{0}'"
   FailedToRemoveFromPlaylist: "Failed to remove '{1}' from '{0}'\n{2}"
+  DeletedImage: "Deleted image of '{0}'"
+  FailedToDeleteImage: "Failed to delete image of '{0}'\n{1}"

@@ -1,4 +1,5 @@
 import type { IndexableType, Table } from 'dexie';
+import { useMessage } from 'naive-ui';
 import type { DeletionEntityType } from '$shared/types/db';
 import api from '~/logic/api';
 import type { ResourceDeletion } from '$/types';
@@ -88,7 +89,7 @@ export async function syncDB(reconstruct = false): Promise<void> {
           db.trackCoArtists,
           db.tracks,
         ],
-        async () => {
+        async (): Promise<void> => {
           if (reconstruct) {
             localStorage.removeItem('db.lastUpdate');
             await Promise.all([
@@ -127,4 +128,16 @@ export async function syncDB(reconstruct = false): Promise<void> {
   }
 }
 
-(window as any).syncDB = syncDB;
+export function useSyncDB(): (reconstruct?: boolean) => Promise<void> {
+  const { t } = useI18n();
+  const message = useMessage();
+
+  return (reconstruct = false): Promise<void> =>
+    syncDB(reconstruct)
+      .then((): void => {
+        message.success(t('message.SyncedDatabase'));
+      })
+      .catch((error): void => {
+        message.error(t('message.FailedToSyncDatabase', [String(error)]));
+      });
+}
