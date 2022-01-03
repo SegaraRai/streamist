@@ -285,6 +285,28 @@ export function createTrackListDropdown({
       },
     });
 
+    // debug menu
+    if (import.meta.env.DEV) {
+      // --- divider ---
+      menuItems.push({
+        key: 'debug-div',
+        type: 'divider',
+      });
+
+      // remove track
+      menuItems.push({
+        key: 'debug-remove',
+        label: '# Remove',
+        icon: nCreateDropdownIcon('mdi-minus'),
+        props: {
+          onClick: () => {
+            playbackStore.debugRemoveTrack$$q(trackId);
+            closeMenu$$q();
+          },
+        },
+      });
+    }
+
     return menuItems;
   });
 }

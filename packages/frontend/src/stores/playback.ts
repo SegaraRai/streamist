@@ -12,6 +12,7 @@ import {
 } from '~/logic/volume';
 import type { ResourceTrack } from '$/types';
 import { useVolumeStore } from './volume';
+import { useAllTracks } from '~/logic/useDB';
 
 // TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる
 
@@ -61,6 +62,7 @@ export interface PlaybackState {
   readonly skipPrevious$$q: (n?: number) => void;
   /** 次のトラックに進む */
   readonly next$$q: () => void;
+  readonly debugRemoveTrack$$q: (trackId: string) => void;
 }
 
 const audioContainer = document.body;
@@ -103,11 +105,36 @@ async function createMetadataInit(
 }
 
 function _usePlaybackStore(): PlaybackState {
+  const allTracks = useAllTracks();
+
   const volumeStore = useVolumeStore();
 
   let currentAudio: HTMLAudioElement | undefined;
 
   const trackProvider = new TrackProvider2<ResourceTrack>();
+
+  const internalSeekingPosition = ref<number | undefined>();
+  const internalPosition = ref<number | undefined>();
+  const position = computed<number | undefined>({
+    get: () => {
+      return internalSeekingPosition.value ?? internalPosition.value;
+    },
+    set: (value: number | undefined) => {
+      if (value == null || !currentAudio) {
+        return;
+      }
+      internalSeekingPosition.value = value;
+      currentAudio.currentTime = value;
+    },
+  });
+
+  const repeat = ref<RepeatType>('off');
+  const shuffle = ref<boolean>(false);
+  const currentTrack = ref<ResourceTrack | undefined>();
+  const queue = ref<ResourceTrack[]>([]);
+  const playNextQueue = ref<ResourceTrack[]>([]);
+
+  const defaultSetList = ref<ResourceTrack[] | undefined>();
 
   const internalPlaying = ref<boolean>(false);
   const playing = computed<boolean>({
@@ -133,27 +160,6 @@ function _usePlaybackStore(): PlaybackState {
       }
     },
   });
-
-  const internalSeekingPosition = ref<number | undefined>();
-  const internalPosition = ref<number | undefined>();
-  const position = computed<number | undefined>({
-    get: () => {
-      return internalSeekingPosition.value ?? internalPosition.value;
-    },
-    set: (value: number | undefined) => {
-      if (value == null || !currentAudio) {
-        return;
-      }
-      internalSeekingPosition.value = value;
-      currentAudio.currentTime = value;
-    },
-  });
-  const repeat = ref<RepeatType>('off');
-  const shuffle = ref<boolean>(false);
-  const currentTrack = ref<ResourceTrack | undefined>();
-  const queue = ref<ResourceTrack[]>([]);
-  const playNextQueue = ref<ResourceTrack[]>([]);
-  const defaultSetList = ref<ResourceTrack[] | undefined>();
 
   const createAudio = (): HTMLAudioElement => {
     const audio = new Audio();
@@ -268,6 +274,10 @@ function _usePlaybackStore(): PlaybackState {
     setSetListAndPlay(tracks, track);
   };
 
+  /**
+   * 現在再生中のトラックがないときに再生ボタンが押された際の処理 \
+   * キューにトラックがある場合はそちらを、ない場合は（現在のビューの）デフォルトのセットリストを再生する
+   */
   const playNext = (): void => {
     if (currentTrack.value) {
       return;
@@ -283,6 +293,41 @@ function _usePlaybackStore(): PlaybackState {
       trackProvider.skipNext$$q();
     }
   };
+
+  const removeTracks = (trackIds: readonly string[]): void => {
+    if (defaultSetList.value) {
+      const trackIdSet = new Set(trackIds);
+      defaultSetList.value = defaultSetList.value.filter(
+        (track) => !trackIdSet.has(track.id)
+      );
+    }
+
+    trackProvider.removeTracks$$q(trackIds);
+  };
+
+  // watch for allTracks changes
+  // - if tracks in setList are deleted, remove them from setList
+  // - if the current track is deleted, play next
+  //   - if no track is in setList, clear setList
+  watch(allTracks.value, (newAllTracks, oldAllTracks): void => {
+    if (!newAllTracks || !oldAllTracks) {
+      return;
+    }
+
+    const newAllTrackIdSet = new Set(newAllTracks.map((track) => track.id));
+    const deletedTrackIdSet = new Set(
+      oldAllTracks
+        .map((track) => track.id)
+        .filter((trackId) => !newAllTrackIdSet.has(trackId))
+    );
+    const deletedTrackIds = Array.from(deletedTrackIdSet);
+
+    if (deletedTrackIds.length === 0) {
+      return;
+    }
+
+    removeTracks(deletedTrackIds);
+  });
 
   trackProvider.addEventListener('trackChange', () => {
     const track = trackProvider.currentTrack$$q;
@@ -502,6 +547,9 @@ function _usePlaybackStore(): PlaybackState {
     },
     next$$q: (): void => {
       trackProvider.next$$q();
+    },
+    debugRemoveTrack$$q: (trackId: string): void => {
+      removeTracks([trackId]);
     },
   };
 }

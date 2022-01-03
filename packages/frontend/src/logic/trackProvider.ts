@@ -523,6 +523,29 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
     this.skipNext$$q();
   }
 
+  removeTracks$$q(trackIds: string | readonly string[]): void {
+    if (typeof trackIds === 'string') {
+      trackIds = [trackIds];
+    }
+
+    if (trackIds.length === 0) {
+      return;
+    }
+
+    const trackIdSet = new Set(trackIds);
+    const filterFunc = (track: T): boolean => !trackIdSet.has(track.id);
+    this._setList$$q = this._setList$$q.filter(filterFunc);
+    this._queue$$q = this._queue$$q.filter(filterFunc);
+    this._repeatQueue$$q = this._repeatQueue$$q.filter(filterFunc);
+    this._history$$q = this._history$$q.filter(filterFunc);
+    this.fillRepeatQueue$$q();
+    if (this._currentTrack$$q && trackIdSet.has(this._currentTrack$$q.id)) {
+      this._skipNext$$q();
+    } else {
+      this.emitQueueChangeEvent$$q();
+    }
+  }
+
   /**
    * 現在のトラック \
    * getterのみ
@@ -545,7 +568,6 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
   }
 
   /**
-   * \
    * シャッフルのsetterでは変更があった際にキューの再生成が行われる \
    * （変更がなければそのまま）
    */
@@ -563,7 +585,6 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
   }
 
   /**
-   * \
    * リピートのsetterでは変更があった際にキューの再生成が行われる \
    * （変更がなければそのまま）
    */

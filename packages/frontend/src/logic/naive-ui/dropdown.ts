@@ -18,9 +18,6 @@ export function nCreateDropdownTextColorStyle(
 ): string {
   const colorValue = theme.getTheme(theme.current.value).colors[color];
   return [
-    `--option-text-color:${colorValue};`,
-    `--option-text-color-hover:${colorValue};`,
-    `--prefix-color:${colorValue};`,
     `--n-option-text-color:${colorValue};`,
     `--n-option-text-color-hover:${colorValue};`,
     `--n-prefix-color:${colorValue};`,

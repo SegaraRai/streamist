@@ -144,6 +144,31 @@ export class TrackProvider2<T extends TrackBase> extends TrackProvider<T> {
     }
     this.emitPlayNextQueueChangeEvent$$q();
   }
+
+  override removeTracks$$q(trackIds: string | readonly string[]): void {
+    super.removeTracks$$q(trackIds);
+
+    if (typeof trackIds === 'string') {
+      trackIds = [trackIds];
+    }
+
+    if (trackIds.length === 0) {
+      return;
+    }
+
+    const trackIdSet = new Set(trackIds);
+    const filterFunc = (track: T): boolean => !trackIdSet.has(track.id);
+    this._playNextQueue$$q = this._playNextQueue$$q.filter(filterFunc);
+    this._playNextHistory$$q = this._playNextHistory$$q.filter(filterFunc);
+    if (
+      this._currentTrackOverride$$q &&
+      trackIdSet.has(this._currentTrackOverride$$q.id)
+    ) {
+      this.skipNext$$q();
+    } else {
+      this.emitPlayNextQueueChangeEvent$$q();
+    }
+  }
 }
 
 // `TrackProvider2`の`addEventListener`メソッドのオーバーロードの定義
