@@ -59,6 +59,16 @@ const navItems = computed<readonly NavItem[]>(() => [
     path: '/playlists',
     text: t('sidebar.Playlists'),
   },
+  // debug
+  {
+    type: 'divider',
+  },
+  {
+    type: 'link',
+    icon: 'mdi-play',
+    path: '/playing',
+    text: 'Playing',
+  },
 ]);
 
 const uploadStore = useUploadStore();
@@ -78,6 +88,12 @@ const onScroll$$q = (e: Event): void => {
   currentScrollRef.value = (e.target as HTMLElement).scrollTop;
   // console.log(currentScrollRef.value);
 };
+
+const router = useRouter();
+
+const hideShell$$q = eagerComputed(
+  () => !!router.currentRoute.value.meta.hideShell
+);
 </script>
 
 <template>
@@ -99,6 +115,7 @@ const onScroll$$q = (e: Event): void => {
         @contextmenu.prevent
       ></div>
 
+      <!-- Right Sidebar: Queue -->
       <v-navigation-drawer
         :model-value="rightSidebar"
         temporary
@@ -122,11 +139,12 @@ const onScroll$$q = (e: Event): void => {
           <n-scrollbar class="flex-1 s-n-scrollbar-min-h-full">
             <s-queue />
           </n-scrollbar>
-          <!-- div class="h-24"></div -->
+          <!-- div class="h-24" :class="hideShell$$q && '!hidden'"></div -->
           <div class="s-offline-mod-h"></div>
         </div>
       </v-navigation-drawer>
 
+      <!-- Header -->
       <v-app-bar
         flat
         :border="1"
@@ -172,8 +190,10 @@ const onScroll$$q = (e: Event): void => {
         </div>
       </v-app-bar>
 
+      <!-- Left Sidebar: Navigation -->
       <!-- not setting !z-2120 because it makes tooltips hidden -->
       <v-navigation-drawer
+        :model-value="!hideShell$$q"
         permanent
         position="left"
         :rail="railedNavigation"
@@ -209,8 +229,8 @@ const onScroll$$q = (e: Event): void => {
               ALPHA VERSION<br />
               no warranty / use with caution
             </div>
-            <div class="h-24"></div>
             <div class="s-offline-mod-h"></div>
+            <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
           </div>
         </n-scrollbar>
       </v-navigation-drawer>
@@ -222,7 +242,7 @@ const onScroll$$q = (e: Event): void => {
         >
           <router-view class="px-4" />
         </n-scrollbar>
-        <div class="flex-none h-24"></div>
+        <div class="flex-none h-24" :class="hideShell$$q && '!hidden'"></div>
       </v-main>
 
       <v-dialog
@@ -255,6 +275,7 @@ const onScroll$$q = (e: Event): void => {
     <!-- !z-2150 -->
     <footer
       class="select-none playback-sheet fixed bottom-0 !z-1900 w-full m-0 p-0 h-24"
+      :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >
       <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
