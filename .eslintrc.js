@@ -7,12 +7,7 @@ module.exports = defineConfig({
     browser: true,
     node: true,
   },
-  extends: [
-    '@nuxtjs/eslint-config-typescript',
-    'prettier',
-    'plugin:import/recommended',
-    'plugin:import/typescript',
-  ],
+  extends: ['@nuxtjs/eslint-config-typescript', 'prettier'],
   rules: {
     'vue/no-v-model-argument': 'off',
     'vue/multi-word-component-names': 'off',
@@ -52,7 +47,6 @@ module.exports = defineConfig({
       },
     ],
     'import/named': 'off',
-    'import/no-unresolved': 'off',
     'import/order': [
       'error',
       {
@@ -87,5 +81,8 @@ module.exports = defineConfig({
         pathGroupsExcludedImportTypes: ['builtin', 'external'],
       },
     ],
+  },
+  settings: {
+    'import/internal-regex': '^[~$]',
   },
 });

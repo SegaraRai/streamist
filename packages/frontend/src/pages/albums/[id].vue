@@ -1,8 +1,8 @@
 <script lang="ts">
+import type { ResourceTrack } from '$/types';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ResourceTrack } from '$/types';
 
 export default defineComponent({
   props: {

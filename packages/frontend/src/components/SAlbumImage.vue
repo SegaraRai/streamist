@@ -1,8 +1,8 @@
 <script lang="ts">
 import type { PropType } from 'vue';
+import type { ResourceAlbum } from '$/types';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
-import type { ResourceAlbum } from '$/types';
 
 export default defineComponent({
   props: {

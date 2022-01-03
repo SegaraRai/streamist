@@ -1,9 +1,9 @@
 import { MenuOption, useDialog, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import { useTheme } from 'vuetify';
+import type { ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ResourceTrack } from '$/types';
 import api from '../api';
 import { useAllPlaylists } from '../useDB';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';

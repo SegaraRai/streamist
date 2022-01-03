@@ -2,6 +2,12 @@
 import GGrid from 'vue-virtual-scroll-grid';
 import { useDisplay } from 'vuetify';
 import { createMultiMap } from '$shared/multiMap';
+import type {
+  ResourceAlbum,
+  ResourceArtist,
+  ResourceImage,
+  ResourceTrack,
+} from '$/types';
 import { getDefaultArtistImage } from '~/logic/image';
 import {
   useAllAlbums,
@@ -10,12 +16,6 @@ import {
   useAllTracks,
 } from '~/logic/useDB';
 import { usePlaybackStore } from '~/stores/playback';
-import type {
-  ResourceAlbum,
-  ResourceArtist,
-  ResourceImage,
-  ResourceTrack,
-} from '$/types';
 
 interface Item {
   artist$$q: ResourceArtist;

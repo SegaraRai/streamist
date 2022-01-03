@@ -2,6 +2,12 @@
 import GGrid from 'vue-virtual-scroll-grid';
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$shared/sort';
+import type {
+  ResourceAlbum,
+  ResourceArtist,
+  ResourceImage,
+  ResourceTrack,
+} from '$/types';
 import {
   useAllAlbums,
   useAllArtists,
@@ -9,12 +15,6 @@ import {
   useAllTracks,
 } from '~/logic/useDB';
 import { usePlaybackStore } from '~/stores/playback';
-import type {
-  ResourceAlbum,
-  ResourceArtist,
-  ResourceImage,
-  ResourceTrack,
-} from '$/types';
 
 interface Item {
   readonly album$$q: ResourceAlbum;

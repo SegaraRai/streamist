@@ -1,10 +1,10 @@
 <script lang="ts">
+import type { ResourceArtist, ResourceTrack } from '$/types';
 import { minQueueSize } from '~/config/queue';
 import { db } from '~/db';
 import { formatTime } from '~/logic/formatTime';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ResourceArtist, ResourceTrack } from '$/types';
 
 interface ListItem {
   formattedDuration$$q: string;

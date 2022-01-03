@@ -1,10 +1,10 @@
 <script lang="ts">
 import type { PropType } from 'vue';
+import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { db } from '~/db';
 import { formatTracksTotalDuration } from '~/logic/duration';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ResourcePlaylist, ResourceTrack } from '$/types';
 
 export default defineComponent({
   props: {

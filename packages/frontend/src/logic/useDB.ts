@@ -4,7 +4,6 @@ import {
   comparePlaylist,
   compareTrack,
 } from '$shared/sort';
-import { db } from '~/db';
 import type {
   ResourceAlbum,
   ResourceArtist,
@@ -14,6 +13,7 @@ import type {
   ResourceSourceFile,
   ResourceTrack,
 } from '$/types';
+import { db } from '~/db';
 import { transformObservableComputed, useLiveQuery } from './useLiveQuery';
 
 function _useAllAlbums() {

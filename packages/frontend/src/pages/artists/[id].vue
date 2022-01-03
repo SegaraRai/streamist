@@ -1,9 +1,9 @@
 <script lang="ts">
 import { compareAlbum, compareTrack } from '$shared/sort';
+import type { ResourceAlbum, ResourceTrack } from '$/types';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ResourceAlbum, ResourceTrack } from '$/types';
 
 export default defineComponent({
   props: {

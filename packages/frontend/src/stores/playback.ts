@@ -1,5 +1,6 @@
 import type { Ref } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
+import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png';
 import { db } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
@@ -11,7 +12,6 @@ import {
   realVolumeToVisualVolume,
   visualVolumeToRealVolume,
 } from '~/logic/volume';
-import type { ResourceTrack } from '$/types';
 import { useVolumeStore } from './volume';
 
 // TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる

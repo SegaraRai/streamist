@@ -16,14 +16,14 @@ import type {
   SourceFileState,
   SourceFileType,
 } from '$shared/types/db';
-import { db } from '~/db';
-import api from '~/logic/api';
 import type {
   CreateSourceResponse,
   ResourceSourceFile,
   UploadURL,
 } from '$/types';
 import type { CreateSourceResponseFile } from '$/types/createSource';
+import { db } from '~/db';
+import api from '~/logic/api';
 import type { ResolvedFileId, ResolvedUploadFile } from './uploadResolver';
 
 const SYNC_INTERVAL = 20 * 1000;

@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { SrcObject, createSrc } from '~/logic/srcSet';
 import type { ResourceImage } from '$/types';
+import { SrcObject, createSrc } from '~/logic/srcSet';
 
 export default defineComponent({
   props: {

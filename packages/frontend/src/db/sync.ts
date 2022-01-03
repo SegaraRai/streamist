@@ -1,8 +1,8 @@
 import type { IndexableType, Table } from 'dexie';
 import { useMessage } from 'naive-ui';
 import type { DeletionEntityType } from '$shared/types/db';
-import api from '~/logic/api';
 import type { ResourceDeletion } from '$/types';
+import api from '~/logic/api';
 import { db } from '.';
 
 async function clearAndAdd<T>(

@@ -1,6 +1,12 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import GGrid from 'vue-virtual-scroll-grid';
+import type {
+  ResourceAlbum,
+  ResourceArtist,
+  ResourceImage,
+  ResourceTrack,
+} from '$/types';
 import { db } from '~/db';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
@@ -9,12 +15,6 @@ import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { currentScrollRef } from '~/stores/scroll';
 import { useThemeStore } from '~/stores/theme';
-import type {
-  ResourceAlbum,
-  ResourceArtist,
-  ResourceImage,
-  ResourceTrack,
-} from '$/types';
 
 /**
  * インデックスのところに表示する内容

@@ -2,6 +2,7 @@
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import type { SourceFileAttachToType } from '$shared/types/db';
+import type { ResourceImage } from '$/types';
 import { db } from '~/db';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
@@ -9,7 +10,6 @@ import { getImageFileURL } from '~/logic/fileURL';
 import type { FileId } from '~/logic/uploadManager';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { useUploadStore } from '~/stores/upload';
-import type { ResourceImage } from '$/types';
 
 export default defineComponent({
   props: {

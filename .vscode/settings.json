@@ -8,6 +8,8 @@
     "streamist",
     "vuetify"
   ],
+  "eslint.packageManager": "pnpm",
+  "eslint.useESLintClass": true,
   "eslint.run": "onSave",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true

@@ -1,12 +1,12 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
+import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import apiInstance from '~/logic/api';
 import { calcTracksTotalDuration, formatTotalDuration } from '~/logic/duration';
 import { useAllPlaylists, useAllTrackMap } from '~/logic/useDB';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
-import type { ResourcePlaylist, ResourceTrack } from '$/types';
 
 interface Item {
   readonly playlist$$q: ResourcePlaylist;

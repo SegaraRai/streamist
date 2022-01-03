@@ -1,9 +1,9 @@
 <script lang="ts">
 import { PropType } from 'vue';
 import { compareAlbum } from '$shared/sort';
+import { ResourceArtist } from '$/types';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
-import { ResourceArtist } from '$/types';
 
 export default defineComponent({
   props: {

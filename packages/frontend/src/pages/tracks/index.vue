@@ -1,9 +1,9 @@
 <script lang="ts">
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$shared/sort';
+import type { ResourceAlbum, ResourceArtist } from '$/types';
 import { useAllAlbums, useAllArtists, useAllTracks } from '~/logic/useDB';
 import { usePlaybackStore } from '~/stores/playback';
-import type { ResourceAlbum, ResourceArtist } from '$/types';
 
 export default defineComponent({
   setup() {
