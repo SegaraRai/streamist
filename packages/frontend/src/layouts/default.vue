@@ -241,7 +241,7 @@ const hideShell$$q = eagerComputed(
                     >
                       <v-icon>{{ item.icon }}</v-icon>
                     </v-list-item-avatar>
-                    <v-list-item-header v-show="!railedNavigation" class="px-4">
+                    <v-list-item-header class="px-4">
                       {{ item.text }}
                     </v-list-item-header>
                   </v-list-item>
