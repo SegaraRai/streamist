@@ -6,11 +6,13 @@ import { useThemeStore } from '~/stores/theme';
 import { useUploadStore } from '~/stores/upload';
 
 const { t } = useI18n();
-const theme = useThemeStore();
+const router = useRouter();
+const isOnline = useOnline();
 const display = useDisplay();
 const syncDB = useSyncDB();
+const theme = useThemeStore();
 
-const uploadDialog = ref(false);
+const uploadDialog$$q = ref(false);
 
 interface NavItemLink {
   type: 'link';
@@ -25,7 +27,7 @@ interface NavItemDivider {
 
 type NavItem = NavItemLink | NavItemDivider;
 
-const navItems = computed<readonly NavItem[]>(() => [
+const navItems$$q = computed<readonly NavItem[]>(() => [
   {
     type: 'link',
     icon: 'mdi-home',
@@ -71,25 +73,36 @@ const navItems = computed<readonly NavItem[]>(() => [
   },
 ]);
 
-const uploadStore = useUploadStore();
+const uploadStore$$q = useUploadStore();
 
-const rightSidebar = ref(false);
+const fullscreenDialog = eagerComputed(() => display.xs.value);
 
-const railedNavigation = computed(() => display.xs.value);
-const fullscreenDialog = computed(() => display.xs.value);
+const rightSidebar$$q = ref(false);
+const _leftSidebar$$q = ref(false);
+const alwaysShowLeftSidebar$$q = eagerComputed(() => display.mdAndUp.value);
+const leftSidebar$$q = computed<boolean>({
+  get: (): boolean => {
+    return alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value;
+  },
+  set: (value: boolean): void => {
+    _leftSidebar$$q.value = !alwaysShowLeftSidebar$$q.value && value;
+  },
+});
 
-const devSync = (event: MouseEvent) => {
+watchEffect(() => {
+  if (alwaysShowLeftSidebar$$q.value) {
+    _leftSidebar$$q.value = false;
+  }
+});
+
+const devSync$$q = (event: MouseEvent) => {
   syncDB(event.shiftKey);
 };
-
-const isOnline = useOnline();
 
 const onScroll$$q = (e: Event): void => {
   currentScrollRef.value = (e.target as HTMLElement).scrollTop;
   // console.log(currentScrollRef.value);
 };
-
-const router = useRouter();
 
 const hideShell$$q = eagerComputed(
   () => !!router.currentRoute.value.meta.hideShell
@@ -110,14 +123,14 @@ const hideShell$$q = eagerComputed(
     <v-app theme="dark" class="flex-1 !h-auto">
       <div
         class="bg-black z-2135 fixed top-0 left-0 w-full h-full transition-all"
-        :class="rightSidebar ? 'opacity-25' : 'opacity-0 invisible'"
-        @click="rightSidebar = false"
+        :class="rightSidebar$$q ? 'opacity-25' : 'opacity-0 invisible'"
+        @click="rightSidebar$$q = false"
         @contextmenu.prevent
       ></div>
 
       <!-- Right Sidebar: Queue -->
       <v-navigation-drawer
-        :model-value="rightSidebar"
+        :model-value="rightSidebar$$q"
         temporary
         position="right"
         :theme="theme.rightSidebarTheme"
@@ -130,7 +143,7 @@ const hideShell$$q = eagerComputed(
             <div class="title flex items-center py-1">
               <v-icon class="mx-4">mdi-playlist-play</v-icon>
               <span class="flex-1">{{ t('queue.PlayQueue') }}</span>
-              <v-btn flat icon size="small" @click="rightSidebar = false">
+              <v-btn flat icon size="small" @click="rightSidebar$$q = false">
                 <v-icon>mdi-close</v-icon>
               </v-btn>
             </div>
@@ -153,13 +166,26 @@ const hideShell$$q = eagerComputed(
         class="s-offline-mod-mt !z-2130"
       >
         <div class="w-full flex justify-between items-center">
-          <div class="ml-0 pl-4 pr-12 hidden-xs-only select-none flex-none">
+          <template v-if="!alwaysShowLeftSidebar$$q && !hideShell$$q">
+            <div class="flex-none">
+              <v-btn
+                flat
+                icon
+                text
+                size="small"
+                @click="_leftSidebar$$q = !_leftSidebar$$q"
+              >
+                <v-icon>mdi-menu</v-icon>
+              </v-btn>
+            </div>
+          </template>
+          <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
             <router-link to="/">
               <span class="text-xl leading-none">streamist</span>
               <span class="text-sm leading-none">.app</span>
             </router-link>
           </div>
-          <div class="sm:flex-1 flex gap-x-2 justify-end">
+          <div class="flex-1 flex gap-x-2 justify-end">
             <v-text-field
               class="s-search-box flex-1 max-w-md <sm:hidden"
               density="compact"
@@ -169,12 +195,12 @@ const hideShell$$q = eagerComputed(
             <v-btn icon size="small" class="sm:hidden">
               <v-icon>mdi-magnify</v-icon>
             </v-btn>
-            <v-btn icon size="small" @click="devSync">
+            <v-btn icon size="small" @click="devSync$$q">
               <v-icon>mdi-sync</v-icon>
             </v-btn>
-            <v-btn icon size="small" @click="uploadDialog = true">
+            <v-btn icon size="small" @click="uploadDialog$$q = true">
               <v-badge
-                :model-value="!!uploadStore.badge"
+                :model-value="!!uploadStore$$q.badge"
                 dot
                 color="primary"
                 text-color="primary"
@@ -183,7 +209,7 @@ const hideShell$$q = eagerComputed(
                 <v-icon>mdi-cloud-upload</v-icon>
               </v-badge>
             </v-btn>
-            <v-btn icon size="small" @click="rightSidebar = true">
+            <v-btn icon size="small" @click="rightSidebar$$q = true">
               <v-icon>mdi-playlist-play</v-icon>
             </v-btn>
           </div>
@@ -192,20 +218,21 @@ const hideShell$$q = eagerComputed(
 
       <!-- Left Sidebar: Navigation -->
       <!-- not setting !z-2120 because it makes tooltips hidden -->
+      <!-- TODO: hide sidebar on click outside -->
       <v-navigation-drawer
-        :model-value="!hideShell$$q"
-        permanent
+        :model-value="leftSidebar$$q && !hideShell$$q"
+        :permanent="alwaysShowLeftSidebar$$q"
         position="left"
-        :rail="railedNavigation"
         rail-width="56"
         class="s-offline-mod-mt select-none"
+        @update:model-value="leftSidebar$$q = $event"
       >
         <n-scrollbar
           class="h-full s-n-scrollbar-min-h-full s-n-scrollbar-flex-col"
         >
           <div class="flex-1 flex flex-col h-full">
             <v-list dense class="overflow-x-hidden">
-              <template v-for="(item, _index) in navItems" :key="_index">
+              <template v-for="(item, _index) in navItems$$q" :key="_index">
                 <template v-if="item.type === 'link'">
                   <v-list-item link :to="item.path">
                     <v-list-item-avatar
@@ -246,7 +273,7 @@ const hideShell$$q = eagerComputed(
       </v-main>
 
       <v-dialog
-        v-model="uploadDialog"
+        v-model="uploadDialog$$q"
         class="s-v-dialog select-none"
         :fullscreen="fullscreenDialog"
       >
@@ -259,7 +286,7 @@ const hideShell$$q = eagerComputed(
                 icon
                 size="x-small"
                 class="text-red-500"
-                @click="uploadDialog = false"
+                @click="uploadDialog$$q = false"
               >
                 <v-icon>mdi-close</v-icon>
               </v-btn>
