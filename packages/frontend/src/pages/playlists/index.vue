@@ -1,4 +1,5 @@
 <script lang="ts">
+import { useMessage } from 'naive-ui';
 import { useSyncDB } from '~/db/sync';
 import apiInstance from '~/logic/api';
 import { calcTracksTotalDuration, formatTotalDuration } from '~/logic/duration';
@@ -22,6 +23,7 @@ interface Item {
 export default defineComponent({
   setup() {
     const { t } = useI18n();
+    const message = useMessage();
     const themeStore = useThemeStore();
     const syncDB = useSyncDB();
     const playbackStore = usePlaybackStore();
@@ -84,18 +86,23 @@ export default defineComponent({
           return;
         }
         createPlaylistDialogLoading.value = true;
+        const title = createPlaylistDialogTitle.value;
         apiInstance.my.playlists
           .$post({
             body: {
-              title: createPlaylistDialogTitle.value,
+              title,
               notes: createPlaylistDialogDescription.value,
             },
           })
-          .then(() => syncDB())
           .then(() => {
+            message.success(t('message.CreatedPlaylist', [title]));
             createPlaylistDialog.value = false;
+            syncDB();
           })
-          .catch(() => {
+          .catch((error) => {
+            message.error(
+              t('message.FailedToCreatePlaylist', [title, String(error)])
+            );
             createPlaylistDialogLoading.value = false;
           });
       },
