@@ -200,7 +200,7 @@ export default defineComponent({
     <!-- Album Title -->
     <template v-if="showAlbum">
       <v-list-item-header
-        class="list-column-content flex flex-col flex-nowrap justify-center ml-6 gap-y-1"
+        class="list-column-content flex flex-col flex-nowrap justify-center ml-6 gap-y-1 !<md:hidden"
       >
         <v-list-item-title class="track-album-title">
           <s-conditional-link

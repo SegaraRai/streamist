@@ -290,7 +290,7 @@ export default defineComponent({
         </v-list-item-header>
         <template v-if="showAlbum">
           <v-list-item-header
-            class="list-header-column list-column-content flex flex-row flex-nowrap items-center ml-6 py-2"
+            class="list-header-column list-column-content flex flex-row flex-nowrap items-center ml-6 py-2 !<md:hidden"
           >
             <v-list-item-title class="track-album-title">
               {{ t('trackList.Album') }}
