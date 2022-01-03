@@ -266,6 +266,12 @@ export function createTrackListDropdown({
       });
     }
 
+    // --- divider ---
+    menuItems.push({
+      key: 'div3',
+      type: 'divider',
+    });
+
     // Edit
     menuItems.push({
       key: 'edit',
@@ -277,12 +283,6 @@ export function createTrackListDropdown({
           closeMenu$$q();
         },
       },
-    });
-
-    // --- divider ---
-    menuItems.push({
-      key: 'div3',
-      type: 'divider',
     });
 
     // Delete
