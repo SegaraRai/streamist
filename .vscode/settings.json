@@ -35,5 +35,11 @@
   },
   "files.exclude": {
     "**/node_modules": true
-  }
+  },
+  "stylelint.validate": [
+    "css",
+    "less",
+    "postcss",
+    "vue"
+  ]
 }

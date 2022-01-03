@@ -58,6 +58,7 @@ track-list-dropdown:
   AddToQueue: Add to queue
   RemoveFromQueue: Remove from queue
   AddToPlaylist: Add to playlist
+  AddToNewPlaylist: Add to new playlist
   RemoveFromPlaylist: Remove from playlist
   Edit: Edit
   Delete: Delete

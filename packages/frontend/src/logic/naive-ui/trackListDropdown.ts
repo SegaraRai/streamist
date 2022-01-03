@@ -149,47 +149,85 @@ export function createTrackListDropdown({
       label: t('track-list-dropdown.AddToPlaylist'),
       icon: nCreateDropdownIcon('mdi-playlist-plus'),
       disabled: !playlists.length,
-      children: playlists.map((playlist) => {
-        const disabled = playlist.trackIds.includes(trackId);
-        return {
-          key: `addToPlaylist.${playlist.id}`,
-          label: playlist.title,
-          disabled,
+      children: [
+        {
+          key: 'addToPlaylist.createNew',
+          label: t('track-list-dropdown.AddToNewPlaylist'),
           props: {
             onClick: () => {
               closeMenu$$q();
 
-              if (disabled) {
-                return;
-              }
-
               api.my.playlists
-                ._playlistId(playlist.id)
-                .tracks.$post({
+                .$post({
                   body: {
-                    trackId,
+                    title: track.title,
+                    notes: '',
+                    trackIds: [track.id],
                   },
                 })
                 .then(() => {
-                  message.success(
-                    t('message.AddedToPlaylist', [playlist.title, track.title])
-                  );
+                  message.success(t('message.CreatedPlaylist', [track.title]));
                   syncDB();
                 })
                 .catch((error) => {
                   message.error(
-                    t('message.FailedToAddToPlaylist', [
-                      playlist.title,
+                    t('message.FailedToCreatePlaylist', [
                       track.title,
                       String(error),
                     ])
                   );
-                  console.error(error);
                 });
             },
           },
-        };
-      }),
+        },
+        {
+          key: 'addToPlaylist.div',
+          type: 'divider',
+        },
+        ...playlists.map((playlist) => {
+          const disabled = playlist.trackIds.includes(trackId);
+          return {
+            key: `addToPlaylist.id-${playlist.id}`,
+            label: playlist.title,
+            disabled,
+            props: {
+              onClick: () => {
+                closeMenu$$q();
+
+                if (disabled) {
+                  return;
+                }
+
+                api.my.playlists
+                  ._playlistId(playlist.id)
+                  .tracks.$post({
+                    body: {
+                      trackId,
+                    },
+                  })
+                  .then(() => {
+                    message.success(
+                      t('message.AddedToPlaylist', [
+                        playlist.title,
+                        track.title,
+                      ])
+                    );
+                    syncDB();
+                  })
+                  .catch((error) => {
+                    message.error(
+                      t('message.FailedToAddToPlaylist', [
+                        playlist.title,
+                        track.title,
+                        String(error),
+                      ])
+                    );
+                  });
+              },
+            },
+          };
+        }),
+      ],
     });
 
     // Remove from Playlist
@@ -222,7 +260,6 @@ export function createTrackListDropdown({
                     String(error),
                   ])
                 );
-                console.error(error);
               });
           },
         },
