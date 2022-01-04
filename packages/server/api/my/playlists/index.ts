@@ -1,11 +1,12 @@
 import type { Playlist } from '$prisma/client';
+import type { VPlaylistCreateBody } from '$/validators';
 
 export type Methods = {
   get: {
     resBody: Playlist[];
   };
   post: {
-    reqBody: Pick<Playlist, 'title' | 'notes'> & { trackIds?: string[] };
+    reqBody: VPlaylistCreateBody;
     resBody: Playlist;
   };
 };

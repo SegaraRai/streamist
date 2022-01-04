@@ -1,6 +1,8 @@
+import type { VTrackOrderUpdateBody } from '$/validators';
+
 export type Methods = {
   patch: {
-    reqBody: { nextTrackId: string | null };
+    reqBody: VTrackOrderUpdateBody;
   };
   delete: {};
 };

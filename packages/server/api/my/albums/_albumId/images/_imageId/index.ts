@@ -1,6 +1,8 @@
+import type { VImageOrderUpdateBody } from '$/validators';
+
 export type Methods = {
   patch: {
-    reqBody: { nextImageId: string | null };
+    reqBody: VImageOrderUpdateBody;
   };
   delete: {};
 };

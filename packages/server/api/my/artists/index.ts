@@ -8,6 +8,7 @@ export type Methods = {
     query?: {
       forceNewArtist?: boolean | number;
     };
+    // NOTE: APIがstableになるまでvalidatorは作成しない
     reqBody: Pick<Artist, 'name'>;
     resBody: Artist;
   };

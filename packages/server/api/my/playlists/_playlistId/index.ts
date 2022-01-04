@@ -1,4 +1,5 @@
 import type { Playlist } from '$prisma/client';
+import type { VPlaylistUpdateBody } from '$/validators';
 
 export type Methods = {
   get: {
@@ -12,7 +13,7 @@ export type Methods = {
     resBody: Playlist;
   };
   patch: {
-    reqBody: Partial<Pick<Playlist, 'title' | 'notes'>>;
+    reqBody: VPlaylistUpdateBody;
   };
   delete: {};
 };

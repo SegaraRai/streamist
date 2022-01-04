@@ -1,0 +1,160 @@
+// Vitest Snapshot v1
+
+exports[`VAuthBodyWrapper > should reject malformed payloads 1`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "constraints": {
+          "nestedValidation": "nested property !payload must be either object or array",
+        },
+        "property": "!payload",
+        "target": [Function],
+        "value": true,
+      },
+    ],
+    "constraints": {
+      "isObject": "grant_type must be either \\"password\\" or \\"refresh_token\\"",
+    },
+    "property": "!payload",
+    "value": true,
+  },
+]
+`;
+
+exports[`VAuthBodyWrapper > should reject malformed payloads 2`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "constraints": {
+          "nestedValidation": "nested property !payload must be either object or array",
+        },
+        "property": "!payload",
+        "target": [Function],
+        "value": true,
+      },
+    ],
+    "constraints": {
+      "isObject": "grant_type must be either \\"password\\" or \\"refresh_token\\"",
+    },
+    "property": "!payload",
+    "value": true,
+  },
+]
+`;
+
+exports[`VAuthBodyWrapper > should reject malformed payloads 3`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isString": "password must be a string",
+        },
+        "property": "password",
+        "value": 123,
+      },
+    ],
+    "property": "!payload",
+    "value": VAuthBodyPassword {
+      "grant_type": "password",
+      "password": 123,
+      "username": "test_id",
+    },
+  },
+]
+`;
+
+exports[`VAuthBodyWrapper > should reject malformed payloads 4`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isNotEmpty": "password should not be empty",
+          "isString": "password must be a string",
+        },
+        "property": "password",
+        "value": undefined,
+      },
+    ],
+    "property": "!payload",
+    "value": VAuthBodyPassword {
+      "grant_type": "password",
+      "password": undefined,
+      "username": "test_id",
+    },
+  },
+]
+`;
+
+exports[`VAuthBodyWrapper > should reject malformed payloads 5`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isString": "refresh_token must be a string",
+        },
+        "property": "refresh_token",
+        "value": 123,
+      },
+    ],
+    "property": "!payload",
+    "value": VAuthBodyRefreshToken {
+      "grant_type": "refresh_token",
+      "refresh_token": 123,
+    },
+  },
+]
+`;
+
+exports[`VAuthBodyWrapper > should reject malformed payloads 6`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isNotEmpty": "refresh_token should not be empty",
+          "isString": "refresh_token must be a string",
+        },
+        "property": "refresh_token",
+        "value": undefined,
+      },
+    ],
+    "property": "!payload",
+    "value": VAuthBodyRefreshToken {
+      "grant_type": "refresh_token",
+      "refresh_token": undefined,
+    },
+  },
+]
+`;
+
+exports[`VAuthBodyWrapper > should reject malformed payloads 7`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isNotEmpty": "refresh_token should not be empty",
+          "isString": "refresh_token must be a string",
+        },
+        "property": "refresh_token",
+        "value": null,
+      },
+    ],
+    "property": "!payload",
+    "value": VAuthBodyRefreshToken {
+      "grant_type": "refresh_token",
+      "refresh_token": null,
+    },
+  },
+]
+`;

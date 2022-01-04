@@ -1,10 +1,7 @@
-import type { SourceFileState } from '$shared/types/db';
+import type { VSourceFinishUploadBody } from '$/validators';
 
 export type Methods = {
   patch: {
-    reqBody: {
-      state: SourceFileState & 'uploaded';
-      parts?: string[];
-    };
+    reqBody: VSourceFinishUploadBody;
   };
 };

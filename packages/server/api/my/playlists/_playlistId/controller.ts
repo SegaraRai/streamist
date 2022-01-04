@@ -1,8 +1,7 @@
 import { ImageSortableAlbum, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
-import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { dbPlaylistSortTracks } from '$/db/playlist';
-import { playlistDelete } from '$/services/playlists';
+import { playlistDelete, playlistUpdate } from '$/services/playlists';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -53,29 +52,7 @@ export default defineController(() => ({
     };
   },
   patch: async ({ body, params, user }) => {
-    if (body.title == null && body.notes == null) {
-      return { status: 204 };
-    }
-
-    if (body.title != null && !body.title.trim()) {
-      throw new HTTPError(400, 'title must not be empty');
-    }
-
-    const newPlaylist = await client.playlist.updateMany({
-      where: {
-        id: params.playlistId,
-        userId: user.id,
-      },
-      data: {
-        title: body.title?.trim(),
-        notes: body.notes?.trim(),
-        updatedAt: Date.now(),
-      },
-    });
-    if (!newPlaylist) {
-      throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
-    }
-    await dbResourceUpdateTimestamp(user.id);
+    await playlistUpdate(user.id, params.playlistId, body);
     return { status: 204 };
   },
   delete: async ({ params, user }) => {

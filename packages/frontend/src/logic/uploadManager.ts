@@ -348,10 +348,10 @@ function doUpload(
   blob: Blob,
   onProgress: (size: number) => void
 ): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject): void => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', url);
-    xhr.onload = () => {
+    xhr.onload = (): void => {
       xhr.onload = null;
       xhr.onerror = null;
       xhr.upload.onprogress = null;
@@ -367,14 +367,14 @@ function doUpload(
         reject(new Error(`Failed to upload file: ${xhr.status}`));
       }
     };
-    xhr.onerror = (error) => {
+    xhr.onerror = (error): void => {
       xhr.onload = null;
       xhr.onerror = null;
       xhr.upload.onprogress = null;
 
       reject(new Error(`Failed to upload file: ${xhr.status} ${error}`));
     };
-    xhr.upload.onprogress = (event) => {
+    xhr.upload.onprogress = (event): void => {
       try {
         onProgress(event.loaded);
       } catch (_error: unknown) {
@@ -492,7 +492,7 @@ export class UploadManager extends EventTarget {
     onProgress: (size: number) => void
   ): Promise<string[] | void> {
     if (url.parts) {
-      const uploadedSizes = new Array(url.parts.length).fill(0);
+      const uploadedSizes: number[] = new Array(url.parts.length).fill(0);
       const eTagPromises: Promise<string>[] = [];
       let failed = false;
       let offset = 0;
@@ -512,7 +512,9 @@ export class UploadManager extends EventTarget {
                 partBlob,
                 (size: number): void => {
                   uploadedSizes[partIndex] = size;
-                  onProgress(uploadedSizes.reduce((acc, cur) => acc + cur, 0));
+                  onProgress(
+                    uploadedSizes.reduce((acc, cur): number => acc + cur, 0)
+                  );
                 }
               );
 
@@ -528,7 +530,7 @@ export class UploadManager extends EventTarget {
       }
       return Promise.all(eTagPromises);
     } else {
-      return this.uploadQueue.add(async () => {
+      return this.uploadQueue.add(async (): Promise<void> => {
         await doUpload(url.url, file, onProgress);
       });
     }

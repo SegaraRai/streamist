@@ -25,12 +25,15 @@ export default defineController(() => ({
     };
   },
   post: async ({ body, params, user }) => {
-    await dbPlaylistAddTrack(user.id, params.playlistId, body.trackId);
+    await dbPlaylistAddTrack(user.id, params.playlistId, body.trackIds);
     await dbResourceUpdateTimestamp(user.id);
     return {
       status: 201,
       headers: {
-        Location: `/api/my/playlists/${params.playlistId}/tracks/${body.trackId}`,
+        Location: body.trackIds.map(
+          (trackId): string =>
+            `/api/my/playlists/${params.playlistId}/tracks/${trackId}`
+        ),
       },
     };
   },

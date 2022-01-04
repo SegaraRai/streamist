@@ -7,6 +7,7 @@ import fastifyJwt from 'fastify-jwt';
 import server from '$/$server';
 import { devCDN } from '$/services/dev';
 import { API_BASE_PATH, SECRET_API_JWT_SECRET } from '$/services/env';
+import { fastPlainToInstance } from '$/services/fastClassTransformer';
 import { transcoderCallback } from '$/services/transcoderCallback';
 
 export const init = (serverFactory?: FastifyServerFactory) => {
@@ -43,7 +44,9 @@ export const init = (serverFactory?: FastifyServerFactory) => {
         fastify.register(cors);
       }
       fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
-      server(fastify);
+      server(fastify, {
+        plainToInstance: fastPlainToInstance,
+      });
       done();
     },
     {

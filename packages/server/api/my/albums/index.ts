@@ -14,6 +14,7 @@ export type Methods = {
     query?: {
       forceNewAlbum?: boolean | number;
     };
+    // NOTE: APIがstableになるまでvalidatorは作成しない
     reqBody: Pick<Album, 'title' | 'artistId'>;
     resBody: Album;
   };

@@ -1,3 +1,4 @@
+import { Playlist } from '@prisma/client';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
@@ -6,7 +7,88 @@ import {
   dbPlaylistRemoveImageTx,
 } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
+import { dbArraySerializeItemIds } from '../dbArray';
+import { generatePlaylistId } from '../generateId';
 import { imageDeleteFilesAndSourceFiles } from './images';
+
+export async function playlistCreate(
+  userId: string,
+  data: Pick<Playlist, 'title' | 'notes'> & { trackIds?: string[] }
+): Promise<Playlist> {
+  const trackIds = data.trackIds || [];
+  if (Array.from(new Set(trackIds)).length !== trackIds.length) {
+    throw new HTTPError(400, 'trackIds must be unique');
+  }
+
+  // トラックが存在するか確認
+  // NOTE(security): ここでトラックの所有者を確認している
+  // 存在しないトラックについてはconnectの段階でエラーになるので実は確認しなくても良いが、他のユーザーのトラックが指定できると問題なので
+  const trackCount = await client.track.count({
+    where: {
+      id: {
+        in: trackIds,
+      },
+      userId,
+    },
+  });
+  if (trackCount !== trackIds.length) {
+    throw new HTTPError(400, 'some trackIds are not found');
+  }
+
+  const playlist = await client.playlist.create({
+    data: {
+      id: await generatePlaylistId(),
+      title: String(data.title),
+      notes: String(data.notes),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      trackOrder: dbArraySerializeItemIds(trackIds),
+      tracks: {
+        connect: trackIds.map((trackId) => ({ id: String(trackId) })),
+      },
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+    },
+  });
+
+  await dbResourceUpdateTimestamp(userId);
+
+  return playlist;
+}
+
+export async function playlistUpdate(
+  userId: string,
+  playlistId: string,
+  data: Partial<Pick<Playlist, 'title' | 'notes'>>
+): Promise<void> {
+  if (data.title == null && data.notes == null) {
+    return;
+  }
+
+  if (data.title != null && !data.title.trim()) {
+    throw new HTTPError(400, 'title must not be empty');
+  }
+
+  const newPlaylist = await client.playlist.updateMany({
+    where: {
+      id: playlistId,
+      userId,
+    },
+    data: {
+      title: data.title?.trim(),
+      notes: data.notes?.trim(),
+      updatedAt: Date.now(),
+    },
+  });
+  if (newPlaylist.count === 0) {
+    throw new HTTPError(404, `Playlist ${playlistId} not found`);
+  }
+
+  await dbResourceUpdateTimestamp(userId);
+}
 
 export async function playlistDelete(
   userId: string,

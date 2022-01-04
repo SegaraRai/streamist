@@ -1,3 +1,4 @@
+import { validateOrReject } from 'class-validator';
 import { createAudioSource, createImageSource } from '$/services/uploadBegin';
 import type {
   CreateSourceRequestAudio,
@@ -5,6 +6,7 @@ import type {
   CreateSourceResponse,
 } from '$/types';
 import { HTTPError } from '$/utils/httpError';
+import { VSourceCreateBodyWrapper } from '$/validators';
 import { defineController } from './$relay';
 
 function createSource(
@@ -23,6 +25,9 @@ function createSource(
 
 export default defineController(() => ({
   post: async ({ user, body }) => {
+    await validateOrReject(
+      Object.assign(new VSourceCreateBodyWrapper(), { data: body })
+    );
     const response = await createSource(user.id, body);
     return {
       status: 201,

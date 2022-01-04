@@ -1,9 +1,7 @@
-import { MinLength } from 'class-validator';
+import 'reflect-metadata';
 
-export class LoginBody {
-  @MinLength(2)
-  id!: string;
-
-  @MinLength(4)
-  pass!: string;
-}
+export * from './auth';
+export * from './images';
+export * from './playlists';
+export * from './sources';
+export * from './tracks';

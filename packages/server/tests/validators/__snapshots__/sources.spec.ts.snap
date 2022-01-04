@@ -1,0 +1,284 @@
+// Vitest Snapshot v1
+
+exports[`VSourceCreateBodyWrapper > should reject malformed payloads 1`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isRegionConstraint": "region must be a valid region",
+        },
+        "property": "region",
+        "value": "ap-northeast-x",
+      },
+    ],
+    "property": "!payload",
+    "value": VSourceCreateBodyAudio {
+      "audioFile": VSourceCreateBodyAudioFile {
+        "fileSize": 1000,
+        "filename": "test.mp3",
+        "type": "audio",
+      },
+      "cueSheetFile": null,
+      "region": "ap-northeast-x",
+      "type": "audio",
+    },
+  },
+]
+`;
+
+exports[`VSourceCreateBodyWrapper > should reject malformed payloads 2`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isIdConstraint": "attachToId must be a valid id",
+        },
+        "property": "attachToId",
+        "value": "/test",
+      },
+    ],
+    "property": "!payload",
+    "value": VSourceCreateBodyImage {
+      "attachPrepend": true,
+      "attachToId": "/test",
+      "attachToType": "album",
+      "imageFile": VSourceCreateBodyImageFile {
+        "fileSize": 1000,
+        "filename": "test.jpg",
+        "type": "image",
+      },
+      "region": "ap-northeast-1",
+      "type": "image",
+    },
+  },
+]
+`;
+
+exports[`VSourceCreateBodyWrapper > should reject malformed payloads 3`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [
+          ValidationError {
+            "children": [],
+            "constraints": {
+              "equals": "type must be equal to audio",
+            },
+            "property": "type",
+            "value": "image",
+          },
+        ],
+        "property": "audioFile",
+        "value": VSourceCreateBodyAudioFile {
+          "fileSize": 1000,
+          "filename": "test.mp3",
+          "type": "image",
+        },
+      },
+    ],
+    "property": "!payload",
+    "value": VSourceCreateBodyAudio {
+      "audioFile": VSourceCreateBodyAudioFile {
+        "fileSize": 1000,
+        "filename": "test.mp3",
+        "type": "image",
+      },
+      "cueSheetFile": null,
+      "region": "ap-northeast-1",
+      "type": "audio",
+    },
+  },
+]
+`;
+
+exports[`VSourceCreateBodyWrapper > should reject malformed payloads 4`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isIn": "attachToType must be one of the following values: album, artist, playlist",
+        },
+        "property": "attachToType",
+        "value": undefined,
+      },
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isIdConstraint": "attachToId must be a valid id",
+        },
+        "property": "attachToId",
+        "value": undefined,
+      },
+      ValidationError {
+        "children": [],
+        "constraints": {
+          "isBoolean": "attachPrepend must be a boolean value",
+        },
+        "property": "attachPrepend",
+        "value": undefined,
+      },
+    ],
+    "property": "!payload",
+    "value": VSourceCreateBodyImage {
+      "attachPrepend": undefined,
+      "attachToId": undefined,
+      "attachToType": undefined,
+      "audioFile": {
+        "fileSize": 1000,
+        "filename": "test.mp3",
+        "type": "audio",
+      },
+      "cueSheetFile": null,
+      "imageFile": undefined,
+      "region": "ap-northeast-1",
+      "type": "image",
+    },
+  },
+]
+`;
+
+exports[`VSourceCreateBodyWrapper > should reject malformed payloads 5`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "constraints": {
+          "nestedValidation": "nested property !payload must be either object or array",
+        },
+        "property": "!payload",
+        "target": [Function],
+        "value": true,
+      },
+    ],
+    "constraints": {
+      "isObject": "type must be either \\"audio\\" or \\"image\\"",
+    },
+    "property": "!payload",
+    "value": true,
+  },
+]
+`;
+
+exports[`VSourceCreateBodyWrapper > should reject malformed payloads 6`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "constraints": {
+          "nestedValidation": "nested property !payload must be either object or array",
+        },
+        "property": "!payload",
+        "target": [Function],
+        "value": true,
+      },
+    ],
+    "constraints": {
+      "isObject": "type must be either \\"audio\\" or \\"image\\"",
+    },
+    "property": "!payload",
+    "value": true,
+  },
+]
+`;
+
+exports[`VSourceCreateBodyWrapper > should reject malformed payloads 7`] = `
+[
+  ValidationError {
+    "children": [
+      ValidationError {
+        "constraints": {
+          "nestedValidation": "nested property !payload must be either object or array",
+        },
+        "property": "!payload",
+        "target": [Function],
+        "value": true,
+      },
+    ],
+    "constraints": {
+      "isObject": "type must be either \\"audio\\" or \\"image\\"",
+    },
+    "property": "!payload",
+    "value": true,
+  },
+]
+`;
+
+exports[`VSourceFinishUploadBody > should reject malformed payloads 1`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "equals": "state must be equal to uploaded",
+    },
+    "property": "state",
+    "value": "uploadable",
+  },
+]
+`;
+
+exports[`VSourceFinishUploadBody > should reject malformed payloads 2`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "arrayNotEmpty": "parts should not be empty",
+      "isArray": "parts must be an array",
+      "isString": "each value in parts must be a string",
+    },
+    "property": "parts",
+    "value": null,
+  },
+]
+`;
+
+exports[`VSourceFinishUploadBody > should reject malformed payloads 3`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "arrayNotEmpty": "parts should not be empty",
+    },
+    "property": "parts",
+    "value": [],
+  },
+]
+`;
+
+exports[`VSourceFinishUploadBody > should reject malformed payloads 4`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "isString": "each value in parts must be a string",
+    },
+    "property": "parts",
+    "value": [
+      123,
+    ],
+  },
+]
+`;
+
+exports[`VSourceFinishUploadBody > should reject malformed payloads 5`] = `
+[
+  ValidationError {
+    "children": [],
+    "constraints": {
+      "arrayNotEmpty": "parts should not be empty",
+      "isArray": "parts must be an array",
+      "isString": "each value in parts must be a string",
+    },
+    "property": "parts",
+    "value": {
+      "0": "etag1",
+    },
+  },
+]
+`;

@@ -202,7 +202,7 @@ export function createTrackListDropdown({
                   ._playlistId(playlist.id)
                   .tracks.$post({
                     body: {
-                      trackId,
+                      trackIds: [trackId],
                     },
                   })
                   .then(() => {

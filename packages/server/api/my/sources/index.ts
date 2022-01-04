@@ -1,12 +1,9 @@
-import type {
-  CreateSourceRequestAudio,
-  CreateSourceRequestImage,
-  CreateSourceResponse,
-} from '$/types';
+import type { CreateSourceResponse } from '$/types';
+import type { VSourceCreateBodyWrapper } from '$/validators';
 
 export type Methods = {
   post: {
-    reqBody: CreateSourceRequestAudio | CreateSourceRequestImage;
+    reqBody: VSourceCreateBodyWrapper['!payload'];
     resBody: CreateSourceResponse;
   };
 };
