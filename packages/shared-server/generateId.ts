@@ -43,6 +43,10 @@ export function generateAlbumId(): Promise<string> {
   return generateId(IdTypeCode.Album);
 }
 
+export function generateAlbumCoArtistId(): Promise<string> {
+  return generateId(IdTypeCode.AlbumCoArtist);
+}
+
 export function generateArtistId(): Promise<string> {
   return generateId(IdTypeCode.Artist);
 }
@@ -69,6 +73,10 @@ export function generateTextId(): Promise<string> {
 
 export function generateTrackId(): Promise<string> {
   return generateId(IdTypeCode.Track);
+}
+
+export function generateTrackCoArtistId(): Promise<string> {
+  return generateId(IdTypeCode.TrackCoArtist);
 }
 
 export function generateTranscodedAudioFileId(): Promise<string> {

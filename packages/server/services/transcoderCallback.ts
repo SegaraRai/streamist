@@ -28,6 +28,7 @@ import { dbResourceUpdateTimestamp } from '$/db/lib/resource.js';
 import type { TransactionalPrismaClient } from '$/db/lib/types.js';
 import { dbPlaylistAddImageTx } from '$/db/playlist.js';
 import { dbTrackCreateTx } from '$/db/track.js';
+import { CoArtistType } from '../coArtist.js';
 import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env.js';
 
 export const TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
@@ -292,42 +293,61 @@ async function handleTranscoderResponse(
         const tagTrackArtistSort = tags.artistsort;
         const tagAlbumArtist =
           tags.albumartist ||
-          (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtist);
+          (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtist) ||
+          undefined;
         const tagAlbumArtistSort =
           tags.albumartistsort ||
-          (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtistSort);
+          (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtistSort) ||
+          undefined;
 
         const tagTrackTitle = tags.title;
         const tagTrackTitleSort = tags.titlesort;
         const tagAlbumTitle =
           tags.album ||
-          (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitle);
+          (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitle) ||
+          undefined;
         const tagAlbumTitleSort =
           tags.albumtitlesort ||
-          (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitleSort);
+          (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitleSort) ||
+          undefined;
 
-        const [track, trackArtist, album, albumArtist] = await dbTrackCreateTx(
-          txClient,
-          userId,
-          tagAlbumTitle || options.defaultUnknownAlbumTitle,
-          tagAlbumArtist || options.defaultUnknownAlbumArtist,
-          tagTrackArtist || options.defaultUnknownTrackArtist,
-          {
-            title: tagTrackTitle || defaultUnknownTrackTitle,
-            titleSort: tagTrackTitleSort || null,
-            discNumber,
-            trackNumber,
-            duration,
-            genre: tags.genre || null,
-            bpm: numberOr(tags.bpm, null),
-            releaseDate: date?.dateString$$q,
-            releaseDatePrecision: date?.precision$$q,
-            releaseDateText: date?.text$$q,
-            replayGainGain: floatOr(tags.replaygain_track_gain, null),
-            replayGainPeak: floatOr(tags.replaygain_track_peak, null),
-            sourceFileId: artifact.source.sourceFileId,
-          }
-        );
+        const tagCoArtists: [CoArtistType, string, string | undefined][] = [];
+        if (tags.arranger) {
+          tagCoArtists.push(['#arranger', tags.arranger, tags.arrangersort]);
+        }
+        if (tags.composer) {
+          tagCoArtists.push(['#composer', tags.composer, tags.composersort]);
+        }
+        if (tags.lyricist) {
+          tagCoArtists.push(['#lyricist', tags.lyricist, tags.lyricistsort]);
+        }
+
+        const { track, trackArtist, album, albumArtist, coArtists } =
+          await dbTrackCreateTx(txClient, userId, {
+            albumTitle: tagAlbumTitle || options.defaultUnknownAlbumTitle,
+            albumArtistName:
+              tagAlbumArtist || options.defaultUnknownAlbumArtist,
+            albumArtistNameSort: tagAlbumArtistSort,
+            trackArtistName:
+              tagTrackArtist || options.defaultUnknownTrackArtist,
+            trackArtistNameSort: tagTrackArtistSort,
+            coArtists: tagCoArtists,
+            data: {
+              title: tagTrackTitle || defaultUnknownTrackTitle,
+              titleSort: tagTrackTitleSort || null,
+              discNumber,
+              trackNumber,
+              duration,
+              genre: tags.genre || null,
+              bpm: numberOr(tags.bpm, null),
+              releaseDate: date?.dateString$$q,
+              releaseDatePrecision: date?.precision$$q,
+              releaseDateText: date?.text$$q,
+              replayGainGain: floatOr(tags.replaygain_track_gain, null),
+              replayGainPeak: floatOr(tags.replaygain_track_peak, null),
+              sourceFile: { connect: { id: artifact.source.sourceFileId } },
+            },
+          });
 
         sourceFileIdToAlbumIdMap.set(sourceFileId, album.id);
 
@@ -365,24 +385,35 @@ async function handleTranscoderResponse(
           }
         }
 
-        // update track artist
-        if (!trackArtist.nameSort && tagTrackArtistSort) {
-          await txClient.artist.updateMany({
-            where: { id: trackArtist.id, userId },
-            data: {
-              nameSort: tagTrackArtistSort,
-              updatedAt: Date.now(),
-            },
-          });
-        }
+        // update artists' sort names
+        {
+          const artistAndNameSorts = [
+            [trackArtist, tagTrackArtistSort] as const,
+            [albumArtist, tagAlbumArtistSort] as const,
+            ...coArtists.map(
+              ([_1, _2, artist, nameSort]) => [artist, nameSort] as const
+            ),
+          ];
 
-        // update album artist
-        if (albumArtist.id !== trackArtist.id || !tagTrackArtistSort) {
-          if (!albumArtist.nameSort && tagAlbumArtistSort) {
+          const processedArtistIdSet = new Set<string>();
+          for (const [artist, nameSort] of artistAndNameSorts) {
+            if (processedArtistIdSet.has(artist.id)) {
+              continue;
+            }
+
+            if (artist.nameSort) {
+              processedArtistIdSet.add(artist.id);
+              continue;
+            }
+
+            if (!nameSort) {
+              continue;
+            }
+
             await txClient.artist.updateMany({
-              where: { id: albumArtist.id, userId },
+              where: { id: artist.id, userId },
               data: {
-                nameSort: tagAlbumArtistSort,
+                nameSort,
                 updatedAt: Date.now(),
               },
             });

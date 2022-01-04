@@ -25,7 +25,7 @@ export default defineController(() => ({
             updatedAt: Date.now(),
           },
         })
-      : await dbArtistGetOrCreateByName(user.id, body.name, newArtistId);
+      : await dbArtistGetOrCreateByName(user.id, body.name);
 
     const created = artist.id === newArtistId;
     if (created) {

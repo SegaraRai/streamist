@@ -34,11 +34,11 @@ export class VPlaylistUpdateBody implements IPlaylistUpdateBody {
   @IsString()
   @IsNotEmpty()
   @Matches(/\S/)
-  title!: string;
+  title?: string;
 
   @IsUndefinable()
   @IsString()
-  notes!: string;
+  notes?: string;
 }
 
 export class VPlaylistAddTrackBody {

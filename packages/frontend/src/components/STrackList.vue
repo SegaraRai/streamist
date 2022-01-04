@@ -174,7 +174,6 @@ export default defineComponent({
     });
 
     const itemsProvider$$q = eagerComputed(() => {
-      console.log('update provider');
       const v = items.value;
       return () => Promise.resolve(v);
     });
@@ -217,8 +216,15 @@ export default defineComponent({
       playlistId$$q: eagerComputed(() => props.playlistId),
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
-      play$$q: (track) => {
-        play$$q(track, selectedTrackIndex$$q.value!);
+      play$$q: (track: ResourceTrack) => {
+        if (
+          !selectedTrack$$q.value ||
+          selectedTrackIndex$$q.value == null ||
+          track !== selectedTrack$$q.value
+        ) {
+          return;
+        }
+        play$$q(selectedTrack$$q.value, selectedTrackIndex$$q.value);
       },
       openEditTrackDialog$$q: (_track: ResourceTrack) => {},
       closeMenu$$q,

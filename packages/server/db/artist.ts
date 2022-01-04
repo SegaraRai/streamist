@@ -17,6 +17,7 @@ export type ImageSortableArtist = { imageOrder: string; images: Image[] };
 /* #__PURE__ */ expectType<'Artist'>(Prisma.ModelName.Artist);
 /* #__PURE__ */ expectType<'id'>(Prisma.ArtistScalarFieldEnum.id);
 /* #__PURE__ */ expectType<'name'>(Prisma.ArtistScalarFieldEnum.name);
+/* #__PURE__ */ expectType<'nameSort'>(Prisma.ArtistScalarFieldEnum.nameSort);
 /* #__PURE__ */ expectType<'userId'>(Prisma.ArtistScalarFieldEnum.userId);
 /* #__PURE__ */ expectType<'createdAt'>(Prisma.ArtistScalarFieldEnum.createdAt);
 /* #__PURE__ */ expectType<'updatedAt'>(Prisma.ArtistScalarFieldEnum.updatedAt);
@@ -25,16 +26,18 @@ export async function dbArtistGetOrCreateByNameTx(
   txClient: TransactionalPrismaClient,
   userId: string,
   artistName: string,
-  newArtistIdPromise: string | Promise<string> = generateArtistId()
+  artistNameSort?: string
 ): Promise<Artist> {
-  const newArtistId = await newArtistIdPromise;
+  const newArtistId = await generateArtistId();
 
   const createdAt = Date.now();
 
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
-    INSERT INTO Artist (id, name, userId, createdAt, updatedAt)
-    SELECT ${newArtistId}, ${artistName}, ${userId}, ${createdAt}, ${createdAt}
+    INSERT INTO Artist (id, name, nameSort, userId, createdAt, updatedAt)
+    SELECT ${newArtistId}, ${artistName}, ${
+    artistNameSort || null
+  }, ${userId}, ${createdAt}, ${createdAt}
       WHERE NOT EXISTS (
         SELECT 1
           FROM Artist
@@ -59,16 +62,37 @@ export async function dbArtistGetOrCreateByNameTx(
   return artist;
 }
 
-export async function dbArtistGetOrCreateByName(
+export function dbArtistCreateCachedGetOrCreateByNameTx(
+  txClient: TransactionalPrismaClient,
+  userId: string
+): (artistName: string, artistNameSort?: string) => Promise<Artist> {
+  const cacheMap = new Map<string, Promise<Artist>>();
+
+  return (artistName: string, artistNameSort?: string): Promise<Artist> => {
+    let promise = cacheMap.get(artistName);
+    if (!promise) {
+      promise = dbArtistGetOrCreateByNameTx(
+        txClient,
+        userId,
+        artistName,
+        artistNameSort
+      );
+      cacheMap.set(artistName, promise);
+    }
+
+    return promise;
+  };
+}
+
+export function dbArtistGetOrCreateByName(
   userId: string,
   artistName: string,
-  newArtistIdPromise: string | Promise<string> = generateArtistId()
+  artistNameSort?: string
 ): Promise<Artist> {
   // resolve Promise in advance to reduce transaction processing time
-  const newArtistId = await newArtistIdPromise;
   return client.$transaction(
     (txClient): Promise<Artist> =>
-      dbArtistGetOrCreateByNameTx(txClient, userId, artistName, newArtistId)
+      dbArtistGetOrCreateByNameTx(txClient, userId, artistName, artistNameSort)
   );
 }
 

@@ -1,16 +1,17 @@
 import {
   generateAlbumId,
-  generateArtistId,
+  generateTrackCoArtistId,
   generateTrackId,
 } from '$shared-server/generateId';
+import { CoArtistType, isValidCoArtistType } from '$shared/coArtist';
 import { Album, Artist, Prisma, Track } from '$prisma/client';
 import { dbAlbumGetOrCreateByNameTx } from './album';
-import { dbArtistGetOrCreateByNameTx } from './artist';
+import { dbArtistCreateCachedGetOrCreateByNameTx } from './artist';
 import { client } from './lib/client';
 import type { TransactionalPrismaClient } from './lib/types';
 
 export type CreateTrackData = Omit<
-  Prisma.TrackUncheckedCreateInput,
+  Prisma.TrackCreateInput,
   | 'id'
   | 'createdAt'
   | 'updatedAt'
@@ -25,29 +26,58 @@ export type CreateTrackData = Omit<
   | 'coArtists'
 >;
 
+export interface CreateTrackInput {
+  albumTitle: string;
+  albumArtistName: string;
+  albumArtistNameSort: string | undefined;
+  trackArtistName: string;
+  trackArtistNameSort: string | undefined;
+  coArtists: readonly (readonly [
+    role: CoArtistType,
+    artistName: string,
+    artistNameSort: string | undefined
+  ])[];
+  data: CreateTrackData;
+}
+
+export interface CreateTrackResult {
+  track: Track;
+  trackArtist: Artist;
+  album: Album;
+  albumArtist: Artist;
+  coArtists: (readonly [
+    role: CoArtistType,
+    coArtistId: string,
+    artist: Artist,
+    artistNameSort: string | undefined
+  ])[];
+}
+
 export async function dbTrackCreateTx(
   txClient: TransactionalPrismaClient,
   userId: string,
-  albumTitle: string,
-  albumArtistName: string,
-  trackArtistName: string,
-  data: CreateTrackData
-): Promise<
-  [track: Track, trackArtist: Artist, album: Album, albumArtist: Artist]
-> {
-  const isSameArtist = trackArtistName === albumArtistName;
-
+  {
+    albumTitle,
+    albumArtistName,
+    albumArtistNameSort,
+    trackArtistName,
+    trackArtistNameSort,
+    coArtists,
+    data,
+  }: CreateTrackInput
+): Promise<CreateTrackResult> {
   // TODO(pref): generate id before the transaction
-  const newAlbumArtistId = await generateArtistId();
   const newAlbumId = await generateAlbumId();
-  const newTrackArtistId = isSameArtist ? null : await generateArtistId();
   const newTrackId = await generateTrackId();
 
-  const albumArtist = await dbArtistGetOrCreateByNameTx(
+  const artistGetOrCreateTx = dbArtistCreateCachedGetOrCreateByNameTx(
     txClient,
-    userId,
+    userId
+  );
+
+  const albumArtist = await artistGetOrCreateTx(
     albumArtistName,
-    newAlbumArtistId
+    albumArtistNameSort
   );
 
   const album = await dbAlbumGetOrCreateByNameTx(
@@ -58,50 +88,63 @@ export async function dbTrackCreateTx(
     newAlbumId
   );
 
-  const trackArtist = isSameArtist
-    ? albumArtist
-    : await dbArtistGetOrCreateByNameTx(
-        txClient,
-        userId,
-        trackArtistName,
-        newTrackArtistId!
-      );
+  const trackArtist = await artistGetOrCreateTx(
+    trackArtistName,
+    trackArtistNameSort
+  );
+
+  const resolvedCoArtists = await Promise.all(
+    coArtists
+      .filter((coArtist) => isValidCoArtistType(coArtist[0]))
+      .map(
+        async ([coArtistType, coArtistName, coArtistNameSort]) =>
+          [
+            coArtistType,
+            await generateTrackCoArtistId(),
+            await artistGetOrCreateTx(coArtistName, coArtistNameSort),
+            coArtistNameSort,
+          ] as const
+      )
+  );
+
+  // remove duplicates
+  const filteredResolvedCoArtists = Array.from(
+    new Map(
+      resolvedCoArtists.map((item) => [`${item[0]}\n${item[2].id}`, item])
+    ).values()
+  );
+
+  const timestamp = Date.now();
 
   const track = await txClient.track.create({
     data: {
       ...data,
       id: newTrackId,
-      artistId: trackArtist.id,
-      albumId: album.id,
-      userId,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      artist: { connect: { id: trackArtist.id } },
+      album: { connect: { id: album.id } },
+      user: { connect: { id: userId } },
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      coArtists: {
+        create: filteredResolvedCoArtists.map(([id, role, artist]) => ({
+          id,
+          role,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+          artist: { connect: { id: artist.id } },
+          user: { connect: { id: userId } },
+        })),
+      },
     },
   });
 
-  return [track, trackArtist, album, albumArtist];
-}
-
-export function dbTrackCreate(
-  userId: string,
-  albumTitle: string,
-  albumArtistName: string,
-  trackArtistName: string,
-  data: CreateTrackData
-): Promise<
-  [track: Track, trackArtist: Artist, album: Album, albumArtist: Artist]
-> {
-  return client.$transaction(
-    (txClient): Promise<[Track, Artist, Album, Artist]> =>
-      dbTrackCreateTx(
-        txClient,
-        userId,
-        albumTitle,
-        albumArtistName,
-        trackArtistName,
-        data
-      )
-  );
+  return {
+    track,
+    trackArtist,
+    album,
+    albumArtist,
+    coArtists: filteredResolvedCoArtists,
+  };
 }
 
 export function dbTrackCount(userId: string): Promise<number> {

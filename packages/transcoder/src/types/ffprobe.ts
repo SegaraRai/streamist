@@ -144,7 +144,7 @@ export function normalizeFFprobeTags(tags: FFprobeTags): FFprobeTags {
     Object.entries(tags)
       .map(([key, value]) => [
         key.toLowerCase().replace(/[^a-z\d]/g, ''),
-        value?.trim(),
+        value?.trim().replace(/[\r\n\v\f\u0085\u2028\u2029]/g, ''),
       ])
       .filter((e): e is [string, string] => !!e[1])
       .sort((a, b) => a[1].length - b[1].length)

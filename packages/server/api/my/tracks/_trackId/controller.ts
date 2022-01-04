@@ -47,9 +47,6 @@ export default defineController(() => ({
     };
   },
   patch: async ({ body, params, query, user }) => {
-    const tempNewAlbumId = await generateAlbumId();
-    const tempNewArtistId = await generateArtistId();
-
     const [oldTrack, newTrack] = await client.$transaction(async (txClient) => {
       const track = await txClient.track.findFirst({
         where: {
@@ -81,7 +78,7 @@ export default defineController(() => ({
         const artist = query?.forceNewArtist
           ? await txClient.artist.create({
               data: {
-                id: tempNewArtistId,
+                id: await generateArtistId(),
                 name: body.artistName,
                 userId: user.id,
                 createdAt: Date.now(),
@@ -91,8 +88,7 @@ export default defineController(() => ({
           : await dbArtistGetOrCreateByNameTx(
               txClient,
               user.id,
-              body.artistName,
-              tempNewArtistId
+              body.artistName
             );
         artistId = artist.id;
       }
@@ -117,7 +113,7 @@ export default defineController(() => ({
         const album = query?.forceNewAlbum
           ? await txClient.album.create({
               data: {
-                id: tempNewAlbumId,
+                id: await generateAlbumId(),
                 title: body.albumTitle,
                 artistId: newArtistId,
                 userId: user.id,
@@ -130,7 +126,7 @@ export default defineController(() => ({
               user.id,
               newArtistId,
               body.albumTitle,
-              tempNewAlbumId
+              await generateAlbumId()
             );
         albumId = album.id;
       }
