@@ -5,13 +5,18 @@ import {
   calcMenuPositionByEvent,
 } from './menuPosition';
 
-export function useMenu(onCloseCallback?: () => void) {
+export interface UseMenuOptions {
+  scrollRef$$q?: Readonly<Ref<number>>;
+  onClose$$q?: () => void;
+}
+
+export function useMenu({ scrollRef$$q, onClose$$q }: UseMenuOptions = {}) {
+  const scrollRef = scrollRef$$q || currentScrollRef;
+
   const isOpen$$q = ref(false);
   const x$$q = ref(0);
   const yOffset$$q = ref(0);
-  const y$$q = computed(
-    (): number => yOffset$$q.value - currentScrollRef.value
-  );
+  const y$$q = computed((): number => yOffset$$q.value - scrollRef.value);
 
   return {
     isOpen$$q: isOpen$$q as Readonly<Ref<boolean>>,
@@ -25,7 +30,7 @@ export function useMenu(onCloseCallback?: () => void) {
         eventOrElement instanceof MouseEvent
           ? calcMenuPositionByEvent(eventOrElement)
           : calcMenuPositionByElement(eventOrElement);
-      const scroll = currentScrollRef.value;
+      const scroll = scrollRef.value;
 
       isOpen$$q.value = false;
 
@@ -39,7 +44,7 @@ export function useMenu(onCloseCallback?: () => void) {
     },
     close$$q: (): void => {
       isOpen$$q.value = false;
-      onCloseCallback?.();
+      onClose$$q?.();
     },
   };
 }

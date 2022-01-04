@@ -29,6 +29,9 @@
       "$transcoder/*": [
         "../transcoder/src/*"
       ],
+      "class-transformer": [
+        "./node_modules/class-transformer/esm2015"
+      ],
     },
     "rootDirs": [
       ".",

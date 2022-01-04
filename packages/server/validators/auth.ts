@@ -40,10 +40,6 @@ class VAuthBodyRefreshToken implements IAuthBodyRefreshToken {
   refresh_token!: string;
 }
 
-/**
- * class-transformer does not support root level discrimination so this is a wrapper class
- * @see https://github.com/typestack/class-transformer/issues/223
- */
 export class VAuthBodyWrapper {
   @IsObject({
     message: 'grant_type must be either "password" or "refresh_token"',

@@ -104,6 +104,11 @@ const onScroll$$q = (e: Event): void => {
   // console.log(currentScrollRef.value);
 };
 
+const queueScroll$$q = ref(0);
+const onQueueScroll$$q = (e: Event): void => {
+  queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
+};
+
 const hideShell$$q = eagerComputed(
   () => !!router.currentRoute.value.meta.hideShell
 );
@@ -121,12 +126,12 @@ const hideShell$$q = eagerComputed(
     </div>
 
     <v-app theme="dark" class="flex-1 !h-auto">
-      <div
+      <!-- div
         class="bg-black z-2135 fixed top-0 left-0 w-full h-full transition-all"
         :class="rightSidebar$$q ? 'opacity-25' : 'opacity-0 invisible'"
         @click="rightSidebar$$q = false"
         @contextmenu.prevent
-      ></div>
+      ></div -->
 
       <!-- Right Sidebar: Queue -->
       <v-navigation-drawer
@@ -136,7 +141,7 @@ const hideShell$$q = eagerComputed(
         :theme="theme.rightSidebarTheme"
         :width="400"
         hide-overlay
-        class="s-offline-mod-mt select-none !z-2140"
+        class="s-offline-mod-mt select-none"
       >
         <div class="flex flex-col h-full">
           <v-sheet tile>
@@ -149,8 +154,11 @@ const hideShell$$q = eagerComputed(
             </div>
             <v-divider />
           </v-sheet>
-          <n-scrollbar class="flex-1 s-n-scrollbar-min-h-full">
-            <s-queue />
+          <n-scrollbar
+            class="flex-1 s-n-scrollbar-min-h-full"
+            @scroll="onQueueScroll$$q"
+          >
+            <s-queue :menu-parent-scroll="queueScroll$$q" />
           </n-scrollbar>
           <!-- div class="h-24" :class="hideShell$$q && '!hidden'"></div -->
           <div class="s-offline-mod-h"></div>
@@ -163,7 +171,7 @@ const hideShell$$q = eagerComputed(
         :border="1"
         density="compact"
         :theme="theme.headerTheme"
-        class="s-offline-mod-mt !z-2130"
+        class="s-offline-mod-mt"
       >
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q && !hideShell$$q">

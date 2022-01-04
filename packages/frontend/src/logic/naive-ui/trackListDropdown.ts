@@ -11,11 +11,9 @@ import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 interface TrackListDropdownCreateOptions {
   readonly selectedTrack$$q: Readonly<Ref<ResourceTrack | null | undefined>>;
   readonly playlistId$$q: Readonly<Ref<string | null | undefined>>;
-  readonly setList$$q: Readonly<
-    Ref<readonly ResourceTrack[] | null | undefined>
-  >;
   readonly showVisitAlbum$$q: Readonly<Ref<boolean>>;
   readonly showVisitArtist$$q: Readonly<Ref<boolean>>;
+  readonly play$$q: (track: ResourceTrack) => void;
   readonly openEditTrackDialog$$q: (track: ResourceTrack) => void;
   readonly closeMenu$$q: () => void;
 }
@@ -23,9 +21,9 @@ interface TrackListDropdownCreateOptions {
 export function createTrackListDropdown({
   selectedTrack$$q,
   playlistId$$q,
-  setList$$q,
   showVisitAlbum$$q,
   showVisitArtist$$q,
+  play$$q,
   openEditTrackDialog$$q,
   closeMenu$$q,
 }: TrackListDropdownCreateOptions): ComputedRef<MenuOption[]> {
@@ -74,8 +72,8 @@ export function createTrackListDropdown({
         onClick: () => {
           if (playbackStore.currentTrack$$q.value?.id === trackId) {
             playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
-          } else if (setList$$q.value) {
-            playbackStore.setSetListAndPlay$$q(setList$$q.value, track);
+          } else {
+            play$$q(track);
           }
           closeMenu$$q();
         },

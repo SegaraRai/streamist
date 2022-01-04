@@ -1,10 +1,19 @@
 import {
   TransformationType,
   TypeMetadata,
+  plainToInstance as esm2015PlainToInstance,
   plainToInstance,
 } from 'class-transformer';
-import { TransformOperationExecutor } from 'class-transformer/esm5/TransformOperationExecutor';
-import { defaultOptions } from 'class-transformer/esm5/constants/default-options.constant';
+import { TransformOperationExecutor as esm2015TransformOperationExecutor } from 'class-transformer/esm2015/TransformOperationExecutor';
+import { defaultOptions } from 'class-transformer/esm2015/constants/default-options.constant';
+
+const TransformOperationExecutor =
+  plainToInstance === esm2015PlainToInstance
+    ? esm2015TransformOperationExecutor
+    : null;
+if (!TransformOperationExecutor) {
+  throw new Error('Unsupported class-transformer variant');
+}
 
 /**
  * a transformer which keeps class instances as is

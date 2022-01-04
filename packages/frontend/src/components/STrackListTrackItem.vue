@@ -41,42 +41,35 @@ export default defineComponent({
       type: Array as PropType<readonly string[] | undefined>,
       default: undefined,
     },
-    setList: {
-      type: Array as PropType<readonly ResourceTrack[] | null | undefined>,
-      default: undefined,
-    },
     showAlbum: Boolean,
     showArtist: Boolean,
     hideDuration: Boolean,
     selected: Boolean,
+    disableCurrentPlaying: Boolean,
   },
   emits: {
     menu: (_event: MouseEvent) => true,
     ctxMenu: (_event: MouseEvent) => true,
+    play: () => true,
   },
   setup(props, { emit }) {
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const themeStore = useThemeStore();
 
-    const currentPlayingTrackId = eagerComputed(
-      () => playbackStore.currentTrack$$q.value?.id
+    const isCurrentPlayingTrack$$q = eagerComputed(
+      () =>
+        !props.disableCurrentPlaying &&
+        playbackStore.currentTrack$$q.value?.id === props.item.track$$q.id
     );
 
     return {
       t,
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
-      currentPlayingTrackId$$q: currentPlayingTrackId,
-      play$$q: (track: ResourceTrack): void => {
-        if (!props.setList) {
-          return;
-        }
-        if (track.id === currentPlayingTrackId.value) {
-          playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
-          return;
-        }
-        playbackStore.setSetListAndPlay$$q(props.setList, track);
+      isCurrentPlayingTrack$$q,
+      play$$q: (): void => {
+        emit('play');
       },
       onContextMenu$$q: (event: MouseEvent): void => {
         emit('ctxMenu', event);
@@ -101,66 +94,47 @@ export default defineComponent({
   >
     <!-- Track Number -->
     <div class="list-column-icon mr-4">
-      <!-- hiddenを切り替えるのとv-ifとどっちがいいか -->
-      <div
-        v-show="currentPlayingTrackId$$q === item.track$$q.id"
-        class="icon-container"
-      >
-        <!-- 再生中（または一時停止中）の曲 -->
-        <v-btn
-          icon
-          flat
-          text
-          :disabled="!setList"
-          class="bg-transparent"
-          @click.stop="play$$q(item.track$$q)"
-        >
-          <v-icon class="play-icon s-hover-visible">
-            {{
-              playing$$q
-                ? 'mdi-pause-circle-outline'
-                : 'mdi-play-circle-outline'
-            }}
-          </v-icon>
-          <v-icon class="play-icon s-hover-hidden">
-            {{ playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle' }}
-          </v-icon>
-        </v-btn>
-      </div>
-      <div
-        v-show="currentPlayingTrackId$$q !== item.track$$q.id"
-        class="icon-container"
-      >
-        <!-- それ以外の曲 -->
-        <v-btn
-          icon
-          flat
-          text
-          :disabled="!setList"
-          class="bg-transparent"
-          @click.stop="play$$q(item.track$$q)"
-        >
-          <template v-if="indexContent === 'index'">
-            <div class="track-index s-numeric s-hover-hidden">
-              {{ item.index$$q + 1 }}
-            </div>
-          </template>
-          <template v-if="indexContent === 'trackNumber'">
-            <div class="track-index s-numeric s-hover-hidden">
-              {{ item.track$$q.trackNumber }}
-            </div>
-          </template>
-          <template v-if="indexContent === 'albumArtwork'">
-            <s-album-image-x
-              class="track-index s-hover-hidden flex-none w-9 h-9"
-              size="36"
-              :image="item.image$$q"
-            />
-          </template>
-          <v-icon class="play-icon s-hover-visible">
-            mdi-play-circle-outline
-          </v-icon>
-        </v-btn>
+      <div class="icon-container">
+        <template v-if="isCurrentPlayingTrack$$q">
+          <!-- 再生中（または一時停止中）の曲 -->
+          <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
+            <v-icon class="play-icon s-hover-visible">
+              {{
+                playing$$q
+                  ? 'mdi-pause-circle-outline'
+                  : 'mdi-play-circle-outline'
+              }}
+            </v-icon>
+            <v-icon class="play-icon s-hover-hidden">
+              {{ playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle' }}
+            </v-icon>
+          </v-btn>
+        </template>
+        <template v-else>
+          <!-- それ以外の曲 -->
+          <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
+            <template v-if="indexContent === 'index'">
+              <div class="track-index s-hover-hidden s-numeric">
+                {{ item.index$$q + 1 }}
+              </div>
+            </template>
+            <template v-if="indexContent === 'trackNumber'">
+              <div class="track-index s-hover-hidden s-numeric">
+                {{ item.track$$q.trackNumber }}
+              </div>
+            </template>
+            <template v-if="indexContent === 'albumArtwork'">
+              <s-album-image-x
+                class="track-index s-hover-hidden flex-none w-9 h-9"
+                size="36"
+                :image="item.image$$q"
+              />
+            </template>
+            <v-icon class="play-icon s-hover-visible">
+              mdi-play-circle-outline
+            </v-icon>
+          </v-btn>
+        </template>
       </div>
     </div>
     <!-- Track Title -->
@@ -170,15 +144,8 @@ export default defineComponent({
       <v-list-item-title class="track-title">
         <span
           class="block overflow-hidden overflow-ellipsis max-w-max"
-          :class="
-            currentPlayingTrackId$$q === item.track$$q.id
-              ? 'text-primary'
-              : 'cursor-pointer'
-          "
-          @click.stop="
-            currentPlayingTrackId$$q !== item.track$$q.id &&
-              play$$q(item.track$$q)
-          "
+          :class="isCurrentPlayingTrack$$q ? 'text-primary' : 'cursor-pointer'"
+          @click.stop="!isCurrentPlayingTrack$$q && play$$q()"
         >
           {{ item.track$$q.title }}
         </span>
@@ -235,7 +202,6 @@ export default defineComponent({
         flat
         text
         size="small"
-        :disabled="!setList"
         class="bg-transparent"
         @click.stop="onMenu$$q($event)"
       >

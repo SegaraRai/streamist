@@ -14,6 +14,7 @@ import { useMenu } from '~/logic/menu';
 import { createTrackListDropdown } from '~/logic/naive-ui/trackListDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
+import { currentScrollRef } from '~/stores/scroll';
 import { useThemeStore } from '~/stores/theme';
 import type { ListItemDiscNumberHeader } from './STrackListDiscHeaderItem.vue';
 import type { ListItemTrack } from './STrackListTrackItem.vue';
@@ -51,6 +52,7 @@ export default defineComponent({
       type: Array as PropType<readonly ResourceTrack[] | null | undefined>,
       default: undefined,
     },
+    hideHeader: Boolean,
     showAlbum: Boolean,
     showArtist: Boolean,
     hideDuration: Boolean,
@@ -60,8 +62,14 @@ export default defineComponent({
     },
     visitAlbum: Boolean,
     visitArtist: Boolean,
+    disableCurrentPlaying: Boolean,
+    menuParentScroll: {
+      type: Number,
+      default: undefined,
+    },
   },
   emits: {
+    play: (_track: ResourceTrack, _index: number) => true,
     move: (_track: ResourceTrack, _nextTrack: ResourceTrack | undefined) =>
       true,
   },
@@ -69,8 +77,8 @@ export default defineComponent({
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const themeStore = useThemeStore();
-    //
-    const propTracksRef = computed(() => props.tracks);
+
+    const propTracksRef = eagerComputed(() => props.tracks);
     const { value: trackItems } = useLiveQuery(async () => {
       const propTracks = propTracksRef.value;
       if (!propTracks) {
@@ -117,6 +125,7 @@ export default defineComponent({
         };
       });
     }, [propTracksRef]);
+
     const useDiscNumber = eagerComputed(
       () =>
         (props.showDiscNumber &&
@@ -125,6 +134,7 @@ export default defineComponent({
           )) ||
         false
     );
+
     const items = eagerComputed(() => {
       if (!trackItems.value) {
         return [];
@@ -160,32 +170,58 @@ export default defineComponent({
           array.push(item);
         }
       }
-      console.log(array);
       return array;
     });
-    //
+
+    const itemsProvider$$q = eagerComputed(() => {
+      console.log('update provider');
+      const v = items.value;
+      return () => Promise.resolve(v);
+    });
+
     const currentPlayingTrackId = eagerComputed(
       () => playbackStore.currentTrack$$q.value?.id
     );
-    //
+
+    const play$$q = (track: ResourceTrack, index: number): void => {
+      emit('play', track, index);
+      if (!props.setList) {
+        return;
+      }
+      if (track.id === currentPlayingTrackId.value) {
+        playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
+        return;
+      }
+      playbackStore.setSetListAndPlay$$q(props.setList, track);
+    };
+
     const selectedTrack$$q = ref<ResourceTrack | undefined>();
+    const selectedTrackIndex$$q = ref<number | undefined>();
     const {
       x$$q: menuX$$q,
       y$$q: menuY$$q,
       isOpen$$q: menuIsOpen$$q,
       close$$q: closeMenu$$q,
       open$$q: openMenu$$q,
-    } = useMenu(() => {
-      selectedTrack$$q.value = undefined;
+    } = useMenu({
+      onClose$$q: () => {
+        selectedTrack$$q.value = undefined;
+        selectedTrackIndex$$q.value = undefined;
+      },
+      scrollRef$$q: eagerComputed(
+        () => props.menuParentScroll ?? currentScrollRef.value
+      ),
     });
     const menuOptions$$q = createTrackListDropdown({
-      closeMenu$$q,
       selectedTrack$$q,
-      setList$$q: eagerComputed(() => props.setList),
       playlistId$$q: eagerComputed(() => props.playlistId),
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
+      play$$q: (track) => {
+        play$$q(track, selectedTrackIndex$$q.value!);
+      },
       openEditTrackDialog$$q: (_track: ResourceTrack) => {},
+      closeMenu$$q,
     });
 
     const dragging$$q = ref(false);
@@ -200,33 +236,27 @@ export default defineComponent({
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       items$$q: items,
+      itemsProvider$$q,
       currentPlayingTrackId$$q: currentPlayingTrackId,
       useDiscNumber$$q: useDiscNumber,
-      play$$q: (track: ResourceTrack): void => {
-        if (!props.setList) {
-          return;
-        }
-        if (track.id === currentPlayingTrackId.value) {
-          playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
-          return;
-        }
-        playbackStore.setSetListAndPlay$$q(props.setList, track);
-      },
+      pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
+      play$$q,
       showMenu$$q: (
         eventOrElement: MouseEvent | HTMLElement,
-        track: ResourceTrack
+        item: ListItemTrack
       ): void => {
         openMenu$$q(eventOrElement, () => {
-          selectedTrack$$q.value = track;
+          selectedTrack$$q.value = item.track$$q;
+          selectedTrackIndex$$q.value = item.index$$q;
         });
       },
+      selectedTrackIndex$$q,
       selectedTrack$$q,
       menuOptions$$q,
       menuIsOpen$$q,
       menuX$$q,
       menuY$$q,
       closeMenu$$q,
-      pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
       dragging$$q,
       onTrackOrderChanged$$q: (
         event: VueDraggableChangeEvent<ListItem>
@@ -273,38 +303,42 @@ export default defineComponent({
       class="s-track-list select-none"
       @contextmenu.prevent
     >
-      <v-list-item class="list-header w-full flex flex-row !<sm:px-2">
-        <div class="list-header-column list-column-icon mr-4 py-2">
-          {{
-            indexContent === 'index' || indexContent === 'trackNumber'
-              ? '#'
-              : ''
-          }}
-        </div>
-        <v-list-item-header
-          class="list-header-column list-column-content flex flex-row flex-nowrap items-center py-2"
-        >
-          <v-list-item-title class="track-title">
-            {{ t('trackList.Title') }}
-          </v-list-item-title>
-        </v-list-item-header>
-        <template v-if="showAlbum">
+      <template v-if="!hideHeader">
+        <v-list-item class="list-header w-full flex flex-row !<sm:px-2">
+          <div class="list-header-column list-column-icon mr-4 py-2">
+            {{
+              indexContent === 'index' || indexContent === 'trackNumber'
+                ? '#'
+                : ''
+            }}
+          </div>
           <v-list-item-header
-            class="list-header-column list-column-content flex flex-row flex-nowrap items-center ml-6 py-2 !<md:hidden"
+            class="list-header-column list-column-content flex flex-row flex-nowrap items-center py-2"
           >
-            <v-list-item-title class="track-album-title">
-              {{ t('trackList.Album') }}
+            <v-list-item-title class="track-title">
+              {{ t('trackList.Title') }}
             </v-list-item-title>
           </v-list-item-header>
-        </template>
-        <template v-if="!hideDuration">
-          <div class="list-header-column list-column-duration py-1 !<sm:hidden">
-            <v-icon>mdi-clock-outline</v-icon>
-          </div>
-        </template>
-        <div class="list-header-column list-column-menu py-1"></div>
-      </v-list-item>
-      <v-divider />
+          <template v-if="showAlbum">
+            <v-list-item-header
+              class="list-header-column list-column-content flex flex-row flex-nowrap items-center ml-6 py-2 !<md:hidden"
+            >
+              <v-list-item-title class="track-album-title">
+                {{ t('trackList.Album') }}
+              </v-list-item-title>
+            </v-list-item-header>
+          </template>
+          <template v-if="!hideDuration">
+            <div
+              class="list-header-column list-column-duration py-1 !<sm:hidden"
+            >
+              <v-icon>mdi-clock-outline</v-icon>
+            </div>
+          </template>
+          <div class="list-header-column list-column-menu py-1"></div>
+        </v-list-item>
+        <v-divider />
+      </template>
       <template v-if="renderMode === 'plain'">
         <div class="flex flex-col">
           <template v-for="(item, _index) in items$$q" :key="_index">
@@ -316,13 +350,17 @@ export default defineComponent({
                 :item="item"
                 :index-content="indexContent"
                 :link-excludes="linkExcludes"
-                :set-list="setList"
                 :show-album="showAlbum"
                 :show-artist="showArtist"
                 :hide-duration="hideDuration"
-                :selected="selectedTrack$$q?.id === item.track$$q.id"
-                @menu="showMenu$$q($event.target as HTMLElement, item.track$$q)"
-                @ctx-menu="showMenu$$q($event, item.track$$q)"
+                :selected="
+                  selectedTrackIndex$$q === item.index$$q &&
+                  selectedTrack$$q?.id === item.track$$q.id
+                "
+                :disable-current-playing="disableCurrentPlaying"
+                @play="play$$q(item.track$$q, item.index$$q)"
+                @menu="showMenu$$q($event.target as HTMLElement, item)"
+                @ctx-menu="showMenu$$q($event, item)"
               />
             </template>
           </template>
@@ -345,23 +383,28 @@ export default defineComponent({
                 :item="element"
                 :index-content="indexContent"
                 :link-excludes="linkExcludes"
-                :set-list="setList"
                 :show-album="showAlbum"
                 :show-artist="showArtist"
                 :hide-duration="hideDuration"
-                :selected="selectedTrack$$q?.id === element.track$$q.id"
-                @menu="showMenu$$q($event.target as HTMLElement, element.track$$q)"
-                @ctx-menu="showMenu$$q($event, element.track$$q)"
+                :selected="
+                  selectedTrackIndex$$q === element.index$$q &&
+                  selectedTrack$$q?.id === element.track$$q.id
+                "
+                :disable-current-playing="disableCurrentPlaying"
+                @play="play$$q(element.track$$q, element.index$$q)"
+                @menu="showMenu$$q($event.target as HTMLElement, element)"
+                @ctx-menu="showMenu$$q($event, element)"
               />
             </template>
           </template>
         </g-draggable>
       </template>
       <template v-else-if="renderMode === 'virtual'">
+        <!-- this render mode is not reactive for props.tracks -->
         <g-grid
           class="grid grid-cols-1"
           :length="items$$q.length"
-          :page-provider="async () => items$$q"
+          :page-provider="itemsProvider$$q"
           :page-size="pageSize$$q"
         >
           <template #probe>
@@ -385,13 +428,17 @@ export default defineComponent({
                   :item="item"
                   :index-content="indexContent"
                   :link-excludes="linkExcludes"
-                  :set-list="setList"
                   :show-album="showAlbum"
                   :show-artist="showArtist"
                   :hide-duration="hideDuration"
-                  :selected="selectedTrack$$q?.id === item.track$$q.id"
-                  @menu="showMenu$$q($event.target as HTMLElement, item.track$$q)"
-                  @ctx-menu="showMenu$$q($event, item.track$$q)"
+                  :selected="
+                    selectedTrackIndex$$q === item.index$$q &&
+                    selectedTrack$$q?.id === item.track$$q.id
+                  "
+                  :disable-current-playing="disableCurrentPlaying"
+                  @play="play$$q(item.track$$q, item.index$$q)"
+                  @menu="showMenu$$q($event.target as HTMLElement, item)"
+                  @ctx-menu="showMenu$$q($event, item)"
                 />
               </div>
             </template>
@@ -415,12 +462,12 @@ export default defineComponent({
 <style>
 .s-track-list--selected .s-track-list-item--unselected .s-hover-visible,
 .s-track-list--selected .s-track-list-item--selected .s-hover-hidden {
-  display: none;
+  display: none !important;
 }
 
 .s-track-list--selected .s-track-list-item--unselected .s-hover-hidden,
 .s-track-list--selected .s-track-list-item--selected .s-hover-visible {
-  display: flex;
+  display: flex !important;
 }
 
 .s-track-list--ghost .s-track-list-item,

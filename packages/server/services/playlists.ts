@@ -1,4 +1,6 @@
 import { Playlist } from '@prisma/client';
+import { generatePlaylistId } from '$shared-server/generateId';
+import { dbArraySerializeItemIds } from '$shared/dbArray';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
@@ -7,8 +9,6 @@ import {
   dbPlaylistRemoveImageTx,
 } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
-import { dbArraySerializeItemIds } from '../dbArray';
-import { generatePlaylistId } from '../generateId';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
 export async function playlistCreate(
