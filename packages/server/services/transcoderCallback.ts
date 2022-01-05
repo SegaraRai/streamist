@@ -1,35 +1,35 @@
 import { PrismaClient } from '@prisma/client';
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
-import { generateImageId } from '$shared-server/generateId.js';
-import { osDelete } from '$shared-server/objectStorage.js';
+import { generateImageId } from '$shared-server/generateId';
+import { osDelete } from '$shared-server/objectStorage';
 import {
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-} from '$shared-server/objectStorages.js';
-import { is } from '$shared/is.js';
-import { parseDate } from '$shared/parseDate.js';
+} from '$shared-server/objectStorages';
+import { CoArtistType } from '$shared/coArtist';
+import { is } from '$shared/is';
+import { parseDate } from '$shared/parseDate';
 import type {
   SourceFileAttachToType,
   SourceFileState,
   SourceFileType,
   SourceState,
-} from '$shared/types/db.js';
-import type { FFprobeTags } from '$transcoder/types/ffprobe.js';
+} from '$shared/types/db';
+import type { FFprobeTags } from '$transcoder/types/ffprobe';
 import type {
   TranscoderResponse,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactError,
   TranscoderResponseArtifactImage,
-} from '$transcoder/types/transcoder.js';
-import { dbAlbumAddImageTx } from '$/db/album.js';
-import { dbArtistAddImageTx } from '$/db/artist.js';
-import { client } from '$/db/lib/client.js';
-import { dbResourceUpdateTimestamp } from '$/db/lib/resource.js';
-import type { TransactionalPrismaClient } from '$/db/lib/types.js';
-import { dbPlaylistAddImageTx } from '$/db/playlist.js';
-import { dbTrackCreateTx } from '$/db/track.js';
-import { CoArtistType } from '../coArtist.js';
-import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env.js';
+} from '$transcoder/types/transcoder';
+import { dbAlbumAddImageTx } from '$/db/album';
+import { dbArtistAddImageTx } from '$/db/artist';
+import { client } from '$/db/lib/client';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import type { TransactionalPrismaClient } from '$/db/lib/types';
+import { dbPlaylistAddImageTx } from '$/db/playlist';
+import { dbTrackCreateTx } from '$/db/track';
+import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
 
 export const TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
 export const TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${TRANSCODER_CALLBACK_API_PATH}`;

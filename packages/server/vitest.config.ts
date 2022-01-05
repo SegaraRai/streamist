@@ -8,8 +8,14 @@ export default defineConfig({
       '$prisma/': `${path.resolve(__dirname, './node_modules/.prisma')}/`,
       '.prisma/': `${path.resolve(__dirname, './node_modules/.prisma')}/`,
       '$shared/': `${path.resolve(__dirname, '../shared')}/`,
-      'class-transformer/esm2015': 'class-transformer/esm2015',
-      'class-transformer': 'class-transformer/esm2015',
+      'class-transformer/esm2015': `${path.resolve(
+        __dirname,
+        './node_modules/class-transformer/esm2015'
+      )}/`,
+      'class-transformer': `${path.resolve(
+        __dirname,
+        './node_modules/class-transformer/esm2015'
+      )}/`,
     },
   },
 });

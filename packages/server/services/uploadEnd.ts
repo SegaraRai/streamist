@@ -2,30 +2,30 @@ import fetch from 'node-fetch';
 import {
   getSourceFileKey,
   getSourceFileOS,
-} from '$shared-server/objectStorages.js';
-import { is } from '$shared/is.js';
-import type { Region } from '$shared/regions.js';
+} from '$shared-server/objectStorages';
+import { is } from '$shared/is';
+import type { Region } from '$shared/regions';
 import type {
   SourceFileAttachToType,
   SourceFileState,
   SourceState,
-} from '$shared/types/db.js';
-import { TRANSCODER_API_ENDPOINT } from '$transcoder/devConfig.js';
+} from '$shared/types/db';
+import { TRANSCODER_API_ENDPOINT } from '$transcoder/devConfig';
 import {
   TranscoderRequest,
   TranscoderRequestFile,
   TranscoderRequestOptions,
-} from '$transcoder/types/transcoder.js';
+} from '$transcoder/types/transcoder';
 import { Source, SourceFile } from '$prisma/client';
-import { client } from '$/db/lib/client.js';
-import { dbResourceUpdateTimestamp } from '$/db/lib/resource.js';
-import { HTTPError } from '$/utils/httpError.js';
+import { client } from '$/db/lib/client';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { HTTPError } from '$/utils/httpError';
 import {
   TRANSCODER_CALLBACK_API_ENDPOINT,
   TRANSCODER_CALLBACK_API_TOKEN,
-} from './transcoderCallback.js';
-import { splitIntoParts } from './uploadConfig.js';
-import { createUserUploadS3Cached } from './userOS.js';
+} from './transcoderCallback';
+import { splitIntoParts } from './uploadConfig';
+import { createUserUploadS3Cached } from './userOS';
 
 function createTranscoderRequestFiles(
   source: Source & { files: SourceFile[] },

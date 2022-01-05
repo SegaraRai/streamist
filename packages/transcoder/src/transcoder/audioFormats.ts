@@ -1,5 +1,5 @@
-import { filterFalsy } from '$shared/filter.js';
-import type { FFprobeResult, FFprobeStreamAudio } from '../types/ffprobe.js';
+import { filterFalsy } from '$shared/filter';
+import type { FFprobeResult, FFprobeStreamAudio } from '../types/ffprobe';
 
 export interface AudioFormat {
   /** フォーマットのID */

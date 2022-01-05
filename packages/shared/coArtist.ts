@@ -1,3 +1,5 @@
+import { normalizeText } from './normalize';
+
 export const CO_ARTIST_PREFIX_BUILTIN = '#' as const;
 export const CO_ARTIST_PREFIX_USER_DEFINED = '=' as const;
 
@@ -21,11 +23,7 @@ export type CoArtistType =
   | `${typeof CO_ARTIST_PREFIX_USER_DEFINED}${string}`;
 
 export function isValidUserDefinedCoArtistText(text: string): boolean {
-  return (
-    text.length > 0 &&
-    !/[\r\n\v\f\u0085\u2028\u2029]/.test(text) &&
-    !/^\s|\s$/.test(text)
-  );
+  return text.length > 0 && text === normalizeText(text);
 }
 
 export function isValidCoArtistType(

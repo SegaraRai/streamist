@@ -1,6 +1,6 @@
 export type Region = 'ap-northeast-1';
 
-export function isRegion(region: unknown): region is Region {
+export function isValidRegion(region: unknown): region is Region {
   if (typeof region !== 'string') {
     return false;
   }
@@ -14,7 +14,7 @@ export function isRegion(region: unknown): region is Region {
 }
 
 export function toRegion(region: unknown): Region {
-  if (isRegion(region)) {
+  if (isValidRegion(region)) {
     return region;
   }
 

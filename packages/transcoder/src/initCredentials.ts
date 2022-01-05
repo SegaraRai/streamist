@@ -1,4 +1,4 @@
-import { setOSCredentials } from '$shared-server/objectStorage.js';
+import { setOSCredentials } from '$shared-server/objectStorage';
 
 setOSCredentials({
   WASABI_ACCESS_KEY_ID: process.env.SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID,

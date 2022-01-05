@@ -1,5 +1,5 @@
-import type { CueSheet } from './cueParser.js';
-import { CUE_SHEET_OFFSET_INDEX } from './cueSheetConfig.js';
+import type { CueSheet } from './cueParser';
+import { CUE_SHEET_OFFSET_INDEX } from './cueSheetConfig';
 
 export class CueSheetError extends Error {
   constructor(message: string) {

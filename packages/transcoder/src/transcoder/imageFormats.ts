@@ -1,8 +1,5 @@
-import { filterFalsy } from '$shared/filter.js';
-import type {
-  ImageMagickImage,
-  ImageMagickResult,
-} from '../types/imageMagick.js';
+import { filterFalsy } from '$shared/filter';
+import type { ImageMagickImage, ImageMagickResult } from '../types/imageMagick';
 
 export interface ImageFormat {
   /** フォーマットのID */

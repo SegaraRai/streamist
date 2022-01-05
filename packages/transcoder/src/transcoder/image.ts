@@ -1,27 +1,23 @@
 import { unlink } from 'node:fs/promises';
-import { generateTranscodedImageFileId } from '$shared-server/generateId.js';
-import {
-  osDelete,
-  osGetFile,
-  osPutFile,
-} from '$shared-server/objectStorage.js';
+import { generateTranscodedImageFileId } from '$shared-server/generateId';
+import { osDelete, osGetFile, osPutFile } from '$shared-server/objectStorage';
 import {
   getSourceFileKey,
   getSourceFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-} from '$shared-server/objectStorages.js';
-import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools.js';
-import { getTempFilepath } from '../tempFile.js';
-import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig.js';
+} from '$shared-server/objectStorages';
+import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
+import { getTempFilepath } from '../tempFile';
+import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig';
 import type {
   TranscoderRequestFileImage,
   TranscoderRequestFileImageExtracted,
   TranscoderResponseArtifactImage,
   TranscoderResponseArtifactImageFile,
-} from '../types/transcoder.js';
-import { TranscodeError } from './error.js';
-import { getTranscodeImageFormats } from './imageFormats.js';
+} from '../types/transcoder';
+import { TranscodeError } from './error';
+import { getTranscodeImageFormats } from './imageFormats';
 
 export async function processImageRequest(
   file: TranscoderRequestFileImage | TranscoderRequestFileImageExtracted

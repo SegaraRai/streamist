@@ -1,4 +1,4 @@
-import { client } from './client.js';
+import { client } from './client';
 
 export function truncate(): Promise<void> {
   return client.$transaction(async (txClient): Promise<void> => {

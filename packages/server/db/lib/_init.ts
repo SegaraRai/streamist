@@ -1,4 +1,4 @@
-import { client } from './client.js';
+import { client } from './client';
 
 export function init(): Promise<void> {
   return client.$transaction(

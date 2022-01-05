@@ -3,13 +3,13 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import {
   generateSourceFileId,
   generateSourceId,
-} from '$shared-server/generateId.js';
+} from '$shared-server/generateId';
 import {
   getSourceFileKey,
   getSourceFileOS,
-} from '$shared-server/objectStorages.js';
-import { is } from '$shared/is.js';
-import { Region, toRegion } from '$shared/regions.js';
+} from '$shared-server/objectStorages';
+import { is } from '$shared/is';
+import { Region, toRegion } from '$shared/regions';
 import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE,
@@ -20,25 +20,25 @@ import {
   SOURCE_FILE_CONTENT_TYPE,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
-} from '$shared/sourceFileConfig.js';
+} from '$shared/sourceFileConfig';
 import {
   SourceFileState,
   SourceFileType,
   SourceState,
   toSourceFileAttachToType,
-} from '$shared/types/db.js';
-import { client } from '$/db/lib/client.js';
-import { dbResourceUpdateTimestamp } from '$/db/lib/resource.js';
+} from '$shared/types/db';
+import { client } from '$/db/lib/client';
+import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import type {
   CreateSourceRequestAudio,
   CreateSourceRequestImage,
   CreateSourceResponse,
   UploadURL,
   UploadURLPart,
-} from '$/types/index.js';
-import { HTTPError } from '$/utils/httpError.js';
-import { splitIntoParts, useMultipartUpload } from './uploadConfig.js';
-import { createUserUploadS3Cached } from './userOS.js';
+} from '$/types/index';
+import { HTTPError } from '$/utils/httpError';
+import { splitIntoParts, useMultipartUpload } from './uploadConfig';
+import { createUserUploadS3Cached } from './userOS';
 
 /**
  * @note mutates S3

@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { nfsTempDir, tempDir } from './config.js';
+import { nfsTempDir, tempDir } from './config';
 
 let gCounter = 0;
 

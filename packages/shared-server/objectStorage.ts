@@ -2,8 +2,8 @@ import { Hash, createHash } from 'node:crypto';
 import { createReadStream, createWriteStream } from 'node:fs';
 import { PassThrough, Readable } from 'node:stream';
 import { S3 } from '@aws-sdk/client-s3';
-import { decodeBuffer } from './contentEncoding.js';
-import { nodeReadableStreamToBuffer } from './stream.js';
+import { decodeBuffer } from './contentEncoding';
+import { nodeReadableStreamToBuffer } from './stream';
 
 export interface ObjectStorageCredentials {
   readonly WASABI_ACCESS_KEY_ID: string;

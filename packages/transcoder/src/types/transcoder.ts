@@ -1,12 +1,12 @@
-import type { Region } from '$shared/regions.js';
-import type { SourceFileAttachToType } from '$shared/types/db.js';
+import type { Region } from '$shared/regions';
+import type { SourceFileAttachToType } from '$shared/types/db';
 import type {
   FFprobeFormat,
   FFprobeResult,
   FFprobeStreamAudio,
   FFprobeTags,
-} from './ffprobe.js';
-import type { ImageMagickImage, ImageMagickResult } from './imageMagick.js';
+} from './ffprobe';
+import type { ImageMagickImage, ImageMagickResult } from './imageMagick';
 
 /** options specific to transcoding or user's preference */
 export interface TranscoderRequestOptions {

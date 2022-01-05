@@ -1,5 +1,5 @@
-import { encodeBase32 } from './base32.js';
-import { randomBytesAsync } from './randomBytesAsync.js';
+import { encodeBase32 } from './base32';
+import { randomBytesAsync } from './randomBytesAsync';
 
 const enum IdTypeCode {
   Album = 'al',

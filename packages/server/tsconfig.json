@@ -11,9 +11,6 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "$/*": [
-        "./*"
-      ],
       "$prisma/*": [
         "./node_modules/.prisma/*"
       ],
@@ -28,6 +25,9 @@
       ],
       "$transcoder/*": [
         "../transcoder/src/*"
+      ],
+      "$/*": [
+        "./*"
       ],
       "class-transformer": [
         "./node_modules/class-transformer/esm2015"

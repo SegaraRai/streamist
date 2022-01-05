@@ -41,5 +41,9 @@
     "less",
     "postcss",
     "vue"
-  ]
+  ],
+  "javascript.preferences.importModuleSpecifier": "project-relative",
+  "javascript.preferences.importModuleSpecifierEnding": "minimal",
+  "typescript.preferences.importModuleSpecifier": "project-relative",
+  "typescript.preferences.importModuleSpecifierEnding": "minimal"
 }

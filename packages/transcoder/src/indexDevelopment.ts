@@ -1,13 +1,13 @@
-import './checkEnv.js';
-import './initCredentials.js';
+import './checkEnv';
+import './initCredentials';
 
 import { createServer } from 'node:http';
 import fetch from 'node-fetch';
-import { nodeReadableStreamToBuffer } from '$shared-server/stream.js';
-import { TRANSCODER_API_PATH, TRANSCODER_PORT } from './devConfig.js';
-import logger from './logger.js';
-import { transcode } from './transcode.js';
-import type { TranscoderRequest } from './types/transcoder.js';
+import { nodeReadableStreamToBuffer } from '$shared-server/stream';
+import { TRANSCODER_API_PATH, TRANSCODER_PORT } from './devConfig';
+import logger from './logger';
+import { transcode } from './transcode';
+import type { TranscoderRequest } from './types/transcoder';
 
 const server = createServer();
 

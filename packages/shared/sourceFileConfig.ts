@@ -1,6 +1,6 @@
-import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from './cacheControl.js';
-import { getExtension } from './path.js';
-import type { SourceFileType } from './types/db.js';
+import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from './cacheControl';
+import { getExtension } from './path';
+import type { SourceFileType } from './types/db';
 
 export const SOURCE_FILE_CONTENT_ENCODING = 'identity';
 export const SOURCE_FILE_CONTENT_TYPE = 'application/octet-stream';

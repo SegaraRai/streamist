@@ -4,49 +4,49 @@ import { rename, stat, unlink } from 'node:fs/promises';
 import {
   generateSourceFileId,
   generateTranscodedAudioFileId,
-} from '$shared-server/generateId.js';
+} from '$shared-server/generateId';
 import {
   osDelete,
   osGetData,
   osGetFile,
   osPutFile,
-} from '$shared-server/objectStorage.js';
+} from '$shared-server/objectStorage';
 import {
   getSourceFileKey,
   getSourceFileOS,
   getTranscodedAudioFileKey,
   getTranscodedAudioFileOS,
-} from '$shared-server/objectStorages.js';
-import { CueSheet, parseCueSheet } from '$shared/cueParser.js';
+} from '$shared-server/objectStorages';
+import { CueSheet, parseCueSheet } from '$shared/cueParser';
 import { validateCueSheet } from '$shared/cueSheetCheck';
-import { decodeText } from '$shared/decodeText.js';
-import { calcFileHash } from '../fileHash.js';
-import logger from '../logger.js';
+import { decodeText } from '$shared/decodeText';
+import { calcFileHash } from '../fileHash';
+import logger from '../logger';
 import {
   cleanAudio,
   extractImageFromAudio,
   probeAudio,
   transcodeAudio,
-} from '../mediaTools.js';
+} from '../mediaTools';
 import {
   generateTempFilename,
   getNFSTempFilepath,
   getTempFilepath,
-} from '../tempFile.js';
-import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig.js';
+} from '../tempFile';
+import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig';
 import type {
   FFprobeStreamAudio,
   FFprobeStreamVideo,
   FFprobeTags,
-} from '../types/ffprobe.js';
+} from '../types/ffprobe';
 import type {
   TranscoderRequestFileAudio,
   TranscoderRequestFileImageExtracted,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactAudioTrack,
-} from '../types/transcoder.js';
-import { getTranscodeAudioFormats } from './audioFormats.js';
-import { TranscodeError } from './error.js';
+} from '../types/transcoder';
+import { getTranscodeAudioFormats } from './audioFormats';
+import { TranscodeError } from './error';
 
 function createTracksFromCueSheet(
   cueSheet: CueSheet,

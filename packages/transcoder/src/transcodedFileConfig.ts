@@ -1,3 +1,3 @@
-import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from '$shared/cacheControl.js';
+import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from '$shared/cacheControl';
 
 export const TRANSCODED_FILE_CACHE_CONTROL = CACHE_CONTROL_PRIVATE_IMMUTABLE;

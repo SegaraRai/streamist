@@ -1,4 +1,4 @@
-import { gunzipAsync } from './gzip.js';
+import { gunzipAsync } from './gzip';
 
 export function decodeBuffer(
   buffer: Buffer,

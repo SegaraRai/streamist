@@ -1,8 +1,9 @@
 import { existsSync } from 'node:fs';
-import { calcDHash } from './dHash.js';
-import { execAndLog } from './execAndLog.js';
-import { FFprobeResult, normalizeFFprobeTags } from './types/ffprobe.js';
-import type { ImageMagickResult } from './types/imageMagick.js';
+import { normalizeText } from '$shared/normalize';
+import { calcDHash } from './dHash';
+import { execAndLog } from './execAndLog';
+import type { FFprobeResult, FFprobeTags } from './types/ffprobe';
+import type { ImageMagickResult } from './types/imageMagick';
 
 const isProductionOrStagingEnv =
   process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
@@ -35,6 +36,33 @@ const sRGBProfileFilepath = isProductionOrStagingEnv
   : 'sRGB_ICC_v4_Appearance.icc';
 
 // ffprobe 関数
+
+/**
+ * タグをノーマライズする
+ * - キーを小文字にし、英数字以外を除去する
+ * - 値の両端の空白を除去する
+ * - 空値（空白だけのものを含む）を削除する
+ * - 同じキーのものは値が長いものを採用する
+ * @param tags タグ
+ * @returns ノーマライズしたタグ
+ */
+export function normalizeFFprobeTags(tags: FFprobeTags): FFprobeTags {
+  return Object.fromEntries(
+    Object.entries(tags)
+      .map(([key, value]) => [
+        key.toLowerCase().replace(/[^a-z\d]/g, ''),
+        normalizeText(value),
+      ])
+      .filter((e): e is [string, string] => !!e[1])
+      .sort((a, b) => a[1].length - b[1].length)
+  );
+}
+
+if (process.env.NODE_ENV === 'development') {
+  if (!existsSync(sRGBProfileFilepath)) {
+    throw new Error(`sRGB color profile not found: ${sRGBProfileFilepath}`);
+  }
+}
 
 export async function probeAudio(
   userId: string,
@@ -337,10 +365,4 @@ export async function transcodeImage(
     srcFileId,
     `image_transcode_${formatName}`
   );
-}
-
-if (process.env.NODE_ENV === 'development') {
-  if (!existsSync(sRGBProfileFilepath)) {
-    throw new Error(`sRGB color profile not found: ${sRGBProfileFilepath}`);
-  }
 }

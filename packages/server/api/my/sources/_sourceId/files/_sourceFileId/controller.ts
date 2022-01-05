@@ -1,6 +1,6 @@
-import { onSourceFileUploaded } from '$/services/uploadEnd.js';
-import { HTTPError } from '$/utils/httpError.js';
-import { defineController } from './$relay.js';
+import { onSourceFileUploaded } from '$/services/uploadEnd';
+import { HTTPError } from '$/utils/httpError';
+import { defineController } from './$relay';
 
 export default defineController(() => ({
   patch: async ({ params, user, body }) => {
