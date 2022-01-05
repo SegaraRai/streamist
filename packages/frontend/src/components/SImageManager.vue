@@ -192,7 +192,8 @@ export default defineComponent({
           return;
         }
 
-        const fileList = (event.target as HTMLInputElement).files;
+        const inputElement = event.target as HTMLInputElement;
+        const fileList = inputElement.files;
         if (!fileList) {
           return;
         }
@@ -203,6 +204,8 @@ export default defineComponent({
           props.attachToId,
           props.disableDialog
         );
+
+        inputElement.files = new DataTransfer().files;
       },
     };
   },

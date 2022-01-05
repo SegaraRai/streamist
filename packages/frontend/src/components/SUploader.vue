@@ -4,11 +4,14 @@ import { useUploadStore } from '~/stores/upload';
 const uploadStore = useUploadStore();
 
 const onFileSelected = (event: Event) => {
-  const fileList = (event.target as HTMLInputElement).files;
+  const inputElement = event.target as HTMLInputElement;
+  const fileList = inputElement.files;
   if (!fileList) {
     return;
   }
   uploadStore.stageFiles(Array.from(fileList));
+
+  inputElement.files = new DataTransfer().files;
 };
 
 const inputFileElement = ref<HTMLInputElement | undefined>();
