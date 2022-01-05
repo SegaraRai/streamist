@@ -1,29 +1,21 @@
-import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import {
-  dbPlaylistMoveTrackBefore,
-  dbPlaylistRemoveTrack,
-} from '$/db/playlist';
-import { HTTPError } from '$/utils/httpError';
+  playlistTrackMoveBefore,
+  playlistTrackRemove,
+} from '$/services/playlists';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
   patch: async ({ body, params, user }) => {
-    await dbPlaylistMoveTrackBefore(
+    await playlistTrackMoveBefore(
       user.id,
       params.playlistId,
       params.trackId,
-      body.nextTrackId || undefined
-    ).catch((error) => Promise.reject(new HTTPError(400, String(error))));
-    await dbResourceUpdateTimestamp(user.id);
+      body.nextTrackId
+    );
     return { status: 204 };
   },
   delete: async ({ params, user }) => {
-    await dbPlaylistRemoveTrack(
-      user.id,
-      params.playlistId,
-      params.trackId
-    ).catch((error) => Promise.reject(new HTTPError(404, String(error))));
-    await dbResourceUpdateTimestamp(user.id);
+    await playlistTrackRemove(user.id, params.playlistId, [params.trackId]);
     return { status: 204 };
   },
 }));

@@ -1,5 +1,6 @@
 import type { Playlist } from '@prisma/client';
 import {
+  ArrayUnique,
   IsArray,
   IsNotEmpty,
   IsString,
@@ -23,6 +24,7 @@ export class VPlaylistCreateBody implements IPlaylistCreateBody {
 
   @IsUndefinable()
   @IsArray()
+  @ArrayUnique()
   @Validate(IsIdConstraint, { each: true })
   trackIds?: string[];
 }
@@ -43,6 +45,7 @@ export class VPlaylistUpdateBody implements IPlaylistUpdateBody {
 
 export class VPlaylistAddTrackBody {
   @IsArray()
+  @ArrayUnique()
   @Validate(IsIdConstraint, { each: true })
   trackIds!: string[];
 }

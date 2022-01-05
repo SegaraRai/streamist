@@ -1,12 +1,19 @@
 import { Playlist } from '@prisma/client';
 import { generatePlaylistId } from '$shared-server/generateId';
 import { dbArraySerializeItemIds } from '$shared/dbArray';
+import {
+  normalizeTextForMultipleLines,
+  normalizeTextForSingleLine,
+} from '$shared/normalize';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import {
+  dbPlaylistAddTrack,
   dbPlaylistMoveImageBefore,
+  dbPlaylistMoveTrackBefore,
   dbPlaylistRemoveImageTx,
+  dbPlaylistRemoveTrack,
 } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
@@ -15,6 +22,15 @@ export async function playlistCreate(
   userId: string,
   data: Pick<Playlist, 'title' | 'notes'> & { trackIds?: string[] }
 ): Promise<Playlist> {
+  let { title, notes } = data;
+
+  title = normalizeTextForSingleLine(title) || '';
+  if (!title) {
+    throw new HTTPError(400, 'title must not be empty');
+  }
+
+  notes = normalizeTextForMultipleLines(notes) || '';
+
   const trackIds = data.trackIds || [];
   if (Array.from(new Set(trackIds)).length !== trackIds.length) {
     throw new HTTPError(400, 'trackIds must be unique');
@@ -40,8 +56,8 @@ export async function playlistCreate(
   const playlist = await client.playlist.create({
     data: {
       id: await generatePlaylistId(),
-      title: String(data.title),
-      notes: String(data.notes),
+      title,
+      notes,
       createdAt: timestamp,
       updatedAt: timestamp,
       trackOrder: dbArraySerializeItemIds(trackIds),
@@ -66,12 +82,21 @@ export async function playlistUpdate(
   playlistId: string,
   data: Partial<Pick<Playlist, 'title' | 'notes'>>
 ): Promise<void> {
-  if (data.title == null && data.notes == null) {
+  let { title, notes } = data;
+
+  if (title == null && notes == null) {
     return;
   }
 
-  if (data.title != null && !data.title.trim()) {
-    throw new HTTPError(400, 'title must not be empty');
+  if (title != null) {
+    title = normalizeTextForSingleLine(title);
+    if (!title) {
+      throw new HTTPError(400, 'title must not be empty');
+    }
+  }
+
+  if (notes != null) {
+    notes = normalizeTextForMultipleLines(notes) || '';
   }
 
   const newPlaylist = await client.playlist.updateMany({
@@ -80,8 +105,8 @@ export async function playlistUpdate(
       userId,
     },
     data: {
-      title: data.title?.trim(),
-      notes: data.notes?.trim(),
+      title,
+      notes,
       updatedAt: Date.now(),
     },
   });
@@ -146,6 +171,39 @@ export async function playlistDelete(
   if (!skipUpdateTimestamp) {
     await dbResourceUpdateTimestamp(userId);
   }
+}
+
+export async function playlistTrackAdd(
+  userId: string,
+  playlistId: string,
+  trackIds: readonly string[]
+): Promise<void> {
+  await dbPlaylistAddTrack(userId, playlistId, trackIds);
+  await dbResourceUpdateTimestamp(userId);
+}
+
+export async function playlistTrackMoveBefore(
+  userId: string,
+  playlistId: string,
+  trackId: string,
+  nextTrackId: string | null
+): Promise<void> {
+  await dbPlaylistMoveTrackBefore(
+    userId,
+    playlistId,
+    trackId,
+    nextTrackId || undefined
+  );
+  await dbResourceUpdateTimestamp(userId);
+}
+
+export async function playlistTrackRemove(
+  userId: string,
+  playlistId: string,
+  trackIds: readonly string[]
+): Promise<void> {
+  await dbPlaylistRemoveTrack(userId, playlistId, trackIds);
+  await dbResourceUpdateTimestamp(userId);
 }
 
 export async function playlistImageMoveBefore(

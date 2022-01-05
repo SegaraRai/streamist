@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { normalizeText } from '$shared/normalize';
+import { normalizeTextForSingleLine } from '$shared/normalize';
 import { calcDHash } from './dHash';
 import { execAndLog } from './execAndLog';
 import type { FFprobeResult, FFprobeTags } from './types/ffprobe';
@@ -51,7 +51,7 @@ export function normalizeFFprobeTags(tags: FFprobeTags): FFprobeTags {
     Object.entries(tags)
       .map(([key, value]) => [
         key.toLowerCase().replace(/[^a-z\d]/g, ''),
-        normalizeText(value),
+        normalizeTextForSingleLine(value),
       ])
       .filter((e): e is [string, string] => !!e[1])
       .sort((a, b) => a[1].length - b[1].length)
