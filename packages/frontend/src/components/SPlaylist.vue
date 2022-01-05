@@ -79,7 +79,9 @@ export default defineComponent({
       isOpen$$q: menuIsOpen$$q,
       close$$q: closeMenu$$q,
       open$$q: openMenu$$q,
-    } = useMenu();
+    } = useMenu({
+      closeOnScroll$$q: true,
+    });
     const menuOptions$$q = createPlaylistDropdown({
       playlist$$q: eagerComputed(() => value.value?.playlist$$q),
       playlistTracks$$q: eagerComputed(() => value.value?.tracks$$q),

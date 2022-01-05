@@ -107,3 +107,14 @@ message:
   FailedToReorderImage: "Failed to reorder image\n{1}"
   DeletedImage: 'Deleted image'
   FailedToDeleteImage: "Failed to delete image\n{1}"
+timeAgo:
+  justNow: just now
+  past: '{0} ago'
+  future: 'in {0}'
+  year: '0 year | 1 year | {n} years'
+  month: '0 month | 1 month | {n} months'
+  day: '0 day | 1 day | {n} days'
+  week: '0 week | 1 week | {n} weeks'
+  hour: '0 hour | 1 hour | {n} hours'
+  minute: '0 minute | 1 minute | {n} minutes'
+  second: '0 second | 1 second | {n} seconds'

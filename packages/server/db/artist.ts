@@ -51,6 +51,9 @@ export async function dbArtistGetOrCreateByNameTx(
       name: artistName,
       userId,
     },
+    orderBy: {
+      updatedAt: 'desc',
+    },
   });
   if (!artist) {
     // should rarely happen

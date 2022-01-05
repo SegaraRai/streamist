@@ -71,7 +71,7 @@ export default defineComponent({
       true
     );
 
-    const releaseDate = eagerComputed(() => {
+    const releaseDate = computed(() => {
       return (
         value.value?.tracks$$q
           .map((track) => track.releaseDateText)
@@ -79,7 +79,7 @@ export default defineComponent({
       );
     });
 
-    const duration = eagerComputed(
+    const duration = computed(
       () => value.value && formatTracksTotalDuration(value.value?.tracks$$q)
     );
 

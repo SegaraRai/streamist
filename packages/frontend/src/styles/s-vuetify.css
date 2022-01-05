@@ -1,3 +1,5 @@
+/* many hacks */
+
 /* stylelint-disable-next-line selector-class-pattern */
 .s-v-dialog.v-dialog:not(.v-dialog--fullscreen) .v-overlay__content {
   @apply max-w-full;
@@ -14,4 +16,9 @@
 /* for headers, footers, sidebars, etc. */
 .s-v-theme-surface {
   background: var(--v-theme-surface);
+}
+
+/* I don't know why but details appears whatever we set hide-details */
+.s-v-input-hide-details .v-input__details {
+  @apply hidden;
 }

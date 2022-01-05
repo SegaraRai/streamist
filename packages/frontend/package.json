@@ -30,6 +30,7 @@
     "class-validator": "^0.13.2",
     "core-js": "^3.20.2",
     "dexie": "^3.2.0",
+    "fuse.js": "^6.5.3",
     "humanize-duration": "^3.27.1",
     "lazysizes": "^5.3.2",
     "naive-ui": "^2.23.2",

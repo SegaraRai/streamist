@@ -126,7 +126,7 @@ export default defineComponent({
       });
     }, [propTracksRef]);
 
-    const useDiscNumber = eagerComputed(
+    const useDiscNumber = computed(
       () =>
         (props.showDiscNumber &&
           trackItems.value?.some(
@@ -135,7 +135,7 @@ export default defineComponent({
         false
     );
 
-    const items = eagerComputed(() => {
+    const items = computed(() => {
       if (!trackItems.value) {
         return [];
       }
@@ -194,6 +194,8 @@ export default defineComponent({
       playbackStore.setSetListAndPlay$$q(props.setList, track);
     };
 
+    const dialog$$q = ref(false);
+    const lastSelectedTrack$$q = ref<ResourceTrack | undefined>();
     const selectedTrack$$q = ref<ResourceTrack | undefined>();
     const selectedTrackIndex$$q = ref<number | undefined>();
     const {
@@ -203,13 +205,14 @@ export default defineComponent({
       close$$q: closeMenu$$q,
       open$$q: openMenu$$q,
     } = useMenu({
+      closeOnScroll$$q: true,
+      scrollRef$$q: eagerComputed(
+        () => props.menuParentScroll ?? currentScrollRef.value
+      ),
       onClose$$q: () => {
         selectedTrack$$q.value = undefined;
         selectedTrackIndex$$q.value = undefined;
       },
-      scrollRef$$q: eagerComputed(
-        () => props.menuParentScroll ?? currentScrollRef.value
-      ),
     });
     const menuOptions$$q = createTrackListDropdown({
       selectedTrack$$q,
@@ -226,7 +229,9 @@ export default defineComponent({
         }
         play$$q(selectedTrack$$q.value, selectedTrackIndex$$q.value);
       },
-      openEditTrackDialog$$q: (_track: ResourceTrack) => {},
+      openEditTrackDialog$$q: (_track: ResourceTrack) => {
+        dialog$$q.value = true;
+      },
       closeMenu$$q,
     });
 
@@ -252,12 +257,15 @@ export default defineComponent({
         item: ListItemTrack
       ): void => {
         openMenu$$q(eventOrElement, () => {
+          lastSelectedTrack$$q.value = item.track$$q;
           selectedTrack$$q.value = item.track$$q;
           selectedTrackIndex$$q.value = item.index$$q;
         });
       },
       selectedTrackIndex$$q,
       selectedTrack$$q,
+      lastSelectedTrack$$q,
+      dialog$$q,
       menuOptions$$q,
       menuIsOpen$$q,
       menuX$$q,
@@ -453,16 +461,19 @@ export default defineComponent({
       </template>
     </v-list>
   </div>
-  <n-dropdown
-    placement="bottom-start"
-    trigger="manual"
-    :x="menuX$$q"
-    :y="menuY$$q"
-    :options="menuOptions$$q"
-    :show="menuIsOpen$$q"
-    :on-clickoutside="closeMenu$$q"
-    @contextmenu.prevent
-  />
+  <template v-if="lastSelectedTrack$$q">
+    <n-dropdown
+      placement="bottom-start"
+      trigger="manual"
+      :x="menuX$$q"
+      :y="menuY$$q"
+      :options="menuOptions$$q"
+      :show="menuIsOpen$$q"
+      :on-clickoutside="closeMenu$$q"
+      @contextmenu.prevent
+    />
+    <s-dialog-track-edit v-model="dialog$$q" :track="lastSelectedTrack$$q" />
+  </template>
 </template>
 
 <style>

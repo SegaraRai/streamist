@@ -11,7 +11,7 @@ export default defineComponent({
     update: (_newVolume: number) => true,
     mute: () => true,
   },
-  setup(props, context) {
+  setup(props, { emit }) {
     const draggingVolume$$q = ref<number | undefined>();
     const volume$$q = ref(props.volume);
     watch(
@@ -36,15 +36,15 @@ export default defineComponent({
         if (newVolume == null) {
           return;
         }
-        context.emit('dragging', newVolume);
+        emit('dragging', newVolume);
         volume$$q.value = newVolume;
       },
       onUpdate$$q(newVolume: number) {
-        context.emit('update', newVolume);
+        emit('update', newVolume);
         volume$$q.value = newVolume;
       },
       toggleMute$$q() {
-        context.emit('mute');
+        emit('mute');
       },
     };
   },

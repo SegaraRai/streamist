@@ -15,7 +15,7 @@ export default defineComponent({
     update: (_value: number) => true,
     dragging: (_value: number | undefined) => true,
   },
-  setup(props, context) {
+  setup(props, { emit }) {
     const valid = computed(
       () =>
         !props.disabled &&
@@ -52,7 +52,7 @@ export default defineComponent({
 
     watch([dragging, mousePosition], ([newDragging, newPosition]) => {
       if (valid.value && newDragging && props.max != null) {
-        context.emit('dragging', newPosition * props.max);
+        emit('dragging', newPosition * props.max);
       }
     });
 
@@ -64,7 +64,7 @@ export default defineComponent({
       dragging.value = false;
 
       if (valid.value && props.max != null) {
-        context.emit('update', mousePosition.value * props.max);
+        emit('update', mousePosition.value * props.max);
       }
     });
 

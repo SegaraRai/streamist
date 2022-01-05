@@ -14,8 +14,8 @@ export default defineComponent({
   emits: {
     'update:modelValue': (_modelValue: boolean) => true,
   },
-  setup(props, context) {
-    const dialog$$q = useVModel(props, 'modelValue', context.emit);
+  setup(props, { emit }) {
+    const dialog$$q = useVModel(props, 'modelValue', emit);
     const display = useDisplay();
 
     return {

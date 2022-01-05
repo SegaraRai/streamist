@@ -123,7 +123,7 @@ export default defineComponent({
 <template>
   <div class="absolute w-full h-full select-none !px-0">
     <div
-      class="flex flex-col h-full px-6 py-8 max-w-xl mx-auto"
+      class="flex flex-col h-full px-6 pt-8 max-w-xl mx-auto"
       @click="preventXButton$$q"
       @mousedown="preventXButton$$q"
       @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
@@ -160,7 +160,10 @@ export default defineComponent({
           </div>
         </template>
       </div>
-      <div class="flex flex-col justify-center gap-y-8">
+      <!-- we are using position: fixed here due to browser's navigation bar -->
+      <div
+        class="flex flex-col justify-center gap-y-8 fixed left-0 right-0 bottom-0 w-full max-w-md mx-auto pb-8"
+      >
         <s-seek-bar
           class="pt-2"
           :current-time="position$$q"

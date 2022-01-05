@@ -160,7 +160,7 @@ const hideShell$$q = eagerComputed(
           >
             <s-queue :menu-parent-scroll="queueScroll$$q" />
           </n-scrollbar>
-          <!-- div class="h-24" :class="hideShell$$q && '!hidden'"></div -->
+          <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
           <div class="s-offline-mod-h"></div>
         </div>
       </v-navigation-drawer>
@@ -174,17 +174,24 @@ const hideShell$$q = eagerComputed(
         class="s-offline-mod-mt"
       >
         <div class="w-full flex justify-between items-center">
-          <template v-if="!alwaysShowLeftSidebar$$q && !hideShell$$q">
+          <template v-if="!alwaysShowLeftSidebar$$q">
             <div class="flex-none">
-              <v-btn
-                flat
-                icon
-                text
-                size="small"
-                @click="_leftSidebar$$q = !_leftSidebar$$q"
-              >
-                <v-icon>mdi-menu</v-icon>
-              </v-btn>
+              <template v-if="hideShell$$q">
+                <v-btn flat icon text size="small" @click="router.back()">
+                  <v-icon>mdi-arrow-left</v-icon>
+                </v-btn>
+              </template>
+              <template v-else>
+                <v-btn
+                  flat
+                  icon
+                  text
+                  size="small"
+                  @click="_leftSidebar$$q = !_leftSidebar$$q"
+                >
+                  <v-icon>mdi-menu</v-icon>
+                </v-btn>
+              </template>
             </div>
           </template>
           <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
@@ -195,10 +202,10 @@ const hideShell$$q = eagerComputed(
           </div>
           <div class="flex-1 flex gap-x-2 justify-end">
             <v-text-field
-              class="s-search-box flex-1 max-w-md <sm:hidden"
+              class="s-v-input-hide-details flex-1 max-w-md <sm:hidden"
               density="compact"
               prepend-inner-icon="mdi-magnify"
-              :hide-details="true"
+              hide-details
             />
             <v-btn icon size="small" class="sm:hidden">
               <v-icon>mdi-magnify</v-icon>
@@ -307,9 +314,8 @@ const hideShell$$q = eagerComputed(
       </v-dialog>
     </v-app>
 
-    <!-- !z-2150 -->
     <footer
-      class="select-none playback-sheet fixed bottom-0 !z-1900 w-full m-0 p-0 h-24"
+      class="select-none playback-sheet fixed bottom-0 z-100 w-full m-0 p-0 h-24"
       :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >
@@ -330,11 +336,6 @@ const hideShell$$q = eagerComputed(
 .s-offline--offline .s-offline-mod-h,
 .s-offline--offline .s-offline-bar {
   @apply h-6 !important;
-}
-
-/* I don't know why but details appears whatever we set hide-details */
-.s-search-box .v-input__details {
-  @apply hidden;
 }
 
 .s-v-main.v-main > .v-main__wrap {

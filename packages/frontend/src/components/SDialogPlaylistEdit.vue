@@ -43,7 +43,7 @@ export default defineComponent({
 
     const modified$$q = eagerComputed(
       () =>
-        title$$q.value !== props.playlist.title ||
+        (title$$q.value && title$$q.value !== props.playlist.title) ||
         notes$$q.value !== props.playlist.notes
     );
 
@@ -65,7 +65,9 @@ export default defineComponent({
           .$patch({
             body: {
               title:
-                playlist.title !== title$$q.value ? title$$q.value : undefined,
+                title$$q.value && title$$q.value !== playlist.title
+                  ? title$$q.value
+                  : undefined,
               notes:
                 playlist.notes !== notes$$q.value ? notes$$q.value : undefined,
             },
@@ -126,8 +128,19 @@ export default defineComponent({
             </s-image-manager>
           </div>
           <div class="flex-1">
-            <v-text-field v-model="title$$q" label="Title" />
-            <v-textarea v-model="notes$$q" label="Description" />
+            <v-text-field
+              v-model="title$$q"
+              hide-details
+              class="s-v-input-hide-details"
+              label="Title"
+              required
+            />
+            <v-textarea
+              v-model="notes$$q"
+              hide-details
+              class="s-v-input-hide-details"
+              label="Description"
+            />
           </div>
         </div>
       </v-card-text>

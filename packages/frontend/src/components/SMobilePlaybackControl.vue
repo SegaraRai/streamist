@@ -65,10 +65,16 @@ export default defineComponent({
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
   >
-    <div class="flex-1 flex flex-row px-4 items-center">
-      <router-link class="flex-1 flex flex-row items-center" to="/playing">
+    <div class="w-full flex-1 flex flex-row px-4 items-center">
+      <router-link
+        class="flex-1 flex flex-row gap-x-4 items-center overflow-hidden"
+        to="/playing"
+      >
         <template v-if="currentTrack$$q">
-          <router-link class="block" :to="`/albums/${currentTrack$$q.albumId}`">
+          <router-link
+            class="flex-none block"
+            :to="`/albums/${currentTrack$$q.albumId}`"
+          >
             <s-album-image
               class="w-18 h-18"
               :album="currentTrack$$q.albumId"
@@ -76,10 +82,10 @@ export default defineComponent({
             />
           </router-link>
           <!-- pb-1で気持ち上に持ち上げる -->
-          <div class="overflow-hidden flex-grow-1 pl-4 pb-1 flex flex-col">
+          <div class="overflow-hidden flex-1 pb-1 flex flex-col">
             <router-link
               class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-1"
-              :to="`/albums/${currentTrack$$q.albumId}`"
+              to="/playing"
             >
               {{ currentTrack$$q.title }}
             </router-link>

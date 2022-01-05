@@ -6,8 +6,12 @@ declare module 'vue' {
   export interface GlobalComponents {
     GDraggable: typeof import('vuedraggable')['default']
     GGrid: typeof import('vue-virtual-scroll-grid')['default']
+    IMdiAccountPlus: typeof import('~icons/mdi/account-plus')['default']
     IMdiCloudUpload: typeof import('~icons/mdi/cloud-upload')['default']
+    NAutoComplete: typeof import('naive-ui')['NAutoComplete']
     NButton: typeof import('naive-ui')['NButton']
+    NCollapse: typeof import('naive-ui')['NCollapse']
+    NCollapseItem: typeof import('naive-ui')['NCollapseItem']
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NDropdown: typeof import('naive-ui')['NDropdown']

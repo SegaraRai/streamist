@@ -1,4 +1,5 @@
 <script lang="ts">
+import { db } from '~/db';
 import { useArtistSearch } from '~/logic/useSearch';
 
 export default defineComponent({
@@ -7,32 +8,50 @@ export default defineComponent({
       type: String,
       default: '',
     },
+    artistId: {
+      type: String,
+      default: undefined,
+    },
   },
   emits: {
     'update:modelValue': (_modelValue: string) => true,
   },
-  setup(props, context) {
-    const artistSearch = useArtistSearch();
-    const modelValue$$q = useVModel(props, 'modelValue', context.emit);
+  setup(props, { emit }) {
+    const searchArtists = useArtistSearch();
+    const modelValue$$q = useVModel(props, 'modelValue', emit);
+    const artistId$$q = useVModel(props, 'artistId', emit);
 
-    const value$$q = ref('');
-    const lastSelectedArtistId$$q = ref<string | undefined>();
+    const artists$$q = searchArtists(modelValue$$q);
+
+    watch(
+      [modelValue$$q, artistId$$q],
+      ([newModelValue, newArtistId]) => {
+        if (!newModelValue && newArtistId) {
+          db.artists.get(newArtistId).then((artist) => {
+            if (artist && artist.id === newArtistId) {
+              modelValue$$q.value = artist.name;
+            }
+          });
+        }
+      },
+      {
+        immediate: true,
+      }
+    );
 
     return {
       options$$q: computed(
         () =>
-          artistSearch.value(value$$q.value).map((artist) => ({
-            label: artist.name,
-            value: artist.id,
+          artists$$q.value.map(({ item }) => ({
+            label: item.name,
+            value: item.id,
           })) || []
       ),
       modelValue$$q,
-      value$$q,
-      lastSelectedArtistId$$q,
+      artistId$$q,
       onSelected$$q: (artistId: string | number): void => {
-        lastSelectedArtistId$$q.value = artistId as string;
+        artistId$$q.value = artistId as string;
       },
-      editMode$$q: ref(true),
     };
   },
 });
@@ -40,39 +59,34 @@ export default defineComponent({
 
 <template>
   <div class="flex gap-x-4 items-center">
-    <template v-if="lastSelectedArtistId$$q">
-      <s-artist-image
-        class="flex-none w-6 h-6"
-        :artist="lastSelectedArtistId$$q"
-      />
-    </template>
-    <template v-else>
-      <i-mdi-account-plus class="flex-none w-6 h-6" />
-    </template>
-    <template v-if="editMode$$q">
-      <n-auto-complete
-        v-model:value="value$$q"
-        class="flex-1"
-        :options="options$$q"
-        @select="onSelected$$q"
-        @update-value="lastSelectedArtistId$$q = undefined"
-      >
-        <template #default="{ handleInput }">
-          <input
-            :value="value$$q"
-            @input="e => handleInput((e.target as HTMLInputElement).value)"
-          />
-        </template>
-      </n-auto-complete>
-      <v-btn flat icon text size="x-small" @click="editMode$$q = false">
-        <v-icon color="success">mdi-check</v-icon>
-      </v-btn>
-    </template>
-    <template v-else>
-      <div class="text-sm min-w-32">{{ value$$q }}</div>
-      <v-btn flat icon text size="x-small" @click="editMode$$q = true">
-        <v-icon>mdi-pencil</v-icon>
-      </v-btn>
-    </template>
+    <n-auto-complete
+      v-model:value="modelValue$$q"
+      class="flex-1"
+      :options="options$$q"
+      @select="onSelected$$q"
+      @update-value="artistId$$q = undefined"
+    >
+      <template #default="{ handleInput }">
+        <v-text-field
+          class="s-v-input-hide-details"
+          label="Artist"
+          hide-details
+          :model-value="modelValue$$q"
+          @input="e => handleInput((e.target as HTMLInputElement).value)"
+        >
+          <template #prependInner>
+            <template v-if="artistId$$q">
+              <s-artist-image
+                class="flex-none mr-2 w-6 h-6"
+                :artist="artistId$$q"
+              />
+            </template>
+            <template v-else-if="modelValue$$q">
+              <i-mdi-account-plus class="flex-none mr-2 w-6 h-6" />
+            </template>
+          </template>
+        </v-text-field>
+      </template>
+    </n-auto-complete>
   </div>
 </template>

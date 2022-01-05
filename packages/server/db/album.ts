@@ -51,6 +51,9 @@ export async function dbAlbumGetOrCreateByNameTx(
       artistId,
       userId,
     },
+    orderBy: {
+      updatedAt: 'desc',
+    },
   });
   if (!album) {
     // should rarely happen

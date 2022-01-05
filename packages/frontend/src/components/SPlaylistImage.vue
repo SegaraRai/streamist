@@ -14,10 +14,10 @@ export default defineComponent({
   emits: {
     imageIds: (_imageIds: readonly string[] | undefined) => true,
   },
-  setup(props, context) {
+  setup(props, { emit }) {
     const propPlaylistRef = computed(() => props.playlist);
     watch(propPlaylistRef, () => {
-      context.emit('imageIds', undefined);
+      emit('imageIds', undefined);
     });
     const { value: image, valueExists: fetched } = useLiveQuery(async () => {
       const propPlaylist = propPlaylistRef.value;
@@ -31,7 +31,7 @@ export default defineComponent({
       if (propPlaylist !== propPlaylistRef.value) {
         return;
       }
-      context.emit('imageIds', playlist.imageIds);
+      emit('imageIds', playlist.imageIds);
       if (playlist.imageIds[0]) {
         const imageId = playlist.imageIds[0];
         const image = await db.images.get(imageId);

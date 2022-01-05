@@ -48,11 +48,13 @@ export default defineComponent({
             v-model="username$$q"
             prepend-inner-icon="mdi-account"
             type="text"
+            hide-details
           />
           <v-text-field
             v-model="password$$q"
             type="password"
             prepend-inner-icon="mdi-lock"
+            hide-details
           />
         </v-form>
       </v-card-text>

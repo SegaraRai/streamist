@@ -15,7 +15,7 @@ export default defineComponent({
   emits: {
     update: (_newTime: number) => true,
   },
-  setup(props, context) {
+  setup(props, { emit }) {
     const showRemaining = ref(false);
     const draggingTime = ref<number | undefined>();
 
@@ -50,7 +50,7 @@ export default defineComponent({
       },
       onUpdate$$q(value: number) {
         draggingTime.value = undefined;
-        context.emit('update', value);
+        emit('update', value);
       },
       toggleRemaining$$q() {
         showRemaining.value = !showRemaining.value;

@@ -86,7 +86,9 @@ export default defineComponent({
       isOpen$$q: menuIsOpen$$q,
       close$$q: closeMenu$$q,
       open$$q: openMenu$$q,
-    } = useMenu();
+    } = useMenu({
+      closeOnScroll$$q: true,
+    });
     const menuOptions$$q = createPlaylistDropdown({
       playlist$$q: selectedPlaylist$$q,
       playlistTracks$$q: selectedPlaylistTracks$$q,
@@ -178,6 +180,7 @@ export default defineComponent({
                 v-model="i"
                 label="Title"
                 required
+                hide-details
                 :readonly="createPlaylistDialogLoading$$q"
               />
             </div>
@@ -185,6 +188,7 @@ export default defineComponent({
               <v-textarea
                 v-model="e"
                 label="Description"
+                hide-details
                 :readonly="createPlaylistDialogLoading$$q"
               />
             </div>
