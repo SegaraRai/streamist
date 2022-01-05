@@ -35,13 +35,15 @@ export async function playlistCreate(
     throw new HTTPError(400, 'some trackIds are not found');
   }
 
+  const timestamp = Date.now();
+
   const playlist = await client.playlist.create({
     data: {
       id: await generatePlaylistId(),
       title: String(data.title),
       notes: String(data.notes),
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
       trackOrder: dbArraySerializeItemIds(trackIds),
       tracks: {
         connect: trackIds.map((trackId) => ({ id: String(trackId) })),

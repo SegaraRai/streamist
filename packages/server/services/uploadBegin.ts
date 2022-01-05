@@ -237,12 +237,14 @@ export async function createAudioSource(
         )
       : null;
 
+  const timestamp = Date.now();
+
   await client.source.create({
     data: {
       id: sourceId,
       state: is<SourceState>('uploading'),
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
       user: { connect: { id: userId } },
       files: {
         create: [
@@ -260,8 +262,8 @@ export async function createAudioSource(
             attachPrepend: null,
             entityExists: false,
             uploadId,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
+            createdAt: timestamp,
+            updatedAt: timestamp,
             user: { connect: { id: userId } },
           },
           ...(request.cueSheetFile
@@ -280,8 +282,8 @@ export async function createAudioSource(
                   attachPrepend: null,
                   entityExists: false,
                   uploadId: cueSheetUploadId,
-                  createdAt: Date.now(),
-                  updatedAt: Date.now(),
+                  createdAt: timestamp,
+                  updatedAt: timestamp,
                   user: { connect: { id: userId } },
                 },
               ]
@@ -403,12 +405,14 @@ export async function createImageSource(
       request.imageFile.fileSize
     )) ?? null;
 
+  const timestamp = Date.now();
+
   await client.source.create({
     data: {
       id: sourceId,
       state: is<SourceState>('uploading'),
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
       user: { connect: { id: userId } },
       files: {
         create: [
@@ -426,8 +430,8 @@ export async function createImageSource(
             attachPrepend: !!request.attachPrepend,
             entityExists: false,
             uploadId,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
+            createdAt: timestamp,
+            updatedAt: timestamp,
             user: { connect: { id: userId } },
           },
         ],

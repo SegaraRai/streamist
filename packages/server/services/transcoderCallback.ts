@@ -93,7 +93,8 @@ async function registerImage(
   imageId: string,
   attachToType: SourceFileAttachToType,
   attachToId: string,
-  attachPrepend: boolean
+  attachPrepend: boolean,
+  timestamp: number
 ): Promise<void> {
   const { sourceFileId, region, userId } = artifact.source;
 
@@ -106,8 +107,8 @@ async function registerImage(
       sourceHeight: artifact.probe.height,
       dHash: artifact.dHash,
       user: { connect: { id: userId } },
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
       sourceFile: {
         connect: {
           id: sourceFileId,
@@ -125,8 +126,8 @@ async function registerImage(
           width: file.width,
           height: file.height,
           user: { connect: { id: userId } },
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
+          createdAt: timestamp,
+          updatedAt: timestamp,
         })),
       },
     },
@@ -169,7 +170,8 @@ async function registerImage(
 async function markSourceIdAsTranscodedTx(
   txClient: TransactionalPrismaClient | PrismaClient,
   userId: string,
-  sourceId: string
+  sourceId: string,
+  timestamp: number
 ): Promise<void> {
   await txClient.source.updateMany({
     where: {
@@ -179,8 +181,8 @@ async function markSourceIdAsTranscodedTx(
     },
     data: {
       state: is<SourceState>('transcoded'),
-      transcodeFinishedAt: Date.now(),
-      updatedAt: Date.now(),
+      transcodeFinishedAt: timestamp,
+      updatedAt: timestamp,
     },
   });
 }
@@ -190,7 +192,8 @@ async function markSourceFileIdAsTx(
   userId: string,
   sourceId: string,
   sourceFileId: string,
-  newState: SourceFileState & ('transcoded' | 'failed')
+  newState: SourceFileState & ('transcoded' | 'failed'),
+  timestamp: number
 ): Promise<void> {
   await txClient.sourceFile.updateMany({
     where: {
@@ -201,7 +204,7 @@ async function markSourceFileIdAsTx(
     },
     data: {
       state: newState,
-      updatedAt: Date.now(),
+      updatedAt: timestamp,
     },
   });
 }
@@ -225,6 +228,8 @@ async function handleTranscoderResponse(
   );
 
   await client.$transaction(async (txClient) => {
+    const timestamp = Date.now();
+
     const processedSourceIds = new Map<string, string>();
 
     // handle errors
@@ -238,7 +243,8 @@ async function handleTranscoderResponse(
         userId,
         sourceId,
         sourceFileId,
-        'failed'
+        'failed',
+        timestamp
       );
 
       processedSourceIds.set(sourceId, userId);
@@ -266,7 +272,8 @@ async function handleTranscoderResponse(
         userId,
         sourceId,
         sourceFileId,
-        'transcoded'
+        'transcoded',
+        timestamp
       );
 
       if (cueSheetSourceFileId) {
@@ -275,7 +282,8 @@ async function handleTranscoderResponse(
           userId,
           sourceId,
           cueSheetSourceFileId,
-          'transcoded'
+          'transcoded',
+          timestamp
         );
       }
 
@@ -379,7 +387,7 @@ async function handleTranscoderResponse(
                 ...(newAlbumPeak != null
                   ? { replayGainPeak: newAlbumPeak }
                   : {}),
-                updatedAt: Date.now(),
+                updatedAt: timestamp,
               },
             });
           }
@@ -414,7 +422,7 @@ async function handleTranscoderResponse(
               where: { id: artist.id, userId },
               data: {
                 nameSort,
-                updatedAt: Date.now(),
+                updatedAt: timestamp,
               },
             });
           }
@@ -435,8 +443,8 @@ async function handleTranscoderResponse(
               duration: file.duration,
               trackId: track.id,
               userId,
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
+              createdAt: timestamp,
+              updatedAt: timestamp,
             },
           });
         }
@@ -524,8 +532,8 @@ async function handleTranscoderResponse(
             uploadId: null,
             sourceId,
             userId,
-            createdAt: Date.now(),
-            updatedAt: Date.now(),
+            createdAt: timestamp,
+            updatedAt: timestamp,
           },
         });
       } else {
@@ -537,7 +545,8 @@ async function handleTranscoderResponse(
           userId,
           sourceId,
           sourceFileId,
-          'transcoded'
+          'transcoded',
+          timestamp
         );
       }
 
@@ -549,12 +558,13 @@ async function handleTranscoderResponse(
         imageId,
         attachToType,
         attachToId,
-        attachPrepend
+        attachPrepend,
+        timestamp
       );
     }
 
     for (const [sourceId, userId] of processedSourceIds) {
-      await markSourceIdAsTranscodedTx(txClient, userId, sourceId);
+      await markSourceIdAsTranscodedTx(txClient, userId, sourceId, timestamp);
     }
   });
 

@@ -31,12 +31,12 @@ export async function dbAlbumGetOrCreateByNameTx(
 ): Promise<Album> {
   const newAlbumId = await newAlbumIdPromise;
 
-  const createdAt = Date.now();
+  const timestamp = Date.now();
 
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
     INSERT INTO Album (id, title, artistId, userId, createdAt, updatedAt)
-    SELECT ${newAlbumId}, ${albumTitle}, ${artistId}, ${userId}, ${createdAt}, ${createdAt}
+    SELECT ${newAlbumId}, ${albumTitle}, ${artistId}, ${userId}, ${timestamp}, ${timestamp}
       WHERE NOT EXISTS (
         SELECT 1
           FROM Album

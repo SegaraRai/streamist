@@ -30,14 +30,14 @@ export async function dbArtistGetOrCreateByNameTx(
 ): Promise<Artist> {
   const newArtistId = await generateArtistId();
 
-  const createdAt = Date.now();
+  const timestamp = Date.now();
 
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
     INSERT INTO Artist (id, name, nameSort, userId, createdAt, updatedAt)
     SELECT ${newArtistId}, ${artistName}, ${
     artistNameSort || null
-  }, ${userId}, ${createdAt}, ${createdAt}
+  }, ${userId}, ${timestamp}, ${timestamp}
       WHERE NOT EXISTS (
         SELECT 1
           FROM Artist

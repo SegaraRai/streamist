@@ -121,6 +121,8 @@ async function invokeTranscoderBySource(
     throw new HTTPError(409, `state of source ${sourceId} is ${source.state}`);
   }
 
+  const timestamp = Date.now();
+
   const updated = await client.source.updateMany({
     where: {
       id: sourceId,
@@ -129,8 +131,8 @@ async function invokeTranscoderBySource(
     },
     data: {
       state: is<SourceState>('transcoding'),
-      transcodeStartedAt: Date.now(),
-      updatedAt: Date.now(),
+      transcodeStartedAt: timestamp,
+      updatedAt: timestamp,
     },
   });
   if (!updated.count) {
@@ -146,7 +148,7 @@ async function invokeTranscoderBySource(
     },
     data: {
       state: is<SourceFileState>('transcoding'),
-      updatedAt: Date.now(),
+      updatedAt: timestamp,
     },
   });
 
@@ -249,6 +251,8 @@ export async function onSourceFileUploaded(
     });
   }
 
+  const timestamp = Date.now();
+
   const updated = await client.sourceFile.updateMany({
     where: {
       id: sourceFileId,
@@ -259,8 +263,8 @@ export async function onSourceFileUploaded(
     data: {
       state: is<SourceFileState>('uploaded'),
       entityExists: true,
-      uploadedAt: Date.now(),
-      updatedAt: Date.now(),
+      uploadedAt: timestamp,
+      updatedAt: timestamp,
     },
   });
   if (!updated.count) {
@@ -296,7 +300,7 @@ export async function onSourceFileUploaded(
     },
     data: {
       state: is<SourceState>('uploaded'),
-      updatedAt: Date.now(),
+      updatedAt: timestamp,
     },
   });
 
