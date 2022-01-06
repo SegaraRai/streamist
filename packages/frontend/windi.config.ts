@@ -25,6 +25,7 @@ export default defineConfig({
       g_md_lg: '1120px',
       g_lg_xl: '1600px',
       g_xl_2xl: '2240px',
+      print: { raw: 'print' },
     },
     extend: {
       typography: {
