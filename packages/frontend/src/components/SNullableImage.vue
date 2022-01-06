@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import type { ResourceImage } from '$/types';
+import noImage from '~/assets/no_image.svg';
 import { SrcObject, createSrc } from '~/logic/srcSet';
 
 export default defineComponent({
@@ -22,6 +23,7 @@ export default defineComponent({
     );
 
     return {
+      noImageSrc$$q: noImage,
       srcObject$$q: srcObject,
     };
   },
@@ -30,7 +32,10 @@ export default defineComponent({
 
 <template>
   <template v-if="srcObject$$q == null">
-    <s-no-image />
+    <img
+      :src="noImageSrc$$q"
+      class="block object-cover overflow-hidden leading-none bg-true-gray-300 text-white"
+    />
   </template>
   <template v-else>
     <div class="overflow-hidden leading-none relative s-lazyload-container z-0">
