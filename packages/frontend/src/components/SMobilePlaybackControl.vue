@@ -67,35 +67,15 @@ export default defineComponent({
   >
     <div class="w-full flex-1 flex flex-row px-4 items-center">
       <router-link
-        class="flex-1 flex flex-row gap-x-4 items-center overflow-hidden"
+        class="flex-1 flex items-center overflow-hidden"
         to="/playing"
       >
         <template v-if="currentTrack$$q">
-          <router-link
-            class="flex-none block"
-            :to="`/albums/${currentTrack$$q.albumId}`"
-          >
-            <s-album-image
-              class="w-18 h-18"
-              :album="currentTrack$$q.albumId"
-              size="72"
-            />
-          </router-link>
-          <!-- pb-1で気持ち上に持ち上げる -->
-          <div class="overflow-hidden flex-1 pb-1 flex flex-col">
-            <router-link
-              class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-1"
-              to="/playing"
-            >
-              {{ currentTrack$$q.title }}
-            </router-link>
-            <router-link
-              class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-2"
-              :to="`/artists/${currentTrack$$q.artistId}`"
-            >
-              {{ currentTrackInfo$$q?.trackArtist$$q?.name }}
-            </router-link>
-          </div>
+          <s-playback-track-view
+            :track="currentTrack$$q"
+            :artist-name="currentTrackInfo$$q?.trackArtist$$q?.name"
+            navigate-playing
+          />
         </template>
       </router-link>
       <div class="flex-none items-center">

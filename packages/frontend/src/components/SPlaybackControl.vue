@@ -122,33 +122,12 @@ export default defineComponent({
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
   >
-    <div class="left-pane flex-none flex flex-row items-center justify-start">
+    <div class="w-20vw min-w-50 flex-none flex items-center">
       <template v-if="currentTrack$$q">
-        <router-link
-          class="block flex-none"
-          :to="`/albums/${currentTrack$$q.albumId}`"
-        >
-          <s-album-image
-            class="w-16 h-16"
-            size="64"
-            :album="currentTrack$$q.albumId"
-          />
-        </router-link>
-        <!-- pb-1で気持ち上に持ち上げる -->
-        <div class="overflow-hidden flex-grow-1 pl-4 pb-1 flex flex-col">
-          <router-link
-            class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-1"
-            :to="`/albums/${currentTrack$$q.albumId}`"
-          >
-            {{ currentTrack$$q.title }}
-          </router-link>
-          <router-link
-            class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis subtitle-2"
-            :to="`/artists/${currentTrack$$q.artistId}`"
-          >
-            {{ currentTrackInfo$$q?.trackArtist$$q?.name }}
-          </router-link>
-        </div>
+        <s-playback-track-view
+          :track="currentTrack$$q"
+          :artist-name="currentTrackInfo$$q?.trackArtist$$q?.name"
+        />
       </template>
     </div>
     <div class="flex-1 flex flex-col justify-center">
@@ -164,11 +143,11 @@ export default defineComponent({
           <template #trigger>
             <button
               class="mx-5 rounded-full"
-              :class="shuffleEnabled$$q ? 'active-button' : ''"
+              :class="shuffleEnabled$$q && 'text-shadow'"
               @click="switchShuffle$$q"
               @mouseup="blurButton$$q"
             >
-              <v-icon :color="shuffleEnabled$$q ? 'primary' : ''">
+              <v-icon :color="(shuffleEnabled$$q && 'primary') || undefined">
                 {{ shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled' }}
               </v-icon>
             </button>
@@ -210,11 +189,11 @@ export default defineComponent({
           <template #trigger>
             <button
               class="mx-5 rounded-full"
-              :class="repeatEnabled$$q ? 'active-button' : ''"
+              :class="repeatEnabled$$q && 'text-shadow'"
               @click="switchRepeat$$q"
               @mouseup="blurButton$$q"
             >
-              <v-icon :color="repeatEnabled$$q ? 'primary' : ''">
+              <v-icon :color="(repeatEnabled$$q && 'primary') || undefined">
                 {{ repeatIcon$$q }}
               </v-icon>
             </button>
@@ -237,7 +216,7 @@ export default defineComponent({
         @update="seekTo$$q"
       />
     </div>
-    <div class="right-pane flex-none flex items-center justify-end">
+    <div class="w-20vw min-w-50 flex-none flex items-center justify-end">
       <div class="flex-1 max-w-40">
         <s-volume-control
           :volume="volumeStore$$q.volume"
@@ -249,23 +228,3 @@ export default defineComponent({
     </div>
   </v-sheet>
 </template>
-
-<style scoped>
-.left-pane,
-.right-pane {
-  width: 20vw;
-  min-width: 200px;
-}
-
-.duration-left {
-  text-align: right;
-}
-
-.duration-right {
-  text-align: left;
-}
-
-.active-button {
-  text-shadow: 0 0 1px;
-}
-</style>
