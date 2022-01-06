@@ -35,7 +35,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "dotenv": "^10.0.0",
-    "fast-json-stringify": "^2.7.13",
+    "fast-json-stringify": "^3.0.0",
     "fast-jwt": "^1.4.1",
     "fastify": "^3.25.3",
     "fastify-cookie": "^5.5.0",
@@ -61,8 +61,8 @@
     "npm-run-all": "^4.1.5",
     "prisma": "^3.7.0",
     "ts-loader": "^9.2.6",
-    "typescript": "^4.5.4",
+    "typescript": "npm:@typescript-deploys/pr-build@4.6.0-pr-47183-2",
     "vite": "^2.7.10",
-    "vitest": "^0.0.131"
+    "vitest": "^0.0.134"
   }
 }
