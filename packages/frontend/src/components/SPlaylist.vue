@@ -177,7 +177,7 @@ export default defineComponent({
         </template>
       </div>
       <div class="flex flex-col gap-y-6 md:gap-y-4 <md:text-center">
-        <div class="flex-none album-title text-xl">
+        <div class="flex-none font-bold text-xl">
           <s-conditional-link
             :to="`/playlists/${playlistId$$q}`"
             :disabled="linkExcludes.includes(playlistId$$q)"
@@ -188,7 +188,7 @@ export default defineComponent({
         </div>
         <div>{{ value$$q?.playlist$$q.notes }}</div>
         <div class="flex-1 <md:hidden"></div>
-        <div class="flex-none album-misc text-sm">
+        <div class="flex-none text-sm">
           <span>
             {{ t('playlist.n_tracks', value$$q.tracks$$q.length) }}
           </span>
@@ -196,9 +196,7 @@ export default defineComponent({
         </div>
       </div>
     </div>
-    <div
-      class="flex-none album-actions flex flex-row items-center gap-x-8 my-8"
-    >
+    <div class="flex-none flex flex-row items-center gap-x-8 my-8">
       <v-btn
         color="primary"
         flat
@@ -225,6 +223,7 @@ export default defineComponent({
       >
         <v-icon>mdi-dots-vertical</v-icon>
       </button>
+      <v-divider />
     </div>
   </template>
   <s-track-list
@@ -242,6 +241,7 @@ export default defineComponent({
   />
   <template v-if="value$$q">
     <n-dropdown
+      class="select-none"
       placement="bottom-start"
       trigger="manual"
       :x="menuX$$q"
@@ -257,9 +257,3 @@ export default defineComponent({
     />
   </template>
 </template>
-
-<style scoped>
-.playlist-title {
-  font-weight: 600;
-}
-</style>

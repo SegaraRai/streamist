@@ -143,7 +143,7 @@ export default defineComponent({
       </div>
       <div class="flex flex-col gap-y-6 md:gap-y-4 <md:text-center">
         <div>
-          <div class="flex-none album-title text-xl">
+          <div class="flex-none font-bold text-xl">
             <s-conditional-link
               :to="`/albums/${albumId$$q}`"
               :disabled="linkExcludes.includes(albumId$$q)"
@@ -151,7 +151,7 @@ export default defineComponent({
               {{ value$$q.album$$q.title }}
             </s-conditional-link>
           </div>
-          <div class="flex-none album-artist-name">
+          <div class="flex-none">
             <s-conditional-link
               :to="`/artists/${value$$q.artist$$q.id}`"
               :disabled="linkExcludes.includes(value$$q.artist$$q.id)"
@@ -161,7 +161,7 @@ export default defineComponent({
           </div>
         </div>
         <div class="flex-1 <md:hidden"></div>
-        <div class="flex-none album-actions flex flex-row gap-x-8">
+        <div class="flex-none flex flex-row gap-x-8">
           <v-btn
             color="primary"
             :disabled="!value$$q.tracks$$q.length"
@@ -184,7 +184,7 @@ export default defineComponent({
             </span>
           </v-btn>
         </div>
-        <div class="flex-none album-misc text-sm">
+        <div class="flex-none text-sm">
           <span>
             {{ t('album.n_tracks', value$$q.tracks$$q.length) }}
           </span>
@@ -207,9 +207,3 @@ export default defineComponent({
     :visit-artist="visitArtist"
   />
 </template>
-
-<style scoped>
-.album-title {
-  font-weight: 600;
-}
-</style>

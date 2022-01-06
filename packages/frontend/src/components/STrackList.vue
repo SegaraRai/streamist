@@ -467,6 +467,7 @@ export default defineComponent({
   </div>
   <template v-if="lastSelectedTrack$$q">
     <n-dropdown
+      class="select-none"
       placement="bottom-start"
       trigger="manual"
       :x="menuX$$q"

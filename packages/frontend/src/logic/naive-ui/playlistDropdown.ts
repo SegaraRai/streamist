@@ -59,7 +59,7 @@ export function createPlaylistDropdown({
           }
           playbackStore.appendTracksToPlayNextQueue$$q(playlistTracks);
           message.success(
-            t('message.AddedToPlayNextQueueMany', playlistTracks.length)
+            t('message.n_AddedToPlayNextQueue', playlistTracks.length)
           );
         },
       },

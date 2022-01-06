@@ -117,7 +117,7 @@ const hideShell$$q = eagerComputed(
 <template>
   <div
     :class="isOnline ? 's-offline--online' : 's-offline--offline'"
-    class="min-h-screen flex flex-col"
+    class="min-h-screen flex flex-col print:invisible"
   >
     <div
       class="s-offline-bar bg-yellow-400 h-0 text-white font-weight-bold text-md flex items-center px-4 leading-none z-2200 overflow-hidden"

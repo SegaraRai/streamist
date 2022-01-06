@@ -122,12 +122,7 @@ export default defineComponent({
 
 <template>
   <div class="absolute w-full h-full select-none !px-0">
-    <div
-      class="flex flex-col h-full px-6 pt-8 max-w-xl mx-auto"
-      @click="preventXButton$$q"
-      @mousedown="preventXButton$$q"
-      @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
-    >
+    <div class="flex flex-col h-full px-6 pt-8 max-w-xl mx-auto">
       <div class="flex-1 flex flex-col items-center justify-start gap-y-4">
         <template v-if="currentTrack$$q">
           <div class="w-full px-8">
@@ -146,13 +141,13 @@ export default defineComponent({
             class="overflow-hidden flex-grow-1 flex flex-col items-center gap-y-2"
           >
             <router-link
-              class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis text-lg"
+              class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-lg"
               :to="`/albums/${currentTrack$$q.albumId}`"
             >
               {{ currentTrack$$q.title }}
             </router-link>
             <router-link
-              class="block max-w-max whitespace-pre overflow-hidden overflow-ellipsis text-sm"
+              class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-sm"
               :to="`/artists/${currentTrack$$q.artistId}`"
             >
               {{ currentTrackInfo$$q?.trackArtist$$q?.name }}
@@ -170,7 +165,12 @@ export default defineComponent({
           :duration="duration$$q"
           @update="seekTo$$q"
         />
-        <div class="flex flex-row justify-center px-4">
+        <div
+          class="flex flex-row justify-center px-4"
+          @click="preventXButton$$q"
+          @mousedown="preventXButton$$q"
+          @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
+        >
           <!-- clickではなくmouseupでblurButtonを呼んでいるのはキーで操作されたときにblurしないようにするため -->
           <v-btn
             class="bg-transparent"

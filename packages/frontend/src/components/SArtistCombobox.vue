@@ -17,6 +17,7 @@ export default defineComponent({
     'update:modelValue': (_modelValue: string) => true,
   },
   setup(props, { emit }) {
+    const { t } = useI18n();
     const searchArtists = useArtistSearch();
     const modelValue$$q = useVModel(props, 'modelValue', emit);
     const artistId$$q = useVModel(props, 'artistId', emit);
@@ -40,6 +41,7 @@ export default defineComponent({
     );
 
     return {
+      t,
       options$$q: computed(
         () =>
           artists$$q.value.map(({ item }) => ({
@@ -82,7 +84,16 @@ export default defineComponent({
               />
             </template>
             <template v-else-if="modelValue$$q">
-              <i-mdi-account-plus class="flex-none mr-2 w-6 h-6" />
+              <n-popover placement="top" trigger="hover">
+                <template #trigger>
+                  <i-mdi-account-plus
+                    class="flex-none mr-2 w-6 h-6 text-blue-500"
+                  />
+                </template>
+                <div>
+                  {{ t('combobox.artist.CreateNewArtist') }}
+                </div>
+              </n-popover>
             </template>
           </template>
         </v-text-field>

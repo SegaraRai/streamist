@@ -90,11 +90,15 @@ export default defineComponent({
       selected ? 's-track-list-item--selected' : 's-track-list-item--unselected'
     "
     :ripple="false"
-    @contextmenu.prevent="onContextMenu$$q($event)"
+    @contextmenu.stop.prevent="onContextMenu$$q($event)"
   >
     <!-- Track Number -->
     <div class="list-column-icon mr-4">
-      <div class="icon-container">
+      <div
+        class="icon-container"
+        data-draggable="false"
+        @dragstart.stop.prevent
+      >
         <template v-if="isCurrentPlayingTrack$$q">
           <!-- 再生中（または一時停止中）の曲 -->
           <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
@@ -203,7 +207,9 @@ export default defineComponent({
         text
         size="small"
         class="bg-transparent"
+        data-draggable="false"
         @click.stop="onMenu$$q($event)"
+        @dragstart.stop.prevent
       >
         <v-icon class="s-hover-visible"> mdi-dots-vertical </v-icon>
       </v-btn>
@@ -211,6 +217,10 @@ export default defineComponent({
   </v-list-item>
   <!-- Divider -->
   <template v-if="!item.isLast$$q">
-    <v-divider @contextmenu.prevent />
+    <v-divider
+      data-draggable="false"
+      @contextmenu.stop.prevent
+      @dragstart.stop.prevent
+    />
   </template>
 </template>

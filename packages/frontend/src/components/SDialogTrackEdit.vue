@@ -19,7 +19,7 @@ export default defineComponent({
     'update:modelValue': (_modelValue: boolean) => true,
   },
   setup(props, { emit }) {
-    // const { t } = useI18n();
+    const { t } = useI18n();
     const display = useDisplay();
     // const message = useMessage();
     // const syncDB = useSyncDB();
@@ -55,6 +55,7 @@ export default defineComponent({
     );
 
     return {
+      t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
       fullscreen$$q: eagerComputed(() => display.smAndDown.value),
@@ -117,7 +118,9 @@ export default defineComponent({
   >
     <v-card class="w-full md:min-w-2xl">
       <v-card-title class="flex">
-        <div class="flex-1">Edit {{ track.title }}</div>
+        <div class="flex-1">
+          {{ t('dialogComponent.editTrack.title', [track.title]) }}
+        </div>
         <div class="flex-none">
           <v-btn
             flat
@@ -193,28 +196,30 @@ export default defineComponent({
                     class="s-v-input-hide-details"
                     label="Lyrics"
                   />
+                  <footer class="flex m-0 gap-x-4 justify-end">
+                    <dl class="flex gap-x-4">
+                      <dt>created</dt>
+                      <dd>{{ strCreatedAt$$q }}</dd>
+                    </dl>
+                    <div class="border-l"></div>
+                    <dl class="flex gap-x-4">
+                      <dt>last updated</dt>
+                      <dd>{{ strUpdatedAt$$q }}</dd>
+                    </dl>
+                  </footer>
                 </div>
               </n-collapse-item>
             </n-collapse>
-            <footer class="flex m-0 px-4 gap-x-4 justify-end">
-              <dl class="flex gap-x-4">
-                <dt>created</dt>
-                <dd>{{ strCreatedAt$$q }}</dd>
-              </dl>
-              <div class="border-l"></div>
-              <dl class="flex gap-x-4">
-                <dt>last updated</dt>
-                <dd>{{ strUpdatedAt$$q }}</dd>
-              </dl>
-            </footer>
           </div>
         </div>
       </v-card-text>
-      <v-card-actions class="gap-x-4 pb-4 px-6">
+      <v-card-actions class="gap-x-4 pb-4 px-4">
         <v-spacer />
-        <v-btn @click="dialog$$q = false">Cancel</v-btn>
+        <v-btn @click="dialog$$q = false">
+          {{ t('dialogComponent.editTrack.buttonCancel') }}
+        </v-btn>
         <v-btn color="primary" :disabled="!modified$$q" @click="apply$$q">
-          OK
+          {{ t('dialogComponent.editTrack.buttonOK') }}
         </v-btn>
       </v-card-actions>
     </v-card>

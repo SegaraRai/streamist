@@ -48,6 +48,7 @@ export default defineComponent({
     );
 
     return {
+      t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
       fullscreen$$q: eagerComputed(() => display.smAndDown.value),
@@ -95,7 +96,9 @@ export default defineComponent({
   <v-dialog v-model="dialog$$q" class="select-none" :fullscreen="fullscreen$$q">
     <v-card class="w-full md:min-w-2xl">
       <v-card-title class="flex">
-        <div class="flex-1">Edit {{ playlist.title }}</div>
+        <div class="flex-1">
+          {{ t('dialogComponent.editPlaylist.title', [playlist.title]) }}
+        </div>
         <div class="flex-none">
           <v-btn
             flat
@@ -109,7 +112,7 @@ export default defineComponent({
         </div>
       </v-card-title>
       <v-card-text class="opacity-100">
-        <div class="flex gap-x-4">
+        <div class="flex gap-x-6">
           <div>
             <s-image-manager
               attach-to-type="playlist"
@@ -127,7 +130,7 @@ export default defineComponent({
               />
             </s-image-manager>
           </div>
-          <div class="flex-1">
+          <div class="flex-1 flex flex-col gap-y-6">
             <v-text-field
               v-model="title$$q"
               hide-details
@@ -146,9 +149,11 @@ export default defineComponent({
       </v-card-text>
       <v-card-actions class="gap-x-4 pb-4 px-6">
         <v-spacer />
-        <v-btn @click="dialog$$q = false">Cancel</v-btn>
+        <v-btn @click="dialog$$q = false">
+          {{ t('dialogComponent.editPlaylist.buttonCancel') }}
+        </v-btn>
         <v-btn color="primary" :disabled="!modified$$q" @click="apply$$q">
-          OK
+          {{ t('dialogComponent.editPlaylist.buttonOK') }}
         </v-btn>
       </v-card-actions>
     </v-card>

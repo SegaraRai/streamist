@@ -235,7 +235,7 @@ export default defineComponent({
           class="s-hover-visible absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl bg-black/50"
           :class="rounded && 'rounded-full'"
         >
-          <i-mdi-cloud-upload class="w-16 h-16" />
+          <i-mdi-image-plus class="w-16 h-16" />
         </div>
       </template>
     </template>
@@ -328,7 +328,7 @@ export default defineComponent({
                       class="!w-32 !h-32 !sm:w-48 !sm:h-48 flex items-center justify-center border"
                       @click="inputFileElement$$q?.click()"
                     >
-                      <v-icon size="48">mdi-plus</v-icon>
+                      <v-icon size="48">mdi-image-plus</v-icon>
                     </v-btn>
                   </div>
                 </template>
