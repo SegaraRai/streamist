@@ -1,9 +1,5 @@
 import { generateAlbumId, generateArtistId } from '$shared-server/generateId';
-import {
-  ImageSortableAlbum,
-  dbAlbumGetOrCreateByNameTx,
-  dbAlbumSortImages,
-} from '$/db/album';
+import { dbAlbumGetOrCreateByNameTx } from '$/db/album';
 import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
@@ -14,32 +10,15 @@ import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
-  get: async ({ params, query, user }) => {
+  get: async ({ params, user }) => {
     const track = await client.track.findFirst({
       where: {
         id: params.trackId,
         userId: user.id,
       },
-      include: {
-        artist: !!query?.includeTrackArtist,
-        album: !!query?.includeAlbum && {
-          include: {
-            artist: !!query.includeAlbumArtist,
-            images: !!query.includeAlbumImages && {
-              include: {
-                files: true,
-              },
-            },
-          },
-        },
-      },
     });
     if (!track) {
       throw new HTTPError(404, `track ${params.trackId} not found`);
-    }
-    if (query?.includeAlbum && query.includeAlbumImages) {
-      const { album } = track;
-      dbAlbumSortImages(album as unknown as ImageSortableAlbum);
     }
     return {
       status: 200,

@@ -5,6 +5,7 @@ import { Album, Image, ImageFile, Prisma } from '$prisma/client';
 import {
   dbArrayAddTx,
   dbArrayCreateMoveBeforeReorderCallback,
+  dbArrayGetSortedItems,
   dbArrayRemoveTx,
   dbArrayReorder,
 } from './lib/array';
@@ -95,6 +96,7 @@ export function dbAlbumAddImageTx(
   return dbArrayAddTx<typeof Prisma.AlbumScalarFieldEnum>(
     txClient,
     userId,
+    Prisma.ModelName.AAlbumImage,
     Prisma.ModelName.Album,
     Prisma.ModelName.Image,
     Prisma.AlbumScalarFieldEnum.imageOrder,
@@ -113,8 +115,8 @@ export function dbAlbumRemoveImageTx(
   return dbArrayRemoveTx<typeof Prisma.AlbumScalarFieldEnum>(
     txClient,
     userId,
+    Prisma.ModelName.AAlbumImage,
     Prisma.ModelName.Album,
-    Prisma.ModelName.Image,
     Prisma.AlbumScalarFieldEnum.imageOrder,
     albumId,
     imageIds
@@ -153,8 +155,12 @@ export async function dbAlbumGetImages(
     select: {
       imageOrder: true,
       images: {
-        include: {
-          files: true,
+        select: {
+          image: {
+            include: {
+              files: true,
+            },
+          },
         },
       },
     },
@@ -164,5 +170,8 @@ export async function dbAlbumGetImages(
       `dbAlbumGetImages: album not found (userId=${userId}, albumId=${albumId})`
     );
   }
-  return dbAlbumSortImages(album).images;
+  return dbArrayGetSortedItems<
+    'image',
+    typeof album['images'][number]['image']
+  >(album.images, album.imageOrder, 'image');
 }

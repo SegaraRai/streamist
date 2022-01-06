@@ -29,6 +29,10 @@ model User {
   trackCoArtist   TrackCoArtist[]
   deletions       Deletion[]
   resourceUpdates ResourceUpdate[] // though this is an one-to-one relation
+  APlaylistTrack  APlaylistTrack[]
+  AAlbumImage     AAlbumImage[]
+  AArtistImage    AArtistImage[]
+  APlaylistImage  APlaylistImage[]
 }
 
 model Source {
@@ -89,7 +93,7 @@ model Artist {
   updatedAt      Int //@db.BigInt
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
-  images         Image[]         @relation(onDelete: Restrict)
+  images         AArtistImage[]
   imageOrder     String          @default("")
   tracks         Track[]
   albums         Album[]
@@ -112,7 +116,7 @@ model Album {
   userId         String
   artist         Artist          @relation(fields: [artistId], references: [id], onDelete: Restrict)
   artistId       String
-  images         Image[]         @relation(onDelete: Restrict)
+  images         AAlbumImage[]
   imageOrder     String          @default("")
   tracks         Track[]
   coArtists      AlbumCoArtist[]
@@ -122,7 +126,7 @@ model Album {
 }
 
 model Track {
-  id                   String          @id
+  id                   String           @id
   title                String
   titleSort            String?
   discNumber           Int
@@ -139,16 +143,16 @@ model Track {
   replayGainPeak       Float?
   createdAt            Int //@db.BigInt
   updatedAt            Int //@db.BigInt
-  user                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId               String
-  artist               Artist          @relation(fields: [artistId], references: [id], onDelete: Restrict)
+  artist               Artist           @relation(fields: [artistId], references: [id], onDelete: Restrict)
   artistId             String
-  album                Album           @relation(fields: [albumId], references: [id], onDelete: Restrict)
+  album                Album            @relation(fields: [albumId], references: [id], onDelete: Restrict)
   albumId              String
-  sourceFile           SourceFile      @relation(fields: [sourceFileId], references: [id], onDelete: Restrict)
+  sourceFile           SourceFile       @relation(fields: [sourceFileId], references: [id], onDelete: Restrict)
   sourceFileId         String
   files                TrackFile[]
-  playlists            Playlist[]      @relation(onDelete: Cascade)
+  playlists            APlaylistTrack[]
   coArtists            TrackCoArtist[]
 
   @@index([userId])
@@ -177,20 +181,20 @@ model TrackFile {
 }
 
 model Image {
-  id           String      @id
+  id           String           @id
   sourceWidth  Int
   sourceHeight Int
   dHash        String
   createdAt    Int //@db.BigInt
   updatedAt    Int //@db.BigInt
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
-  sourceFile   SourceFile  @relation(fields: [sourceFileId], references: [id], onDelete: Restrict)
+  sourceFile   SourceFile       @relation(fields: [sourceFileId], references: [id], onDelete: Restrict)
   sourceFileId String
   files        ImageFile[]
-  albums       Album[]     @relation(onDelete: Restrict)
-  artists      Artist[]    @relation(onDelete: Restrict)
-  playlists    Playlist[]  @relation(onDelete: Restrict)
+  albums       AAlbumImage[]
+  artists      AArtistImage[]
+  playlists    APlaylistImage[]
 
   @@index([userId])
 }
@@ -253,17 +257,17 @@ model TrackCoArtist {
 }
 
 model Playlist {
-  id         String  @id
+  id         String           @id
   title      String
-  notes      String  @default("")
+  notes      String           @default("")
   createdAt  Int //@db.BigInt
   updatedAt  Int //@db.BigInt
-  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
-  images     Image[] @relation(onDelete: Restrict)
-  imageOrder String  @default("")
-  tracks     Track[] @relation(onDelete: Restrict)
-  trackOrder String  @default("")
+  images     APlaylistImage[]
+  imageOrder String           @default("")
+  tracks     APlaylistTrack[]
+  trackOrder String           @default("")
 
   @@index([userId])
 }
@@ -284,4 +288,64 @@ model ResourceUpdate {
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String @id
   updatedAt Int //@db.BigInt
+}
+
+// not visible to the user
+model AAlbumImage {
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  album  Album  @relation(fields: [x], references: [id], onDelete: Cascade)
+  x      String
+  image  Image  @relation(fields: [y], references: [id], onDelete: Restrict)
+  y      String
+
+  @@id([x, y])
+  @@index([userId])
+  @@index([x])
+  @@index([y])
+}
+
+// not visible to the user
+model AArtistImage {
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  artist Artist @relation(fields: [x], references: [id], onDelete: Cascade)
+  x      String
+  image  Image  @relation(fields: [y], references: [id], onDelete: Restrict)
+  y      String
+
+  @@id([x, y])
+  @@index([userId])
+  @@index([x])
+  @@index([y])
+}
+
+// not visible to the user
+model APlaylistImage {
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  playlist Playlist @relation(fields: [x], references: [id], onDelete: Cascade)
+  x        String
+  image    Image    @relation(fields: [y], references: [id], onDelete: Restrict)
+  y        String
+
+  @@id([x, y])
+  @@index([userId])
+  @@index([x])
+  @@index([y])
+}
+
+// not visible to the user
+model APlaylistTrack {
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  playlist Playlist @relation(fields: [x], references: [id], onDelete: Cascade)
+  x        String
+  track    Track    @relation(fields: [y], references: [id], onDelete: Restrict)
+  y        String
+
+  @@id([x, y])
+  @@index([userId])
+  @@index([x])
+  @@index([y])
 }

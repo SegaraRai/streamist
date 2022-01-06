@@ -1,31 +1,17 @@
 import { generateAlbumId } from '$shared-server/generateId';
-import { dbAlbumGetOrCreateByName, dbAlbumSortImages } from '$/db/album';
+import { dbAlbumGetOrCreateByName } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
-  get: async ({ query, user }) => {
+  get: async ({ user }) => {
     const albums = await client.album.findMany({
       where: {
         userId: user.id,
       },
-      include: {
-        artist: !!query?.includeAlbumArtist,
-        images: !!query?.includeAlbumImages,
-        tracks: !!query?.includeTracks && {
-          include: {
-            artist: !!query.includeTrackArtist,
-          },
-        },
-      },
     });
-    if (query?.includeAlbumImages) {
-      for (const album of albums) {
-        dbAlbumSortImages(album);
-      }
-    }
     return { status: 200, body: albums };
   },
   post: async ({ body, query, user }) => {

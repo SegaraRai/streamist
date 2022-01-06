@@ -1,6 +1,11 @@
 import type { Image, ImageFile } from '@prisma/client';
 import { dbArrayDeserializeItemIds } from '$shared/dbArray';
 import { HTTPError } from '$/utils/httpError';
+import {
+  TableWithJunctionTableArray,
+  TableWithSortedItems,
+  dbArrayConvert,
+} from './array';
 import { dbDeletionAddTx } from './resource';
 import type { TransactionalPrismaClient } from './types';
 
@@ -83,4 +88,14 @@ export function dbImageDeleteByImageOrderTx(
     userId,
     dbArrayDeserializeItemIds(imageOrder)
   );
+}
+
+export type ImageArrayConvertInput<V extends Image> =
+  TableWithJunctionTableArray<'image', V>;
+
+export function dbImageArrayConvert<
+  V extends Image,
+  T extends ImageArrayConvertInput<V>
+>(item: T): TableWithSortedItems<'image', V, T> {
+  return dbArrayConvert(item, 'image');
 }

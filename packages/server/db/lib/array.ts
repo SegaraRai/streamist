@@ -1,6 +1,7 @@
 import {
   dbArrayDeserializeItemIds,
   dbArraySerializeItemIds,
+  dbArraySort,
 } from '$shared/dbArray';
 import type { Prisma, PrismaClient } from '$prisma/client';
 import { HTTPError } from '$/utils/httpError';
@@ -28,14 +29,23 @@ export class DBArrayOptimisticLockAbortError extends HTTPError {
   }
 }
 
-const idColumn = 'id' as const;
-const userIdColumn = 'userId' as const;
-const updatedAtColumn = 'updatedAt' as const;
+const COL_ID = 'id' as const;
+const COL_USER_ID = 'userId' as const;
+const COL_UPDATED_AT = 'updatedAt' as const;
 
-interface ArrayMainTable {
-  [idColumn]: typeof idColumn;
-  [userIdColumn]: typeof userIdColumn;
-  [updatedAtColumn]: typeof updatedAtColumn;
+const COL_X = 'x' as const;
+const COL_Y = 'y' as const;
+
+export interface ArrayMainTable {
+  [COL_ID]: typeof COL_ID;
+  [COL_USER_ID]: typeof COL_USER_ID;
+  [COL_UPDATED_AT]: typeof COL_UPDATED_AT;
+}
+
+export interface ArrayJunctionTable {
+  [COL_X]: typeof COL_X;
+  [COL_Y]: typeof COL_Y;
+  [COL_USER_ID]: typeof COL_USER_ID;
 }
 
 function isSameItems(a: readonly string[], b: readonly string[]): boolean {
@@ -50,27 +60,11 @@ function isSameItems(a: readonly string[], b: readonly string[]): boolean {
   );
 }
 
-function getManyToManyTableInfo(
-  table1: Prisma.ModelName,
-  table2: Prisma.ModelName
-) {
-  const isTable1Primary = table1 <= table2;
-  const jtPrimaryTable = isTable1Primary ? table1 : table2;
-  const jtSecondaryTable = isTable1Primary ? table2 : table1;
-  const junctionTable = `_${jtPrimaryTable}To${jtSecondaryTable}` as const;
-  const jtTable1Column = isTable1Primary ? ('A' as const) : ('B' as const);
-  const jtTable2Column = isTable1Primary ? ('B' as const) : ('A' as const);
-  return {
-    junctionTable,
-    jtTable1Column,
-    jtTable2Column,
-  };
-}
-
 /**
  * 配列に新規レコードを作成する（多分アトミック）
  * @param txClient transactional prisma client
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
  * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
@@ -81,6 +75,7 @@ function getManyToManyTableInfo(
 export async function dbArrayAddTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
   itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
@@ -104,27 +99,21 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
     );
   }
 
-  // get the junction table info
-  const {
-    junctionTable,
-    jtTable1Column: jtMainTableColumn,
-    jtTable2Column: jtItemTableColumn,
-  } = getManyToManyTableInfo(mainTable, itemTable);
-
   // insert pairs into the junction table
   // NOTE: すでに存在するペアはここでユニーク制約によって弾かれる
   // NOTE(security): ここでitemIdsのユーザーIDを確認している
   // 本当はitemTableもArrayMainTable型であることを確認したい
   const inserted = await txClient.$executeRawUnsafe(
     `
-    INSERT INTO \`${junctionTable}\` (\`${jtMainTableColumn}\`, \`${jtItemTableColumn}\`)
-    SELECT $1, \`${idColumn}\`
+    INSERT INTO \`${junctionTable}\` (\`${COL_USER_ID}\`, \`${COL_X}\`, \`${COL_Y}\`)
+    SELECT $1, $2, \`${COL_ID}\`
       FROM \`${itemTable}\`
-      WHERE \`${userIdColumn}\` = $2 AND \`${idColumn}\` IN (${dbCreatePlaceholders(
+      WHERE \`${COL_USER_ID}\` = $3 AND \`${COL_ID}\` IN (${dbCreatePlaceholders(
       itemIds,
-      3
+      4
     )})
     `,
+    userId,
     groupId,
     userId,
     ...itemIds
@@ -145,8 +134,8 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
   const updated = await txClient.$executeRawUnsafe(
     `
     UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = ${expression}, \`${updatedAtColumn}\` = $2
-      WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4
+      SET \`${itemOrderColumn}\` = ${expression}, \`${COL_UPDATED_AT}\` = $2
+      WHERE \`${COL_USER_ID}\` = $3 AND \`${COL_ID}\` = $4
     `,
     dbArraySerializeItemIds(itemIds),
     Date.now(),
@@ -165,6 +154,7 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
 /**
  * 配列に新規レコードを作成する（多分アトミック）
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
  * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
@@ -174,6 +164,7 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
  */
 export function dbArrayAdd<T extends ArrayMainTable>(
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
   itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
@@ -185,6 +176,7 @@ export function dbArrayAdd<T extends ArrayMainTable>(
     dbArrayAddTx(
       txClient,
       userId,
+      junctionTable,
       mainTable,
       itemTable,
       itemOrderColumn,
@@ -199,8 +191,8 @@ export function dbArrayAdd<T extends ArrayMainTable>(
  * コールバックを指定して配列からレコードを削除する（楽観ロック）
  * @param txClient transactional prisma client
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
- * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
  * @param groupId `mainTable`の対象行のID（例えばプレイリストならプレイリストID）
  * @param callback コールバック（`true`を返すと削除）
@@ -208,26 +200,19 @@ export function dbArrayAdd<T extends ArrayMainTable>(
 async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
-  itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string,
   callback: (itemId: string) => boolean
 ): Promise<void> {
-  // get the junction table info
-  const {
-    junctionTable,
-    jtTable1Column: jtMainTableColumn,
-    jtTable2Column: jtItemTableColumn,
-  } = getManyToManyTableInfo(mainTable, itemTable);
-
   // retrieve current item order
   // NOTE(security): ここでgroupIdのユーザーIDを確認している
   const main = await txClient.$queryRawUnsafe<Record<string, string>[]>(
     `
     SELECT \`${itemOrderColumn}\`
       FROM \`${mainTable}\`
-      WHERE \`${userIdColumn}\` = ? AND \`${idColumn}\` = ?
+      WHERE \`${COL_USER_ID}\` = ? AND \`${COL_ID}\` = ?
     `,
     userId,
     groupId
@@ -262,7 +247,7 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
     `
     DELETE
       FROM \`${junctionTable}\`
-      WHERE \`${jtMainTableColumn}\` = $1 AND \`${jtItemTableColumn}\` IN (${dbCreatePlaceholders(
+      WHERE \`${COL_X}\` = $1 AND \`${COL_Y}\` IN (${dbCreatePlaceholders(
       removeItemIds,
       2
     )})
@@ -281,8 +266,8 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
   const updated = await txClient.$executeRawUnsafe(
     `
     UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = $1, \`${updatedAtColumn}\` = $2
-      WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4 AND \`${itemOrderColumn}\` = $5
+      SET \`${itemOrderColumn}\` = $1, \`${COL_UPDATED_AT}\` = $2
+      WHERE \`${COL_USER_ID}\` = $3 AND \`${COL_ID}\` = $4 AND \`${itemOrderColumn}\` = $5
     `,
     newItemOrder,
     Date.now(),
@@ -302,8 +287,8 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
  * IDを指定して配列からレコードを削除する（楽観ロック）
  * @param txClient transactional prisma client
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
- * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
  * @param groupId `mainTable`の対象行のID（例えばプレイリストならプレイリストID）
  * @param itemIds 削除するアイテムID（例えばプレイリストならトラックID）
@@ -311,8 +296,8 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
 function dbArrayRemoveByIdsTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
-  itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string,
   itemIds: string | readonly string[]
@@ -331,8 +316,8 @@ function dbArrayRemoveByIdsTx<T extends ArrayMainTable>(
   return dbArrayRemoveByCallbackTx(
     txClient,
     userId,
+    junctionTable,
     mainTable,
-    itemTable,
     itemOrderColumn,
     groupId,
     (itemId) => itemIdSet.has(itemId)
@@ -343,8 +328,8 @@ function dbArrayRemoveByIdsTx<T extends ArrayMainTable>(
  * 配列からレコードを削除する（楽観ロック）
  * @param txClient transactional prisma client
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
- * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
  * @param groupId `mainTable`の対象行のID（例えばプレイリストならプレイリストID）
  * @param target 削除するアイテムID（例えばプレイリストならトラックID）またはコールバック（`true`を返すと削除）
@@ -352,8 +337,8 @@ function dbArrayRemoveByIdsTx<T extends ArrayMainTable>(
 export function dbArrayRemoveTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
-  itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string,
   target: string | readonly string[] | ((itemId: string) => boolean)
@@ -362,8 +347,8 @@ export function dbArrayRemoveTx<T extends ArrayMainTable>(
     ? dbArrayRemoveByCallbackTx(
         txClient,
         userId,
+        junctionTable,
         mainTable,
-        itemTable,
         itemOrderColumn,
         groupId,
         target
@@ -371,8 +356,8 @@ export function dbArrayRemoveTx<T extends ArrayMainTable>(
     : dbArrayRemoveByIdsTx(
         txClient,
         userId,
+        junctionTable,
         mainTable,
-        itemTable,
         itemOrderColumn,
         groupId,
         target
@@ -382,16 +367,16 @@ export function dbArrayRemoveTx<T extends ArrayMainTable>(
 /**
  * 配列からレコードを削除する（楽観ロック）
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
- * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
  * @param groupId `mainTable`の対象行のID（例えばプレイリストならプレイリストID）
  * @param target 削除するアイテムID（例えばプレイリストならトラックID）またはコールバック（`true`を返すと削除）
  */
 export function dbArrayRemove<T extends ArrayMainTable>(
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
-  itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string,
   target: string | readonly string[] | ((itemId: string) => boolean)
@@ -400,8 +385,8 @@ export function dbArrayRemove<T extends ArrayMainTable>(
     dbArrayRemoveTx(
       txClient,
       userId,
+      junctionTable,
       mainTable,
-      itemTable,
       itemOrderColumn,
       groupId,
       target
@@ -413,24 +398,24 @@ export function dbArrayRemove<T extends ArrayMainTable>(
  * 配列から全てのレコードを削除する（楽観ロック）
  * @param txClient transactional prisma client
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
- * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
  * @param groupId `mainTable`の対象行のID（例えばプレイリストならプレイリストID）
  */
 export function dbArrayRemoveAllTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
-  itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string
 ): Promise<void> {
   return dbArrayRemoveByCallbackTx(
     txClient,
     userId,
+    junctionTable,
     mainTable,
-    itemTable,
     itemOrderColumn,
     groupId,
     () => true
@@ -440,15 +425,15 @@ export function dbArrayRemoveAllTx<T extends ArrayMainTable>(
 /**
  * 配列から全てのレコードを削除する（楽観ロック）
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
- * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
  * @param groupId `mainTable`の対象行のID（例えばプレイリストならプレイリストID）
  */
 export function dbArrayRemoveAll<T extends ArrayMainTable>(
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
-  itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string
 ): Promise<void> {
@@ -456,8 +441,8 @@ export function dbArrayRemoveAll<T extends ArrayMainTable>(
     dbArrayRemoveAllTx(
       txClient,
       userId,
+      junctionTable,
       mainTable,
-      itemTable,
       itemOrderColumn,
       groupId
     )
@@ -487,7 +472,7 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
     `
     SELECT \`${itemOrderColumn}\`
       FROM \`${mainTable}\`
-      WHERE \`${userIdColumn}\` = ? AND \`${idColumn}\` = ?
+      WHERE \`${COL_USER_ID}\` = ? AND \`${COL_ID}\` = ?
     `,
     userId,
     groupId
@@ -518,8 +503,8 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
   const updated = await txClient.$executeRawUnsafe(
     `
     UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = $1, \`${updatedAtColumn}\` = $2
-      WHERE \`${userIdColumn}\` = $3 AND \`${idColumn}\` = $4 AND \`${itemOrderColumn}\` = $5
+      SET \`${itemOrderColumn}\` = $1, \`${COL_UPDATED_AT}\` = $2
+      WHERE \`${COL_USER_ID}\` = $3 AND \`${COL_ID}\` = $4 AND \`${itemOrderColumn}\` = $5
     `,
     newItemOrder,
     Date.now(),
@@ -662,16 +647,16 @@ export function dbArrayCreateMoveAfterReorderCallback(
  * これ自体はアトミックだが、使用者はこの処理以降に新たに作成される場合に備えておく必要がある
  * @param txClient transactional prisma client
  * @param userId ユーザーID
+ * @param junctionTable 中間テーブル
  * @param mainTable 主となるテーブル（配列を持つ）
- * @param itemTable 配列の要素となるテーブル
  * @param itemOrderColumn 配列の順序を保持するカラム
  * @param itemId 削除するアイテムID（例えばプレイリストならトラックID）
  */
 export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
+  junctionTable: Prisma.ModelName,
   mainTable: Prisma.ModelName,
-  itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   itemId: string
 ): Promise<void> {
@@ -682,35 +667,28 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
   const itemIdBlock = dbArraySerializeItemIds([itemId]);
   const searchQuery = `%${itemIdBlock}%`;
 
-  // get the junction table info
-  const {
-    junctionTable,
-    jtTable1Column: jtMainTableColumn,
-    jtTable2Column: jtItemTableColumn,
-  } = getManyToManyTableInfo(mainTable, itemTable);
-
   const groupIds = (
-    await txClient.$queryRawUnsafe<
-      { readonly A: string; readonly B: string }[]
-    >(
+    await txClient.$queryRawUnsafe<ArrayJunctionTable[]>(
       `
-      SELECT \`${jtMainTableColumn}\`
+      SELECT \`${COL_X}\`
         FROM \`${junctionTable}\`
-        WHERE \`${jtItemTableColumn}\` = $1
+        WHERE \`${COL_USER_ID}\` = $1 AND \`${COL_Y}\` = $2
       `,
+      userId,
       itemId
     )
-  ).map((junctionRow): string => junctionRow[jtMainTableColumn]);
+  ).map((junctionRow): string => junctionRow[COL_X]);
 
   const deleted = await txClient.$executeRawUnsafe(
     `
     DELETE
       FROM \`${junctionTable}\`
-      WHERE \`${jtItemTableColumn}\` = $1 AND \`${jtMainTableColumn}\` IN (${dbCreatePlaceholders(
+      WHERE \`${COL_USER_ID}\` = $1 AND \`${COL_Y}\` = $2 AND \`${COL_X}\` IN (${dbCreatePlaceholders(
       groupIds,
-      2
+      3
     )})
     `,
+    userId,
     itemId,
     ...groupIds
   );
@@ -723,8 +701,8 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
   const updated = await txClient.$executeRawUnsafe(
     `
     UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = REPLACE(\`${itemOrderColumn}\`, $1, ''), \`${updatedAtColumn}\` = $2
-      WHERE \`${userIdColumn}\` = $3 AND \`${itemOrderColumn}\` LIKE $4 AND \`${idColumn}\` IN (${dbCreatePlaceholders(
+      SET \`${itemOrderColumn}\` = REPLACE(\`${itemOrderColumn}\`, $1, ''), \`${COL_UPDATED_AT}\` = $2
+      WHERE \`${COL_USER_ID}\` = $3 AND \`${itemOrderColumn}\` LIKE $4 AND \`${COL_ID}\` IN (${dbCreatePlaceholders(
       groupIds,
       5
     )})
@@ -740,4 +718,56 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
       `dbArrayRemoveFromAllTx: failed to UPDATE some rows (at ${junctionTable}, userId: ${userId}, itemId: ${itemId}, groupIds: ${groupIds})`
     );
   }
+}
+
+//
+
+type ItemBase = { readonly id: string };
+
+type OrderProp<K extends string> = `${K}Order`;
+type ItemsProp<K extends string> = `${K}s`;
+
+export type ArrayJunctionTableForSort<
+  K extends string,
+  V extends ItemBase
+> = Readonly<Record<K, V>>;
+
+export type TableWithJunctionTableArray<
+  K extends string,
+  V extends ItemBase
+> = Readonly<Record<OrderProp<K>, string>> &
+  Readonly<Record<ItemsProp<K>, readonly ArrayJunctionTableForSort<K, V>[]>>;
+
+export type TableWithSortedItems<
+  K extends string,
+  V extends ItemBase,
+  T extends TableWithJunctionTableArray<K, V>
+> = Omit<T, ItemsProp<K>> & Record<ItemsProp<K>, V[]>;
+
+export function dbArrayGetSortedItems<K extends string, V extends ItemBase>(
+  items: readonly ArrayJunctionTableForSort<K, V>[],
+  itemOrder: string,
+  key: K
+): V[] {
+  return dbArraySort(
+    items.map((v): V => v[key]),
+    itemOrder
+  );
+}
+
+export function dbArrayConvert<
+  K extends string,
+  V extends ItemBase,
+  T extends TableWithJunctionTableArray<K, V>
+>(item: T, key: K): TableWithSortedItems<K, V, T> {
+  const itemsProp: ItemsProp<K> = `${key}s` as const;
+  const orderProp: OrderProp<K> = `${key}Order` as const;
+  const items = item[
+    itemsProp
+  ] as unknown as readonly ArrayJunctionTableForSort<K, V>[];
+  const order = item[orderProp] as unknown as string;
+  return {
+    ...item,
+    [itemsProp]: dbArrayGetSortedItems(items, order, key),
+  } as unknown as TableWithSortedItems<K, V, T>;
 }

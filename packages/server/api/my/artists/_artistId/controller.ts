@@ -1,60 +1,18 @@
-import { ImageSortableAlbum, dbAlbumSortImages } from '$/db/album';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
-  get: async ({ params, query, user }) => {
+  get: async ({ params, user }) => {
     const artist = await client.artist.findFirst({
       where: {
         id: params.artistId,
         userId: user.id,
       },
-      include: {
-        albums: !!query?.includeAlbums && {
-          include: {
-            images: !!query.includeAlbumImages && {
-              include: {
-                files: true,
-              },
-            },
-          },
-        },
-        tracks: !!query?.includeTracks && {
-          include: {
-            album: !!query.includeTrackAlbum && {
-              include: {
-                images: !!query.includeTrackAlbumImages && {
-                  include: {
-                    files: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
     });
     if (!artist) {
       throw new HTTPError(404, `Artist ${params.artistId} not found`);
-    }
-    if (query?.includeAlbums && query.includeAlbumImages) {
-      for (const album of artist.albums) {
-        dbAlbumSortImages(album as unknown as ImageSortableAlbum);
-      }
-    }
-    if (
-      query?.includeTracks &&
-      query.includeTrackAlbum &&
-      query.includeTrackAlbumImages
-    ) {
-      for (const track of artist.tracks) {
-        const { album } = track as unknown as {
-          album: ImageSortableAlbum;
-        };
-        dbAlbumSortImages(album);
-      }
     }
     return {
       status: 200,

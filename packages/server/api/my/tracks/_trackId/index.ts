@@ -2,12 +2,6 @@ import type { Track } from '$prisma/client';
 
 export type Methods = {
   get: {
-    query?: {
-      includeTrackArtist?: boolean | number;
-      includeAlbum?: boolean | number;
-      includeAlbumArtist?: boolean | number;
-      includeAlbumImages?: boolean | number;
-    };
     resBody: Track;
   };
   patch: {

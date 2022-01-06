@@ -53,7 +53,7 @@ export default defineController(() => ({
   get: async ({ query, user }) => {
     const beginTimestamp = Date.now();
 
-    const since = query?.since || 0;
+    const since = Number(query?.since || 0);
 
     const data = await client.$transaction(
       async (txClient): Promise<ResourcesNotUpdated | ResourcesUpdated> => {
@@ -93,17 +93,20 @@ export default defineController(() => ({
           throw new HTTPError(404, `User ${user.id} not found`);
         }
 
-        const query = {
+        const q = {
           where: {
             userId: user.id,
-            updatedAt: {
-              gte: since,
-            },
+            updatedAt:
+              since > 0
+                ? {
+                    gte: since,
+                  }
+                : undefined,
           },
         } as const;
 
-        const queryWithFiles = {
-          ...query,
+        const qWithFiles = {
+          ...q,
           include: {
             files: true,
           },
@@ -114,15 +117,15 @@ export default defineController(() => ({
           timestamp,
           updatedAt,
           user: dbUser,
-          albumCoArtists: await txClient.albumCoArtist.findMany(query),
-          albums: convertAlbums(await txClient.album.findMany(query)),
-          artists: convertArtists(await txClient.artist.findMany(query)),
-          images: await txClient.image.findMany(queryWithFiles),
-          playlists: convertPlaylists(await txClient.playlist.findMany(query)),
-          sourceFiles: await txClient.sourceFile.findMany(query),
-          sources: await txClient.source.findMany(query),
-          trackCoArtists: await txClient.trackCoArtist.findMany(query),
-          tracks: await txClient.track.findMany(queryWithFiles),
+          albumCoArtists: await txClient.albumCoArtist.findMany(q),
+          albums: convertAlbums(await txClient.album.findMany(q)),
+          artists: convertArtists(await txClient.artist.findMany(q)),
+          images: await txClient.image.findMany(qWithFiles),
+          playlists: convertPlaylists(await txClient.playlist.findMany(q)),
+          sourceFiles: await txClient.sourceFile.findMany(q),
+          sources: await txClient.source.findMany(q),
+          trackCoArtists: await txClient.trackCoArtist.findMany(q),
+          tracks: await txClient.track.findMany(qWithFiles),
           deletions: (await txClient.deletion.findMany({
             where: {
               userId: user.id,

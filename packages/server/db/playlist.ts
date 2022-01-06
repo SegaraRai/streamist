@@ -1,19 +1,35 @@
-import { dbArraySort } from '$shared/dbArray';
-import { Image, ImageFile, Prisma, Track } from '$prisma/client';
 import {
+  APlaylistImage,
+  APlaylistTrack,
+  Image,
+  ImageFile,
+  Prisma,
+  Track,
+} from '$prisma/client';
+import {
+  TableWithSortedItems,
   dbArrayAdd,
   dbArrayAddTx,
   dbArrayCreateMoveBeforeReorderCallback,
+  dbArrayGetSortedItems,
   dbArrayRemove,
   dbArrayRemoveAll,
   dbArrayRemoveTx,
   dbArrayReorder,
 } from './lib/array';
 import { client } from './lib/client';
+import { dbImageArrayConvert } from './lib/image';
+import { dbTrackArrayConvert } from './lib/track';
 import type { TransactionalPrismaClient } from './lib/types';
 
-export type ImageSortablePlaylist = { imageOrder: string; images: Image[] };
-export type TrackSortablePlaylist = { trackOrder: string; tracks: Track[] };
+export type ImageSortablePlaylist<T extends Image> = {
+  imageOrder: string;
+  images: (APlaylistImage & { image: T })[];
+};
+export type TrackSortablePlaylist<T extends Track> = {
+  trackOrder: string;
+  tracks: (APlaylistTrack & { track: T })[];
+};
 
 export function dbPlaylistAddTrackTx(
   txClient: TransactionalPrismaClient,
@@ -24,6 +40,7 @@ export function dbPlaylistAddTrackTx(
   return dbArrayAddTx<typeof Prisma.PlaylistScalarFieldEnum>(
     txClient,
     userId,
+    Prisma.ModelName.APlaylistTrack,
     Prisma.ModelName.Playlist,
     Prisma.ModelName.Track,
     Prisma.PlaylistScalarFieldEnum.trackOrder,
@@ -39,6 +56,7 @@ export function dbPlaylistAddTrack(
 ): Promise<void> {
   return dbArrayAdd<typeof Prisma.PlaylistScalarFieldEnum>(
     userId,
+    Prisma.ModelName.APlaylistTrack,
     Prisma.ModelName.Playlist,
     Prisma.ModelName.Track,
     Prisma.PlaylistScalarFieldEnum.trackOrder,
@@ -56,8 +74,8 @@ export function dbPlaylistRemoveTrackTx(
   return dbArrayRemoveTx<typeof Prisma.PlaylistScalarFieldEnum>(
     txClient,
     userId,
+    Prisma.ModelName.APlaylistTrack,
     Prisma.ModelName.Playlist,
-    Prisma.ModelName.Track,
     Prisma.PlaylistScalarFieldEnum.trackOrder,
     playlistId,
     trackIds
@@ -71,8 +89,8 @@ export function dbPlaylistRemoveTrack(
 ): Promise<void> {
   return dbArrayRemove<typeof Prisma.PlaylistScalarFieldEnum>(
     userId,
+    Prisma.ModelName.APlaylistTrack,
     Prisma.ModelName.Playlist,
-    Prisma.ModelName.Track,
     Prisma.PlaylistScalarFieldEnum.trackOrder,
     playlistId,
     trackIds
@@ -85,8 +103,8 @@ export function dbPlaylistRemoveAllTracks(
 ): Promise<void> {
   return dbArrayRemoveAll<typeof Prisma.PlaylistScalarFieldEnum>(
     userId,
+    Prisma.ModelName.APlaylistTrack,
     Prisma.ModelName.Playlist,
-    Prisma.ModelName.Track,
     Prisma.PlaylistScalarFieldEnum.trackOrder,
     playlistId
   );
@@ -107,11 +125,11 @@ export function dbPlaylistMoveTrackBefore(
   );
 }
 
-export function dbPlaylistSortTracks<T extends TrackSortablePlaylist>(
-  playlist: T
-): T {
-  dbArraySort(playlist.tracks, playlist.trackOrder);
-  return playlist;
+export function dbPlaylistConvertTracks<
+  V extends Track,
+  T extends TrackSortablePlaylist<V>
+>(playlist: T): TableWithSortedItems<'track', V, T> {
+  return dbTrackArrayConvert(playlist);
 }
 
 export function dbPlaylistAddImageTx(
@@ -124,6 +142,7 @@ export function dbPlaylistAddImageTx(
   return dbArrayAddTx<typeof Prisma.PlaylistScalarFieldEnum>(
     txClient,
     userId,
+    Prisma.ModelName.APlaylistImage,
     Prisma.ModelName.Playlist,
     Prisma.ModelName.Image,
     Prisma.PlaylistScalarFieldEnum.imageOrder,
@@ -142,8 +161,8 @@ export function dbPlaylistRemoveImageTx(
   return dbArrayRemoveTx<typeof Prisma.PlaylistScalarFieldEnum>(
     txClient,
     userId,
+    Prisma.ModelName.APlaylistImage,
     Prisma.ModelName.Playlist,
-    Prisma.ModelName.Image,
     Prisma.PlaylistScalarFieldEnum.imageOrder,
     playlistId,
     imageIds
@@ -165,11 +184,11 @@ export function dbPlaylistMoveImageBefore(
   );
 }
 
-export function dbPlaylistSortImages<T extends ImageSortablePlaylist>(
-  playlist: T
-): T {
-  dbArraySort(playlist.images, playlist.imageOrder);
-  return playlist;
+export function dbPlaylistConvertImages<
+  V extends Image,
+  T extends ImageSortablePlaylist<V>
+>(playlist: T): TableWithSortedItems<'image', V, T> {
+  return dbImageArrayConvert<V, T>(playlist);
 }
 
 export async function dbPlaylistGetImages(
@@ -184,8 +203,12 @@ export async function dbPlaylistGetImages(
     select: {
       imageOrder: true,
       images: {
-        include: {
-          files: true,
+        select: {
+          image: {
+            include: {
+              files: true,
+            },
+          },
         },
       },
     },
@@ -195,5 +218,8 @@ export async function dbPlaylistGetImages(
       `dbPlaylistGetImages: playlist not found (userId=${userId}, playlistId=${playlistId})`
     );
   }
-  return dbPlaylistSortImages(playlist).images;
+  return dbArrayGetSortedItems<
+    'image',
+    typeof playlist['images'][number]['image']
+  >(playlist.images, playlist.imageOrder, 'image');
 }

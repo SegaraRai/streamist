@@ -5,6 +5,7 @@ import { Artist, Image, ImageFile, Prisma } from '$prisma/client';
 import {
   dbArrayAddTx,
   dbArrayCreateMoveBeforeReorderCallback,
+  dbArrayGetSortedItems,
   dbArrayRemoveTx,
   dbArrayReorder,
 } from './lib/array';
@@ -109,6 +110,7 @@ export function dbArtistAddImageTx(
   return dbArrayAddTx<typeof Prisma.ArtistScalarFieldEnum>(
     txClient,
     userId,
+    Prisma.ModelName.AArtistImage,
     Prisma.ModelName.Artist,
     Prisma.ModelName.Image,
     Prisma.ArtistScalarFieldEnum.imageOrder,
@@ -127,8 +129,8 @@ export function dbArtistRemoveImageTx(
   return dbArrayRemoveTx<typeof Prisma.ArtistScalarFieldEnum>(
     txClient,
     userId,
+    Prisma.ModelName.AAlbumImage,
     Prisma.ModelName.Artist,
-    Prisma.ModelName.Image,
     Prisma.ArtistScalarFieldEnum.imageOrder,
     artistId,
     imageIds
@@ -169,8 +171,12 @@ export async function dbArtistGetImages(
     select: {
       imageOrder: true,
       images: {
-        include: {
-          files: true,
+        select: {
+          image: {
+            include: {
+              files: true,
+            },
+          },
         },
       },
     },
@@ -180,5 +186,8 @@ export async function dbArtistGetImages(
       `dbArtistGetImages: artist not found (userId=${userId}, artistId=${artistId})`
     );
   }
-  return dbArtistSortImages(artist).images;
+  return dbArrayGetSortedItems<
+    'image',
+    typeof artist['images'][number]['image']
+  >(artist.images, artist.imageOrder, 'image');
 }
