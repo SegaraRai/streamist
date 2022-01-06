@@ -6,7 +6,6 @@ import {
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
 } from '$shared-server/objectStorages';
-import { CoArtistType } from '$shared/coArtist';
 import { is } from '$shared/is';
 import { parseDate } from '$shared/parseDate';
 import type {
@@ -28,7 +27,7 @@ import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import type { TransactionalPrismaClient } from '$/db/lib/types';
 import { dbPlaylistAddImageTx } from '$/db/playlist';
-import { dbTrackCreateTx } from '$/db/track';
+import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
 import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
 
 export const TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
@@ -319,15 +318,27 @@ async function handleTranscoderResponse(
           (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitleSort) ||
           undefined;
 
-        const tagCoArtists: [CoArtistType, string, string | undefined][] = [];
+        const tagCoArtists: CreateTrackInputCoArtist[] = [];
         if (tags.arranger) {
-          tagCoArtists.push(['#arranger', tags.arranger, tags.arrangersort]);
+          tagCoArtists.push({
+            role: '#arranger',
+            artistName: tags.arranger,
+            artistNameSort: tags.arrangersort,
+          });
         }
         if (tags.composer) {
-          tagCoArtists.push(['#composer', tags.composer, tags.composersort]);
+          tagCoArtists.push({
+            role: '#composer',
+            artistName: tags.composer,
+            artistNameSort: tags.composersort,
+          });
         }
         if (tags.lyricist) {
-          tagCoArtists.push(['#lyricist', tags.lyricist, tags.lyricistsort]);
+          tagCoArtists.push({
+            role: '#lyricist',
+            artistName: tags.lyricist,
+            artistNameSort: tags.lyricistsort,
+          });
         }
 
         const { track, trackArtist, album, albumArtist, coArtists } =
@@ -399,7 +410,8 @@ async function handleTranscoderResponse(
             [trackArtist, tagTrackArtistSort] as const,
             [albumArtist, tagAlbumArtistSort] as const,
             ...coArtists.map(
-              ([_1, _2, artist, nameSort]) => [artist, nameSort] as const
+              ({ artist, input: { artistNameSort } }) =>
+                [artist, artistNameSort] as const
             ),
           ];
 

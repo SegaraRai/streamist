@@ -26,18 +26,27 @@ export type CreateTrackData = Omit<
   | 'coArtists'
 >;
 
+export interface CreateTrackInputCoArtist {
+  role: CoArtistType;
+  artistName: string;
+  artistNameSort: string | undefined;
+}
+
 export interface CreateTrackInput {
   albumTitle: string;
   albumArtistName: string;
   albumArtistNameSort: string | undefined;
   trackArtistName: string;
   trackArtistNameSort: string | undefined;
-  coArtists: readonly (readonly [
-    role: CoArtistType,
-    artistName: string,
-    artistNameSort: string | undefined
-  ])[];
+  coArtists: readonly CreateTrackInputCoArtist[];
   data: CreateTrackData;
+}
+
+export interface CreateTrackResultCoArtist {
+  /** TrackCoArtist id */
+  id: string;
+  artist: Artist;
+  input: CreateTrackInputCoArtist;
 }
 
 export interface CreateTrackResult {
@@ -45,12 +54,7 @@ export interface CreateTrackResult {
   trackArtist: Artist;
   album: Album;
   albumArtist: Artist;
-  coArtists: (readonly [
-    role: CoArtistType,
-    coArtistId: string,
-    artist: Artist,
-    artistNameSort: string | undefined
-  ])[];
+  coArtists: CreateTrackResultCoArtist[];
 }
 
 export async function dbTrackCreateTx(
@@ -93,24 +97,26 @@ export async function dbTrackCreateTx(
     trackArtistNameSort
   );
 
-  const resolvedCoArtists = await Promise.all(
+  const createdCoArtists = await Promise.all(
     coArtists
-      .filter((coArtist) => isValidCoArtistType(coArtist[0]))
-      .map(
-        async ([coArtistType, coArtistName, coArtistNameSort]) =>
-          [
-            coArtistType,
-            await generateTrackCoArtistId(),
-            await artistGetOrCreateTx(coArtistName, coArtistNameSort),
-            coArtistNameSort,
-          ] as const
-      )
+      .filter((coArtist) => isValidCoArtistType(coArtist.role))
+      .map(async (input) => ({
+        id: await generateTrackCoArtistId(),
+        artist: await artistGetOrCreateTx(
+          input.artistName,
+          input.artistNameSort
+        ),
+        input,
+      }))
   );
 
   // remove duplicates
   const filteredResolvedCoArtists = Array.from(
     new Map(
-      resolvedCoArtists.map((item) => [`${item[0]}\n${item[2].id}`, item])
+      createdCoArtists.map((item) => [
+        `${item.input.role}\n${item.input.artistName}`,
+        item,
+      ])
     ).values()
   );
 
@@ -126,14 +132,16 @@ export async function dbTrackCreateTx(
       createdAt: timestamp,
       updatedAt: timestamp,
       coArtists: {
-        create: filteredResolvedCoArtists.map(([id, role, artist]) => ({
-          id,
-          role,
-          createdAt: timestamp,
-          updatedAt: timestamp,
-          artist: { connect: { id: artist.id } },
-          user: { connect: { id: userId } },
-        })),
+        create: filteredResolvedCoArtists.map(
+          ({ id, artist, input: { role } }) => ({
+            id,
+            role,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+            artist: { connect: { id: artist.id } },
+            user: { connect: { id: userId } },
+          })
+        ),
       },
     },
   });
