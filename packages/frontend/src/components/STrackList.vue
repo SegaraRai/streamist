@@ -172,6 +172,11 @@ export default defineComponent({
       }
       return array;
     });
+    const trackOnlyItems$$q = computed(() =>
+      items.value.filter(
+        (item): item is ListItemTrack => item.type$$q === 'track'
+      )
+    );
 
     const itemsProvider$$q = eagerComputed(() => {
       const v = items.value;
@@ -247,6 +252,7 @@ export default defineComponent({
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       items$$q: items,
+      trackOnlyItems$$q,
       itemsProvider$$q,
       currentPlayingTrackId$$q: currentPlayingTrackId,
       useDiscNumber$$q: useDiscNumber,
@@ -273,7 +279,7 @@ export default defineComponent({
       closeMenu$$q,
       dragging$$q,
       onTrackOrderChanged$$q: (
-        event: VueDraggableChangeEvent<ListItem>
+        event: VueDraggableChangeEvent<ListItemTrack>
       ): void => {
         const { moved } = event;
         if (!moved) {
@@ -284,17 +290,11 @@ export default defineComponent({
         if (newIndex === oldIndex) {
           return;
         }
-        if (element.type$$q === 'discNumberHeader') {
-          return;
-        }
 
         const referenceItemIndex = newIndex + (newIndex > oldIndex ? 1 : 0);
-        const referenceItem = items.value[referenceItemIndex] as
-          | ListItem
+        const referenceItem = trackOnlyItems$$q.value[referenceItemIndex] as
+          | ListItemTrack
           | undefined;
-        if (referenceItem?.type$$q === 'discNumberHeader') {
-          return;
-        }
 
         emit('move', element.track$$q, referenceItem?.track$$q);
       },
@@ -381,8 +381,9 @@ export default defineComponent({
         </div>
       </template>
       <template v-else-if="renderMode === 'draggable'">
+        <!-- discNumberHeader is not supported with 'draggable' render mode -->
         <g-draggable
-          :model-value="items$$q"
+          :model-value="trackOnlyItems$$q"
           item-key="id"
           class="flex flex-col"
           ghost-class="s-track-list--ghost"
@@ -390,9 +391,12 @@ export default defineComponent({
           @start="dragging$$q = true"
           @end="dragging$$q = false"
         >
-          <!-- discNumberHeader is not supported with 'draggable' render mode -->
+          <!--
+            multiple root template is currently not supported
+            c.f. https://github.com/SortableJS/vue.draggable.next/issues/111
+          -->
           <template #item="{ element }">
-            <template v-if="element.type$$q === 'track'">
+            <div>
               <s-track-list-track-item
                 :item="element"
                 :index-content="indexContent"
@@ -409,7 +413,7 @@ export default defineComponent({
                 @menu="showMenu$$q($event.target as HTMLElement, element)"
                 @ctx-menu="showMenu$$q($event, element)"
               />
-            </template>
+            </div>
           </template>
         </g-draggable>
       </template>
