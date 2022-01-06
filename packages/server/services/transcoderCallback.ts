@@ -490,11 +490,15 @@ async function handleTranscoderResponse(
           select: {
             images: {
               select: {
-                id: true,
-                sourceFile: {
+                image: {
                   select: {
                     id: true,
-                    sha256: true,
+                    sourceFile: {
+                      select: {
+                        id: true,
+                        sha256: true,
+                      },
+                    },
                   },
                 },
               },
@@ -506,7 +510,7 @@ async function handleTranscoderResponse(
         if (
           !album ||
           album.images
-            .flatMap((image) => image.sourceFile)
+            .flatMap(({ image }) => image.sourceFile)
             .some((file) => file.sha256 === source.sha256)
         ) {
           // album not found (= deleted during transcoding) or image already exists

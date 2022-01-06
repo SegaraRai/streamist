@@ -62,7 +62,7 @@ export async function playlistCreate(
       updatedAt: timestamp,
       trackOrder: dbArraySerializeItemIds(trackIds),
       tracks: {
-        connect: trackIds.map((trackId) => ({ id: String(trackId) })),
+        create: trackIds.map((trackId) => ({ y: String(trackId), userId })),
       },
       user: {
         connect: {

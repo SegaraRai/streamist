@@ -1,5 +1,5 @@
 import { client } from '$/db/lib/client';
-import { dbPlaylistSortTracks } from '$/db/playlist';
+import { dbPlaylistGetTracks } from '$/db/playlist';
 import { playlistTrackAdd } from '$/services/playlists';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
@@ -11,17 +11,14 @@ export default defineController(() => ({
         id: params.playlistId,
         userId: user.id,
       },
-      include: {
-        tracks: true,
-      },
     });
     if (!playlist) {
       throw new HTTPError(404, `Playlist ${params.playlistId} not found`);
     }
-    dbPlaylistSortTracks(playlist);
+    const tracks = await dbPlaylistGetTracks(user.id, params.playlistId);
     return {
       status: 200,
-      body: playlist.tracks,
+      body: tracks,
     };
   },
   post: async ({ body, params, user }) => {

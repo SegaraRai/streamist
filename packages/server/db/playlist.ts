@@ -5,6 +5,7 @@ import {
   ImageFile,
   Prisma,
   Track,
+  TrackFile,
 } from '$prisma/client';
 import {
   TableWithSortedItems,
@@ -130,6 +131,39 @@ export function dbPlaylistConvertTracks<
   T extends TrackSortablePlaylist<V>
 >(playlist: T): TableWithSortedItems<'track', V, T> {
   return dbTrackArrayConvert(playlist);
+}
+
+export async function dbPlaylistGetTracks(
+  userId: string,
+  playlistId: string
+): Promise<(Track & { files: TrackFile[] })[]> {
+  const playlist = await client.playlist.findFirst({
+    where: {
+      id: playlistId,
+      userId,
+    },
+    select: {
+      trackOrder: true,
+      tracks: {
+        select: {
+          track: {
+            include: {
+              files: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  if (!playlist) {
+    throw new Error(
+      `dbPlaylistGetTracks: playlist not found (userId=${userId}, playlistId=${playlistId})`
+    );
+  }
+  return dbArrayGetSortedItems<
+    'track',
+    typeof playlist['tracks'][number]['track']
+  >(playlist.tracks, playlist.trackOrder, 'track');
 }
 
 export function dbPlaylistAddImageTx(
