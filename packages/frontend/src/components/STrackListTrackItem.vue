@@ -215,12 +215,4 @@ export default defineComponent({
       </v-btn>
     </div>
   </v-list-item>
-  <!-- Divider -->
-  <template v-if="!item.isLast$$q">
-    <v-divider
-      data-draggable="false"
-      @contextmenu.stop.prevent
-      @dragstart.stop.prevent
-    />
-  </template>
 </template>

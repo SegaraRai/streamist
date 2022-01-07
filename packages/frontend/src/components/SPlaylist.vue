@@ -107,25 +107,26 @@ export default defineComponent({
         }
         playbackStore.setSetListAndPlayAuto$$q(value.value.tracks$$q);
       },
-      onMove$$q: (
+      onMove$$q: async (
         track: ResourceTrack,
         nextTrack: ResourceTrack | undefined
-      ): void => {
-        api.my.playlists
-          ._playlistId(playlistId$$q.value)
-          .tracks._trackId(track.id)
-          .patch({
-            body: {
-              nextTrackId: nextTrack?.id ?? null,
-            },
-          })
-          .then(() => {
-            message.success(t('message.ReorderedTrack'));
-            syncDB();
-          })
-          .catch((error) => {
-            message.error(t('message.FailedToReorderTrack', [String(error)]));
-          });
+      ): Promise<void> => {
+        try {
+          await api.my.playlists
+            ._playlistId(playlistId$$q.value)
+            .tracks._trackId(track.id)
+            .patch({
+              body: {
+                nextTrackId: nextTrack?.id ?? null,
+              },
+            });
+
+          message.success(t('message.ReorderedTrack'));
+
+          syncDB();
+        } catch (error) {
+          message.error(t('message.FailedToReorderTrack', [String(error)]));
+        }
       },
       dialog$$q,
       menuOptions$$q,
@@ -237,7 +238,7 @@ export default defineComponent({
     :playlist-id="playlistId$$q"
     visit-album
     visit-artist
-    @move="onMove$$q"
+    :on-move="onMove$$q"
   />
   <template v-if="value$$q">
     <n-dropdown

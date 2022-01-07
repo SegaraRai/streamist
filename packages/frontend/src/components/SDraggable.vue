@@ -26,6 +26,11 @@ export default defineComponent({
       >,
       default: undefined,
     },
+    disabled: Boolean,
+  },
+  emits: {
+    start: () => true,
+    end: () => true,
   },
   setup(props) {
     const tentativeItems$$q = shallowRef<any[] | undefined>();
@@ -75,7 +80,7 @@ export default defineComponent({
   <g-draggable
     :model-value="items$$q"
     :item-key="itemKey"
-    :disabled="tentative$$q"
+    :disabled="disabled || tentative$$q"
     @change="onChange$$q"
   >
     <!-- https://github.com/SortableJS/vue.draggable.next/issues/111 -->

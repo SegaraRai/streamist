@@ -265,6 +265,7 @@ export default defineComponent({
                 item-key="id"
                 class="flex gap-x-4 h-64 sm:h-80 pt-8"
                 :on-move="onImageOrderChanged$$q"
+                :disabled="images$$q.length <= 1"
                 @dragstart="dragging$$q = true"
                 @dragend="dragging$$q = false"
               >

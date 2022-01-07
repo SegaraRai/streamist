@@ -120,7 +120,7 @@ message:
   RemovedFromPlaylist: "Removed '{1}' from '{0}'"
   FailedToRemoveFromPlaylist: "Failed to remove '{1}' from '{0}'\n{2}"
   ReorderedTrack: 'Reordered track'
-  FailedToReorderTrack: "Failed to reorder track\n{1}"
+  FailedToReorderTrack: "Failed to reorder track\n{0}"
   ReorderedImage: 'Reordered image'
   FailedToReorderImage: "Failed to reorder image\n{1}"
   DeletedImage: 'Deleted image'

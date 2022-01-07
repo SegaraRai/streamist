@@ -7,12 +7,12 @@ import type {
   ResourceTrack,
 } from '$/types';
 import { db } from '~/db';
-import { VueDraggableChangeEvent } from '~/logic/draggable/types';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
 import { useMenu } from '~/logic/menu';
 import { createTrackListDropdown } from '~/logic/naive-ui/trackListDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
+import { waitForChange } from '~/logic/waitForChange';
 import { usePlaybackStore } from '~/stores/playback';
 import { currentScrollRef } from '~/stores/scroll';
 import { useThemeStore } from '~/stores/theme';
@@ -67,11 +67,18 @@ export default defineComponent({
       type: Number,
       default: undefined,
     },
+    onMove: {
+      type: Function as PropType<
+        (
+          track: ResourceTrack,
+          nextTrack: ResourceTrack | undefined
+        ) => void | Promise<void>
+      >,
+      default: undefined,
+    },
   },
   emits: {
     play: (_track: ResourceTrack, _index: number) => true,
-    move: (_track: ResourceTrack, _nextTrack: ResourceTrack | undefined) =>
-      true,
   },
   setup(props, { emit }) {
     const { t } = useI18n();
@@ -278,25 +285,12 @@ export default defineComponent({
       menuY$$q,
       closeMenu$$q,
       dragging$$q,
-      onTrackOrderChanged$$q: (
-        event: VueDraggableChangeEvent<ListItemTrack>
-      ): void => {
-        const { moved } = event;
-        if (!moved) {
-          return;
-        }
-
-        const { newIndex, oldIndex, element } = moved;
-        if (newIndex === oldIndex) {
-          return;
-        }
-
-        const referenceItemIndex = newIndex + (newIndex > oldIndex ? 1 : 0);
-        const referenceItem = trackOnlyItems$$q.value[referenceItemIndex] as
-          | ListItemTrack
-          | undefined;
-
-        emit('move', element.track$$q, referenceItem?.track$$q);
+      onMove$$q: async (
+        item: ListItemTrack,
+        nextItem: ListItemTrack | undefined
+      ) => {
+        await props.onMove?.(item.track$$q, nextItem?.track$$q);
+        await waitForChange(trackOnlyItems$$q, 1000);
       },
     };
   },
@@ -351,7 +345,9 @@ export default defineComponent({
           </template>
           <div class="list-header-column list-column-menu py-1"></div>
         </v-list-item>
-        <v-divider />
+      </template>
+      <template v-if="items$$q.length === 0">
+        <v-divider class="mx-1" @contextmenu.stop.prevent />
       </template>
       <template v-if="renderMode === 'plain'">
         <div class="flex flex-col">
@@ -360,6 +356,7 @@ export default defineComponent({
               <s-track-list-disc-header-item :item="item" />
             </template>
             <template v-else>
+              <v-divider class="mx-1" @contextmenu.stop.prevent />
               <s-track-list-track-item
                 :item="item"
                 :index-content="indexContent"
@@ -382,40 +379,41 @@ export default defineComponent({
       </template>
       <template v-else-if="renderMode === 'draggable'">
         <!-- discNumberHeader is not supported with 'draggable' render mode -->
-        <g-draggable
-          :model-value="trackOnlyItems$$q"
+        <s-draggable
+          :items="trackOnlyItems$$q"
           item-key="id"
           class="flex flex-col"
           ghost-class="s-track-list--ghost"
-          @change="onTrackOrderChanged$$q"
-          @start="dragging$$q = true"
-          @end="dragging$$q = false"
+          :on-move="onMove$$q"
+          :disabled="trackOnlyItems$$q.length <= 1"
+          @dragstart="dragging$$q = true"
+          @dragend="dragging$$q = false"
         >
-          <!--
-            multiple root template is currently not supported
-            c.f. https://github.com/SortableJS/vue.draggable.next/issues/111
-          -->
           <template #item="{ element }">
-            <div>
-              <s-track-list-track-item
-                :item="element"
-                :index-content="indexContent"
-                :link-excludes="linkExcludes"
-                :show-album="showAlbum"
-                :show-artist="showArtist"
-                :hide-duration="hideDuration"
-                :selected="
-                  selectedTrackIndex$$q === element.index$$q &&
-                  selectedTrack$$q?.id === element.track$$q.id
-                "
-                :disable-current-playing="disableCurrentPlaying"
-                @play="play$$q(element.track$$q, element.index$$q)"
-                @menu="showMenu$$q($event.target as HTMLElement, element)"
-                @ctx-menu="showMenu$$q($event, element)"
-              />
-            </div>
+            <v-divider
+              class="mx-1"
+              data-draggable="false"
+              @contextmenu.stop.prevent
+              @dragstart.stop.prevent
+            />
+            <s-track-list-track-item
+              :item="element"
+              :index-content="indexContent"
+              :link-excludes="linkExcludes"
+              :show-album="showAlbum"
+              :show-artist="showArtist"
+              :hide-duration="hideDuration"
+              :selected="
+                selectedTrackIndex$$q === element.index$$q &&
+                selectedTrack$$q?.id === element.track$$q.id
+              "
+              :disable-current-playing="disableCurrentPlaying"
+              @play="play$$q(element.track$$q, element.index$$q)"
+              @menu="showMenu$$q($event.target as HTMLElement, element)"
+              @ctx-menu="showMenu$$q($event, element)"
+            />
           </template>
-        </g-draggable>
+        </s-draggable>
       </template>
       <template v-else-if="renderMode === 'virtual'">
         <!-- this render mode is not reactive for props.tracks -->
@@ -442,6 +440,7 @@ export default defineComponent({
             </template>
             <template v-else>
               <div :style="style">
+                <v-divider class="mx-1" @contextmenu.stop.prevent />
                 <s-track-list-track-item
                   :item="item"
                   :index-content="indexContent"

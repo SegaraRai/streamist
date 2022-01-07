@@ -30,6 +30,5 @@ export default defineComponent({
         </span>
       </div>
     </v-list-subheader>
-    <v-divider />
   </v-sheet>
 </template>
