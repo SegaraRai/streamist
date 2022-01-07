@@ -1,4 +1,4 @@
-import { ThemeDefinition } from 'vuetify';
+import type { ThemeDefinition } from 'vuetify';
 import { THEMES, ThemeName } from './definitions';
 
 export const VUETIFY_THEMES: Record<ThemeName, ThemeDefinition> =

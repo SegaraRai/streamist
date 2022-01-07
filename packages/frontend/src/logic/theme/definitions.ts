@@ -21,9 +21,9 @@ export interface ThemeDefinitionColor {
 const THEME_DARK: ThemeDefinitionColor = {
   name: 'dark',
   dark: true,
-  background: '#121212',
-  surface: '#212121',
-  tooltip: '#343434',
+  background: '#101010',
+  surface: '#1b1b1c',
+  tooltip: '#343437',
   onTooltip: '#FFFFFF',
   text: '#FFFFFF',
   primary: '#4a8af2',

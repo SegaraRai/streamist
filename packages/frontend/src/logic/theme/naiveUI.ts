@@ -54,7 +54,7 @@ export const NAIVE_UI_THEMES: Record<ThemeName, NaiveUITheme> =
             // closeColorHover: string,
             // closeColorPressed: string,
             // closeColorDisabled: string,
-            popoverColor: theme.surface,
+            popoverColor: theme.tooltip,
           },
         },
       },
