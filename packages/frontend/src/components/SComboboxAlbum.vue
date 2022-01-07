@@ -1,6 +1,6 @@
 <script lang="ts">
 import { db } from '~/db';
-import { useArtistSearch } from '~/logic/useSearch';
+import { useAlbumSearch } from '~/logic/useSearch';
 
 export default defineComponent({
   props: {
@@ -8,29 +8,34 @@ export default defineComponent({
       type: String,
       default: '',
     },
-    artistId: {
+    albumId: {
+      type: String,
+      default: undefined,
+    },
+    artistName: {
       type: String,
       default: undefined,
     },
   },
   emits: {
     'update:modelValue': (_modelValue: string) => true,
+    'update:albumId': (_albumId: string) => true,
   },
   setup(props, { emit }) {
     const { t } = useI18n();
-    const searchArtists = useArtistSearch();
+    const searchAlbums = useAlbumSearch();
     const modelValue$$q = useVModel(props, 'modelValue', emit);
-    const artistId$$q = useVModel(props, 'artistId', emit);
+    const albumId$$q = useVModel(props, 'albumId', emit);
 
-    const artists$$q = searchArtists(modelValue$$q);
+    const albums$$q = searchAlbums(modelValue$$q);
 
     watch(
-      [modelValue$$q, artistId$$q],
-      ([newModelValue, newArtistId]) => {
-        if (!newModelValue && newArtistId) {
-          db.artists.get(newArtistId).then((artist) => {
-            if (artist && artist.id === newArtistId) {
-              modelValue$$q.value = artist.name;
+      [modelValue$$q, albumId$$q],
+      ([newModelValue, newAlbumId]) => {
+        if (!newModelValue && newAlbumId) {
+          db.albums.get(newAlbumId).then((album) => {
+            if (album && album.id === newAlbumId) {
+              modelValue$$q.value = album.title;
             }
           });
         }
@@ -44,15 +49,15 @@ export default defineComponent({
       t,
       options$$q: computed(
         () =>
-          artists$$q.value.map(({ item }) => ({
-            label: item.name,
+          albums$$q.value.map(({ item }) => ({
+            label: item.title,
             value: item.id,
           })) || []
       ),
       modelValue$$q,
-      artistId$$q,
-      onSelected$$q: (artistId: string | number): void => {
-        artistId$$q.value = artistId as string;
+      albumId$$q,
+      onSelected$$q: (albumId: string | number): void => {
+        albumId$$q.value = albumId as string;
       },
     };
   },
@@ -66,32 +71,37 @@ export default defineComponent({
       class="flex-1"
       :options="options$$q"
       @select="onSelected$$q"
-      @update-value="artistId$$q = undefined"
+      @update-value="albumId$$q = undefined"
     >
       <template #default="{ handleInput }">
         <v-text-field
           class="s-v-input-hide-details"
-          label="Artist"
+          label="Album"
           hide-details
           :model-value="modelValue$$q"
           @input="e => handleInput((e.target as HTMLInputElement).value)"
         >
           <template #prependInner>
-            <template v-if="artistId$$q">
-              <s-artist-image
+            <template v-if="albumId$$q">
+              <s-album-image
                 class="flex-none mr-2 w-6 h-6"
-                :artist="artistId$$q"
+                :album="albumId$$q"
               />
             </template>
             <template v-else-if="modelValue$$q">
               <n-popover placement="top" trigger="hover">
                 <template #trigger>
-                  <i-mdi-account-plus
+                  <i-mdi-plus-circle
                     class="flex-none mr-2 w-6 h-6 text-blue-500"
                   />
                 </template>
                 <div>
-                  {{ t('combobox.artist.CreateNewArtist') }}
+                  {{
+                    t('combobox.album.CreateNewAlbum', [
+                      modelValue$$q,
+                      artistName,
+                    ])
+                  }}
                 </div>
               </n-popover>
             </template>

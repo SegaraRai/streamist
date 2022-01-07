@@ -62,17 +62,23 @@ export default defineComponent({
 
 <template>
   <template v-if="!fetched">
-    <s-nullable-image :image="false" class="select-none" />
+    <s-nullable-image
+      :image="false"
+      class="select-none rounded-lg overflow-hidden"
+    />
   </template>
   <template v-else-if="Array.isArray(image)">
     <template v-if="image.length === 0">
-      <s-nullable-image class="select-none" />
+      <s-nullable-image class="select-none rounded-lg overflow-hidden" />
     </template>
     <template v-else-if="image.length === 1">
-      <s-nullable-image :image="image[0]" class="select-none" />
+      <s-nullable-image
+        :image="image[0]"
+        class="select-none rounded-lg overflow-hidden"
+      />
     </template>
     <template v-else-if="image.length === 2">
-      <div class="flex flex-wrap select-none">
+      <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
         <s-nullable-image class="w-1/2 h-1/2" :image="image[0]" />
         <div class="w-1/2 h-1/2"></div>
         <div class="w-1/2 h-1/2"></div>
@@ -80,7 +86,7 @@ export default defineComponent({
       </div>
     </template>
     <template v-else-if="image.length === 3">
-      <div class="flex flex-wrap select-none">
+      <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
         <s-nullable-image class="w-1/2 h-1/2" :image="image[0]" />
         <s-nullable-image class="w-1/2 h-1/2" :image="image[1]" />
         <s-nullable-image class="w-1/2 h-1/2" :image="image[2]" />
@@ -88,7 +94,7 @@ export default defineComponent({
       </div>
     </template>
     <template v-else>
-      <div class="flex flex-wrap select-none">
+      <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
         <s-nullable-image class="w-1/2 h-1/2" :image="image[0]" />
         <s-nullable-image class="w-1/2 h-1/2" :image="image[1]" />
         <s-nullable-image class="w-1/2 h-1/2" :image="image[2]" />
@@ -97,6 +103,9 @@ export default defineComponent({
     </template>
   </template>
   <template v-else>
-    <s-nullable-image :image="image" class="select-none" />
+    <s-nullable-image
+      :image="image"
+      class="select-none rounded-lg overflow-hidden"
+    />
   </template>
 </template>

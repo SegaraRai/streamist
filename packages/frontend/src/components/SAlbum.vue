@@ -188,8 +188,10 @@ export default defineComponent({
           <span>
             {{ t('album.n_tracks', value$$q.tracks$$q.length) }}
           </span>
-          <span v-show="duration$$q">, {{ duration$$q }}</span>
-          <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
+          <template v-if="value$$q.tracks$$q.length">
+            <span v-show="duration$$q">, {{ duration$$q }}</span>
+            <span v-show="releaseDate$$q">, {{ releaseDate$$q }}</span>
+          </template>
         </div>
       </div>
     </div>

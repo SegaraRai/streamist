@@ -30,7 +30,6 @@ export default defineComponent({
       type: Array as PropType<readonly string[] | undefined>,
       default: undefined,
     },
-    rounded: Boolean,
     disableDialog: Boolean,
   },
   setup(props) {
@@ -38,6 +37,19 @@ export default defineComponent({
     const message = useMessage();
     const syncDB = useSyncDB();
     const uploadStore = useUploadStore();
+
+    const roundClass$$q = eagerComputed(() => {
+      switch (props.attachToType) {
+        case 'album':
+          return '';
+
+        case 'artist':
+          return 'rounded-full';
+
+        case 'playlist':
+          return 'rounded-lg';
+      }
+    });
 
     const getAPIRoot = () => {
       switch (props.attachToType) {
@@ -100,6 +112,7 @@ export default defineComponent({
     return {
       t,
       inputFileElement$$q,
+      roundClass$$q,
       dialog$$q,
       loaded$$q,
       hasImage$$q,
@@ -202,7 +215,7 @@ export default defineComponent({
     v-ripple
     v-bind="$attrs"
     class="active:outline-none s-hover-container relative"
-    :class="rounded && 'rounded-full'"
+    :class="roundClass$$q"
     @click="onImageClicked$$q"
   >
     <slot></slot>
@@ -210,7 +223,7 @@ export default defineComponent({
       <template v-if="uploading$$q">
         <div
           class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl bg-black/50"
-          :class="rounded && 'rounded-full'"
+          :class="roundClass$$q"
         >
           <v-progress-circular indeterminate />
         </div>
@@ -218,7 +231,7 @@ export default defineComponent({
       <template v-else>
         <div
           class="s-hover-visible absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl bg-black/50"
-          :class="rounded && 'rounded-full'"
+          :class="roundClass$$q"
         >
           <i-mdi-image-plus class="w-16 h-16" />
         </div>
@@ -284,8 +297,8 @@ export default defineComponent({
                       />
                     </a>
                     <n-popconfirm
-                      :positive-text="t('confirm.deleteImage.buttonDelete')"
-                      :negative-text="t('confirm.deleteImage.buttonCancel')"
+                      :positive-text="t('confirm.deleteImage.button.Delete')"
+                      :negative-text="t('confirm.deleteImage.button.Cancel')"
                       @positive-click="removeImage$$q(element.id)"
                     >
                       <template #trigger>

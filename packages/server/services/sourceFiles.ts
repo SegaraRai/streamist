@@ -56,14 +56,14 @@ export async function sourceFileDeleteFromOSIfUnreferenced(
   }
 
   const updated = await client.sourceFile.updateMany({
-    data: {
-      entityExists: false,
-      updatedAt: Date.now(),
-    },
     where: {
       id: sourceFileId,
       entityExists: true,
       userId,
+    },
+    data: {
+      entityExists: false,
+      updatedAt: Date.now(),
     },
   });
 

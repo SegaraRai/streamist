@@ -1,10 +1,6 @@
 import { Playlist } from '@prisma/client';
 import { generatePlaylistId } from '$shared-server/generateId';
 import { dbArraySerializeItemIds } from '$shared/dbArray';
-import {
-  normalizeTextForMultipleLines,
-  normalizeTextForSingleLine,
-} from '$shared/normalize';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
@@ -22,14 +18,7 @@ export async function playlistCreate(
   userId: string,
   data: Pick<Playlist, 'title' | 'notes'> & { trackIds?: string[] }
 ): Promise<Playlist> {
-  let { title, notes } = data;
-
-  title = normalizeTextForSingleLine(title) || '';
-  if (!title) {
-    throw new HTTPError(400, 'title must not be empty');
-  }
-
-  notes = normalizeTextForMultipleLines(notes) || '';
+  const { title, notes } = data;
 
   const trackIds = data.trackIds || [];
   if (Array.from(new Set(trackIds)).length !== trackIds.length) {
@@ -82,21 +71,10 @@ export async function playlistUpdate(
   playlistId: string,
   data: Partial<Pick<Playlist, 'title' | 'notes'>>
 ): Promise<void> {
-  let { title, notes } = data;
+  const { title, notes } = data;
 
   if (title == null && notes == null) {
     return;
-  }
-
-  if (title != null) {
-    title = normalizeTextForSingleLine(title);
-    if (!title) {
-      throw new HTTPError(400, 'title must not be empty');
-    }
-  }
-
-  if (notes != null) {
-    notes = normalizeTextForMultipleLines(notes) || '';
   }
 
   const newPlaylist = await client.playlist.updateMany({

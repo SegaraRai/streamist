@@ -1,4 +1,9 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, Track } from '@prisma/client';
+import { generateAlbumId, generateArtistId } from '$shared-server/generateId';
+import { parseDate } from '$shared/parseDate';
+import { emptyToNull } from '$shared/transform';
+import { dbAlbumGetOrCreateByNameTx } from '$/db/album';
+import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
 import { dbArrayRemoveFromAllTx } from '$/db/lib/array';
 import { client } from '$/db/lib/client';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
@@ -7,6 +12,193 @@ import { HTTPError } from '$/utils/httpError';
 import { albumDeleteIfUnreferenced } from './albums';
 import { artistDeleteIfUnreferenced } from './artists';
 import { sourceFileDeleteFromOSIfUnreferenced } from './sourceFiles';
+
+export type UpdateTrackData = Partial<
+  Pick<
+    Track,
+    | 'title'
+    | 'titleSort'
+    | 'discNumber'
+    | 'trackNumber'
+    | 'comment'
+    | 'lyric'
+    | 'releaseDateText'
+    | 'genre'
+    | 'bpm'
+    | 'albumId'
+    | 'artistId'
+  >
+> & {
+  artistName?: string;
+  albumTitle?: string;
+};
+
+export interface UpdateTrackOptions {
+  readonly forceNewAlbum?: boolean;
+  readonly forceNewArtist?: boolean;
+  readonly preferOldArtist?: boolean;
+  readonly preferAlbumArtist?: boolean;
+}
+
+export async function trackUpdate(
+  userId: string,
+  trackId: string,
+  data: UpdateTrackData,
+  {
+    forceNewAlbum = false,
+    forceNewArtist = false,
+    preferOldArtist = false,
+    preferAlbumArtist = false,
+  }: UpdateTrackOptions
+): Promise<Track> {
+  const parsedDate =
+    data.releaseDateText != null ? parseDate(data.releaseDateText) : undefined;
+
+  const [oldTrack, newTrack] = await client.$transaction(async (txClient) => {
+    const timestamp = Date.now();
+
+    const track = await txClient.track.findFirst({
+      where: {
+        id: trackId,
+        userId,
+      },
+      select: {
+        albumId: true,
+        artistId: true,
+        album: {
+          select: {
+            artistId: true,
+          },
+        },
+      },
+    });
+    if (!track) {
+      throw new HTTPError(404, `track ${trackId} not found`);
+    }
+
+    // create artist
+    let artistId: string | undefined;
+    if (data.artistId) {
+      const artist = await txClient.artist.findFirst({
+        where: {
+          id: data.artistId,
+          userId,
+        },
+      });
+      if (!artist) {
+        throw new HTTPError(400, `Artist ${data.artistId} not found`);
+      }
+      artistId = artist.id;
+    } else if (data.artistName) {
+      const artist = forceNewArtist
+        ? await txClient.artist.create({
+            data: {
+              id: await generateArtistId(),
+              name: data.artistName,
+              userId,
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            },
+          })
+        : await dbArtistGetOrCreateByNameTx(txClient, userId, data.artistName);
+      artistId = artist.id;
+    }
+
+    // create album
+    let albumId: string | undefined;
+    if (data.albumId) {
+      const album = await txClient.album.findFirst({
+        where: {
+          id: data.albumId,
+          userId,
+        },
+      });
+      if (!album) {
+        throw new HTTPError(400, `Album ${data.albumId} not found`);
+      }
+      albumId = album.id;
+    } else if (data.albumTitle) {
+      const newAlbumArtistId =
+        (!preferOldArtist && artistId) ||
+        (preferAlbumArtist ? track.album.artistId : track.artistId);
+      const album = forceNewAlbum
+        ? await txClient.album.create({
+            data: {
+              id: await generateAlbumId(),
+              title: data.albumTitle,
+              artistId: newAlbumArtistId,
+              userId,
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            },
+          })
+        : await dbAlbumGetOrCreateByNameTx(
+            txClient,
+            userId,
+            newAlbumArtistId,
+            data.albumTitle,
+            await generateAlbumId()
+          );
+      albumId = album.id;
+    }
+
+    // update track
+    const newTrack = await txClient.track.update({
+      where: {
+        id: trackId,
+      },
+      data: {
+        title: data.title,
+        titleSort: emptyToNull(data.titleSort),
+        discNumber: data.discNumber,
+        trackNumber: data.trackNumber,
+        comment: emptyToNull(data.comment),
+        lyric: emptyToNull(data.lyric),
+        releaseDate: parsedDate?.dateString$$q ?? null,
+        releaseDatePrecision: parsedDate?.precision$$q ?? null,
+        releaseDateText: parsedDate?.text$$q ?? null,
+        genre: emptyToNull(data.genre),
+        bpm: data.bpm,
+        albumId,
+        artistId,
+        updatedAt: timestamp,
+      },
+    });
+
+    return [track, newTrack];
+  });
+
+  let checkedArtistId: string | undefined;
+  if (newTrack.albumId !== oldTrack.albumId) {
+    const albumArtistId = await albumDeleteIfUnreferenced(
+      userId,
+      oldTrack.albumId,
+      true
+    );
+
+    // check if albumArtistId is in use
+    if (
+      // album was deleted and,
+      albumArtistId &&
+      // albumArtistId is not referenced (by newTrack)
+      albumArtistId !== newTrack.artistId
+    ) {
+      await artistDeleteIfUnreferenced(userId, albumArtistId, true);
+      checkedArtistId = albumArtistId;
+    }
+  }
+
+  if (
+    newTrack.artistId !== oldTrack.artistId &&
+    oldTrack.artistId !== checkedArtistId
+  ) {
+    await artistDeleteIfUnreferenced(userId, oldTrack.artistId, true);
+  }
+
+  await dbResourceUpdateTimestamp(userId);
+
+  return newTrack;
+}
 
 /**
  * 指定されたトラックを削除する \

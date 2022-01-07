@@ -34,7 +34,11 @@ export const TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
 export const TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${TRANSCODER_CALLBACK_API_PATH}`;
 export const TRANSCODER_CALLBACK_API_TOKEN = `Bearer ${SECRET_TRANSCODER_CALLBACK_SECRET}`;
 
-function numberOr<T>(str: string | null | undefined, fallback: T): number | T {
+function numberOr<T>(
+  str: string | null | undefined,
+  fallback: T,
+  min: number
+): number | T {
   if (!str) {
     return fallback;
   }
@@ -42,7 +46,7 @@ function numberOr<T>(str: string | null | undefined, fallback: T): number | T {
   if (!isFinite(value)) {
     return fallback;
   }
-  return value;
+  return Math.max(value, min);
 }
 
 function floatOr<T>(str: string | null | undefined, fallback: T): number | T {
@@ -68,15 +72,15 @@ function parseDiscAndTrackNumber(
   const strDisc = tags.disc?.replace(/\s/g, '');
   const strTrack = tags.track?.replace(/\s/g, '');
   if (strDisc) {
-    discNumber = numberOr(strDisc, undefined);
+    discNumber = numberOr(strDisc, undefined, 1);
   }
   if (strTrack) {
     const match = strTrack.match(/^(\d+)\.(\d+)/);
     if (match) {
-      discNumber = numberOr(match[1], undefined);
-      trackNumber = numberOr(match[2], undefined);
+      discNumber = numberOr(match[1], undefined, 1);
+      trackNumber = numberOr(match[2], undefined, 1);
     } else {
-      trackNumber = numberOr(strTrack, undefined);
+      trackNumber = numberOr(strTrack, undefined, 1);
     }
   }
 
@@ -289,7 +293,7 @@ async function handleTranscoderResponse(
       for (const artifactTrack of artifact.tracks) {
         const { duration, files, tags } = artifactTrack;
 
-        const date = (tags.date && parseDate(tags.date)) || undefined;
+        const date = tags.date ? parseDate(tags.date) : undefined;
         const [discNumber, trackNumber] = parseDiscAndTrackNumber(tags);
 
         const defaultUnknownTrackTitle = options.useFilenameAsUnknownTrackTitle
@@ -357,11 +361,13 @@ async function handleTranscoderResponse(
               discNumber,
               trackNumber,
               duration,
+              comment: tags.comment || null,
+              lyric: tags.lyrics || tags.lyric || null,
+              releaseDate: date?.dateString$$q ?? null,
+              releaseDatePrecision: date?.precision$$q ?? null,
+              releaseDateText: date?.text$$q ?? null,
               genre: tags.genre || null,
-              bpm: numberOr(tags.bpm, null),
-              releaseDate: date?.dateString$$q,
-              releaseDatePrecision: date?.precision$$q,
-              releaseDateText: date?.text$$q,
+              bpm: numberOr(tags.bpm, null, 1),
               replayGainGain: floatOr(tags.replaygain_track_gain, null),
               replayGainPeak: floatOr(tags.replaygain_track_peak, null),
               sourceFile: { connect: { id: artifact.source.sourceFileId } },

@@ -233,8 +233,10 @@ export default defineComponent({
               <v-list-item-header class="flex-1">
                 <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
                 <v-list-item-subtitle>
-                  {{ t('playlists.n_tracks', item.trackCount$$q) }},
-                  {{ item.formattedDuration$$q }}
+                  <span>{{ t('playlists.n_tracks', item.trackCount$$q) }}</span>
+                  <template v-if="item.trackCount$$q">
+                    <span>, {{ item.formattedDuration$$q }}</span>
+                  </template>
                 </v-list-item-subtitle>
               </v-list-item-header>
               <v-btn
@@ -248,9 +250,6 @@ export default defineComponent({
                 <v-icon class="s-hover-visible"> mdi-dots-vertical </v-icon>
               </v-btn>
             </v-list-item>
-            <template v-if="!item.isLast$$q">
-              <v-divider @contextmenu.prevent />
-            </template>
           </template>
         </v-list>
       </template>

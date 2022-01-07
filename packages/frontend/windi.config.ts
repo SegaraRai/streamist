@@ -5,7 +5,7 @@ import filters from 'windicss/plugin/filters';
 import lineClamp from 'windicss/plugin/line-clamp';
 import scrollSnap from 'windicss/plugin/scroll-snap';
 import typography from 'windicss/plugin/typography';
-import { COLOR_CSS_VAR_MAP } from './theme';
+import { COLOR_CSS_VAR_MAP, toKebabCase } from './theme';
 
 export default defineConfig({
   darkMode: 'class',
@@ -31,7 +31,7 @@ export default defineConfig({
     extend: {
       colors: Object.fromEntries(
         Object.entries(COLOR_CSS_VAR_MAP).map(([key, value]) => [
-          key,
+          `st-${toKebabCase(key)}`,
           `var(${value})`,
         ])
       ),

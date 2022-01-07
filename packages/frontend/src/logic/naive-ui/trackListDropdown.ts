@@ -13,6 +13,7 @@ interface TrackListDropdownCreateOptions {
   readonly playlistId$$q: Readonly<Ref<string | null | undefined>>;
   readonly showVisitAlbum$$q: Readonly<Ref<boolean>>;
   readonly showVisitArtist$$q: Readonly<Ref<boolean>>;
+  readonly showPlayback$$q: Readonly<Ref<boolean>>;
   readonly play$$q: (track: ResourceTrack) => void;
   readonly openEditTrackDialog$$q: (track: ResourceTrack) => void;
   readonly closeMenu$$q: () => void;
@@ -23,6 +24,7 @@ export function createTrackListDropdown({
   playlistId$$q,
   showVisitAlbum$$q,
   showVisitArtist$$q,
+  showPlayback$$q,
   play$$q,
   openEditTrackDialog$$q,
   closeMenu$$q,
@@ -55,53 +57,55 @@ export function createTrackListDropdown({
 
     const menuItems: MenuOption[] = [];
 
-    // Play
-    menuItems.push({
-      key: 'play',
-      label: isPlayingThisTrack
-        ? t('dropdown.trackList.Pause')
-        : t('dropdown.trackList.Play'),
-      icon: nCreateDropdownIcon(() =>
-        // NOTE: we have to access to ref directly in the render function to make icon reactive
-        playbackStore.playing$$q.value &&
-        trackId === playbackStore.currentTrack$$q.value?.id
-          ? 'mdi-pause'
-          : 'mdi-play'
-      ),
-      props: {
-        onClick: () => {
-          if (playbackStore.currentTrack$$q.value?.id === trackId) {
-            playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
-          } else {
-            play$$q(track);
-          }
-          closeMenu$$q();
+    if (showPlayback$$q.value) {
+      // Play
+      menuItems.push({
+        key: 'play',
+        label: isPlayingThisTrack
+          ? t('dropdown.trackList.Pause')
+          : t('dropdown.trackList.Play'),
+        icon: nCreateDropdownIcon(() =>
+          // NOTE: we have to access to ref directly in the render function to make icon reactive
+          playbackStore.playing$$q.value &&
+          trackId === playbackStore.currentTrack$$q.value?.id
+            ? 'mdi-pause'
+            : 'mdi-play'
+        ),
+        props: {
+          onClick: () => {
+            if (playbackStore.currentTrack$$q.value?.id === trackId) {
+              playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
+            } else {
+              play$$q(track);
+            }
+            closeMenu$$q();
+          },
         },
-      },
-    });
+      });
 
-    // Add To Play Next Queue
-    menuItems.push({
-      key: 'addToPNQueue',
-      label: t('dropdown.trackList.AddToPlayNextQueue'),
-      icon: nCreateDropdownIcon('mdi-playlist-play'),
-      props: {
-        onClick: () => {
-          closeMenu$$q();
-          playbackStore.appendTracksToPlayNextQueue$$q([track]);
-          message.success(t('message.AddedToPlayNextQueue', [track.title]));
+      // Add To Play Next Queue
+      menuItems.push({
+        key: 'addToPNQueue',
+        label: t('dropdown.trackList.AddToPlayNextQueue'),
+        icon: nCreateDropdownIcon('mdi-playlist-play'),
+        props: {
+          onClick: () => {
+            closeMenu$$q();
+            playbackStore.appendTracksToPlayNextQueue$$q([track]);
+            message.success(t('message.AddedToPlayNextQueue', [track.title]));
+          },
         },
-      },
-    });
+      });
 
-    // TODO: Remove from Play Next Queue
-    // TODO: Remove from Queue
+      // TODO: Remove from Play Next Queue
+      // TODO: Remove from Queue
 
-    // --- divider ---
-    menuItems.push({
-      key: 'div1',
-      type: 'divider',
-    });
+      // --- divider ---
+      menuItems.push({
+        key: 'div1',
+        type: 'divider',
+      });
+    }
 
     // Visit Album
     if (showVisitAlbum$$q.value) {
@@ -190,11 +194,11 @@ export function createTrackListDropdown({
             disabled,
             props: {
               onClick: () => {
-                closeMenu$$q();
-
                 if (disabled) {
                   return;
                 }
+
+                closeMenu$$q();
 
                 api.my.playlists
                   ._playlistId(playlist.id)
@@ -291,11 +295,14 @@ export function createTrackListDropdown({
       props: {
         style: nCreateDropdownTextColorStyle(theme, 'error'),
         onClick: () => {
-          dialog.warning({
+          dialog.error({
+            icon: nCreateDropdownIcon('mdi-alert-circle', {
+              style: 'font-size: inherit',
+            }),
             title: t('dialog.deleteTrack.title'),
             content: t('dialog.deleteTrack.content', [track.title]),
-            positiveText: t('dialog.deleteTrack.buttonDelete'),
-            negativeText: t('dialog.deleteTrack.buttonCancel'),
+            positiveText: t('dialog.deleteTrack.button.Delete'),
+            negativeText: t('dialog.deleteTrack.button.Cancel'),
             onPositiveClick: () => {
               api.my.tracks
                 ._trackId(trackId)

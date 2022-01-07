@@ -76,32 +76,57 @@ combobox:
 dialogComponent:
   editAlbum:
     title: Edit {0}
-    buttonOK: OK
-    buttonCancel: Cancel
+    button:
+      OK: OK
+      Cancel: Cancel
   editPlaylist:
     title: Edit {0}
-    buttonOK: OK
-    buttonCancel: Cancel
+    button:
+      OK: OK
+      Cancel: Cancel
+    label:
+      Title: Title
+      Description: Description
   editTrack:
     title: Edit {0}
-    buttonOK: OK
-    buttonCancel: Cancel
+    button:
+      OK: OK
+      Cancel: Cancel
+    more: More
+    label:
+      Title: Title
+      TitleSort: Title sort
+      Album: Album
+      Artist: Artist
+      TrackNumber: Track no.
+      DiscNumber: Disc no.
+      ReleaseDate: Release date
+      Genre: Genre
+      BPM: BPM
+      Comment: Comment
+      Lyrics: Lyrics
+    releaseDate:
+      hint: Release date will be treated as {0}
+      invalid: Cannot parse release date
 dialog:
   deletePlaylist:
     title: Delete Playlist
     content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
-    buttonDelete: Delete
-    buttonCancel: Cancel
+    button:
+      Delete: Delete
+      Cancel: Cancel
   deleteTrack:
     title: Delete Track
     content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
-    buttonDelete: Delete
-    buttonCancel: Cancel
+    button:
+      Delete: Delete
+      Cancel: Cancel
 confirm:
   deleteImage:
     text: "Are you sure you want to delete image of '{0}'?\nThis action cannot be undone."
-    buttonDelete: Delete
-    buttonCancel: Cancel
+    button:
+      Delete: Delete
+      Cancel: Cancel
 message:
   SyncedDatabase: Synchronized
   FailedToSyncDatabase: "Failed to synchronize\n{0}"
@@ -111,6 +136,10 @@ message:
   FailedToModifyPlaylist: "Failed to modify playlist '{0}'\n{1}"
   DeletedPlaylist: "Deleted playlist '{0}'"
   FailedToDeletePlaylist: "Failed to delete playlist '{0}'\n{1}"
+  ReorderedTrack: 'Reordered track'
+  FailedToReorderTrack: "Failed to reorder track\n{0}"
+  ModifiedTrack: "Modified track '{0}'"
+  FailedToModifyTrack: "Failed to modify track '{0}'\n{1}"
   DeletedTrack: "Deleted track '{0}'"
   FailedToDeleteTrack: "Failed to delete track '{0}'\n{1}"
   AddedToPlayNextQueue: Added to queue
@@ -119,8 +148,6 @@ message:
   FailedToAddToPlaylist: "Failed to add '{1}' to '{0}'\n{2}"
   RemovedFromPlaylist: "Removed '{1}' from '{0}'"
   FailedToRemoveFromPlaylist: "Failed to remove '{1}' from '{0}'\n{2}"
-  ReorderedTrack: 'Reordered track'
-  FailedToReorderTrack: "Failed to reorder track\n{0}"
   ReorderedImage: 'Reordered image'
   FailedToReorderImage: "Failed to reorder image\n{1}"
   DeletedImage: 'Deleted image'

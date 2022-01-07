@@ -1,4 +1,5 @@
 import type { Track } from '$prisma/client';
+import type { VTrackUpdateBody } from '$/validators';
 
 export type Methods = {
   get: {
@@ -8,13 +9,10 @@ export type Methods = {
     query?: {
       forceNewArtist?: boolean | number;
       forceNewAlbum?: boolean | number;
+      preferOldArtist?: boolean | number;
       preferAlbumArtist?: boolean | number;
     };
-    // NOTE: APIがstableになるまでvalidatorは作成しない
-    reqBody: Partial<Pick<Track, 'title' | 'albumId' | 'artistId'>> & {
-      artistName?: string;
-      albumTitle?: string;
-    };
+    reqBody: VTrackUpdateBody;
     resBody: Track;
   };
   delete: {

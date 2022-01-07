@@ -133,13 +133,15 @@ export default defineComponent({
       });
     }, [propTracksRef]);
 
-    const useDiscNumber = computed(
+    const useDiscNumber = computed<boolean>(
       () =>
-        (props.showDiscNumber &&
-          trackItems.value?.some(
-            (trackItem) => trackItem.track.discNumber !== 1
-          )) ||
-        false
+        props.showDiscNumber &&
+        !!trackItems.value &&
+        trackItems.value.length > 0 &&
+        trackItems.value.some(
+          (trackItem, _, array) =>
+            trackItem.track.discNumber !== array[0].track.discNumber
+        )
     );
 
     const items = computed(() => {
@@ -231,6 +233,7 @@ export default defineComponent({
       playlistId$$q: eagerComputed(() => props.playlistId),
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
+      showPlayback$$q: ref(true),
       play$$q: (track: ResourceTrack) => {
         if (
           !selectedTrack$$q.value ||
@@ -345,10 +348,9 @@ export default defineComponent({
           </template>
           <div class="list-header-column list-column-menu py-1"></div>
         </v-list-item>
+        <v-divider class="mx-1" @contextmenu.prevent />
       </template>
-      <template v-if="items$$q.length === 0">
-        <v-divider class="mx-1" @contextmenu.stop.prevent />
-      </template>
+      <template v-if="items$$q.length === 0"> </template>
       <template v-if="renderMode === 'plain'">
         <div class="flex flex-col">
           <template v-for="(item, _index) in items$$q" :key="_index">
@@ -356,7 +358,6 @@ export default defineComponent({
               <s-track-list-disc-header-item :item="item" />
             </template>
             <template v-else>
-              <v-divider class="mx-1" @contextmenu.stop.prevent />
               <s-track-list-track-item
                 :item="item"
                 :index-content="indexContent"
@@ -390,12 +391,6 @@ export default defineComponent({
           @dragend="dragging$$q = false"
         >
           <template #item="{ element }">
-            <v-divider
-              class="mx-1"
-              data-draggable="false"
-              @contextmenu.stop.prevent
-              @dragstart.stop.prevent
-            />
             <s-track-list-track-item
               :item="element"
               :index-content="indexContent"
@@ -440,7 +435,6 @@ export default defineComponent({
             </template>
             <template v-else>
               <div :style="style">
-                <v-divider class="mx-1" @contextmenu.stop.prevent />
                 <s-track-list-track-item
                   :item="item"
                   :index-content="indexContent"

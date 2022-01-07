@@ -26,15 +26,15 @@ export default defineComponent({
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
     const playlistId$$q = ref('');
-    const title$$q = ref('');
-    const notes$$q = ref('');
+    const itemTitle$$q = ref('');
+    const itemNotes$$q = ref('');
 
     watch(
       eagerComputed(() => props.playlist),
       (newPlaylist) => {
         playlistId$$q.value = newPlaylist.id;
-        title$$q.value = newPlaylist.title;
-        notes$$q.value = newPlaylist.notes;
+        itemTitle$$q.value = newPlaylist.title;
+        itemNotes$$q.value = newPlaylist.notes;
       },
       {
         immediate: true,
@@ -43,8 +43,8 @@ export default defineComponent({
 
     const modified$$q = eagerComputed(
       () =>
-        (title$$q.value && title$$q.value !== props.playlist.title) ||
-        notes$$q.value !== props.playlist.notes
+        (itemTitle$$q.value && itemTitle$$q.value !== props.playlist.title) ||
+        itemNotes$$q.value !== props.playlist.notes
     );
 
     return {
@@ -52,8 +52,8 @@ export default defineComponent({
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
       fullscreen$$q: eagerComputed(() => display.smAndDown.value),
-      title$$q,
-      notes$$q,
+      itemTitle$$q,
+      itemNotes$$q,
       modified$$q,
       apply$$q: () => {
         const playlist = props.playlist;
@@ -66,22 +66,26 @@ export default defineComponent({
           .$patch({
             body: {
               title:
-                title$$q.value && title$$q.value !== playlist.title
-                  ? title$$q.value
+                itemTitle$$q.value && itemTitle$$q.value !== playlist.title
+                  ? itemTitle$$q.value
                   : undefined,
               notes:
-                playlist.notes !== notes$$q.value ? notes$$q.value : undefined,
+                playlist.notes !== itemNotes$$q.value
+                  ? itemNotes$$q.value
+                  : undefined,
             },
           })
           .then(() => {
             dialog$$q.value = false;
-            message.success(t('message.ModifiedPlaylist', [title$$q.value]));
+            message.success(
+              t('message.ModifiedPlaylist', [itemTitle$$q.value])
+            );
             syncDB();
           })
           .catch((error) => {
             message.error(
               t('message.FailedToModifyPlaylist', [
-                title$$q.value,
+                playlist.title,
                 String(error),
               ])
             );
@@ -132,17 +136,17 @@ export default defineComponent({
           </div>
           <div class="flex-1 flex flex-col gap-y-6">
             <v-text-field
-              v-model="title$$q"
+              v-model="itemTitle$$q"
               hide-details
               class="s-v-input-hide-details"
-              label="Title"
+              :label="t('dialogComponent.editPlaylist.label.Title')"
               required
             />
             <v-textarea
-              v-model="notes$$q"
+              v-model="itemNotes$$q"
               hide-details
               class="s-v-input-hide-details"
-              label="Description"
+              :label="t('dialogComponent.editPlaylist.label.Description')"
             />
           </div>
         </div>
@@ -150,10 +154,10 @@ export default defineComponent({
       <v-card-actions class="gap-x-4 pb-4 px-6">
         <v-spacer />
         <v-btn @click="dialog$$q = false">
-          {{ t('dialogComponent.editPlaylist.buttonCancel') }}
+          {{ t('dialogComponent.editPlaylist.button.Cancel') }}
         </v-btn>
         <v-btn color="primary" :disabled="!modified$$q" @click="apply$$q">
-          {{ t('dialogComponent.editPlaylist.buttonOK') }}
+          {{ t('dialogComponent.editPlaylist.button.OK') }}
         </v-btn>
       </v-card-actions>
     </v-card>

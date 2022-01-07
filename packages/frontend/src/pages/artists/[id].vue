@@ -119,7 +119,6 @@ export default defineComponent({
         :attach-to-id="id"
         :attach-to-title="value$$q?.artist$$q.name"
         :image-ids="imageIds$$q"
-        rounded
       >
         <s-artist-image
           class="w-50 h-50"

@@ -193,7 +193,9 @@ export default defineComponent({
           <span>
             {{ t('playlist.n_tracks', value$$q.tracks$$q.length) }}
           </span>
-          <span v-show="duration$$q">, {{ duration$$q }}</span>
+          <template v-if="value$$q.tracks$$q.length">
+            <span v-show="duration$$q">, {{ duration$$q }}</span>
+          </template>
         </div>
       </div>
     </div>

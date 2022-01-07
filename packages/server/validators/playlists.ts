@@ -1,13 +1,17 @@
 import type { Playlist } from '@prisma/client';
+import { Transform } from 'class-transformer';
 import {
   ArrayUnique,
   IsArray,
   IsNotEmpty,
   IsString,
-  Matches,
   Validate,
 } from 'class-validator';
 import { IsIdConstraint, IsUndefinable } from './utils';
+import {
+  tStringNormalizeMultipleLines,
+  tStringNormalizeSingleLine,
+} from './utils/transform';
 
 type IPlaylistCreateBody = Pick<Playlist, 'title' | 'notes'> & {
   trackIds?: string[];
@@ -16,10 +20,11 @@ type IPlaylistCreateBody = Pick<Playlist, 'title' | 'notes'> & {
 export class VPlaylistCreateBody implements IPlaylistCreateBody {
   @IsString()
   @IsNotEmpty()
-  @Matches(/\S/)
+  @Transform(({ value }) => tStringNormalizeSingleLine(value))
   title!: string;
 
   @IsString()
+  @Transform(({ value }) => tStringNormalizeMultipleLines(value))
   notes!: string;
 
   @IsUndefinable()
@@ -35,11 +40,12 @@ export class VPlaylistUpdateBody implements IPlaylistUpdateBody {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()
-  @Matches(/\S/)
+  @Transform(({ value }) => tStringNormalizeSingleLine(value))
   title?: string;
 
   @IsUndefinable()
   @IsString()
+  @Transform(({ value }) => tStringNormalizeMultipleLines(value))
   notes?: string;
 }
 

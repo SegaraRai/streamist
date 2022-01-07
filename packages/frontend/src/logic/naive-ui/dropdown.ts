@@ -5,11 +5,12 @@ import { VIcon } from 'vuetify/lib/components/index';
 type ThemeInstance = ReturnType<typeof useTheme>;
 
 export function nCreateDropdownIcon(
-  icon: string | (() => string)
+  icon: string | (() => string),
+  props?: Record<string, any> | null
 ): () => VNode {
   return typeof icon === 'string'
-    ? (): VNode => h(VIcon, null, (): string => icon) // wrap in a function to suppress the warning from vue
-    : (): VNode => h(VIcon, null, icon);
+    ? (): VNode => h(VIcon, props, (): string => icon) // wrap in a function to suppress the warning from vue
+    : (): VNode => h(VIcon, props, icon);
 }
 
 export function nCreateDropdownTextColorStyle(

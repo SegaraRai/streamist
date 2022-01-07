@@ -148,7 +148,9 @@ export default defineComponent({
       <v-list-item-title class="track-title">
         <span
           class="block overflow-hidden overflow-ellipsis max-w-max"
-          :class="isCurrentPlayingTrack$$q ? 'text-primary' : 'cursor-pointer'"
+          :class="
+            isCurrentPlayingTrack$$q ? 'text-st-primary' : 'cursor-pointer'
+          "
           @click.stop="!isCurrentPlayingTrack$$q && play$$q()"
         >
           {{ item.track$$q.title }}

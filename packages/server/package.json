@@ -51,7 +51,7 @@
     "velona": "^0.7.0"
   },
   "devDependencies": {
-    "@segararai/frourio": "^0.25.1-fork",
+    "@segararai/frourio": "^0.25.1-fork.2",
     "@types/busboy": "^0.3.1",
     "@types/node": "^17.0.6",
     "cross-env": "^7.0.3",

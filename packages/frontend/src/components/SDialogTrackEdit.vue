@@ -1,11 +1,25 @@
 <script lang="ts">
-// import { useMessage } from 'naive-ui';
+import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
-import { useDisplay } from 'vuetify';
+import { parseDate } from '$shared/parseDate';
 import type { ResourceTrack } from '$/types';
 import { useTranslatedTimeAgo } from '~/composables/timeAgo';
-// import { useSyncDB } from '~/db/sync';
-// import api from '~/logic/api';
+import { useSyncDB } from '~/db/sync';
+import api from '~/logic/api';
+
+const createNumericRef = () => {
+  const internal = ref<number | undefined>();
+  return computed({
+    get: (): number | undefined => internal.value,
+    set: (value: string | number | undefined): void => {
+      let parsed: number | undefined;
+      if (value != null && value !== '') {
+        parsed = typeof value === 'string' ? parseInt(value, 10) : value;
+      }
+      internal.value = parsed != null && isFinite(parsed) ? parsed : undefined;
+    },
+  });
+};
 
 export default defineComponent({
   props: {
@@ -20,37 +34,109 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { t } = useI18n();
-    const display = useDisplay();
-    // const message = useMessage();
-    // const syncDB = useSyncDB();
+    const message = useMessage();
+    const syncDB = useSyncDB();
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
     const trackId$$q = ref('');
-    const title$$q = ref('');
+    const albumId$$q = ref('');
+    const albumTitle$$q = ref('');
     const artistId$$q = ref('');
     const artistName$$q = ref('');
+    const itemTitle$$q = ref('');
+    const itemTitleSort$$q = ref('');
+    const itemTrackNumber$$q = createNumericRef();
+    const itemDiscNumber$$q = createNumericRef();
+    const itemReleaseDateText$$q = ref('');
+    const itemGenre$$q = ref('');
+    const itemBPM$$q = createNumericRef();
+    const itemComment$$q = ref('');
+    const itemLyrics$$q = ref('');
 
     watch(
       eagerComputed(() => props.track),
       (newTrack) => {
         trackId$$q.value = newTrack.id;
-        title$$q.value = newTrack.title;
+        albumId$$q.value = newTrack.albumId;
+        albumTitle$$q.value = '';
         artistId$$q.value = newTrack.artistId;
         artistName$$q.value = '';
+        itemTitle$$q.value = newTrack.title;
+        itemTitleSort$$q.value = newTrack.titleSort || '';
+        itemDiscNumber$$q.value = newTrack.discNumber;
+        itemTrackNumber$$q.value = newTrack.trackNumber;
+        itemReleaseDateText$$q.value = newTrack.releaseDateText || '';
+        itemGenre$$q.value = newTrack.genre || '';
+        itemBPM$$q.value = newTrack.bpm ?? undefined;
+        itemComment$$q.value = newTrack.comment || '';
+        itemLyrics$$q.value = newTrack.lyric || '';
       },
       {
         immediate: true,
       }
     );
 
+    const isAlbumEmpty$$q = eagerComputed(
+      () => !albumId$$q.value && !albumTitle$$q.value
+    );
+
     const isArtistEmpty$$q = eagerComputed(
       () => !artistId$$q.value && !artistName$$q.value
     );
 
+    const parsedReleaseDate$$q = eagerComputed(() =>
+      itemReleaseDateText$$q.value
+        ? parseDate(itemReleaseDateText$$q.value)
+        : undefined
+    );
+    const releaseDateWarning$$q = eagerComputed(
+      () => !!itemReleaseDateText$$q.value && !parsedReleaseDate$$q.value
+    );
+    const releaseDateHint$$q = eagerComputed(() => {
+      if (releaseDateWarning$$q.value) {
+        return t('dialogComponent.editTrack.releaseDate.invalid');
+      }
+
+      const parsed = parsedReleaseDate$$q.value;
+      if (!parsed) {
+        return;
+      }
+
+      // TODO: localization
+      const dateString = parsed.dateString$$q;
+      switch (parsed.precision$$q) {
+        case 'year':
+          return t('dialogComponent.editTrack.releaseDate.hint', [
+            dateString.slice(0, 4),
+          ]);
+
+        case 'month':
+          return t('dialogComponent.editTrack.releaseDate.hint', [
+            dateString.slice(0, 7),
+          ]);
+
+        case 'day':
+          return t('dialogComponent.editTrack.releaseDate.hint', [dateString]);
+      }
+    });
+
     const modified$$q = eagerComputed(
       () =>
-        (title$$q.value && title$$q.value !== props.track.title) ||
+        (itemTitle$$q.value && itemTitle$$q.value !== props.track.title) ||
+        (itemTitleSort$$q.value || null) !== props.track.titleSort ||
+        (itemDiscNumber$$q.value != null &&
+          itemDiscNumber$$q.value !== props.track.discNumber) ||
+        (itemTrackNumber$$q.value != null &&
+          itemTrackNumber$$q.value !== props.track.trackNumber) ||
+        (itemReleaseDateText$$q.value || null) !==
+          props.track.releaseDateText ||
+        (itemGenre$$q.value || null) !== props.track.genre ||
+        (itemBPM$$q.value ?? null) !== props.track.bpm ||
+        (itemComment$$q.value || null) !== props.track.comment ||
+        ((itemLyrics$$q.value || null) &&
+          itemLyrics$$q.value !== props.track.lyric) ||
+        (!isAlbumEmpty$$q.value && albumId$$q.value !== props.track.albumId) ||
         (!isArtistEmpty$$q.value && artistId$$q.value !== props.track.artistId)
     );
 
@@ -58,10 +144,24 @@ export default defineComponent({
       t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
-      fullscreen$$q: eagerComputed(() => display.smAndDown.value),
-      title$$q,
+      isAlbumEmpty$$q,
+      albumId$$q,
+      albumName$$q: albumTitle$$q,
+      isArtistEmpty$$q,
       artistId$$q,
       artistName$$q,
+      parsedReleaseDate$$q,
+      releaseDateHint$$q,
+      releaseDateWarning$$q,
+      itemTitle$$q,
+      itemTitleSort$$q,
+      itemDiscNumber$$q,
+      itemTrackNumber$$q,
+      itemReleaseDateText$$q,
+      itemGenre$$q,
+      itemBPM$$q,
+      itemComment$$q,
+      itemLyrics$$q,
       modified$$q,
       strCreatedAt$$q: useTranslatedTimeAgo(
         eagerComputed(() => props.track.createdAt)
@@ -76,34 +176,73 @@ export default defineComponent({
           return;
         }
 
-        console.log('todo');
+        const convertReqStr = (
+          input: string,
+          org: string
+        ): string | undefined => {
+          input = input.trim();
+          return input && input !== org ? input : undefined;
+        };
+        const convertReqNum = (
+          input: number | undefined,
+          org: number
+        ): number | undefined =>
+          input != null && input !== org ? input : undefined;
+        const convertOptStr = (
+          input: string,
+          org: string | null
+        ): string | undefined => {
+          input = input.trim();
+          return input && input !== (org || '') ? input : undefined;
+        };
+        const convertOptNum = (
+          input: number | undefined,
+          org: number | null
+        ): number | null | undefined =>
+          (input ?? null) !== org ? input ?? null : undefined;
 
-        // TODO
-        /*
-        api.my.playlists
-          ._playlistId(playlistId)
+        api.my.tracks
+          ._trackId(trackId)
           .$patch({
             body: {
-              title:
-                playlist.title !== title$$q.value ? title$$q.value : undefined,
-              notes:
-                playlist.notes !== notes$$q.value ? notes$$q.value : undefined,
+              title: convertReqStr(itemTitle$$q.value, track.title),
+              titleSort: convertOptStr(itemTitleSort$$q.value, track.titleSort),
+              trackNumber: convertReqNum(
+                itemTrackNumber$$q.value,
+                track.trackNumber
+              ),
+              discNumber: convertReqNum(
+                itemDiscNumber$$q.value,
+                track.discNumber
+              ),
+              releaseDateText: convertOptStr(
+                itemReleaseDateText$$q.value,
+                track.releaseDateText
+              ),
+              genre: convertOptStr(itemGenre$$q.value, track.genre),
+              bpm: convertOptNum(itemBPM$$q.value, track.bpm),
+              comment: convertOptStr(itemComment$$q.value, track.comment),
+              lyric: convertOptStr(itemLyrics$$q.value, track.lyric),
+              albumId: convertOptStr(albumId$$q.value, track.albumId),
+              albumTitle: albumId$$q.value
+                ? undefined
+                : albumTitle$$q.value.trim(),
+              artistId: convertOptStr(artistId$$q.value, track.artistId),
+              artistName: artistId$$q.value
+                ? undefined
+                : artistName$$q.value.trim(),
             },
           })
           .then(() => {
             dialog$$q.value = false;
-            message.success(t('message.ModifiedPlaylist', [title$$q.value]));
+            message.success(t('message.ModifiedTrack', [itemTitle$$q.value]));
             syncDB();
           })
           .catch((error) => {
             message.error(
-              t('message.FailedToModifyPlaylist', [
-                title$$q.value,
-                String(error),
-              ])
+              t('message.FailedToModifyTrack', [track.title, String(error)])
             );
           });
-        //*/
       },
     };
   },
@@ -138,63 +277,90 @@ export default defineComponent({
           <div class="flex-1 flex flex-col gap-y-6">
             <div class="flex gap-x-6">
               <v-text-field
-                v-model="title$$q"
+                v-model="itemTitle$$q"
                 hide-details
                 class="flex-1 s-v-input-hide-details"
-                label="Title"
+                :label="t('dialogComponent.editTrack.label.Title')"
                 required
               />
               <v-text-field
-                v-model="title$$q"
+                v-model="itemTitleSort$$q"
                 hide-details
                 class="flex-1 s-v-input-hide-details"
-                label="Title sort"
+                :label="t('dialogComponent.editTrack.label.TitleSort')"
               />
             </div>
-            <s-artist-combobox
+            <s-combobox-artist
               v-model="artistName$$q"
               v-model:artistId="artistId$$q"
             />
-            <v-text-field
-              v-model="title$$q"
-              hide-details
-              class="s-v-input-hide-details"
-              label="Album"
+            <s-combobox-album
+              v-model="albumName$$q"
+              v-model:albumId="albumId$$q"
             />
             <n-collapse>
               <n-collapse-item title="More">
                 <div class="flex flex-col gap-y-6">
+                  <div class="flex gap-6 flex-col sm:flex-row">
+                    <div class="flex-1 flex-grow-[2] flex gap-6">
+                      <v-text-field
+                        v-model="itemTrackNumber$$q"
+                        hide-details
+                        type="number"
+                        min="1"
+                        class="s-v-input-hide-details !flex-1"
+                        :label="
+                          t('dialogComponent.editTrack.label.TrackNumber')
+                        "
+                      />
+                      <v-text-field
+                        v-model="itemDiscNumber$$q"
+                        hide-details
+                        type="number"
+                        min="1"
+                        class="s-v-input-hide-details !flex-1"
+                        :label="t('dialogComponent.editTrack.label.DiscNumber')"
+                      />
+                    </div>
+                    <v-text-field
+                      v-model="itemReleaseDateText$$q"
+                      hide-details
+                      class="s-v-input-hide-details !flex-1"
+                      :label="t('dialogComponent.editTrack.label.ReleaseDate')"
+                      :hint="releaseDateHint$$q"
+                      :title="releaseDateHint$$q"
+                      :color="releaseDateWarning$$q ? 'warning' : undefined"
+                      :error="releaseDateWarning$$q"
+                      persistent-hint
+                    />
+                  </div>
                   <div class="flex gap-x-6">
                     <v-text-field
-                      v-model="title$$q"
+                      v-model="itemGenre$$q"
                       hide-details
-                      class="s-v-input-hide-details"
-                      label="Release Date"
+                      class="s-v-input-hide-details !flex-1"
+                      :label="t('dialogComponent.editTrack.label.Genre')"
                     />
                     <v-text-field
-                      v-model="title$$q"
+                      v-model="itemBPM$$q"
                       hide-details
-                      class="s-v-input-hide-details"
-                      label="Genre"
-                    />
-                    <v-text-field
-                      v-model="title$$q"
-                      hide-details
-                      class="s-v-input-hide-details"
-                      label="BPM"
+                      type="number"
+                      min="1"
+                      class="s-v-input-hide-details !flex-1"
+                      :label="t('dialogComponent.editTrack.label.BPM')"
                     />
                   </div>
                   <v-text-field
-                    v-model="title$$q"
+                    v-model="itemComment$$q"
                     hide-details
                     class="s-v-input-hide-details"
-                    label="Comment"
+                    :label="t('dialogComponent.editTrack.label.Comment')"
                   />
                   <v-textarea
-                    v-model="title$$q"
+                    v-model="itemLyrics$$q"
                     hide-details
                     class="s-v-input-hide-details"
-                    label="Lyrics"
+                    :label="t('dialogComponent.editTrack.label.Lyrics')"
                   />
                   <footer class="flex m-0 gap-x-4 justify-end">
                     <dl class="flex gap-x-4">
@@ -216,10 +382,14 @@ export default defineComponent({
       <v-card-actions class="gap-x-4 pb-4 px-4">
         <v-spacer />
         <v-btn @click="dialog$$q = false">
-          {{ t('dialogComponent.editTrack.buttonCancel') }}
+          {{ t('dialogComponent.editTrack.button.Cancel') }}
         </v-btn>
-        <v-btn color="primary" :disabled="!modified$$q" @click="apply$$q">
-          {{ t('dialogComponent.editTrack.buttonOK') }}
+        <v-btn
+          color="primary"
+          :disabled="isAlbumEmpty$$q || isArtistEmpty$$q || !modified$$q"
+          @click="apply$$q"
+        >
+          {{ t('dialogComponent.editTrack.button.OK') }}
         </v-btn>
       </v-card-actions>
     </v-card>

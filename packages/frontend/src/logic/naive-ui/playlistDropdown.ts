@@ -92,11 +92,11 @@ export function createPlaylistDropdown({
       props: {
         style: nCreateDropdownTextColorStyle(theme, 'error'),
         onClick: (): void => {
-          dialog.warning({
+          dialog.error({
             title: t('dialog.deletePlaylist.title'),
             content: t('dialog.deletePlaylist.content', [playlist.title]),
-            positiveText: t('dialog.deletePlaylist.buttonDelete'),
-            negativeText: t('dialog.deletePlaylist.buttonCancel'),
+            positiveText: t('dialog.deletePlaylist.button.Delete'),
+            negativeText: t('dialog.deletePlaylist.button.Cancel'),
             onPositiveClick: () => {
               api.my.playlists
                 ._playlistId(playlistId)

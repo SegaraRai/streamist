@@ -210,7 +210,7 @@ importers:
       '@aws-sdk/client-s3': ^3.45.0
       '@aws-sdk/s3-request-presigner': ^3.45.0
       '@prisma/client': ^3.7.0
-      '@segararai/frourio': ^0.25.1-fork
+      '@segararai/frourio': ^0.25.1-fork.2
       '@types/busboy': ^0.3.1
       '@types/node': ^17.0.6
       aspida: ^1.7.1
@@ -265,7 +265,7 @@ importers:
       tsd: 0.19.1
       velona: 0.7.0
     devDependencies:
-      '@segararai/frourio': 0.25.1-fork
+      '@segararai/frourio': 0.25.1-fork.2
       '@types/busboy': 0.3.1
       '@types/node': 17.0.6
       cross-env: 7.0.3
@@ -3576,8 +3576,8 @@ packages:
       picomatch: 2.3.1
     dev: true
 
-  /@segararai/frourio/0.25.1-fork:
-    resolution: {integrity: sha512-fhu/fd6EgW2d/Nw63f7tR5cbMkw+mmJyFl4DvztQZtUtwKjGCulnDBZDVpq1/tMZIJysOTBCl1NZ6BrOo/Hfcg==}
+  /@segararai/frourio/0.25.1-fork.2:
+    resolution: {integrity: sha512-47Izphj80gkEtnhm4w8uN0kQlL6wlZ2nr5cZ/nyp+SpSpkjsDp+4btKM3fekKaJR78PfkH+C0SEZVrqcVKScng==}
     hasBin: true
     dependencies:
       aspida: 1.7.1
