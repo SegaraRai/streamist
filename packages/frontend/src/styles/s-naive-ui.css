@@ -13,3 +13,7 @@
   @apply flex-col;
   @apply items-center;
 }
+
+.n-dialog__icon {
+  line-height: 0;
+}

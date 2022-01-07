@@ -1,5 +1,5 @@
-import { writeFileSync } from 'node:fs';
-import path from 'node:path';
+import { writeFileSync } from 'fs';
+import path from 'path';
 import VueI18n from '@intlify/vite-plugin-vue-i18n';
 import Vue from '@vitejs/plugin-vue';
 import Vuetify from '@vuetify/vite-plugin';
