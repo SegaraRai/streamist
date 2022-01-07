@@ -5,6 +5,7 @@ import filters from 'windicss/plugin/filters';
 import lineClamp from 'windicss/plugin/line-clamp';
 import scrollSnap from 'windicss/plugin/scroll-snap';
 import typography from 'windicss/plugin/typography';
+import { COLOR_CSS_VAR_MAP } from './theme';
 
 export default defineConfig({
   darkMode: 'class',
@@ -28,6 +29,12 @@ export default defineConfig({
       print: { raw: 'print' },
     },
     extend: {
+      colors: Object.fromEntries(
+        Object.entries(COLOR_CSS_VAR_MAP).map(([key, value]) => [
+          key,
+          `var(${value})`,
+        ])
+      ),
       typography: {
         DEFAULT: {
           css: {

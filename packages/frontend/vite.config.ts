@@ -20,6 +20,14 @@ import Pages from 'vite-plugin-pages';
 import { VitePWA } from 'vite-plugin-pwa';
 import Layouts from 'vite-plugin-vue-layouts';
 import WindiCSS from 'vite-plugin-windicss';
+import { COLOR_CSS_VAR_MAP, COLOR_KEYS, THEMES } from './theme';
+
+function toUpperCamelCase(str: string): string {
+  return str
+    .replace(/^[a-z][a-z]?/g, (match) => match.toUpperCase())
+    .replace(/-[a-z]/g, (match) => match[1].toUpperCase())
+    .replace(/-/g, '');
+}
 
 const markdownWrapperClasses = 'prose prose-sm m-auto text-left';
 
@@ -53,12 +61,7 @@ function getNaiveUIComponents(): readonly string[] {
     contributions: { html: { tags: { name: string }[] } };
   };
   return webTypesJSON.contributions.html.tags
-    .map((tag) =>
-      tag.name
-        .replace(/^[a-z][a-z]?/g, (match) => match.toUpperCase())
-        .replace(/-[a-z]/g, (match) => match[1].toUpperCase())
-        .replace(/-/g, '')
-    )
+    .map((tag) => toUpperCamelCase(tag.name))
     .filter((x) => x.startsWith('N'));
 }
 
@@ -83,6 +86,34 @@ function CustomResolver(
   return {
     type,
     resolve: (name: string) => components[name],
+  };
+}
+
+function themePlugin() {
+  const virtualModuleId = 'virtual:theme.css';
+  const resolvedVirtualModuleId = '\0' + virtualModuleId;
+
+  const content = THEMES.map(
+    (theme) =>
+      `.s-theme--${theme.name} {\n` +
+      COLOR_KEYS.map(
+        (key) => `${COLOR_CSS_VAR_MAP[key]}: ${theme[key]};\n`
+      ).join('') +
+      '}\n'
+  ).join('');
+
+  return {
+    name: 'theme-plugin',
+    resolveId(id: string) {
+      if (id === virtualModuleId) {
+        return resolvedVirtualModuleId;
+      }
+    },
+    load(id: string) {
+      if (id === resolvedVirtualModuleId) {
+        return content;
+      }
+    },
   };
 }
 
@@ -232,6 +263,8 @@ export default defineConfig({
     Vuetify({
       autoImport: true,
     }),
+
+    themePlugin(),
   ],
 
   server: {

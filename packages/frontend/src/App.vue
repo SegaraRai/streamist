@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { darkTheme as nDarkTheme$$q } from 'naive-ui';
+import { NAIVE_UI_THEMES } from '~/logic/theme';
+import { useThemeStore } from '~/stores/theme';
+
+const themeStore$$q = useThemeStore();
+const naiveUITheme$$q = eagerComputed(
+  () => NAIVE_UI_THEMES[themeStore$$q.theme]
+);
+
+const themeClass$$q = eagerComputed(() => `s-theme--${themeStore$$q.theme}`);
 
 // https://github.com/vueuse/head
 // you can use this to manipulate the document head in any components,
@@ -11,11 +19,16 @@ useHead({
 </script>
 
 <template>
-  <n-config-provider :theme="nDarkTheme$$q">
+  <n-config-provider
+    :theme="naiveUITheme$$q.base"
+    :theme-overrides="naiveUITheme$$q.overrides"
+  >
     <n-message-provider>
       <n-notification-provider>
         <n-dialog-provider>
-          <router-view />
+          <div :class="themeClass$$q">
+            <router-view />
+          </div>
         </n-dialog-provider>
       </n-notification-provider>
     </n-message-provider>

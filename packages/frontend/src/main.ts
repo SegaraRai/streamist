@@ -10,6 +10,8 @@ import { activateTokenInterceptor } from './logic/api';
 // windicss layers
 import 'virtual:windi-base.css';
 import 'virtual:windi-components.css';
+// theme
+import 'virtual:theme.css';
 // your custom styles here
 import './styles/main.css';
 // windicss utilities should be the last style import

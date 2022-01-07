@@ -125,7 +125,7 @@ const hideShell$$q = eagerComputed(
       No Internet connection.
     </div>
 
-    <v-app theme="dark" class="flex-1 !h-auto">
+    <v-app :theme="theme.theme" class="flex-1 !h-auto">
       <!-- div
         class="bg-black z-2135 fixed top-0 left-0 w-full h-full transition-all"
         :class="rightSidebar$$q ? 'opacity-25' : 'opacity-0 invisible'"
