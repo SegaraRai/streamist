@@ -6,10 +6,10 @@ import type { ResourceImage } from '$/types';
 import { db } from '~/db';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
-import { VueDraggableChangeEvent } from '~/logic/draggable/types';
 import { getImageFileURL } from '~/logic/fileURL';
 import type { FileId } from '~/logic/uploadManager';
 import { useLiveQuery } from '~/logic/useLiveQuery';
+import { waitForChange } from '~/logic/waitForChange';
 import { useUploadStore } from '~/stores/upload';
 
 export default defineComponent({
@@ -136,45 +136,30 @@ export default defineComponent({
             );
           });
       },
-      onImageOrderChanged$$q: (
-        event: VueDraggableChangeEvent<ResourceImage>
-      ): void => {
-        const { moved } = event;
-        if (!moved) {
-          return;
-        }
-
-        const { newIndex, oldIndex, element } = moved;
-        if (newIndex === oldIndex) {
-          return;
-        }
-
-        const images = images$$q.value;
-        if (!images) {
-          return;
-        }
-
-        const referenceImageIndex = newIndex + (newIndex > oldIndex ? 1 : 0);
-        const referenceImageId = images[referenceImageIndex]?.id;
-
-        getAPIImageRoot(element.id)
-          ?.$patch({
+      onImageOrderChanged$$q: async (
+        image: ResourceImage,
+        nextImage: ResourceImage | undefined
+      ): Promise<void> => {
+        try {
+          await getAPIImageRoot(image.id)?.$patch({
             body: {
-              nextImageId: referenceImageId ?? null,
+              nextImageId: nextImage?.id ?? null,
             },
-          })
-          .then(() => {
-            message.success(t('message.ReorderedImage', [props.attachToTitle]));
-            syncDB();
-          })
-          .catch((error) => {
-            message.error(
-              t('message.FailedToReorderImage', [
-                props.attachToTitle,
-                String(error),
-              ])
-            );
           });
+
+          message.success(t('message.ReorderedImage', [props.attachToTitle]));
+
+          syncDB();
+
+          await waitForChange(images$$q, 1000);
+        } catch (error) {
+          message.error(
+            t('message.FailedToReorderImage', [
+              props.attachToTitle,
+              String(error),
+            ])
+          );
+        }
       },
       onImageClicked$$q: (): void => {
         if (!loaded$$q.value) {
@@ -275,18 +260,16 @@ export default defineComponent({
             x-scrollable
           >
             <template v-if="images$$q">
-              <g-draggable
-                :model-value="images$$q"
+              <s-draggable
+                :items="images$$q"
                 item-key="id"
                 class="flex gap-x-4 h-64 sm:h-80 pt-8"
-                @change="onImageOrderChanged$$q"
+                :on-move="onImageOrderChanged$$q"
+                @dragstart="dragging$$q = true"
+                @dragend="dragging$$q = false"
               >
                 <template #item="{ element }">
-                  <div
-                    class="flex-none flex flex-col gap-y-4 items-center"
-                    @dragstart="dragging$$q = true"
-                    @dragend="dragging$$q = false"
-                  >
+                  <div class="flex-none flex flex-col gap-y-4 items-center">
                     <a
                       class="block"
                       target="_blank"
@@ -332,7 +315,7 @@ export default defineComponent({
                     </v-btn>
                   </div>
                 </template>
-              </g-draggable>
+              </s-draggable>
             </template>
           </n-scrollbar>
         </v-card-text>
