@@ -122,7 +122,7 @@ const hideShell$$q = eagerComputed(
     <div
       class="s-offline-bar bg-yellow-400 h-0 text-white font-weight-bold text-md flex items-center px-4 leading-none z-2200 overflow-hidden"
     >
-      No Internet connection.
+      {{ t('header.NoInternetConnection') }}
     </div>
 
     <v-app :theme="theme.theme" class="flex-1 !h-auto">

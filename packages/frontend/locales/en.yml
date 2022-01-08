@@ -11,6 +11,7 @@ sidebar:
   Uploads: Uploads
   Settings: Settings
 header:
+  NoInternetConnection: No Internet connection
   Search: Search
 queue:
   PlayQueue: Queue
