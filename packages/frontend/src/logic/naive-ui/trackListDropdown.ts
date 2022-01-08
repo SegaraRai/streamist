@@ -1,6 +1,5 @@
 import { MenuOption, useDialog, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
-import { useTheme } from 'vuetify';
 import type { ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
@@ -31,7 +30,6 @@ export function createTrackListDropdown({
 }: TrackListDropdownCreateOptions): ComputedRef<MenuOption[]> {
   const router = useRouter();
   const { t } = useI18n();
-  const theme = useTheme({});
   const dialog = useDialog();
   const message = useMessage();
   const syncDB = useSyncDB();
@@ -293,7 +291,7 @@ export function createTrackListDropdown({
       label: t('dropdown.trackList.Delete'),
       icon: nCreateDropdownIcon('mdi-delete'),
       props: {
-        style: nCreateDropdownTextColorStyle(theme, 'error'),
+        style: nCreateDropdownTextColorStyle('error'),
         onClick: () => {
           dialog.error({
             icon: nCreateDropdownIcon('mdi-alert-circle', {

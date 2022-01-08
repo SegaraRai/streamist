@@ -9,6 +9,25 @@ const naiveUITheme$$q = eagerComputed(
 
 const themeClass$$q = eagerComputed(() => `s-theme--${themeStore$$q.theme}`);
 
+const rootElement$$q = document.documentElement;
+
+watch(
+  themeClass$$q,
+  (currentThemeClass, previousThemeClass) => {
+    if (previousThemeClass) {
+      rootElement$$q.classList.remove(previousThemeClass);
+    }
+    rootElement$$q.classList.add(currentThemeClass);
+  },
+  {
+    immediate: true,
+  }
+);
+
+onBeforeUnmount(() => {
+  rootElement$$q.classList.remove(themeClass$$q.value);
+});
+
 // https://github.com/vueuse/head
 // you can use this to manipulate the document head in any components,
 // they will be rendered correctly in the html results with vite-ssg

@@ -29,17 +29,25 @@ export default defineComponent({
     const itemTitle$$q = ref('');
     const itemNotes$$q = ref('');
 
+    const reloadData = (newPlaylist: ResourcePlaylist): void => {
+      playlistId$$q.value = newPlaylist.id;
+      itemTitle$$q.value = newPlaylist.title;
+      itemNotes$$q.value = newPlaylist.notes;
+    };
+
     watch(
       eagerComputed(() => props.playlist),
-      (newPlaylist) => {
-        playlistId$$q.value = newPlaylist.id;
-        itemTitle$$q.value = newPlaylist.title;
-        itemNotes$$q.value = newPlaylist.notes;
-      },
+      reloadData,
       {
         immediate: true,
       }
     );
+
+    watch(dialog$$q, (newDialog, oldDialog) => {
+      if (!newDialog && oldDialog) {
+        reloadData(props.playlist);
+      }
+    });
 
     const modified$$q = eagerComputed(
       () =>

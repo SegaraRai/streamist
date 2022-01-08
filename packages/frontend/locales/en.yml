@@ -49,6 +49,9 @@ title:
   Playlist: "{0} {'|'} Streamist"
   PlaylistInit: "Playlist {'|'} Streamist"
 dropdown:
+  album:
+    AddToPlayNextQueue: Add to queue
+    Edit: Edit
   playlist:
     AddToPlayNextQueue: Add to queue
     Edit: Edit
@@ -79,6 +82,11 @@ dialogComponent:
     button:
       OK: OK
       Cancel: Cancel
+    label:
+      Title: Title
+      TitleSort: Title sort
+      Artist: Artist
+      Description: Description
   editPlaylist:
     title: Edit {0}
     button:

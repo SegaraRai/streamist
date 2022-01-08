@@ -17,6 +17,11 @@ export class VAlbumUpdateBody implements AlbumUpdateData {
   titleSort?: string;
 
   @IsUndefinable()
+  @IsString()
+  @Transform(({ value }) => tStringNormalizeSingleLine(value))
+  notes?: string;
+
+  @IsUndefinable()
   @IsId()
   artistId?: string;
 

@@ -4,6 +4,8 @@ import { compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
 import { db } from '~/db';
 import { formatTracksTotalDuration } from '~/logic/duration';
+import { useMenu } from '~/logic/menu';
+import { createAlbumDropdown } from '~/logic/naive-ui/albumDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 
@@ -83,6 +85,26 @@ export default defineComponent({
       () => value.value && formatTracksTotalDuration(value.value?.tracks$$q)
     );
 
+    const dialog$$q = ref(false);
+
+    const {
+      x$$q: menuX$$q,
+      y$$q: menuY$$q,
+      isOpen$$q: menuIsOpen$$q,
+      close$$q: closeMenu$$q,
+      open$$q: openMenu$$q,
+    } = useMenu({
+      closeOnScroll$$q: true,
+    });
+    const menuOptions$$q = createAlbumDropdown({
+      album$$q: eagerComputed(() => value.value?.album$$q),
+      albumTracks$$q: eagerComputed(() => value.value?.tracks$$q),
+      openEditAlbumDialog$$q: () => {
+        dialog$$q.value = true;
+      },
+      closeMenu$$q,
+    });
+
     return {
       t,
       albumId$$q,
@@ -99,6 +121,13 @@ export default defineComponent({
         }
         playbackStore.setSetListAndPlayAuto$$q(value.value.tracks$$q);
       },
+      dialog$$q,
+      menuOptions$$q,
+      menuIsOpen$$q,
+      menuX$$q,
+      menuY$$q,
+      openMenu$$q,
+      closeMenu$$q,
     };
   },
 });
@@ -116,6 +145,7 @@ export default defineComponent({
             :attach-to-id="albumId$$q"
             :attach-to-title="value$$q.album$$q.title"
             :image-ids="imageIds$$q"
+            @contextmenu.prevent="openMenu$$q($event)"
           >
             <template #title
               >Album Art of {{ value$$q.album$$q.title }}</template
@@ -137,6 +167,7 @@ export default defineComponent({
               size="200"
               :album="value$$q.album$$q"
               @image-ids="imageIds$$q = $event"
+              @contextmenu.prevent="openMenu$$q($event)"
             />
           </router-link>
         </template>
@@ -147,6 +178,7 @@ export default defineComponent({
             <s-conditional-link
               :to="`/albums/${albumId$$q}`"
               :disabled="linkExcludes.includes(albumId$$q)"
+              @contextmenu.prevent="openMenu$$q($event)"
             >
               {{ value$$q.album$$q.title }}
             </s-conditional-link>
@@ -208,4 +240,18 @@ export default defineComponent({
     :visit-album="visitAlbum"
     :visit-artist="visitArtist"
   />
+  <template v-if="value$$q">
+    <n-dropdown
+      class="select-none"
+      placement="bottom-start"
+      trigger="manual"
+      :x="menuX$$q"
+      :y="menuY$$q"
+      :options="menuOptions$$q"
+      :show="menuIsOpen$$q"
+      :on-clickoutside="closeMenu$$q"
+      @contextmenu.prevent
+    />
+    <s-dialog-album-edit v-model="dialog$$q" :album="value$$q.album$$q" />
+  </template>
 </template>

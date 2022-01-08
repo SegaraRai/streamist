@@ -7,6 +7,8 @@ import type {
   ResourceImage,
   ResourceTrack,
 } from '$/types';
+import { useMenu } from '~/logic/menu';
+import { createAlbumDropdown } from '~/logic/naive-ui/albumDropdown';
 import {
   useAllAlbums,
   useAllArtists,
@@ -88,6 +90,27 @@ export default defineComponent({
       return gridItems;
     }, []);
 
+    const selectedAlbum$$q = ref<ResourceAlbum | undefined>();
+    const selectedAlbumTracks$$q = ref<readonly ResourceTrack[] | undefined>();
+    const dialog$$q = ref(false);
+    const {
+      x$$q: menuX$$q,
+      y$$q: menuY$$q,
+      isOpen$$q: menuIsOpen$$q,
+      close$$q: closeMenu$$q,
+      open$$q: openMenu$$q,
+    } = useMenu({
+      closeOnScroll$$q: true,
+    });
+    const menuOptions$$q = createAlbumDropdown({
+      album$$q: selectedAlbum$$q,
+      albumTracks$$q: selectedAlbumTracks$$q,
+      openEditAlbumDialog$$q: () => {
+        dialog$$q.value = true;
+      },
+      closeMenu$$q,
+    });
+
     return {
       t,
       items$$q: items,
@@ -95,6 +118,19 @@ export default defineComponent({
         display.xs.value ? 90 : display.sm.value ? 120 : 180
       ),
       pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
+      selectedAlbum$$q,
+      dialog$$q,
+      menuOptions$$q,
+      menuIsOpen$$q,
+      menuX$$q,
+      menuY$$q,
+      closeMenu$$q,
+      showMenu$$q: (eventOrElement: MouseEvent | HTMLElement, item: Item) => {
+        openMenu$$q(eventOrElement, () => {
+          selectedAlbum$$q.value = item.album$$q;
+          selectedAlbumTracks$$q.value = item.tracks$$q;
+        });
+      },
     };
   },
 });
@@ -162,6 +198,7 @@ export default defineComponent({
           :width="`${imageSize$$q}px`"
           class="bg-transparent flex flex-col"
           :style="style"
+          @contextmenu.prevent="showMenu$$q($event, item)"
         >
           <router-link
             v-ripple
@@ -206,5 +243,19 @@ export default defineComponent({
         </v-card>
       </template>
     </g-grid>
+    <n-dropdown
+      class="select-none"
+      placement="bottom-start"
+      trigger="manual"
+      :x="menuX$$q"
+      :y="menuY$$q"
+      :options="menuOptions$$q"
+      :show="menuIsOpen$$q"
+      :on-clickoutside="closeMenu$$q"
+      @contextmenu.prevent
+    />
+    <template v-if="selectedAlbum$$q">
+      <s-dialog-album-edit v-model="dialog$$q" :album="selectedAlbum$$q" />
+    </template>
   </v-container>
 </template>

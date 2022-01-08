@@ -1,6 +1,5 @@
 import { MenuOption, useDialog, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
-import { useTheme } from 'vuetify';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
@@ -28,7 +27,6 @@ export function createPlaylistDropdown({
 }: PlaylistDropdownCreateOptions): ComputedRef<MenuOption[]> {
   const { t } = useI18n();
   const router = useRouter();
-  const theme = useTheme({});
   const dialog = useDialog();
   const message = useMessage();
   const syncDB = useSyncDB();
@@ -90,7 +88,7 @@ export function createPlaylistDropdown({
       label: t('dropdown.playlist.Delete'),
       icon: nCreateDropdownIcon('mdi-delete'),
       props: {
-        style: nCreateDropdownTextColorStyle(theme, 'error'),
+        style: nCreateDropdownTextColorStyle('error'),
         onClick: (): void => {
           dialog.error({
             title: t('dialog.deletePlaylist.title'),

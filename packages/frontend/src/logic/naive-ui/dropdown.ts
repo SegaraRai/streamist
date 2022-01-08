@@ -1,8 +1,6 @@
 import type { VNode } from 'vue';
-import type { ThemeDefinition, useTheme } from 'vuetify';
 import { VIcon } from 'vuetify/lib/components/index';
-
-type ThemeInstance = ReturnType<typeof useTheme>;
+import { COLOR_CSS_VAR_MAP, ThemeColor } from '../theme';
 
 export function nCreateDropdownIcon(
   icon: string | (() => string),
@@ -13,11 +11,8 @@ export function nCreateDropdownIcon(
     : (): VNode => h(VIcon, props, icon);
 }
 
-export function nCreateDropdownTextColorStyle(
-  theme: ThemeInstance,
-  color: keyof ThemeDefinition['colors']
-): string {
-  const colorValue = theme.getTheme(theme.current.value).colors[color];
+export function nCreateDropdownTextColorStyle(color: ThemeColor): string {
+  const colorValue = `var(${COLOR_CSS_VAR_MAP[color]})`;
   return [
     `--n-option-text-color:${colorValue};`,
     `--n-option-text-color-hover:${colorValue};`,

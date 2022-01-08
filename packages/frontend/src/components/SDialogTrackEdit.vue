@@ -6,20 +6,13 @@ import type { ResourceTrack } from '$/types';
 import { useTranslatedTimeAgo } from '~/composables/timeAgo';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
-
-const createNumericRef = () => {
-  const internal = ref<number | undefined>();
-  return computed({
-    get: (): number | undefined => internal.value,
-    set: (value: string | number | undefined): void => {
-      let parsed: number | undefined;
-      if (value != null && value !== '') {
-        parsed = typeof value === 'string' ? parseInt(value, 10) : value;
-      }
-      internal.value = parsed != null && isFinite(parsed) ? parsed : undefined;
-    },
-  });
-};
+import {
+  convertOptNum,
+  convertOptStr,
+  convertReqNum,
+  convertReqStr,
+  createIntegerRef,
+} from '~/logic/editUtils';
 
 export default defineComponent({
   props: {
@@ -46,36 +39,44 @@ export default defineComponent({
     const artistName$$q = ref('');
     const itemTitle$$q = ref('');
     const itemTitleSort$$q = ref('');
-    const itemTrackNumber$$q = createNumericRef();
-    const itemDiscNumber$$q = createNumericRef();
+    const itemTrackNumber$$q = createIntegerRef();
+    const itemDiscNumber$$q = createIntegerRef();
     const itemReleaseDateText$$q = ref('');
     const itemGenre$$q = ref('');
-    const itemBPM$$q = createNumericRef();
+    const itemBPM$$q = createIntegerRef();
     const itemComment$$q = ref('');
     const itemLyrics$$q = ref('');
 
+    const reloadData = (newTrack: ResourceTrack): void => {
+      trackId$$q.value = newTrack.id;
+      albumId$$q.value = newTrack.albumId;
+      albumTitle$$q.value = '';
+      artistId$$q.value = newTrack.artistId;
+      artistName$$q.value = '';
+      itemTitle$$q.value = newTrack.title;
+      itemTitleSort$$q.value = newTrack.titleSort || '';
+      itemDiscNumber$$q.value = newTrack.discNumber;
+      itemTrackNumber$$q.value = newTrack.trackNumber;
+      itemReleaseDateText$$q.value = newTrack.releaseDateText || '';
+      itemGenre$$q.value = newTrack.genre || '';
+      itemBPM$$q.value = newTrack.bpm ?? undefined;
+      itemComment$$q.value = newTrack.comment || '';
+      itemLyrics$$q.value = newTrack.lyric || '';
+    };
+
     watch(
       eagerComputed(() => props.track),
-      (newTrack) => {
-        trackId$$q.value = newTrack.id;
-        albumId$$q.value = newTrack.albumId;
-        albumTitle$$q.value = '';
-        artistId$$q.value = newTrack.artistId;
-        artistName$$q.value = '';
-        itemTitle$$q.value = newTrack.title;
-        itemTitleSort$$q.value = newTrack.titleSort || '';
-        itemDiscNumber$$q.value = newTrack.discNumber;
-        itemTrackNumber$$q.value = newTrack.trackNumber;
-        itemReleaseDateText$$q.value = newTrack.releaseDateText || '';
-        itemGenre$$q.value = newTrack.genre || '';
-        itemBPM$$q.value = newTrack.bpm ?? undefined;
-        itemComment$$q.value = newTrack.comment || '';
-        itemLyrics$$q.value = newTrack.lyric || '';
-      },
+      reloadData,
       {
         immediate: true,
       }
     );
+
+    watch(dialog$$q, (newDialog, oldDialog) => {
+      if (!newDialog && oldDialog) {
+        reloadData(props.track);
+      }
+    });
 
     const isAlbumEmpty$$q = eagerComputed(
       () => !albumId$$q.value && !albumTitle$$q.value
@@ -175,31 +176,6 @@ export default defineComponent({
         if (track.id !== trackId) {
           return;
         }
-
-        const convertReqStr = (
-          input: string,
-          org: string
-        ): string | undefined => {
-          input = input.trim();
-          return input && input !== org ? input : undefined;
-        };
-        const convertReqNum = (
-          input: number | undefined,
-          org: number
-        ): number | undefined =>
-          input != null && input !== org ? input : undefined;
-        const convertOptStr = (
-          input: string,
-          org: string | null
-        ): string | undefined => {
-          input = input.trim();
-          return input && input !== (org || '') ? input : undefined;
-        };
-        const convertOptNum = (
-          input: number | undefined,
-          org: number | null
-        ): number | null | undefined =>
-          (input ?? null) !== org ? input ?? null : undefined;
 
         api.my.tracks
           ._trackId(trackId)
