@@ -97,6 +97,7 @@ export default defineComponent({
     const dropdown$$q = ref<DropdownArtistInput | undefined>();
 
     return {
+      t,
       setList$$q,
       additionalTracks$$q,
       value$$q: value,
@@ -108,6 +109,25 @@ export default defineComponent({
         loadedTracksMap.set(albumId, tracks);
         notLoadedAlbumIdSet.delete(albumId);
         updateSetList(value.value.albums$$q, value.value.tracks$$q);
+      },
+      play$$q: (shuffle?: boolean): void => {
+        if (!setList$$q.value.length) {
+          return;
+        }
+        if (shuffle !== undefined) {
+          playbackStore.shuffle$$q.value = shuffle;
+        }
+        playbackStore.setSetListAndPlayAuto$$q(setList$$q.value);
+      },
+      playAdditional$$q: (): void => {
+        if (!setList$$q.value.length || !additionalTracks$$q.value.length) {
+          return;
+        }
+        playbackStore.shuffle$$q.value = false;
+        playbackStore.setSetListAndPlay$$q(
+          setList$$q.value,
+          additionalTracks$$q.value[0]
+        );
       },
       dropdown$$q,
       openMenu$$q: (target: MouseEvent | HTMLElement) => {
@@ -149,10 +169,37 @@ export default defineComponent({
         {{ value$$q?.artist$$q.name }}
       </div>
     </div>
-    <v-divider class="mt-8" />
+    <div class="flex-none flex flex-row items-center gap-x-8 my-8">
+      <v-btn
+        color="primary"
+        flat
+        icon
+        :disabled="!value$$q?.tracks$$q.length"
+        @click="play$$q(false)"
+      >
+        <v-icon>mdi-play</v-icon>
+      </v-btn>
+      <v-btn
+        outlined
+        :disabled="!value$$q?.tracks$$q.length"
+        @click="play$$q(true)"
+      >
+        <v-icon left>mdi-shuffle</v-icon>
+        <span>
+          {{ t('artist.Shuffle') }}
+        </span>
+      </v-btn>
+      <button
+        class="rounded-full"
+        @click="openMenu$$q($event.target as HTMLElement)"
+      >
+        <v-icon>mdi-dots-vertical</v-icon>
+      </button>
+      <v-divider />
+    </div>
     <template v-if="value$$q">
-      <div class="h-12"></div>
       <template v-if="value$$q.albums$$q.length">
+        <div class="h-12"></div>
         <div class="mb-6">
           <template v-for="album in value$$q.albums$$q" :key="album.id">
             <div class="my-12">
@@ -169,8 +216,15 @@ export default defineComponent({
       </template>
       <template v-if="additionalTracks$$q.length">
         <template v-if="value$$q.albums$$q.length">
-          <v-divider />
-          <div class="h-12"></div>
+          <div class="flex-none flex flex-row items-center gap-x-8 my-8">
+            <div class="flex-none text-3xl whitespace-nowrap">
+              {{ t('artist.MoreTracks') }}
+            </div>
+            <!-- v-btn color="primary" flat icon @click="playAdditional$$q()">
+              <v-icon>mdi-play</v-icon>
+            </v-btn -->
+            <v-divider />
+          </div>
         </template>
         <s-track-list
           :link-excludes="[id]"
