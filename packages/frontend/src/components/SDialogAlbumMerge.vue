@@ -85,7 +85,11 @@ export default defineComponent({
           })
           .catch((error) => {
             message.error(
-              t('message.FailedToMergeAlbum', [album.title, String(error)])
+              t('message.FailedToMergeAlbum', [
+                album.title,
+                newAlbumTitle$$q.value,
+                String(error),
+              ])
             );
           });
       },

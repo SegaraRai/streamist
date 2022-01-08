@@ -202,7 +202,6 @@ export default defineComponent({
         <v-icon>mdi-play</v-icon>
       </v-btn>
       <v-btn
-        color="accent"
         outlined
         :disabled="!value$$q?.tracks$$q.length"
         @click="play$$q(true)"

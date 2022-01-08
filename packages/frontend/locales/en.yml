@@ -21,6 +21,9 @@ album:
   n_tracks: 'no tracks | one track | {n} tracks'
 albums:
   Albums: Albums
+artist:
+  Shuffle: Shuffle
+  MoreTracks: More Tracks
 artists:
   Artists: Artists
 playlist:
@@ -177,8 +180,12 @@ message:
   FailedToSyncDatabase: "Failed to synchronize\n{0}"
   ModifiedAlbum: "Modified album '{0}'"
   FailedToModifyAlbum: "Failed to modify album '{0}'\n{1}"
+  MergedAlbum: "Merged album '{0}' into '{1}'"
+  FailedToMergeAlbum: "Failed to merge album '{0}'\n{2}"
   ModifiedArtist: "Modified artist '{0}'"
   FailedToModifyArtist: "Failed to modify artist '{0}'\n{1}"
+  MergedArtist: "Merged artist '{0}' into '{1}'"
+  FailedToMergeArtist: "Failed to merge artist '{0}'\n{2}"
   CreatedPlaylist: "Created playlist '{0}'"
   FailedToCreatePlaylist: "Failed to create playlist '{0}'\n{1}"
   ModifiedPlaylist: "Modified playlist '{0}'"

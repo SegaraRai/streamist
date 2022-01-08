@@ -85,7 +85,11 @@ export default defineComponent({
           })
           .catch((error) => {
             message.error(
-              t('message.FailedToMergeArtist', [artist.name, String(error)])
+              t('message.FailedToMergeArtist', [
+                artist.name,
+                newArtistName$$q.value,
+                String(error),
+              ])
             );
           });
       },

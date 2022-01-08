@@ -195,14 +195,13 @@ export default defineComponent({
         <v-icon>mdi-play</v-icon>
       </v-btn>
       <v-btn
-        color="accent"
         outlined
         :disabled="!value$$q?.tracks$$q.length"
         @click="play$$q(true)"
       >
         <v-icon left>mdi-shuffle</v-icon>
         <span>
-          {{ t('album.Shuffle') }}
+          {{ t('playlist.Shuffle') }}
         </span>
       </v-btn>
       <button
