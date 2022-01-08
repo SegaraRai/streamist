@@ -16,6 +16,10 @@ export default defineComponent({
       type: [Number, String],
       default: 0,
     },
+    alt: {
+      type: String,
+      default: undefined,
+    },
   },
   setup(props) {
     const srcObject = computed<SrcObject | null | undefined | false>(
@@ -47,6 +51,7 @@ export default defineComponent({
           :data-srcset="srcObject$$q.srcSet$$q"
           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII="
           class="block object-cover absolute top-0 left-0 w-full h-full s-lazyload-image z-1"
+          :alt="alt"
         />
       </template>
       <template v-else-if="srcObject$$q === false">

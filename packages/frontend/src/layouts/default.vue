@@ -156,7 +156,7 @@ const hideShell$$q = eagerComputed(
           </v-sheet>
           <n-scrollbar
             class="flex-1 s-n-scrollbar-min-h-full"
-            @scroll="onQueueScroll$$q"
+            @scroll.passive="onQueueScroll$$q"
           >
             <s-queue :menu-parent-scroll="queueScroll$$q" />
           </n-scrollbar>
@@ -280,7 +280,7 @@ const hideShell$$q = eagerComputed(
       <v-main class="s-v-main w-full">
         <n-scrollbar
           class="s-scroll-target s-n-scrollbar-min-h-full flex-1 !h-auto"
-          @scroll="onScroll$$q"
+          @scroll.passive="onScroll$$q"
         >
           <router-view class="px-4" />
         </n-scrollbar>
