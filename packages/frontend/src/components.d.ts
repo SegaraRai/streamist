@@ -5,7 +5,6 @@
 declare module 'vue' {
   export interface GlobalComponents {
     GDraggable: typeof import('vuedraggable')['default']
-    GGrid: typeof import('vue-virtual-scroll-grid')['default']
     IMdiAccountPlus: typeof import('~icons/mdi/account-plus')['default']
     IMdiImagePlus: typeof import('~icons/mdi/image-plus')['default']
     IMdiPlusCircle: typeof import('~icons/mdi/plus-circle')['default']
@@ -16,7 +15,6 @@ declare module 'vue' {
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NDropdown: typeof import('naive-ui')['NDropdown']
-    NEllipsis: typeof import('naive-ui')['NEllipsis']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NModal: typeof import('naive-ui')['NModal']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']

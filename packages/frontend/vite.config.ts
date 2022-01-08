@@ -180,9 +180,6 @@ export default defineConfig({
           GDraggable: {
             path: 'vuedraggable',
           },
-          GGrid: {
-            path: 'vue-virtual-scroll-grid',
-          },
         }),
       ],
 

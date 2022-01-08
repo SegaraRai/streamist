@@ -135,7 +135,6 @@ importers:
       vue-i18n: ^9.2.0-beta.23
       vue-router: ^4.0.12
       vue-tsc: ^0.30.2
-      vue-virtual-scroll-grid: ^1.2.4
       vuedraggable: ^4.1.0
       vuetify: ^3.0.0-alpha.12
       windicss: ^3.4.2
@@ -164,7 +163,6 @@ importers:
       vue-demi: 0.12.1_vue@3.2.26
       vue-i18n: 9.2.0-beta.23_vue@3.2.26
       vue-router: 4.0.12_vue@3.2.26
-      vue-virtual-scroll-grid: 1.2.4_vue@3.2.26
       vuedraggable: 4.1.0_vue@3.2.26
       vuetify: 3.0.0-alpha.12_vue@3.2.26
     devDependencies:
@@ -10605,10 +10603,6 @@ packages:
     resolution: {integrity: sha512-ARhCpm70fzdcvNQfPoy49IaanKkTlRWF2JMzqhcJbhSFRZv7nPTvZJdcY7301IPmvW+/p0RgIWnQDLJxifsQ7g==}
     engines: {node: '>=8'}
 
-  /ramda/0.27.1:
-    resolution: {integrity: sha512-PgIdVpn5y5Yns8vqb8FzBUEYn98V3xcPgawAkkgj0YJ0qDsnHCiNmZYfOGMgOvoB0eWFLpYbhxUR3mxfDIMvpw==}
-    dev: false
-
   /randombytes/2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
     dependencies:
@@ -10929,12 +10923,6 @@ packages:
 
   /run-series/1.1.9:
     resolution: {integrity: sha512-Arc4hUN896vjkqCYrUXquBFtRZdv1PfLbTYP71efP6butxyQ0kWpiNJyAgsxscmQg1cqvHY32/UCBzXedTpU2g==}
-    dev: false
-
-  /rxjs/7.4.0:
-    resolution: {integrity: sha512-7SQDi7xeTMCJpqViXh8gL/lebcwlp3d831F05+9B44A4B0WfsEwUQHR64gsH1kvJ+Ep/J9K2+n1hVl1CsGN23w==}
-    dependencies:
-      tslib: 2.1.0
     dev: false
 
   /rxjs/7.5.1:
@@ -12015,10 +12003,6 @@ packages:
     resolution: {integrity: sha512-4krF8scpejhaOgqzBEcGM7yDIEfi0/8+8zDRZhNZZ2kjmHJ4hv3zCbQWxoJGz1iw5U0Jl0nma13xzHXcncMavQ==}
     dev: false
 
-  /tslib/2.1.0:
-    resolution: {integrity: sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==}
-    dev: false
-
   /tslib/2.3.1:
     resolution: {integrity: sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==}
 
@@ -12811,20 +12795,6 @@ packages:
       typescript: /@typescript-deploys/pr-build/4.6.0-pr-47183-2
       vscode-vue-languageservice: 0.30.2
     dev: true
-
-  /vue-virtual-scroll-grid/1.2.4_vue@3.2.26:
-    resolution: {integrity: sha512-TIgtYq3VhKKhmnKMgkj2bWwkl21/nXK7nseCdRY5q0yQ4OBzYWZYqJMAn5LgEoyl0k9e2/H8luzbzsK63p7iHw==}
-    engines: {node: '>=16'}
-    peerDependencies:
-      vue: ^3.2.23
-    dependencies:
-      '@vueuse/core': 7.5.3_vue@3.2.26
-      ramda: 0.27.1
-      rxjs: 7.4.0
-      vue: 3.2.26
-    transitivePeerDependencies:
-      - '@vue/composition-api'
-    dev: false
 
   /vue/3.2.26:
     resolution: {integrity: sha512-KD4lULmskL5cCsEkfhERVRIOEDrfEL9CwAsLYpzptOGjaGFNWo3BQ9g8MAb7RaIO71rmVOziZ/uEN/rHwcUIhg==}
