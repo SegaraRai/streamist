@@ -42,7 +42,12 @@ export async function dbCoArtistMergeTx<T extends CoArtistTable>(
               A.\`${COL_ROLE}\` = \`${table}\`.\`${COL_ROLE}\` AND A.\`${COL_ARTIST_ID}\` = \`${table}\`.\`${COL_ARTIST_ID}\`
         )
     `,
-    [toEntityId, timestamp, userId, entityId, userId, toEntityId]
+    toEntityId,
+    timestamp,
+    userId,
+    entityId,
+    userId,
+    toEntityId
   );
   // we don't have to delete the old entity, because it will be cascade deleted
 }
@@ -74,7 +79,12 @@ export async function dbCoArtistMergeArtistTx<T extends CoArtistTable>(
               A.\`${COL_ROLE}\` = \`${table}\`.\`${COL_ROLE}\` AND A.\`${entityColumn}\` = \`${table}\`.\`${entityColumn}\`
         )
     `,
-    [toArtistId, timestamp, userId, artistId, userId, toArtistId]
+    toArtistId,
+    timestamp,
+    userId,
+    artistId,
+    userId,
+    toArtistId
   );
   // we have to delete the old entity explicitly, because it won't be cascade deleted
   await txClient.$executeRawUnsafe(
@@ -85,6 +95,7 @@ export async function dbCoArtistMergeArtistTx<T extends CoArtistTable>(
         \`${COL_USER_ID}\` = $3 AND
         \`${COL_ARTIST_ID}\` = $4 AND
     `,
-    [userId, artistId]
+    userId,
+    artistId
   );
 }
