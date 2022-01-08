@@ -138,6 +138,10 @@ confirm:
 message:
   SyncedDatabase: Synchronized
   FailedToSyncDatabase: "Failed to synchronize\n{0}"
+  ModifiedAlbum: "Modified album '{0}'"
+  FailedToModifyAlbum: "Failed to modify album '{0}'\n{1}"
+  ModifiedArtist: "Modified artist '{0}'"
+  FailedToModifyArtist: "Failed to modify artist '{0}'\n{1}"
   CreatedPlaylist: "Created playlist '{0}'"
   FailedToCreatePlaylist: "Failed to create playlist '{0}'\n{1}"
   ModifiedPlaylist: "Modified playlist '{0}'"
