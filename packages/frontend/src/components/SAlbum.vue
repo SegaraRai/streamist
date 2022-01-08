@@ -178,30 +178,8 @@ export default defineComponent({
             </s-conditional-link>
           </div>
         </div>
+        <div>{{ value$$q?.album$$q.notes }}</div>
         <div class="flex-1 <md:hidden"></div>
-        <div class="flex-none flex flex-row gap-x-8">
-          <v-btn
-            color="primary"
-            :disabled="!value$$q.tracks$$q.length"
-            @click="play$$q(false)"
-          >
-            <v-icon left>mdi-play</v-icon>
-            <span>
-              {{ t('album.Play') }}
-            </span>
-          </v-btn>
-          <v-btn
-            color="accent"
-            outlined
-            :disabled="!value$$q.tracks$$q.length"
-            @click="play$$q(true)"
-          >
-            <v-icon left>mdi-shuffle</v-icon>
-            <span>
-              {{ t('album.Shuffle') }}
-            </span>
-          </v-btn>
-        </div>
         <div class="flex-none text-sm">
           <span>
             {{ t('album.n_tracks', value$$q.tracks$$q.length) }}
@@ -212,6 +190,35 @@ export default defineComponent({
           </template>
         </div>
       </div>
+    </div>
+    <div class="flex-none flex flex-row items-center gap-x-8 my-8">
+      <v-btn
+        color="primary"
+        flat
+        icon
+        :disabled="!value$$q?.tracks$$q.length"
+        @click="play$$q(false)"
+      >
+        <v-icon>mdi-play</v-icon>
+      </v-btn>
+      <v-btn
+        color="accent"
+        outlined
+        :disabled="!value$$q?.tracks$$q.length"
+        @click="play$$q(true)"
+      >
+        <v-icon left>mdi-shuffle</v-icon>
+        <span>
+          {{ t('album.Shuffle') }}
+        </span>
+      </v-btn>
+      <button
+        class="rounded-full"
+        @click="openMenu$$q($event.target as HTMLElement)"
+      >
+        <v-icon>mdi-dots-vertical</v-icon>
+      </button>
+      <v-divider />
     </div>
   </template>
   <s-track-list
