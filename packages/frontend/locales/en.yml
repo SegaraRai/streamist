@@ -54,6 +54,9 @@ dropdown:
     AddToPlayNextQueue: Add to queue
     Edit: Edit
     Merge: Merge
+  artist:
+    Edit: Edit
+    Merge: Merge
   playlist:
     Play: Play
     AddToPlayNextQueue: Add to queue
@@ -97,6 +100,21 @@ dialogComponent:
       Cancel: Cancel
     label:
       Album: Album
+  editArtist:
+    title: Edit {0}
+    button:
+      OK: OK
+      Cancel: Cancel
+    label:
+      Name: Name
+      NameSort: Name sort
+  mergeArtist:
+    title: Merge {0} into
+    button:
+      Merge: Merge
+      Cancel: Cancel
+    label:
+      Artist: Artist
   createPlaylist:
     title: Create Playlist
     button:

@@ -12,6 +12,10 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    label: {
+      type: String,
+      default: undefined,
+    },
   },
   emits: {
     'update:modelValue': (_modelValue: string) => true,
@@ -72,7 +76,7 @@ export default defineComponent({
       <template #default="{ handleInput }">
         <v-text-field
           class="s-v-input-hide-details"
-          label="Artist"
+          :label="label"
           hide-details
           :model-value="modelValue$$q"
           @input="e => handleInput((e.target as HTMLInputElement).value)"

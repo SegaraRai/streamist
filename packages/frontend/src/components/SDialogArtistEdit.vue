@@ -1,7 +1,7 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
-import type { ResourceAlbum } from '$/types';
+import type { ResourceArtist } from '$/types';
 import { useTranslatedTimeAgo } from '~/composables/timeAgo';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
@@ -9,8 +9,8 @@ import { convertOptStr, convertReqStr } from '~/logic/editUtils';
 
 export default defineComponent({
   props: {
-    album: {
-      type: Object as PropType<ResourceAlbum>,
+    artist: {
+      type: Object as PropType<ResourceArtist>,
       required: true,
     },
     modelValue: Boolean,
@@ -25,24 +25,18 @@ export default defineComponent({
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
-    const albumId$$q = ref('');
     const artistId$$q = ref('');
-    const artistName$$q = ref('');
-    const itemTitle$$q = ref('');
-    const itemTitleSort$$q = ref('');
-    const itemDescription$$q = ref('');
+    const itemName$$q = ref('');
+    const itemNameSort$$q = ref('');
 
-    const reloadData = (newAlbum: ResourceAlbum): void => {
-      albumId$$q.value = newAlbum.id;
-      artistId$$q.value = newAlbum.artistId;
-      artistName$$q.value = '';
-      itemTitle$$q.value = newAlbum.title;
-      itemTitleSort$$q.value = newAlbum.titleSort || '';
-      itemDescription$$q.value = newAlbum.notes || '';
+    const reloadData = (newArtist: ResourceArtist): void => {
+      artistId$$q.value = newArtist.id;
+      itemName$$q.value = newArtist.name;
+      itemNameSort$$q.value = newArtist.nameSort || '';
     };
 
     watch(
-      eagerComputed(() => props.album),
+      eagerComputed(() => props.artist),
       reloadData,
       {
         immediate: true,
@@ -51,67 +45,53 @@ export default defineComponent({
 
     watch(dialog$$q, (newDialog, oldDialog) => {
       if (!newDialog && oldDialog) {
-        reloadData(props.album);
+        reloadData(props.artist);
       }
     });
 
-    const isArtistEmpty$$q = eagerComputed(
-      () => !artistId$$q.value && !artistName$$q.value
-    );
-
     const modified$$q = eagerComputed(
       () =>
-        (itemTitle$$q.value && itemTitle$$q.value !== props.album.title) ||
-        (itemTitleSort$$q.value || null) !== props.album.titleSort ||
-        itemDescription$$q.value !== props.album.notes ||
-        (!isArtistEmpty$$q.value && artistId$$q.value !== props.album.artistId)
+        (itemName$$q.value && itemName$$q.value !== props.artist.name) ||
+        (itemNameSort$$q.value || null) !== props.artist.nameSort
     );
 
     return {
       t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
-      isArtistEmpty$$q,
       artistId$$q,
-      artistName$$q,
-      itemTitle$$q,
-      itemTitleSort$$q,
-      itemDescription$$q,
+      itemName$$q,
+      itemNameSort$$q,
       modified$$q,
       strCreatedAt$$q: useTranslatedTimeAgo(
-        eagerComputed(() => props.album.createdAt)
+        eagerComputed(() => props.artist.createdAt)
       ),
       strUpdatedAt$$q: useTranslatedTimeAgo(
-        eagerComputed(() => props.album.updatedAt)
+        eagerComputed(() => props.artist.updatedAt)
       ),
       apply$$q: () => {
-        const album = props.album;
-        const albumId = albumId$$q.value;
-        if (album.id !== albumId) {
+        const artist = props.artist;
+        const artistId = artistId$$q.value;
+        if (artist.id !== artistId) {
           return;
         }
 
-        api.my.albums
-          ._albumId(albumId)
+        api.my.artists
+          ._artistId(artistId)
           .$patch({
             body: {
-              title: convertReqStr(itemTitle$$q.value, album.title),
-              titleSort: convertOptStr(itemTitleSort$$q.value, album.titleSort),
-              notes: convertReqStr(itemDescription$$q.value, album.notes),
-              artistId: convertOptStr(artistId$$q.value, album.artistId),
-              artistName: artistId$$q.value
-                ? undefined
-                : artistName$$q.value.trim(),
+              name: convertReqStr(itemName$$q.value, artist.name),
+              nameSort: convertOptStr(itemNameSort$$q.value, artist.nameSort),
             },
           })
           .then(() => {
             dialog$$q.value = false;
-            message.success(t('message.ModifiedAlbum', [itemTitle$$q.value]));
+            message.success(t('message.ModifiedArtist', [itemName$$q.value]));
             syncDB();
           })
           .catch((error) => {
             message.error(
-              t('message.FailedToModifyAlbum', [album.title, String(error)])
+              t('message.FailedToModifyArtist', [artist.name, String(error)])
             );
           });
       },
@@ -129,7 +109,7 @@ export default defineComponent({
     <v-card class="w-full md:min-w-2xl">
       <v-card-title class="flex">
         <div class="flex-1">
-          {{ t('dialogComponent.editAlbum.title', [album.title]) }}
+          {{ t('dialogComponent.editArtist.title', [artist.name]) }}
         </div>
         <div class="flex-none">
           <v-btn
@@ -147,17 +127,17 @@ export default defineComponent({
         <div class="flex gap-x-4">
           <div>
             <s-image-manager
-              attach-to-type="album"
-              :attach-to-id="album.id"
-              :attach-to-title="album.title"
+              attach-to-type="artist"
+              :attach-to-id="artist.id"
+              :attach-to-title="artist.name"
               :image-ids="imageIds$$q"
               disable-dialog
               @contextmenu.prevent
             >
-              <s-album-image
+              <s-artist-image
                 class="w-40 h-40"
                 size="160"
-                :album="album"
+                :artist="artist"
                 @image-ids="imageIds$$q = $event"
               />
             </s-image-manager>
@@ -165,30 +145,19 @@ export default defineComponent({
           <div class="flex-1 flex flex-col gap-y-6">
             <div class="flex gap-x-6">
               <v-text-field
-                v-model="itemTitle$$q"
+                v-model="itemName$$q"
                 hide-details
                 class="flex-1 s-v-input-hide-details"
-                :label="t('dialogComponent.editAlbum.label.Title')"
+                :label="t('dialogComponent.editArtist.label.Name')"
                 required
               />
               <v-text-field
-                v-model="itemTitleSort$$q"
+                v-model="itemNameSort$$q"
                 hide-details
                 class="flex-1 s-v-input-hide-details"
-                :label="t('dialogComponent.editAlbum.label.TitleSort')"
+                :label="t('dialogComponent.editArtist.label.NameSort')"
               />
             </div>
-            <s-combobox-artist
-              v-model="artistName$$q"
-              v-model:artistId="artistId$$q"
-              :label="t('dialogComponent.editAlbum.label.Artist')"
-            />
-            <v-textarea
-              v-model="itemDescription$$q"
-              hide-details
-              class="s-v-input-hide-details"
-              :label="t('dialogComponent.editAlbum.label.Description')"
-            />
             <footer class="flex m-0 gap-x-4 justify-end">
               <dl class="flex gap-x-4">
                 <dt>created</dt>
@@ -206,14 +175,10 @@ export default defineComponent({
       <v-card-actions class="gap-x-4 pb-4 px-4">
         <v-spacer />
         <v-btn @click="dialog$$q = false">
-          {{ t('dialogComponent.editAlbum.button.Cancel') }}
+          {{ t('dialogComponent.editArtist.button.Cancel') }}
         </v-btn>
-        <v-btn
-          color="primary"
-          :disabled="isArtistEmpty$$q || !modified$$q"
-          @click="apply$$q"
-        >
-          {{ t('dialogComponent.editAlbum.button.OK') }}
+        <v-btn color="primary" :disabled="!modified$$q" @click="apply$$q">
+          {{ t('dialogComponent.editArtist.button.OK') }}
         </v-btn>
       </v-card-actions>
     </v-card>

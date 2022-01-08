@@ -1,6 +1,7 @@
 <script lang="ts">
 import { compareAlbum, compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
+import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
@@ -93,6 +94,8 @@ export default defineComponent({
     const setList$$q = ref<readonly ResourceTrack[]>([]);
     const additionalTracks$$q = ref<readonly ResourceTrack[]>([]);
 
+    const dropdown$$q = ref<DropdownArtistInput | undefined>();
+
     return {
       setList$$q,
       additionalTracks$$q,
@@ -105,6 +108,17 @@ export default defineComponent({
         loadedTracksMap.set(albumId, tracks);
         notLoadedAlbumIdSet.delete(albumId);
         updateSetList(value.value.albums$$q, value.value.tracks$$q);
+      },
+      dropdown$$q,
+      openMenu$$q: (target: MouseEvent | HTMLElement) => {
+        if (!value.value) {
+          return;
+        }
+
+        dropdown$$q.value = {
+          target$$q: target,
+          artist$$q: value.value.artist$$q,
+        };
       },
     };
   },
@@ -119,6 +133,7 @@ export default defineComponent({
         :attach-to-id="id"
         :attach-to-title="value$$q?.artist$$q.name"
         :image-ids="imageIds$$q"
+        @contextmenu.prevent="openMenu$$q($event)"
       >
         <s-artist-image
           class="w-50 h-50"
@@ -127,7 +142,10 @@ export default defineComponent({
           @image-ids="imageIds$$q = $event"
         />
       </s-image-manager>
-      <div class="text-2xl <md:flex-1 max-w-4xl">
+      <div
+        class="text-2xl <md:flex-1 max-w-4xl"
+        @contextmenu.prevent="openMenu$$q($event)"
+      >
         {{ value$$q?.artist$$q.name }}
       </div>
     </div>
@@ -164,5 +182,6 @@ export default defineComponent({
         />
       </template>
     </template>
+    <s-dropdown-artist v-model="dropdown$$q" />
   </v-container>
 </template>

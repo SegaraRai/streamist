@@ -7,6 +7,7 @@ import type {
   ResourceImage,
   ResourceTrack,
 } from '$/types';
+import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
 import { getDefaultArtistImage } from '~/logic/image';
 import {
   useAllAlbums,
@@ -73,6 +74,8 @@ export default defineComponent({
       return gridItems;
     }, []);
 
+    const dropdown$$q = ref<DropdownArtistInput | undefined>();
+
     return {
       t,
       items$$q: items,
@@ -80,6 +83,13 @@ export default defineComponent({
         display.xs.value ? 90 : display.sm.value ? 120 : 180
       ),
       pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
+      dropdown$$q,
+      showMenu$$q: (target: MouseEvent | HTMLElement, item: Item) => {
+        dropdown$$q.value = {
+          target$$q: target,
+          artist$$q: item.artist$$q,
+        };
+      },
     };
   },
 });
@@ -142,6 +152,7 @@ export default defineComponent({
           :width="`${imageSize$$q}px`"
           class="bg-transparent flex flex-col"
           :style="style"
+          @contextmenu.prevent="showMenu$$q($event, item)"
         >
           <router-link
             v-ripple
@@ -174,5 +185,6 @@ export default defineComponent({
         </v-card>
       </template>
     </g-grid>
+    <s-dropdown-artist v-model="dropdown$$q" />
   </v-container>
 </template>

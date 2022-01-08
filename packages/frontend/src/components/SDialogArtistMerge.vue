@@ -1,14 +1,14 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
-import type { ResourceAlbum } from '$/types';
+import type { ResourceArtist } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 
 export default defineComponent({
   props: {
-    album: {
-      type: Object as PropType<ResourceAlbum>,
+    artist: {
+      type: Object as PropType<ResourceArtist>,
       required: true,
     },
     modelValue: Boolean,
@@ -23,18 +23,18 @@ export default defineComponent({
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
-    const albumId$$q = ref('');
-    const newAlbumId$$q = ref('');
-    const newAlbumTitle$$q = ref('');
+    const artistId$$q = ref('');
+    const newArtistId$$q = ref('');
+    const newArtistName$$q = ref('');
 
-    const reloadData = (newAlbum: ResourceAlbum): void => {
-      albumId$$q.value = newAlbum.id;
-      newAlbumId$$q.value = newAlbum.id;
-      newAlbumTitle$$q.value = '';
+    const reloadData = (newArtist: ResourceArtist): void => {
+      artistId$$q.value = newArtist.id;
+      newArtistId$$q.value = newArtist.id;
+      newArtistName$$q.value = '';
     };
 
     watch(
-      eagerComputed(() => props.album),
+      eagerComputed(() => props.artist),
       reloadData,
       {
         immediate: true,
@@ -43,49 +43,49 @@ export default defineComponent({
 
     watch(dialog$$q, (newDialog, oldDialog) => {
       if (!newDialog && oldDialog) {
-        reloadData(props.album);
+        reloadData(props.artist);
       }
     });
 
     const modified$$q = eagerComputed(
-      () => newAlbumId$$q.value && newAlbumId$$q.value !== albumId$$q.value
+      () => newArtistId$$q.value && newArtistId$$q.value !== artistId$$q.value
     );
 
     return {
       t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
-      newAlbumId$$q,
-      newAlbumTitle$$q,
+      newArtistId$$q,
+      newArtistName$$q,
       modified$$q,
       apply$$q: () => {
-        const album = props.album;
-        const albumId = albumId$$q.value;
-        if (album.id !== albumId) {
+        const artist = props.artist;
+        const artistId = artistId$$q.value;
+        if (artist.id !== artistId) {
           return;
         }
 
-        if (!newAlbumId$$q.value) {
+        if (!newArtistId$$q.value) {
           return;
         }
 
-        api.my.albums
-          ._albumId(albumId)
+        api.my.artists
+          ._artistId(artistId)
           .$post({
             body: {
-              toAlbumId: newAlbumId$$q.value,
+              toArtistId: newArtistId$$q.value,
             },
           })
           .then(() => {
             dialog$$q.value = false;
             message.success(
-              t('message.MergedAlbum', [album.title, newAlbumTitle$$q.value])
+              t('message.MergedArtist', [artist.name, newArtistName$$q.value])
             );
             syncDB();
           })
           .catch((error) => {
             message.error(
-              t('message.FailedToMergeAlbum', [album.title, String(error)])
+              t('message.FailedToMergeArtist', [artist.name, String(error)])
             );
           });
       },
@@ -103,7 +103,7 @@ export default defineComponent({
     <v-card class="w-full md:min-w-2xl">
       <v-card-title class="flex">
         <div class="flex-1">
-          {{ t('dialogComponent.mergeAlbum.title', [album.title]) }}
+          {{ t('dialogComponent.mergeArtist.title', [artist.name]) }}
         </div>
         <div class="flex-none">
           <v-btn
@@ -120,21 +120,21 @@ export default defineComponent({
       <v-card-text class="opacity-100">
         <div class="flex gap-x-4">
           <div>
-            <s-album-image
+            <s-artist-image
               class="w-40 h-40"
               size="160"
-              :album="album"
+              :artist="artist"
               @image-ids="imageIds$$q = $event"
             />
           </div>
           <div class="flex-1 flex flex-col gap-y-6">
             <div>
-              Merging album <strong>{{ album.title }}</strong> to
+              Merging artist <strong>{{ artist.name }}</strong> to
             </div>
-            <s-combobox-album
-              v-model="newAlbumTitle$$q"
-              v-model:albumId="newAlbumId$$q"
-              :label="t('dialogComponent.mergeAlbum.label.Album')"
+            <s-combobox-artist
+              v-model="newArtistName$$q"
+              v-model:artistId="newArtistId$$q"
+              :label="t('dialogComponent.mergeArtist.label.Artist')"
             />
           </div>
         </div>
@@ -142,10 +142,10 @@ export default defineComponent({
       <v-card-actions class="gap-x-4 pb-4 px-4">
         <v-spacer />
         <v-btn @click="dialog$$q = false">
-          {{ t('dialogComponent.mergeAlbum.button.Cancel') }}
+          {{ t('dialogComponent.mergeArtist.button.Cancel') }}
         </v-btn>
         <v-btn color="warning" :disabled="!modified$$q" @click="apply$$q">
-          {{ t('dialogComponent.mergeAlbum.button.Merge') }}
+          {{ t('dialogComponent.mergeArtist.button.Merge') }}
         </v-btn>
       </v-card-actions>
     </v-card>
