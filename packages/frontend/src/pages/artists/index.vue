@@ -76,13 +76,46 @@ export default defineComponent({
 
     const dropdown$$q = ref<DropdownArtistInput | undefined>();
 
+    const displayObj = computed(() => {
+      let itemWidth;
+      let marginWidth;
+      let extraHeight;
+      let marginHeight;
+
+      if (display.xs.value) {
+        itemWidth = 120;
+        marginWidth = 10;
+        extraHeight = 60;
+        marginHeight = 20;
+      } else if (display.sm.value) {
+        itemWidth = 140;
+        marginWidth = 10;
+        extraHeight = 60;
+        marginHeight = 20;
+      } else if (display.md.value) {
+        itemWidth = 160;
+        marginWidth = 10;
+        extraHeight = 60;
+        marginHeight = 20;
+      } else {
+        itemWidth = 180;
+        marginWidth = 20;
+        extraHeight = 60;
+        marginHeight = 20;
+      }
+
+      return {
+        width$$q: itemWidth,
+        height$$q: itemWidth + extraHeight,
+        marginWidth$$q: marginWidth,
+        marginHeight$$q: marginHeight,
+      };
+    });
+
     return {
       t,
+      displayObj$$q: displayObj,
       items$$q: items,
-      imageSize$$q: eagerComputed(() =>
-        display.xs.value ? 90 : display.sm.value ? 120 : 180
-      ),
-      pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
       dropdown$$q,
       showMenu$$q: (target: MouseEvent | HTMLElement, item: Item) => {
         dropdown$$q.value = {
@@ -102,56 +135,19 @@ export default defineComponent({
         {{ t('artists.Artists') }}
       </div>
     </header>
-    <g-grid
-      class="s-g-grid grid gap-y-8"
-      :length="items$$q.length"
-      :page-provider="async () => items$$q"
-      :page-size="pageSize$$q"
+    <s-virtual-grid
+      :items="items$$q"
+      :item-width="displayObj$$q.width$$q"
+      :item-height="displayObj$$q.height$$q"
+      :item-margin-width="displayObj$$q.marginWidth$$q"
+      :item-margin-height="displayObj$$q.marginHeight$$q"
     >
-      <template #probe>
+      <template #default="{ data: item, width }">
         <v-card
           flat
           tile
-          :width="`${imageSize$$q}px`"
+          :width="`${width}px`"
           class="bg-transparent flex flex-col"
-        >
-          <div
-            class="rounded-full"
-            :style="{
-              width: `${imageSize$$q}px`,
-              height: `${imageSize$$q}px`,
-            }"
-          ></div>
-          <v-card-title
-            class="p-0 my-1 text-base sm:text-lg font-weight-medium text-center"
-          >
-            <!-- FIXME: leading-tight等でline-heightを縮めると表示しきれていてもoffsetHeightがscrollHeightより小さい値になってツールチップが常に表示されてしまう -->
-            <n-ellipsis
-              class="w-full break-words"
-              :line-clamp="2"
-              :tooltip="{ showArrow: false }"
-            >
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </n-ellipsis>
-          </v-card-title>
-        </v-card>
-      </template>
-      <template
-        #default="{
-          item,
-          style,
-        }: {
-          item: (typeof items$$q)[0],
-          style: string,
-        }"
-      >
-        <v-card
-          flat
-          tile
-          :width="`${imageSize$$q}px`"
-          class="bg-transparent flex flex-col"
-          :style="style"
           @contextmenu.prevent="showMenu$$q($event, item)"
         >
           <router-link
@@ -161,30 +157,23 @@ export default defineComponent({
           >
             <s-artist-image-x
               :style="{
-                width: `${imageSize$$q}px`,
-                height: `${imageSize$$q}px`,
+                width: `${width}px`,
+                height: `${width}px`,
               }"
               :image="item.image$$q"
-              :size="imageSize$$q"
+              :size="width"
             />
           </router-link>
           <v-card-title
-            class="p-0 my-1 text-base sm:text-lg font-weight-medium !leading-tight text-center flex-1 flex flex-col"
+            class="p-0 my-1 text-base sm:text-lg font-weight-medium !leading-tight text-center flex-1 flex flex-col line-clamp-2 break-words"
           >
-            <!-- FIXME: leading-tight等でline-heightを縮めると表示しきれていてもoffsetHeightがscrollHeightより小さい値になってツールチップが常に表示されてしまう -->
-            <n-ellipsis
-              class="w-full break-words"
-              :line-clamp="2"
-              :tooltip="{ showArrow: false }"
-            >
-              <router-link :to="`/artists/${item.artist$$q.id}`">
-                {{ item.artist$$q.name }}
-              </router-link>
-            </n-ellipsis>
+            <router-link :to="`/artists/${item.artist$$q.id}`">
+              {{ item.artist$$q.name }}
+            </router-link>
           </v-card-title>
         </v-card>
       </template>
-    </g-grid>
+    </s-virtual-grid>
     <s-dropdown-artist v-model="dropdown$$q" />
   </v-container>
 </template>

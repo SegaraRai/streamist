@@ -89,15 +89,48 @@ export default defineComponent({
       return gridItems;
     }, []);
 
+    const displayObj = computed(() => {
+      let itemWidth;
+      let marginWidth;
+      let extraHeight;
+      let marginHeight;
+
+      if (display.xs.value) {
+        itemWidth = 120;
+        marginWidth = 10;
+        extraHeight = 80;
+        marginHeight = 20;
+      } else if (display.sm.value) {
+        itemWidth = 140;
+        marginWidth = 10;
+        extraHeight = 80;
+        marginHeight = 20;
+      } else if (display.md.value) {
+        itemWidth = 160;
+        marginWidth = 10;
+        extraHeight = 80;
+        marginHeight = 20;
+      } else {
+        itemWidth = 180;
+        marginWidth = 20;
+        extraHeight = 80;
+        marginHeight = 20;
+      }
+
+      return {
+        width$$q: itemWidth,
+        height$$q: itemWidth + extraHeight,
+        marginWidth$$q: marginWidth,
+        marginHeight$$q: marginHeight,
+      };
+    });
+
     const dropdown$$q = ref<DropdownAlbumInput | undefined>();
 
     return {
       t,
+      displayObj$$q: displayObj,
       items$$q: items,
-      imageSize$$q: eagerComputed(() =>
-        display.xs.value ? 90 : display.sm.value ? 120 : 180
-      ),
-      pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
       dropdown$$q,
       showMenu$$q: (target: MouseEvent | HTMLElement, item: Item) => {
         dropdown$$q.value = {
@@ -118,61 +151,19 @@ export default defineComponent({
         {{ t('albums.Albums') }}
       </div>
     </header>
-    <g-grid
-      class="s-g-grid grid gap-y-8"
-      :length="items$$q.length"
-      :page-provider="async () => items$$q"
-      :page-size="pageSize$$q"
+    <s-virtual-grid
+      :items="items$$q"
+      :item-width="displayObj$$q.width$$q"
+      :item-height="displayObj$$q.height$$q"
+      :item-margin-width="displayObj$$q.marginWidth$$q"
+      :item-margin-height="displayObj$$q.marginHeight$$q"
     >
-      <template #probe>
+      <template #default="{ data: item, width }">
         <v-card
           flat
           tile
-          :width="`${imageSize$$q}px`"
+          :width="`${width}px`"
           class="bg-transparent flex flex-col"
-        >
-          <div
-            :style="{
-              width: `${imageSize$$q}px`,
-              height: `${imageSize$$q}px`,
-            }"
-          ></div>
-          <v-card-title
-            class="p-0 my-1 text-base sm:text-lg font-medium !leading-tight flex flex-col items-start"
-          >
-            <n-ellipsis
-              class="w-full flex-1 break-words"
-              :line-clamp="2"
-              :tooltip="{ showArrow: false }"
-            >
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </n-ellipsis>
-          </v-card-title>
-          <v-card-subtitle class="px-0 text-sm flex justify-between">
-            <n-ellipsis class="flex-1" :tooltip="{ showArrow: false }">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </n-ellipsis>
-            <div class="flex-none pl-2">9999</div>
-          </v-card-subtitle>
-        </v-card>
-      </template>
-      <template
-        #default="{
-          item,
-          style,
-        }: {
-          item: (typeof items$$q)[0],
-          style: string,
-        }"
-      >
-        <v-card
-          flat
-          tile
-          :width="`${imageSize$$q}px`"
-          class="bg-transparent flex flex-col"
-          :style="style"
           @contextmenu.prevent="showMenu$$q($event, item)"
         >
           <router-link
@@ -182,33 +173,27 @@ export default defineComponent({
           >
             <s-album-image-x
               :style="{
-                width: `${imageSize$$q}px`,
-                height: `${imageSize$$q}px`,
+                width: `${width}px`,
+                height: `${width}px`,
               }"
               :image="item.image$$q"
-              :size="imageSize$$q"
+              :size="width"
             />
           </router-link>
           <v-card-title
-            class="p-0 my-1 text-base sm:text-lg font-medium !leading-tight flex flex-col items-start"
+            class="p-0 my-1 text-base sm:text-lg font-medium !leading-tight flex flex-col items-start line-clamp-2 break-words"
           >
-            <!-- FIXME: leading-tight等でline-heightを縮めると表示しきれていてもoffsetHeightがscrollHeightより小さい値になってツールチップが常に表示されてしまう -->
-            <n-ellipsis
-              :line-clamp="2"
-              :tooltip="{ showArrow: false }"
-              class="w-full flex-1 break-words"
-            >
-              <router-link :to="`/albums/${item.album$$q.id}`">
-                {{ item.album$$q.title }}
-              </router-link>
-            </n-ellipsis>
+            <router-link :to="`/albums/${item.album$$q.id}`">
+              {{ item.album$$q.title }}
+            </router-link>
           </v-card-title>
           <v-card-subtitle class="px-0 text-sm flex justify-between">
-            <n-ellipsis class="flex-1" :tooltip="{ showArrow: false }">
-              <router-link :to="`/artists/${item.artist$$q.id}`">
-                {{ item.artist$$q.name }}
-              </router-link>
-            </n-ellipsis>
+            <router-link
+              :to="`/artists/${item.artist$$q.id}`"
+              class="overflow-hidden overflow-ellipsis whitespace-nowrap"
+            >
+              {{ item.artist$$q.name }}
+            </router-link>
             <template v-if="item.releaseYear$$q">
               <div class="flex-none pl-2">
                 {{ item.releaseYear$$q }}
@@ -217,7 +202,7 @@ export default defineComponent({
           </v-card-subtitle>
         </v-card>
       </template>
-    </g-grid>
+    </s-virtual-grid>
     <s-dropdown-album v-model="dropdown$$q" />
   </v-container>
 </template>

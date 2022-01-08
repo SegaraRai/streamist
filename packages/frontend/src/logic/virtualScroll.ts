@@ -3,7 +3,10 @@
 import type { Ref } from 'vue';
 
 export interface UseVirtualScrollListOptions {
-  itemHeight: number | ((index: number) => number);
+  disabled?: Readonly<Ref<boolean>>;
+  itemHeightRef?: Readonly<Ref<number>>;
+  itemHeightFunc?: (index: number) => number;
+  additionalHeight?: Readonly<Ref<number>>;
   overscan?: number;
   containerElementRef: Readonly<Ref<HTMLElement | undefined>>;
   contentElementRef: Readonly<Ref<HTMLElement | undefined>>;
@@ -17,7 +20,10 @@ export type UseVirtualScrollListItem<T> = {
 export function useVirtualScrollList<T>(
   list: Ref<T[]>,
   {
-    itemHeight,
+    disabled,
+    itemHeightRef,
+    itemHeightFunc,
+    additionalHeight,
     overscan = 5,
     containerElementRef,
     contentElementRef,
@@ -28,13 +34,16 @@ export function useVirtualScrollList<T>(
   const size = useElementSize(containerElementRef);
 
   const currentList: Ref<UseVirtualScrollListItem<T>[]> = ref([]);
-  const source = shallowRef(list);
+  const shallowList = shallowRef(list);
+  const source = eagerComputed(() =>
+    disabled?.value ? [] : shallowList.value
+  );
 
   const state = ref({ start: 0, end: 10 });
 
   const getViewCapacity = (containerHeight: number, start: number) => {
-    if (typeof itemHeight === 'number') {
-      return Math.ceil(containerHeight / itemHeight);
+    if (itemHeightRef) {
+      return Math.ceil(containerHeight / itemHeightRef.value);
     }
 
     if (containerHeight <= 0) {
@@ -45,7 +54,7 @@ export function useVirtualScrollList<T>(
 
     let sum = 0;
     for (let i = start; i < length; i++) {
-      const height = (itemHeight as (index: number) => number)(i);
+      const height = itemHeightFunc!(i);
       sum += height;
       if (sum >= containerHeight) {
         return i - start;
@@ -56,8 +65,8 @@ export function useVirtualScrollList<T>(
   };
 
   const getOffset = (scrollTop: number) => {
-    if (typeof itemHeight === 'number') {
-      return Math.floor(scrollTop / itemHeight);
+    if (itemHeightRef) {
+      return Math.floor(scrollTop / itemHeightRef.value);
     }
 
     if (scrollTop <= 0) {
@@ -66,7 +75,7 @@ export function useVirtualScrollList<T>(
 
     let sum = 0;
     for (let i = 0; i < source.value.length; i++) {
-      const height = (itemHeight as (index: number) => number)(i);
+      const height = itemHeightFunc!(i);
       sum += height;
       if (sum >= scrollTop) {
         return i + 1;
@@ -77,11 +86,16 @@ export function useVirtualScrollList<T>(
   };
 
   const calculateRange = () => {
+    if (disabled?.value) {
+      return;
+    }
+
     const listElement = listElementRef.value;
     const containerElement = containerElementRef.value;
     const contentElement = contentElementRef.value;
 
     if (!listElement || !containerElement || !contentElement) {
+      console.warn('some of elements are not defined', list.value);
       return;
     }
 
@@ -121,6 +135,7 @@ export function useVirtualScrollList<T>(
       containerElementRef,
       contentElementRef,
       listElementRef,
+      itemHeightRef || ref(0),
     ],
     () => {
       calculateRange();
@@ -137,25 +152,34 @@ export function useVirtualScrollList<T>(
   );
 
   const totalHeight = computed(() => {
-    if (typeof itemHeight === 'number') return source.value.length * itemHeight;
-    return source.value.reduce((sum, _, index) => sum + itemHeight(index), 0);
+    if (disabled?.value) {
+      return 0;
+    }
+    if (itemHeightRef) {
+      return source.value.length * itemHeightRef.value;
+    }
+    return source.value.reduce(
+      (sum, _, index) => sum + itemHeightFunc!(index),
+      0
+    );
   });
 
   const getDistanceTop = (index: number) => {
-    if (typeof itemHeight === 'number') {
-      const height = index * itemHeight;
-      return height;
+    if (disabled?.value) {
+      return 0;
     }
-    const height = source.value
+    if (itemHeightRef) {
+      return index * itemHeightRef.value;
+    }
+    return source.value
       .slice(0, index)
-      .reduce((sum, _, i) => sum + itemHeight(i), 0);
-    return height;
+      .reduce((sum, _, i) => sum + itemHeightFunc!(i), 0);
   };
 
   const offsetTop = computed(() => getDistanceTop(state.value.start));
   const containerStyle = computed(() => {
     return {
-      height: `${totalHeight.value}px`,
+      height: `${totalHeight.value + (additionalHeight?.value || 0)}px`,
       paddingTop: `${offsetTop.value}px`,
     };
   });

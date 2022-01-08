@@ -273,13 +273,14 @@ export default defineComponent({
     const { containerStyle, list, listElementRef } = useVirtualScrollList(
       items,
       {
+        disabled: eagerComputed(() => props.renderMode !== 'virtual'),
         containerElementRef: eagerComputed(
           () => props.scrollContainer || currentScrollContainerRef.value
         ),
         contentElementRef: eagerComputed(
           () => props.scrollContent || currentScrollContentRef.value
         ),
-        itemHeight: (index: number) => items.value[index].height$$q,
+        itemHeightFunc: (index: number) => items.value[index].height$$q,
       }
     );
 

@@ -58,6 +58,7 @@ declare module 'vue' {
     SUploader: typeof import('./components/SUploader.vue')['default']
     SUploaderList: typeof import('./components/SUploaderList.vue')['default']
     SUploaderListItem: typeof import('./components/SUploaderListItem.vue')['default']
+    SVirtualGrid: typeof import('./components/SVirtualGrid.vue')['default']
     SVolumeControl: typeof import('./components/SVolumeControl.vue')['default']
   }
 }
