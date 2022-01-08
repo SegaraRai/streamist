@@ -24,7 +24,7 @@ export default defineComponent({
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
     const artistId$$q = ref('');
-    const newArtistId$$q = ref('');
+    const newArtistId$$q = ref<string | undefined>();
     const newArtistName$$q = ref('');
 
     const reloadData = (newArtist: ResourceArtist): void => {

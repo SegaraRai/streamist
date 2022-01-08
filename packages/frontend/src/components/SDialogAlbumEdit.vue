@@ -5,7 +5,7 @@ import type { ResourceAlbum } from '$/types';
 import { useTranslatedTimeAgo } from '~/composables/timeAgo';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
-import { convertOptStr, convertReqStr } from '~/logic/editUtils';
+import { convertOptId, convertOptStr, convertReqStr } from '~/logic/editUtils';
 
 export default defineComponent({
   props: {
@@ -26,7 +26,7 @@ export default defineComponent({
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
     const albumId$$q = ref('');
-    const artistId$$q = ref('');
+    const artistId$$q = ref<string | undefined>();
     const artistName$$q = ref('');
     const itemTitle$$q = ref('');
     const itemTitleSort$$q = ref('');
@@ -98,7 +98,7 @@ export default defineComponent({
               title: convertReqStr(itemTitle$$q.value, album.title),
               titleSort: convertOptStr(itemTitleSort$$q.value, album.titleSort),
               notes: convertReqStr(itemDescription$$q.value, album.notes),
-              artistId: convertOptStr(artistId$$q.value, album.artistId),
+              artistId: convertOptId(artistId$$q.value, album.artistId),
               artistName: artistId$$q.value
                 ? undefined
                 : artistName$$q.value.trim(),

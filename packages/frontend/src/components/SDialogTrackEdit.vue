@@ -7,6 +7,7 @@ import { useTranslatedTimeAgo } from '~/composables/timeAgo';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import {
+  convertOptId,
   convertOptNum,
   convertOptStr,
   convertReqNum,
@@ -33,9 +34,9 @@ export default defineComponent({
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
     const trackId$$q = ref('');
-    const albumId$$q = ref('');
+    const albumId$$q = ref<string | undefined>();
     const albumTitle$$q = ref('');
-    const artistId$$q = ref('');
+    const artistId$$q = ref<string | undefined>();
     const artistName$$q = ref('');
     const itemTitle$$q = ref('');
     const itemTitleSort$$q = ref('');
@@ -199,11 +200,11 @@ export default defineComponent({
               bpm: convertOptNum(itemBPM$$q.value, track.bpm),
               comment: convertOptStr(itemComment$$q.value, track.comment),
               lyric: convertOptStr(itemLyrics$$q.value, track.lyric),
-              albumId: convertOptStr(albumId$$q.value, track.albumId),
+              albumId: convertOptId(albumId$$q.value, track.albumId),
               albumTitle: albumId$$q.value
                 ? undefined
                 : albumTitle$$q.value.trim(),
-              artistId: convertOptStr(artistId$$q.value, track.artistId),
+              artistId: convertOptId(artistId$$q.value, track.artistId),
               artistName: artistId$$q.value
                 ? undefined
                 : artistName$$q.value.trim(),

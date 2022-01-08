@@ -30,6 +30,13 @@ export function convertOptStr(
   return input && input !== (org || '') ? input : undefined;
 }
 
+export function convertOptId(
+  input: string | undefined,
+  org: string
+): string | undefined {
+  return input !== org ? input : undefined;
+}
+
 export function convertReqNum(
   input: number | undefined,
   org: number
