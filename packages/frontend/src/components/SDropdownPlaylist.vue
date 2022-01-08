@@ -28,8 +28,8 @@ export default defineComponent({
       readonly ResourceTrack[] | undefined
     >();
 
-    const dialog$$q = ref(false);
-    const createDialog$$q = ref(false);
+    const dialogEdit$$q = ref(false);
+    const dialogCreate$$q = ref(false);
 
     const {
       x$$q: menuX$$q,
@@ -46,10 +46,10 @@ export default defineComponent({
       moveWhenDelete$$q: ref(true),
       showCreatePlaylist$$q: eagerComputed(() => props.showCreateItem),
       openEditPlaylistDialog$$q: () => {
-        dialog$$q.value = true;
+        dialogEdit$$q.value = true;
       },
       openCreatePlaylistDialog$$q: () => {
-        createDialog$$q.value = true;
+        dialogCreate$$q.value = true;
       },
       closeMenu$$q,
     });
@@ -72,15 +72,15 @@ export default defineComponent({
         return;
       }
 
-      createDialog$$q.value = true;
+      dialogCreate$$q.value = true;
 
       showCreateDialog$$q.value = false;
     });
 
     return {
       selectedPlaylist$$q,
-      createDialog$$q,
-      dialog$$q,
+      dialogCreate$$q,
+      dialogEdit$$q,
       menuOptions$$q,
       menuIsOpen$$q,
       menuX$$q,
@@ -105,9 +105,9 @@ export default defineComponent({
   />
   <template v-if="selectedPlaylist$$q">
     <s-dialog-playlist-edit
-      v-model="dialog$$q"
+      v-model="dialogEdit$$q"
       :playlist="selectedPlaylist$$q"
     />
   </template>
-  <s-dialog-playlist-create v-model="createDialog$$q" />
+  <s-dialog-playlist-create v-model="dialogCreate$$q" />
 </template>
