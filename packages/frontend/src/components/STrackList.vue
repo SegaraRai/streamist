@@ -334,14 +334,14 @@ export default defineComponent({
   <div
     :class="
       dragging$$q || selectedTrack$$q
-        ? 's-track-list--selected'
-        : 's-track-list--unselected'
+        ? 's-list--selected'
+        : 's-list--unselected'
     "
   >
     <v-list
       flat
       density="compact"
-      class="s-track-list select-none"
+      class="s-list select-none"
       @contextmenu.prevent
     >
       <template v-if="!hideHeader">
@@ -414,7 +414,7 @@ export default defineComponent({
           :items="trackOnlyItems$$q"
           item-key="id"
           class="flex flex-col"
-          ghost-class="s-track-list--ghost"
+          ghost-class="s-list--ghost"
           :on-move="onMove$$q"
           :disabled="trackOnlyItems$$q.length <= 1"
           @dragstart="(dragging$$q = true), closeMenu$$q()"
@@ -494,22 +494,6 @@ export default defineComponent({
 </template>
 
 <style>
-.s-track-list--selected .s-track-list-item--unselected .s-hover-visible,
-.s-track-list--selected .s-track-list-item--selected .s-hover-hidden {
-  display: none !important;
-}
-
-.s-track-list--selected .s-track-list-item--unselected .s-hover-hidden,
-.s-track-list--selected .s-track-list-item--selected .s-hover-visible {
-  display: flex !important;
-}
-
-.s-track-list--ghost .s-track-list-item,
-.s-track-list--unselected .s-track-list-item:hover,
-.s-track-list-item--selected {
-  @apply bg-true-gray-400/10;
-}
-
 .sheet-header {
   @apply sticky;
 

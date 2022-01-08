@@ -56,12 +56,14 @@ export default defineComponent({
       });
     });
 
+    const selectedPlaylist$$q = ref<ResourcePlaylist | undefined>();
     const dropdown$$q = ref<DropdownPlaylistInput | undefined>();
 
     return {
       t,
       items$$q: items,
       showCreateDialog$$q: ref(false),
+      selectedPlaylist$$q,
       dropdown$$q,
       showMenu$$q: (target: MouseEvent | HTMLElement, item: Item) => {
         dropdown$$q.value = {
@@ -89,13 +91,20 @@ export default defineComponent({
       </v-btn>
     </div>
 
-    <div class="playlists">
+    <div
+      :class="selectedPlaylist$$q ? 's-list--selected' : 's-list--unselected'"
+    >
       <template v-if="items$$q?.length">
-        <v-list flat>
+        <v-list flat @contextmenu.prevent>
           <template v-for="(item, _index) in items$$q" :key="_index">
             <v-list-item
               :to="`/playlists/${item.id$$q}`"
               class="flex gap-x-4 s-hover-container"
+              :class="
+                selectedPlaylist$$q?.id === item.id$$q
+                  ? 's-list-item--selected'
+                  : 's-list-item--unselected'
+              "
               @contextmenu.prevent="showMenu$$q($event, item)"
             >
               <s-playlist-image
@@ -118,7 +127,7 @@ export default defineComponent({
                 text
                 size="small"
                 class="bg-transparent"
-                @click.stop="showMenu$$q($event.target as HTMLElement, item)"
+                @click.prevent.stop="showMenu$$q($event.target as HTMLElement, item)"
               >
                 <v-icon class="s-hover-visible"> mdi-dots-vertical </v-icon>
               </v-btn>
@@ -134,6 +143,7 @@ export default defineComponent({
       v-model="dropdown$$q"
       v-model:show-create-dialog="showCreateDialog$$q"
       show-create-item
+      @update:selected-playlist="selectedPlaylist$$q = $event"
     />
   </v-container>
 </template>

@@ -19,6 +19,11 @@ export default defineComponent({
     showCreateDialog: Boolean,
     showCreateItem: Boolean,
   },
+  emits: {
+    'update:modelValue': (_value: DropdownPlaylistInput | undefined) => true,
+    'update:showCreateDialog': (_value: Boolean) => true,
+    'update:selectedPlaylist': (_value: ResourcePlaylist | undefined) => true,
+  },
   setup(props, { emit }) {
     const modelValue$$q = useVModel(props, 'modelValue', emit);
     const showCreateDialog$$q = useVModel(props, 'showCreateDialog', emit);
@@ -39,6 +44,9 @@ export default defineComponent({
       open$$q: openMenu$$q,
     } = useMenu({
       closeOnScroll$$q: true,
+      onClose$$q: () => {
+        emit('update:selectedPlaylist', undefined);
+      },
     });
     const menuOptions$$q = createPlaylistDropdown({
       playlist$$q: selectedPlaylist$$q,
@@ -64,6 +72,8 @@ export default defineComponent({
         selectedPlaylistTracks$$q.value = value.tracks$$q;
 
         modelValue$$q.value = undefined;
+
+        emit('update:selectedPlaylist', value.playlist$$q);
       });
     });
 

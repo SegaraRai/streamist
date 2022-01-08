@@ -85,10 +85,8 @@ export default defineComponent({
 <template>
   <v-list-item
     v-bind="$attrs"
-    class="s-hover-container s-track-list-item w-full py-1 h-14 !<sm:px-2"
-    :class="
-      selected ? 's-track-list-item--selected' : 's-track-list-item--unselected'
-    "
+    class="s-hover-container s-list-item w-full py-1 h-14 !<sm:px-2"
+    :class="selected ? 's-list-item--selected' : 's-list-item--unselected'"
     :ripple="false"
     @contextmenu.stop.prevent="onContextMenu$$q($event)"
   >
