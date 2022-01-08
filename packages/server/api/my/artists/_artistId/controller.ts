@@ -1,5 +1,5 @@
 import { client } from '$/db/lib/client';
-import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { artistMerge, artistUpdate } from '$/services/artists';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -20,20 +20,11 @@ export default defineController(() => ({
     };
   },
   patch: async ({ body, params, user }) => {
-    const newArtist = await client.artist.updateMany({
-      where: {
-        id: params.artistId,
-        userId: user.id,
-      },
-      data: {
-        name: body.name,
-        updatedAt: Date.now(),
-      },
-    });
-    if (!newArtist) {
-      throw new HTTPError(404, `Artist ${params.artistId} not found`);
-    }
-    await dbResourceUpdateTimestamp(user.id);
+    await artistUpdate(user.id, params.artistId, body);
+    return { status: 204 };
+  },
+  post: async ({ body, params, user }) => {
+    await artistMerge(user.id, params.artistId, body.toArtistId);
     return { status: 204 };
   },
 }));

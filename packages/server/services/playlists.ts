@@ -14,9 +14,13 @@ import {
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
+export type PlaylistCreateData = Pick<Playlist, 'title' | 'notes'> & {
+  trackIds?: string[];
+};
+
 export async function playlistCreate(
   userId: string,
-  data: Pick<Playlist, 'title' | 'notes'> & { trackIds?: string[] }
+  data: PlaylistCreateData
 ): Promise<Playlist> {
   const { title, notes } = data;
 
@@ -66,10 +70,12 @@ export async function playlistCreate(
   return playlist;
 }
 
+export type PlaylistUpdateData = Partial<Pick<Playlist, 'title' | 'notes'>>;
+
 export async function playlistUpdate(
   userId: string,
   playlistId: string,
-  data: Partial<Pick<Playlist, 'title' | 'notes'>>
+  data: PlaylistUpdateData
 ): Promise<void> {
   const { title, notes } = data;
 
@@ -77,7 +83,7 @@ export async function playlistUpdate(
     return;
   }
 
-  const newPlaylist = await client.playlist.updateMany({
+  const playlist = await client.playlist.updateMany({
     where: {
       id: playlistId,
       userId,
@@ -88,7 +94,7 @@ export async function playlistUpdate(
       updatedAt: Date.now(),
     },
   });
-  if (newPlaylist.count === 0) {
+  if (playlist.count === 0) {
     throw new HTTPError(404, `Playlist ${playlistId} not found`);
   }
 

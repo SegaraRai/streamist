@@ -1,4 +1,3 @@
-import type { Playlist } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   ArrayUnique,
@@ -7,17 +6,16 @@ import {
   IsString,
   Validate,
 } from 'class-validator';
+import type {
+  PlaylistCreateData,
+  PlaylistUpdateData,
+} from '$/services/playlists';
 import { IsIdConstraint, IsUndefinable } from './utils';
 import {
   tStringNormalizeMultipleLines,
   tStringNormalizeSingleLine,
 } from './utils/transform';
-
-type IPlaylistCreateBody = Pick<Playlist, 'title' | 'notes'> & {
-  trackIds?: string[];
-};
-
-export class VPlaylistCreateBody implements IPlaylistCreateBody {
+export class VPlaylistCreateBody implements PlaylistCreateData {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => tStringNormalizeSingleLine(value))
@@ -34,9 +32,7 @@ export class VPlaylistCreateBody implements IPlaylistCreateBody {
   trackIds?: string[];
 }
 
-type IPlaylistUpdateBody = Partial<Pick<Playlist, 'title' | 'notes'>>;
-
-export class VPlaylistUpdateBody implements IPlaylistUpdateBody {
+export class VPlaylistUpdateBody implements PlaylistUpdateData {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()

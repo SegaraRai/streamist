@@ -13,7 +13,7 @@ import { albumDeleteIfUnreferenced } from './albums';
 import { artistDeleteIfUnreferenced } from './artists';
 import { sourceFileDeleteFromOSIfUnreferenced } from './sourceFiles';
 
-export type UpdateTrackData = Partial<
+export type TrackUpdateData = Partial<
   Pick<
     Track,
     | 'title'
@@ -33,7 +33,7 @@ export type UpdateTrackData = Partial<
   albumTitle?: string;
 };
 
-export interface UpdateTrackOptions {
+export interface TrackUpdateOptions {
   readonly forceNewAlbum?: boolean;
   readonly forceNewArtist?: boolean;
   readonly preferOldArtist?: boolean;
@@ -43,13 +43,13 @@ export interface UpdateTrackOptions {
 export async function trackUpdate(
   userId: string,
   trackId: string,
-  data: UpdateTrackData,
+  data: TrackUpdateData,
   {
     forceNewAlbum = false,
     forceNewArtist = false,
     preferOldArtist = false,
     preferAlbumArtist = false,
-  }: UpdateTrackOptions
+  }: TrackUpdateOptions
 ): Promise<Track> {
   const parsedDate =
     data.releaseDateText != null ? parseDate(data.releaseDateText) : undefined;

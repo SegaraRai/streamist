@@ -1,24 +1,178 @@
+import { Album, Prisma } from '@prisma/client';
+import { generateArtistId } from '$shared-server/generateId';
+import { emptyToNull } from '$shared/transform';
 import { dbAlbumMoveImageBefore, dbAlbumRemoveImageTx } from '$/db/album';
+import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
+import { dbCoArtistMergeTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
+export type AlbumUpdateData = Partial<
+  Pick<Album, 'title' | 'titleSort' | 'notes' | 'artistId'>
+> & {
+  artistName?: string;
+};
+
+export interface UpdateAlbumOptions {
+  readonly forceNewArtist?: boolean;
+}
+
 export async function albumUpdate(
   userId: string,
   albumId: string,
-  title: string
-) {
-  await client.album.updateMany({
-    where: {
-      id: albumId,
+  data: AlbumUpdateData,
+  { forceNewArtist = false }: UpdateAlbumOptions
+): Promise<void> {
+  await client.$transaction(async (txClient) => {
+    const timestamp = Date.now();
+
+    const albumCount = await txClient.album.count({
+      where: {
+        id: albumId,
+        userId,
+      },
+    });
+    if (!albumCount) {
+      throw new HTTPError(404, `album ${albumId} not found`);
+    }
+
+    // create artist
+    let artistId: string | undefined;
+    if (data.artistId) {
+      const artist = await txClient.artist.findFirst({
+        where: {
+          id: data.artistId,
+          userId,
+        },
+      });
+      if (!artist) {
+        throw new HTTPError(400, `Artist ${data.artistId} not found`);
+      }
+      artistId = artist.id;
+    } else if (data.artistName) {
+      const artist = forceNewArtist
+        ? await txClient.artist.create({
+            data: {
+              id: await generateArtistId(),
+              name: data.artistName,
+              userId,
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            },
+          })
+        : await dbArtistGetOrCreateByNameTx(txClient, userId, data.artistName);
+      artistId = artist.id;
+    }
+
+    await txClient.album.updateMany({
+      where: {
+        id: albumId,
+        userId,
+      },
+      data: {
+        title: data.title,
+        titleSort: emptyToNull(data.titleSort),
+        notes: data.notes,
+        artistId,
+        updatedAt: timestamp,
+      },
+    });
+  });
+
+  await dbResourceUpdateTimestamp(userId);
+}
+
+export async function albumMerge(
+  userId: string,
+  albumId: string,
+  toAlbumId: string
+): Promise<void> {
+  await client.$transaction(async (txClient): Promise<void> => {
+    const timestamp = Date.now();
+
+    const album = await txClient.album.findFirst({
+      where: {
+        id: albumId,
+        userId,
+      },
+    });
+
+    if (!album) {
+      throw new HTTPError(404, `album ${albumId} not found`);
+    }
+
+    const toAlbum = await txClient.album.findFirst({
+      where: {
+        id: toAlbumId,
+        userId,
+      },
+    });
+
+    if (!toAlbum) {
+      throw new HTTPError(404, `album ${toAlbumId} not found`);
+    }
+
+    await txClient.track.updateMany({
+      where: {
+        albumId,
+        userId,
+      },
+      data: {
+        albumId: toAlbumId,
+        updatedAt: timestamp,
+      },
+    });
+
+    await dbCoArtistMergeTx<typeof Prisma.AlbumCoArtistScalarFieldEnum>(
+      txClient,
+      Prisma.ModelName.AlbumCoArtist,
+      'albumId',
       userId,
-    },
-    data: {
-      title,
-      updatedAt: Date.now(),
-    },
+      albumId,
+      toAlbumId,
+      timestamp
+    );
+
+    await txClient.aAlbumImage.updateMany({
+      where: {
+        x: albumId,
+        userId,
+      },
+      data: {
+        x: toAlbumId,
+      },
+    });
+
+    const updated = await txClient.album.updateMany({
+      where: {
+        id: toAlbumId,
+        imageOrder: toAlbum.imageOrder,
+        userId,
+      },
+      data: {
+        updatedAt: timestamp,
+        imageOrder: toAlbum.imageOrder + album.imageOrder,
+      },
+    });
+    if (!updated.count) {
+      throw new HTTPError(409, `album ${toAlbumId} changed during merge`);
+    }
+
+    const deleted = await txClient.album.deleteMany({
+      where: {
+        id: albumId,
+        imageOrder: album.imageOrder,
+        userId,
+      },
+    });
+    if (!deleted.count) {
+      throw new HTTPError(409, `album ${albumId} changed during merge`);
+    }
+
+    await dbDeletionAddTx(txClient, userId, 'album', albumId);
   });
 
   await dbResourceUpdateTimestamp(userId);

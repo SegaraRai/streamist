@@ -1,9 +1,130 @@
+import { Artist, Prisma } from '@prisma/client';
 import { dbArtistMoveImageBefore, dbArtistRemoveImageTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
+import { dbCoArtistMergeArtistTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
+
+export type ArtistUpdateData = Partial<Pick<Artist, 'name' | 'nameSort'>>;
+
+export async function artistUpdate(
+  userId: string,
+  artistId: string,
+  data: ArtistUpdateData
+): Promise<void> {
+  const { name, nameSort } = data;
+
+  if (name == null && nameSort == null) {
+    return;
+  }
+
+  const artist = await client.artist.updateMany({
+    where: {
+      id: artistId,
+      userId,
+    },
+    data: {
+      name,
+      nameSort,
+      updatedAt: Date.now(),
+    },
+  });
+  if (artist.count === 0) {
+    throw new HTTPError(404, `artist ${artistId} not found`);
+  }
+
+  await dbResourceUpdateTimestamp(userId);
+}
+
+export async function artistMerge(
+  userId: string,
+  artistId: string,
+  toArtistId: string
+): Promise<void> {
+  await client.$transaction(async (txClient): Promise<void> => {
+    const timestamp = Date.now();
+
+    const artist = await txClient.artist.findFirst({
+      where: {
+        id: artistId,
+        userId,
+      },
+    });
+
+    if (!artist) {
+      throw new HTTPError(404, `artist ${artistId} not found`);
+    }
+
+    const toArtist = await txClient.artist.findFirst({
+      where: {
+        id: toArtistId,
+        userId,
+      },
+    });
+
+    if (!toArtist) {
+      throw new HTTPError(404, `artist ${toArtistId} not found`);
+    }
+
+    const query = {
+      where: {
+        artistId,
+        userId,
+      },
+      data: {
+        artistId: toArtistId,
+        updatedAt: timestamp,
+      },
+    } as const;
+
+    await txClient.track.updateMany(query);
+    await txClient.album.updateMany(query);
+    await dbCoArtistMergeArtistTx<typeof Prisma.TrackCoArtistScalarFieldEnum>(
+      txClient,
+      Prisma.ModelName.TrackCoArtist,
+      'trackId',
+      userId,
+      artistId,
+      toArtistId,
+      timestamp
+    );
+    await dbCoArtistMergeArtistTx<typeof Prisma.AlbumCoArtistScalarFieldEnum>(
+      txClient,
+      Prisma.ModelName.AlbumCoArtist,
+      'albumId',
+      userId,
+      artistId,
+      toArtistId,
+      timestamp
+    );
+
+    await txClient.artist.updateMany({
+      where: {
+        id: toArtistId,
+        userId,
+      },
+      data: {
+        updatedAt: timestamp,
+      },
+    });
+
+    const deleted = await txClient.album.deleteMany({
+      where: {
+        id: artistId,
+        userId,
+      },
+    });
+    if (!deleted.count) {
+      throw new HTTPError(409, `artist ${artistId} deleted during merge`);
+    }
+
+    await dbDeletionAddTx(txClient, userId, 'artist', artistId);
+  });
+
+  await dbResourceUpdateTimestamp(userId);
+}
 
 /**
  * 指定されたアーティストが参照されていない場合に削除する
