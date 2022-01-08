@@ -8,6 +8,7 @@ import { dbCoArtistMergeTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
+import { artistDeleteIfUnreferenced } from './artists';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
 export type AlbumUpdateData = Partial<
@@ -26,16 +27,16 @@ export async function albumUpdate(
   data: AlbumUpdateData,
   { forceNewArtist = false }: UpdateAlbumOptions
 ): Promise<void> {
-  await client.$transaction(async (txClient) => {
+  const [oldAlbum, newAlbum] = await client.$transaction(async (txClient) => {
     const timestamp = Date.now();
 
-    const albumCount = await txClient.album.count({
+    const album = await txClient.album.findFirst({
       where: {
         id: albumId,
         userId,
       },
     });
-    if (!albumCount) {
+    if (!album) {
       throw new HTTPError(404, `album ${albumId} not found`);
     }
 
@@ -67,10 +68,9 @@ export async function albumUpdate(
       artistId = artist.id;
     }
 
-    await txClient.album.updateMany({
+    const newAlbum = await txClient.album.update({
       where: {
         id: albumId,
-        userId,
       },
       data: {
         title: data.title,
@@ -80,7 +80,13 @@ export async function albumUpdate(
         updatedAt: timestamp,
       },
     });
+
+    return [album, newAlbum];
   });
+
+  if (newAlbum.artistId !== oldAlbum.artistId) {
+    await artistDeleteIfUnreferenced(userId, oldAlbum.artistId, true);
+  }
 
   await dbResourceUpdateTimestamp(userId);
 }
