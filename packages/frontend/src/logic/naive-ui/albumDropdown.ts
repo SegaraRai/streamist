@@ -4,7 +4,7 @@ import type { ResourceAlbum, ResourceTrack } from '$/types';
 import { usePlaybackStore } from '~/stores/playback';
 import { nCreateDropdownIcon } from './dropdown';
 
-interface AlbumDropdownCreateOptions {
+export interface AlbumDropdownCreateOptions {
   readonly album$$q: Readonly<Ref<ResourceAlbum | null | undefined>>;
   readonly albumTracks$$q: Readonly<
     Ref<readonly ResourceTrack[] | null | undefined>

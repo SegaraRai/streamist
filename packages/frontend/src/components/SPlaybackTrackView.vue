@@ -2,7 +2,7 @@
 import type { PropType } from 'vue';
 import type { ResourceTrack } from '$/types';
 import { useMenu } from '~/logic/menu';
-import { createTrackListDropdown } from '~/logic/naive-ui/trackListDropdown';
+import { createTrackDropdown } from '~/logic/naive-ui/trackDropdown';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
@@ -32,7 +32,7 @@ export default defineComponent({
       closeOnScroll$$q: true,
       scrollRef$$q: ref(0),
     });
-    const menuOptions$$q = createTrackListDropdown({
+    const menuOptions$$q = createTrackDropdown({
       selectedTrack$$q: playbackStore.currentTrack$$q,
       playlistId$$q: ref(),
       showVisitAlbum$$q: ref(true),

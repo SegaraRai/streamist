@@ -7,7 +7,7 @@ import { usePlaybackStore } from '~/stores/playback';
 import { useAllPlaylists } from '../useDB';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
-interface TrackListDropdownCreateOptions {
+export interface TrackDropdownCreateOptions {
   readonly selectedTrack$$q: Readonly<Ref<ResourceTrack | null | undefined>>;
   readonly playlistId$$q: Readonly<Ref<string | null | undefined>>;
   readonly showVisitAlbum$$q: Readonly<Ref<boolean>>;
@@ -18,7 +18,7 @@ interface TrackListDropdownCreateOptions {
   readonly closeMenu$$q: () => void;
 }
 
-export function createTrackListDropdown({
+export function createTrackDropdown({
   selectedTrack$$q,
   playlistId$$q,
   showVisitAlbum$$q,
@@ -27,7 +27,7 @@ export function createTrackListDropdown({
   play$$q,
   openEditTrackDialog$$q,
   closeMenu$$q,
-}: TrackListDropdownCreateOptions): ComputedRef<MenuOption[]> {
+}: TrackDropdownCreateOptions): ComputedRef<MenuOption[]> {
   const router = useRouter();
   const { t } = useI18n();
   const dialog = useDialog();

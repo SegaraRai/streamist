@@ -6,7 +6,7 @@ import api from '~/logic/api';
 import { usePlaybackStore } from '~/stores/playback';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
-interface PlaylistDropdownCreateOptions {
+export interface PlaylistDropdownCreateOptions {
   readonly playlist$$q: Readonly<Ref<ResourcePlaylist | null | undefined>>;
   readonly playlistTracks$$q: Readonly<
     Ref<readonly ResourceTrack[] | null | undefined>

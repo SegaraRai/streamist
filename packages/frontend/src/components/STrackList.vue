@@ -10,7 +10,7 @@ import { db } from '~/db';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
 import { useMenu } from '~/logic/menu';
-import { createTrackListDropdown } from '~/logic/naive-ui/trackListDropdown';
+import { createTrackDropdown } from '~/logic/naive-ui/trackDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { waitForChange } from '~/logic/waitForChange';
 import { usePlaybackStore } from '~/stores/playback';
@@ -228,7 +228,7 @@ export default defineComponent({
         selectedTrackIndex$$q.value = undefined;
       },
     });
-    const menuOptions$$q = createTrackListDropdown({
+    const menuOptions$$q = createTrackDropdown({
       selectedTrack$$q,
       playlistId$$q: eagerComputed(() => props.playlistId),
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
