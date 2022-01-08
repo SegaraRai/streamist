@@ -12,9 +12,14 @@ import { getDefaultAlbumImage } from '~/logic/image';
 import { useMenu } from '~/logic/menu';
 import { createTrackDropdown } from '~/logic/naive-ui/trackDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
+import { useVirtualScrollList } from '~/logic/virtualScroll';
 import { waitForChange } from '~/logic/waitForChange';
 import { usePlaybackStore } from '~/stores/playback';
-import { currentScrollRef } from '~/stores/scroll';
+import {
+  currentScrollContainerRef,
+  currentScrollContentRef,
+  currentScrollRef,
+} from '~/stores/scroll';
 import { useThemeStore } from '~/stores/theme';
 import type { ListItemDiscNumberHeader } from './STrackListDiscHeaderItem.vue';
 import type { ListItemTrack } from './STrackListTrackItem.vue';
@@ -63,8 +68,16 @@ export default defineComponent({
     visitAlbum: Boolean,
     visitArtist: Boolean,
     disableCurrentPlaying: Boolean,
-    menuParentScroll: {
+    scrollTop: {
       type: Number,
+      default: undefined,
+    },
+    scrollContainer: {
+      type: Object as PropType<HTMLElement | null | undefined>,
+      default: undefined,
+    },
+    scrollContent: {
+      type: Object as PropType<HTMLElement | null | undefined>,
       default: undefined,
     },
     onMove: {
@@ -221,7 +234,7 @@ export default defineComponent({
     } = useMenu({
       closeOnScroll$$q: true,
       scrollRef$$q: eagerComputed(
-        () => props.menuParentScroll ?? currentScrollRef.value
+        () => props.scrollTop ?? currentScrollRef.value
       ),
       onClose$$q: () => {
         selectedTrack$$q.value = undefined;
@@ -257,12 +270,28 @@ export default defineComponent({
       }
     });
 
+    const { containerStyle, list, listElementRef } = useVirtualScrollList(
+      items,
+      {
+        containerElementRef: eagerComputed(
+          () => props.scrollContainer || currentScrollContainerRef.value
+        ),
+        contentElementRef: eagerComputed(
+          () => props.scrollContent || currentScrollContentRef.value
+        ),
+        itemHeight: (index: number) => items.value[index].height$$q,
+      }
+    );
+
     return {
       t,
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       items$$q: items,
       trackOnlyItems$$q,
+      containerStyle$$q: containerStyle,
+      virtualListItems$$q: list,
+      virtualListElementRef$$q: listElementRef,
       itemsProvider$$q,
       currentPlayingTrackId$$q: currentPlayingTrackId,
       useDiscNumber$$q: useDiscNumber,
@@ -350,7 +379,7 @@ export default defineComponent({
         </v-list-item>
         <v-divider class="mx-1" @contextmenu.prevent />
       </template>
-      <template v-if="items$$q.length === 0"> </template>
+      <template v-if="items$$q.length === 0"></template>
       <template v-if="renderMode === 'plain'">
         <div class="flex flex-col">
           <template v-for="(item, _index) in items$$q" :key="_index">
@@ -412,49 +441,38 @@ export default defineComponent({
       </template>
       <template v-else-if="renderMode === 'virtual'">
         <!-- this render mode is not reactive for props.tracks -->
-        <g-grid
-          class="grid grid-cols-1"
-          :length="items$$q.length"
-          :page-provider="itemsProvider$$q"
-          :page-size="pageSize$$q"
+        <div
+          ref="virtualListElementRef$$q"
+          class="w-full"
+          :style="containerStyle$$q"
         >
-          <template #probe>
-            <div class="h-57px"></div>
-          </template>
           <template
-            #default="{
-              item,
-              style,
-            }: {
-              item: (typeof items$$q)[0],
-              style: string,
-            }"
+            v-for="{ data: item, index: _index } in virtualListItems$$q"
+            :key="_index"
           >
             <template v-if="item.type$$q === 'discNumberHeader'">
-              <s-track-list-disc-header-item :style="style" :item="item" />
+              <s-track-list-disc-header-item :item="item" />
             </template>
             <template v-else>
-              <div :style="style">
-                <s-track-list-track-item
-                  :item="item"
-                  :index-content="indexContent"
-                  :link-excludes="linkExcludes"
-                  :show-album="showAlbum"
-                  :show-artist="showArtist"
-                  :hide-duration="hideDuration"
-                  :selected="
-                    selectedTrackIndex$$q === item.index$$q &&
-                    selectedTrack$$q?.id === item.track$$q.id
-                  "
-                  :disable-current-playing="disableCurrentPlaying"
-                  @play="play$$q(item.track$$q, item.index$$q)"
-                  @menu="showMenu$$q($event.target as HTMLElement, item)"
-                  @ctx-menu="showMenu$$q($event, item)"
-                />
-              </div>
+              <s-track-list-track-item
+                :item="item"
+                :index-content="indexContent"
+                :link-excludes="linkExcludes"
+                :show-album="showAlbum"
+                :show-artist="showArtist"
+                :hide-duration="hideDuration"
+                :selected="
+                  selectedTrackIndex$$q === item.index$$q &&
+                  selectedTrack$$q?.id === item.track$$q.id
+                "
+                :disable-current-playing="disableCurrentPlaying"
+                @play="play$$q(item.track$$q, item.index$$q)"
+                @menu="showMenu$$q($event.target as HTMLElement, item)"
+                @ctx-menu="showMenu$$q($event, item)"
+              />
             </template>
           </template>
-        </g-grid>
+        </div>
       </template>
     </v-list>
   </div>

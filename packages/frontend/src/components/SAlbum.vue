@@ -215,7 +215,7 @@ export default defineComponent({
     </div>
   </template>
   <s-track-list
-    render-mode="plain"
+    render-mode="virtual"
     :show-album="false"
     :show-artist="false"
     :tracks="value$$q?.tracks$$q"

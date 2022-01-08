@@ -5,7 +5,7 @@ import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
   props: {
-    menuParentScroll: {
+    scrollTop: {
       type: Number,
       required: true,
     },
@@ -52,7 +52,7 @@ export default defineComponent({
         visit-album
         visit-artist
         disable-current-playing
-        :menu-parent-scroll="menuParentScroll"
+        :scroll-top="scrollTop"
         @play="playFromPNQueue$$q"
       />
     </template>
@@ -65,7 +65,7 @@ export default defineComponent({
       visit-album
       visit-artist
       disable-current-playing
-      :menu-parent-scroll="menuParentScroll"
+      :scroll-top="scrollTop"
       @play="playFromQueue$$q"
     />
   </div>

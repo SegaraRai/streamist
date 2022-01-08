@@ -1,7 +1,13 @@
 <script lang="ts" setup>
+import type { ScrollbarInst } from 'naive-ui';
 import { useDisplay } from 'vuetify';
 import { useSyncDB } from '~/db/sync';
-import { currentScrollRef } from '~/stores/scroll';
+import { getNaiveUIScrollbarElements } from '~/logic/naive-ui/getScrollbarElements';
+import {
+  currentScrollContainerRef,
+  currentScrollContentRef,
+  currentScrollRef,
+} from '~/stores/scroll';
 import { useThemeStore } from '~/stores/theme';
 import { useUploadStore } from '~/stores/upload';
 
@@ -99,11 +105,6 @@ const devSync$$q = (event: MouseEvent) => {
   syncDB(event.shiftKey);
 };
 
-const onScroll$$q = (e: Event): void => {
-  currentScrollRef.value = (e.target as HTMLElement).scrollTop;
-  // console.log(currentScrollRef.value);
-};
-
 const queueScroll$$q = ref(0);
 const onQueueScroll$$q = (e: Event): void => {
   queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
@@ -111,6 +112,38 @@ const onQueueScroll$$q = (e: Event): void => {
 
 const hideShell$$q = eagerComputed(
   () => !!router.currentRoute.value.meta.hideShell
+);
+
+const scrollRef$$q = ref<ScrollbarInst | undefined>();
+
+onMounted(() => {
+  if (!scrollRef$$q.value) {
+    return;
+  }
+
+  const { container$$q, content$$q } = getNaiveUIScrollbarElements(
+    scrollRef$$q.value
+  );
+  if (!container$$q || !content$$q) {
+    return;
+  }
+
+  currentScrollContainerRef.value = container$$q;
+  currentScrollContentRef.value = content$$q;
+});
+
+onBeforeUnmount(() => {
+  currentScrollContainerRef.value = undefined;
+  currentScrollContentRef.value = undefined;
+});
+
+useEventListener(
+  currentScrollContainerRef,
+  'scroll',
+  (e) => {
+    currentScrollRef.value = (e.target as HTMLElement).scrollTop;
+  },
+  { passive: true }
 );
 </script>
 
@@ -158,7 +191,7 @@ const hideShell$$q = eagerComputed(
             class="flex-1 s-n-scrollbar-min-h-full"
             @scroll.passive="onQueueScroll$$q"
           >
-            <s-queue :menu-parent-scroll="queueScroll$$q" />
+            <s-queue :scroll-top="queueScroll$$q" />
           </n-scrollbar>
           <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
           <div class="s-offline-mod-h"></div>
@@ -279,8 +312,8 @@ const hideShell$$q = eagerComputed(
 
       <v-main class="s-v-main w-full">
         <n-scrollbar
+          ref="scrollRef$$q"
           class="s-scroll-target s-n-scrollbar-min-h-full flex-1 !h-auto"
-          @scroll.passive="onScroll$$q"
         >
           <router-view class="px-4" />
         </n-scrollbar>
