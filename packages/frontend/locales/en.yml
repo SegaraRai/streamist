@@ -50,10 +50,12 @@ title:
   PlaylistInit: "Playlist {'|'} Streamist"
 dropdown:
   album:
+    Play: Play
     AddToPlayNextQueue: Add to queue
     Edit: Edit
     Merge: Merge
   playlist:
+    Play: Play
     AddToPlayNextQueue: Add to queue
     Edit: Edit
     Delete: Delete

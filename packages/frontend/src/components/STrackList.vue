@@ -387,7 +387,7 @@ export default defineComponent({
           ghost-class="s-track-list--ghost"
           :on-move="onMove$$q"
           :disabled="trackOnlyItems$$q.length <= 1"
-          @dragstart="dragging$$q = true"
+          @dragstart="(dragging$$q = true), closeMenu$$q()"
           @dragend="dragging$$q = false"
         >
           <template #item="{ element }">

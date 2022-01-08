@@ -45,6 +45,24 @@ export function createPlaylistDropdown({
 
     const menuItems: MenuOption[] = [];
 
+    // Play
+    menuItems.push({
+      key: 'play',
+      label: t('dropdown.playlist.Play'),
+      icon: nCreateDropdownIcon('mdi-play'),
+      disabled: !playlistTracks?.length,
+      props: {
+        onClick: (): void => {
+          closeMenu$$q();
+          if (!playlistTracks?.length) {
+            return;
+          }
+          playbackStore.shuffle$$q.value = false;
+          playbackStore.setSetListAndPlayAuto$$q(playlistTracks);
+        },
+      },
+    });
+
     // Add To Play Next Queue
     menuItems.push({
       key: 'addToPNQueue',
