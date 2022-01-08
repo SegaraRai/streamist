@@ -237,6 +237,7 @@ export function createTrackDropdown({
         label: t('dropdown.trackList.RemoveFromPlaylist'),
         icon: nCreateDropdownIcon('mdi-playlist-remove'),
         props: {
+          style: nCreateDropdownTextColorStyle('warning'),
           onClick: () => {
             closeMenu$$q();
             api.my.playlists

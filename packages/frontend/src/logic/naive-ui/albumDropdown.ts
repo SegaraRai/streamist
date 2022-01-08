@@ -2,7 +2,7 @@ import { MenuOption, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
 import { usePlaybackStore } from '~/stores/playback';
-import { nCreateDropdownIcon } from './dropdown';
+import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
 export interface AlbumDropdownCreateOptions {
   readonly album$$q: Readonly<Ref<ResourceAlbum | null | undefined>>;
@@ -10,6 +10,7 @@ export interface AlbumDropdownCreateOptions {
     Ref<readonly ResourceTrack[] | null | undefined>
   >;
   readonly openEditAlbumDialog$$q: () => void;
+  readonly openMergeAlbumDialog$$q: () => void;
   readonly closeMenu$$q: () => void;
 }
 
@@ -17,6 +18,7 @@ export function createAlbumDropdown({
   album$$q,
   albumTracks$$q,
   openEditAlbumDialog$$q,
+  openMergeAlbumDialog$$q,
   closeMenu$$q,
 }: AlbumDropdownCreateOptions): ComputedRef<MenuOption[]> {
   const { t } = useI18n();
@@ -66,6 +68,20 @@ export function createAlbumDropdown({
       props: {
         onClick: (): void => {
           openEditAlbumDialog$$q();
+          closeMenu$$q();
+        },
+      },
+    });
+
+    // Merge
+    menuItems.push({
+      key: 'merge',
+      label: t('dropdown.album.Merge'),
+      icon: nCreateDropdownIcon('mdi-merge'),
+      props: {
+        style: nCreateDropdownTextColorStyle('warning'),
+        onClick: (): void => {
+          openMergeAlbumDialog$$q();
           closeMenu$$q();
         },
       },

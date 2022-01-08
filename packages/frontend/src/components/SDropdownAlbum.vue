@@ -23,7 +23,9 @@ export default defineComponent({
     const selectedAlbum$$q = ref<ResourceAlbum | undefined>();
     const selectedAlbumTracks$$q = ref<readonly ResourceTrack[] | undefined>();
 
-    const dialog$$q = ref(false);
+    const dialogEdit$$q = ref(false);
+    const dialogMerge$$q = ref(false);
+
     const {
       x$$q: menuX$$q,
       y$$q: menuY$$q,
@@ -33,11 +35,15 @@ export default defineComponent({
     } = useMenu({
       closeOnScroll$$q: true,
     });
+
     const menuOptions$$q = createAlbumDropdown({
       album$$q: selectedAlbum$$q,
       albumTracks$$q: selectedAlbumTracks$$q,
       openEditAlbumDialog$$q: () => {
-        dialog$$q.value = true;
+        dialogEdit$$q.value = true;
+      },
+      openMergeAlbumDialog$$q: () => {
+        dialogMerge$$q.value = true;
       },
       closeMenu$$q,
     });
@@ -57,7 +63,8 @@ export default defineComponent({
 
     return {
       selectedAlbum$$q,
-      dialog$$q,
+      dialogEdit$$q,
+      dialogMerge$$q,
       menuOptions$$q,
       menuIsOpen$$q,
       menuX$$q,
@@ -81,6 +88,7 @@ export default defineComponent({
     @contextmenu.prevent
   />
   <template v-if="selectedAlbum$$q">
-    <s-dialog-album-edit v-model="dialog$$q" :album="selectedAlbum$$q" />
+    <s-dialog-album-edit v-model="dialogEdit$$q" :album="selectedAlbum$$q" />
+    <s-dialog-album-merge v-model="dialogMerge$$q" :album="selectedAlbum$$q" />
   </template>
 </template>

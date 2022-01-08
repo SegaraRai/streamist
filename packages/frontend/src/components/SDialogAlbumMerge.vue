@@ -1,0 +1,152 @@
+<script lang="ts">
+import { useMessage } from 'naive-ui';
+import type { PropType } from 'vue';
+import type { ResourceAlbum } from '$/types';
+import { useSyncDB } from '~/db/sync';
+import api from '~/logic/api';
+
+export default defineComponent({
+  props: {
+    album: {
+      type: Object as PropType<ResourceAlbum>,
+      required: true,
+    },
+    modelValue: Boolean,
+  },
+  emits: {
+    'update:modelValue': (_modelValue: boolean) => true,
+  },
+  setup(props, { emit }) {
+    const { t } = useI18n();
+    const message = useMessage();
+    const syncDB = useSyncDB();
+
+    const dialog$$q = useVModel(props, 'modelValue', emit);
+
+    const albumId$$q = ref('');
+    const newAlbumId$$q = ref('');
+    const newAlbumTitle$$q = ref('');
+
+    const reloadData = (newAlbum: ResourceAlbum): void => {
+      albumId$$q.value = newAlbum.id;
+      newAlbumId$$q.value = newAlbum.id;
+      newAlbumTitle$$q.value = '';
+    };
+
+    watch(
+      eagerComputed(() => props.album),
+      reloadData,
+      {
+        immediate: true,
+      }
+    );
+
+    watch(dialog$$q, (newDialog, oldDialog) => {
+      if (!newDialog && oldDialog) {
+        reloadData(props.album);
+      }
+    });
+
+    const modified$$q = eagerComputed(
+      () => newAlbumId$$q.value && newAlbumId$$q.value !== albumId$$q.value
+    );
+
+    return {
+      t,
+      imageIds$$q: ref<readonly string[] | undefined>(),
+      dialog$$q,
+      newAlbumId$$q,
+      newAlbumTitle$$q,
+      modified$$q,
+      apply$$q: () => {
+        const album = props.album;
+        const albumId = albumId$$q.value;
+        if (album.id !== albumId) {
+          return;
+        }
+
+        if (!newAlbumId$$q.value) {
+          return;
+        }
+
+        api.my.albums
+          ._albumId(albumId)
+          .$post({
+            body: {
+              toAlbumId: newAlbumId$$q.value,
+            },
+          })
+          .then(() => {
+            dialog$$q.value = false;
+            message.success(
+              t('message.MergedAlbum', [album.title, newAlbumTitle$$q.value])
+            );
+            syncDB();
+          })
+          .catch((error) => {
+            message.error(
+              t('message.FailedToMergeAlbum', [album.title, String(error)])
+            );
+          });
+      },
+    };
+  },
+});
+</script>
+
+<template>
+  <n-modal
+    v-model:show="dialog$$q"
+    transform-origin="center"
+    class="select-none max-w-xl"
+  >
+    <v-card class="w-full md:min-w-2xl">
+      <v-card-title class="flex">
+        <div class="flex-1">
+          {{ t('dialogComponent.mergeAlbum.title', [album.title]) }}
+        </div>
+        <div class="flex-none">
+          <v-btn
+            flat
+            icon
+            size="x-small"
+            class="text-red-500"
+            @click="dialog$$q = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
+      </v-card-title>
+      <v-card-text class="opacity-100">
+        <div class="flex gap-x-4">
+          <div>
+            <s-album-image
+              class="w-40 h-40"
+              size="160"
+              :album="album"
+              @image-ids="imageIds$$q = $event"
+            />
+          </div>
+          <div class="flex-1 flex flex-col gap-y-6">
+            <div>
+              Merging album <strong>{{ album.title }}</strong> to
+            </div>
+            <s-combobox-album
+              v-model="newAlbumTitle$$q"
+              v-model:albumId="newAlbumId$$q"
+            />
+          </div>
+        </div>
+      </v-card-text>
+      <v-card-actions class="gap-x-4 pb-4 px-4">
+        <v-spacer />
+        <v-btn @click="dialog$$q = false">
+          {{ t('dialogComponent.mergeAlbum.button.Cancel') }}
+        </v-btn>
+        <v-btn color="warning" :disabled="!modified$$q" @click="apply$$q">
+          {{ t('dialogComponent.mergeAlbum.button.Merge') }}
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </n-modal>
+</template>
