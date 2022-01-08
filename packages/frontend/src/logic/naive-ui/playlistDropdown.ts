@@ -12,8 +12,9 @@ interface PlaylistDropdownCreateOptions {
     Ref<readonly ResourceTrack[] | null | undefined>
   >;
   readonly moveWhenDelete$$q: Readonly<Ref<boolean>>;
+  readonly showCreatePlaylist$$q: Readonly<Ref<boolean>>;
   readonly openEditPlaylistDialog$$q: () => void;
-  readonly openCreatePlaylistDialog$$q?: () => void;
+  readonly openCreatePlaylistDialog$$q: () => void;
   readonly closeMenu$$q: () => void;
 }
 
@@ -21,6 +22,7 @@ export function createPlaylistDropdown({
   playlist$$q,
   playlistTracks$$q,
   moveWhenDelete$$q,
+  showCreatePlaylist$$q,
   openEditPlaylistDialog$$q,
   openCreatePlaylistDialog$$q,
   closeMenu$$q,
@@ -123,7 +125,7 @@ export function createPlaylistDropdown({
       },
     });
 
-    if (openCreatePlaylistDialog$$q) {
+    if (showCreatePlaylist$$q.value) {
       // --- divider ---
       menuItems.push({
         key: 'div2',

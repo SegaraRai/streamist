@@ -4,10 +4,9 @@ import { compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
 import { db } from '~/db';
 import { formatTracksTotalDuration } from '~/logic/duration';
-import { useMenu } from '~/logic/menu';
-import { createAlbumDropdown } from '~/logic/naive-ui/albumDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
+import type { DropdownAlbumInput } from './SDropdownAlbum.vue';
 
 export default defineComponent({
   props: {
@@ -85,25 +84,7 @@ export default defineComponent({
       () => value.value && formatTracksTotalDuration(value.value?.tracks$$q)
     );
 
-    const dialog$$q = ref(false);
-
-    const {
-      x$$q: menuX$$q,
-      y$$q: menuY$$q,
-      isOpen$$q: menuIsOpen$$q,
-      close$$q: closeMenu$$q,
-      open$$q: openMenu$$q,
-    } = useMenu({
-      closeOnScroll$$q: true,
-    });
-    const menuOptions$$q = createAlbumDropdown({
-      album$$q: eagerComputed(() => value.value?.album$$q),
-      albumTracks$$q: eagerComputed(() => value.value?.tracks$$q),
-      openEditAlbumDialog$$q: () => {
-        dialog$$q.value = true;
-      },
-      closeMenu$$q,
-    });
+    const dropdown$$q = ref<DropdownAlbumInput | undefined>();
 
     return {
       t,
@@ -121,13 +102,18 @@ export default defineComponent({
         }
         playbackStore.setSetListAndPlayAuto$$q(value.value.tracks$$q);
       },
-      dialog$$q,
-      menuOptions$$q,
-      menuIsOpen$$q,
-      menuX$$q,
-      menuY$$q,
-      openMenu$$q,
-      closeMenu$$q,
+      dropdown$$q,
+      openMenu$$q: (target: MouseEvent | HTMLElement) => {
+        if (!value.value) {
+          return;
+        }
+
+        dropdown$$q.value = {
+          target$$q: target,
+          album$$q: value.value.album$$q,
+          tracks$$q: value.value.tracks$$q,
+        };
+      },
     };
   },
 });
@@ -240,18 +226,5 @@ export default defineComponent({
     :visit-album="visitAlbum"
     :visit-artist="visitArtist"
   />
-  <template v-if="value$$q">
-    <n-dropdown
-      class="select-none"
-      placement="bottom-start"
-      trigger="manual"
-      :x="menuX$$q"
-      :y="menuY$$q"
-      :options="menuOptions$$q"
-      :show="menuIsOpen$$q"
-      :on-clickoutside="closeMenu$$q"
-      @contextmenu.prevent
-    />
-    <s-dialog-album-edit v-model="dialog$$q" :album="value$$q.album$$q" />
-  </template>
+  <s-dropdown-album v-model="dropdown$$q" />
 </template>

@@ -1,7 +1,6 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
-import { useDisplay } from 'vuetify';
 import type { ResourcePlaylist } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
@@ -19,7 +18,6 @@ export default defineComponent({
   },
   setup(props, { emit }) {
     const { t } = useI18n();
-    const display = useDisplay();
     const message = useMessage();
     const syncDB = useSyncDB();
 
@@ -59,7 +57,6 @@ export default defineComponent({
       t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
-      fullscreen$$q: eagerComputed(() => display.smAndDown.value),
       itemTitle$$q,
       itemNotes$$q,
       modified$$q,
@@ -105,7 +102,11 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-dialog v-model="dialog$$q" class="select-none" :fullscreen="fullscreen$$q">
+  <n-modal
+    v-model:show="dialog$$q"
+    transform-origin="center"
+    class="select-none max-w-xl"
+  >
     <v-card class="w-full md:min-w-2xl">
       <v-card-title class="flex">
         <div class="flex-1">
@@ -169,5 +170,5 @@ export default defineComponent({
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </n-modal>
 </template>

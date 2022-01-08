@@ -6,10 +6,9 @@ import { db } from '~/db';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import { formatTracksTotalDuration } from '~/logic/duration';
-import { useMenu } from '~/logic/menu';
-import { createPlaylistDropdown } from '~/logic/naive-ui/playlistDropdown';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
+import type { DropdownPlaylistInput } from './SDropdownPlaylist.vue';
 
 export default defineComponent({
   props: {
@@ -71,26 +70,7 @@ export default defineComponent({
       () => value.value && formatTracksTotalDuration(value.value.tracks$$q)
     );
 
-    const dialog$$q = ref(false);
-
-    const {
-      x$$q: menuX$$q,
-      y$$q: menuY$$q,
-      isOpen$$q: menuIsOpen$$q,
-      close$$q: closeMenu$$q,
-      open$$q: openMenu$$q,
-    } = useMenu({
-      closeOnScroll$$q: true,
-    });
-    const menuOptions$$q = createPlaylistDropdown({
-      playlist$$q: eagerComputed(() => value.value?.playlist$$q),
-      playlistTracks$$q: eagerComputed(() => value.value?.tracks$$q),
-      moveWhenDelete$$q: ref(true),
-      openEditPlaylistDialog$$q: () => {
-        dialog$$q.value = true;
-      },
-      closeMenu$$q,
-    });
+    const dropdown$$q = ref<DropdownPlaylistInput | undefined>();
 
     return {
       t,
@@ -128,13 +108,18 @@ export default defineComponent({
           message.error(t('message.FailedToReorderTrack', [String(error)]));
         }
       },
-      dialog$$q,
-      menuOptions$$q,
-      menuIsOpen$$q,
-      menuX$$q,
-      menuY$$q,
-      openMenu$$q,
-      closeMenu$$q,
+      dropdown$$q,
+      openMenu$$q: (target: MouseEvent | HTMLElement) => {
+        if (!value.value) {
+          return;
+        }
+
+        dropdown$$q.value = {
+          target$$q: target,
+          playlist$$q: value.value.playlist$$q,
+          tracks$$q: value.value.tracks$$q,
+        };
+      },
     };
   },
 });
@@ -242,21 +227,5 @@ export default defineComponent({
     visit-artist
     :on-move="onMove$$q"
   />
-  <template v-if="value$$q">
-    <n-dropdown
-      class="select-none"
-      placement="bottom-start"
-      trigger="manual"
-      :x="menuX$$q"
-      :y="menuY$$q"
-      :options="menuOptions$$q"
-      :show="menuIsOpen$$q"
-      :on-clickoutside="closeMenu$$q"
-      @contextmenu.prevent
-    />
-    <s-dialog-playlist-edit
-      v-model="dialog$$q"
-      :playlist="value$$q.playlist$$q"
-    />
-  </template>
+  <s-dropdown-playlist v-model="dropdown$$q" />
 </template>

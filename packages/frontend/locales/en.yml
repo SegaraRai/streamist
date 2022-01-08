@@ -87,6 +87,14 @@ dialogComponent:
       TitleSort: Title sort
       Artist: Artist
       Description: Description
+  createPlaylist:
+    title: Create Playlist
+    button:
+      Create: Create
+      Cancel: Cancel
+    label:
+      Title: Title
+      Description: Description
   editPlaylist:
     title: Edit {0}
     button:
