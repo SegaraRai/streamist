@@ -197,23 +197,6 @@ function _usePlaybackStore(): PlaybackState {
       }
 
       internalPosition.value = audio.currentTime;
-
-      if ('mediaSession' in navigator) {
-        if (
-          audio.readyState !== audio.HAVE_NOTHING &&
-          isFinite(audio.duration) &&
-          isFinite(audio.playbackRate) &&
-          isFinite(audio.currentTime) &&
-          audio.duration > 0
-        ) {
-          navigator.mediaSession.setPositionState({
-            duration: audio.duration,
-            playbackRate: audio.playbackRate,
-            position: audio.currentTime,
-          });
-          console.log('mediaSession updated E');
-        }
-      }
     };
 
     audio.onended = () => {
@@ -368,12 +351,6 @@ function _usePlaybackStore(): PlaybackState {
 
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata(metadataInit);
-          navigator.mediaSession.setPositionState({
-            duration: track.duration,
-            playbackRate: 1,
-            position: 0,
-          });
-          navigator.mediaSession.playbackState = 'playing';
           console.log('mediaSession updated A', navigator.mediaSession);
         }
       })();
@@ -419,17 +396,13 @@ function _usePlaybackStore(): PlaybackState {
   //
 
   if ('mediaSession' in navigator) {
+    console.log('init mediaSession');
+
     watch(currentTrack, (newTrack) => {
       if (!newTrack) {
-        navigator.mediaSession.metadata = null;
-        navigator.mediaSession.playbackState = 'none';
+        navigator.mediaSession.metadata = new MediaMetadata();
         console.log('mediaSession updated B');
       }
-    });
-
-    watch(playing, (newPlaying) => {
-      console.log('mediaSession updated C');
-      navigator.mediaSession.playbackState = newPlaying ? 'playing' : 'paused';
     });
 
     navigator.mediaSession.setActionHandler('play', () => {
