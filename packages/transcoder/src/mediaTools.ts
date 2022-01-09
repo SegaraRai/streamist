@@ -147,13 +147,14 @@ export async function extractImageFromAudio(
     ffprobeExtractImageTimeout,
     userId,
     srcFileId,
-    `audio_extract_${index}`
+    `audio_extract_s${index}`
   );
 }
 
 export async function transcodeAudio(
   userId: string,
   srcFileId: string,
+  trackIndex: number,
   formatName: string,
   srcPath: string,
   destPath: string,
@@ -194,9 +195,10 @@ export async function transcodeAudio(
     ffprobeTranscodeAudioTimeout,
     userId,
     srcFileId,
-    `audio_transcode_${formatName}`,
+    `audio_transcode_s${index}_t${trackIndex}_${formatName}`,
     {
       index,
+      trackIndex,
     }
   );
 }
@@ -206,6 +208,7 @@ export async function transcodeAudio(
 export async function cleanAudio(
   userId: string,
   srcFileId: string,
+  trackIndex: number,
   formatName: string,
   srcPath: string,
   destPath: string,
@@ -224,7 +227,7 @@ export async function cleanAudio(
     mkcleanCleanAudioTimeout,
     userId,
     srcFileId,
-    `audio_clean_${formatName}`
+    `audio_clean_t${trackIndex}_${formatName}`
   );
 }
 

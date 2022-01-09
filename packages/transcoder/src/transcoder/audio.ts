@@ -20,6 +20,7 @@ import {
 import { CueSheet, parseCueSheet } from '$shared/cueParser';
 import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText';
+import { uploadJSON } from '../execAndLog';
 import { calcFileHash } from '../fileHash';
 import logger from '../logger';
 import {
@@ -299,7 +300,7 @@ export async function processAudioRequest(
 
     // トランスコード
     // TODO(perf)?: 並列化
-    for (const track of tracks) {
+    for (const [trackIndex, track] of tracks.entries()) {
       for (const audioFormat of getTranscodeAudioFormats(
         audioInfo,
         audioStream
@@ -333,6 +334,7 @@ export async function processAudioRequest(
         await transcodeAudio(
           userId,
           sourceFileId,
+          trackIndex,
           audioFormat.name,
           sourceAudioFilepath,
           transcodedAudioFilepath,
@@ -353,6 +355,7 @@ export async function processAudioRequest(
           await cleanAudio(
             userId,
             sourceFileId,
+            trackIndex,
             audioFormat.name,
             tempFilepath,
             transcodedAudioFilepath,
@@ -442,27 +445,34 @@ export async function processAudioRequest(
         audioSourceFileId: sourceFileId,
         filePath: imageFilepath,
         streamIndex: imageStream.index,
+        attachPrepend: false,
       });
     }
 
     await unlink(sourceAudioFilepath);
 
-    return [
-      {
-        type: 'audio',
-        source: file,
-        tracks,
-        probe: {
-          ffprobeResult: audioInfo,
-          formatInfo: audioInfo.format,
-          streamInfo: audioStream,
-        },
-        sha256: sourceFileSHA256,
-        strCueSheet,
-        cueSheetSHA256,
+    const artifact: TranscoderResponseArtifactAudio = {
+      type: 'audio',
+      source: file,
+      tracks,
+      probe: {
+        ffprobeResult: audioInfo,
+        formatInfo: audioInfo.format,
+        streamInfo: audioStream,
       },
+      sha256: sourceFileSHA256,
+      strCueSheet,
+      cueSheetSHA256,
+    };
+
+    await uploadJSON(userId, sourceFileId, 'audio_result', {
+      userId,
+      input: file,
+      artifact,
       extractedImageFiles,
-    ];
+    });
+
+    return [artifact, extractedImageFiles];
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));

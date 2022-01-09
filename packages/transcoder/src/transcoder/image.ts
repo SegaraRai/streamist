@@ -7,6 +7,7 @@ import {
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
 } from '$shared-server/objectStorages';
+import { uploadJSON } from '../execAndLog';
 import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
 import { getTempFilepath } from '../tempFile';
 import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig';
@@ -155,7 +156,7 @@ export async function processImageRequest(
 
     await unlink(sourceImageFilepath);
 
-    return {
+    const artifact: TranscoderResponseArtifactImage = {
       type: 'image',
       source: file,
       files: transcodedFiles,
@@ -168,6 +169,14 @@ export async function processImageRequest(
         metadata: imageInfo,
       },
     };
+
+    await uploadJSON(userId, sourceFileId, 'image_result', {
+      userId,
+      input: file,
+      artifact,
+    });
+
+    return artifact;
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));
