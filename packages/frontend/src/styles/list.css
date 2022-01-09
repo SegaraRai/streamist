@@ -1,0 +1,15 @@
+.s-list--selected .s-list-item--unselected .s-hover-visible,
+.s-list--selected .s-list-item--selected .s-hover-hidden {
+  display: none !important;
+}
+
+.s-list--selected .s-list-item--unselected .s-hover-hidden,
+.s-list--selected .s-list-item--selected .s-hover-visible {
+  display: flex !important;
+}
+
+.s-list--ghost .s-list-item,
+.s-list--unselected .s-list-item:hover,
+.s-list-item--selected {
+  @apply bg-true-gray-400/10;
+}

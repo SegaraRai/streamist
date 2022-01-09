@@ -98,7 +98,7 @@ dialogComponent:
       Artist: Artist
       Description: Description
   mergeAlbum:
-    title: Merge {0} into
+    title: Merge {0}
     button:
       Merge: Merge
       Cancel: Cancel
@@ -113,7 +113,7 @@ dialogComponent:
       Name: Name
       NameSort: Name sort
   mergeArtist:
-    title: Merge {0} into
+    title: Merge {0}
     button:
       Merge: Merge
       Cancel: Cancel

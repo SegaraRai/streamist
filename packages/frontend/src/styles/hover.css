@@ -1,0 +1,7 @@
+.s-hover-container:not(:hover) .s-hover-visible {
+  display: none;
+}
+
+.s-hover-container:hover .s-hover-hidden {
+  display: none;
+}

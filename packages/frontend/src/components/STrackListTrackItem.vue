@@ -65,6 +65,13 @@ export default defineComponent({
 
     return {
       t,
+      indexContentNumber$$q: eagerComputed(() =>
+        props.indexContent === 'trackNumber'
+          ? props.item.track$$q.trackNumber
+          : props.indexContent === 'index'
+          ? props.item.index$$q + 1
+          : undefined
+      ),
       themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       isCurrentPlayingTrack$$q,
@@ -91,23 +98,23 @@ export default defineComponent({
     @contextmenu.stop.prevent="onContextMenu$$q($event)"
   >
     <!-- Track Number -->
-    <div class="list-column-icon mr-4">
+    <div class="s-track-list-column-icon mr-4">
       <div
-        class="icon-container"
+        class="flex items-center justify-center"
         data-draggable="false"
         @dragstart.stop.prevent
       >
         <template v-if="isCurrentPlayingTrack$$q">
           <!-- 再生中（または一時停止中）の曲 -->
           <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
-            <v-icon class="play-icon s-hover-visible">
+            <v-icon class="s-hover-visible" :class="$style.playIcon">
               {{
                 playing$$q
                   ? 'mdi-pause-circle-outline'
                   : 'mdi-play-circle-outline'
               }}
             </v-icon>
-            <v-icon class="play-icon s-hover-hidden">
+            <v-icon class="s-hover-hidden" :class="$style.playIcon">
               {{ playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle' }}
             </v-icon>
           </v-btn>
@@ -115,24 +122,22 @@ export default defineComponent({
         <template v-else>
           <!-- それ以外の曲 -->
           <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
-            <template v-if="indexContent === 'index'">
-              <div class="track-index s-hover-hidden s-numeric">
-                {{ item.index$$q + 1 }}
+            <template v-if="indexContentNumber$$q != null">
+              <div
+                class="s-hover-hidden s-numeric font-bold tracking-[0.01em]"
+                :class="$style.trackIndex"
+              >
+                {{ indexContentNumber$$q }}
               </div>
             </template>
-            <template v-if="indexContent === 'trackNumber'">
-              <div class="track-index s-hover-hidden s-numeric">
-                {{ item.track$$q.trackNumber }}
-              </div>
-            </template>
-            <template v-if="indexContent === 'albumArtwork'">
+            <template v-else-if="indexContent === 'albumArtwork'">
               <s-album-image-x
-                class="track-index s-hover-hidden flex-none w-9 h-9"
+                class="s-hover-hidden flex-none w-9 h-9"
                 size="36"
                 :image="item.image$$q"
               />
             </template>
-            <v-icon class="play-icon s-hover-visible">
+            <v-icon class="s-hover-visible" :class="$style.playIcon">
               mdi-play-circle-outline
             </v-icon>
           </v-btn>
@@ -141,9 +146,9 @@ export default defineComponent({
     </div>
     <!-- Track Title -->
     <v-list-item-header
-      class="list-column-content flex flex-col flex-nowrap justify-center gap-y-1"
+      class="s-track-list-column-title flex flex-col flex-nowrap justify-center gap-y-1"
     >
-      <v-list-item-title class="track-title">
+      <v-list-item-title class="leading-tight">
         <span
           class="block overflow-hidden overflow-ellipsis max-w-max"
           :class="
@@ -157,7 +162,7 @@ export default defineComponent({
       <template
         v-if="showArtist || item.artist$$q.id !== item.albumArtist$$q.id"
       >
-        <v-list-item-subtitle class="track-artist">
+        <v-list-item-subtitle class="leading-tight">
           <s-conditional-link
             class="block overflow-hidden overflow-ellipsis max-w-max"
             :to="`/artists/${item.artist$$q.id}`"
@@ -171,9 +176,9 @@ export default defineComponent({
     <!-- Album Title -->
     <template v-if="showAlbum">
       <v-list-item-header
-        class="list-column-content flex flex-col flex-nowrap justify-center ml-6 gap-y-1 !<md:hidden"
+        class="s-track-list-column-album flex flex-col flex-nowrap justify-center ml-6 gap-y-1 !<md:hidden"
       >
-        <v-list-item-title class="track-album-title">
+        <v-list-item-title class="leading-tight">
           <s-conditional-link
             class="block overflow-hidden overflow-ellipsis max-w-max"
             :to="`/albums/${item.album$$q.id}`"
@@ -182,7 +187,7 @@ export default defineComponent({
             {{ item.album$$q.title }}
           </s-conditional-link>
         </v-list-item-title>
-        <v-list-item-subtitle class="track-album-artist">
+        <v-list-item-subtitle class="leading-tight">
           <s-conditional-link
             class="block overflow-hidden overflow-ellipsis max-w-max"
             :to="`/artists/${item.albumArtist$$q.id}`"
@@ -195,12 +200,12 @@ export default defineComponent({
     </template>
     <!-- Duration -->
     <template v-if="!hideDuration">
-      <div class="list-column-duration s-duration body-2 !<sm:hidden">
+      <div class="s-track-list-column-duration s-duration body-2 !<sm:hidden">
         {{ item.formattedDuration$$q }}
       </div>
     </template>
     <!-- Menu -->
-    <div class="list-header-column list-column-menu py-1">
+    <div class="s-track-list-column-menu py-1">
       <v-btn
         icon
         flat
@@ -216,3 +221,16 @@ export default defineComponent({
     </div>
   </v-list-item>
 </template>
+
+<style module>
+.play-icon {
+  font-size: 32px !important;
+  transition: all 0.1s ease-in-out;
+  opacity: 0.9;
+}
+
+.play-icon:hover {
+  font-size: 36px !important;
+  opacity: 1;
+}
+</style>

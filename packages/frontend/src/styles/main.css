@@ -1,4 +1,9 @@
 @import './markdown.css';
+
+@import './hover.css';
+@import './list.css';
+@import './track-list.css';
+
 @import './s-lazysizes.css';
 @import './s-naive-ui.css';
 @import './s-nprogress.css';
@@ -16,33 +21,9 @@
   @apply whitespace-nowrap;
 }
 
-.s-hover-container:not(:hover) .s-hover-visible {
-  display: none;
-}
-
-.s-hover-container:hover .s-hover-hidden {
-  display: none;
-}
-
 .s-autofill-color input:-webkit-autofill,
 .s-autofill-color textarea:-webkit-autofill {
   background-color: var(--s-autofill-bg) !important;
   background-image: none;
   color: var(--s-autofill-text);
-}
-
-.s-list--selected .s-list-item--unselected .s-hover-visible,
-.s-list--selected .s-list-item--selected .s-hover-hidden {
-  display: none !important;
-}
-
-.s-list--selected .s-list-item--unselected .s-hover-hidden,
-.s-list--selected .s-list-item--selected .s-hover-visible {
-  display: flex !important;
-}
-
-.s-list--ghost .s-list-item,
-.s-list--unselected .s-list-item:hover,
-.s-list-item--selected {
-  @apply bg-true-gray-400/10;
 }

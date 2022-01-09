@@ -21,14 +21,10 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-sheet tile class="sheet-disc-number-header w-full h-6">
-    <v-list-subheader class="list-disc-number-header">
-      <div class="list-column-disc-number flex align-center">
-        <v-icon>mdi-disc</v-icon>
-        <span class="disc-number-text s-numeric">
-          {{ item.discNumber$$q }}
-        </span>
-      </div>
-    </v-list-subheader>
+  <v-sheet tile class="w-full flex items-center gap-x-1 px-2 h-7">
+    <v-icon>mdi-disc</v-icon>
+    <span class="s-numeric font-semibold">
+      {{ item.discNumber$$q }}
+    </span>
   </v-sheet>
 </template>

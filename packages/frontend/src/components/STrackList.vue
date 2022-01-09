@@ -172,7 +172,7 @@ export default defineComponent({
           image$$q: track.image,
           formattedDuration$$q: formatTime(track.track.duration),
           isLast$$q: index === array.length - 1,
-          height$$q: 57,
+          height$$q: 56,
         })
       );
       if (useDiscNumber.value) {
@@ -186,7 +186,7 @@ export default defineComponent({
             array.push({
               type$$q: 'discNumberHeader',
               discNumber$$q: currentDiscNumber,
-              height$$q: 24,
+              height$$q: 28,
             });
           }
           array.push(item);
@@ -345,8 +345,10 @@ export default defineComponent({
       @contextmenu.prevent
     >
       <template v-if="!hideHeader">
-        <v-list-item class="list-header w-full flex flex-row !<sm:px-2">
-          <div class="list-header-column list-column-icon mr-4 py-2">
+        <v-list-item
+          class="w-full py-0 h-8 !min-h-0 flex items-center !<sm:px-2 select-none font-bold text-sm"
+        >
+          <div class="s-track-list-column-icon mr-4 py-2">
             {{
               indexContent === 'index' || indexContent === 'trackNumber'
                 ? '#'
@@ -354,31 +356,38 @@ export default defineComponent({
             }}
           </div>
           <v-list-item-header
-            class="list-header-column list-column-content flex flex-row flex-nowrap items-center py-2"
+            class="s-track-list-column-title flex items-center py-2"
           >
-            <v-list-item-title class="track-title">
+            <v-list-item-title>
               {{ t('trackList.Title') }}
             </v-list-item-title>
           </v-list-item-header>
           <template v-if="showAlbum">
             <v-list-item-header
-              class="list-header-column list-column-content flex flex-row flex-nowrap items-center ml-6 py-2 !<md:hidden"
+              class="s-track-list-column-album flex items-center ml-6 py-2 !<md:hidden"
             >
-              <v-list-item-title class="track-album-title">
+              <v-list-item-title>
                 {{ t('trackList.Album') }}
               </v-list-item-title>
             </v-list-item-header>
           </template>
           <template v-if="!hideDuration">
-            <div
-              class="list-header-column list-column-duration py-1 !<sm:hidden"
-            >
+            <div class="s-track-list-column-duration py-1 !<sm:hidden">
               <v-icon>mdi-clock-outline</v-icon>
             </div>
           </template>
-          <div class="list-header-column list-column-menu py-1"></div>
+          <div class="s-track-list-column-menu py-1"></div>
         </v-list-item>
-        <v-divider class="mx-1" @contextmenu.prevent />
+        <v-divider
+          class="mx-1"
+          :class="
+            renderMode !== 'draggable' &&
+            items$$q[0]?.type$$q === 'discNumberHeader'
+              ? 'invisible'
+              : ''
+          "
+          @contextmenu.prevent
+        />
       </template>
       <template v-if="items$$q.length === 0"></template>
       <template v-if="renderMode === 'plain'">
@@ -441,7 +450,6 @@ export default defineComponent({
         </s-draggable>
       </template>
       <template v-else-if="renderMode === 'virtual'">
-        <!-- this render mode is not reactive for props.tracks -->
         <div
           ref="virtualListElementRef$$q"
           class="w-full"
@@ -492,108 +500,3 @@ export default defineComponent({
     <s-dialog-track-edit v-model="dialog$$q" :track="lastSelectedTrack$$q" />
   </template>
 </template>
-
-<style>
-.sheet-header {
-  @apply sticky;
-
-  top: 48px;
-  z-index: 1;
-}
-
-.sheet-disc-number-header {
-  @apply sticky;
-
-  top: calc(48px + 1px + 34px);
-  z-index: 1;
-}
-
-.list-disc-number-header {
-  height: 28px;
-  padding: 0 14px !important;
-}
-
-.disc-number-text {
-  padding-left: 2px;
-  font-weight: 700;
-}
-
-.list-column-icon {
-  width: 40px;
-  text-align: center;
-  line-height: 1 !important;
-}
-
-.list-column-content {
-  flex: 1 1 0;
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.list-column-duration {
-  width: 72px;
-  text-align: right;
-}
-
-.list-column-menu {
-  width: 50px;
-  text-align: right;
-}
-
-.icon-container {
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-}
-
-.track-title,
-.track-album-title {
-  @apply leading-tight;
-
-  flex: auto 0 0;
-  align-items: baseline;
-  max-width: 100%;
-}
-
-.track-artist,
-.track-album-artist {
-  @apply flex;
-  @apply leading-tight;
-
-  flex: auto 0 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.track-index {
-  font-weight: 600;
-  letter-spacing: 0.01em !important;
-}
-
-.play-icon {
-  font-size: 32px !important;
-  transition: all 0.1s ease-in-out;
-  opacity: 0.9;
-}
-
-.play-icon:hover {
-  font-size: 36px !important;
-  opacity: 1;
-}
-
-.list-header {
-  @apply pt-0 !important;
-  @apply pb-0 !important;
-  @apply min-h-0 !important;
-  @apply select-none;
-
-  height: 34px;
-}
-
-.list-header .track-title,
-.list-header .track-album-title {
-  @apply text-sm !important;
-  @apply font-bold !important;
-}
-</style>

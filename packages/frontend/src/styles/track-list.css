@@ -1,0 +1,22 @@
+.s-track-list-column-icon {
+  @apply w-10;
+  @apply text-center;
+  @apply leading-none;
+}
+
+.s-track-list-column-title,
+.s-track-list-column-album {
+  @apply flex-1;
+  @apply overflow-hidden;
+  @apply overflow-ellipsis;
+}
+
+.s-track-list-column-duration {
+  @apply w-18;
+  @apply text-right;
+}
+
+.s-track-list-column-menu {
+  @apply w-12;
+  @apply text-right;
+}
