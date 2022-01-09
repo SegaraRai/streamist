@@ -21,7 +21,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-sheet tile class="w-full flex items-center gap-x-1 px-2 h-7">
+  <v-sheet tile class="w-full flex items-center gap-x-1 px-3 h-7">
     <v-icon>mdi-disc</v-icon>
     <span class="s-numeric font-semibold">
       {{ item.discNumber$$q }}

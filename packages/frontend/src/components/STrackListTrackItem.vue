@@ -107,14 +107,14 @@ export default defineComponent({
         <template v-if="isCurrentPlayingTrack$$q">
           <!-- 再生中（または一時停止中）の曲 -->
           <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
-            <v-icon class="s-hover-visible" :class="$style.playIcon">
+            <v-icon class="s-hover-visible" :class="$style.icon">
               {{
                 playing$$q
                   ? 'mdi-pause-circle-outline'
                   : 'mdi-play-circle-outline'
               }}
             </v-icon>
-            <v-icon class="s-hover-hidden" :class="$style.playIcon">
+            <v-icon class="s-hover-hidden" :class="$style.icon">
               {{ playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle' }}
             </v-icon>
           </v-btn>
@@ -123,10 +123,7 @@ export default defineComponent({
           <!-- それ以外の曲 -->
           <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
             <template v-if="indexContentNumber$$q != null">
-              <div
-                class="s-hover-hidden s-numeric font-bold tracking-[0.01em]"
-                :class="$style.trackIndex"
-              >
+              <div class="s-hover-hidden s-numeric font-bold tracking-[0.01em]">
                 {{ indexContentNumber$$q }}
               </div>
             </template>
@@ -137,7 +134,7 @@ export default defineComponent({
                 :image="item.image$$q"
               />
             </template>
-            <v-icon class="s-hover-visible" :class="$style.playIcon">
+            <v-icon class="s-hover-visible" :class="$style.icon">
               mdi-play-circle-outline
             </v-icon>
           </v-btn>
@@ -223,13 +220,13 @@ export default defineComponent({
 </template>
 
 <style module>
-.play-icon {
+.icon {
   font-size: 32px !important;
   transition: all 0.1s ease-in-out;
   opacity: 0.9;
 }
 
-.play-icon:hover {
+.icon:hover {
   font-size: 36px !important;
   opacity: 1;
 }
