@@ -9,6 +9,7 @@ import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
 export interface TrackDropdownCreateOptions {
   readonly selectedTrack$$q: Readonly<Ref<ResourceTrack | null | undefined>>;
+  readonly isSameSetList$$q: Readonly<Ref<boolean>>;
   readonly playlistId$$q: Readonly<Ref<string | null | undefined>>;
   readonly showVisitAlbum$$q: Readonly<Ref<boolean>>;
   readonly showVisitArtist$$q: Readonly<Ref<boolean>>;
@@ -20,6 +21,7 @@ export interface TrackDropdownCreateOptions {
 
 export function createTrackDropdown({
   selectedTrack$$q,
+  isSameSetList$$q,
   playlistId$$q,
   showVisitAlbum$$q,
   showVisitArtist$$q,
@@ -46,7 +48,9 @@ export function createTrackDropdown({
 
     const currentPlayingTrackId = playbackStore.currentTrack$$q.value?.id;
     const isPlayingThisTrack =
-      playbackStore.playing$$q.value && trackId === currentPlayingTrackId;
+      isSameSetList$$q.value &&
+      playbackStore.playing$$q.value &&
+      trackId === currentPlayingTrackId;
 
     const playlists = allPlaylist.value.value || [];
     const removeFromPlaylist = playlistId$$q.value
@@ -64,6 +68,7 @@ export function createTrackDropdown({
           : t('dropdown.trackList.Play'),
         icon: nCreateDropdownIcon(() =>
           // NOTE: we have to access to ref directly in the render function to make icon reactive
+          isSameSetList$$q.value &&
           playbackStore.playing$$q.value &&
           trackId === playbackStore.currentTrack$$q.value?.id
             ? 'mdi-pause'
@@ -71,11 +76,7 @@ export function createTrackDropdown({
         ),
         props: {
           onClick: () => {
-            if (playbackStore.currentTrack$$q.value?.id === trackId) {
-              playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
-            } else {
-              play$$q(track);
-            }
+            play$$q(track);
             closeMenu$$q();
           },
         },

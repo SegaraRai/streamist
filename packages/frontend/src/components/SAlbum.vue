@@ -145,7 +145,7 @@ export default defineComponent({
               <s-album-image
                 class="w-50 h-50"
                 size="200"
-                :album="value$$q.album$$q"
+                :album="albumId$$q"
                 @image-ids="imageIds$$q = $event"
               />
             </template>

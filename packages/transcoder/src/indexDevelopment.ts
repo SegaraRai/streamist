@@ -1,7 +1,8 @@
 import './checkEnv';
+import './initOS';
 import './initCredentials';
 
-import { createServer } from 'node:http';
+import { createServer } from 'http';
 import fetch from 'node-fetch';
 import { nodeReadableStreamToBuffer } from '$shared-server/stream';
 import { TRANSCODER_API_PATH, TRANSCODER_PORT } from './devConfig';

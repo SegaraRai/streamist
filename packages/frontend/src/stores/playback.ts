@@ -1,7 +1,7 @@
 import type { Ref } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
 import type { ResourceTrack } from '$/types';
-import defaultAlbumArt from '~/assets/default_album_art_256x256.png';
+import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
 import { db } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
@@ -50,6 +50,10 @@ export interface PlaybackState {
   readonly shuffle$$q: Ref<boolean>;
   /** 現在のトラック */
   readonly currentTrack$$q: Readonly<Ref<ResourceTrack | undefined>>;
+  /** 現在のセットリスト */
+  readonly currentSetList$$q: Readonly<
+    Ref<readonly ResourceTrack[] | undefined>
+  >;
   /** 再生キュー */
   readonly queue$$q: Readonly<Ref<ResourceTrack[]>>;
   /** 次に再生のキュー */
@@ -134,7 +138,8 @@ function _usePlaybackStore(): PlaybackState {
   const queue = ref<ResourceTrack[]>([]);
   const playNextQueue = ref<ResourceTrack[]>([]);
 
-  const defaultSetList = ref<ResourceTrack[] | undefined>();
+  const currentSetList = ref<readonly ResourceTrack[] | undefined>();
+  const defaultSetList = ref<readonly ResourceTrack[] | undefined>();
 
   const internalPlaying = ref<boolean>(false);
   const playing = computed<boolean>({
@@ -238,6 +243,7 @@ function _usePlaybackStore(): PlaybackState {
     track?: ResourceTrack | null
   ): void => {
     playing.value = false;
+    currentSetList.value = tracks;
     // NOTE: `setSetList$$q`に渡す`currentTrack`（第2引数）は`null`と`undefined`で挙動が異なる
     trackProvider.setSetList$$q(tracks, tracks.length ? track : null);
     if (tracks.length) {
@@ -316,9 +322,12 @@ function _usePlaybackStore(): PlaybackState {
     const track = trackProvider.currentTrack$$q;
     currentTrack.value = track;
 
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = null;
+    }
+
     if (currentAudio) {
       cleanupAudio(currentAudio);
-      currentAudio.pause();
       currentAudio.remove();
       currentAudio = undefined;
     }
@@ -400,7 +409,7 @@ function _usePlaybackStore(): PlaybackState {
 
     watch(currentTrack, (newTrack) => {
       if (!newTrack) {
-        navigator.mediaSession.metadata = new MediaMetadata();
+        navigator.mediaSession.metadata = null;
         console.log('mediaSession updated B');
       }
     });
@@ -502,6 +511,7 @@ function _usePlaybackStore(): PlaybackState {
     repeat$$q: repeat,
     shuffle$$q: shuffle,
     currentTrack$$q: currentTrack,
+    currentSetList$$q: currentSetList,
     queue$$q: queue,
     playNextQueue$$q: playNextQueue,
     appendTracksToPlayNextQueue$$q: (

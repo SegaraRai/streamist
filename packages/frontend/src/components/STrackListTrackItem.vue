@@ -27,6 +27,8 @@ export interface ListItemTrack {
   height$$q: number;
 }
 
+export const trackItemHeight = 56;
+
 export default defineComponent({
   props: {
     item: {
@@ -147,7 +149,7 @@ export default defineComponent({
     >
       <v-list-item-title class="leading-tight">
         <span
-          class="block overflow-hidden overflow-ellipsis max-w-max"
+          class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
           :class="
             isCurrentPlayingTrack$$q ? 'text-st-primary' : 'cursor-pointer'
           "
@@ -161,7 +163,7 @@ export default defineComponent({
       >
         <v-list-item-subtitle class="leading-tight">
           <s-conditional-link
-            class="block overflow-hidden overflow-ellipsis max-w-max"
+            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
             :to="`/artists/${item.artist$$q.id}`"
             :disabled="linkExcludes?.includes(item.artist$$q.id)"
           >
@@ -177,7 +179,7 @@ export default defineComponent({
       >
         <v-list-item-title class="leading-tight">
           <s-conditional-link
-            class="block overflow-hidden overflow-ellipsis max-w-max"
+            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
             :to="`/albums/${item.album$$q.id}`"
             :disabled="linkExcludes?.includes(item.album$$q.id)"
           >
@@ -186,7 +188,7 @@ export default defineComponent({
         </v-list-item-title>
         <v-list-item-subtitle class="leading-tight">
           <s-conditional-link
-            class="block overflow-hidden overflow-ellipsis max-w-max"
+            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
             :to="`/artists/${item.albumArtist$$q.id}`"
             :disabled="linkExcludes?.includes(item.albumArtist$$q.id)"
           >

@@ -21,8 +21,11 @@ import {
   currentScrollRef,
 } from '~/stores/scroll';
 import { useThemeStore } from '~/stores/theme';
-import type { ListItemDiscNumberHeader } from './STrackListDiscHeaderItem.vue';
-import type { ListItemTrack } from './STrackListTrackItem.vue';
+import {
+  ListItemDiscNumberHeader,
+  discHeaderHeight,
+} from './STrackListDiscHeaderItem.vue';
+import { ListItemTrack, trackItemHeight } from './STrackListTrackItem.vue';
 
 type ListItem = ListItemDiscNumberHeader | ListItemTrack;
 
@@ -57,6 +60,7 @@ export default defineComponent({
       type: Array as PropType<readonly ResourceTrack[] | null | undefined>,
       default: undefined,
     },
+    skipSetListCheck: Boolean,
     hideHeader: Boolean,
     showAlbum: Boolean,
     showArtist: Boolean,
@@ -154,6 +158,17 @@ export default defineComponent({
         )
     );
 
+    const isSameSetList$$q = eagerComputed(
+      () =>
+        props.skipSetListCheck ||
+        (!!props.setList &&
+          !!playbackStore.currentSetList$$q.value &&
+          props.setList.map(({ id }) => id).join('\n') ===
+            playbackStore.currentSetList$$q.value
+              .map(({ id }) => id)
+              .join('\n'))
+    );
+
     const items = computed(() => {
       if (!trackItems.value) {
         return [];
@@ -169,7 +184,7 @@ export default defineComponent({
           image$$q: track.image,
           formattedDuration$$q: formatTime(track.track.duration),
           isLast$$q: index === array.length - 1,
-          height$$q: 56,
+          height$$q: trackItemHeight,
         })
       );
       if (useDiscNumber.value) {
@@ -183,7 +198,7 @@ export default defineComponent({
             array.push({
               type$$q: 'discNumberHeader',
               discNumber$$q: currentDiscNumber,
-              height$$q: 28,
+              height$$q: discHeaderHeight,
             });
           }
           array.push(item);
@@ -197,11 +212,6 @@ export default defineComponent({
       )
     );
 
-    const itemsProvider$$q = eagerComputed(() => {
-      const v = items.value;
-      return () => Promise.resolve(v);
-    });
-
     const currentPlayingTrackId = eagerComputed(
       () => playbackStore.currentTrack$$q.value?.id
     );
@@ -211,7 +221,7 @@ export default defineComponent({
       if (!props.setList) {
         return;
       }
-      if (track.id === currentPlayingTrackId.value) {
+      if (track.id === currentPlayingTrackId.value && isSameSetList$$q.value) {
         playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
         return;
       }
@@ -240,6 +250,7 @@ export default defineComponent({
     });
     const menuOptions$$q = createTrackDropdown({
       selectedTrack$$q,
+      isSameSetList$$q,
       playlistId$$q: eagerComputed(() => props.playlistId),
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
@@ -290,10 +301,9 @@ export default defineComponent({
       containerStyle$$q: containerStyle,
       virtualListItems$$q: list,
       virtualListElementRef$$q: listElementRef,
-      itemsProvider$$q,
       currentPlayingTrackId$$q: currentPlayingTrackId,
       useDiscNumber$$q: useDiscNumber,
-      pageSize$$q: eagerComputed(() => Math.max(items.value.length, 1)),
+      isSameSetList$$q,
       play$$q,
       showMenu$$q: (
         eventOrElement: MouseEvent | HTMLElement,
@@ -405,7 +415,9 @@ export default defineComponent({
                   selectedTrackIndex$$q === item.index$$q &&
                   selectedTrack$$q?.id === item.track$$q.id
                 "
-                :disable-current-playing="disableCurrentPlaying"
+                :disable-current-playing="
+                  disableCurrentPlaying || !isSameSetList$$q
+                "
                 @play="play$$q(item.track$$q, item.index$$q)"
                 @menu="showMenu$$q($event.target as HTMLElement, item)"
                 @ctx-menu="showMenu$$q($event, item)"
@@ -438,7 +450,9 @@ export default defineComponent({
                 selectedTrackIndex$$q === element.index$$q &&
                 selectedTrack$$q?.id === element.track$$q.id
               "
-              :disable-current-playing="disableCurrentPlaying"
+              :disable-current-playing="
+                disableCurrentPlaying || !isSameSetList$$q
+              "
               @play="play$$q(element.track$$q, element.index$$q)"
               @menu="showMenu$$q($event.target as HTMLElement, element)"
               @ctx-menu="showMenu$$q($event, element)"
@@ -471,7 +485,9 @@ export default defineComponent({
                   selectedTrackIndex$$q === item.index$$q &&
                   selectedTrack$$q?.id === item.track$$q.id
                 "
-                :disable-current-playing="disableCurrentPlaying"
+                :disable-current-playing="
+                  disableCurrentPlaying || !isSameSetList$$q
+                "
                 @play="play$$q(item.track$$q, item.index$$q)"
                 @menu="showMenu$$q($event.target as HTMLElement, item)"
                 @ctx-menu="showMenu$$q($event, item)"

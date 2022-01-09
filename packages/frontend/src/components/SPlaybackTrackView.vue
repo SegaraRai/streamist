@@ -31,6 +31,7 @@ export default defineComponent({
     });
     const menuOptions$$q = createTrackDropdown({
       selectedTrack$$q: eagerComputed(() => props.track),
+      isSameSetList$$q: ref(true),
       playlistId$$q: ref(),
       showVisitAlbum$$q: ref(true),
       showVisitArtist$$q: ref(true),

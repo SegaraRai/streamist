@@ -138,7 +138,7 @@ export default defineComponent({
               <s-playlist-image
                 class="w-40 h-40"
                 size="160"
-                :playlist="playlist"
+                :playlist="playlist.id"
                 @image-ids="imageIds$$q = $event"
               />
             </s-image-manager>

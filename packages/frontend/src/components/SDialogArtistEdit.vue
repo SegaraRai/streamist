@@ -137,7 +137,7 @@ export default defineComponent({
               <s-artist-image
                 class="w-40 h-40"
                 size="160"
-                :artist="artist"
+                :artist="artist.id"
                 @image-ids="imageIds$$q = $event"
               />
             </s-image-manager>
