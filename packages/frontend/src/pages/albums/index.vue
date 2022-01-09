@@ -150,9 +150,11 @@ export default defineComponent({
       <div class="text-h5">
         {{ t('albums.Albums') }}
       </div>
-      <div class="opacity-60">
-        {{ t('albums.n_albums', items$$q.length) }}
-      </div>
+      <template v-if="items$$q.length">
+        <div class="opacity-60">
+          {{ t('albums.n_albums', items$$q.length) }}
+        </div>
+      </template>
     </header>
     <s-virtual-grid
       :items="items$$q"

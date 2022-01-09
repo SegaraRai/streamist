@@ -57,7 +57,7 @@ export default defineComponent({
           isLast$$q: index === arr.length - 1,
         };
       });
-    });
+    }, []);
 
     const selectedPlaylist$$q = ref<ResourcePlaylist | undefined>();
     const dropdown$$q = ref<DropdownPlaylistInput | undefined>();
@@ -86,9 +86,11 @@ export default defineComponent({
       <div class="text-h5">
         {{ t('playlists.Playlists') }}
       </div>
-      <div class="opacity-60">
-        {{ t('playlists.n_playlists', items$$q.length) }}
-      </div>
+      <template v-if="items$$q.length">
+        <div class="opacity-60">
+          {{ t('playlists.n_playlists', items$$q.length || 0) }}
+        </div>
+      </template>
     </header>
     <div class="mb-6 flex items-center gap-x-8">
       <v-btn color="primary" flat icon @click="showCreateDialog$$q = true">
@@ -99,7 +101,7 @@ export default defineComponent({
     <div
       :class="selectedPlaylist$$q ? 's-list--selected' : 's-list--unselected'"
     >
-      <template v-if="items$$q?.length">
+      <template v-if="items$$q.length">
         <v-list flat @contextmenu.prevent>
           <template v-for="(item, _index) in items$$q" :key="_index">
             <v-list-item

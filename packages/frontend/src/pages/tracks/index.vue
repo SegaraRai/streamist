@@ -75,9 +75,11 @@ export default defineComponent({
       <div class="text-h5">
         {{ t('tracks.Tracks') }}
       </div>
-      <div class="opacity-60">
-        {{ t('tracks.n_tracks', items$$q.length) }}
-      </div>
+      <template v-if="items$$q.length">
+        <div class="opacity-60">
+          {{ t('tracks.n_tracks', items$$q.length) }}
+        </div>
+      </template>
     </header>
     <s-track-list
       :show-disc-number="false"
