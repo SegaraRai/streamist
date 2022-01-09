@@ -92,8 +92,8 @@ export async function dbCoArtistMergeArtistTx<T extends CoArtistTable>(
     DELETE
       FROM \`${table}\`
       WHERE
-        \`${COL_USER_ID}\` = $3 AND
-        \`${COL_ARTIST_ID}\` = $4 AND
+        \`${COL_USER_ID}\` = $1 AND
+        \`${COL_ARTIST_ID}\` = $2
     `,
     userId,
     artistId

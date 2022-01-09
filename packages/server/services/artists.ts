@@ -110,7 +110,7 @@ export async function artistMerge(
       },
     });
 
-    const deleted = await txClient.album.deleteMany({
+    const deleted = await txClient.artist.deleteMany({
       where: {
         id: artistId,
         userId,
