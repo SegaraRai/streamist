@@ -9,6 +9,7 @@ declare module 'vue' {
     IMdiImagePlus: typeof import('~icons/mdi/image-plus')['default']
     IMdiPlusCircle: typeof import('~icons/mdi/plus-circle')['default']
     NAutoComplete: typeof import('naive-ui')['NAutoComplete']
+    NBadge: typeof import('naive-ui')['NBadge']
     NButton: typeof import('naive-ui')['NButton']
     NCollapse: typeof import('naive-ui')['NCollapse']
     NCollapseItem: typeof import('naive-ui')['NCollapseItem']

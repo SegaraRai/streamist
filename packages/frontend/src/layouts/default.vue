@@ -247,15 +247,13 @@ useEventListener(
               <v-icon>mdi-sync</v-icon>
             </v-btn>
             <v-btn icon size="small" @click="uploadDialog$$q = true">
-              <v-badge
-                :model-value="!!uploadStore$$q.badge"
-                dot
-                color="primary"
-                text-color="primary"
-                bordered
+              <n-badge
+                :value="uploadStore$$q.badge"
+                :dot="!!uploadStore$$q.badge"
+                :processing="!!uploadStore$$q.badge"
               >
-                <v-icon>mdi-cloud-upload</v-icon>
-              </v-badge>
+                <v-icon class="text-st-text">mdi-cloud-upload</v-icon>
+              </n-badge>
             </v-btn>
             <v-btn icon size="small" @click="rightSidebar$$q = true">
               <v-icon>mdi-playlist-play</v-icon>
