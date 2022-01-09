@@ -200,7 +200,7 @@ export default defineComponent({
           <template v-for="album in value$$q.albums$$q" :key="album.id">
             <div class="my-12">
               <s-album
-                :album="album"
+                :album="album.id"
                 :link-excludes="[id]"
                 :set-list="setList$$q"
                 visit-album
