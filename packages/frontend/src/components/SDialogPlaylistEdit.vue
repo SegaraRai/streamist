@@ -31,7 +31,7 @@ export default defineComponent({
     const reloadData = (newPlaylist: ResourcePlaylist): void => {
       playlistId$$q.value = newPlaylist.id;
       itemTitle$$q.value = newPlaylist.title;
-      itemDescription$$q.value = newPlaylist.notes;
+      itemDescription$$q.value = newPlaylist.description;
     };
 
     watch(
@@ -51,7 +51,7 @@ export default defineComponent({
     const modified$$q = eagerComputed(
       () =>
         (itemTitle$$q.value && itemTitle$$q.value !== props.playlist.title) ||
-        itemDescription$$q.value !== props.playlist.notes
+        itemDescription$$q.value !== props.playlist.description
     );
 
     return {
@@ -72,7 +72,10 @@ export default defineComponent({
           .$patch({
             body: {
               title: convertReqStr(itemTitle$$q.value, playlist.title),
-              notes: convertOptStr(itemDescription$$q.value, playlist.notes),
+              description: convertOptStr(
+                itemDescription$$q.value,
+                playlist.description
+              ),
             },
           })
           .then(() => {

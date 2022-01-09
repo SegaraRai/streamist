@@ -164,7 +164,7 @@ export function createTrackDropdown({
                 .$post({
                   body: {
                     title: track.title,
-                    notes: '',
+                    description: '',
                     trackIds: [track.id],
                   },
                 })

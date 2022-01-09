@@ -23,7 +23,7 @@ export class VPlaylistCreateBody implements PlaylistCreateData {
 
   @IsString()
   @Transform(({ value }) => tStringNormalizeMultipleLines(value))
-  notes!: string;
+  description!: string;
 
   @IsUndefinable()
   @IsArray()
@@ -42,7 +42,7 @@ export class VPlaylistUpdateBody implements PlaylistUpdateData {
   @IsUndefinable()
   @IsString()
   @Transform(({ value }) => tStringNormalizeMultipleLines(value))
-  notes?: string;
+  description?: string;
 }
 
 export class VPlaylistAddTrackBody {

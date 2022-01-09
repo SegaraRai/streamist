@@ -44,7 +44,7 @@ export default defineComponent({
           .$post({
             body: {
               title: itemTitle$$q.value,
-              notes: itemNotes$$q.value,
+              description: itemNotes$$q.value,
             },
           })
           .then(() => {

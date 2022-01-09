@@ -38,7 +38,7 @@ export default defineComponent({
       artistName$$q.value = '';
       itemTitle$$q.value = newAlbum.title;
       itemTitleSort$$q.value = newAlbum.titleSort || '';
-      itemDescription$$q.value = newAlbum.notes || '';
+      itemDescription$$q.value = newAlbum.description || '';
     };
 
     watch(
@@ -63,7 +63,7 @@ export default defineComponent({
       () =>
         (itemTitle$$q.value && itemTitle$$q.value !== props.album.title) ||
         (itemTitleSort$$q.value || null) !== props.album.titleSort ||
-        itemDescription$$q.value !== props.album.notes ||
+        itemDescription$$q.value !== props.album.description ||
         (!isArtistEmpty$$q.value && artistId$$q.value !== props.album.artistId)
     );
 
@@ -97,7 +97,10 @@ export default defineComponent({
             body: {
               title: convertReqStr(itemTitle$$q.value, album.title),
               titleSort: convertOptStr(itemTitleSort$$q.value, album.titleSort),
-              notes: convertOptStr(itemDescription$$q.value, album.notes),
+              description: convertOptStr(
+                itemDescription$$q.value,
+                album.description
+              ),
               artistId: convertOptId(artistId$$q.value, album.artistId),
               artistName: artistId$$q.value
                 ? undefined

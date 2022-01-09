@@ -183,7 +183,7 @@ export default defineComponent({
             </s-conditional-link>
           </div>
         </div>
-        <div>{{ value$$q?.album$$q.notes }}</div>
+        <div>{{ value$$q?.album$$q.description }}</div>
         <div class="flex-1 <md:hidden"></div>
         <div class="flex-none text-sm">
           <span>

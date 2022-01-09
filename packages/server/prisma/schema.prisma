@@ -107,7 +107,7 @@ model Album {
   id             String          @id
   title          String
   titleSort      String?
-  notes          String          @default("")
+  description    String          @default("")
   replayGainGain Float?
   replayGainPeak Float?
   createdAt      Int //@db.BigInt
@@ -257,17 +257,17 @@ model TrackCoArtist {
 }
 
 model Playlist {
-  id         String           @id
-  title      String
-  notes      String           @default("")
-  createdAt  Int //@db.BigInt
-  updatedAt  Int //@db.BigInt
-  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String
-  images     APlaylistImage[]
-  imageOrder String           @default("")
-  tracks     APlaylistTrack[]
-  trackOrder String           @default("")
+  id          String           @id
+  title       String
+  description String           @default("")
+  createdAt   Int //@db.BigInt
+  updatedAt   Int //@db.BigInt
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  images      APlaylistImage[]
+  imageOrder  String           @default("")
+  tracks      APlaylistTrack[]
+  trackOrder  String           @default("")
 
   @@index([userId])
 }

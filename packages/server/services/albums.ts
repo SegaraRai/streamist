@@ -12,7 +12,7 @@ import { artistDeleteIfUnreferenced } from './artists';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
 export type AlbumUpdateData = Partial<
-  Pick<Album, 'title' | 'titleSort' | 'notes' | 'artistId'>
+  Pick<Album, 'title' | 'titleSort' | 'description' | 'artistId'>
 > & {
   artistName?: string;
 };
@@ -75,7 +75,7 @@ export async function albumUpdate(
       data: {
         title: data.title,
         titleSort: emptyToNull(data.titleSort),
-        notes: data.notes,
+        description: data.description,
         artistId,
         updatedAt: timestamp,
       },

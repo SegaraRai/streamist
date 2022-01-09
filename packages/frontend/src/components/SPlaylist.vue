@@ -179,7 +179,7 @@ export default defineComponent({
             {{ value$$q?.playlist$$q.title }}
           </s-conditional-link>
         </div>
-        <div>{{ value$$q?.playlist$$q.notes }}</div>
+        <div>{{ value$$q?.playlist$$q.description }}</div>
         <div class="flex-1 <md:hidden"></div>
         <div class="flex-none text-sm">
           <span>

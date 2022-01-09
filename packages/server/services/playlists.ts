@@ -14,7 +14,7 @@ import {
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
-export type PlaylistCreateData = Pick<Playlist, 'title' | 'notes'> & {
+export type PlaylistCreateData = Pick<Playlist, 'title' | 'description'> & {
   trackIds?: string[];
 };
 
@@ -22,7 +22,7 @@ export async function playlistCreate(
   userId: string,
   data: PlaylistCreateData
 ): Promise<Playlist> {
-  const { title, notes } = data;
+  const { title, description } = data;
 
   const trackIds = data.trackIds || [];
   if (Array.from(new Set(trackIds)).length !== trackIds.length) {
@@ -50,7 +50,7 @@ export async function playlistCreate(
     data: {
       id: await generatePlaylistId(),
       title,
-      notes,
+      description,
       createdAt: timestamp,
       updatedAt: timestamp,
       trackOrder: dbArraySerializeItemIds(trackIds),
@@ -70,16 +70,18 @@ export async function playlistCreate(
   return playlist;
 }
 
-export type PlaylistUpdateData = Partial<Pick<Playlist, 'title' | 'notes'>>;
+export type PlaylistUpdateData = Partial<
+  Pick<Playlist, 'title' | 'description'>
+>;
 
 export async function playlistUpdate(
   userId: string,
   playlistId: string,
   data: PlaylistUpdateData
 ): Promise<void> {
-  const { title, notes } = data;
+  const { title, description } = data;
 
-  if (title == null && notes == null) {
+  if (title == null && description == null) {
     return;
   }
 
@@ -90,7 +92,7 @@ export async function playlistUpdate(
     },
     data: {
       title,
-      notes,
+      description,
       updatedAt: Date.now(),
     },
   });

@@ -49,7 +49,7 @@ export default defineComponent({
           tracks$$q: tracks,
           id$$q: playlist.id,
           title$$q: playlist.title,
-          description$$q: playlist.notes,
+          description$$q: playlist.description,
           trackCount$$q: tracks.length,
           duration$$q: duration,
           formattedDuration$$q: formatTotalDuration(
