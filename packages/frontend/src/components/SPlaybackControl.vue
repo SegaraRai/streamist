@@ -107,7 +107,7 @@ export default defineComponent({
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
   >
-    <div class="w-20vw min-w-50 flex-none flex items-center">
+    <div class="w-20vw xl:w-25vw min-w-50 flex-none flex items-center">
       <template v-if="currentTrackInfo$$q">
         <s-playback-track-view
           :track="currentTrackInfo$$q.track$$q"
@@ -201,7 +201,9 @@ export default defineComponent({
         @update="seekTo$$q"
       />
     </div>
-    <div class="w-20vw min-w-50 flex-none flex items-center justify-end">
+    <div
+      class="w-20vw xl:w-25vw min-w-50 flex-none flex items-center justify-end"
+    >
       <div class="flex-1 max-w-40">
         <s-volume-control
           :volume="volumeStore$$q.volume"
