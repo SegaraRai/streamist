@@ -14,6 +14,38 @@ const NAIVE_UI_BASE_THEMES = {
   light: lightTheme,
 } as const;
 
+function blend(x: string, y: string, alpha: number): string {
+  const xr = parseInt(x.slice(1, 3), 16);
+  const xg = parseInt(x.slice(3, 5), 16);
+  const xb = parseInt(x.slice(5, 7), 16);
+  const yr = parseInt(y.slice(1, 3), 16);
+  const yg = parseInt(y.slice(3, 5), 16);
+  const yb = parseInt(y.slice(5, 7), 16);
+  const revAlpha = 1 - alpha;
+  const r = Math.round(xr * revAlpha + yr * alpha);
+  const g = Math.round(xg * revAlpha + yg * alpha);
+  const b = Math.round(xb * revAlpha + yb * alpha);
+  return `#${r.toString(16).padStart(2, '0')}${g
+    .toString(16)
+    .padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+function createHover(color: string, _dark: boolean): string {
+  return blend(color, '#FFFFFF', 0.2);
+}
+
+function createPressed(color: string, _dark: boolean): string {
+  return blend(color, '#000000', 0.2);
+}
+
+function createSuppl(color: string, _dark: boolean): string {
+  return blend(color, '#000000', 0.4);
+}
+
+function createDisabled(color: string, _dark: boolean): string {
+  return blend(color, '#FFFFFF', 0.4);
+}
+
 export const NAIVE_UI_THEMES: Record<ThemeName, NaiveUITheme> =
   Object.fromEntries(
     THEMES.map((theme): [ThemeName, NaiveUITheme] => [
@@ -25,25 +57,25 @@ export const NAIVE_UI_THEMES: Record<ThemeName, NaiveUITheme> =
           common: {
             baseColor: theme.background,
             primaryColor: theme.primary,
-            // primaryColorHover: string,
-            // primaryColorPressed: string,
-            // primaryColorSuppl: string,
+            primaryColorHover: createHover(theme.primary, theme.dark),
+            primaryColorPressed: createPressed(theme.primary, theme.dark),
+            primaryColorSuppl: createSuppl(theme.primary, theme.dark),
             infoColor: theme.info,
-            // infoColorHover: string,
-            // infoColorPressed: string,
-            // infoColorSuppl: string,
+            infoColorHover: createHover(theme.info, theme.dark),
+            infoColorPressed: createPressed(theme.info, theme.dark),
+            infoColorSuppl: createSuppl(theme.info, theme.dark),
             successColor: theme.success,
-            // successColorHover: string,
-            // successColorPressed: string,
-            // successColorSuppl: string,
+            successColorHover: createHover(theme.success, theme.dark),
+            successColorPressed: createPressed(theme.success, theme.dark),
+            successColorSuppl: createSuppl(theme.success, theme.dark),
             warningColor: theme.warning,
-            // warningColorHover: string,
-            // warningColorPressed: string,
-            // warningColorSuppl: string,
+            warningColorHover: createHover(theme.warning, theme.dark),
+            warningColorPressed: createPressed(theme.warning, theme.dark),
+            warningColorSuppl: createSuppl(theme.warning, theme.dark),
             errorColor: theme.error,
-            // errorColorHover: string,
-            // errorColorPressed: string,
-            // errorColorSuppl: string,
+            errorColorHover: createHover(theme.error, theme.dark),
+            errorColorPressed: createPressed(theme.error, theme.dark),
+            errorColorSuppl: createSuppl(theme.error, theme.dark),
             textColorBase: theme.text,
             // textColorDisabled: string,
             // placeholderColor: string,
@@ -51,9 +83,9 @@ export const NAIVE_UI_THEMES: Record<ThemeName, NaiveUITheme> =
             // dividerColor: string,
             // borderColor: string,
             closeColor: theme.error,
-            // closeColorHover: string,
-            // closeColorPressed: string,
-            // closeColorDisabled: string,
+            closeColorHover: createHover(theme.error, theme.dark),
+            closeColorPressed: createPressed(theme.error, theme.dark),
+            closeColorDisabled: createDisabled(theme.error, theme.dark),
             popoverColor: theme.tooltip,
           },
         },
