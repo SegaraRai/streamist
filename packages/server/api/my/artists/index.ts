@@ -4,12 +4,5 @@ export type Methods = {
   get: {
     resBody: Artist[];
   };
-  post: {
-    query?: {
-      forceNewArtist?: boolean | number;
-    };
-    // NOTE: APIがstableになるまでvalidatorは作成しない
-    reqBody: Pick<Artist, 'name'>;
-    resBody: Artist;
-  };
+  // アルバムやトラックのPATCHから作成できるのでとりあえずここにはPOSTは設けない
 };
