@@ -1,27 +1,14 @@
 <script lang="ts">
-import { db } from '~/db';
-import { useLiveQuery } from '~/logic/useLiveQuery';
+import { useCurrentTrackInfo } from '~/logic/currentTrackInfo';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
   setup() {
     const playbackStore = usePlaybackStore();
 
-    const currentTrack = playbackStore.currentTrack$$q;
-
-    const { value: currentTrackInfo } = useLiveQuery(async () => {
-      const track = currentTrack.value;
-      if (!track) {
-        return {};
-      }
-      const trackArtist$$q = await db.artists.get(track.artistId);
-      return {
-        trackArtist$$q,
-      };
-    }, [currentTrack]);
+    const { value: currentTrackInfo } = useCurrentTrackInfo();
 
     return {
-      currentTrack$$q: currentTrack,
       currentTrackInfo$$q: currentTrackInfo,
       playing$$q: playbackStore.playing$$q,
       progress$$q: computed(() =>
@@ -70,10 +57,10 @@ export default defineComponent({
         class="flex-1 flex items-center overflow-hidden"
         to="/playing"
       >
-        <template v-if="currentTrack$$q">
+        <template v-if="currentTrackInfo$$q">
           <s-playback-track-view
-            :track="currentTrack$$q"
-            :artist-name="currentTrackInfo$$q?.trackArtist$$q?.name"
+            :track="currentTrackInfo$$q.track$$q"
+            :artist-name="currentTrackInfo$$q.trackArtist$$q.name"
             navigate-playing
           />
         </template>

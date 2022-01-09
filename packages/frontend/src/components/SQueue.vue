@@ -12,9 +12,11 @@ export default defineComponent({
   },
   setup() {
     const playbackStore = usePlaybackStore();
-    const { playNextQueue$$q } = playbackStore;
+    const playNextQueue$$q = eagerComputed(() =>
+      playbackStore.playNextQueue$$q.value.map(({ id }) => id)
+    );
     const queue$$q = eagerComputed(() =>
-      playbackStore.queue$$q.value.slice(0, minQueueSize)
+      playbackStore.queue$$q.value.slice(0, minQueueSize).map(({ id }) => id)
     );
 
     const play$$q = (index: number): void => {

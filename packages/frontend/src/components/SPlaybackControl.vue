@@ -1,8 +1,7 @@
 <script lang="ts">
 import type { RepeatType } from '$shared/types/playback';
-import { db } from '~/db';
+import { useCurrentTrackInfo } from '~/logic/currentTrackInfo';
 import { findAncestor } from '~/logic/findAncestor';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { useVolumeStore } from '~/stores/volume';
 
@@ -11,7 +10,8 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const volumeStore = useVolumeStore();
 
-    const currentTrack = playbackStore.currentTrack$$q;
+    const { value: currentTrackInfo } = useCurrentTrackInfo();
+
     const repeatEnabled = computed(
       () => playbackStore.repeat$$q.value !== 'off'
     );
@@ -52,24 +52,9 @@ export default defineComponent({
       playbackStore.shuffle$$q.value = !playbackStore.shuffle$$q.value;
     };
 
-    const { value: currentTrackInfo } = useLiveQuery(async () => {
-      const track = currentTrack.value;
-      if (!track) {
-        return {};
-      }
-      const trackArtist$$q = await db.artists.get(track.artistId);
-      if (track.id !== currentTrack.value?.id) {
-        return {};
-      }
-      return {
-        trackArtist$$q,
-      };
-    }, [currentTrack]);
-
     return {
       currentTrackInfo$$q: currentTrackInfo,
       volumeStore$$q: volumeStore,
-      currentTrack$$q: currentTrack,
       playing$$q: playbackStore.playing$$q,
       repeatEnabled$$q: repeatEnabled,
       shuffleEnabled$$q: shuffleEnabled,
@@ -123,10 +108,10 @@ export default defineComponent({
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
   >
     <div class="w-20vw min-w-50 flex-none flex items-center">
-      <template v-if="currentTrack$$q">
+      <template v-if="currentTrackInfo$$q">
         <s-playback-track-view
-          :track="currentTrack$$q"
-          :artist-name="currentTrackInfo$$q?.trackArtist$$q?.name"
+          :track="currentTrackInfo$$q.track$$q"
+          :artist-name="currentTrackInfo$$q.trackArtist$$q.name"
         />
       </template>
     </div>

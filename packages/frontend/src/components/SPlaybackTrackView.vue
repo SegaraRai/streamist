@@ -3,7 +3,6 @@ import type { PropType } from 'vue';
 import type { ResourceTrack } from '$/types';
 import { useMenu } from '~/logic/menu';
 import { createTrackDropdown } from '~/logic/naive-ui/trackDropdown';
-import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
   props: {
@@ -17,9 +16,7 @@ export default defineComponent({
     },
     navigatePlaying: Boolean,
   },
-  setup() {
-    const playbackStore = usePlaybackStore();
-
+  setup(props) {
     const dialog$$q = ref(false);
     const lastSelectedTrack$$q = ref<ResourceTrack | undefined>();
     const {
@@ -33,7 +30,7 @@ export default defineComponent({
       scrollRef$$q: ref(0),
     });
     const menuOptions$$q = createTrackDropdown({
-      selectedTrack$$q: playbackStore.currentTrack$$q,
+      selectedTrack$$q: eagerComputed(() => props.track),
       playlistId$$q: ref(),
       showVisitAlbum$$q: ref(true),
       showVisitArtist$$q: ref(true),

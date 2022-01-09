@@ -5,9 +5,8 @@ meta:
 
 <script lang="ts">
 import type { RepeatType } from '$shared/types/playback';
-import { db } from '~/db';
+import { useCurrentTrackInfo } from '~/logic/currentTrackInfo';
 import { findAncestor } from '~/logic/findAncestor';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { useVolumeStore } from '~/stores/volume';
 
@@ -16,7 +15,8 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const volumeStore = useVolumeStore();
 
-    const currentTrack = playbackStore.currentTrack$$q;
+    const { value: currentTrackInfo } = useCurrentTrackInfo();
+
     const repeatEnabled = computed(
       () => playbackStore.repeat$$q.value !== 'off'
     );
@@ -57,24 +57,9 @@ export default defineComponent({
       playbackStore.shuffle$$q.value = !playbackStore.shuffle$$q.value;
     };
 
-    const { value: currentTrackInfo } = useLiveQuery(async () => {
-      const track = currentTrack.value;
-      if (!track) {
-        return {};
-      }
-      const trackArtist$$q = await db.artists.get(track.artistId);
-      if (track.id !== currentTrack.value?.id) {
-        return {};
-      }
-      return {
-        trackArtist$$q,
-      };
-    }, [currentTrack]);
-
     return {
       currentTrackInfo$$q: currentTrackInfo,
       volumeStore$$q: volumeStore,
-      currentTrack$$q: currentTrack,
       playing$$q: playbackStore.playing$$q,
       repeatEnabled$$q: repeatEnabled,
       shuffleEnabled$$q: shuffleEnabled,
@@ -124,16 +109,16 @@ export default defineComponent({
   <div class="absolute w-full h-full select-none !px-0">
     <div class="flex flex-col h-full px-6 pt-8 max-w-xl mx-auto">
       <div class="flex-1 flex flex-col items-center justify-start gap-y-4">
-        <template v-if="currentTrack$$q">
+        <template v-if="currentTrackInfo$$q">
           <div class="w-full px-8">
             <router-link
               class="block w-full max-w-80 flex-1 mx-auto"
-              :to="`/albums/${currentTrack$$q.albumId}`"
+              :to="`/albums/${currentTrackInfo$$q.track$$q.albumId}`"
             >
               <s-album-image
                 class="aspect-square"
                 size="400"
-                :album="currentTrack$$q.albumId"
+                :album="currentTrackInfo$$q.track$$q.albumId"
               />
             </router-link>
           </div>
@@ -142,15 +127,15 @@ export default defineComponent({
           >
             <router-link
               class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-lg"
-              :to="`/albums/${currentTrack$$q.albumId}`"
+              :to="`/albums/${currentTrackInfo$$q.track$$q.albumId}`"
             >
-              {{ currentTrack$$q.title }}
+              {{ currentTrackInfo$$q.track$$q.title }}
             </router-link>
             <router-link
               class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-sm"
-              :to="`/artists/${currentTrack$$q.artistId}`"
+              :to="`/artists/${currentTrackInfo$$q.track$$q.artistId}`"
             >
-              {{ currentTrackInfo$$q?.trackArtist$$q?.name }}
+              {{ currentTrackInfo$$q.trackArtist$$q.name }}
             </router-link>
           </div>
         </template>
