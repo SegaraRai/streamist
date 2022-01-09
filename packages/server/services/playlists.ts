@@ -79,9 +79,9 @@ export async function playlistUpdate(
   playlistId: string,
   data: PlaylistUpdateData
 ): Promise<void> {
-  const { title, description } = data;
+  const { description, title } = data;
 
-  if (title == null && description == null) {
+  if (description === undefined && title === undefined) {
     return;
   }
 
