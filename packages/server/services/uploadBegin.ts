@@ -4,12 +4,13 @@ import {
   generateSourceFileId,
   generateSourceId,
 } from '$shared-server/generateId';
+import { is } from '$shared/is';
 import {
+  OSRegion,
   getSourceFileKey,
   getSourceFileOS,
-} from '$shared-server/objectStorages';
-import { is } from '$shared/is';
-import { Region, toRegion } from '$shared/regions';
+  toOSRegion,
+} from '$shared/objectStorage';
 import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE,
@@ -51,7 +52,7 @@ import { createUserUploadS3Cached } from './userOS';
 async function createMultipartUploadId(
   userId: string,
   sourceFileId: string,
-  region: Region,
+  region: OSRegion,
   fileSize: number
 ): Promise<string | undefined> {
   const useMultipart = useMultipartUpload(fileSize);
@@ -77,7 +78,7 @@ async function createMultipartUploadId(
 function createPresignedMultipartURLs(
   userId: string,
   sourceFileId: string,
-  region: Region,
+  region: OSRegion,
   fileSize: number,
   uploadId: string
 ): Promise<UploadURLPart[]> {
@@ -112,7 +113,7 @@ function createPresignedMultipartURLs(
 function createPresignedURL(
   userId: string,
   sourceFileId: string,
-  region: Region,
+  region: OSRegion,
   fileSize: number
 ): Promise<string> {
   const os = getSourceFileOS(region);
@@ -146,7 +147,7 @@ function createPresignedURL(
 async function createUploadURL(
   userId: string,
   sourceFileId: string,
-  region: Region,
+  region: OSRegion,
   fileSize: number,
   uploadId?: string | null
 ): Promise<UploadURL> {
@@ -175,7 +176,7 @@ export async function createAudioSource(
   userId: string,
   request: CreateSourceRequestAudio
 ): Promise<CreateSourceResponse> {
-  const region = toRegion(request.region);
+  const region = toOSRegion(request.region);
 
   // TODO(security): validate request
 
@@ -332,7 +333,7 @@ export async function createImageSource(
   userId: string,
   request: CreateSourceRequestImage
 ): Promise<CreateSourceResponse> {
-  const region = toRegion(request.region);
+  const region = toOSRegion(request.region);
 
   // TODO(security): validate request
 
@@ -489,7 +490,7 @@ export async function getUploadURLForSourceFile(
   return createUploadURL(
     userId,
     sourceFileId,
-    sourceFile.region as Region,
+    sourceFile.region as OSRegion,
     sourceFile.fileSize,
     sourceFile.uploadId
   );

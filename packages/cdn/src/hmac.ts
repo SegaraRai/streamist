@@ -11,11 +11,14 @@ let hmacKeyPromise: PromiseLike<CryptoKey> | undefined;
  * @param message メッセージ
  * @returns MAC値
  */
-export async function calculateHMAC(message: string): Promise<string> {
+export async function calculateHMAC(
+  secret: string,
+  message: string
+): Promise<string> {
   if (!hmacKeyPromise) {
     hmacKeyPromise = crypto.subtle.importKey(
       'raw',
-      new TextEncoder().encode(SECRET_CACHE_SECURITY_KEY),
+      new TextEncoder().encode(secret),
       {
         name: 'HMAC',
         hash: 'SHA-256',

@@ -46,6 +46,7 @@ export default defineComponent({
       <template v-if="srcObject$$q">
         <img
           v-lazysizes
+          crossorigin="use-credentials"
           data-sizes="auto"
           :data-src="srcObject$$q.src$$q"
           :data-srcset="srcObject$$q.srcSet$$q"

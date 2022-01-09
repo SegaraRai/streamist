@@ -1,22 +1,24 @@
 import { gzipAsync } from '$shared-server/gzip';
 import { osPutData } from '$shared-server/objectStorage';
+import { CACHE_CONTROL_NO_STORE } from '$shared/cacheControl';
 import {
+  OSRegion,
   getTranscodeLogFileKey,
   getTranscodeLogFileOS,
-} from '$shared-server/objectStorages';
-import { CACHE_CONTROL_NO_STORE } from '$shared/cacheControl';
+} from '$shared/objectStorage';
 import { ExecFileResult, execFileAsync } from './execFileAsync';
 import logger from './logger';
 
 export async function uploadJSON(
   userId: string,
   sourceFileId: string,
+  region: OSRegion,
   type: string,
   data: unknown
 ): Promise<void> {
   try {
     await osPutData(
-      getTranscodeLogFileOS(),
+      getTranscodeLogFileOS(region),
       getTranscodeLogFileKey(userId, sourceFileId, type),
       await gzipAsync(Buffer.from(JSON.stringify(data, null, 2))),
       {
@@ -39,13 +41,14 @@ export async function execAndLog(
   timeout: number,
   userId: string,
   sourceFileId: string,
+  region: OSRegion,
   type: string,
   additionalLogRecord: Record<string, unknown> = {}
 ): Promise<ExecFileResult> {
   const beginTimestamp = Date.now();
   const result = await execFileAsync(file, args, timeout);
   const endTimestamp = Date.now();
-  await uploadJSON(userId, sourceFileId, type, {
+  await uploadJSON(userId, sourceFileId, region, type, {
     userId,
     file,
     args,

@@ -1,3 +1,4 @@
+import '$/services/initOS';
 import '$/services/initCredentials';
 
 import Fastify, { FastifyServerFactory } from 'fastify';

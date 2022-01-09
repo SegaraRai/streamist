@@ -1,4 +1,4 @@
-import type { Region } from '$shared/regions';
+import type { OSRegion } from '$shared/objectStorage';
 import type { SourceFileAttachToType } from '$shared/types/db';
 import type { UploadURL } from './upload';
 
@@ -22,14 +22,14 @@ export interface CreateSourceRequestFileImage {
 
 export interface CreateSourceRequestAudio {
   type: 'audio';
-  region: Region;
+  region: OSRegion;
   audioFile: CreateSourceRequestFileAudio;
   cueSheetFile: CreateSourceRequestFileCueSheet | null;
 }
 
 export interface CreateSourceRequestImage {
   type: 'image';
-  region: Region;
+  region: OSRegion;
   attachToType: SourceFileAttachToType;
   attachToId: string;
   attachPrepend: boolean;

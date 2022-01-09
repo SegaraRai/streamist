@@ -1,3 +1,5 @@
+import '$/services/initOS';
+
 import { describe, expect, it } from 'vitest';
 import {
   VSourceCreateBodyWrapper,

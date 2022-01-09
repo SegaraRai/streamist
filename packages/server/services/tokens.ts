@@ -1,6 +1,10 @@
 import { createSigner, createVerifier } from 'fast-jwt';
 import { randomBytesAsync } from '$shared-server/randomBytesAsync';
-import { SECRET_API_JWT_SECRET } from './env';
+import {
+  SECRET_API_JWT_SECRET,
+  SECRET_CDN_JWT_SECRET,
+  SECRET_REFRESH_TOKEN_JWT_SECRET,
+} from './env';
 
 export const REFRESH_TOKEN_EXPIRES_IN = 1 * 24 * 60 * 60 * 1000;
 export const API_TOKEN_EXPIRES_IN = 60 * 1000;
@@ -13,18 +17,16 @@ export async function issueRefreshToken(
   const signer = createSigner({
     algorithm: 'HS256',
     jti: `R.${(await randomBytesAsync(32)).toString('hex')}`,
-    key:
-      process.env.SECRET_REFRESH_TOKEN_JWT_SECRET || 'REFRESH_TOKEN_JWT_SECRET',
+    key: SECRET_REFRESH_TOKEN_JWT_SECRET,
     aud: 'refresh',
+    iss: 'https://streamist.app',
     clockTimestamp: timestamp,
     expiresIn: REFRESH_TOKEN_EXPIRES_IN,
-  });
-  signer({
-    id: userId,
   });
   return Promise.resolve(
     signer({
       id: userId,
+      sub: userId,
     })
   );
 }
@@ -34,8 +36,7 @@ export async function extractUserIdFromRefreshToken(
 ): Promise<string | undefined> {
   const verifier = createVerifier({
     algorithms: ['HS256'],
-    key:
-      process.env.SECRET_REFRESH_TOKEN_JWT_SECRET || 'REFRESH_TOKEN_JWT_SECRET',
+    key: SECRET_REFRESH_TOKEN_JWT_SECRET,
     allowedAud: 'refresh',
   });
 
@@ -53,12 +54,14 @@ export function issueAPIToken(
     algorithm: 'HS256',
     key: SECRET_API_JWT_SECRET,
     aud: 'api',
+    iss: 'https://streamist.app',
     clockTimestamp: timestamp,
     expiresIn: API_TOKEN_EXPIRES_IN,
   });
   return Promise.resolve(
     signer({
       id: userId,
+      sub: userId,
     })
   );
 }
@@ -69,14 +72,16 @@ export function issueCDNToken(
 ): Promise<string> {
   const signer = createSigner({
     algorithm: 'HS256',
-    key: process.env.SECRET_CDN_TOKEN_JWT_SECRET || 'CDN_TOKEN_JWT_SECRET',
+    key: SECRET_CDN_JWT_SECRET,
     aud: 'cdn',
+    iss: 'https://streamist.app',
     clockTimestamp: timestamp,
     expiresIn: CDN_TOKEN_EXPIRES_IN,
   });
   return Promise.resolve(
     signer({
       id: userId,
+      sub: userId,
     })
   );
 }
@@ -86,7 +91,7 @@ export async function extractPayloadFromCDNToken(
 ): Promise<{ id: string; exp: number } | undefined> {
   const verifier = createVerifier({
     algorithms: ['HS256'],
-    key: process.env.SECRET_CDN_TOKEN_JWT_SECRET || 'CDN_TOKEN_JWT_SECRET',
+    key: SECRET_CDN_JWT_SECRET,
     allowedAud: 'cdn',
   });
 

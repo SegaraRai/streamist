@@ -1,3 +1,5 @@
+import '$/services/initOS';
+
 import { describe, expect, it } from 'vitest';
 import { VAuthBodyWrapper } from '$/validators';
 import { validate } from './utils';

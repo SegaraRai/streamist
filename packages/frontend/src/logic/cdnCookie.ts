@@ -4,7 +4,7 @@ import { isJWTNotExpired } from './jwt';
 import { tokens } from './tokens';
 
 async function setTokenCookie(token: string): Promise<void> {
-  const res = await fetch(`${CDN_ENDPOINT}/api/cookies/token`, {
+  const res = await fetch(`${CDN_ENDPOINT}/api/cookies/token?_=${Date.now()}`, {
     credentials: 'include',
     method: 'POST',
     headers: {

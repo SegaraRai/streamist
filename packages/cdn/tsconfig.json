@@ -4,7 +4,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
-    "module": "ESNext",
+    "module": "ES2020",
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
@@ -19,6 +19,9 @@
     "skipLibCheck": true,
     "strict": true,
     "strictPropertyInitialization": false,
-    "target": "ESNext"
+    "target": "ES2020",
+    "types": [
+      "@cloudflare/workers-types"
+    ]
   }
 }

@@ -1,4 +1,4 @@
-import type { Region } from '$shared/regions';
+import type { OSRegion } from '$shared/objectStorage';
 import type { SourceFileAttachToType } from '$shared/types/db';
 import type {
   FFprobeFormat,
@@ -29,7 +29,7 @@ export interface TranscoderRequestFileAudio {
   sourceId: string;
   options: TranscoderRequestOptions;
   sourceFileId: string;
-  region: Region;
+  region: OSRegion;
   fileSize: number;
   filename: string;
   cueSheetSourceFileId?: string | null;
@@ -41,7 +41,7 @@ export interface TranscoderRequestFileImage {
   sourceId: string;
   options: TranscoderRequestOptions;
   sourceFileId: string;
-  region: Region;
+  region: OSRegion;
   filename: string;
   fileSize: number;
   attachToType: SourceFileAttachToType;

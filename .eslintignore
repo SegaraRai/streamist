@@ -9,3 +9,5 @@ packages/server/lambda.js
 packages/server/lambda_migration.js
 
 packages/transcoder/index.js
+
+packages/cdn/index.js

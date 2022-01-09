@@ -1,10 +1,10 @@
 import fetch from 'node-fetch';
+import { is } from '$shared/is';
 import {
+  OSRegion,
   getSourceFileKey,
   getSourceFileOS,
-} from '$shared-server/objectStorages';
-import { is } from '$shared/is';
-import type { Region } from '$shared/regions';
+} from '$shared/objectStorage';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -38,7 +38,7 @@ function createTranscoderRequestFiles(
           return {
             type: 'audio',
             sourceFileId: file.id,
-            region: file.region as Region,
+            region: file.region as OSRegion,
             filename: file.filename,
             fileSize: file.fileSize,
             sourceId: source.id,
@@ -57,7 +57,7 @@ function createTranscoderRequestFiles(
           return {
             type: 'image',
             sourceFileId: file.id,
-            region: file.region as Region,
+            region: file.region as OSRegion,
             filename: file.filename,
             fileSize: file.fileSize,
             sourceId: source.id,
@@ -233,7 +233,7 @@ export async function onSourceFileUploaded(
     }
 
     // complete multipart upload
-    const os = getSourceFileOS(sourceFile.region as Region);
+    const os = getSourceFileOS(sourceFile.region as OSRegion);
     const key = getSourceFileKey(userId, sourceFileId);
     const s3 = createUserUploadS3Cached(os);
 

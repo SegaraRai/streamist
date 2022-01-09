@@ -1,11 +1,11 @@
 import type { TrackFile } from '@prisma/client';
 import { osDelete } from '$shared-server/objectStorage';
+import { createMultiMap } from '$shared/multiMap';
 import {
+  OSRegion,
   getTranscodedAudioFileKey,
   getTranscodedAudioFileOS,
-} from '$shared-server/objectStorages';
-import { createMultiMap } from '$shared/multiMap';
-import type { Region } from '$shared/regions';
+} from '$shared/objectStorage';
 
 export async function osDeleteTrackFiles(
   userId: string,
@@ -13,7 +13,7 @@ export async function osDeleteTrackFiles(
 ): Promise<void> {
   const regionToFilesMap = createMultiMap(trackFiles, 'region');
   for (const [region, regionFiles] of regionToFilesMap) {
-    const os = getTranscodedAudioFileOS(region as Region);
+    const os = getTranscodedAudioFileOS(region as OSRegion);
     await osDelete(
       os,
       regionFiles.map((file): string =>

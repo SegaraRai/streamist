@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { normalizeTextForSingleLine } from '$shared/normalize';
+import { OSRegion } from '$shared/objectStorage';
 import { calcDHash } from './dHash';
 import { execAndLog } from './execAndLog';
 import type { FFprobeResult, FFprobeTags } from './types/ffprobe';
@@ -67,6 +68,7 @@ if (process.env.NODE_ENV === 'development') {
 export async function probeAudio(
   userId: string,
   srcFileId: string,
+  region: OSRegion,
   srcPath: string
 ): Promise<FFprobeResult> {
   const execResult = await execAndLog(
@@ -90,6 +92,7 @@ export async function probeAudio(
     ffprobeProbeAudioTimeout,
     userId,
     srcFileId,
+    region,
     'audio_probe'
   );
 
@@ -111,6 +114,7 @@ export async function probeAudio(
 export async function extractImageFromAudio(
   userId: string,
   srcFileId: string,
+  region: OSRegion,
   srcPath: string,
   destPath: string,
   index: number
@@ -147,6 +151,7 @@ export async function extractImageFromAudio(
     ffprobeExtractImageTimeout,
     userId,
     srcFileId,
+    region,
     `audio_extract_s${index}`
   );
 }
@@ -154,6 +159,7 @@ export async function extractImageFromAudio(
 export async function transcodeAudio(
   userId: string,
   srcFileId: string,
+  region: OSRegion,
   trackIndex: number,
   formatName: string,
   srcPath: string,
@@ -195,6 +201,7 @@ export async function transcodeAudio(
     ffprobeTranscodeAudioTimeout,
     userId,
     srcFileId,
+    region,
     `audio_transcode_s${index}_t${trackIndex}_${formatName}`,
     {
       index,
@@ -208,6 +215,7 @@ export async function transcodeAudio(
 export async function cleanAudio(
   userId: string,
   srcFileId: string,
+  region: OSRegion,
   trackIndex: number,
   formatName: string,
   srcPath: string,
@@ -227,6 +235,7 @@ export async function cleanAudio(
     mkcleanCleanAudioTimeout,
     userId,
     srcFileId,
+    region,
     `audio_clean_t${trackIndex}_${formatName}`
   );
 }
@@ -236,6 +245,7 @@ export async function cleanAudio(
 export async function probeImage(
   userId: string,
   srcFileId: string,
+  region: OSRegion,
   srcPath: string
 ): Promise<ImageMagickResult> {
   const execResult = await execAndLog(
@@ -252,6 +262,7 @@ export async function probeImage(
     imagemagickProbeImageTimeout,
     userId,
     srcFileId,
+    region,
     'image_probe'
   );
 
@@ -261,6 +272,7 @@ export async function probeImage(
 export async function calcImageDHash(
   userId: string,
   srcFileId: string,
+  region: OSRegion,
   srcPath: string
 ): Promise<string> {
   const execResult = await execAndLog(
@@ -301,6 +313,7 @@ export async function calcImageDHash(
     imagemagickProbeImageTimeout,
     userId,
     srcFileId,
+    region,
     'image_dhash'
   );
 
@@ -310,6 +323,7 @@ export async function calcImageDHash(
 export async function transcodeImage(
   userId: string,
   srcFileId: string,
+  region: OSRegion,
   formatName: string,
   srcPath: string,
   destPath: string,
@@ -366,6 +380,7 @@ export async function transcodeImage(
     imagemagickTranscodeImageTimeout,
     userId,
     srcFileId,
+    region,
     `image_transcode_${formatName}`
   );
 }

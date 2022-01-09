@@ -83,7 +83,7 @@ export default defineComponent({
       let marginHeight;
 
       if (display.xs.value) {
-        itemWidth = 120;
+        itemWidth = 100;
         marginWidth = 10;
         extraHeight = 60;
         marginHeight = 20;

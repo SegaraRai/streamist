@@ -5,7 +5,7 @@ import {
   ValidatorConstraintInterface,
   registerDecorator,
 } from 'class-validator';
-import { isValidRegion } from '$shared/regions';
+import { isValidOSRegion } from '$shared/objectStorage';
 
 // class-validatorはv0.13.2時点でカスタムデコレーターに対するeachオプションに対応していないため、
 // それらについては@IsRegionデコレーターではなく@ValidateデコレーターとIsRegionConstraintを組み合わせて検証する
@@ -16,7 +16,7 @@ import { isValidRegion } from '$shared/regions';
 })
 export class IsRegionConstraint implements ValidatorConstraintInterface {
   validate(value: unknown): boolean {
-    return isValidRegion(value);
+    return isValidOSRegion(value);
   }
 
   defaultMessage(args: ValidationArguments): string {

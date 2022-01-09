@@ -8,6 +8,6 @@
     "typescript": "npm:@typescript-deploys/pr-build@4.6.0-pr-47183-2"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.45.0"
+    "@aws-sdk/client-s3": "^3.46.0"
   }
 }

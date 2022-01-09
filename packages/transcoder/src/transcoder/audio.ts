@@ -11,15 +11,15 @@ import {
   osGetFile,
   osPutFile,
 } from '$shared-server/objectStorage';
+import { CueSheet, parseCueSheet } from '$shared/cueParser';
+import { validateCueSheet } from '$shared/cueSheetCheck';
+import { decodeText } from '$shared/decodeText';
 import {
   getSourceFileKey,
   getSourceFileOS,
   getTranscodedAudioFileKey,
   getTranscodedAudioFileOS,
-} from '$shared-server/objectStorages';
-import { CueSheet, parseCueSheet } from '$shared/cueParser';
-import { validateCueSheet } from '$shared/cueSheetCheck';
-import { decodeText } from '$shared/decodeText';
+} from '$shared/objectStorage';
 import { uploadJSON } from '../execAndLog';
 import { calcFileHash } from '../fileHash';
 import logger from '../logger';
@@ -246,6 +246,7 @@ export async function processAudioRequest(
     const audioInfo = await probeAudio(
       userId,
       sourceFileId,
+      region,
       sourceAudioFilepath
     );
 
@@ -334,6 +335,7 @@ export async function processAudioRequest(
         await transcodeAudio(
           userId,
           sourceFileId,
+          region,
           trackIndex,
           audioFormat.name,
           sourceAudioFilepath,
@@ -355,6 +357,7 @@ export async function processAudioRequest(
           await cleanAudio(
             userId,
             sourceFileId,
+            region,
             trackIndex,
             audioFormat.name,
             tempFilepath,
@@ -411,6 +414,7 @@ export async function processAudioRequest(
         await extractImageFromAudio(
           userId,
           sourceFileId,
+          region,
           sourceAudioFilepath,
           imageFilepath,
           imageStream.index
@@ -465,7 +469,7 @@ export async function processAudioRequest(
       cueSheetSHA256,
     };
 
-    await uploadJSON(userId, sourceFileId, 'audio_result', {
+    await uploadJSON(userId, sourceFileId, region, 'audio_result', {
       userId,
       input: file,
       artifact,

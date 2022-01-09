@@ -2,11 +2,11 @@ import { PrismaClient } from '@prisma/client';
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import { generateImageId } from '$shared-server/generateId';
 import { osDelete } from '$shared-server/objectStorage';
+import { is } from '$shared/is';
 import {
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-} from '$shared-server/objectStorages';
-import { is } from '$shared/is';
+} from '$shared/objectStorage';
 import { parseDate } from '$shared/parseDate';
 import type {
   SourceFileAttachToType,

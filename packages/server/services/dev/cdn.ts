@@ -9,8 +9,8 @@ import {
   getTranscodedAudioFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-} from '$shared-server/objectStorages';
-import { toRegion } from '$shared/regions';
+  toOSRegion,
+} from '$shared/objectStorage';
 import { extractPayloadFromCDNToken } from '../tokens';
 import { createUserDownloadS3Cached } from '../userOS';
 
@@ -75,7 +75,7 @@ export const devCDN: FastifyPluginCallback<{}> = (
 
       const params = request.params as Record<string, string>;
       const { type, userId, filename } = params;
-      const region = toRegion(params.region);
+      const region = toOSRegion(params.region);
 
       if (userId !== payload.id) {
         return reply.code(401).send();
@@ -85,12 +85,12 @@ export const devCDN: FastifyPluginCallback<{}> = (
       let key: string;
 
       switch (type) {
-        case 'audio':
+        case 'audios':
           os = getTranscodedAudioFileOS(region);
           key = getTranscodedAudioFileKey(userId, filename, '');
           break;
 
-        case 'image':
+        case 'images':
           os = getTranscodedImageFileOS(region);
           key = getTranscodedImageFileKey(userId, filename, '');
           break;

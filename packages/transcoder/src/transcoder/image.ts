@@ -6,7 +6,7 @@ import {
   getSourceFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-} from '$shared-server/objectStorages';
+} from '$shared/objectStorage';
 import { uploadJSON } from '../execAndLog';
 import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
 import { getTempFilepath } from '../tempFile';
@@ -57,6 +57,7 @@ export async function processImageRequest(
     const imageInfoList = await probeImage(
       userId,
       sourceFileId,
+      region,
       sourceImageFilepath
     );
     if (imageInfoList.length < 1) {
@@ -106,6 +107,7 @@ export async function processImageRequest(
       await transcodeImage(
         userId,
         sourceFileId,
+        region,
         imageFormat.name,
         sourceImageFilepath,
         transcodedImageFilepath,
@@ -151,6 +153,7 @@ export async function processImageRequest(
     const dHash = await calcImageDHash(
       userId,
       sourceFileId,
+      region,
       sourceImageFilepath
     );
 
@@ -170,7 +173,7 @@ export async function processImageRequest(
       },
     };
 
-    await uploadJSON(userId, sourceFileId, 'image_result', {
+    await uploadJSON(userId, sourceFileId, region, 'image_result', {
       userId,
       input: file,
       artifact,

@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { is } from '$shared/is';
-import type { Region } from '$shared/regions';
+import type { OSRegion } from '$shared/objectStorage';
 import type { SourceFileAttachToType, SourceFileState } from '$shared/types/db';
 import {
   CreateSourceRequestAudio,
@@ -64,7 +64,7 @@ class VSourceCreateBodyAudio implements CreateSourceRequestAudio {
   type!: 'audio';
 
   @IsRegion()
-  region!: Region;
+  region!: OSRegion;
 
   @ValidateNested()
   @Type(() => VSourceCreateBodyAudioFile)
@@ -81,7 +81,7 @@ class VSourceCreateBodyImage implements CreateSourceRequestImage {
   type!: 'image';
 
   @IsRegion()
-  region!: Region;
+  region!: OSRegion;
 
   @IsIn(is<SourceFileAttachToType[]>(['album', 'artist', 'playlist']))
   attachToType!: SourceFileAttachToType;

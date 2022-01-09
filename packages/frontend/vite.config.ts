@@ -287,7 +287,6 @@ export default defineConfig({
       'vue',
       'vuedraggable',
       'vue-router',
-      'vue-virtual-scroll-grid',
       '@vueuse/core',
       '@vueuse/head',
     ],
