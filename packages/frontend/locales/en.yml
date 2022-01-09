@@ -10,6 +10,8 @@ sidebar:
   Downloads: Downloads
   Uploads: Uploads
   Settings: Settings
+common:
+  ThisActionCannotBeUndone: This action cannot be undone.
 header:
   NoInternetConnection: No Internet connection
   Search: Search
@@ -170,19 +172,19 @@ dialog:
       Cancel: Cancel
   deletePlaylist:
     title: Delete playlist
-    content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
+    content: "Are you sure you want to delete '{0}'?"
     button:
       Delete: Delete
       Cancel: Cancel
   deleteTrack:
     title: Delete track
-    content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
+    content: "Are you sure you want to delete '{0}'?"
     button:
       Delete: Delete
       Cancel: Cancel
 confirm:
   deleteImage:
-    text: "Are you sure you want to delete image of '{0}'?\nThis action cannot be undone."
+    text: "Are you sure you want to delete image of '{0}'?"
     button:
       Delete: Delete
       Cancel: Cancel

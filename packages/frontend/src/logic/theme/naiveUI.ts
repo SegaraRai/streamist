@@ -60,3 +60,37 @@ export const NAIVE_UI_THEMES: Record<ThemeName, NaiveUITheme> =
       },
     ])
   ) as Record<ThemeName, NaiveUITheme>;
+
+export function createOverrideTheme(
+  base: Exclude<GlobalThemeOverrides, undefined>,
+  key: 'primary' | 'info' | 'success' | 'warning' | 'error'
+) {
+  const baseColor = base.common![`${key}Color`];
+  const baseColorHover = base.common![`${key}ColorHover`];
+  const baseColorPressed = base.common![`${key}ColorPressed`];
+  const baseColorSuppl = base.common![`${key}ColorSuppl`];
+  return {
+    common: {
+      primaryColor: baseColor,
+      primaryColorHover: baseColorHover,
+      primaryColorPressed: baseColorPressed,
+      primaryColorSuppl: baseColorSuppl,
+      infoColor: baseColor,
+      infoColorHover: baseColorHover,
+      infoColorPressed: baseColorPressed,
+      infoColorSuppl: baseColorSuppl,
+      successColor: baseColor,
+      successColorHover: baseColorHover,
+      successColorPressed: baseColorPressed,
+      successColorSuppl: baseColorSuppl,
+      warningColor: baseColor,
+      warningColorHover: baseColorHover,
+      warningColorPressed: baseColorPressed,
+      warningColorSuppl: baseColorSuppl,
+      errorColor: baseColor,
+      errorColorHover: baseColorHover,
+      errorColorPressed: baseColorPressed,
+      errorColorSuppl: baseColorSuppl,
+    },
+  };
+}

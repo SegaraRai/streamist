@@ -6,6 +6,7 @@ import api from '~/logic/api';
 import { usePlaybackStore } from '~/stores/playback';
 import { setRedirect } from '~/stores/redirect';
 import { useAllPlaylists } from '../useDB';
+import { nCreateDialogContentWithWarning } from './dialog';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
 export interface TrackDropdownCreateOptions {
@@ -312,7 +313,10 @@ export function createTrackDropdown({
               style: 'font-size: inherit',
             }),
             title: t('dialog.deleteTrack.title'),
-            content: t('dialog.deleteTrack.content', [track.title]),
+            content: nCreateDialogContentWithWarning(
+              () => t('dialog.deleteTrack.content', [track.title]),
+              () => t('common.ThisActionCannotBeUndone')
+            ),
             positiveText: t('dialog.deleteTrack.button.Delete'),
             negativeText: t('dialog.deleteTrack.button.Cancel'),
             onPositiveClick: () => {

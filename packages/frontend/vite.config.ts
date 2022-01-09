@@ -2,6 +2,7 @@ import { writeFileSync } from 'fs';
 import path from 'path';
 import VueI18n from '@intlify/vite-plugin-vue-i18n';
 import Vue from '@vitejs/plugin-vue';
+import VueJSX from '@vitejs/plugin-vue-jsx';
 import Vuetify from '@vuetify/vite-plugin';
 import LinkAttributes from 'markdown-it-link-attributes';
 import Prism from 'markdown-it-prism';
@@ -139,6 +140,8 @@ export default defineConfig({
     Vue({
       include: [/\.vue$/, /\.md$/],
     }),
+
+    VueJSX(),
 
     // https://github.com/hannoeru/vite-plugin-pages
     Pages({
@@ -282,7 +285,9 @@ export default defineConfig({
       'axios',
       '@aspida/axios',
       'dexie',
+      'fuse.js',
       'humanize-duration',
+      'naive-ui',
       'p-queue',
       'vue',
       'vuedraggable',

@@ -7,9 +7,11 @@ import { db } from '~/db';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import { getImageFileURL } from '~/logic/fileURL';
+import { NAIVE_UI_THEMES, createOverrideTheme } from '~/logic/theme';
 import type { FileId } from '~/logic/uploadManager';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { waitForChange } from '~/logic/waitForChange';
+import { useThemeStore } from '~/stores/theme';
 import { useUploadStore } from '~/stores/upload';
 
 export default defineComponent({
@@ -37,6 +39,14 @@ export default defineComponent({
     const message = useMessage();
     const syncDB = useSyncDB();
     const uploadStore = useUploadStore();
+    const themeStore$$q = useThemeStore();
+
+    const errorOverrideTheme$$q = eagerComputed(() =>
+      createOverrideTheme(
+        NAIVE_UI_THEMES[themeStore$$q.theme].overrides,
+        'error'
+      )
+    );
 
     const roundClass$$q = eagerComputed(() => {
       switch (props.attachToType) {
@@ -111,6 +121,7 @@ export default defineComponent({
 
     return {
       t,
+      errorOverrideTheme$$q,
       inputFileElement$$q,
       roundClass$$q,
       dialog$$q,
@@ -296,26 +307,35 @@ export default defineComponent({
                         size="200"
                       />
                     </a>
-                    <n-popconfirm
-                      :positive-text="t('confirm.deleteImage.button.Delete')"
-                      :negative-text="t('confirm.deleteImage.button.Cancel')"
-                      @positive-click="removeImage$$q(element.id)"
-                    >
-                      <template #trigger>
-                        <n-button
-                          tag="div"
-                          text
-                          class="select-none"
-                          :class="dragging$$q ? 'invisible' : ''"
-                          @dragstart.stop.prevent
-                        >
-                          <v-btn flat icon size="small" class="text-red-500">
-                            <v-icon>mdi-delete</v-icon>
-                          </v-btn>
-                        </n-button>
-                      </template>
-                      {{ t('confirm.deleteImage.text', [attachToTitle]) }}
-                    </n-popconfirm>
+                    <n-config-provider :theme-overrides="errorOverrideTheme$$q">
+                      <n-popconfirm
+                        :positive-text="t('confirm.deleteImage.button.Delete')"
+                        :negative-text="t('confirm.deleteImage.button.Cancel')"
+                        @positive-click="removeImage$$q(element.id)"
+                      >
+                        <template #trigger>
+                          <n-button
+                            tag="div"
+                            text
+                            class="select-none"
+                            :class="dragging$$q ? 'invisible' : ''"
+                            @dragstart.stop.prevent
+                          >
+                            <v-btn flat icon size="small" class="text-red-500">
+                              <v-icon>mdi-delete</v-icon>
+                            </v-btn>
+                          </n-button>
+                        </template>
+                        <div class="flex flex-col gap-y-2">
+                          <div class="flex-1">
+                            {{ t('confirm.deleteImage.text', [attachToTitle]) }}
+                          </div>
+                          <div class="font-bold text-sm text-st-error">
+                            {{ t('common.ThisActionCannotBeUndone') }}
+                          </div>
+                        </div>
+                      </n-popconfirm>
+                    </n-config-provider>
                   </div>
                 </template>
                 <template #footer>

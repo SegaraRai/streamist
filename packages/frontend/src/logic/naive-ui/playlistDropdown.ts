@@ -5,6 +5,7 @@ import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import { usePlaybackStore } from '~/stores/playback';
 import { setRedirect } from '~/stores/redirect';
+import { nCreateDialogContentWithWarning } from './dialog';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
 export interface PlaylistDropdownCreateOptions {
@@ -110,7 +111,10 @@ export function createPlaylistDropdown({
         onClick: (): void => {
           dialog.error({
             title: t('dialog.deletePlaylist.title'),
-            content: t('dialog.deletePlaylist.content', [playlist.title]),
+            content: nCreateDialogContentWithWarning(
+              () => t('dialog.deletePlaylist.content', [playlist.title]),
+              () => t('common.ThisActionCannotBeUndone')
+            ),
             positiveText: t('dialog.deletePlaylist.button.Delete'),
             negativeText: t('dialog.deletePlaylist.button.Cancel'),
             onPositiveClick: () => {
