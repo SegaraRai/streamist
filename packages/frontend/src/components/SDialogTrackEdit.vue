@@ -63,7 +63,7 @@ export default defineComponent({
       itemGenre$$q.value = newTrack.genre || '';
       itemBPM$$q.value = newTrack.bpm ?? undefined;
       itemComment$$q.value = newTrack.comment || '';
-      itemLyrics$$q.value = newTrack.lyric || '';
+      itemLyrics$$q.value = newTrack.lyrics || '';
     };
 
     watch(
@@ -138,7 +138,7 @@ export default defineComponent({
         (itemBPM$$q.value ?? null) !== props.track.bpm ||
         (itemComment$$q.value || null) !== props.track.comment ||
         ((itemLyrics$$q.value || null) &&
-          itemLyrics$$q.value !== props.track.lyric) ||
+          itemLyrics$$q.value !== props.track.lyrics) ||
         (!isAlbumEmpty$$q.value && albumId$$q.value !== props.track.albumId) ||
         (!isArtistEmpty$$q.value && artistId$$q.value !== props.track.artistId)
     );
@@ -203,7 +203,7 @@ export default defineComponent({
               genre: convertOptStr(itemGenre$$q.value, track.genre),
               bpm: convertOptNum(itemBPM$$q.value, track.bpm),
               comment: convertOptStr(itemComment$$q.value, track.comment),
-              lyric: convertOptStr(itemLyrics$$q.value, track.lyric),
+              lyrics: convertOptStr(itemLyrics$$q.value, track.lyrics),
               albumId: convertOptId(albumId$$q.value, track.albumId),
               albumTitle: albumId$$q.value
                 ? undefined

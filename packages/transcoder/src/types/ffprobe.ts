@@ -33,8 +33,8 @@ export interface FFprobeTags extends Record<string, string | undefined> {
 
   // 歌詞
 
-  lyric?: string;
   lyrics?: string;
+  lyric?: string;
 
   // sort
 

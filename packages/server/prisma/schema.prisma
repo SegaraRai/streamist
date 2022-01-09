@@ -134,7 +134,7 @@ model Track {
   trackNumber          Int
   duration             Float
   comment              String?
-  lyric                String?
+  lyrics               String?
   releaseDate          String?
   releaseDatePrecision String?
   releaseDateText      String?

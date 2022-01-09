@@ -362,7 +362,7 @@ async function handleTranscoderResponse(
               trackNumber,
               duration,
               comment: tags.comment || null,
-              lyric: tags.lyrics || tags.lyric || null,
+              lyrics: tags.lyrics || tags.lyric || null,
               releaseDate: date?.dateString$$q ?? null,
               releaseDatePrecision: date?.precision$$q ?? null,
               releaseDateText: date?.text$$q ?? null,

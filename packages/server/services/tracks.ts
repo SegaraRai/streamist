@@ -21,7 +21,7 @@ export type TrackUpdateData = Partial<
     | 'discNumber'
     | 'trackNumber'
     | 'comment'
-    | 'lyric'
+    | 'lyrics'
     | 'releaseDateText'
     | 'genre'
     | 'bpm'
@@ -153,7 +153,7 @@ export async function trackUpdate(
         discNumber: data.discNumber,
         trackNumber: data.trackNumber,
         comment: emptyToNull(data.comment),
-        lyric: emptyToNull(data.lyric),
+        lyrics: emptyToNull(data.lyrics),
         releaseDate: parsedDate?.dateString$$q ?? null,
         releaseDatePrecision: parsedDate?.precision$$q ?? null,
         releaseDateText: parsedDate?.text$$q ?? null,

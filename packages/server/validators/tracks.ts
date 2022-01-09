@@ -43,7 +43,7 @@ export class VTrackUpdateBody implements TrackUpdateData {
   @IsUndefinable()
   @IsString()
   @Transform(({ value }) => tStringNormalizeMultipleLines(value))
-  lyric?: string;
+  lyrics?: string;
 
   @IsUndefinable()
   @IsString()
