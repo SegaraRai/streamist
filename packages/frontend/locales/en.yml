@@ -23,23 +23,27 @@ album:
   n_tracks: 'no tracks | one track | {n} tracks'
 albums:
   Albums: Albums
+  n_albums: 'no albums | one album | {n} albums'
 artist:
   Shuffle: Shuffle
   MoreTracks: More Tracks
 artists:
   Artists: Artists
+  n_artists: 'no artists | one artist | {n} artists'
 playlist:
   Play: Play
   Shuffle: Shuffle
   n_tracks: 'no tracks | one track | {n} tracks'
 playlists:
   Playlists: Playlists
+  n_playlists: 'no playlists | one playlist | {n} playlists'
+  n_tracks: 'no tracks | one track | {n} tracks'
+tracks:
+  Tracks: Tracks
   n_tracks: 'no tracks | one track | {n} tracks'
 trackList:
   Album: Album
   Title: Title
-tracks:
-  Tracks: Tracks
 title:
   Home: 'Streamist'
   Login: "Login {'|'} Streamist"

@@ -71,11 +71,13 @@ export default defineComponent({
 
 <template>
   <v-container fluid>
-    <header class="mb-6 flex items-baseline justify-between">
+    <header class="mb-6 flex items-baseline gap-x-4">
       <div class="text-h5">
         {{ t('tracks.Tracks') }}
       </div>
-      <div>{{ items$$q.length }} tracks</div>
+      <div class="opacity-60">
+        {{ t('tracks.n_tracks', items$$q.length) }}
+      </div>
     </header>
     <s-track-list
       :show-disc-number="false"

@@ -146,9 +146,12 @@ export default defineComponent({
 
 <template>
   <v-container fluid>
-    <header class="mb-6">
+    <header class="mb-6 flex items-baseline gap-x-4">
       <div class="text-h5">
         {{ t('albums.Albums') }}
+      </div>
+      <div class="opacity-60">
+        {{ t('albums.n_albums', items$$q.length) }}
       </div>
     </header>
     <s-virtual-grid

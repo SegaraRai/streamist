@@ -82,19 +82,20 @@ export default defineComponent({
 
 <template>
   <v-container fluid>
-    <header class="mb-6">
+    <header class="mb-6 flex items-baseline gap-x-4">
       <div class="text-h5">
         {{ t('playlists.Playlists') }}
       </div>
+      <div class="opacity-60">
+        {{ t('playlists.n_playlists', items$$q.length) }}
+      </div>
     </header>
-
     <div class="mb-6 flex items-center gap-x-8">
       <v-btn color="primary" flat icon @click="showCreateDialog$$q = true">
         <v-icon>mdi-plus</v-icon>
       </v-btn>
       <v-divider />
     </div>
-
     <div
       :class="selectedPlaylist$$q ? 's-list--selected' : 's-list--unselected'"
     >
