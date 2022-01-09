@@ -10,24 +10,24 @@ const uploadStore = useUploadStore();
       <s-uploader-list-item
         :file="file.file"
         :file-type="file.type"
-        class="s-hover-container text-blue-500"
+        class="s-hover-container text-st-primary"
       >
         <v-btn
           flat
           icon
           size="small"
-          class="s-hover-visible text-red-500"
+          class="s-hover-visible text-st-error"
           @click="uploadStore.removeStagingFile(file.id)"
         >
           <v-icon>mdi-delete</v-icon>
         </v-btn>
         <template v-if="file.type === 'unknown'">
-          <v-icon class="s-hover-hidden text-red-500">mdi-alert-circle</v-icon>
+          <v-icon class="s-hover-hidden text-st-error">mdi-alert-circle</v-icon>
         </template>
       </s-uploader-list-item>
       <template v-if="file.type === 'audioWithCueSheet'">
         <s-uploader-list-item
-          class="ml-6 text-blue-500"
+          class="ml-6 text-st-info"
           :file="file.cueSheetFile"
           file-type="cueSheet"
         />
@@ -52,7 +52,7 @@ const uploadStore = useUploadStore();
               flat
               icon
               size="small"
-              class="s-hover-visible text-red-500"
+              class="s-hover-visible text-st-error"
               @click="uploadStore.removeFile(file.id)"
             >
               <v-icon>mdi-delete</v-icon>
@@ -97,21 +97,24 @@ const uploadStore = useUploadStore();
               flat
               icon
               size="small"
-              class="s-hover-visible text-green-500"
+              class="s-hover-visible text-st-success"
               @click="uploadStore.removeFile(file.id)"
             >
               <v-icon>mdi-check</v-icon>
             </v-btn>
             <template v-if="file.status === 'transcoded'">
               <v-icon
-                class="s-hover-hidden text-green-500"
+                class="s-hover-hidden text-st-success"
                 title="Upload complete"
               >
                 mdi-check-circle
               </v-icon>
             </template>
             <template v-else>
-              <v-icon class="s-hover-hidden text-red-500" title="Upload failed">
+              <v-icon
+                class="s-hover-hidden text-st-error"
+                title="Upload failed"
+              >
                 mdi-alert-circle
               </v-icon>
             </template>

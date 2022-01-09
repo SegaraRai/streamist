@@ -24,14 +24,14 @@ const THEME_DARK: ThemeDefinitionColor = {
   background: '#101010',
   surface: '#1b1b1c',
   tooltip: '#343437',
-  onTooltip: '#FFFFFF',
-  text: '#FFFFFF',
+  onTooltip: '#ffffff',
+  text: '#ffffff',
   primary: '#4a8af2',
-  secondary: '#ff0000',
-  error: '#CF6679',
-  info: '#2196F3',
-  success: '#4CAF50',
-  warning: '#FB8C00',
+  secondary: '#4a8af2',
+  error: '#d63854',
+  info: '#1f94ed',
+  success: '#4bad4e',
+  warning: '#e07e07',
 };
 
 // TODO

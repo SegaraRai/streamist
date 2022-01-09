@@ -298,7 +298,7 @@ useEventListener(
               </template>
             </v-list>
             <div class="flex-1"></div>
-            <div class="text-xs ml-2 text-right text-red-400 p-2">
+            <div class="text-xs ml-2 text-right text-st-error p-2">
               ALPHA VERSION<br />
               no warranty / use with caution
             </div>
@@ -331,7 +331,7 @@ useEventListener(
                 flat
                 icon
                 size="x-small"
-                class="text-red-500"
+                class="text-st-error"
                 @click="uploadDialog$$q = false"
               >
                 <v-icon>mdi-close</v-icon>

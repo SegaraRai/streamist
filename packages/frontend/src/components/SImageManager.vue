@@ -271,7 +271,7 @@ export default defineComponent({
               flat
               icon
               size="x-small"
-              class="text-red-500"
+              class="text-st-error"
               @click="dialog$$q = false"
             >
               <v-icon>mdi-close</v-icon>
@@ -321,7 +321,7 @@ export default defineComponent({
                             :class="dragging$$q ? 'invisible' : ''"
                             @dragstart.stop.prevent
                           >
-                            <v-btn flat icon size="small" class="text-red-500">
+                            <v-btn flat icon size="small" class="text-st-error">
                               <v-icon>mdi-delete</v-icon>
                             </v-btn>
                           </n-button>

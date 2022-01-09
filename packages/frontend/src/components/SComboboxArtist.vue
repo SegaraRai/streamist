@@ -92,7 +92,7 @@ export default defineComponent({
               <n-popover placement="top" trigger="hover">
                 <template #trigger>
                   <i-mdi-account-plus
-                    class="flex-none mr-2 w-6 h-6 text-blue-500"
+                    class="flex-none mr-2 w-6 h-6 text-st-info"
                   />
                 </template>
                 <div>

@@ -137,7 +137,7 @@ export default defineComponent({
             flat
             icon
             size="x-small"
-            class="text-red-500"
+            class="text-st-error"
             @click="dialog$$q = false"
           >
             <v-icon>mdi-close</v-icon>
