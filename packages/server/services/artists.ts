@@ -7,16 +7,22 @@ import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { imageDeleteFilesAndSourceFiles } from './images';
 
-export type ArtistUpdateData = Partial<Pick<Artist, 'name' | 'nameSort'>>;
+export type ArtistUpdateData = Partial<
+  Pick<Artist, 'name' | 'nameSort' | 'description'>
+>;
 
 export async function artistUpdate(
   userId: string,
   artistId: string,
   data: ArtistUpdateData
 ): Promise<void> {
-  const { name, nameSort } = data;
+  const { description, name, nameSort } = data;
 
-  if (name == null && nameSort == null) {
+  if (
+    description === undefined &&
+    name === undefined &&
+    nameSort === undefined
+  ) {
     return;
   }
 
@@ -28,6 +34,7 @@ export async function artistUpdate(
     data: {
       name,
       nameSort,
+      description,
       updatedAt: Date.now(),
     },
   });

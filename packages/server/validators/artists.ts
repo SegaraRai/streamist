@@ -2,7 +2,10 @@ import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
 import type { ArtistUpdateData } from '$/services/artists';
 import { IsId, IsUndefinable } from './utils';
-import { tStringNormalizeSingleLine } from './utils/transform';
+import {
+  tStringNormalizeMultipleLines,
+  tStringNormalizeSingleLine,
+} from './utils/transform';
 
 export class VArtistUpdateBody implements ArtistUpdateData {
   @IsUndefinable()
@@ -15,6 +18,11 @@ export class VArtistUpdateBody implements ArtistUpdateData {
   @IsString()
   @Transform(({ value }) => tStringNormalizeSingleLine(value))
   nameSort?: string;
+
+  @IsUndefinable()
+  @IsString()
+  @Transform(({ value }) => tStringNormalizeMultipleLines(value))
+  description?: string;
 }
 
 export class VArtistMergeBody {
