@@ -89,6 +89,7 @@ model Artist {
   id             String          @id
   name           String
   nameSort       String?
+  description    String          @default("")
   createdAt      Int //@db.BigInt
   updatedAt      Int //@db.BigInt
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
