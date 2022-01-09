@@ -124,8 +124,8 @@ export default defineComponent({
         </div>
       </v-card-title>
       <v-card-text class="opacity-100">
-        <div class="flex gap-x-4">
-          <div>
+        <div class="flex <sm:flex-col gap-x-4 gap-y-6">
+          <div class="<sm:w-full text-center leading-none">
             <s-image-manager
               attach-to-type="artist"
               :attach-to-id="artist.id"
