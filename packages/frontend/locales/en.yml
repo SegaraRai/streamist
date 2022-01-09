@@ -157,14 +157,20 @@ dialogComponent:
       hint: Release date will be treated as {0}
       invalid: Cannot parse release date
 dialog:
+  removeFromPlaylist:
+    title: Remove track from playlist
+    content: "Are you sure you want to remove '{1}' from '{0}'?"
+    button:
+      Remove: Remove
+      Cancel: Cancel
   deletePlaylist:
-    title: Delete Playlist
+    title: Delete playlist
     content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
     button:
       Delete: Delete
       Cancel: Cancel
   deleteTrack:
-    title: Delete Track
+    title: Delete track
     content: "Are you sure you want to delete '{0}'?\nThis action cannot be undone."
     button:
       Delete: Delete

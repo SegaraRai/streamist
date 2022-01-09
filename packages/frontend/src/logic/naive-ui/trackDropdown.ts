@@ -239,29 +239,40 @@ export function createTrackDropdown({
         props: {
           style: nCreateDropdownTextColorStyle('warning'),
           onClick: () => {
+            dialog.warning({
+              title: t('dialog.removeFromPlaylist.title'),
+              content: t('dialog.removeFromPlaylist.content', [
+                removeFromPlaylist.title,
+                track.title,
+              ]),
+              positiveText: t('dialog.removeFromPlaylist.button.Remove'),
+              negativeText: t('dialog.removeFromPlaylist.button.Cancel'),
+              onPositiveClick: () => {
+                api.my.playlists
+                  ._playlistId(removeFromPlaylist.id)
+                  .tracks._trackId(trackId)
+                  .$delete()
+                  .then(() => {
+                    message.success(
+                      t('message.RemovedFromPlaylist', [
+                        removeFromPlaylist.title,
+                        track.title,
+                      ])
+                    );
+                    syncDB();
+                  })
+                  .catch((error) => {
+                    message.error(
+                      t('message.FailedToRemoveFromPlaylist', [
+                        removeFromPlaylist.title,
+                        track.title,
+                        String(error),
+                      ])
+                    );
+                  });
+              },
+            });
             closeMenu$$q();
-            api.my.playlists
-              ._playlistId(removeFromPlaylist.id)
-              .tracks._trackId(trackId)
-              .$delete()
-              .then(() => {
-                message.success(
-                  t('message.RemovedFromPlaylist', [
-                    removeFromPlaylist.title,
-                    track.title,
-                  ])
-                );
-                syncDB();
-              })
-              .catch((error) => {
-                message.error(
-                  t('message.FailedToRemoveFromPlaylist', [
-                    removeFromPlaylist.title,
-                    track.title,
-                    String(error),
-                  ])
-                );
-              });
           },
         },
       });
