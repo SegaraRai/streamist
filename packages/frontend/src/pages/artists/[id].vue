@@ -159,6 +159,9 @@ export default defineComponent({
           :image-ids="imageIds$$q"
           @contextmenu.prevent="openMenu$$q($event)"
         >
+          <template #title>
+            {{ t('imageManager.title.artist', [value$$q?.artist$$q.name]) }}
+          </template>
           <s-artist-image
             class="w-50 h-50"
             size="200"

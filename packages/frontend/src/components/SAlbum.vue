@@ -138,9 +138,9 @@ export default defineComponent({
             :image-ids="imageIds$$q"
             @contextmenu.prevent="openMenu$$q($event)"
           >
-            <template #title
-              >Album Art of {{ value$$q.album$$q.title }}</template
-            >
+            <template #title>
+              {{ t('imageManager.title.album', [value$$q.album$$q.title]) }}
+            </template>
             <template #default>
               <s-album-image
                 class="w-50 h-50"

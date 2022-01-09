@@ -52,6 +52,11 @@ title:
   Playlists: "Playlists {'|'} Streamist"
   Playlist: "{0} {'|'} Streamist"
   PlaylistInit: "Playlist {'|'} Streamist"
+imageManager:
+  title:
+    album: "Album artwork of '{0}'"
+    artist: "Artist artwork of '{0}'"
+    playlist: "Playlist artwork of '{0}'"
 dropdown:
   album:
     Play: Play

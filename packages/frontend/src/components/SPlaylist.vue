@@ -145,7 +145,9 @@ export default defineComponent({
             @contextmenu.prevent="openMenu$$q($event)"
           >
             <template #title>
-              Artwork of Playlist {{ value$$q.playlist$$q.title }}
+              {{
+                t('imageManager.title.playlist', [value$$q.playlist$$q.title])
+              }}
             </template>
             <s-playlist-image
               class="w-50 h-50"
