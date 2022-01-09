@@ -21,7 +21,7 @@ export async function calculateHMAC(
       new TextEncoder().encode(secret),
       {
         name: 'HMAC',
-        hash: 'SHA-256',
+        hash: 'SHA-512',
       },
       false,
       ['sign']

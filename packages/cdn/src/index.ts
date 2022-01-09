@@ -89,10 +89,6 @@ API.add(
   'GET',
   '/files/:region/:type/:userId/:filename',
   async (req, context) => {
-    if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
-      return send(403, 'invalid origin');
-    }
-
     const strJWT = parse(req.headers.get('Cookie') || '')[COOKIE_JWT_KEY];
     if (!strJWT) {
       return send(401);
@@ -167,8 +163,8 @@ API.add(
       context.bindings.SECRET_CACHE_SECURITY_KEY,
       securityTokenBase
     );
-    const securityTokenQuery = fullSecurityToken.slice(0, 32);
-    const securityTokenHeader = fullSecurityToken.slice(-32);
+    const securityTokenQuery = fullSecurityToken.slice(0, 64);
+    const securityTokenHeader = fullSecurityToken.slice(64, 64);
 
     const originRequestHeaders: [string, string][] = [
       // Refererはアクセス制御（バケットポリシーでこのRefererでないとアクセスできなくしてある）
