@@ -6,16 +6,12 @@ import {
   IsString,
   Validate,
 } from 'class-validator';
-import type {
-  PlaylistCreateData,
-  PlaylistUpdateData,
-} from '$/services/playlists';
 import { IsIdConstraint, IsUndefinable } from './utils';
 import {
   tStringNormalizeMultipleLines,
   tStringNormalizeSingleLine,
 } from './utils/transform';
-export class VPlaylistCreateBody implements PlaylistCreateData {
+export class VPlaylistCreateBody {
   @IsString()
   @IsNotEmpty()
   @Transform(({ value }) => tStringNormalizeSingleLine(value))
@@ -32,7 +28,7 @@ export class VPlaylistCreateBody implements PlaylistCreateData {
   trackIds?: string[];
 }
 
-export class VPlaylistUpdateBody implements PlaylistUpdateData {
+export class VPlaylistUpdateBody {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()

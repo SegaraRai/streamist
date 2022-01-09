@@ -1,13 +1,12 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
-import type { ArtistUpdateData } from '$/services/artists';
 import { IsId, IsUndefinable } from './utils';
 import {
   tStringNormalizeMultipleLines,
   tStringNormalizeSingleLine,
 } from './utils/transform';
 
-export class VArtistUpdateBody implements ArtistUpdateData {
+export class VArtistUpdateBody {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()

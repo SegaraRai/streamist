@@ -1,6 +1,5 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
-import type { TrackUpdateData } from '$/services/tracks';
 import { IsId, IsNullable, IsUndefinable } from './utils';
 import {
   tStringNormalizeMultipleLines,
@@ -13,7 +12,7 @@ export class VTrackOrderUpdateBody {
   nextTrackId!: string | null;
 }
 
-export class VTrackUpdateBody implements TrackUpdateData {
+export class VTrackUpdateBody {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()

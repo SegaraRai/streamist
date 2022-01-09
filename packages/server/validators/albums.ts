@@ -1,10 +1,9 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
-import type { AlbumUpdateData } from '$/services/albums';
 import { IsId, IsUndefinable } from './utils';
 import { tStringNormalizeSingleLine } from './utils/transform';
 
-export class VAlbumUpdateBody implements AlbumUpdateData {
+export class VAlbumUpdateBody {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()
