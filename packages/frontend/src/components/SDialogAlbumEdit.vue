@@ -105,6 +105,7 @@ export default defineComponent({
             },
           })
           .then(() => {
+            // TODO: アーティストIDが更新されたらリダイレクトを登録
             dialog$$q.value = false;
             message.success(t('message.ModifiedAlbum', [itemTitle$$q.value]));
             syncDB();

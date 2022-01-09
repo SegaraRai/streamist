@@ -179,6 +179,9 @@ export default defineComponent({
           return;
         }
 
+        const oldAlbumId = track.albumId;
+        const oldArtistId = track.artistId;
+
         api.my.tracks
           ._trackId(trackId)
           .$patch({
@@ -214,16 +217,16 @@ export default defineComponent({
           .then((newTrack) => {
             // NOTE: 本当はアルバムアーティストもチェックしないといけない
             // NOTE: 実際にはリダイレクトが正しくない場合もあるが、見つからない場合だけ行われるため別に良い
-            if (track.artistId !== newTrack.artistId) {
+            if (newTrack.albumId !== oldAlbumId) {
               setRedirect(
-                `/artists/${track.artistId}`,
-                `/artists/${newTrack.artistId}`
+                `/albums/${oldAlbumId}`,
+                `/albums/${newTrack.albumId}`
               );
             }
-            if (track.albumId !== newTrack.albumId) {
+            if (newTrack.artistId !== oldArtistId) {
               setRedirect(
-                `/albums/${track.albumId}`,
-                `/albums/${newTrack.albumId}`
+                `/artists/${oldArtistId}`,
+                `/artists/${newTrack.artistId}`
               );
             }
             dialog$$q.value = false;
