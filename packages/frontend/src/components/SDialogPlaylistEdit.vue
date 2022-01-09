@@ -4,6 +4,7 @@ import type { PropType } from 'vue';
 import type { ResourcePlaylist } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
+import { convertOptStr, convertReqStr } from '~/logic/editUtils';
 
 export default defineComponent({
   props: {
@@ -25,12 +26,12 @@ export default defineComponent({
 
     const playlistId$$q = ref('');
     const itemTitle$$q = ref('');
-    const itemNotes$$q = ref('');
+    const itemDescription$$q = ref('');
 
     const reloadData = (newPlaylist: ResourcePlaylist): void => {
       playlistId$$q.value = newPlaylist.id;
       itemTitle$$q.value = newPlaylist.title;
-      itemNotes$$q.value = newPlaylist.notes;
+      itemDescription$$q.value = newPlaylist.notes;
     };
 
     watch(
@@ -50,7 +51,7 @@ export default defineComponent({
     const modified$$q = eagerComputed(
       () =>
         (itemTitle$$q.value && itemTitle$$q.value !== props.playlist.title) ||
-        itemNotes$$q.value !== props.playlist.notes
+        itemDescription$$q.value !== props.playlist.notes
     );
 
     return {
@@ -58,7 +59,7 @@ export default defineComponent({
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
       itemTitle$$q,
-      itemNotes$$q,
+      itemDescription$$q,
       modified$$q,
       apply$$q: () => {
         const playlist = props.playlist;
@@ -70,14 +71,8 @@ export default defineComponent({
           ._playlistId(playlistId)
           .$patch({
             body: {
-              title:
-                itemTitle$$q.value && itemTitle$$q.value !== playlist.title
-                  ? itemTitle$$q.value
-                  : undefined,
-              notes:
-                playlist.notes !== itemNotes$$q.value
-                  ? itemNotes$$q.value
-                  : undefined,
+              title: convertReqStr(itemTitle$$q.value, playlist.title),
+              notes: convertOptStr(itemDescription$$q.value, playlist.notes),
             },
           })
           .then(() => {
@@ -152,7 +147,7 @@ export default defineComponent({
               required
             />
             <v-textarea
-              v-model="itemNotes$$q"
+              v-model="itemDescription$$q"
               hide-details
               class="s-v-input-hide-details"
               :label="t('dialogComponent.editPlaylist.label.Description')"

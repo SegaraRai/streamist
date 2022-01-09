@@ -97,7 +97,7 @@ export default defineComponent({
             body: {
               title: convertReqStr(itemTitle$$q.value, album.title),
               titleSort: convertOptStr(itemTitleSort$$q.value, album.titleSort),
-              notes: convertReqStr(itemDescription$$q.value, album.notes),
+              notes: convertOptStr(itemDescription$$q.value, album.notes),
               artistId: convertOptId(artistId$$q.value, album.artistId),
               artistName: artistId$$q.value
                 ? undefined
