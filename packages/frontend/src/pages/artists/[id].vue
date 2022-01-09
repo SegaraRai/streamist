@@ -151,22 +151,24 @@ export default defineComponent({
 <template>
   <v-container fluid>
     <div class="flex gap-4 <md:flex-col <md:items-center">
-      <s-image-manager
-        attach-to-type="artist"
-        :attach-to-id="id"
-        :attach-to-title="value$$q?.artist$$q.name"
-        :image-ids="imageIds$$q"
-        @contextmenu.prevent="openMenu$$q($event)"
-      >
-        <s-artist-image
-          class="w-50 h-50"
-          size="200"
-          :artist="id"
-          @image-ids="imageIds$$q = $event"
-        />
-      </s-image-manager>
+      <div class="p-0 m-0 leading-none flex-none">
+        <s-image-manager
+          attach-to-type="artist"
+          :attach-to-id="id"
+          :attach-to-title="value$$q?.artist$$q.name"
+          :image-ids="imageIds$$q"
+          @contextmenu.prevent="openMenu$$q($event)"
+        >
+          <s-artist-image
+            class="w-50 h-50"
+            size="200"
+            :artist="id"
+            @image-ids="imageIds$$q = $event"
+          />
+        </s-image-manager>
+      </div>
       <div
-        class="text-2xl <md:flex-1 max-w-4xl"
+        class="text-2xl <md:flex-1 max-w-4xl line-clamp-2 overflow-hidden"
         @contextmenu.prevent="openMenu$$q($event)"
       >
         {{ value$$q?.artist$$q.name }}

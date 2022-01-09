@@ -129,7 +129,7 @@ export default defineComponent({
     <div
       class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-6 md:gap-y-4"
     >
-      <div class="p-0 m-0 leading-none">
+      <div class="p-0 m-0 leading-none flex-none">
         <template v-if="linkExcludes.includes(albumId$$q)">
           <s-image-manager
             attach-to-type="album"
@@ -165,7 +165,7 @@ export default defineComponent({
       </div>
       <div class="flex flex-col gap-y-6 md:gap-y-4 <md:text-center">
         <div>
-          <div class="flex-none font-bold text-xl">
+          <div class="flex-none font-bold text-xl line-clamp-2 overflow-hidden">
             <s-conditional-link
               :to="`/albums/${albumId$$q}`"
               :disabled="linkExcludes.includes(albumId$$q)"
@@ -174,7 +174,7 @@ export default defineComponent({
               {{ value$$q.album$$q.title }}
             </s-conditional-link>
           </div>
-          <div class="flex-none">
+          <div class="flex-none line-clamp-2 overflow-hidden">
             <s-conditional-link
               :to="`/artists/${value$$q.artist$$q.id}`"
               :disabled="linkExcludes.includes(value$$q.artist$$q.id)"

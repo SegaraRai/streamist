@@ -135,7 +135,7 @@ export default defineComponent({
     <div
       class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-6 md:gap-y-4"
     >
-      <div class="p-0 m-0 leading-none">
+      <div class="p-0 m-0 leading-none flex-none">
         <template v-if="linkExcludes.includes(playlistId$$q)">
           <s-image-manager
             attach-to-type="playlist"
@@ -168,7 +168,7 @@ export default defineComponent({
         </template>
       </div>
       <div class="flex flex-col gap-y-6 md:gap-y-4 <md:text-center">
-        <div class="flex-none font-bold text-xl">
+        <div class="flex-none font-bold text-xl line-clamp-2 overflow-hidden">
           <s-conditional-link
             :to="`/playlists/${playlistId$$q}`"
             :disabled="linkExcludes.includes(playlistId$$q)"

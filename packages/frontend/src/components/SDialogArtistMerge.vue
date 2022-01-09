@@ -109,7 +109,7 @@ export default defineComponent({
   >
     <v-card class="w-full md:min-w-2xl">
       <v-card-title class="flex">
-        <div class="flex-1">
+        <div class="flex-1 line-clamp-2 overflow-hidden">
           {{ t('dialogComponent.mergeArtist.title', [artist.name]) }}
         </div>
         <div class="flex-none">

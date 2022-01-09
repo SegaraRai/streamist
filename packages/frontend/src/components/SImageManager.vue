@@ -252,7 +252,7 @@ export default defineComponent({
     >
       <v-card class="w-full h-full">
         <v-card-title class="flex">
-          <div class="flex-1">
+          <div class="flex-1 line-clamp-2 overflow-hidden">
             <slot name="title"></slot>
           </div>
           <div class="flex-none">

@@ -88,7 +88,7 @@ export default defineComponent({
       </div>
     </header>
 
-    <div class="mb-6 flex items-center gap-x-4">
+    <div class="mb-6 flex items-center gap-x-8">
       <v-btn color="primary" flat icon @click="showCreateDialog$$q = true">
         <v-icon>mdi-plus</v-icon>
       </v-btn>
