@@ -181,7 +181,7 @@ export default defineComponent({
         </div>
         <div>{{ value$$q?.playlist$$q.description }}</div>
         <div class="flex-1 <md:hidden"></div>
-        <div class="flex-none text-sm">
+        <div class="flex-none text-sm opacity-60">
           <span>
             {{ t('playlist.n_tracks', value$$q.tracks$$q.length) }}
           </span>
