@@ -150,7 +150,9 @@ export default defineComponent({
 
 <template>
   <v-container fluid>
-    <div class="flex gap-4 <md:flex-col <md:items-center">
+    <div
+      class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-6 md:gap-y-4"
+    >
       <div class="p-0 m-0 leading-none flex-none">
         <s-image-manager
           attach-to-type="artist"
@@ -170,11 +172,17 @@ export default defineComponent({
           />
         </s-image-manager>
       </div>
-      <div
-        class="text-2xl <md:flex-1 max-w-4xl line-clamp-2 overflow-hidden"
-        @contextmenu.prevent="openMenu$$q($event)"
-      >
-        {{ value$$q?.artist$$q.name }}
+      <div class="flex flex-col gap-y-6 md:gap-y-4 <md:text-center">
+        <div>
+          <div
+            class="flex-none font-bold text-2xl line-clamp-2 overflow-hidden"
+          >
+            <span @contextmenu.prevent="openMenu$$q($event)">
+              {{ value$$q?.artist$$q.name }}
+            </span>
+          </div>
+        </div>
+        <div>{{ value$$q?.artist$$q.description }}</div>
       </div>
     </div>
     <div class="flex-none flex flex-row items-center gap-x-8 my-8">

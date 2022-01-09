@@ -28,11 +28,13 @@ export default defineComponent({
     const artistId$$q = ref('');
     const itemName$$q = ref('');
     const itemNameSort$$q = ref('');
+    const itemDescription$$q = ref('');
 
     const reloadData = (newArtist: ResourceArtist): void => {
       artistId$$q.value = newArtist.id;
       itemName$$q.value = newArtist.name;
       itemNameSort$$q.value = newArtist.nameSort || '';
+      itemDescription$$q.value = newArtist.description;
     };
 
     watch(
@@ -52,7 +54,8 @@ export default defineComponent({
     const modified$$q = eagerComputed(
       () =>
         (itemName$$q.value && itemName$$q.value !== props.artist.name) ||
-        (itemNameSort$$q.value || null) !== props.artist.nameSort
+        (itemNameSort$$q.value || null) !== props.artist.nameSort ||
+        itemDescription$$q.value !== props.artist.description
     );
 
     return {
@@ -62,6 +65,7 @@ export default defineComponent({
       artistId$$q,
       itemName$$q,
       itemNameSort$$q,
+      itemDescription$$q,
       modified$$q,
       strCreatedAt$$q: useTranslatedTimeAgo(
         eagerComputed(() => props.artist.createdAt)
@@ -82,6 +86,10 @@ export default defineComponent({
             body: {
               name: convertReqStr(itemName$$q.value, artist.name),
               nameSort: convertOptStr(itemNameSort$$q.value, artist.nameSort),
+              description: convertOptStr(
+                itemDescription$$q.value,
+                artist.description
+              ),
             },
           })
           .then(() => {
@@ -158,6 +166,12 @@ export default defineComponent({
                 :label="t('dialogComponent.editArtist.label.NameSort')"
               />
             </div>
+            <v-textarea
+              v-model="itemDescription$$q"
+              hide-details
+              class="s-v-input-hide-details"
+              :label="t('dialogComponent.editArtist.label.Description')"
+            />
             <footer class="flex m-0 gap-x-4 justify-end">
               <dl class="flex gap-x-4">
                 <dt>created</dt>

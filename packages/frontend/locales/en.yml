@@ -123,6 +123,7 @@ dialogComponent:
     label:
       Name: Name
       NameSort: Name sort
+      Description: Description
   mergeArtist:
     title: Merge {0}
     button:
