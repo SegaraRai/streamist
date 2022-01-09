@@ -149,11 +149,8 @@ export default defineComponent({
     const useDiscNumber = computed<boolean>(
       () =>
         props.showDiscNumber &&
-        !!trackItems.value &&
-        trackItems.value.length > 0 &&
-        trackItems.value.some(
-          (trackItem, _, array) =>
-            trackItem.track.discNumber !== array[0].track.discNumber
+        !!trackItems.value?.some(
+          (trackItem) => trackItem.track.discNumber !== 1
         )
     );
 
