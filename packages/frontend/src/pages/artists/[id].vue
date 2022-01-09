@@ -174,16 +174,12 @@ export default defineComponent({
         color="primary"
         flat
         icon
-        :disabled="!value$$q?.tracks$$q.length"
+        :disabled="!setList$$q.length"
         @click="play$$q(false)"
       >
         <v-icon>mdi-play</v-icon>
       </v-btn>
-      <v-btn
-        outlined
-        :disabled="!value$$q?.tracks$$q.length"
-        @click="play$$q(true)"
-      >
+      <v-btn outlined :disabled="!setList$$q.length" @click="play$$q(true)">
         <v-icon left>mdi-shuffle</v-icon>
         <span>
           {{ t('artist.Shuffle') }}
@@ -198,8 +194,8 @@ export default defineComponent({
       <v-divider />
     </div>
     <template v-if="value$$q">
+      <div class="h-4"></div>
       <template v-if="value$$q.albums$$q.length">
-        <div class="h-12"></div>
         <div class="mb-6">
           <template v-for="album in value$$q.albums$$q" :key="album.id">
             <div class="my-12">
