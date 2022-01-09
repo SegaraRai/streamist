@@ -14,6 +14,7 @@ import {
   convertReqStr,
   createIntegerRef,
 } from '~/logic/editUtils';
+import { setRedirect } from '~/stores/redirect';
 
 export default defineComponent({
   props: {
@@ -210,7 +211,21 @@ export default defineComponent({
                 : artistName$$q.value.trim(),
             },
           })
-          .then(() => {
+          .then((newTrack) => {
+            // NOTE: 本当はアルバムアーティストもチェックしないといけない
+            // NOTE: 実際にはリダイレクトが正しくない場合もあるが、見つからない場合だけ行われるため別に良い
+            if (track.artistId !== newTrack.artistId) {
+              setRedirect(
+                `/artists/${track.artistId}`,
+                `/artists/${newTrack.artistId}`
+              );
+            }
+            if (track.albumId !== newTrack.albumId) {
+              setRedirect(
+                `/albums/${track.albumId}`,
+                `/albums/${newTrack.albumId}`
+              );
+            }
             dialog$$q.value = false;
             message.success(t('message.ModifiedTrack', [itemTitle$$q.value]));
             syncDB();

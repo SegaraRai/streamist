@@ -51,7 +51,6 @@ export default defineComponent({
     const menuOptions$$q = createPlaylistDropdown({
       playlist$$q: selectedPlaylist$$q,
       playlistTracks$$q: selectedPlaylistTracks$$q,
-      moveWhenDelete$$q: ref(true),
       showCreatePlaylist$$q: eagerComputed(() => props.showCreateItem),
       openEditPlaylistDialog$$q: () => {
         dialogEdit$$q.value = true;

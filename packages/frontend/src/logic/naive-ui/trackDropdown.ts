@@ -4,6 +4,7 @@ import type { ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import { usePlaybackStore } from '~/stores/playback';
+import { setRedirect } from '~/stores/redirect';
 import { useAllPlaylists } from '../useDB';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
@@ -319,6 +320,8 @@ export function createTrackDropdown({
                 ._trackId(trackId)
                 .$delete()
                 .then(() => {
+                  setRedirect(`/albums/${track.albumId}`, '/albums');
+                  setRedirect(`/artists/${track.artistId}`, '/artists');
                   message.success(t('message.DeletedTrack', [track.title]));
                   syncDB();
                 })

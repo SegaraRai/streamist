@@ -1,4 +1,8 @@
 <script lang="ts">
+import { db } from '~/db';
+import { useLiveQuery } from '~/logic/useLiveQuery';
+import { tryRedirect } from '~/stores/redirect';
+
 export default defineComponent({
   props: {
     id: {
@@ -7,7 +11,23 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const router = useRouter();
+
     const playlistId = computed(() => props.id);
+
+    useLiveQuery(
+      async () => {
+        const id = playlistId.value;
+
+        const playlist$$q = await db.playlists.get(id);
+        if (!playlist$$q) {
+          tryRedirect(router);
+          throw new Error(`Playlist ${id} not found`);
+        }
+      },
+      [playlistId],
+      true
+    );
 
     return {
       playlistId$$q: playlistId,

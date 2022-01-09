@@ -4,6 +4,7 @@ import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import { usePlaybackStore } from '~/stores/playback';
+import { setRedirect } from '~/stores/redirect';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
 export interface PlaylistDropdownCreateOptions {
@@ -11,7 +12,6 @@ export interface PlaylistDropdownCreateOptions {
   readonly playlistTracks$$q: Readonly<
     Ref<readonly ResourceTrack[] | null | undefined>
   >;
-  readonly moveWhenDelete$$q: Readonly<Ref<boolean>>;
   readonly showCreatePlaylist$$q: Readonly<Ref<boolean>>;
   readonly openEditPlaylistDialog$$q: () => void;
   readonly openCreatePlaylistDialog$$q: () => void;
@@ -21,14 +21,12 @@ export interface PlaylistDropdownCreateOptions {
 export function createPlaylistDropdown({
   playlist$$q,
   playlistTracks$$q,
-  moveWhenDelete$$q,
   showCreatePlaylist$$q,
   openEditPlaylistDialog$$q,
   openCreatePlaylistDialog$$q,
   closeMenu$$q,
 }: PlaylistDropdownCreateOptions): ComputedRef<MenuOption[]> {
   const { t } = useI18n();
-  const router = useRouter();
   const dialog = useDialog();
   const message = useMessage();
   const syncDB = useSyncDB();
@@ -120,13 +118,11 @@ export function createPlaylistDropdown({
                 ._playlistId(playlistId)
                 .$delete()
                 .then(() => {
+                  setRedirect(`/playlists/${playlistId}`, '/playlists');
                   message.success(
                     t('message.DeletedPlaylist', [playlist.title])
                   );
                   syncDB();
-                  if (moveWhenDelete$$q.value) {
-                    router.replace('/playlists');
-                  }
                 })
                 .catch((error) => {
                   message.error(

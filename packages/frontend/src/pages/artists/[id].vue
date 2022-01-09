@@ -5,6 +5,7 @@ import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
+import { tryRedirect } from '~/stores/redirect';
 
 export default defineComponent({
   props: {
@@ -14,6 +15,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const router = useRouter();
     const { t } = useI18n();
 
     const headTitleRef = ref(t('title.ArtistInit'));
@@ -57,6 +59,7 @@ export default defineComponent({
         const artistId = propArtistIdRef.value;
         const artist$$q = await db.artists.get(artistId);
         if (!artist$$q) {
+          tryRedirect(router);
           throw new Error(`Artist ${artistId} not found`);
         }
         const albums$$q = await db.albums.where({ artistId }).toArray();

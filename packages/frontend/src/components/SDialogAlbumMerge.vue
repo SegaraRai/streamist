@@ -4,6 +4,7 @@ import type { PropType } from 'vue';
 import type { ResourceAlbum } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
+import { setRedirect } from '~/stores/redirect';
 
 export default defineComponent({
   props: {
@@ -65,7 +66,8 @@ export default defineComponent({
           return;
         }
 
-        if (!newAlbumId$$q.value) {
+        const newAlbumId = newAlbumId$$q.value;
+        if (!newAlbumId) {
           return;
         }
 
@@ -73,10 +75,11 @@ export default defineComponent({
           ._albumId(albumId)
           .$post({
             body: {
-              toAlbumId: newAlbumId$$q.value,
+              toAlbumId: newAlbumId,
             },
           })
           .then(() => {
+            setRedirect(`/albums/${albumId}`, `/albums/${newAlbumId}`);
             dialog$$q.value = false;
             message.success(
               t('message.MergedAlbum', [album.title, newAlbumTitle$$q.value])

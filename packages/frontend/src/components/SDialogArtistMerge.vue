@@ -4,6 +4,7 @@ import type { PropType } from 'vue';
 import type { ResourceArtist } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
+import { setRedirect } from '~/stores/redirect';
 
 export default defineComponent({
   props: {
@@ -65,7 +66,8 @@ export default defineComponent({
           return;
         }
 
-        if (!newArtistId$$q.value) {
+        const newArtistId = newArtistId$$q.value;
+        if (!newArtistId) {
           return;
         }
 
@@ -73,10 +75,11 @@ export default defineComponent({
           ._artistId(artistId)
           .$post({
             body: {
-              toArtistId: newArtistId$$q.value,
+              toArtistId: newArtistId,
             },
           })
           .then(() => {
+            setRedirect(`/artists/${artistId}`, `/artists/${newArtistId}`);
             dialog$$q.value = false;
             message.success(
               t('message.MergedArtist', [artist.name, newArtistName$$q.value])

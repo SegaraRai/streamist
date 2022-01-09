@@ -3,6 +3,7 @@ import type { ResourceTrack } from '$/types';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
+import { tryRedirect } from '~/stores/redirect';
 
 export default defineComponent({
   props: {
@@ -12,6 +13,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const router = useRouter();
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
 
@@ -30,6 +32,7 @@ export default defineComponent({
         const albumId = propAlbumIdRef.value;
         const album$$q = await db.albums.get(albumId);
         if (!album$$q) {
+          tryRedirect(router);
           throw new Error(`Album ${albumId} not found`);
         }
         const artist$$q = await db.artists.get(album$$q.artistId);
