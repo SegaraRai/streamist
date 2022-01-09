@@ -43,7 +43,12 @@ export const useUploadStore = defineStore('upload', () => {
             f.status === 'validating' ||
             f.status === 'validated' ||
             f.status === 'queued' ||
-            f.status === 'uploading'
+            f.status === 'uploading' ||
+            f.status === 'uploaded' ||
+            f.status === 'transcoding' ||
+            f.status === 'error_invalid' ||
+            f.status === 'error_transcode_failed' ||
+            f.status === 'error_upload_failed'
         ).length
     ),
     stageFiles(files: readonly File[]): void {
