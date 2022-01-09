@@ -37,6 +37,8 @@ export default defineComponent({
       const playlists = await allPlaylists.valueAsync.value;
       const trackMap = await allTrackMap.valueAsync.value;
 
+      // NOTE: setDefaultSetList is intentionally not called because users will not want this behavior
+
       return playlists.map((playlist, index, arr): Item => {
         const tracks = playlist.trackIds.map(
           (trackId) => trackMap.get(trackId)!

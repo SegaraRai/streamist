@@ -1,6 +1,8 @@
 <script lang="ts">
+import type { ResourceTrack } from '$/types';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
+import { usePlaybackStore } from '~/stores/playback';
 import { tryRedirect } from '~/stores/redirect';
 
 export default defineComponent({
@@ -12,25 +14,31 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter();
+    const playbackStore = usePlaybackStore();
 
-    const playlistId = computed(() => props.id);
+    onBeforeUnmount(() => {
+      playbackStore.setDefaultSetList$$q();
+    });
 
+    const propPlaylistIdRef = computed(() => props.id);
     useLiveQuery(
       async () => {
-        const id = playlistId.value;
-
-        const playlist$$q = await db.playlists.get(id);
+        const playlistId = propPlaylistIdRef.value;
+        const playlist$$q = await db.playlists.get(playlistId);
         if (!playlist$$q) {
           tryRedirect(router);
-          throw new Error(`Playlist ${id} not found`);
+          throw new Error(`Playlist ${playlistId} not found`);
         }
       },
-      [playlistId],
+      [propPlaylistIdRef],
       true
     );
 
     return {
-      playlistId$$q: playlistId,
+      playlistId$$q: propPlaylistIdRef.value,
+      onTrackLoad$$q: (tracks: readonly ResourceTrack[]) => {
+        playbackStore.setDefaultSetList$$q(tracks);
+      },
     };
   },
 });
@@ -38,6 +46,10 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-8 px-6">
-    <s-playlist :playlist="playlistId$$q" :link-excludes="[playlistId$$q]" />
+    <s-playlist
+      :playlist="playlistId$$q"
+      :link-excludes="[playlistId$$q]"
+      @track-load="onTrackLoad$$q"
+    />
   </v-container>
 </template>
