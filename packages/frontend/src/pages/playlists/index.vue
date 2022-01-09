@@ -50,7 +50,10 @@ export default defineComponent({
           description$$q: playlist.notes,
           trackCount$$q: tracks.length,
           duration$$q: duration,
-          formattedDuration$$q: formatTotalDuration(duration),
+          formattedDuration$$q: formatTotalDuration(
+            duration,
+            t('vendor.humanizeDuration.language')
+          ),
           isLast$$q: index === arr.length - 1,
         };
       });

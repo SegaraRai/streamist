@@ -225,3 +225,6 @@ timeAgo:
   hour: '0 hours | 1 hour | {n} hours'
   minute: '0 minutes | 1 minute | {n} minutes'
   second: '0 seconds | 1 second | {n} seconds'
+vendor:
+  humanizeDuration:
+    language: en

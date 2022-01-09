@@ -6,10 +6,12 @@ import type { Track } from '$prisma/client';
  * @param duration 合計トラック長（秒）
  * @returns 合計トラック長を分単位でフォーマットした文字列
  */
-export function formatTotalDuration(duration: number): string {
+export function formatTotalDuration(
+  duration: number,
+  language: string
+): string {
   return humanizeDuration(duration * 1000, {
-    // TODO
-    language: 'ja',
+    language,
     fallbacks: ['en'],
     units: ['h', 'm'],
     delimiter: ' ',
@@ -34,7 +36,8 @@ export function calcTracksTotalDuration(
  * @returns 合計トラック長を分単位でフォーマットした文字列
  */
 export function formatTracksTotalDuration(
-  tracks: readonly Readonly<Track>[]
+  tracks: readonly Readonly<Track>[],
+  language: string
 ): string {
-  return formatTotalDuration(calcTracksTotalDuration(tracks));
+  return formatTotalDuration(calcTracksTotalDuration(tracks), language);
 }

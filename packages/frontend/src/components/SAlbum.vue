@@ -81,7 +81,12 @@ export default defineComponent({
     });
 
     const duration = computed(
-      () => value.value && formatTracksTotalDuration(value.value?.tracks$$q)
+      () =>
+        value.value &&
+        formatTracksTotalDuration(
+          value.value?.tracks$$q,
+          t('vendor.humanizeDuration.language')
+        )
     );
 
     const dropdown$$q = ref<DropdownAlbumInput | undefined>();
