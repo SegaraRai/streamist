@@ -245,6 +245,7 @@ export default defineComponent({
           show-album
           index-content="albumArtwork"
           visit-album
+          show-delete
         />
       </template>
     </template>

@@ -71,6 +71,7 @@ export default defineComponent({
     },
     visitAlbum: Boolean,
     visitArtist: Boolean,
+    showDelete: Boolean,
     disableCurrentPlaying: Boolean,
     scrollTop: {
       type: Number,
@@ -255,6 +256,7 @@ export default defineComponent({
       showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
       showVisitArtist$$q: eagerComputed(() => props.visitArtist),
       showPlayback$$q: ref(true),
+      showDelete$$q: eagerComputed(() => props.showDelete),
       play$$q: (track: ResourceTrack) => {
         if (
           !selectedTrack$$q.value ||

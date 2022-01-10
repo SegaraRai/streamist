@@ -236,6 +236,7 @@ export default defineComponent({
     :set-list="setList"
     :visit-album="visitAlbum"
     :visit-artist="visitArtist"
+    show-delete
   />
   <s-dropdown-album v-model="dropdown$$q" />
 </template>
