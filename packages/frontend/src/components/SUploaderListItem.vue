@@ -17,13 +17,19 @@ const typeToFileIcon: Record<FileType, string> = {
 
 export default defineComponent({
   props: {
-    file: Object as PropType<File>,
-    fileType: String as PropType<FileType>,
+    file: {
+      type: Object as PropType<File>,
+      required: true,
+    },
+    fileType: {
+      type: String as PropType<FileType>,
+      required: true,
+    },
   },
   setup() {
     return {
-      humanizeSize,
-      typeToFileIcon,
+      humanizeSize$$q: humanizeSize,
+      typeToFileIcon$$q: typeToFileIcon,
     };
   },
 });
@@ -32,7 +38,7 @@ export default defineComponent({
 <template>
   <v-list-item>
     <v-list-item-avatar icon class="flex-none flex items-center justify-center">
-      <v-icon>{{ typeToFileIcon[fileType || 'unknown'] }}</v-icon>
+      <v-icon>{{ typeToFileIcon$$q[fileType || 'unknown'] }}</v-icon>
     </v-list-item-avatar>
     <v-list-item-header class="px-2">
       <div class="flex-1 flex items-center">
@@ -42,7 +48,7 @@ export default defineComponent({
           {{ file?.name ?? '' }}
         </div>
         <div class="flex-none text-sm w-24 text-right opacity-60">
-          {{ humanizeSize(file?.size ?? 0) }}
+          {{ humanizeSize$$q(file?.size ?? 0) }}
         </div>
       </div>
     </v-list-item-header>

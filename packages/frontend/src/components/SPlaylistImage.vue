@@ -53,58 +53,58 @@ export default defineComponent({
     }, [propPlaylistRef]);
 
     return {
-      image,
-      fetched,
+      image$$q: image,
+      fetched$$q: fetched,
     };
   },
 });
 </script>
 
 <template>
-  <template v-if="!fetched">
+  <template v-if="!fetched$$q">
     <s-nullable-image
       :image="false"
       class="select-none rounded-lg overflow-hidden"
     />
   </template>
-  <template v-else-if="Array.isArray(image)">
-    <template v-if="image.length === 0">
+  <template v-else-if="Array.isArray(image$$q)">
+    <template v-if="image$$q.length === 0">
       <s-nullable-image class="select-none rounded-lg overflow-hidden" />
     </template>
-    <template v-else-if="image.length === 1">
+    <template v-else-if="image$$q.length === 1">
       <s-nullable-image
-        :image="image[0]"
+        :image="image$$q[0]"
         class="select-none rounded-lg overflow-hidden"
       />
     </template>
-    <template v-else-if="image.length === 2">
+    <template v-else-if="image$$q.length === 2">
       <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[0]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[0]" />
         <div class="w-1/2 h-1/2"></div>
         <div class="w-1/2 h-1/2"></div>
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[1]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[1]" />
       </div>
     </template>
-    <template v-else-if="image.length === 3">
+    <template v-else-if="image$$q.length === 3">
       <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[0]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[1]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[2]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[0]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[1]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[2]" />
         <div class="w-1/2 h-1/2"></div>
       </div>
     </template>
     <template v-else>
       <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[0]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[1]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[2]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image[3]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[0]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[1]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[2]" />
+        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[3]" />
       </div>
     </template>
   </template>
   <template v-else>
     <s-nullable-image
-      :image="image"
+      :image="image$$q"
       class="select-none rounded-lg overflow-hidden"
     />
   </template>

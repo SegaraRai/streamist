@@ -1,12 +1,23 @@
-<script lang="ts" setup>
+<script lang="ts">
 import { useUploadStore } from '~/stores/upload';
 
-const uploadStore = useUploadStore();
+export default defineComponent({
+  setup() {
+    const uploadStore = useUploadStore();
+
+    return {
+      stagedFiles$$q: uploadStore.stagedFiles,
+      files$$q: uploadStore.files,
+      removeStagingFile$$q: uploadStore.removeStagingFile,
+      removeFile$$q: uploadStore.removeFile,
+    };
+  },
+});
 </script>
 
 <template>
   <v-list density="compact">
-    <template v-for="(file, _index) in uploadStore.stagedFiles" :key="_index">
+    <template v-for="(file, _index) in stagedFiles$$q" :key="_index">
       <s-uploader-list-item
         :file="file.file"
         :file-type="file.type"
@@ -17,7 +28,7 @@ const uploadStore = useUploadStore();
           icon
           size="small"
           class="s-hover-visible text-st-error"
-          @click="uploadStore.removeStagingFile(file.id)"
+          @click="removeStagingFile$$q(file.id)"
         >
           <v-icon>mdi-delete</v-icon>
         </v-btn>
@@ -33,7 +44,7 @@ const uploadStore = useUploadStore();
         />
       </template>
     </template>
-    <template v-for="(file, _index) in uploadStore.files" :key="_index">
+    <template v-for="(file, _index) in files$$q" :key="_index">
       <template v-if="file.status !== 'removed'">
         <s-uploader-list-item
           :file="file.file"
@@ -53,7 +64,7 @@ const uploadStore = useUploadStore();
               icon
               size="small"
               class="s-hover-visible text-st-error"
-              @click="uploadStore.removeFile(file.id)"
+              @click="removeFile$$q(file.id)"
             >
               <v-icon>mdi-delete</v-icon>
             </v-btn>
@@ -98,7 +109,7 @@ const uploadStore = useUploadStore();
               icon
               size="small"
               class="s-hover-visible text-st-success"
-              @click="uploadStore.removeFile(file.id)"
+              @click="removeFile$$q(file.id)"
             >
               <v-icon>mdi-check</v-icon>
             </v-btn>
