@@ -28,7 +28,7 @@ const THEME_DARK: ThemeDefinitionColor = {
   text: '#ffffff',
   primary: '#4a8af2',
   secondary: '#4a8af2',
-  error: '#c92026',
+  error: '#f2444a',
   info: '#1f94ed',
   success: '#4bad4e',
   warning: '#f28a0a',

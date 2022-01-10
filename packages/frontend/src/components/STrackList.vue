@@ -450,7 +450,7 @@ export default defineComponent({
         >
           <template #item="{ element }">
             <s-track-list-track-item
-              class="active:cursor-move"
+              :class="trackOnlyItems$$q.length > 1 && 'active:cursor-move'"
               :item="element"
               :index-content="indexContent"
               :link-excludes="linkExcludes"
