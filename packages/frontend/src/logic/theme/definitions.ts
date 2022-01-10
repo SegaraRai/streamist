@@ -28,10 +28,10 @@ const THEME_DARK: ThemeDefinitionColor = {
   text: '#ffffff',
   primary: '#4a8af2',
   secondary: '#4a8af2',
-  error: '#d63854',
+  error: '#c92026',
   info: '#1f94ed',
   success: '#4bad4e',
-  warning: '#e07e07',
+  warning: '#f28a0a',
 };
 
 // TODO
