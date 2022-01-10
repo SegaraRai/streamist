@@ -90,7 +90,7 @@ export default defineComponent({
       </div>
       <template v-if="items$$q.length">
         <div class="opacity-60">
-          {{ t('playlists.n_playlists', items$$q.length || 0) }}
+          {{ t('playlists.n_items', items$$q.length || 0) }}
         </div>
       </template>
     </header>

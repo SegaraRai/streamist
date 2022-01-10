@@ -23,24 +23,24 @@ album:
   n_tracks: 'no tracks | one track | {n} tracks'
 albums:
   Albums: Albums
-  n_albums: 'no albums | one album | {n} albums'
+  n_items: 'no items | one item | {n} items'
 artist:
   Shuffle: Shuffle
   MoreTracks: More Tracks
 artists:
   Artists: Artists
-  n_artists: 'no artists | one artist | {n} artists'
+  n_items: 'no items | one item | {n} items'
 playlist:
   Play: Play
   Shuffle: Shuffle
-  n_tracks: 'no tracks | one track | {n} tracks'
+  n_items: 'no items | one item | {n} items'
 playlists:
   Playlists: Playlists
-  n_playlists: 'no playlists | one playlist | {n} playlists'
+  n_items: 'no items | one item | {n} items'
   n_tracks: 'no tracks | one track | {n} tracks'
 tracks:
   Tracks: Tracks
-  n_tracks: 'no tracks | one track | {n} tracks'
+  n_items: 'no items | one item | {n} items'
 trackList:
   Album: Album
   Title: Title

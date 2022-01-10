@@ -152,7 +152,7 @@ export default defineComponent({
       </div>
       <template v-if="items$$q.length">
         <div class="opacity-60">
-          {{ t('albums.n_albums', items$$q.length) }}
+          {{ t('albums.n_items', items$$q.length) }}
         </div>
       </template>
     </header>
