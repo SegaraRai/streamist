@@ -147,13 +147,6 @@ useEventListener(
 );
 
 const searchDialog$$q = ref(false);
-const searchQuery$$q = ref('');
-
-watch(searchQuery$$q, (value) => {
-  if (value) {
-    searchDialog$$q.value = true;
-  }
-});
 </script>
 
 <template>
@@ -242,15 +235,26 @@ watch(searchQuery$$q, (value) => {
               <span class="text-sm leading-none">.app</span>
             </router-link>
           </div>
-          <div class="flex-1 flex gap-x-2 justify-end">
-            <v-text-field
-              v-model="searchQuery$$q"
-              class="s-v-input-hide-details flex-1 max-w-md <sm:hidden"
-              density="compact"
-              prepend-inner-icon="mdi-magnify"
-              hide-details
-            />
-            <v-btn icon size="small" class="sm:hidden">
+          <div class="flex-1 flex gap-x-2 justify-end items-center">
+            <n-button
+              class="<sm:hidden"
+              ghost
+              round
+              @click="searchDialog$$q = true"
+            >
+              <template #icon>
+                <n-icon>
+                  <i-mdi-magnify />
+                </n-icon>
+              </template>
+              <v-kbd>Ctrl+K</v-kbd>
+            </n-button>
+            <v-btn
+              class="sm:hidden"
+              icon
+              size="small"
+              @click="searchDialog$$q = true"
+            >
               <v-icon>mdi-magnify</v-icon>
             </v-btn>
             <v-btn icon size="small" @click="devSync$$q">
@@ -367,7 +371,7 @@ watch(searchQuery$$q, (value) => {
       </v-sheet>
     </footer>
 
-    <s-dialog-search v-model:show="searchDialog$$q" v-model="searchQuery$$q" />
+    <s-dialog-search v-model="searchDialog$$q" />
   </div>
 </template>
 
