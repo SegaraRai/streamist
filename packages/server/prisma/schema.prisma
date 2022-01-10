@@ -47,6 +47,7 @@ model Source {
   files               SourceFile[]
 
   @@index([userId])
+  @@index([userId, updatedAt])
 }
 
 model SourceFile {
@@ -83,6 +84,7 @@ model SourceFile {
 
   @@index([userId])
   @@index([sourceId])
+  @@index([userId, updatedAt])
 }
 
 model Artist {
@@ -102,6 +104,7 @@ model Artist {
   trackCoArtists TrackCoArtist[]
 
   @@index([userId])
+  @@index([userId, updatedAt])
 }
 
 model Album {
@@ -124,6 +127,7 @@ model Album {
 
   @@index([userId])
   @@index([artistId])
+  @@index([userId, updatedAt])
 }
 
 model Track {
@@ -159,6 +163,7 @@ model Track {
   @@index([userId])
   @@index([albumId])
   @@index([artistId])
+  @@index([userId, updatedAt])
 }
 
 model TrackFile {
@@ -177,8 +182,10 @@ model TrackFile {
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
 
+  // the index [userId, updatedAt] is actually useless because TrackFile is included to Track
   @@index([userId])
   @@index([trackId])
+  @@index([userId, updatedAt])
 }
 
 model Image {
@@ -198,6 +205,7 @@ model Image {
   playlists    APlaylistImage[]
 
   @@index([userId])
+  @@index([userId, updatedAt])
 }
 
 model ImageFile {
@@ -217,8 +225,10 @@ model ImageFile {
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
 
+  // the index [userId, updatedAt] is actually useless because ImageFile is included to Image
   @@index([userId])
   @@index([imageId])
+  @@index([userId, updatedAt])
 }
 
 model AlbumCoArtist {
@@ -237,6 +247,7 @@ model AlbumCoArtist {
   @@index([userId])
   @@index([artistId])
   @@index([albumId])
+  @@index([userId, updatedAt])
 }
 
 model TrackCoArtist {
@@ -255,6 +266,7 @@ model TrackCoArtist {
   @@index([userId])
   @@index([artistId])
   @@index([trackId])
+  @@index([userId, updatedAt])
 }
 
 model Playlist {
@@ -271,6 +283,7 @@ model Playlist {
   trackOrder  String           @default("")
 
   @@index([userId])
+  @@index([userId, updatedAt])
 }
 
 model Deletion {
@@ -283,6 +296,7 @@ model Deletion {
 
   @@id([entityType, entityId, userId])
   @@index([userId])
+  @@index([userId, deletedAt])
 }
 
 model ResourceUpdate {
