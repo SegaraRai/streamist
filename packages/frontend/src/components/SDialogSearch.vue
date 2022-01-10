@@ -53,7 +53,7 @@ export default defineComponent({
 
       let toggle = false;
       if (show$$q.value) {
-        toggle = isInput && event.key === 'Escape';
+        toggle = event.key === 'Escape';
       } else {
         toggle =
           !isInput &&
