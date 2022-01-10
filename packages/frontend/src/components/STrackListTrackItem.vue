@@ -163,7 +163,7 @@ export default defineComponent({
       >
         <v-list-item-subtitle class="leading-tight">
           <s-conditional-link
-            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
+            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max text-xs"
             :to="`/artists/${item.artist$$q.id}`"
             :disabled="linkExcludes?.includes(item.artist$$q.id)"
           >
@@ -188,7 +188,7 @@ export default defineComponent({
         </v-list-item-title>
         <v-list-item-subtitle class="leading-tight">
           <s-conditional-link
-            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
+            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max text-xs"
             :to="`/artists/${item.albumArtist$$q.id}`"
             :disabled="linkExcludes?.includes(item.albumArtist$$q.id)"
           >
