@@ -110,7 +110,7 @@ export default defineComponent({
         <div
           class="w-full h-1 rounded-full s-hover-hidden"
           :class="
-            dragging$$q ? 'bg-primary' : 'text-st-text bg-current opacity-60'
+            dragging$$q ? 'bg-primary' : 'text-st-text bg-current opacity-70'
           "
         ></div>
         <div class="w-full h-1 rounded-full s-hover-visible bg-primary"></div>
