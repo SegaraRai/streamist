@@ -19,7 +19,7 @@ export default defineComponent({
     watch(propAlbumRef, () => {
       emit('imageIds', undefined);
     });
-    const { value: image, valueExists: fetched } = useLiveQuery(async () => {
+    const { value, valueExists: fetched } = useLiveQuery(async () => {
       const propAlbum = propAlbumRef.value;
       if (!propAlbum) {
         return;
@@ -40,17 +40,20 @@ export default defineComponent({
         return;
       }
       const image = await db.images.get(imageId);
-      return image;
+      return { album$$q: album, image$$q: image };
     }, [propAlbumRef]);
 
     return {
-      image,
-      fetched,
+      value$$q: value,
+      fetched$$q: fetched,
     };
   },
 });
 </script>
 
 <template>
-  <s-album-image-x :image="fetched && image" />
+  <s-album-image-x
+    :image="fetched$$q && value$$q?.image$$q"
+    :alt="value$$q?.album$$q.title"
+  />
 </template>

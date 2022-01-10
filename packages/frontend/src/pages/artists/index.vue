@@ -167,6 +167,7 @@ export default defineComponent({
               }"
               :image="item.image$$q"
               :size="width"
+              :alt="item.artist$$q.name"
             />
           </router-link>
           <v-card-title

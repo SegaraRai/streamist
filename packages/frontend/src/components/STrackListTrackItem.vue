@@ -134,6 +134,7 @@ export default defineComponent({
                 class="s-hover-hidden flex-none w-9 h-9"
                 size="36"
                 :image="item.image$$q"
+                :alt="item.album$$q.title"
               />
             </template>
             <v-icon class="s-hover-visible" :class="$style.icon">

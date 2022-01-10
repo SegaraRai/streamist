@@ -304,6 +304,7 @@ export default defineComponent({
                       <s-nullable-image
                         class="flex-none w-32 h-32 sm:w-48 sm:h-48"
                         :image="element"
+                        :alt="attachToTitle"
                         size="200"
                       />
                     </a>

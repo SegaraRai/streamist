@@ -10,10 +10,14 @@ export default defineComponent({
       >,
       default: undefined,
     },
+    alt: {
+      type: String,
+      default: undefined,
+    },
   },
 });
 </script>
 
 <template>
-  <s-nullable-image class="select-none" :image="image" />
+  <s-nullable-image class="select-none" :image="image" :alt="alt" />
 </template>
