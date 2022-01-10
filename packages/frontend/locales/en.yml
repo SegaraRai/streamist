@@ -104,6 +104,8 @@ dialogComponent:
       artist: Artist
       playlist: Playlist
       track: Track
+  upload:
+    title: Upload
   editAlbum:
     title: Edit {0}
     button:

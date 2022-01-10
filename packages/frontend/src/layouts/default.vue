@@ -18,8 +18,6 @@ const display = useDisplay();
 const syncDB = useSyncDB();
 const theme = useThemeStore();
 
-const uploadDialog$$q = ref(false);
-
 interface NavItemLink {
   type: 'link';
   path: string;
@@ -80,8 +78,6 @@ const navItems$$q = computed<readonly NavItem[]>(() => [
 ]);
 
 const uploadStore$$q = useUploadStore();
-
-const fullscreenDialog = eagerComputed(() => display.xs.value);
 
 const rightSidebar$$q = ref(false);
 const _leftSidebar$$q = ref(false);
@@ -147,6 +143,7 @@ useEventListener(
 );
 
 const searchDialog$$q = ref(false);
+const uploadDialog$$q = ref(false);
 </script>
 
 <template>
@@ -331,32 +328,6 @@ const searchDialog$$q = ref(false);
         </n-scrollbar>
         <div class="flex-none h-24" :class="hideShell$$q && '!hidden'"></div>
       </v-main>
-
-      <v-dialog
-        v-model="uploadDialog$$q"
-        class="s-v-dialog select-none"
-        :fullscreen="fullscreenDialog"
-      >
-        <v-card class="w-full">
-          <v-card-title class="flex">
-            <div class="flex-1">Upload</div>
-            <div class="flex-none">
-              <v-btn
-                flat
-                icon
-                size="x-small"
-                class="text-st-error"
-                @click="uploadDialog$$q = false"
-              >
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </div>
-          </v-card-title>
-          <v-card-text class="opacity-100">
-            <s-uploader />
-          </v-card-text>
-        </v-card>
-      </v-dialog>
     </v-app>
 
     <footer
@@ -372,6 +343,7 @@ const searchDialog$$q = ref(false);
     </footer>
 
     <s-dialog-search v-model="searchDialog$$q" />
+    <s-dialog-upload v-model="uploadDialog$$q" />
   </div>
 </template>
 
