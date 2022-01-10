@@ -42,7 +42,7 @@ export default defineComponent({
     let unmounted = false;
     onBeforeUnmount(() => {
       unmounted = true;
-      playbackStore.setDefaultSetList$$q();
+      playbackStore.clearDefaultSetList$$q();
     });
 
     const items = asyncComputed(async () => {
@@ -82,6 +82,7 @@ export default defineComponent({
 
       if (!unmounted) {
         playbackStore.setDefaultSetList$$q(
+          t('setListName.Albums'),
           gridItems.flatMap((item) => item.tracks$$q)
         );
       }

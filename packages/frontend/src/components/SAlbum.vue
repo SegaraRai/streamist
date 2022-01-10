@@ -23,6 +23,10 @@ export default defineComponent({
       type: Array as PropType<readonly ResourceTrack[] | null | undefined>,
       default: undefined,
     },
+    setListName: {
+      type: String,
+      default: undefined,
+    },
     visitAlbum: Boolean,
     visitArtist: Boolean,
   },
@@ -105,7 +109,10 @@ export default defineComponent({
         if (shuffle !== undefined) {
           playbackStore.shuffle$$q.value = shuffle;
         }
-        playbackStore.setSetListAndPlayAuto$$q(value.value.tracks$$q);
+        playbackStore.setSetListAndPlayAuto$$q(
+          value.value.album$$q.title,
+          value.value.tracks$$q
+        );
       },
       dropdown$$q,
       openMenu$$q: (target: MouseEvent | HTMLElement) => {
@@ -234,6 +241,7 @@ export default defineComponent({
     show-disc-number
     index-content="trackNumber"
     :set-list="setList"
+    :set-list-name="setListName || value$$q?.album$$q.title"
     :visit-album="visitAlbum"
     :visit-artist="visitArtist"
     show-delete

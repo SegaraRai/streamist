@@ -60,6 +60,10 @@ export default defineComponent({
       type: Array as PropType<readonly ResourceTrack[] | null | undefined>,
       default: undefined,
     },
+    setListName: {
+      type: String,
+      default: '',
+    },
     skipSetListCheck: Boolean,
     hideHeader: Boolean,
     showAlbum: Boolean,
@@ -226,7 +230,11 @@ export default defineComponent({
         playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
         return;
       }
-      playbackStore.setSetListAndPlay$$q(props.setList, track);
+      playbackStore.setSetListAndPlay$$q(
+        props.setListName,
+        props.setList,
+        track
+      );
     };
 
     const dialog$$q = ref(false);

@@ -30,6 +30,7 @@ export function createAlbumDropdown({
       return [];
     }
 
+    const album = album$$q.value;
     const albumTracks = albumTracks$$q.value;
 
     const menuItems: MenuOption[] = [];
@@ -46,8 +47,10 @@ export function createAlbumDropdown({
           if (!albumTracks?.length) {
             return;
           }
-          playbackStore.shuffle$$q.value = false;
-          playbackStore.setSetListAndPlayAuto$$q(albumTracks);
+          playbackStore.setSetListAndPlayAutoNoShuffle$$q(
+            album.title,
+            albumTracks
+          );
         },
       },
     });

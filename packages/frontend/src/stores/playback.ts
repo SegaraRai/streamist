@@ -29,12 +29,25 @@ export interface PlaybackState {
   /**
    * 規定のトラックリストを設定する
    */
-  readonly setDefaultSetList$$q: (tracks?: readonly ResourceTrack[]) => void;
+  readonly setDefaultSetList$$q: (
+    name: string,
+    tracks: readonly ResourceTrack[]
+  ) => void;
+  readonly clearDefaultSetList$$q: () => void;
   /**
    * トラックリストを設定して再生する \
    * 同一のトラックが重複してはならない
    */
   readonly setSetListAndPlay$$q: (
+    name: string,
+    tracks: readonly ResourceTrack[],
+    track: ResourceTrack
+  ) => void;
+  /**
+   * シャッフルを無効化しトラックリストを設定して再生する
+   */
+  readonly setSetListAndPlayNoShuffle$$q: (
+    name: string,
     tracks: readonly ResourceTrack[],
     track: ResourceTrack
   ) => void;
@@ -43,13 +56,22 @@ export interface PlaybackState {
    * 再生するトラックは現在のシャッフルの設定によって自動で設定される \
    * （シャッフルが有効なら`tracks`の中からランダムで選択され、無効なら`tracks`の先頭の要素が選択される）
    */
-  readonly setSetListAndPlayAuto$$q: (tracks: readonly ResourceTrack[]) => void;
+  readonly setSetListAndPlayAuto$$q: (
+    name: string,
+    tracks: readonly ResourceTrack[]
+  ) => void;
+  readonly setSetListAndPlayAutoNoShuffle$$q: (
+    name: string,
+    tracks: readonly ResourceTrack[]
+  ) => void;
   /** リピート再生 */
   readonly repeat$$q: Ref<RepeatType>;
   /** シャッフル再生 */
   readonly shuffle$$q: Ref<boolean>;
   /** 現在のトラック */
   readonly currentTrack$$q: Readonly<Ref<ResourceTrack | undefined>>;
+  /** 現在のセットリスト名 */
+  readonly currentSetListName$$q: Readonly<Ref<string>>;
   /** 現在のセットリスト */
   readonly currentSetList$$q: Readonly<
     Ref<readonly ResourceTrack[] | undefined>
@@ -138,7 +160,9 @@ function _usePlaybackStore(): PlaybackState {
   const queue = ref<ResourceTrack[]>([]);
   const playNextQueue = ref<ResourceTrack[]>([]);
 
+  const currentSetListName = ref<string>('');
   const currentSetList = ref<readonly ResourceTrack[] | undefined>();
+  const defaultSetListName = ref<string>('');
   const defaultSetList = ref<readonly ResourceTrack[] | undefined>();
 
   const internalPlaying = ref<boolean>(false);
@@ -239,10 +263,12 @@ function _usePlaybackStore(): PlaybackState {
   };
 
   const setSetListAndPlay = (
+    name: string,
     tracks: readonly ResourceTrack[],
     track?: ResourceTrack | null
   ): void => {
     playing.value = false;
+    currentSetListName.value = name;
     currentSetList.value = tracks;
     // NOTE: `setSetList$$q`に渡す`currentTrack`（第2引数）は`null`と`undefined`で挙動が異なる
     trackProvider.setSetList$$q(tracks, tracks.length ? track : null);
@@ -254,13 +280,16 @@ function _usePlaybackStore(): PlaybackState {
     }
   };
 
-  const setSetListAndPlayAuto = (tracks: readonly ResourceTrack[]): void => {
+  const setSetListAndPlayAuto = (
+    name: string,
+    tracks: readonly ResourceTrack[]
+  ): void => {
     const trackIndex = shuffle.value
       ? Math.floor(Math.random() * tracks.length)
       : 0;
     // NOTE: `setSetListAndPlay`に渡す`track`（第2引数）は`null`と`undefined`で挙動が異なる
     const track = tracks[trackIndex] || null;
-    setSetListAndPlay(tracks, track);
+    setSetListAndPlay(name, tracks, track);
   };
 
   /**
@@ -276,7 +305,7 @@ function _usePlaybackStore(): PlaybackState {
       // TrackProviderのsetListが空とは限らない（前へが使える場合がある）が、次へが無効であることには変わりない
       // 再生できるようにしたほうが利便性高いので再生する
       if (defaultSetList.value && defaultSetList.value.length > 0) {
-        setSetListAndPlayAuto(defaultSetList.value);
+        setSetListAndPlayAuto(defaultSetListName.value, defaultSetList.value);
       }
     } else {
       trackProvider.skipNext$$q();
@@ -496,21 +525,46 @@ function _usePlaybackStore(): PlaybackState {
     defaultSetListAvailable$$q: computed((): boolean => {
       return defaultSetList.value != null && defaultSetList.value.length > 0;
     }),
-    setDefaultSetList$$q(tracks?: readonly ResourceTrack[]): void {
+    setDefaultSetList$$q(name: string, tracks: readonly ResourceTrack[]): void {
+      defaultSetListName.value = name;
       defaultSetList.value = tracks && [...tracks];
     },
+    clearDefaultSetList$$q(): void {
+      defaultSetListName.value = '';
+      defaultSetList.value = undefined;
+    },
     setSetListAndPlay$$q: (
+      name: string,
       tracks: readonly ResourceTrack[],
       track: ResourceTrack
     ): void => {
-      setSetListAndPlay(tracks, track);
+      setSetListAndPlay(name, tracks, track);
     },
-    setSetListAndPlayAuto$$q: (tracks: readonly ResourceTrack[]): void => {
-      setSetListAndPlayAuto(tracks);
+    setSetListAndPlayNoShuffle$$q: (
+      name: string,
+      tracks: readonly ResourceTrack[],
+      track: ResourceTrack
+    ): void => {
+      shuffle.value = false;
+      setSetListAndPlay(name, tracks, track);
+    },
+    setSetListAndPlayAuto$$q: (
+      name: string,
+      tracks: readonly ResourceTrack[]
+    ): void => {
+      setSetListAndPlayAuto(name, tracks);
+    },
+    setSetListAndPlayAutoNoShuffle$$q: (
+      name: string,
+      tracks: readonly ResourceTrack[]
+    ): void => {
+      shuffle.value = false;
+      setSetListAndPlayAuto(name, tracks);
     },
     repeat$$q: repeat,
     shuffle$$q: shuffle,
     currentTrack$$q: currentTrack,
+    currentSetListName$$q: currentSetListName,
     currentSetList$$q: currentSetList,
     queue$$q: queue,
     playNextQueue$$q: playNextQueue,

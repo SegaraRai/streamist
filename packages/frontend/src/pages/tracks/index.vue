@@ -22,7 +22,7 @@ export default defineComponent({
     let unmounted = false;
     onBeforeUnmount(() => {
       unmounted = true;
-      playbackStore.setDefaultSetList$$q();
+      playbackStore.clearDefaultSetList$$q();
     });
 
     const items = asyncComputed(async () => {
@@ -54,7 +54,10 @@ export default defineComponent({
         .sort(compareTrack);
 
       if (!unmounted) {
-        playbackStore.setDefaultSetList$$q(sortedTracks);
+        playbackStore.setDefaultSetList$$q(
+          t('setListName.Tracks'),
+          sortedTracks
+        );
       }
 
       return sortedTracks;
@@ -86,6 +89,7 @@ export default defineComponent({
       :tracks="items$$q"
       :loading="!items$$q"
       :set-list="items$$q"
+      :set-list-name="t('setListName.Tracks')"
       index-content="albumArtwork"
       :show-album="!isMobile$$q"
       show-artist

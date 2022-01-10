@@ -23,11 +23,11 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q();
+      playbackStore.clearDefaultSetList$$q();
     });
 
     const propAlbumIdRef = computed(() => props.id);
-    const { value } = useLiveQuery(
+    const { value, valueAsync } = useLiveQuery(
       async () => {
         const albumId = propAlbumIdRef.value;
         const album$$q = await db.albums.get(albumId);
@@ -57,7 +57,9 @@ export default defineComponent({
       value$$q: value,
       setList$$q,
       onTrackLoad$$q: (tracks: readonly ResourceTrack[]) => {
-        playbackStore.setDefaultSetList$$q(tracks);
+        valueAsync.value.then((v) => {
+          playbackStore.setDefaultSetList$$q(v.album$$q.title, tracks);
+        });
         setList$$q.value = tracks;
       },
     };
@@ -71,6 +73,7 @@ export default defineComponent({
       :album="id"
       :link-excludes="[id]"
       :set-list="setList$$q"
+      :set-list-name="value$$q?.album$$q.title"
       visit-artist
       @track-load="onTrackLoad$$q"
     />

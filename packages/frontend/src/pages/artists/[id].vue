@@ -1,6 +1,6 @@
 <script lang="ts">
 import { compareAlbum, compareTrack } from '$shared/sort';
-import type { ResourceAlbum, ResourceTrack } from '$/types';
+import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
 import { db } from '~/db';
 import { useLiveQuery } from '~/logic/useLiveQuery';
@@ -26,7 +26,7 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
 
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q();
+      playbackStore.clearDefaultSetList$$q();
     });
 
     let loadedTracksArtistId: string | undefined;
@@ -34,6 +34,7 @@ export default defineComponent({
     const notLoadedAlbumIdSet = new Set<string>();
 
     const updateSetList = (
+      artist: ResourceArtist,
       albums: readonly ResourceAlbum[],
       tracks: readonly ResourceTrack[]
     ) => {
@@ -49,7 +50,7 @@ export default defineComponent({
         (track) => !existingTrackIdSet.has(track.id)
       );
       setList.push(...additionalTracks$$q.value);
-      playbackStore.setDefaultSetList$$q(setList);
+      playbackStore.setDefaultSetList$$q(artist.name, setList);
       setList$$q.value = setList;
     };
 
@@ -82,7 +83,7 @@ export default defineComponent({
 
         headTitleRef.value = t('title.Artist', [artist$$q.name]);
 
-        updateSetList(albums$$q, tracks$$q);
+        updateSetList(artist$$q, albums$$q, tracks$$q);
 
         return {
           artist$$q,
@@ -111,23 +112,33 @@ export default defineComponent({
         }
         loadedTracksMap.set(albumId, tracks);
         notLoadedAlbumIdSet.delete(albumId);
-        updateSetList(value.value.albums$$q, value.value.tracks$$q);
+        updateSetList(
+          value.value.artist$$q,
+          value.value.albums$$q,
+          value.value.tracks$$q
+        );
       },
       play$$q: (shuffle?: boolean): void => {
-        if (!setList$$q.value.length) {
+        const artist = value.value?.artist$$q;
+        if (!artist || !setList$$q.value.length) {
           return;
         }
         if (shuffle !== undefined) {
           playbackStore.shuffle$$q.value = shuffle;
         }
-        playbackStore.setSetListAndPlayAuto$$q(setList$$q.value);
+        playbackStore.setSetListAndPlayAuto$$q(artist.name, setList$$q.value);
       },
       playAdditional$$q: (): void => {
-        if (!setList$$q.value.length || !additionalTracks$$q.value.length) {
+        const artist = value.value?.artist$$q;
+        if (
+          !artist ||
+          !setList$$q.value.length ||
+          !additionalTracks$$q.value.length
+        ) {
           return;
         }
-        playbackStore.shuffle$$q.value = false;
-        playbackStore.setSetListAndPlay$$q(
+        playbackStore.setSetListAndPlayNoShuffle$$q(
+          artist.name,
           setList$$q.value,
           additionalTracks$$q.value[0]
         );
@@ -219,6 +230,7 @@ export default defineComponent({
                 :album="album.id"
                 :link-excludes="[id]"
                 :set-list="setList$$q"
+                :set-list-name="value$$q.artist$$q.name"
                 visit-album
                 @track-load="onTrackLoad$$q(album.id, $event)"
               />
@@ -242,6 +254,7 @@ export default defineComponent({
           :link-excludes="[id]"
           :tracks="additionalTracks$$q"
           :set-list="setList$$q"
+          :set-list-name="value$$q.artist$$q.name"
           show-album
           index-content="albumArtwork"
           visit-album

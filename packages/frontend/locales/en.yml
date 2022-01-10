@@ -15,8 +15,17 @@ common:
 header:
   NoInternetConnection: No Internet connection
   Search: Search
+  Upload: Upload
+  Queue: Queue
+setListName:
+  Albums: All albums
+  Artists: All artists
+  Tracks: All tracks
 queue:
-  PlayQueue: Queue
+  title: Queue
+  NowPlaying: Now playing
+  NextInQueue: Next in queue
+  NextFrom: 'Next from: {0}'
 album:
   Play: Play
   Shuffle: Shuffle

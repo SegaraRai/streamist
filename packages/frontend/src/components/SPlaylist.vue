@@ -90,7 +90,10 @@ export default defineComponent({
         if (shuffle !== undefined) {
           playbackStore.shuffle$$q.value = shuffle;
         }
-        playbackStore.setSetListAndPlayAuto$$q(value.value.tracks$$q);
+        playbackStore.setSetListAndPlayAuto$$q(
+          value.value.playlist$$q.title,
+          value.value.tracks$$q
+        );
       },
       onMove$$q: async (
         track: ResourceTrack,
@@ -228,6 +231,7 @@ export default defineComponent({
     :link-excludes="linkExcludes"
     index-content="index"
     :set-list="value$$q?.tracks$$q"
+    :set-list-name="value$$q?.playlist$$q.title"
     :playlist-id="playlistId$$q"
     visit-album
     visit-artist

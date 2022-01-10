@@ -179,7 +179,7 @@ const uploadDialog$$q = ref(false);
           <v-sheet tile>
             <div class="title flex items-center py-1">
               <v-icon class="mx-4">mdi-playlist-play</v-icon>
-              <span class="flex-1">{{ t('queue.PlayQueue') }}</span>
+              <span class="flex-1">{{ t('queue.title') }}</span>
               <v-btn flat icon size="small" @click="rightSidebar$$q = false">
                 <v-icon>mdi-close</v-icon>
               </v-btn>

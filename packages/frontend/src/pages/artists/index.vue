@@ -39,7 +39,7 @@ export default defineComponent({
 
     const unmounted = false;
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q();
+      playbackStore.clearDefaultSetList$$q();
     });
 
     const items = asyncComputed(async () => {
@@ -65,6 +65,7 @@ export default defineComponent({
 
       if (!unmounted) {
         playbackStore.setDefaultSetList$$q(
+          t('setListName.Artists'),
           artists
             .flatMap((artist) => albumMultiMapByArtist.get(artist.id) || [])
             .flatMap((album) => trackMultiMapByAlbum.get(album.id) || [])

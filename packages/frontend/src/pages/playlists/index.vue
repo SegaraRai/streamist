@@ -27,7 +27,7 @@ export default defineComponent({
     });
 
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q();
+      playbackStore.clearDefaultSetList$$q();
     });
 
     const allPlaylists = useAllPlaylists();

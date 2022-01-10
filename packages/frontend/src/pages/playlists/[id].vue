@@ -17,11 +17,11 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
 
     onBeforeUnmount(() => {
-      playbackStore.setDefaultSetList$$q();
+      playbackStore.clearDefaultSetList$$q();
     });
 
     const propPlaylistIdRef = computed(() => props.id);
-    useLiveQuery(
+    const { valueAsync } = useLiveQuery(
       async () => {
         const playlistId = propPlaylistIdRef.value;
         const playlist$$q = await db.playlists.get(playlistId);
@@ -29,6 +29,9 @@ export default defineComponent({
           tryRedirect(router);
           throw new Error(`Playlist ${playlistId} not found`);
         }
+        return {
+          playlist$$q,
+        };
       },
       [propPlaylistIdRef],
       true
@@ -37,7 +40,9 @@ export default defineComponent({
     return {
       playlistId$$q: propPlaylistIdRef.value,
       onTrackLoad$$q: (tracks: readonly ResourceTrack[]) => {
-        playbackStore.setDefaultSetList$$q(tracks);
+        valueAsync.value.then((v) => {
+          playbackStore.setDefaultSetList$$q(v.playlist$$q.title, tracks);
+        });
       },
     };
   },

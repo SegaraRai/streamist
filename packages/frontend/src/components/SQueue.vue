@@ -11,7 +11,9 @@ export default defineComponent({
     },
   },
   setup() {
+    const { t } = useI18n();
     const playbackStore = usePlaybackStore();
+
     const playNextQueue$$q = eagerComputed(() =>
       playbackStore.playNextQueue$$q.value.map(({ id }) => id)
     );
@@ -24,6 +26,8 @@ export default defineComponent({
     };
 
     return {
+      t,
+      currentSetListName$$q: playbackStore.currentSetListName$$q,
       repeatOne$$q: eagerComputed(
         () => playbackStore.repeat$$q.value === 'one'
       ),
@@ -41,10 +45,12 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="repeatOne$$q ? 'opacity-60' : ''">
+  <div :class="repeatOne$$q ? 'opacity-60' : ''" class="py-2">
     <!-- TODO: make list draggable -->
-    <!-- we have to use plain render mode as virtual render mode is not reactive for tracks -->
     <template v-if="playNextQueue$$q.length">
+      <div class="text-lg leading-tight px-2 pb-1 opacity-80">
+        {{ t('queue.NextInQueue') }}
+      </div>
       <s-track-list
         :tracks="playNextQueue$$q"
         render-mode="plain"
@@ -58,17 +64,25 @@ export default defineComponent({
         @play="playFromPNQueue$$q"
       />
     </template>
-    <s-track-list
-      :tracks="queue$$q"
-      render-mode="plain"
-      index-content="albumArtwork"
-      hide-header
-      show-artist
-      visit-album
-      visit-artist
-      disable-current-playing
-      :scroll-top="scrollTop"
-      @play="playFromQueue$$q"
-    />
+    <template v-if="currentSetListName$$q && queue$$q.length">
+      <template v-if="playNextQueue$$q.length">
+        <div class="h-8"></div>
+      </template>
+      <div class="text-lg leading-tight px-2 pb-1 opacity-80">
+        {{ t('queue.NextFrom', [currentSetListName$$q]) }}
+      </div>
+      <s-track-list
+        :tracks="queue$$q"
+        render-mode="plain"
+        index-content="albumArtwork"
+        hide-header
+        show-artist
+        visit-album
+        visit-artist
+        disable-current-playing
+        :scroll-top="scrollTop"
+        @play="playFromQueue$$q"
+      />
+    </template>
   </div>
 </template>
