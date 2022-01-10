@@ -41,7 +41,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="repeatOne$$q ? 'opacity-50' : ''">
+  <div :class="repeatOne$$q ? 'opacity-60' : ''">
     <!-- TODO: make list draggable -->
     <!-- we have to use plain render mode as virtual render mode is not reactive for tracks -->
     <template v-if="playNextQueue$$q.length">

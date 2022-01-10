@@ -99,7 +99,7 @@ export default defineComponent({
       <!-- track (bg) -->
       <div ref="e" class="absolute top-0 w-full h-full flex items-center">
         <div
-          class="w-full h-1 on-background bg-current opacity-25 rounded-full"
+          class="w-full h-1 text-st-text bg-current opacity-20 rounded-full"
         ></div>
       </div>
       <!-- track (progress) -->
@@ -110,7 +110,7 @@ export default defineComponent({
         <div
           class="w-full h-1 rounded-full s-hover-hidden"
           :class="
-            dragging$$q ? 'bg-primary' : 'on-background bg-current opacity-75'
+            dragging$$q ? 'bg-primary' : 'text-st-text bg-current opacity-60'
           "
         ></div>
         <div class="w-full h-1 rounded-full s-hover-visible bg-primary"></div>

@@ -41,7 +41,7 @@ export default defineComponent({
         >
           {{ file?.name ?? '' }}
         </div>
-        <div class="flex-none text-sm w-24 text-right opacity-75">
+        <div class="flex-none text-sm w-24 text-right opacity-60">
           {{ humanizeSize(file?.size ?? 0) }}
         </div>
       </div>
