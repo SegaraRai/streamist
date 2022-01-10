@@ -36,6 +36,7 @@ declare module 'vue' {
     SDialogArtistMerge: typeof import('./components/SDialogArtistMerge.vue')['default']
     SDialogPlaylistCreate: typeof import('./components/SDialogPlaylistCreate.vue')['default']
     SDialogPlaylistEdit: typeof import('./components/SDialogPlaylistEdit.vue')['default']
+    SDialogSearch: typeof import('./components/SDialogSearch.vue')['default']
     SDialogTrackEdit: typeof import('./components/SDialogTrackEdit.vue')['default']
     SDraggable: typeof import('./components/SDraggable.vue')['default']
     SDropdownAlbum: typeof import('./components/SDropdownAlbum.vue')['default']

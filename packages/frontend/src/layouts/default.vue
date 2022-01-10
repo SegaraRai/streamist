@@ -145,6 +145,15 @@ useEventListener(
   },
   { passive: true }
 );
+
+const searchDialog$$q = ref(false);
+const searchQuery$$q = ref('');
+
+watch(searchQuery$$q, (value) => {
+  if (value) {
+    searchDialog$$q.value = true;
+  }
+});
 </script>
 
 <template>
@@ -235,6 +244,7 @@ useEventListener(
           </div>
           <div class="flex-1 flex gap-x-2 justify-end">
             <v-text-field
+              v-model="searchQuery$$q"
               class="s-v-input-hide-details flex-1 max-w-md <sm:hidden"
               density="compact"
               prepend-inner-icon="mdi-magnify"
@@ -356,6 +366,8 @@ useEventListener(
         <s-mobile-playback-control class="md:hidden" />
       </v-sheet>
     </footer>
+
+    <s-dialog-search v-model:show="searchDialog$$q" v-model="searchQuery$$q" />
   </div>
 </template>
 

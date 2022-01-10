@@ -98,6 +98,12 @@ combobox:
   artist:
     CreateNewArtist: Create new artist
 dialogComponent:
+  search:
+    type:
+      album: Album
+      artist: Artist
+      playlist: Playlist
+      track: Track
   editAlbum:
     title: Edit {0}
     button:

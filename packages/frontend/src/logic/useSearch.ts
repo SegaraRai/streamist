@@ -1,6 +1,12 @@
 import Fuse from 'fuse.js';
 import type { Ref } from 'vue';
-import { useAllAlbums, useAllArtists } from './useDB';
+import { useAllItems } from './allItem';
+import {
+  useAllAlbums,
+  useAllArtists,
+  useAllPlaylists,
+  useAllTracks,
+} from './useDB';
 
 function createFuse<T>(
   items: Readonly<Ref<readonly T[] | undefined>>,
@@ -12,18 +18,42 @@ function createFuse<T>(
 }
 
 function _useAlbumSearch() {
-  const albums = useAllAlbums();
-  const fuse = createFuse(albums.value, { keys: ['title'] });
+  const items = useAllAlbums();
+  const fuse = createFuse(items.value, { keys: ['title'] });
   return (term: Readonly<Ref<string>>) =>
     computed(() => fuse.value.search(term.value));
 }
 
 function _useArtistSearch() {
-  const artists = useAllArtists();
-  const fuse = createFuse(artists.value, { keys: ['name'] });
+  const items = useAllArtists();
+  const fuse = createFuse(items.value, { keys: ['name'] });
+  return (term: Readonly<Ref<string>>) =>
+    computed(() => fuse.value.search(term.value));
+}
+
+function _useTrackSearch() {
+  const items = useAllTracks();
+  const fuse = createFuse(items.value, { keys: ['title'] });
+  return (term: Readonly<Ref<string>>) =>
+    computed(() => fuse.value.search(term.value));
+}
+
+function _usePlaylistSearch() {
+  const items = useAllPlaylists();
+  const fuse = createFuse(items.value, { keys: ['title'] });
+  return (term: Readonly<Ref<string>>) =>
+    computed(() => fuse.value.search(term.value));
+}
+
+function _useAllSearch() {
+  const items = useAllItems();
+  const fuse = createFuse(items, { keys: ['l'] });
   return (term: Readonly<Ref<string>>) =>
     computed(() => fuse.value.search(term.value));
 }
 
 export const useAlbumSearch = createSharedComposable(_useAlbumSearch);
 export const useArtistSearch = createSharedComposable(_useArtistSearch);
+export const useTrackSearch = createSharedComposable(_useTrackSearch);
+export const usePlaylistSearch = createSharedComposable(_usePlaylistSearch);
+export const useAllSearch = createSharedComposable(_useAllSearch);
