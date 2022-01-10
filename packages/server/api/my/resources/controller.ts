@@ -105,10 +105,17 @@ export default defineController(() => ({
           },
         } as const;
 
-        const qWithFiles = {
+        const qFiles = {
           ...q,
           include: {
             files: true,
+          },
+        } as const;
+
+        const qDel = {
+          where: {
+            userId: user.id,
+            deletedAt: q.where.updatedAt,
           },
         } as const;
 
@@ -120,20 +127,15 @@ export default defineController(() => ({
           albumCoArtists: await txClient.albumCoArtist.findMany(q),
           albums: convertAlbums(await txClient.album.findMany(q)),
           artists: convertArtists(await txClient.artist.findMany(q)),
-          images: await txClient.image.findMany(qWithFiles),
+          images: await txClient.image.findMany(qFiles),
           playlists: convertPlaylists(await txClient.playlist.findMany(q)),
           sourceFiles: await txClient.sourceFile.findMany(q),
           sources: await txClient.source.findMany(q),
           trackCoArtists: await txClient.trackCoArtist.findMany(q),
-          tracks: await txClient.track.findMany(qWithFiles),
-          deletions: (await txClient.deletion.findMany({
-            where: {
-              userId: user.id,
-              deletedAt: {
-                gte: since,
-              },
-            },
-          })) as ResourceDeletion[],
+          tracks: await txClient.track.findMany(qFiles),
+          deletions: (await txClient.deletion.findMany(
+            qDel
+          )) as ResourceDeletion[],
         };
       }
     );
