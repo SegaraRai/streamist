@@ -289,11 +289,13 @@ export default defineComponent({
               v-model="artistName$$q"
               v-model:artistId="artistId$$q"
               :label="t('dialogComponent.editTrack.label.Artist')"
+              create
             />
             <s-combobox-album
               v-model="albumName$$q"
               v-model:albumId="albumId$$q"
               :label="t('dialogComponent.editTrack.label.Album')"
+              create
             />
             <n-collapse>
               <n-collapse-item title="More">

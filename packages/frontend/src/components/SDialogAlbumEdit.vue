@@ -186,6 +186,7 @@ export default defineComponent({
               v-model="artistName$$q"
               v-model:artistId="artistId$$q"
               :label="t('dialogComponent.editAlbum.label.Artist')"
+              create
             />
             <v-textarea
               v-model="itemDescription$$q"

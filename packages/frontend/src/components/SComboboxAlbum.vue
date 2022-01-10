@@ -20,6 +20,7 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    create: Boolean,
   },
   emits: {
     'update:modelValue': (_modelValue: string) => true,
@@ -92,7 +93,7 @@ export default defineComponent({
                 :album="albumId$$q"
               />
             </template>
-            <template v-else-if="modelValue$$q">
+            <template v-else-if="create && modelValue$$q">
               <n-popover placement="top" trigger="hover">
                 <template #trigger>
                   <i-mdi-plus-circle
@@ -108,6 +109,9 @@ export default defineComponent({
                   }}
                 </div>
               </n-popover>
+            </template>
+            <template v-else>
+              <div class="mr-2 w-6 h-6"></div>
             </template>
           </template>
         </v-text-field>
