@@ -15,7 +15,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const router = useRouter();
     const { t } = useI18n();
-    const activeElement = useActiveElement();
     const playbackStore = usePlaybackStore();
 
     const show$$q = useVModel(props, 'modelValue', emit);
@@ -47,19 +46,17 @@ export default defineComponent({
       }
     };
 
-    const notUsingInput = computed(
-      () =>
-        activeElement.value?.tagName !== 'INPUT' &&
-        activeElement.value?.tagName !== 'TEXTAREA'
-    );
-
     useEventListener('keydown', (event) => {
+      const element = event.target instanceof HTMLElement ? event.target : null;
+      const tagName = element?.tagName;
+      const isInput = tagName === 'INPUT' || tagName === 'TEXTAREA';
+
       let toggle = false;
       if (show$$q.value) {
-        toggle = event.key === 'Escape';
+        toggle = isInput && event.key === 'Escape';
       } else {
         toggle =
-          notUsingInput.value &&
+          !isInput &&
           (event.key === '/' || (event.ctrlKey && event.key === 'k'));
       }
       if (toggle) {
