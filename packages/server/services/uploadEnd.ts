@@ -5,6 +5,7 @@ import {
   getSourceFileKey,
   getSourceFileOS,
 } from '$shared/objectStorage';
+import { retryS3NoReject } from '$shared/retry';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -181,6 +182,180 @@ function invokeTranscodeBySourceSync(userId: string, sourceId: string): void {
   });
 }
 
+async function onSourceFileUpdated(
+  userId: string,
+  sourceId: string,
+  timestamp: number
+): Promise<void> {
+  // NOTE: `uploaded`を更新した後に改めて取得しないと検出漏れする場合がある
+  const sourceFiles = await client.sourceFile.findMany({
+    where: {
+      sourceId,
+      userId,
+    },
+  });
+
+  const someFilesAborted = sourceFiles.some(
+    (file) => file.state === is<SourceFileState>('aborted')
+  );
+  const allFilesUploaded =
+    !someFilesAborted &&
+    sourceFiles.every((file) => file.state === is<SourceFileState>('uploaded'));
+  if (!someFilesAborted && !allFilesUploaded) {
+    // upload in progress
+    await dbResourceUpdateTimestamp(userId);
+    return;
+  }
+
+  await client.source.updateMany({
+    where: {
+      id: sourceId,
+      userId,
+      // checking the state is required as it may be executed at the same time as the change from 'uploaded' to 'transcoding'
+      state: is<SourceState>('uploading'),
+    },
+    data: {
+      state: is<SourceState>(allFilesUploaded ? 'uploaded' : 'aborted'),
+      updatedAt: timestamp,
+    },
+  });
+
+  if (allFilesUploaded) {
+    // start transcode
+    await dbResourceUpdateTimestamp(userId);
+
+    invokeTranscodeBySourceSync(userId, sourceId);
+  } else {
+    // delete uploaded files
+    await client.sourceFile.updateMany({
+      where: {
+        userId,
+        sourceId,
+        entityExists: true,
+        state: is<SourceFileState>('uploaded'),
+      },
+      data: {
+        entityExists: false,
+        updatedAt: timestamp,
+      },
+    });
+
+    const uploadedSourceFiles = await client.sourceFile.findMany({
+      where: {
+        userId,
+        sourceId,
+        state: is<SourceFileState>('uploaded'),
+      },
+      select: {
+        id: true,
+        region: true,
+      },
+    });
+
+    for (const sourceFile of uploadedSourceFiles) {
+      const os = getSourceFileOS(sourceFile.region as OSRegion);
+      const key = getSourceFileKey(userId, sourceFile.id);
+      const s3 = createUserUploadS3Cached(os);
+
+      await retryS3NoReject(() =>
+        s3.deleteObject({
+          Bucket: os.bucket,
+          Key: key,
+        })
+      );
+    }
+
+    await dbResourceUpdateTimestamp(userId);
+  }
+}
+
+/**
+ * クライアントがファイルアップロードの中止を通知したときに呼ぶ関数 \
+ * （DB操作とトランスコーダの起動を行う）
+ * @param userId
+ * @param sourceId
+ * @param sourceFileId
+ * @returns
+ */
+export async function onSourceFileAborted(
+  userId: string,
+  sourceId: string,
+  sourceFileId: string
+): Promise<void> {
+  const sourceFile = await client.sourceFile.findFirst({
+    where: {
+      id: sourceFileId,
+      sourceId,
+      userId,
+    },
+    include: {
+      source: true,
+    },
+  });
+
+  if (!sourceFile) {
+    throw new HTTPError(404, `source file ${sourceFileId} not found`);
+  }
+
+  if (sourceFile.state !== is<SourceFileState>('uploading')) {
+    throw new HTTPError(
+      409,
+      `source file ${sourceFileId} already aborted or uploaded`
+    );
+  }
+
+  if (sourceFile.source.state !== is<SourceState>('uploading')) {
+    throw new HTTPError(500, `state of the source ${sourceId} is inconsistent`);
+  }
+
+  const timestamp = Date.now();
+
+  const updated = await client.sourceFile.updateMany({
+    where: {
+      id: sourceFileId,
+      sourceId,
+      userId,
+      state: is<SourceFileState>('uploading'),
+    },
+    data: {
+      state: is<SourceFileState>('aborted'),
+      entityExists: false,
+      uploadedAt: timestamp,
+      updatedAt: timestamp,
+    },
+  });
+  if (!updated.count) {
+    // updated by another process
+    return;
+  }
+
+  const os = getSourceFileOS(sourceFile.region as OSRegion);
+  const key = getSourceFileKey(userId, sourceFileId);
+  const s3 = createUserUploadS3Cached(os);
+
+  const { uploadId } = sourceFile;
+
+  if (uploadId) {
+    // abort multipart upload
+    await retryS3NoReject(() =>
+      s3.abortMultipartUpload({
+        Bucket: os.bucket,
+        Key: key,
+        UploadId: uploadId,
+      })
+    );
+  } else {
+    await retryS3NoReject(() =>
+      s3.deleteObject({
+        Bucket: os.bucket,
+        Key: key,
+      })
+    );
+  }
+
+  await onSourceFileUpdated(userId, sourceId, timestamp);
+}
+
 /**
  * クライアントがファイルアップロードの完了を通知したときに呼ぶ関数 \
  * （DB操作とトランスコーダの起動を行う）
@@ -212,14 +387,19 @@ export async function onSourceFileUploaded(
   }
 
   if (sourceFile.state !== is<SourceFileState>('uploading')) {
-    throw new HTTPError(409, `source file ${sourceFileId} already uploaded`);
+    throw new HTTPError(
+      409,
+      `source file ${sourceFileId} already aborted or uploaded`
+    );
   }
 
   if (sourceFile.source.state !== is<SourceState>('uploading')) {
     throw new HTTPError(500, `state of the source ${sourceId} is inconsistent`);
   }
 
-  if (sourceFile.uploadId) {
+  const { uploadId } = sourceFile;
+
+  if (uploadId) {
     if (!eTags) {
       throw new HTTPError(400, `ETags must be specified for multipart upload`);
     }
@@ -238,17 +418,19 @@ export async function onSourceFileUploaded(
     const s3 = createUserUploadS3Cached(os);
 
     // TODO(prod): error handling
-    await s3.completeMultipartUpload({
-      Bucket: os.bucket,
-      Key: key,
-      UploadId: sourceFile.uploadId,
-      MultipartUpload: {
-        Parts: eTags!.map((eTag, index) => ({
-          PartNumber: index + 1,
-          ETag: eTag,
-        })),
-      },
-    });
+    await retryS3NoReject(() =>
+      s3.completeMultipartUpload({
+        Bucket: os.bucket,
+        Key: key,
+        UploadId: uploadId,
+        MultipartUpload: {
+          Parts: eTags!.map((eTag, index) => ({
+            PartNumber: index + 1,
+            ETag: eTag,
+          })),
+        },
+      })
+    );
   }
 
   const timestamp = Date.now();
@@ -272,40 +454,5 @@ export async function onSourceFileUploaded(
     return;
   }
 
-  // TODO(prod): lock object
-
-  // NOTE: `uploaded`を更新した後に改めて取得しないと検出漏れする場合がある
-  const sourceFiles = await client.sourceFile.findMany({
-    where: {
-      sourceId,
-      userId,
-    },
-  });
-
-  const allFilesUploaded = sourceFiles.every(
-    (file) => file.state === is<SourceFileState>('uploaded')
-  );
-  if (!allFilesUploaded) {
-    // upload in progress
-    await dbResourceUpdateTimestamp(userId);
-    return;
-  }
-
-  await client.source.updateMany({
-    where: {
-      id: sourceId,
-      userId,
-      // checking the state is required as it may be executed at the same time as the change from 'uploaded' to 'transcoding'
-      state: is<SourceState>('uploading'),
-    },
-    data: {
-      state: is<SourceState>('uploaded'),
-      updatedAt: timestamp,
-    },
-  });
-
-  await dbResourceUpdateTimestamp(userId);
-
-  // start transcode
-  invokeTranscodeBySourceSync(userId, sourceId);
+  await onSourceFileUpdated(userId, sourceId, timestamp);
 }

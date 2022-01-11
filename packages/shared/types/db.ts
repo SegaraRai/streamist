@@ -11,6 +11,8 @@ export type SourceState =
   // [final state] the files are successfully transcoded
   // some files may be skipped due to transcoding error
   | 'transcoded'
+  // [final state] some files are aborted uploading by the user
+  | 'aborted'
   // [final state] some files are not uploaded by the user
   // uploaded source files will be removed from S3
   | 'not_uploaded'
@@ -32,6 +34,8 @@ export type SourceFileState =
   // changed at the same time as SourceState
   // extracted images are registered to database with this state
   | 'transcoded'
+  // [final state] the files is aborted uploading by the user
+  | 'aborted'
   // [final state] the file is not uploaded by the user
   // changed at the same time as SourceState
   | 'not_uploaded'

@@ -1,19 +1,29 @@
-import { onSourceFileUploaded } from '$/services/uploadEnd';
-import { HTTPError } from '$/utils/httpError';
+import {
+  onSourceFileAborted,
+  onSourceFileUploaded,
+} from '$/services/uploadEnd';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
   patch: async ({ params, user, body }) => {
-    if (body.state !== 'uploaded') {
-      throw new HTTPError(400, 'state must be uploaded');
-    }
+    switch (body.state) {
+      case 'aborted':
+        await onSourceFileAborted(
+          user.id,
+          params.sourceId,
+          params.sourceFileId
+        );
+        break;
 
-    await onSourceFileUploaded(
-      user.id,
-      params.sourceId,
-      params.sourceFileId,
-      body.parts
-    );
+      case 'uploaded':
+        await onSourceFileUploaded(
+          user.id,
+          params.sourceId,
+          params.sourceFileId,
+          body.parts
+        );
+        break;
+    }
 
     return { status: 202 };
   },

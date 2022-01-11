@@ -11,6 +11,7 @@ import {
   getSourceFileOS,
   toOSRegion,
 } from '$shared/objectStorage';
+import { retryS3 } from '$shared/retry';
 import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE,
@@ -64,13 +65,15 @@ async function createMultipartUploadId(
   const key = getSourceFileKey(userId, sourceFileId);
   const s3 = createUserUploadS3Cached(os);
 
-  const response = await s3.createMultipartUpload({
-    Bucket: os.bucket,
-    Key: key,
-    CacheControl: SOURCE_FILE_CACHE_CONTROL,
-    ContentEncoding: SOURCE_FILE_CONTENT_ENCODING,
-    ContentType: SOURCE_FILE_CONTENT_TYPE,
-  });
+  const response = await retryS3(() =>
+    s3.createMultipartUpload({
+      Bucket: os.bucket,
+      Key: key,
+      CacheControl: SOURCE_FILE_CACHE_CONTROL,
+      ContentEncoding: SOURCE_FILE_CONTENT_ENCODING,
+      ContentType: SOURCE_FILE_CONTENT_TYPE,
+    })
+  );
 
   return response.UploadId;
 }
