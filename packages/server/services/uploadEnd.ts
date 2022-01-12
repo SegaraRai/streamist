@@ -5,7 +5,7 @@ import {
   getSourceFileKey,
   getSourceFileOS,
 } from '$shared/objectStorage';
-import { retryS3NoReject } from '$shared/retry';
+import { retryS3, retryS3NoReject } from '$shared/retry';
 import { USE_NFS_SIZE_THRESHOLD } from '$shared/sourceFileConfig';
 import type {
   SourceFileAttachToType,
@@ -436,7 +436,7 @@ export async function onSourceFileUploaded(
     const s3 = createUserUploadS3Cached(os);
 
     // TODO(prod): error handling
-    await retryS3NoReject(() =>
+    await retryS3(() =>
       s3.completeMultipartUpload({
         Bucket: os.bucket,
         Key: key,

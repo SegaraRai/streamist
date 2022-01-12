@@ -225,6 +225,11 @@ export async function processAudioRequest(
     userId,
   } = file;
 
+  await uploadJSON(userId, sourceFileId, region, 'audio_request', {
+    userId,
+    input: file,
+  });
+
   const os = getTranscodedAudioFileOS(region);
 
   try {

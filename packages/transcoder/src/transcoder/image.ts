@@ -28,6 +28,11 @@ export async function processImageRequest(
 
   const { extracted, region, sourceFileId, sourceId, userId } = file;
 
+  await uploadJSON(userId, sourceFileId, region, 'image_request', {
+    userId,
+    input: file,
+  });
+
   const os = getTranscodedImageFileOS(region);
 
   try {

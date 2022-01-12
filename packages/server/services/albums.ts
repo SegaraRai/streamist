@@ -230,7 +230,6 @@ export async function albumDeleteIfUnreferenced(
     // delete album
     // * Album id is referenced from: Track, AlbumCoArtist, Image (implicit m:n)
     // AlbumCoArtist will be cascade deleted (Deletion of AlbumCoArtist is not recorded, therefore the client must synchronize AlbumCoArtist based on the Deletion of Album)
-    // TODO(db): set ON DELETE RESTRICT for Track and Image (implicit m:n) table
     const result = await txClient.album.deleteMany({
       where: {
         id: albumId,

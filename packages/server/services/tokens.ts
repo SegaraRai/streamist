@@ -135,7 +135,7 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
       if (!extractedUserId) {
         throw new HTTPError(401, 'Invalid refresh token');
       }
-      // TODO: check if refresh token is not revoked
+      // TODO(auth): check if refresh token is not revoked
       userId = extractedUserId;
       break;
     }

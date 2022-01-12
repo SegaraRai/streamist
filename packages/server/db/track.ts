@@ -70,7 +70,6 @@ export async function dbTrackCreateTx(
     data,
   }: CreateTrackInput
 ): Promise<CreateTrackResult> {
-  // TODO(pref): generate id before the transaction
   const newAlbumId = await generateAlbumId();
   const newTrackId = await generateTrackId();
 

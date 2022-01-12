@@ -34,7 +34,7 @@ const THEME_DARK: ThemeDefinitionColor = {
   warning: '#f28a0a',
 };
 
-// TODO
+// TODO: create theme
 const THEME_LIGHT: ThemeDefinitionColor = {
   ...THEME_DARK,
   name: 'light',

@@ -124,7 +124,6 @@ export async function playlistDelete(
 
     // delete playlist
     // * Playlist id is referenced from: Image (implicit m:n)
-    // TODO(db): set ON DELETE RESTRICT for Image (implicit m:n) table
     const result = await txClient.playlist.deleteMany({
       where: {
         id: playlistId,

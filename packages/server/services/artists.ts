@@ -184,7 +184,6 @@ export async function artistDeleteIfUnreferenced(
 
     // delete artist
     // * Artist id is referenced from: Album, AlbumCoArtist, Track, TrackCoArtist, Image (implicit m:n)
-    // TODO(db): set ON DELETE RESTRICT for Album, AlbumCoArtist, Track, TrackCoArtist, Image (implicit m:n) table
     const result = await txClient.artist.deleteMany({
       where: {
         id: artistId,

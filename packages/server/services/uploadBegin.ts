@@ -181,8 +181,6 @@ export async function createAudioSource(
 ): Promise<CreateSourceResponse> {
   const region = toOSRegion(request.region);
 
-  // TODO(security): validate request
-
   if (request.audioFile.fileSize < MIN_SOURCE_FILE_SIZE) {
     throw new HTTPError(
       400,
@@ -337,8 +335,6 @@ export async function createImageSource(
   request: CreateSourceRequestImage
 ): Promise<CreateSourceResponse> {
   const region = toOSRegion(request.region);
-
-  // TODO(security): validate request
 
   if (request.imageFile.fileSize < MIN_SOURCE_FILE_SIZE) {
     throw new HTTPError(
