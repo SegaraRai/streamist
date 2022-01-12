@@ -1,3 +1,4 @@
+import { logger } from '$/services/logger';
 import type { DeletionEntityType } from '../../types/db';
 import { client } from './client';
 import type { TransactionalPrismaClient } from './types';
@@ -20,8 +21,11 @@ export async function dbResourceUpdateTimestamp(userId: string): Promise<void> {
         updatedAt,
       },
     });
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    logger.error(
+      error,
+      `dbResourceUpdateTimestamp: failed (userId = ${userId})`
+    );
   }
 }
 

@@ -22,6 +22,7 @@ import { Source, SourceFile } from '$prisma/client';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
+import { logger } from './logger';
 import {
   TRANSCODER_CALLBACK_API_ENDPOINT,
   TRANSCODER_CALLBACK_API_TOKEN,
@@ -87,10 +88,10 @@ async function invokeTranscoder(request: TranscoderRequest): Promise<void> {
         body: JSON.stringify(request),
       });
       if (!response.ok) {
-        console.error('failed to invoke transcoder', response.status);
+        logger.error('failed to invoke transcoder (%d)', response.status);
       }
     } catch (error: unknown) {
-      console.error('failed to invoke transcoder', error);
+      logger.error(error, 'failed to invoke transcoder');
     }
   } else {
     // TODO(prod): call AWS Lambda
@@ -195,7 +196,7 @@ async function invokeTranscoderBySource(
 
 function invokeTranscodeBySourceSync(userId: string, sourceId: string): void {
   invokeTranscoderBySource(userId, sourceId).catch((error) => {
-    console.error(error);
+    logger.error(error, 'invokeTranscoderBySource failed');
   });
 }
 

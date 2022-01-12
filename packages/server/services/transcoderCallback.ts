@@ -29,6 +29,7 @@ import type { TransactionalPrismaClient } from '$/db/lib/types';
 import { dbPlaylistAddImageTx } from '$/db/playlist';
 import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
 import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
+import { logger } from './logger';
 
 export const TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
 export const TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${TRANSCODER_CALLBACK_API_PATH}`;
@@ -606,28 +607,49 @@ async function handleTranscoderResponse(
 
   // handle errors
   for (const artifact of errorArtifacts) {
-    await handleTranscoderResponseArtifactError(artifact);
+    try {
+      await handleTranscoderResponseArtifactError(artifact);
+    } catch (error) {
+      logger.error(
+        error,
+        'TranscoderCallback: handleTranscoderResponseArtifactError failed'
+      );
+    }
   }
 
   // register album and tracks
   const sourceFileIdToAlbumIdMap = new Map<string, string | undefined>();
   for (const artifact of audioArtifacts) {
-    const albumId = await handleTranscoderResponseArtifactAudio(artifact);
-    sourceFileIdToAlbumIdMap.set(artifact.source.sourceFileId, albumId);
+    try {
+      const albumId = await handleTranscoderResponseArtifactAudio(artifact);
+      sourceFileIdToAlbumIdMap.set(artifact.source.sourceFileId, albumId);
+    } catch (error) {
+      logger.error(
+        error,
+        'TranscoderCallback: handleTranscoderResponseArtifactAudio failed'
+      );
+    }
   }
 
   // register images
   for (const artifact of imageArtifacts) {
-    await handleTranscoderResponseArtifactImage(
-      artifact,
-      artifact.source.extracted
-        ? sourceFileIdToAlbumIdMap.get(artifact.source.audioSourceFileId)
-        : undefined
-    );
+    try {
+      await handleTranscoderResponseArtifactImage(
+        artifact,
+        artifact.source.extracted
+          ? sourceFileIdToAlbumIdMap.get(artifact.source.audioSourceFileId)
+          : undefined
+      );
+    } catch (error) {
+      logger.error(
+        error,
+        'TranscoderCallback: handleTranscoderResponseArtifactImage failed'
+      );
+    }
   }
 
-  const userIdSet = new Set(
-    artifacts.map((artifact) => artifact.source.userId)
+  const userIdSet: ReadonlySet<string> = new Set(
+    artifacts.map((artifact): string => artifact.source.userId)
   );
   for (const userId of userIdSet) {
     await dbResourceUpdateTimestamp(userId);
@@ -635,8 +657,8 @@ async function handleTranscoderResponse(
 }
 
 function handleTranscoderResponseSync(response: TranscoderResponse): void {
-  handleTranscoderResponse(response).catch((error) => {
-    console.error(error);
+  handleTranscoderResponse(response).catch((error): void => {
+    logger.error(error, 'handleTranscoderResponse failed');
   });
 }
 
@@ -645,7 +667,7 @@ export const transcoderCallback: FastifyPluginCallback<{}> = (
   _options: {},
   done: (err?: Error) => void
 ): void => {
-  fastify.post(TRANSCODER_CALLBACK_API_PATH, (request, reply) => {
+  fastify.post(TRANSCODER_CALLBACK_API_PATH, (request, reply): void => {
     if (request.headers.authorization !== TRANSCODER_CALLBACK_API_TOKEN) {
       reply.code(401).send();
       return;
