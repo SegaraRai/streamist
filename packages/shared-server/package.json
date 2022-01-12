@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^17.0.6",
+    "@types/node": "^16.11.19",
     "typescript": "npm:@typescript-deploys/pr-build@4.6.0-pr-47183-2"
   },
   "dependencies": {
