@@ -6,6 +6,10 @@ import {
   getSourceFileOS,
 } from '$shared/objectStorage';
 import { retryS3NoReject } from '$shared/retry';
+import {
+  SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD,
+  SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE,
+} from '$shared/sourceFileConfig';
 import { SourceFileState, SourceState } from '$shared/types/db';
 import { client } from '$/db/lib/client';
 import { createUserUploadS3Cached } from '$/services/userOS';
@@ -60,7 +64,8 @@ async function updateStaleSources(
 
 export async function cleanupStaleUploads() {
   const timestamp = Date.now();
-  const staleCreatedAt = timestamp - 0;
+  const staleCreatedAt =
+    timestamp - SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE;
 
   await updateStaleSources(
     {
@@ -77,7 +82,8 @@ export async function cleanupStaleUploads() {
 
 export async function cleanupStaleTranscodes() {
   const timestamp = Date.now();
-  const staleUploadedAt = timestamp - 0;
+  const staleUploadedAt =
+    timestamp - SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD;
 
   await updateStaleSources(
     {
