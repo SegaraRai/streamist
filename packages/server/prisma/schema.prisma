@@ -48,6 +48,7 @@ model Source {
 
   @@index([userId])
   @@index([userId, updatedAt])
+  @@index([state])
 }
 
 model SourceFile {

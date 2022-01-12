@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { is } from '$shared/is';
 import {
   OSRegion,
@@ -10,18 +10,48 @@ import {
   SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD,
   SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE,
 } from '$shared/sourceFileConfig';
-import { SourceFileState, SourceState } from '$shared/types/db';
+import type { SourceFileState, SourceState } from '$shared/types/db';
 import { client } from '$/db/lib/client';
 import { createUserUploadS3Cached } from '$/services/userOS';
 
 async function updateStaleSources(
-  where: Prisma.SourceFileWhereInput,
-  postState: SourceFileState,
-  postSourceState: SourceState,
+  where: Prisma.SourceWhereInput,
+  postState: SourceFileState & SourceState,
   timestamp: number
 ): Promise<void> {
-  await client.sourceFile.updateMany({
+  await client.source.updateMany({
     where,
+    data: {
+      state: postState,
+      updatedAt: timestamp,
+    },
+  });
+
+  const updatedSources = await client.source.findMany({
+    where: {
+      state: postState,
+      updatedAt: timestamp,
+    },
+    select: {
+      files: {
+        select: {
+          id: true,
+          region: true,
+          userId: true,
+          entityExists: true,
+        },
+      },
+    },
+  });
+
+  const sourceFiles = updatedSources.flatMap((s) => s.files);
+
+  await client.sourceFile.updateMany({
+    where: {
+      id: {
+        in: sourceFiles.map((f) => f.id),
+      },
+    },
     data: {
       state: postState,
       entityExists: false,
@@ -29,26 +59,7 @@ async function updateStaleSources(
     },
   });
 
-  const updatedFiles = await client.sourceFile.findMany({
-    where: {
-      state: postState,
-      updatedAt: timestamp,
-    },
-  });
-
-  await client.source.updateMany({
-    where: {
-      id: {
-        in: Array.from(new Set(updatedFiles.map((f) => f.sourceId))),
-      },
-    },
-    data: {
-      state: postSourceState,
-      updatedAt: timestamp,
-    },
-  });
-
-  for (const sourceFile of updatedFiles) {
+  for (const sourceFile of sourceFiles) {
     const os = getSourceFileOS(sourceFile.region as OSRegion);
     const key = getSourceFileKey(sourceFile.userId, sourceFile.id);
     const s3 = createUserUploadS3Cached(os);
@@ -62,42 +73,49 @@ async function updateStaleSources(
   }
 }
 
-export async function cleanupStaleUploads() {
+export async function cleanupStaleUploads(): Promise<void> {
   const timestamp = Date.now();
   const staleCreatedAt =
     timestamp - SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE;
 
   await updateStaleSources(
     {
-      state: is<SourceFileState>('uploading'),
+      state: is<SourceState>('uploading'),
       createdAt: {
         lt: staleCreatedAt,
       },
     },
     'not_uploaded',
-    'not_uploaded',
     timestamp
   );
 }
 
-export async function cleanupStaleTranscodes() {
+export async function cleanupStaleTranscodes(): Promise<void> {
   const timestamp = Date.now();
   const staleUploadedAt =
     timestamp - SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD;
 
   await updateStaleSources(
     {
-      state: {
-        in: [
-          is<SourceFileState>('uploaded'),
-          is<SourceFileState>('transcoding'),
-        ],
-      },
-      uploadedAt: {
-        lt: staleUploadedAt,
-      },
+      OR: [
+        {
+          state: {
+            in: is<SourceState>('uploaded'),
+          },
+          updatedAt: {
+            lt: staleUploadedAt,
+          },
+        },
+        {
+          state: {
+            in: is<SourceFileState>('transcoding'),
+          },
+          transcodeStartedAt: {
+            lt: staleUploadedAt,
+          },
+        },
+      ],
     },
-    'not_transcoded',
     'not_transcoded',
     timestamp
   );
