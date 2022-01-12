@@ -152,7 +152,7 @@ const uploadDialog$$q = ref(false);
     class="min-h-screen flex flex-col print:invisible"
   >
     <div
-      class="s-offline-bar bg-yellow-400 h-0 text-white font-weight-bold text-md flex items-center px-4 leading-none z-2200 overflow-hidden"
+      class="s-offline-bar bg-yellow-400 h-0 text-white font-weight-bold text-md flex items-center px-4 leading-none z-1000 overflow-hidden"
     >
       {{ t('header.NoInternetConnection') }}
     </div>
@@ -274,7 +274,6 @@ const uploadDialog$$q = ref(false);
       </v-app-bar>
 
       <!-- Left Sidebar: Navigation -->
-      <!-- not setting !z-2120 because it makes tooltips hidden -->
       <!-- TODO: hide sidebar on click outside -->
       <v-navigation-drawer
         :model-value="leftSidebar$$q && !hideShell$$q"

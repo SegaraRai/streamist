@@ -19,6 +19,10 @@ import 'virtual:windi-utilities.css';
 // windicss devtools support (dev only)
 import 'virtual:windi-devtools';
 import { isAuthenticated } from './logic/tokens';
+import { currentScrollContainerRef, currentScrollRef } from './stores/scroll';
+
+const SCROLL_CHECK_TIMEOUT = 5000;
+const SCROLL_CHECK_INTERVAL = 100;
 
 const routes = setupLayouts(generatedRoutes);
 
@@ -39,6 +43,48 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
         );
       }
       next();
+    });
+
+    // we cannot use beforeEach as it shows navigated (backed) history.state on history back
+    // there seems to be no way (except handling it explicitly on popstate) to deal with it
+    watch(
+      [currentScrollRef, currentScrollContainerRef],
+      ([scrollPosition, element]): void => {
+        history.replaceState(
+          {
+            ...history.state,
+            appScroll: element ? scrollPosition : null,
+          },
+          ''
+        );
+      }
+    );
+
+    window.addEventListener('popstate', (): void => {
+      const state = history.state;
+      const scrollPosition = state?.appScroll as number | null | undefined;
+      if (scrollPosition != null) {
+        const finish = Date.now() + SCROLL_CHECK_TIMEOUT;
+        const interval = SCROLL_CHECK_INTERVAL;
+        const check = (): void => {
+          if (history.state.current !== state.current) {
+            return;
+          }
+
+          const element = currentScrollContainerRef.value;
+          if (
+            element &&
+            scrollPosition <= element.scrollHeight - element.clientHeight
+          ) {
+            element.scrollTop = scrollPosition;
+            return;
+          }
+          if (Date.now() <= finish) {
+            setTimeout(check, interval);
+          }
+        };
+        check();
+      }
     });
 
     activateTokenInterceptor();

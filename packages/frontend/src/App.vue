@@ -1,53 +1,62 @@
-<script setup lang="ts">
+<script lang="ts">
 import { setCDNCookie } from '~/logic/cdnCookie';
 import { NAIVE_UI_THEMES } from '~/logic/theme';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
 
-const themeStore$$q = useThemeStore();
-const naiveUITheme$$q = eagerComputed(
-  () => NAIVE_UI_THEMES[themeStore$$q.theme]
-);
-const playbackStore$$q = usePlaybackStore();
+export default defineComponent({
+  setup() {
+    const themeStore = useThemeStore();
+    const naiveUITheme = eagerComputed(() => NAIVE_UI_THEMES[themeStore.theme]);
+    const playbackStore = usePlaybackStore();
 
-const { idle: idle$$q } = useIdle(1 * 60 * 1000);
+    const { idle } = useIdle(1 * 60 * 1000);
 
-useIntervalFn(() => {
-  const active = !idle$$q.value || playbackStore$$q.playing$$q.value;
-  if (!active) {
-    return;
-  }
+    useIntervalFn(() => {
+      const active = !idle.value || playbackStore.playing$$q.value;
+      if (!active) {
+        return;
+      }
 
-  setCDNCookie();
-}, 30 * 1000);
+      setCDNCookie();
+    }, 30 * 1000);
 
-const themeClass$$q = eagerComputed(() => `s-theme--${themeStore$$q.theme}`);
+    const themeClass = eagerComputed(() => `s-theme--${themeStore.theme}`);
 
-const rootElement$$q = document.documentElement;
+    const rootElement = document.documentElement;
 
-watch(
-  themeClass$$q,
-  (currentThemeClass, previousThemeClass) => {
-    if (previousThemeClass) {
-      rootElement$$q.classList.remove(previousThemeClass);
-    }
-    rootElement$$q.classList.add(currentThemeClass);
+    watch(
+      themeClass,
+      (currentThemeClass, previousThemeClass) => {
+        if (previousThemeClass) {
+          rootElement.classList.remove(previousThemeClass);
+        }
+        rootElement.classList.add(currentThemeClass);
+      },
+      {
+        immediate: true,
+      }
+    );
+
+    onBeforeUnmount(() => {
+      rootElement.classList.remove(themeClass.value);
+    });
+
+    // https://github.com/vueuse/head
+    // you can use this to manipulate the document head in any components,
+    // they will be rendered correctly in the html results with vite-ssg
+    useHead({
+      title: 'Streamist',
+      meta: [
+        { name: 'description', content: 'A streaming service for yourself' },
+      ],
+    });
+
+    return {
+      naiveUITheme$$q: naiveUITheme,
+      themeClass$$q: themeClass,
+    };
   },
-  {
-    immediate: true,
-  }
-);
-
-onBeforeUnmount(() => {
-  rootElement$$q.classList.remove(themeClass$$q.value);
-});
-
-// https://github.com/vueuse/head
-// you can use this to manipulate the document head in any components,
-// they will be rendered correctly in the html results with vite-ssg
-useHead({
-  title: 'Streamist',
-  meta: [{ name: 'description', content: 'A streaming service for yourself' }],
 });
 </script>
 
