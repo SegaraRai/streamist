@@ -1,4 +1,4 @@
-import { Album, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { generateArtistId } from '$shared-server/generateId';
 import { emptyToNull } from '$shared/transform';
 import { dbAlbumMoveImageBefore, dbAlbumRemoveImageTx } from '$/db/album';
@@ -8,14 +8,9 @@ import { dbCoArtistMergeTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
+import type { IAlbumUpdateData } from '$/validators';
 import { artistDeleteIfUnreferenced } from './artists';
 import { imageDeleteFilesAndSourceFiles } from './images';
-
-export type AlbumUpdateData = Partial<
-  Pick<Album, 'title' | 'titleSort' | 'description' | 'artistId'>
-> & {
-  artistName?: string;
-};
 
 export interface UpdateAlbumOptions {
   readonly forceNewArtist?: boolean;
@@ -24,7 +19,7 @@ export interface UpdateAlbumOptions {
 export async function albumUpdate(
   userId: string,
   albumId: string,
-  data: AlbumUpdateData,
+  data: IAlbumUpdateData,
   { forceNewArtist = false }: UpdateAlbumOptions
 ): Promise<void> {
   const [oldAlbum, newAlbum] = await client.$transaction(async (txClient) => {

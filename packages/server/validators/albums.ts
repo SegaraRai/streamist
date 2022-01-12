@@ -1,9 +1,16 @@
+import type { Album } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { IsId, IsUndefinable } from './utils';
 import { tStringNormalizeSingleLine } from './utils/transform';
 
-export class VAlbumUpdateBody {
+export type IAlbumUpdateData = Partial<
+  Pick<Album, 'title' | 'titleSort' | 'description' | 'artistId'>
+> & {
+  artistName?: string;
+};
+
+export class VAlbumUpdateBody implements IAlbumUpdateData {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()

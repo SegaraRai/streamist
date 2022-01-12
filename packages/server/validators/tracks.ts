@@ -1,3 +1,4 @@
+import type { Track } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 import { IsId, IsNullable, IsUndefinable } from './utils';
@@ -6,13 +7,33 @@ import {
   tStringNormalizeSingleLine,
 } from './utils/transform';
 
+export type ITrackUpdateData = Partial<
+  Pick<
+    Track,
+    | 'title'
+    | 'titleSort'
+    | 'discNumber'
+    | 'trackNumber'
+    | 'comment'
+    | 'lyrics'
+    | 'releaseDateText'
+    | 'genre'
+    | 'bpm'
+    | 'albumId'
+    | 'artistId'
+  >
+> & {
+  artistName?: string;
+  albumTitle?: string;
+};
+
 export class VTrackOrderUpdateBody {
   @IsNullable()
   @IsId()
   nextTrackId!: string | null;
 }
 
-export class VTrackUpdateBody {
+export class VTrackUpdateBody implements ITrackUpdateData {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()

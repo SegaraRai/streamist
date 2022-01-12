@@ -1,20 +1,17 @@
-import { Artist, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { dbArtistMoveImageBefore, dbArtistRemoveImageTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
 import { dbCoArtistMergeArtistTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
+import type { IArtistUpdateData } from '$/validators';
 import { imageDeleteFilesAndSourceFiles } from './images';
-
-export type ArtistUpdateData = Partial<
-  Pick<Artist, 'name' | 'nameSort' | 'description'>
->;
 
 export async function artistUpdate(
   userId: string,
   artistId: string,
-  data: ArtistUpdateData
+  data: IArtistUpdateData
 ): Promise<void> {
   const { description, name, nameSort } = data;
 

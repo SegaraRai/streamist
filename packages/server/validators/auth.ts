@@ -7,7 +7,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-interface IAuthBodyPassword {
+export interface IAuthBodyPassword {
   grant_type: 'password';
   username: string;
   password: string;
@@ -26,7 +26,7 @@ class VAuthBodyPassword implements IAuthBodyPassword {
   password!: string;
 }
 
-interface IAuthBodyRefreshToken {
+export interface IAuthBodyRefreshToken {
   grant_type: 'refresh_token';
   refresh_token: string;
 }
@@ -39,6 +39,8 @@ class VAuthBodyRefreshToken implements IAuthBodyRefreshToken {
   @IsNotEmpty()
   refresh_token!: string;
 }
+
+export type IAuthRequest = IAuthBodyPassword | IAuthBodyRefreshToken;
 
 export class VAuthBodyWrapper {
   @IsObject({
@@ -56,4 +58,10 @@ export class VAuthBodyWrapper {
     },
   })
   '!payload'!: VAuthBodyPassword | VAuthBodyRefreshToken;
+}
+
+export interface IAuthResponse {
+  access_token: string;
+  cdn_access_token: string;
+  refresh_token?: string;
 }

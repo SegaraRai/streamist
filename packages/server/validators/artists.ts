@@ -1,3 +1,4 @@
+import type { Artist } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { IsId, IsUndefinable } from './utils';
@@ -6,7 +7,11 @@ import {
   tStringNormalizeSingleLine,
 } from './utils/transform';
 
-export class VArtistUpdateBody {
+export type IArtistUpdateData = Partial<
+  Pick<Artist, 'name' | 'nameSort' | 'description'>
+>;
+
+export class VArtistUpdateBody implements IArtistUpdateData {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()

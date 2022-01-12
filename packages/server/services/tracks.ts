@@ -9,29 +9,10 @@ import { client } from '$/db/lib/client';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { osDeleteTrackFiles } from '$/os/trackFile';
 import { HTTPError } from '$/utils/httpError';
+import type { ITrackUpdateData } from '$/validators';
 import { albumDeleteIfUnreferenced } from './albums';
 import { artistDeleteIfUnreferenced } from './artists';
 import { sourceFileDeleteFromOSIfUnreferenced } from './sourceFiles';
-
-export type TrackUpdateData = Partial<
-  Pick<
-    Track,
-    | 'title'
-    | 'titleSort'
-    | 'discNumber'
-    | 'trackNumber'
-    | 'comment'
-    | 'lyrics'
-    | 'releaseDateText'
-    | 'genre'
-    | 'bpm'
-    | 'albumId'
-    | 'artistId'
-  >
-> & {
-  artistName?: string;
-  albumTitle?: string;
-};
 
 export interface TrackUpdateOptions {
   readonly forceNewAlbum?: boolean;
@@ -43,7 +24,7 @@ export interface TrackUpdateOptions {
 export async function trackUpdate(
   userId: string,
   trackId: string,
-  data: TrackUpdateData,
+  data: ITrackUpdateData,
   {
     forceNewAlbum = false,
     forceNewArtist = false,

@@ -12,15 +12,12 @@ import {
   dbPlaylistRemoveTrack,
 } from '$/db/playlist';
 import { HTTPError } from '$/utils/httpError';
+import type { IPlaylistCreateData, IPlaylistUpdateData } from '$/validators';
 import { imageDeleteFilesAndSourceFiles } from './images';
-
-export type PlaylistCreateData = Pick<Playlist, 'title' | 'description'> & {
-  trackIds?: string[];
-};
 
 export async function playlistCreate(
   userId: string,
-  data: PlaylistCreateData
+  data: IPlaylistCreateData
 ): Promise<Playlist> {
   const { title, description } = data;
 
@@ -70,14 +67,10 @@ export async function playlistCreate(
   return playlist;
 }
 
-export type PlaylistUpdateData = Partial<
-  Pick<Playlist, 'title' | 'description'>
->;
-
 export async function playlistUpdate(
   userId: string,
   playlistId: string,
-  data: PlaylistUpdateData
+  data: IPlaylistUpdateData
 ): Promise<void> {
   const { description, title } = data;
 
