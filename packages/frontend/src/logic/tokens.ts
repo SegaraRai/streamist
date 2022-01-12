@@ -7,6 +7,8 @@ export interface Tokens {
   readonly cdnToken: string;
 }
 
+const TOLERANCE_FOR_SHOULD_RENEW = -5 * 60;
+
 export const tokens = createAsyncCache<Tokens>(
   async (): Promise<Tokens> => {
     const refreshToken = localStorage.getItem('refreshToken');
@@ -35,11 +37,11 @@ export const tokens = createAsyncCache<Tokens>(
       throw error;
     }
   },
-  (tokens) =>
+  (tokens): boolean =>
     isJWTNotExpired(tokens.apiToken) && isJWTNotExpired(tokens.cdnToken),
-  (tokens) =>
-    isJWTNotExpired(tokens.apiToken, -5 * 60) &&
-    isJWTNotExpired(tokens.cdnToken, -5 * 60)
+  (tokens): boolean =>
+    isJWTNotExpired(tokens.apiToken, TOLERANCE_FOR_SHOULD_RENEW) &&
+    isJWTNotExpired(tokens.cdnToken, TOLERANCE_FOR_SHOULD_RENEW)
 );
 
 export async function authenticate(
@@ -74,6 +76,11 @@ export async function authenticate(
   }
 }
 
-export function isAuthenticated(): Promise<boolean> {
-  return tokens.valueAsync.then(() => true).catch(() => false);
+export async function isAuthenticated(): Promise<boolean> {
+  try {
+    await tokens.valueAsync;
+    return true;
+  } catch (_error) {
+    return false;
+  }
 }

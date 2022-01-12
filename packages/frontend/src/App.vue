@@ -1,11 +1,25 @@
 <script setup lang="ts">
 import { NAIVE_UI_THEMES } from '~/logic/theme';
+import { tokens } from '~/logic/tokens';
+import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
 
 const themeStore$$q = useThemeStore();
 const naiveUITheme$$q = eagerComputed(
   () => NAIVE_UI_THEMES[themeStore$$q.theme]
 );
+const playbackStore$$q = usePlaybackStore();
+
+const { idle: idle$$q } = useIdle(1 * 60 * 1000);
+
+useIntervalFn(() => {
+  const active = !idle$$q.value || playbackStore$$q.playing$$q.value;
+  if (!active) {
+    return;
+  }
+
+  tokens.renew();
+}, 30 * 1000);
 
 const themeClass$$q = eagerComputed(() => `s-theme--${themeStore$$q.theme}`);
 
