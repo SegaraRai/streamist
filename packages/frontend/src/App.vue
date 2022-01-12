@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { setCDNCookie } from '~/logic/cdnCookie';
 import { NAIVE_UI_THEMES } from '~/logic/theme';
-import { tokens } from '~/logic/tokens';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
 
@@ -18,7 +18,7 @@ useIntervalFn(() => {
     return;
   }
 
-  tokens.renew();
+  setCDNCookie();
 }, 30 * 1000);
 
 const themeClass$$q = eagerComputed(() => `s-theme--${themeStore$$q.theme}`);
