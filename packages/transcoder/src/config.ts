@@ -1,22 +1,19 @@
 /**
- * 署名の時刻との差の許容範囲（秒）
- * コールドスタートの可能性を考慮しておく
- */
-export const clockTolerance = 50 * 60;
-
-/**
  * 一時ディレクトリ
  */
-export const tempDir =
+export const TEMP_DIR =
   process.env.NODE_ENV === 'production' ||
   process.env.NODE_ENV === 'staging' ||
   process.platform !== 'win32'
     ? '/tmp'
     : './temp';
 
-export const nfsTempDir =
+/**
+ * 一時ディレクトリ（大きいファイル用）
+ */
+export const NFS_TEMP_DIR =
   process.env.NODE_ENV === 'production' ||
   process.env.NODE_ENV === 'staging' ||
   process.platform !== 'win32'
-    ? '/tmp'
+    ? '/mnt/tmp'
     : './temp';

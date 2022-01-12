@@ -6,6 +6,7 @@ import {
   getSourceFileOS,
 } from '$shared/objectStorage';
 import { retryS3NoReject } from '$shared/retry';
+import { USE_NFS_SIZE_THRESHOLD } from '$shared/sourceFileConfig';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -155,6 +156,22 @@ async function invokeTranscoderBySource(
 
   await dbResourceUpdateTimestamp(userId);
 
+  const sourceFiles = await client.sourceFile.findMany({
+    where: {
+      userId,
+      sourceId,
+    },
+    select: {
+      fileSize: true,
+    },
+  });
+
+  const maxSourceFileSize = Math.max(
+    ...sourceFiles.map((sourceFile) => sourceFile.fileSize)
+  );
+
+  const downloadAudioToNFS = maxSourceFileSize >= USE_NFS_SIZE_THRESHOLD;
+
   const request: TranscoderRequest = {
     callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
     callbackToken: TRANSCODER_CALLBACK_API_TOKEN,
@@ -167,7 +184,7 @@ async function invokeTranscoderBySource(
       useFilenameAsUnknownTrackTitle: true,
       useTrackArtistAsUnknownAlbumArtist: true,
       useTrackTitleAsUnknownAlbumTitle: true,
-      downloadAudioToNFS: false,
+      downloadAudioToNFS,
       extractImages: true,
       preferExternalCueSheet: true,
     }),

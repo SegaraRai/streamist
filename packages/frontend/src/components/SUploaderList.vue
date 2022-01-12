@@ -76,7 +76,6 @@ export default defineComponent({
           </template>
           <template v-else-if="file.status === 'uploading'">
             <v-progress-circular
-              color="primary"
               :model-value="((file.uploadedSize || 0) * 100) / file.fileSize"
               :title="`Uploading... (${(
                 ((file.uploadedSize || 0) * 100) /

@@ -27,6 +27,8 @@ export const MAX_SOURCE_AUDIO_FILE_SIZE = 500 * 1024 * 1024; // 300MiB (will be 
 export const MAX_SOURCE_CUE_SHEET_FILE_SIZE = 1 * 1024 * 1024; // 1MiB
 export const MAX_SOURCE_IMAGE_FILE_SIZE = 100 * 1024 * 1024; // 100MiB
 
+export const USE_NFS_SIZE_THRESHOLD = 400 * 1024 * 1024; // 400MiB
+
 export const SOURCE_AUDIO_FILE_EXTENSIONS = [
   '.aac',
   '.aiff',

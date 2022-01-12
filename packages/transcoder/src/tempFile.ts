@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { nfsTempDir, tempDir } from './config';
+import { NFS_TEMP_DIR, TEMP_DIR } from './config';
 
 let gCounter = 0;
 
@@ -10,9 +10,9 @@ export function generateTempFilename(): string {
 }
 
 export function getTempFilepath(filename: string): string {
-  return join(tempDir, filename);
+  return join(TEMP_DIR, filename);
 }
 
 export function getNFSTempFilepath(filename: string): string {
-  return join(nfsTempDir, filename);
+  return join(NFS_TEMP_DIR, filename);
 }
