@@ -4,17 +4,18 @@ import minimist from 'minimist';
 import { initBatch } from '$/batch';
 import { init } from '$/services/app';
 import { API_SERVER_PORT } from '$/services/env';
+import { logger } from '$/services/logger';
 
 function mainAPI(): void {
   if (cluster.isPrimary) {
-    console.log('primary: started');
+    logger.info('primary: started');
 
     const numWorkers = Math.max(cpus().length - 2, 2);
     for (let i = 0; i < numWorkers; i++) {
       cluster.fork();
     }
 
-    console.log('primary: launched workers');
+    logger.info('primary: launched workers');
   } else {
     const app = init();
 
@@ -29,7 +30,9 @@ function mainAPI(): void {
 }
 
 function mainBatch(): void {
+  logger.info('batch: started');
   initBatch();
+  logger.info('batch: initialized');
 }
 
 function main(): void {

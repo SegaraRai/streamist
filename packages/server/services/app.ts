@@ -19,7 +19,7 @@ export const init = (serverFactory?: FastifyServerFactory) => {
       prettyPrint:
         process.env.NODE_ENV === 'development'
           ? {
-              translateTime: 'HH:MM:ss Z',
+              translateTime: 'SYS:HH:MM:ss.l o',
               ignore: 'hostname',
             }
           : false,
