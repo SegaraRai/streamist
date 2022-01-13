@@ -25,10 +25,13 @@ export default defineComponent({
       playbackStore.clearDefaultSetList$$q();
     });
 
-    const items = asyncComputed(async () => {
-      const tracks = await allTracks.valueAsync.value;
-      const albums = await allAlbums.valueAsync.value;
-      const artists = await allArtists.valueAsync.value;
+    const items = computed(() => {
+      const tracks = allTracks.value.value;
+      const albums = allAlbums.value.value;
+      const artists = allArtists.value.value;
+      if (!tracks || !albums || !artists) {
+        return [];
+      }
 
       const albumMap = new Map<string, ResourceAlbum>(
         albums.map((album) => [album.id, album])
@@ -61,7 +64,7 @@ export default defineComponent({
       }
 
       return sortedTracks;
-    }, []);
+    });
 
     return {
       t,
@@ -90,6 +93,7 @@ export default defineComponent({
       :loading="!items$$q"
       :set-list="items$$q"
       :set-list-name="t('setListName.Tracks')"
+      skip-set-list-check
       index-content="albumArtwork"
       :show-album="!isMobile$$q"
       show-artist

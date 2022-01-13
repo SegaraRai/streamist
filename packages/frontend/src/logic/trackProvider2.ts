@@ -145,24 +145,15 @@ export class TrackProvider2<T extends TrackBase> extends TrackProvider<T> {
     this.emitPlayNextQueueChangeEvent$$q();
   }
 
-  override removeTracks$$q(trackIds: string | readonly string[]): void {
-    super.removeTracks$$q(trackIds);
+  override removeTracks$$q(filter: (trackId: string) => boolean): void {
+    super.removeTracks$$q(filter);
 
-    if (typeof trackIds === 'string') {
-      trackIds = [trackIds];
-    }
-
-    if (trackIds.length === 0) {
-      return;
-    }
-
-    const trackIdSet = new Set(trackIds);
-    const filterFunc = (track: T): boolean => !trackIdSet.has(track.id);
+    const filterFunc = (track: T): boolean => filter(track.id);
     this._playNextQueue$$q = this._playNextQueue$$q.filter(filterFunc);
     this._playNextHistory$$q = this._playNextHistory$$q.filter(filterFunc);
     if (
       this._currentTrackOverride$$q &&
-      trackIdSet.has(this._currentTrackOverride$$q.id)
+      !filterFunc(this._currentTrackOverride$$q)
     ) {
       this.skipNext$$q();
     } else {

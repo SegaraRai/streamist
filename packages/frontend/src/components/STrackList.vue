@@ -7,6 +7,7 @@ import type {
   ResourceTrack,
 } from '$/types';
 import { db } from '~/db';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
 import { useMenu } from '~/logic/menu';
@@ -106,6 +107,7 @@ export default defineComponent({
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const themeStore = useThemeStore();
+    const { isTrackAvailable$$q } = useTrackFilter();
 
     const propTracksRef = eagerComputed(() => props.tracks);
     const { value: trackItems } = useLiveQuery(async () => {
@@ -163,15 +165,28 @@ export default defineComponent({
         )
     );
 
+    const propsStrAvailableSetList = computed(
+      () =>
+        props.setList &&
+        props.setList
+          .map(({ id }) => id)
+          .filter((id) => isTrackAvailable$$q(id))
+          .join('\n')
+    );
+
+    const playbacksStrAvailableSetList = computed(
+      () =>
+        playbackStore.currentSetList$$q.value &&
+        playbackStore.currentSetList$$q.value
+          .map(({ id }) => id)
+          .filter((id) => isTrackAvailable$$q(id))
+          .join('\n')
+    );
+
     const isSameSetList$$q = eagerComputed(
       () =>
         props.skipSetListCheck ||
-        (!!props.setList &&
-          !!playbackStore.currentSetList$$q.value &&
-          props.setList.map(({ id }) => id).join('\n') ===
-            playbackStore.currentSetList$$q.value
-              .map(({ id }) => id)
-              .join('\n'))
+        propsStrAvailableSetList.value === playbacksStrAvailableSetList.value
     );
 
     const items = computed(() => {

@@ -27,7 +27,11 @@ const cdnCookieAsyncCache = createAsyncCache<string>(
     return token;
   },
   (token: string): boolean => {
-    return lastSetCookie === token && isJWTNotExpired(token);
+    return (
+      !tokens.renewing &&
+      tokens.value?.cdnToken === token &&
+      isJWTNotExpired(token)
+    );
   }
 );
 
@@ -36,6 +40,11 @@ export function isCDNCookieSet(): boolean {
 }
 
 export async function setCDNCookie(): Promise<void> {
+  await cdnCookieAsyncCache.renew();
+}
+
+export async function renewTokensAndSetCDNCookie(force = false): Promise<void> {
+  await tokens.renew(force);
   await cdnCookieAsyncCache.renew();
 }
 

@@ -9,7 +9,6 @@ import { getImageFileURL } from '~/logic/fileURL';
 import { useTrackFilter } from '~/logic/filterTracks';
 import { useRecentlyPlayed } from '~/logic/recentlyPlayed';
 import { TrackProvider2 } from '~/logic/trackProvider2';
-import { useAllTracks } from '~/logic/useDB';
 import {
   realVolumeToVisualVolume,
   visualVolumeToRealVolume,
@@ -80,7 +79,6 @@ export interface PlaybackState {
   readonly skipPrevious$$q: (n?: number) => void;
   /** 次のトラックに進む */
   readonly next$$q: () => void;
-  readonly debugRemoveTrack$$q: (trackId: string) => void;
 }
 
 const audioContainer = document.body;
@@ -123,9 +121,8 @@ async function createMetadataInit(
 }
 
 function _usePlaybackStore(): PlaybackState {
-  const allTracks = useAllTracks();
   const volumeStore = useVolumeStore();
-  const { isTrackAvailable$$q } = useTrackFilter();
+  const { serializedFilterKey$$q, isTrackAvailable$$q } = useTrackFilter();
   const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
 
   let currentAudio: HTMLAudioElement | undefined;
@@ -313,35 +310,26 @@ function _usePlaybackStore(): PlaybackState {
     }
   };
 
-  const removeTracks = (trackIds: readonly string[]): void => {
+  const removeTracks = (filter: (trackId: string) => boolean): void => {
     if (defaultSetList.value) {
-      const trackIdSet = new Set(trackIds);
-      defaultSetList.value = defaultSetList.value.filter(
-        (track) => !trackIdSet.has(track.id)
+      defaultSetList.value = defaultSetList.value.filter((track) =>
+        filter(track.id)
       );
     }
 
-    trackProvider.removeTracks$$q(trackIds);
+    trackProvider.removeTracks$$q(filter);
   };
 
   // watch for allTracks changes
   // - if tracks in setList are deleted, remove them from setList
   // - if the current track is deleted, play next
   //   - if no track is in setList, clear setList
-  watch(allTracks.value, (newAllTracks, oldAllTracks): void => {
-    if (!newAllTracks || !oldAllTracks) {
+  watch(serializedFilterKey$$q, (newKey): void => {
+    if (!newKey) {
       return;
     }
 
-    const deletedTrackIds = oldAllTracks
-      .map((track) => track.id)
-      .filter((trackId) => !isTrackAvailable$$q(trackId));
-
-    if (deletedTrackIds.length === 0) {
-      return;
-    }
-
-    removeTracks(deletedTrackIds);
+    removeTracks(isTrackAvailable$$q);
   });
 
   trackProvider.addEventListener('trackChange', () => {
@@ -574,9 +562,6 @@ function _usePlaybackStore(): PlaybackState {
     },
     next$$q: (): void => {
       trackProvider.next$$q();
-    },
-    debugRemoveTrack$$q: (trackId: string): void => {
-      removeTracks([trackId]);
     },
   };
 }

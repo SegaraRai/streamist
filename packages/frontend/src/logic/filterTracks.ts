@@ -1,23 +1,27 @@
 import type { Ref } from 'vue';
-import type { ResourceUser } from '$/types';
+import { compareString } from '$shared/sort';
+import { useLocalStorageDB } from '~/db';
 import { useAllTracks } from './useDB';
 
-export function useTrackFilter() {
+function _useTrackFilter() {
   const allTracks = useAllTracks();
-  const user = useLocalStorage<ResourceUser | undefined>('db.user', undefined, {
-    serializer: {
-      read: (v: any) => (v ? JSON.parse(v) : undefined),
-      write: (v: any) => (v ? JSON.stringify(v) : ''),
-    },
-  });
+  const { dbUser$$q } = useLocalStorageDB();
+
+  const maxTrackId = eagerComputed(() => dbUser$$q.value?.maxTrackId ?? null);
+
   const trackIds = computed<readonly string[] | undefined>(() =>
-    allTracks.value.value?.map((track) => track.id)
+    allTracks.value.value
+      ?.map((track) => track.id)
+      .sort((a, b) => compareString(a, b))
   );
   const trackIdSet = computed<ReadonlySet<string> | undefined>(() =>
     trackIds.value ? new Set(trackIds.value) : undefined
   );
-  const maxTrackId = eagerComputed<string | null>(
-    () => user.value?.maxTrackId || null
+
+  const serializedFilterKey = computed<string | undefined>(() =>
+    dbUser$$q.value && trackIds.value
+      ? `${maxTrackId.value}:${trackIds.value.join()}`
+      : undefined
   );
 
   const doesTrackExist = (trackId: string): boolean =>
@@ -26,9 +30,12 @@ export function useTrackFilter() {
   const isTrackAvailable = (trackId: string): boolean =>
     doesTrackExist(trackId) &&
     (!maxTrackId.value || trackId <= maxTrackId.value);
+
   return {
-    trackIds$$q: trackIds as Readonly<Ref<readonly string[] | undefined>>,
+    serializedFilterKey$$q: serializedFilterKey as Readonly<Ref<string>>,
     doesTrackExist$$q: doesTrackExist,
     isTrackAvailable$$q: isTrackAvailable,
   };
 }
+
+export const useTrackFilter = _useTrackFilter;

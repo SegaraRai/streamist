@@ -1,6 +1,6 @@
 <script lang="ts">
 import { COOKIE_CHECK_INTERVAL, IDLE_TIMEOUT } from '~/config';
-import { setCDNCookie } from '~/logic/cdnCookie';
+import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
 import { NAIVE_UI_THEMES } from '~/logic/theme';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
@@ -19,7 +19,7 @@ export default defineComponent({
         return;
       }
 
-      setCDNCookie();
+      renewTokensAndSetCDNCookie();
     }, COOKIE_CHECK_INTERVAL);
 
     const themeClass = eagerComputed(() => `s-theme--${themeStore.theme}`);

@@ -154,7 +154,7 @@ export default defineComponent({
         </template>
         <template v-else>
           <!-- それ以外の曲（再生不可） -->
-          <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
+          <div>
             <template v-if="indexContentNumber$$q != null">
               <div class="s-numeric font-bold tracking-[0.01em]">
                 {{ indexContentNumber$$q }}
@@ -168,7 +168,7 @@ export default defineComponent({
                 :alt="item.album$$q.title"
               />
             </template>
-          </v-btn>
+          </div>
         </template>
       </div>
     </div>

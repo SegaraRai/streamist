@@ -3,9 +3,9 @@ import { useMessage } from 'naive-ui';
 import type { DeletionEntityType } from '$shared/types/db';
 import type { ResourceDeletion, ResourceUser } from '$/types';
 import api from '~/logic/api';
-import { setCDNCookie } from '~/logic/cdnCookie';
-import { tokens } from '~/logic/tokens';
+import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
 import { db } from './db';
+import { useLocalStorageDB } from './localStorage';
 
 async function clearAndAdd<T>(
   table: Table<T, IndexableType>,
@@ -45,11 +45,16 @@ function getDeletionIds(
     .map((item) => item.entityId);
 }
 
-export async function syncDB(reconstruct = false): Promise<void> {
-  let since: number | undefined = reconstruct
-    ? 0
-    : parseInt(localStorage.getItem('db.lastUpdate') || '0', 10);
-  localStorage.setItem('db.updating', '1');
+async function syncDB(
+  {
+    dbLastUpdate$$q,
+    dbUpdating$$q,
+    dbUser$$q,
+  }: ReturnType<typeof useLocalStorageDB>,
+  reconstruct = false
+): Promise<void> {
+  let since: number | undefined = reconstruct ? 0 : dbLastUpdate$$q.value;
+  dbUpdating$$q.value = true;
 
   if (!since || !isFinite(since) || since <= 0) {
     since = undefined;
@@ -66,14 +71,7 @@ export async function syncDB(reconstruct = false): Promise<void> {
     console.log(since, r);
 
     if (r.updated) {
-      let oldUser: ResourceUser | undefined;
-
-      try {
-        oldUser =
-          JSON.parse(localStorage.getItem('db.user') || 'null') || undefined;
-      } catch (error) {
-        console.warn(error);
-      }
+      const oldUser: ResourceUser | null = dbUser$$q.value;
 
       const d = {
         albumCoArtists: getDeletionIds(r.deletions, 'albumCoArtist'),
@@ -102,7 +100,7 @@ export async function syncDB(reconstruct = false): Promise<void> {
         ],
         async (): Promise<void> => {
           if (reconstruct) {
-            localStorage.removeItem('db.lastUpdate');
+            dbLastUpdate$$q.value = undefined;
             await Promise.all([
               clearAndAdd(db.albumCoArtists, r.albumCoArtists),
               clearAndAdd(db.albums, r.albums),
@@ -132,28 +130,29 @@ export async function syncDB(reconstruct = false): Promise<void> {
         }
       );
 
-      localStorage.setItem('db.user', JSON.stringify(r.user));
+      dbUser$$q.value = r.user;
 
       if (
         r.user.plan !== oldUser?.plan ||
         r.user.maxTrackId !== oldUser?.maxTrackId
       ) {
-        tokens.renew(true).then((): Promise<void> => setCDNCookie());
+        renewTokensAndSetCDNCookie(true);
       }
     }
 
-    localStorage.setItem('db.lastUpdate', r.timestamp.toString());
+    dbLastUpdate$$q.value = r.updatedAt;
   } finally {
-    localStorage.removeItem('db.updating');
+    dbUpdating$$q.value = undefined;
   }
 }
 
 export function useSyncDB(): (reconstruct?: boolean) => Promise<void> {
   const { t } = useI18n();
   const message = useMessage();
+  const localStorageDB = useLocalStorageDB();
 
   return (reconstruct = false): Promise<void> =>
-    syncDB(reconstruct)
+    syncDB(localStorageDB, reconstruct)
       .then((): void => {
         message.success(t('message.SyncedDatabase'));
       })
