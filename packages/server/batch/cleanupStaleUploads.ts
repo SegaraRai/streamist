@@ -1,4 +1,8 @@
 import type { Prisma } from '@prisma/client';
+import {
+  SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD,
+  SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE,
+} from '$shared/config/sourceFile';
 import { is } from '$shared/is';
 import {
   OSRegion,
@@ -6,10 +10,6 @@ import {
   getSourceFileOS,
 } from '$shared/objectStorage';
 import { retryS3NoReject } from '$shared/retry';
-import {
-  SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD,
-  SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE,
-} from '$shared/sourceFileConfig';
 import type { SourceFileState, SourceState } from '$shared/types/db';
 import { client } from '$/db/lib/client';
 import { createUserUploadS3Cached } from '$/services/userOS';

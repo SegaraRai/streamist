@@ -1,4 +1,4 @@
-import { CACHE_CONTROL_NO_STORE } from '$shared/cacheControl';
+import { CACHE_CONTROL_NO_STORE } from '$shared/config/cacheControl';
 import { getUploadURLForSourceFile } from '$/services/uploadBegin';
 import { defineController } from './$relay';
 

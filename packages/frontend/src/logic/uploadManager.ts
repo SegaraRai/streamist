@@ -1,7 +1,4 @@
 import PQueue from 'p-queue';
-import { parseCueSheet } from '$shared/cueParser';
-import { validateCueSheet } from '$shared/cueSheetCheck';
-import { decodeText } from '$shared/decodeText';
 import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE,
@@ -10,7 +7,10 @@ import {
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
-} from '$shared/sourceFileConfig';
+} from '$shared/config/sourceFile';
+import { parseCueSheet } from '$shared/cueParser';
+import { validateCueSheet } from '$shared/cueSheetCheck';
+import { decodeText } from '$shared/decodeText';
 import type {
   SourceFileAttachToType,
   SourceFileState,

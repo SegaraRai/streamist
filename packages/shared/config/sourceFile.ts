@@ -1,26 +1,30 @@
+import { getExtension } from '../path';
+import type { SourceFileType } from '../types/db';
 import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from './cacheControl';
-import { getExtension } from './path';
-import type { SourceFileType } from './types/db';
 
 export const SOURCE_FILE_CONTENT_ENCODING = 'identity';
 export const SOURCE_FILE_CONTENT_TYPE = 'application/octet-stream';
 export const SOURCE_FILE_CACHE_CONTROL = CACHE_CONTROL_PRIVATE_IMMUTABLE;
-/** in sec. */
+
+/** in sec. 15m (not used as all upload is multipart) */
 export const SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN = 15 * 60;
-/** in sec. */
+/** in sec. 4h (transfer 800MiB in 500kbps) */
 export const SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART = 4 * 60 * 60;
 
-/** in sec. */
-export const SOURCE_FILE_UPLOADABLE_AFTER_CREATE = 12 * 60 * 60; // 1d
-/** in sec. */
+/** in msec. 12h */
+export const SOURCE_FILE_UPLOADABLE_AFTER_CREATE = 12 * 60 * 60 * 1000;
+/** in msec. 17h */
 export const SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE =
   SOURCE_FILE_UPLOADABLE_AFTER_CREATE +
   Math.max(
     SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
     SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART
-  ) +
+  ) *
+    1000 +
   1 * 60 * 60;
-export const SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD = 6 * 60 * 60;
+/** in msec. 6h */
+export const SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD =
+  6 * 60 * 60 * 1000;
 
 export const MIN_SOURCE_FILE_SIZE = 1; // forbid uploading empty files (due to multipart upload)
 export const MAX_SOURCE_AUDIO_FILE_SIZE = 500 * 1024 * 1024; // 300MiB (will be increased to 800MiB in the future for paid accounts)

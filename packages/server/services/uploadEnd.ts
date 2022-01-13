@@ -1,4 +1,5 @@
 import fetch from 'node-fetch';
+import { USE_NFS_SIZE_THRESHOLD } from '$shared/config/sourceFile';
 import { is } from '$shared/is';
 import {
   OSRegion,
@@ -6,7 +7,6 @@ import {
   getSourceFileOS,
 } from '$shared/objectStorage';
 import { retryS3, retryS3NoReject } from '$shared/retry';
-import { USE_NFS_SIZE_THRESHOLD } from '$shared/sourceFileConfig';
 import type {
   SourceFileAttachToType,
   SourceFileState,

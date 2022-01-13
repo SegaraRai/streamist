@@ -1,6 +1,6 @@
-import { gzipAsync } from '$shared-server/gzip';
 import { osPutData } from '$shared-server/objectStorage';
-import { CACHE_CONTROL_NO_STORE } from '$shared/cacheControl';
+import { brotliCompressAsync } from '$shared-server/zlib';
+import { CACHE_CONTROL_NO_STORE } from '$shared/config/cacheControl';
 import {
   OSRegion,
   getTranscodeLogFileKey,
@@ -20,11 +20,11 @@ export async function uploadJSON(
     await osPutData(
       getTranscodeLogFileOS(region),
       getTranscodeLogFileKey(userId, sourceFileId, type),
-      await gzipAsync(Buffer.from(JSON.stringify(data, null, 2))),
+      await brotliCompressAsync(Buffer.from(JSON.stringify(data, null, 2))),
       {
         cacheControl: CACHE_CONTROL_NO_STORE,
         contentType: 'application/json; charset=UTF-8',
-        contentEncoding: 'gzip',
+        contentEncoding: 'br',
       }
     );
   } catch (error: unknown) {

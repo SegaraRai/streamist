@@ -4,14 +4,6 @@ import {
   generateSourceFileId,
   generateSourceId,
 } from '$shared-server/generateId';
-import { is } from '$shared/is';
-import {
-  OSRegion,
-  getSourceFileKey,
-  getSourceFileOS,
-  toOSRegion,
-} from '$shared/objectStorage';
-import { retryS3 } from '$shared/retry';
 import {
   MAX_SOURCE_AUDIO_FILE_SIZE,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE,
@@ -22,7 +14,15 @@ import {
   SOURCE_FILE_CONTENT_TYPE,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
-} from '$shared/sourceFileConfig';
+} from '$shared/config/sourceFile';
+import { is } from '$shared/is';
+import {
+  OSRegion,
+  getSourceFileKey,
+  getSourceFileOS,
+  toOSRegion,
+} from '$shared/objectStorage';
+import { retryS3 } from '$shared/retry';
 import {
   SourceFileState,
   SourceFileType,

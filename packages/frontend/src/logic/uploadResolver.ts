@@ -1,6 +1,6 @@
+import { getSourceFileType } from '$shared/config/sourceFile';
 import { getExtension, getStem } from '$shared/path';
 import { compareString } from '$shared/sort';
-import { getSourceFileType } from '$shared/sourceFileConfig';
 
 export type ResolvedFileId = symbol;
 

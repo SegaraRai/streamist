@@ -1,4 +1,4 @@
-import { gunzipAsync } from './gzip';
+import { brotliDecompressAsync, gunzipAsync, inflateAsync } from './zlib';
 
 export function decodeBuffer(
   buffer: Buffer,
@@ -11,10 +11,14 @@ export function decodeBuffer(
     case 'identity':
       return Promise.resolve(buffer);
 
+    case 'br':
+      return brotliDecompressAsync(buffer);
+
+    case 'deflate':
+      return inflateAsync(buffer);
+
     case 'gzip':
       return gunzipAsync(buffer);
-
-    // br, deflate
   }
 
   throw new Error(

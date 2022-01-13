@@ -183,9 +183,9 @@ export async function osGetFile(
         wStream.destroy(error);
         reject(error);
       })
-      .pipe(wStream)
-      .once('error', (error) => {
-        rStream.destroy(error);
+      .pipe(wStream as any)
+      .once('error', (error: unknown) => {
+        rStream.destroy(error as Error);
         reject(error);
       })
       .once('close', () => {
