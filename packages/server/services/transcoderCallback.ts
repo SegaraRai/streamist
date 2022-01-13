@@ -31,9 +31,9 @@ import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
 import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
 import { logger } from './logger';
 
-export const TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
-export const TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${TRANSCODER_CALLBACK_API_PATH}`;
-export const TRANSCODER_CALLBACK_API_TOKEN = `Bearer ${SECRET_TRANSCODER_CALLBACK_SECRET}`;
+export const DEV_TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
+export const DEV_TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${DEV_TRANSCODER_CALLBACK_API_PATH}`;
+export const DEV_TRANSCODER_CALLBACK_API_TOKEN = `Bearer ${SECRET_TRANSCODER_CALLBACK_SECRET}`;
 
 function numberOr<T>(
   str: string | null | undefined,
@@ -672,8 +672,8 @@ export const transcoderCallback: FastifyPluginCallback<{}> = (
   _options: {},
   done: (err?: Error) => void
 ): void => {
-  fastify.post(TRANSCODER_CALLBACK_API_PATH, (request, reply): void => {
-    if (request.headers.authorization !== TRANSCODER_CALLBACK_API_TOKEN) {
+  fastify.post(DEV_TRANSCODER_CALLBACK_API_PATH, (request, reply): void => {
+    if (request.headers.authorization !== DEV_TRANSCODER_CALLBACK_API_TOKEN) {
       reply.code(401).send();
       return;
     }

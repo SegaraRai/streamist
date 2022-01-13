@@ -14,6 +14,7 @@ import {
   SOURCE_FILE_CONTENT_TYPE,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
+  SOURCE_FILE_UPLOADABLE_AFTER_CREATE,
 } from '$shared/config/sourceFile';
 import { is } from '$shared/is';
 import {
@@ -39,7 +40,7 @@ import type {
   UploadURLPart,
 } from '$/types/index';
 import { HTTPError } from '$/utils/httpError';
-import { splitIntoParts, useMultipartUpload } from './uploadConfig';
+import { splitIntoParts, useMultipartUpload } from './uploadUtils';
 import { createUserUploadS3Cached } from './userOS';
 
 /**
@@ -487,8 +488,17 @@ export async function getUploadURLForSourceFile(
       sourceId,
       userId,
     },
-    include: {
-      source: true,
+    select: {
+      region: true,
+      state: true,
+      fileSize: true,
+      uploadId: true,
+      createdAt: true,
+      source: {
+        select: {
+          state: true,
+        },
+      },
     },
   });
 
@@ -500,7 +510,14 @@ export async function getUploadURLForSourceFile(
     sourceFile.state !== is<SourceFileState>('uploading') ||
     sourceFile.source.state !== is<SourceState>('uploading')
   ) {
-    throw new HTTPError(409, `source file ${sourceFileId} already uploaded`);
+    throw new HTTPError(
+      409,
+      `source file ${sourceFileId} already uploaded or deleted`
+    );
+  }
+
+  if (sourceFile.createdAt + SOURCE_FILE_UPLOADABLE_AFTER_CREATE < Date.now()) {
+    throw new HTTPError(403, `source file ${sourceFileId} too old to upload`);
   }
 
   return createUploadURL(

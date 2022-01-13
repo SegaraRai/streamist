@@ -15,7 +15,7 @@ import {
 import { extractPayloadFromCDNToken } from '../tokens';
 import { createUserDownloadS3Cached } from '../userOS';
 
-const PRESIGNED_URL_EXPIRES_IN = 15 * 60;
+const DEV_PRESIGNED_URL_EXPIRES_IN = 15 * 60;
 
 export const devCDN: FastifyPluginCallback<{}> = (
   fastify: FastifyInstance,
@@ -125,12 +125,15 @@ export const devCDN: FastifyPluginCallback<{}> = (
           Key: key,
         }),
         {
-          expiresIn: PRESIGNED_URL_EXPIRES_IN,
+          expiresIn: DEV_PRESIGNED_URL_EXPIRES_IN,
         }
       );
 
       return reply
-        .header('Cache-Control', `private, max-age=${PRESIGNED_URL_EXPIRES_IN}`)
+        .header(
+          'Cache-Control',
+          `private, max-age=${DEV_PRESIGNED_URL_EXPIRES_IN}`
+        )
         .redirect(302, url);
     },
   });

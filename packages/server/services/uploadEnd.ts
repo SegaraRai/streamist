@@ -24,10 +24,10 @@ import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
 import { logger } from './logger';
 import {
-  TRANSCODER_CALLBACK_API_ENDPOINT,
-  TRANSCODER_CALLBACK_API_TOKEN,
+  DEV_TRANSCODER_CALLBACK_API_ENDPOINT,
+  DEV_TRANSCODER_CALLBACK_API_TOKEN,
 } from './transcoderCallback';
-import { splitIntoParts } from './uploadConfig';
+import { splitIntoParts } from './uploadUtils';
 import { createUserUploadS3Cached } from './userOS';
 
 function createTranscoderRequestFiles(
@@ -174,8 +174,8 @@ async function invokeTranscoderBySource(
   const downloadAudioToNFS = maxSourceFileSize >= USE_NFS_SIZE_THRESHOLD;
 
   const request: TranscoderRequest = {
-    callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
-    callbackToken: TRANSCODER_CALLBACK_API_TOKEN,
+    callbackURL: DEV_TRANSCODER_CALLBACK_API_ENDPOINT,
+    callbackToken: DEV_TRANSCODER_CALLBACK_API_TOKEN,
     files: createTranscoderRequestFiles(source, {
       // TODO(prod): make this configurable
       defaultUnknownAlbumArtist: 'Unknown Artist',

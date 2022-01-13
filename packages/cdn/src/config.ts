@@ -9,7 +9,7 @@ export const COOKIE_JWT_KEY = 'token' as const;
  * 多少長めにとっておいても問題ない \
  * （リフレッシュはクライアント側でAPIサーバー用のものと同時に適当なタイミングで行われるはず、行われなくても期限切れのものは検証で弾かれる）
  */
-export const COOKIE_EXPIRY_DELAY = 50 * 60;
+export const COOKIE_EXPIRY_DELAY = 1 * 60 * 60;
 
 /**
  * キャッシュのバージョン（文字列） \
