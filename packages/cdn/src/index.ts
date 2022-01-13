@@ -5,7 +5,13 @@ import { Router } from 'worktop';
 import * as CORS from 'worktop/cors';
 import { reply } from 'worktop/module';
 import { send } from 'worktop/response';
-import { CACHE_CONTROL_NO_STORE } from '$shared/config/cacheControl';
+import { arrayBufferToHex } from '$shared/arrayBufferToHex';
+import {
+  CACHE_CONTROL_IMMUTABLE_TTL,
+  CACHE_CONTROL_NO_STORE,
+  CACHE_CONTROL_PRIVATE_IMMUTABLE,
+  CACHE_CONTROL_PUBLIC_IMMUTABLE,
+} from '$shared/config/cacheControl';
 import { isId } from '$shared/id';
 import {
   getOSRawURL,
@@ -16,16 +22,20 @@ import {
   isValidOSRegion,
 } from '$shared/objectStorage';
 import {
-  CACHE_TTL,
   CACHE_VERSION,
   COOKIE_EXPIRY_DELAY,
   COOKIE_JWT_KEY,
   CORS_MAX_AGE,
+  ETAG_VERSION,
 } from './config';
 import { calculateHMAC } from './hmac';
 import { verifyJWT } from './jwt';
 import { convertToMutableResponse } from './response';
 import type { Bindings } from './types';
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': CACHE_CONTROL_NO_STORE,
+};
 
 const API = new Router<Bindings>();
 
@@ -41,12 +51,12 @@ API.prepare = (req, context) => {
 
 API.add('POST', '/api/cookies/token', async (req, context) => {
   if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
-    return send(403);
+    return send(403, null, NO_CACHE_HEADERS);
   }
 
   const auth = req.headers.get('Authorization');
   if (!auth || !auth.startsWith('Bearer ')) {
-    return send(401);
+    return send(401, null, NO_CACHE_HEADERS);
   }
 
   const strJWT = auth.slice(7).trim();
@@ -54,11 +64,11 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
   const jwt = await verifyJWT(strJWT, context);
 
   if (!jwt || jwt.aud !== 'cdn') {
-    return send(401);
+    return send(401, null, NO_CACHE_HEADERS);
   }
 
-  return send(204, '', {
-    'Cache-Control': 'no-store',
+  return send(204, null, {
+    ...NO_CACHE_HEADERS,
     'Set-Cookie': serialize(COOKIE_JWT_KEY, strJWT, {
       expires: new Date((jwt.exp! + COOKIE_EXPIRY_DELAY) * 1000),
       httpOnly: true,
@@ -71,11 +81,11 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
 
 API.add('DELETE', '/api/cookies/token', (req, context) => {
   if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
-    return send(403);
+    return send(403, null, NO_CACHE_HEADERS);
   }
 
-  return send(204, '', {
-    'Cache-Control': 'no-store',
+  return send(204, null, {
+    ...NO_CACHE_HEADERS,
     Cookie: serialize(COOKIE_JWT_KEY, '', {
       expires: new Date(0), // 1970-01-01T00:00:00.000Z
       httpOnly: true,
@@ -92,36 +102,36 @@ API.add(
   async (req, context) => {
     const strJWT = parse(req.headers.get('Cookie') || '')[COOKIE_JWT_KEY];
     if (!strJWT) {
-      return send(401);
+      return send(401, null, NO_CACHE_HEADERS);
     }
 
     const jwt = await verifyJWT(strJWT, context);
     if (!jwt || jwt.aud !== 'cdn') {
-      return send(401);
+      return send(401, null, NO_CACHE_HEADERS);
     }
 
     const { entityId, filename, region, type, userId } = context.params;
 
     if (jwt.sub !== userId) {
-      return send(401);
+      return send(401, null, NO_CACHE_HEADERS);
     }
 
     if (!isValidOSRegion(region)) {
-      return send(404);
+      return send(404, null, NO_CACHE_HEADERS);
     }
 
     if (!isId(entityId)) {
-      return send(404);
+      return send(404, null, NO_CACHE_HEADERS);
     }
 
     const match = filename.match(/([^.]+)(\.[\da-z]+)$/);
     if (!match) {
-      return send(404);
+      return send(404, null, NO_CACHE_HEADERS);
     }
 
     const [, fileId, extension] = match;
     if (!isId(fileId)) {
-      return send(404);
+      return send(404, null, NO_CACHE_HEADERS);
     }
 
     let storageURL: string | false | undefined;
@@ -147,9 +157,7 @@ API.add(
     }
 
     if (!storageURL) {
-      return send(storageURL === false ? 403 : 404, {
-        'Cache-Control': CACHE_CONTROL_NO_STORE,
-      });
+      return send(storageURL === false ? 403 : 404, null, NO_CACHE_HEADERS);
     }
 
     // キャッシュしない設定か確認
@@ -157,7 +165,15 @@ API.add(
     const noCache = context.url.searchParams.get('nc') === '1';
 
     // ETag計算
-    const eTag = `"${userId}.${filename}"`;
+    const eTagBase = arrayBufferToHex(
+      await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(
+          `${ETAG_VERSION}:${region}.${userId}.${entityId}.${filename}`
+        )
+      )
+    );
+    const eTag = `"${eTagBase}"`;
 
     // クライアントにキャッシュが存在する場合は304 Not Modifiedを返す
     {
@@ -196,7 +212,9 @@ API.add(
 
     // オリジンサーバーへのリクエストを作成
     const originRequest = new Request(
-      `${storageURL}?_csq=${securityTokenQuery}&response-Cache-Control=immutable%2C%20max-age%3D${CACHE_TTL}%2C%20public&response-Vary=Referer%2C%20User-Agent%2C%20X-CDN-Cache-Security-Header`,
+      `${storageURL}?_csq=${securityTokenQuery}&response-Cache-Control=${encodeURIComponent(
+        CACHE_CONTROL_PUBLIC_IMMUTABLE
+      )}&response-Vary=Referer%2C%20User-Agent%2C%20X-CDN-Cache-Security-Header`,
       {
         method: req.method,
         cf: noCache
@@ -211,7 +229,7 @@ API.add(
               // （キャッシュを有効化した場合と無効化した場合で動画ファイルのシークにかかる時間が異なった）
               // ここでは、それぞれのファイルが小さいことから、キャッシュを有効化することとしている
               cacheEverything: true,
-              cacheTtl: CACHE_TTL,
+              cacheTtl: CACHE_CONTROL_IMMUTABLE_TTL,
             },
         headers: originRequestHeaders,
       }
@@ -234,10 +252,10 @@ API.add(
     // 失敗した場合はこちらでレスポンスを作成して返す
     if (!responseOk) {
       const errorHeaders = {
+        ...NO_CACHE_HEADERS,
         'X-Origin-Status': responseStatus.toString(),
         'X-Origin-Response-Time':
           timestampAfterRequest - timestampBeforeRequest,
-        'Cache-Control': 'no-store',
       };
 
       // 404 -> 404
@@ -258,11 +276,12 @@ API.add(
 
     responseHeaders.delete('Cache-Control');
     responseHeaders.delete('ETag');
+    responseHeaders.delete('Server');
     responseHeaders.delete('Vary');
 
     responseHeaders.set(
       'Cache-Control',
-      responseOk ? `immutable, max-age=${CACHE_TTL}, private` : 'no-store'
+      responseOk ? CACHE_CONTROL_PRIVATE_IMMUTABLE : CACHE_CONTROL_NO_STORE
     );
 
     if (responseOk) {

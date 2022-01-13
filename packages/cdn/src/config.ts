@@ -20,14 +20,16 @@ export const COOKIE_EXPIRY_DELAY = 50 * 60;
 export const CACHE_VERSION = '20211223' as const;
 
 /**
- * レスポンスのキャッシュの有効期限（immutableをサポートしていないブラウザ用） \
- * in seconds, 1000 days
- */
-export const CACHE_TTL = 1000 * 24 * 60 * 60;
-
-/**
  * CORSのAccess-Control-Max-Ageに指定する値 \
  * in seconds, 24 hours \
  * ブラウザによっても上限が設定されている
  */
 export const CORS_MAX_AGE = 24 * 60 * 60;
+
+/**
+ * キャッシュのバージョン（文字列） \
+ * 何らかの理由で過去のクライントのキャッシュをすべて用いたくなくなった場合はこの値を変更する \
+ * 文字列はなんでもよい \
+ * 特にエンドユーザーに露出はしない
+ */
+export const ETAG_VERSION = `etag-${CACHE_VERSION}` as const;
