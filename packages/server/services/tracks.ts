@@ -8,11 +8,12 @@ import { dbArrayRemoveFromAllTx } from '$/db/lib/array';
 import { client } from '$/db/lib/client';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { osDeleteTrackFiles } from '$/os/trackFile';
+import { albumDeleteIfUnreferenced } from '$/services/albums';
+import { artistDeleteIfUnreferenced } from '$/services/artists';
+import { updateMaxTrackId } from '$/services/maxTrack';
+import { sourceFileDeleteFromOSIfUnreferenced } from '$/services/sourceFiles';
 import { HTTPError } from '$/utils/httpError';
 import type { ITrackUpdateData } from '$/validators';
-import { albumDeleteIfUnreferenced } from './albums';
-import { artistDeleteIfUnreferenced } from './artists';
-import { sourceFileDeleteFromOSIfUnreferenced } from './sourceFiles';
 
 export interface TrackUpdateOptions {
   readonly forceNewAlbum?: boolean;
@@ -290,6 +291,8 @@ export async function trackDelete(
   }
 
   await sourceFileDeleteFromOSIfUnreferenced(userId, track.sourceFileId, true);
+
+  await updateMaxTrackId(userId, true);
 
   await dbResourceUpdateTimestamp(userId);
 

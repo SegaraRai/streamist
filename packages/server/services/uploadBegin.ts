@@ -5,9 +5,12 @@ import {
   generateSourceId,
 } from '$shared-server/generateId';
 import {
-  MAX_SOURCE_AUDIO_FILE_SIZE,
-  MAX_SOURCE_CUE_SHEET_FILE_SIZE,
-  MAX_SOURCE_IMAGE_FILE_SIZE,
+  MAX_SOURCE_AUDIO_FILE_SIZE_PER_PLAN,
+  MAX_SOURCE_CUE_SHEET_FILE_SIZE_PER_PLAN,
+  MAX_SOURCE_IMAGE_FILE_SIZE_PER_PLAN,
+  Plan,
+} from '$shared/config/plans';
+import {
   MIN_SOURCE_FILE_SIZE,
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
@@ -189,6 +192,7 @@ async function createUploadURL(
 
 export async function createAudioSource(
   userId: string,
+  plan: Plan,
   request: CreateSourceRequestAudio
 ): Promise<CreateSourceResponse> {
   const region = toOSRegion(request.region);
@@ -200,10 +204,10 @@ export async function createAudioSource(
     );
   }
 
-  if (request.audioFile.fileSize > MAX_SOURCE_AUDIO_FILE_SIZE) {
+  if (request.audioFile.fileSize > MAX_SOURCE_AUDIO_FILE_SIZE_PER_PLAN[plan]) {
     throw new HTTPError(
       400,
-      `File size ${request.audioFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_AUDIO_FILE_SIZE}`
+      `File size ${request.audioFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_AUDIO_FILE_SIZE_PER_PLAN[plan]}`
     );
   }
 
@@ -219,11 +223,12 @@ export async function createAudioSource(
 
   if (
     request.cueSheetFile &&
-    request.cueSheetFile.fileSize > MAX_SOURCE_CUE_SHEET_FILE_SIZE
+    request.cueSheetFile.fileSize >
+      MAX_SOURCE_CUE_SHEET_FILE_SIZE_PER_PLAN[plan]
   ) {
     throw new HTTPError(
       400,
-      `File size ${request.cueSheetFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_CUE_SHEET_FILE_SIZE}`
+      `File size ${request.cueSheetFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_CUE_SHEET_FILE_SIZE_PER_PLAN[plan]}`
     );
   }
 
@@ -348,6 +353,7 @@ export async function createAudioSource(
 
 export async function createImageSource(
   userId: string,
+  plan: Plan,
   request: CreateSourceRequestImage
 ): Promise<CreateSourceResponse> {
   const region = toOSRegion(request.region);
@@ -359,10 +365,10 @@ export async function createImageSource(
     );
   }
 
-  if (request.imageFile.fileSize > MAX_SOURCE_IMAGE_FILE_SIZE) {
+  if (request.imageFile.fileSize > MAX_SOURCE_IMAGE_FILE_SIZE_PER_PLAN[plan]) {
     throw new HTTPError(
       400,
-      `File size ${request.imageFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_IMAGE_FILE_SIZE}`
+      `File size ${request.imageFile.fileSize} exceeds maximum allowed size of ${MAX_SOURCE_IMAGE_FILE_SIZE_PER_PLAN[plan]}`
     );
   }
 
@@ -528,4 +534,40 @@ export async function getUploadURLForSourceFile(
     sourceFile.fileSize,
     sourceFile.uploadId
   );
+}
+
+export async function createSource(
+  userId: string,
+  request: CreateSourceRequestAudio | CreateSourceRequestImage
+): Promise<CreateSourceResponse> {
+  const user = await client.user.findFirst({
+    where: {
+      id: userId,
+    },
+    select: {
+      plan: true,
+      maxTrackId: true,
+    },
+  });
+
+  if (!user) {
+    throw new HTTPError(404, `user ${userId} not found`);
+  }
+
+  const plan = user.plan as Plan;
+
+  switch (request.type) {
+    case 'audio':
+      if (user.maxTrackId) {
+        throw new HTTPError(
+          403,
+          `user ${userId} has reached maximum number of tracks`
+        );
+      }
+      return createAudioSource(userId, plan, request);
+
+    case 'image':
+      return createImageSource(userId, plan, request);
+  }
+  throw new HTTPError(400, 'invalid type');
 }

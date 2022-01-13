@@ -1,8 +1,11 @@
 import PQueue from 'p-queue';
 import {
-  MAX_SOURCE_AUDIO_FILE_SIZE,
-  MAX_SOURCE_CUE_SHEET_FILE_SIZE,
-  MAX_SOURCE_IMAGE_FILE_SIZE,
+  MAX_SOURCE_AUDIO_FILE_SIZE_PER_PLAN,
+  MAX_SOURCE_CUE_SHEET_FILE_SIZE_PER_PLAN,
+  MAX_SOURCE_IMAGE_FILE_SIZE_PER_PLAN,
+  Plan,
+} from '$shared/config/plans';
+import {
   MIN_SOURCE_FILE_SIZE,
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
@@ -19,13 +22,17 @@ import type {
 import type {
   CreateSourceResponse,
   ResourceSourceFile,
+  ResourceUser,
   UploadURL,
 } from '$/types';
 import type { CreateSourceResponseFile } from '$/types/createSource';
 import { UPLOAD_MANAGER_DB_SYNC_INTERVAL } from '~/config';
 import { db } from '~/db';
 import api from '~/logic/api';
-import type { ResolvedFileId, ResolvedUploadFile } from './uploadResolver';
+import type {
+  ResolvedFileId,
+  ResolvedUploadFile,
+} from '~/logic/uploadResolver';
 
 // CUE+WAV等の場合: CUEシートチェック→CUE&WAVアップロード
 // MP3+JPG等の場合: MP3アップロード→（成功時）JPGアップロード
@@ -307,17 +314,20 @@ function createUploadFilesFromResolvedFiles(
   return uploadFiles;
 }
 
-function isValidAudioFile(audioFile: File): Promise<boolean> {
+function isValidAudioFile(plan: Plan, audioFile: File): Promise<boolean> {
   return Promise.resolve(
     MIN_SOURCE_FILE_SIZE <= audioFile.size &&
-      audioFile.size <= MAX_SOURCE_AUDIO_FILE_SIZE
+      audioFile.size <= MAX_SOURCE_AUDIO_FILE_SIZE_PER_PLAN[plan]
   );
 }
 
-async function isValidCueSheetFile(cueSheetFile: File): Promise<boolean> {
+async function isValidCueSheetFile(
+  plan: Plan,
+  cueSheetFile: File
+): Promise<boolean> {
   if (
     cueSheetFile.size < MIN_SOURCE_FILE_SIZE ||
-    cueSheetFile.size > MAX_SOURCE_CUE_SHEET_FILE_SIZE
+    cueSheetFile.size > MAX_SOURCE_CUE_SHEET_FILE_SIZE_PER_PLAN[plan]
   ) {
     return false;
   }
@@ -335,10 +345,10 @@ async function isValidCueSheetFile(cueSheetFile: File): Promise<boolean> {
   }
 }
 
-function isValidImageFile(imageFile: File): Promise<boolean> {
+function isValidImageFile(plan: Plan, imageFile: File): Promise<boolean> {
   return Promise.resolve(
     MIN_SOURCE_FILE_SIZE <= imageFile.size &&
-      imageFile.size <= MAX_SOURCE_IMAGE_FILE_SIZE
+      imageFile.size <= MAX_SOURCE_IMAGE_FILE_SIZE_PER_PLAN[plan]
   );
 }
 
@@ -402,20 +412,20 @@ export class UploadManager extends EventTarget {
     this.dispatchEvent(new CustomEvent('update', { detail: this._files }));
   }
 
-  private _checkFile(file: UploadFile): void {
+  private _checkFile(plan: Plan, file: UploadFile): void {
     let checkPromise: Promise<boolean>;
     switch (file.fileType) {
       case 'audio':
-        checkPromise = isValidAudioFile(file.file);
+        checkPromise = isValidAudioFile(plan, file.file);
         break;
 
       case 'cueSheet':
-        checkPromise = isValidCueSheetFile(file.file);
+        checkPromise = isValidCueSheetFile(plan, file.file);
         break;
 
       case 'image':
       case 'imageWithAttachTarget':
-        checkPromise = isValidImageFile(file.file);
+        checkPromise = isValidImageFile(plan, file.file);
         break;
 
       case 'unknown':
@@ -554,7 +564,17 @@ export class UploadManager extends EventTarget {
         switch (file.status) {
           case 'pending':
             file.status = 'validating';
-            this._checkFile(file);
+            {
+              let user: ResourceUser | undefined;
+              try {
+                user =
+                  JSON.parse(localStorage.getItem('db.user') || 'null') ||
+                  undefined;
+              } catch (error) {
+                console.warn(error);
+              }
+              this._checkFile((user?.plan as Plan | undefined) ?? 'free', file);
+            }
             changed = true;
             break;
 

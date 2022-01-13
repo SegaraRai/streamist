@@ -28,8 +28,9 @@ import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import type { TransactionalPrismaClient } from '$/db/lib/types';
 import { dbPlaylistAddImageTx } from '$/db/playlist';
 import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
-import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from './env';
-import { logger } from './logger';
+import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from '$/services/env';
+import { logger } from '$/services/logger';
+import { updateMaxTrackId } from '$/services/maxTrack';
 
 export const DEV_TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
 export const DEV_TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${DEV_TRANSCODER_CALLBACK_API_PATH}`;
@@ -623,10 +624,12 @@ async function handleTranscoderResponse(
   }
 
   // register album and tracks
+  const trackAddedUserIdSet = new Set<string>();
   const sourceFileIdToAlbumIdMap = new Map<string, string | undefined>();
   for (const artifact of audioArtifacts) {
     try {
       const albumId = await handleTranscoderResponseArtifactAudio(artifact);
+      trackAddedUserIdSet.add(artifact.source.userId);
       sourceFileIdToAlbumIdMap.set(artifact.source.sourceFileId, albumId);
     } catch (error) {
       logger.error(
@@ -657,6 +660,9 @@ async function handleTranscoderResponse(
     artifacts.map((artifact): string => artifact.source.userId)
   );
   for (const userId of userIdSet) {
+    if (trackAddedUserIdSet.has(userId)) {
+      await updateMaxTrackId(userId, true);
+    }
     await dbResourceUpdateTimestamp(userId);
   }
 }

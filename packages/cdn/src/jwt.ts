@@ -1,4 +1,5 @@
 import { HS256, JWT } from 'worktop/jwt';
+import type { Plan } from '$shared/config/plans';
 import type { Bindings } from './types';
 
 export interface JWTPayload extends JWT.Claims {
@@ -7,7 +8,7 @@ export interface JWTPayload extends JWT.Claims {
   exp: number;
   aud: string;
   iss: string;
-  plan: string;
+  plan: Plan;
   maxTrackId: string | null;
 }
 
