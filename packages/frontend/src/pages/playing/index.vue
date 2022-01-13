@@ -12,10 +12,27 @@ import { useVolumeStore } from '~/stores/volume';
 
 export default defineComponent({
   setup() {
+    const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const volumeStore = useVolumeStore();
 
     const { value: currentTrackInfo } = useCurrentTrackInfo();
+
+    const title = useTitle();
+    watch(
+      currentTrackInfo,
+      (newTrackInfo) => {
+        title.value = newTrackInfo
+          ? t('title.Playing.track', [
+              newTrackInfo.track$$q.title,
+              newTrackInfo.trackArtist$$q.name,
+            ])
+          : t('title.Playing.no_track');
+      },
+      {
+        immediate: true,
+      }
+    );
 
     const repeatEnabled = computed(
       () => playbackStore.repeat$$q.value !== 'off'

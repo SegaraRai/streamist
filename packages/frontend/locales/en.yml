@@ -72,6 +72,9 @@ title:
   Playlists: "Playlists {'|'} Streamist"
   Playlist: "{0} {'|'} Streamist"
   PlaylistInit: "Playlist {'|'} Streamist"
+  Playing:
+    track: "{0} by {1} {'|'} Streamist"
+    no_track: 'Streamist'
 imageManager:
   title:
     album: "Album artwork of '{0}'"
