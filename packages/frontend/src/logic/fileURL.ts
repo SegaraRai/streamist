@@ -1,5 +1,5 @@
 import type { ImageFile, TrackFile } from '$prisma/client';
-import { CDN_ENDPOINT } from './cdn';
+import { CDN_ENDPOINT } from '~/config';
 
 export function getTrackFileURL(file: TrackFile): string {
   return `${CDN_ENDPOINT}/files/${file.region}/audios/${file.userId}/${file.trackId}/${file.id}${file.extension}`;

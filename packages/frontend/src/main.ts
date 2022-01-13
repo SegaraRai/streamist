@@ -2,10 +2,15 @@
 import { setupLayouts } from 'virtual:generated-layouts';
 import generatedRoutes from 'virtual:generated-pages';
 import { ViteSSG } from 'vite-ssg';
-import App from './App.vue';
-
-import { installLazySizes } from './lazyloading';
-import { activateTokenInterceptor } from './logic/api';
+import App from '~/App.vue';
+import {
+  RESTORE_SCROLL_CHECK_INTERVAL,
+  RESTORE_SCROLL_CHECK_TIMEOUT,
+} from '~/config';
+import { installLazySizes } from '~/lazyloading';
+import { activateTokenInterceptor } from '~/logic/api';
+import { isAuthenticated } from '~/logic/tokens';
+import { currentScrollContainerRef, currentScrollRef } from '~/stores/scroll';
 
 // windicss layers
 import 'virtual:windi-base.css';
@@ -18,11 +23,6 @@ import './styles/main.css';
 import 'virtual:windi-utilities.css';
 // windicss devtools support (dev only)
 import 'virtual:windi-devtools';
-import { isAuthenticated } from './logic/tokens';
-import { currentScrollContainerRef, currentScrollRef } from './stores/scroll';
-
-const SCROLL_CHECK_TIMEOUT = 5000;
-const SCROLL_CHECK_INTERVAL = 100;
 
 const routes = setupLayouts(generatedRoutes);
 
@@ -64,8 +64,8 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
       const state = history.state;
       const scrollPosition = state?.appScroll as number | null | undefined;
       if (scrollPosition != null) {
-        const finish = Date.now() + SCROLL_CHECK_TIMEOUT;
-        const interval = SCROLL_CHECK_INTERVAL;
+        const finish = Date.now() + RESTORE_SCROLL_CHECK_TIMEOUT;
+        const interval = RESTORE_SCROLL_CHECK_INTERVAL;
         const check = (): void => {
           if (history.state.current !== state.current) {
             return;

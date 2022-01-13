@@ -1,3 +1,0 @@
-const DEV_API_CDN_ENDPOINT = import.meta.env.VITE_CDN_ORIGIN;
-
-export const CDN_ENDPOINT = DEV_API_CDN_ENDPOINT;

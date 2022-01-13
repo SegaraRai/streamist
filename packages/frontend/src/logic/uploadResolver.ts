@@ -1,6 +1,7 @@
 import { getSourceFileType } from '$shared/config/sourceFile';
 import { getExtension, getStem } from '$shared/path';
 import { compareString } from '$shared/sort';
+import { LOSSLESS_AUDIO_FILE_EXTENSION_SET } from '~/config';
 
 export type ResolvedFileId = symbol;
 
@@ -35,19 +36,6 @@ export type ResolvedUploadFile =
   | ResolvedUploadFileAudioWithCueSheet
   | ResolvedUploadFileImage
   | ResolvedUploadFileUnsupported;
-
-const LOSSLESS_AUDIO_FILE_EXTENSION_SET: ReadonlySet<string> =
-  /* @__PURE__ */ new Set([
-    '.aiff',
-    '.ape',
-    '.flac',
-    '.m4a', // ALAC, in case
-    '.tak',
-    '.tta',
-    '.wav',
-    '.wma', // WMA Lossless, in case
-    '.wv',
-  ]);
 
 function generateFileId(): ResolvedFileId {
   return Symbol('resolvedFileId');

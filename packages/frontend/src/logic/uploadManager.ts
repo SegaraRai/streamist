@@ -22,11 +22,10 @@ import type {
   UploadURL,
 } from '$/types';
 import type { CreateSourceResponseFile } from '$/types/createSource';
+import { UPLOAD_MANAGER_DB_SYNC_INTERVAL } from '~/config';
 import { db } from '~/db';
 import api from '~/logic/api';
 import type { ResolvedFileId, ResolvedUploadFile } from './uploadResolver';
-
-const SYNC_INTERVAL = 20 * 1000;
 
 // CUE+WAV等の場合: CUEシートチェック→CUE&WAVアップロード
 // MP3+JPG等の場合: MP3アップロード→（成功時）JPGアップロード
@@ -827,7 +826,7 @@ export class UploadManager extends EventTarget {
 
     const sync = () => {
       this._sync(syncDB).finally(() => {
-        setTimeout(sync, SYNC_INTERVAL);
+        setTimeout(sync, UPLOAD_MANAGER_DB_SYNC_INTERVAL);
       });
     };
     sync();

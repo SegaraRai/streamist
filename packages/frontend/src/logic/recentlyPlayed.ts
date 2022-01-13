@@ -1,12 +1,11 @@
 import type { Ref } from 'vue';
+import { RECENTLY_PLAYED_MAX_ENTRIES } from '~/config';
 import { useTrackFilter } from './filterTracks';
 
 interface RecentlyPlayedItem {
   id: string;
   at: number;
 }
-
-const MAX_ENTRIES = 10;
 
 function _useRecentlyPlayed() {
   const { doesTrackExist$$q, isTrackAvailable$$q, trackIds$$q } =
@@ -18,7 +17,7 @@ function _useRecentlyPlayed() {
       ...(trackId ? [{ id: trackId, at: Date.now() }] : []),
       ...store.value
         .filter((item) => item.id !== trackId && doesTrackExist$$q(item.id))
-        .slice(0, MAX_ENTRIES - 1),
+        .slice(0, RECENTLY_PLAYED_MAX_ENTRIES - 1),
     ];
   };
 

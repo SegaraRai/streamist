@@ -1,7 +1,7 @@
 import { createAsyncCache } from '$shared/asyncCache';
-import { CDN_ENDPOINT } from './cdn';
-import { isJWTNotExpired } from './jwt';
-import { tokens } from './tokens';
+import { CDN_ENDPOINT } from '~/config';
+import { isJWTNotExpired } from '~/logic/jwt';
+import { tokens } from '~/logic/tokens';
 
 async function setTokenCookie(token: string): Promise<void> {
   const res = await fetch(`${CDN_ENDPOINT}/api/cookies/token`, {

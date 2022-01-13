@@ -2,10 +2,9 @@
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$shared/sort';
 import type { ResourceTrack } from '$/types';
+import { RECENTLY_UPLOADED_MAX_ENTRIES } from '~/config';
 import { useRecentlyPlayed } from '~/logic/recentlyPlayed';
 import { useAllTrackMap, useAllTracks } from '~/logic/useDB';
-
-const MAX_RECENTLY_UPLOADED_ENTRIES = 40;
 
 export default defineComponent({
   setup() {
@@ -24,7 +23,7 @@ export default defineComponent({
       const tracks = allTracks.value.value;
       return Array.from(tracks || [])
         .sort((a, b) => b.createdAt - a.createdAt || compareTrack(a, b))
-        .slice(0, MAX_RECENTLY_UPLOADED_ENTRIES);
+        .slice(0, RECENTLY_UPLOADED_MAX_ENTRIES);
     });
 
     const recentlyPlayedTracks = computed(() => {

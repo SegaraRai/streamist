@@ -1,4 +1,5 @@
 <script lang="ts">
+import { COOKIE_CHECK_INTERVAL, IDLE_TIMEOUT } from '~/config';
 import { setCDNCookie } from '~/logic/cdnCookie';
 import { NAIVE_UI_THEMES } from '~/logic/theme';
 import { usePlaybackStore } from '~/stores/playback';
@@ -10,7 +11,7 @@ export default defineComponent({
     const naiveUITheme = eagerComputed(() => NAIVE_UI_THEMES[themeStore.theme]);
     const playbackStore = usePlaybackStore();
 
-    const { idle } = useIdle(1 * 60 * 1000);
+    const { idle } = useIdle(IDLE_TIMEOUT);
 
     useIntervalFn(() => {
       const active = !idle.value || playbackStore.playing$$q.value;
@@ -19,7 +20,7 @@ export default defineComponent({
       }
 
       setCDNCookie();
-    }, 30 * 1000);
+    }, COOKIE_CHECK_INTERVAL);
 
     const themeClass = eagerComputed(() => `s-theme--${themeStore.theme}`);
 
