@@ -10,28 +10,37 @@ export async function updateMaxTrackId(
   try {
     const user = await client.user.findFirst({
       where: { id: userId },
-      select: { plan: true },
+      select: { maxTrackId: true, plan: true },
     });
     if (!user) {
       return;
     }
 
     const numMaxTracks = MAX_TRACKS_PER_PLAN[user.plan as Plan] || 0;
-    if (numMaxTracks === Infinity) {
+    if (numMaxTracks === Infinity && !user.maxTrackId) {
       return;
     }
 
-    const maxTrack = await client.track.findFirst({
-      where: { userId },
-      orderBy: { id: 'asc' },
-      select: { id: true },
-      skip: Math.max(numMaxTracks - 1, 0),
-      take: 1,
-    });
+    const maxTrack =
+      numMaxTracks === Infinity
+        ? null
+        : await client.track.findFirst({
+            where: { userId },
+            orderBy: { id: 'asc' },
+            select: { id: true },
+            skip: Math.max(numMaxTracks - 1, 0),
+            take: 1,
+          });
+
+    const newMaxTrackId = maxTrack?.id ?? null;
 
     const updated = await client.user.updateMany({
-      where: { id: userId, plan: user.plan, maxTrackId: { not: maxTrack?.id } },
-      data: { maxTrackId: maxTrack?.id ?? null, updatedAt: Date.now() },
+      where: {
+        id: userId,
+        plan: user.plan,
+        maxTrackId: { not: newMaxTrackId },
+      },
+      data: { maxTrackId: newMaxTrackId, updatedAt: Date.now() },
     });
 
     if (updated.count && !skipUpdateTimestamp) {
