@@ -2,6 +2,7 @@ import { createAsyncCache } from '$shared/asyncCache';
 import { TOKEN_SHOULD_RENEW_TOLERANCE } from '~/config';
 import { isJWTNotExpired } from '~/logic/jwt';
 import unAuthAPI from '~/logic/unAuthAPI';
+import { isAxiosError } from './axiosError';
 
 export interface Tokens {
   readonly apiToken: string;
@@ -32,7 +33,13 @@ export const tokens = createAsyncCache<Tokens>(
         cdnToken: tokens.cdn_access_token,
       };
     } catch (error: unknown) {
-      localStorage.removeItem('refreshToken');
+      if (isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status != null && status >= 400 && status < 500) {
+          // console.log('cleared refreshToken');
+          localStorage.removeItem('refreshToken');
+        }
+      }
       throw error;
     }
   },
