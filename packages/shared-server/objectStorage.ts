@@ -117,7 +117,7 @@ export async function osPutFile(
   // PassThrough is needed to read data along with sending it to the S3 stream (https://stackoverflow.com/a/37366093)
   // do not listen passThrough's data events, or it won't be sent to S3
   const passThrough = new PassThrough();
-  stream.pipe(passThrough);
+  stream.pipe(passThrough as any);
   await s3.putObject({
     Bucket: objectStorage.bucket,
     Key: key,

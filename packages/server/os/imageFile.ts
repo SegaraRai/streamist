@@ -6,18 +6,28 @@ import {
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
 } from '$shared/objectStorage';
+import { retryS3 } from '$shared/retry';
 
 export async function osDeleteImageFiles(
-  userId: string,
-  imageFiles: readonly Pick<ImageFile, 'region' | 'id' | 'extension'>[]
+  imageFiles: readonly Pick<
+    ImageFile,
+    'region' | 'id' | 'extension' | 'imageId' | 'userId'
+  >[]
 ): Promise<void> {
   const regionToFilesMap = createMultiMap(imageFiles, 'region');
   for (const [region, regionFiles] of regionToFilesMap) {
     const os = getTranscodedImageFileOS(region as OSRegion);
-    await osDelete(
-      os,
-      regionFiles.map((file): string =>
-        getTranscodedImageFileKey(userId, file.id, file.extension)
+    await retryS3(() =>
+      osDelete(
+        os,
+        regionFiles.map((file): string =>
+          getTranscodedImageFileKey(
+            file.userId,
+            file.imageId,
+            file.id,
+            file.extension
+          )
+        )
       )
     );
   }

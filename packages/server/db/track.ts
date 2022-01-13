@@ -1,7 +1,6 @@
 import {
   generateAlbumId,
   generateTrackCoArtistId,
-  generateTrackId,
 } from '$shared-server/generateId';
 import { CoArtistType, isValidCoArtistType } from '$shared/coArtist';
 import { Album, Artist, Prisma, Track } from '$prisma/client';
@@ -60,6 +59,7 @@ export interface CreateTrackResult {
 export async function dbTrackCreateTx(
   txClient: TransactionalPrismaClient,
   userId: string,
+  newTrackId: string,
   {
     albumTitle,
     albumArtistName,
@@ -71,7 +71,6 @@ export async function dbTrackCreateTx(
   }: CreateTrackInput
 ): Promise<CreateTrackResult> {
   const newAlbumId = await generateAlbumId();
-  const newTrackId = await generateTrackId();
 
   const artistGetOrCreateTx = dbArtistCreateCachedGetOrCreateByNameTx(
     txClient,

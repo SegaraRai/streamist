@@ -1,5 +1,8 @@
 import { unlink } from 'node:fs/promises';
-import { generateTranscodedImageFileId } from '$shared-server/generateId';
+import {
+  generateImageId,
+  generateTranscodedImageFileId,
+} from '$shared-server/generateId';
 import { osDelete, osGetFile, osPutFile } from '$shared-server/objectStorage';
 import {
   getSourceFileKey,
@@ -7,6 +10,7 @@ import {
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
 } from '$shared/objectStorage';
+import { retryS3NoReject } from '$shared/retry';
 import { uploadJSON } from '../execAndLog';
 import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
 import { getTempFilepath } from '../tempFile';
@@ -38,6 +42,8 @@ export async function processImageRequest(
   try {
     const transcodedFiles: TranscoderResponseArtifactImageFile[] = [];
 
+    const imageId = await generateImageId();
+
     const sourceImageFilepath = extracted
       ? file.filePath
       : getTempFilepath(sourceFileId);
@@ -52,7 +58,7 @@ export async function processImageRequest(
       sourceFileSHA256 = (
         await osGetFile(
           getSourceFileOS(region),
-          getSourceFileKey(userId, sourceFileId),
+          getSourceFileKey(userId, sourceId, sourceFileId),
           sourceImageFilepath,
           'sha256'
         )
@@ -124,6 +130,7 @@ export async function processImageRequest(
 
       const key = getTranscodedImageFileKey(
         userId,
+        imageId,
         transcodedImageFileId,
         imageFormat.extension
       );
@@ -167,6 +174,7 @@ export async function processImageRequest(
     const artifact: TranscoderResponseArtifactImage = {
       type: 'image',
       source: file,
+      id: imageId,
       files: transcodedFiles,
       dHash,
       sha256: sourceFileSHA256,
@@ -188,7 +196,7 @@ export async function processImageRequest(
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));
-      await osDelete(os, uploadedTranscodedImageKeys);
+      await retryS3NoReject(() => osDelete(os, uploadedTranscodedImageKeys));
     } catch (_error: unknown) {
       // エラーになっても良い
     }

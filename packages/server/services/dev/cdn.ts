@@ -4,12 +4,13 @@ import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import fastifyCookie from 'fastify-cookie';
 import fastifyCors from 'fastify-cors';
 import type { ObjectStorage } from '$shared-server/objectStorage';
+import { isId } from '$shared/id';
 import {
   getTranscodedAudioFileKey,
   getTranscodedAudioFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-  toOSRegion,
+  isValidOSRegion,
 } from '$shared/objectStorage';
 import { extractPayloadFromCDNToken } from '../tokens';
 import { createUserDownloadS3Cached } from '../userOS';
@@ -61,7 +62,7 @@ export const devCDN: FastifyPluginCallback<{}> = (
 
   fastify.route({
     method: 'GET',
-    url: '/files/:region/:type/:userId/:filename',
+    url: '/files/:region/:type/:userId/:entityId/:filename',
     handler: async (request, reply) => {
       const token = request.cookies.token;
       if (!token) {
@@ -74,11 +75,28 @@ export const devCDN: FastifyPluginCallback<{}> = (
       }
 
       const params = request.params as Record<string, string>;
-      const { type, userId, filename } = params;
-      const region = toOSRegion(params.region);
+      const { entityId, filename, region, type, userId } = params;
 
       if (userId !== payload.id) {
         return reply.code(401).send();
+      }
+
+      if (!isValidOSRegion(region)) {
+        return reply.code(404).send();
+      }
+
+      if (!isId(entityId)) {
+        return reply.code(404).send();
+      }
+
+      const match = filename.match(/([^.]+)(\.[\da-z]+)$/);
+      if (!match) {
+        return reply.code(404).send();
+      }
+
+      const [, fileId, extension] = match;
+      if (!isId(fileId)) {
+        return reply.code(404).send();
       }
 
       let os: ObjectStorage;
@@ -87,12 +105,12 @@ export const devCDN: FastifyPluginCallback<{}> = (
       switch (type) {
         case 'audios':
           os = getTranscodedAudioFileOS(region);
-          key = getTranscodedAudioFileKey(userId, filename, '');
+          key = getTranscodedAudioFileKey(userId, entityId, fileId, extension);
           break;
 
         case 'images':
           os = getTranscodedImageFileOS(region);
-          key = getTranscodedImageFileKey(userId, filename, '');
+          key = getTranscodedImageFileKey(userId, entityId, fileId, extension);
           break;
 
         default:

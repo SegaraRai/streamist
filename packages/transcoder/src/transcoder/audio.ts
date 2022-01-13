@@ -3,6 +3,7 @@ import { Stats } from 'node:fs';
 import { rename, stat, unlink } from 'node:fs/promises';
 import {
   generateSourceFileId,
+  generateTrackId,
   generateTranscodedAudioFileId,
 } from '$shared-server/generateId';
 import {
@@ -20,6 +21,7 @@ import {
   getTranscodedAudioFileKey,
   getTranscodedAudioFileOS,
 } from '$shared/objectStorage';
+import { retryS3NoReject } from '$shared/retry';
 import { uploadJSON } from '../execAndLog';
 import { calcFileHash } from '../fileHash';
 import logger from '../logger';
@@ -54,7 +56,7 @@ function createTracksFromCueSheet(
   audioStream: FFprobeStreamAudio,
   duration: number,
   tags: FFprobeTags = {}
-): TranscoderResponseArtifactAudioTrack[] {
+): Promise<TranscoderResponseArtifactAudioTrack[]> {
   try {
     validateCueSheet(cueSheet);
   } catch (error: unknown) {
@@ -69,123 +71,126 @@ function createTracksFromCueSheet(
     ...file.tracks.map((track) => track.trackNumber)
   );
 
-  return file.tracks.map(
-    (track, index): TranscoderResponseArtifactAudioTrack => {
-      const index01Offset = track.offsetMap.get(1);
-      if (index01Offset === undefined) {
-        // 事前にチェックしているので起こらないはず
-        throw new TranscodeError(
-          'invalid cue sheet. TRACK has no INDEX 01 offset.'
-        );
+  return Promise.all(
+    file.tracks.map(
+      async (track, index): Promise<TranscoderResponseArtifactAudioTrack> => {
+        const index01Offset = track.offsetMap.get(1);
+        if (index01Offset === undefined) {
+          // 事前にチェックしているので起こらないはず
+          throw new TranscodeError(
+            'invalid cue sheet. TRACK has no INDEX 01 offset.'
+          );
+        }
+
+        const nextIndex01Offset = file.tracks[index + 1]?.offsetMap.get(1);
+
+        const currentTrackTime = index01Offset / 75;
+        const nextTrackTime = nextIndex01Offset
+          ? nextIndex01Offset / 75
+          : duration;
+
+        const trackDuration = nextTrackTime - currentTrackTime;
+
+        const getTagFromCueSheet = (keys: string[]): string | undefined => {
+          for (const key of keys) {
+            const value = cueSheet.remMap.get(key);
+            if (value) {
+              return value;
+            }
+          }
+          return undefined;
+        };
+
+        const getTagFromTrack = (keys: string[]): string | undefined => {
+          for (const key of keys) {
+            const value = track.remMap.get(key);
+            if (value) {
+              return value;
+            }
+          }
+          return undefined;
+        };
+
+        const getTagFromTrackAndCueSheet = (
+          keys: string[]
+        ): string | undefined => {
+          return getTagFromTrack(keys) || getTagFromCueSheet(keys);
+        };
+
+        // TODO(feat)?: タグがない場合に曲側のタグを持ってくる
+        const trackTags: FFprobeTags = {
+          album: cueSheet.title || tags.album || tags.title,
+          albumartist: cueSheet.performer || tags.albumartist || tags.artist,
+          artist:
+            track.performer ||
+            cueSheet.performer ||
+            tags.albumartist ||
+            tags.artist,
+          title: track.title || cueSheet.title || tags.album || tags.title,
+          //
+          arranger: getTagFromTrackAndCueSheet(['ARRANGER']),
+          composer: getTagFromTrackAndCueSheet(['COMPOSER']),
+          lyricist: getTagFromTrackAndCueSheet(['LYRICIST']),
+          //
+          albumsort: getTagFromCueSheet(['TITLE_SORT', 'TITLESORT']),
+          albumartistsort: getTagFromCueSheet([
+            'PERFORMER_SORT',
+            'PERFORMERSORT',
+          ]),
+          artistsort: getTagFromTrackAndCueSheet([
+            'PERFORMER_SORT',
+            'PERFORMERSORT',
+          ]),
+          titlesort: getTagFromTrackAndCueSheet(['TITLE_SORT', 'TITLESORT']),
+          //
+          arrangersort: getTagFromTrackAndCueSheet([
+            'ARRANGER_SORT',
+            'ARRANGERSORT',
+          ]),
+          composersort: getTagFromTrackAndCueSheet([
+            'COMPOSER_SORT',
+            'COMPOSERSORT',
+          ]),
+          lyricistsort: getTagFromTrackAndCueSheet([
+            'LYRICIST_SORT',
+            'LYRICISTSORT',
+          ]),
+          //
+          comment: getTagFromTrackAndCueSheet(['COMMENT']),
+          copyright: getTagFromTrackAndCueSheet(['COPYRIGHT']),
+          date: getTagFromTrackAndCueSheet(['DATE']),
+          genre: getTagFromTrackAndCueSheet(['GENRE']),
+          //
+          disc: getTagFromCueSheet(['DISCNUMBER', 'DISC_NUMBER', 'DISC']),
+          //
+          track: `${track.trackNumber}/${maxTrackNumber}`,
+          //
+          discid: cueSheet.remMap.get('DISCID'),
+          catalog: cueSheet.remMap.get('CATALOG'),
+          isrc: track.remMap.get('ISRC'),
+        };
+
+        return {
+          id: await generateTrackId(),
+          duration: trackDuration,
+          streamIndex: audioStream.index,
+          tags: trackTags,
+          // to be filled later
+          files: [],
+          clipStartTime: index01Offset > 0 ? currentTrackTime : undefined,
+          clipDuration:
+            nextIndex01Offset !== undefined ? trackDuration : undefined,
+        };
       }
-
-      const nextIndex01Offset = file.tracks[index + 1]?.offsetMap.get(1);
-
-      const currentTrackTime = index01Offset / 75;
-      const nextTrackTime = nextIndex01Offset
-        ? nextIndex01Offset / 75
-        : duration;
-
-      const trackDuration = nextTrackTime - currentTrackTime;
-
-      const getTagFromCueSheet = (keys: string[]): string | undefined => {
-        for (const key of keys) {
-          const value = cueSheet.remMap.get(key);
-          if (value) {
-            return value;
-          }
-        }
-        return undefined;
-      };
-
-      const getTagFromTrack = (keys: string[]): string | undefined => {
-        for (const key of keys) {
-          const value = track.remMap.get(key);
-          if (value) {
-            return value;
-          }
-        }
-        return undefined;
-      };
-
-      const getTagFromTrackAndCueSheet = (
-        keys: string[]
-      ): string | undefined => {
-        return getTagFromTrack(keys) || getTagFromCueSheet(keys);
-      };
-
-      // TODO(feat)?: タグがない場合に曲側のタグを持ってくる
-      const trackTags: FFprobeTags = {
-        album: cueSheet.title || tags.album || tags.title,
-        albumartist: cueSheet.performer || tags.albumartist || tags.artist,
-        artist:
-          track.performer ||
-          cueSheet.performer ||
-          tags.albumartist ||
-          tags.artist,
-        title: track.title || cueSheet.title || tags.album || tags.title,
-        //
-        arranger: getTagFromTrackAndCueSheet(['ARRANGER']),
-        composer: getTagFromTrackAndCueSheet(['COMPOSER']),
-        lyricist: getTagFromTrackAndCueSheet(['LYRICIST']),
-        //
-        albumsort: getTagFromCueSheet(['TITLE_SORT', 'TITLESORT']),
-        albumartistsort: getTagFromCueSheet([
-          'PERFORMER_SORT',
-          'PERFORMERSORT',
-        ]),
-        artistsort: getTagFromTrackAndCueSheet([
-          'PERFORMER_SORT',
-          'PERFORMERSORT',
-        ]),
-        titlesort: getTagFromTrackAndCueSheet(['TITLE_SORT', 'TITLESORT']),
-        //
-        arrangersort: getTagFromTrackAndCueSheet([
-          'ARRANGER_SORT',
-          'ARRANGERSORT',
-        ]),
-        composersort: getTagFromTrackAndCueSheet([
-          'COMPOSER_SORT',
-          'COMPOSERSORT',
-        ]),
-        lyricistsort: getTagFromTrackAndCueSheet([
-          'LYRICIST_SORT',
-          'LYRICISTSORT',
-        ]),
-        //
-        comment: getTagFromTrackAndCueSheet(['COMMENT']),
-        copyright: getTagFromTrackAndCueSheet(['COPYRIGHT']),
-        date: getTagFromTrackAndCueSheet(['DATE']),
-        genre: getTagFromTrackAndCueSheet(['GENRE']),
-        //
-        disc: getTagFromCueSheet(['DISCNUMBER', 'DISC_NUMBER', 'DISC']),
-        //
-        track: `${track.trackNumber}/${maxTrackNumber}`,
-        //
-        discid: cueSheet.remMap.get('DISCID'),
-        catalog: cueSheet.remMap.get('CATALOG'),
-        isrc: track.remMap.get('ISRC'),
-      };
-
-      return {
-        duration: trackDuration,
-        streamIndex: audioStream.index,
-        tags: trackTags,
-        // to be filled later
-        files: [],
-        clipStartTime: index01Offset > 0 ? currentTrackTime : undefined,
-        clipDuration:
-          nextIndex01Offset !== undefined ? trackDuration : undefined,
-      };
-    }
+    )
   );
 }
 
-function createTracks(
+async function createTracks(
   audioStream: FFprobeStreamAudio,
   tags: FFprobeTags,
   cueSheet?: CueSheet
-): TranscoderResponseArtifactAudioTrack[] {
+): Promise<TranscoderResponseArtifactAudioTrack[]> {
   // 曲長（秒）
   const duration =
     (parseInt(audioStream.duration_ts.toString(), 10) *
@@ -194,9 +199,10 @@ function createTracks(
 
   // トラック作成
   const tracks: TranscoderResponseArtifactAudioTrack[] = cueSheet
-    ? createTracksFromCueSheet(cueSheet, audioStream, duration)
+    ? await createTracksFromCueSheet(cueSheet, audioStream, duration)
     : [
         {
+          id: await generateTrackId(),
           duration,
           streamIndex: audioStream.index,
           tags,
@@ -242,7 +248,7 @@ export async function processAudioRequest(
     // ユーザーがアップロードした音楽ファイルをローカルにダウンロード
     const [, sourceFileSHA256] = await osGetFile(
       getSourceFileOS(region),
-      getSourceFileKey(userId, sourceFileId),
+      getSourceFileKey(userId, sourceId, sourceFileId),
       sourceAudioFilepath,
       'sha256'
     );
@@ -288,7 +294,7 @@ export async function processAudioRequest(
       // NOTE: ダウンロードや変換で例外が発生する可能性あり
       const buffer = await osGetData(
         getSourceFileOS(region),
-        getSourceFileKey(userId, cueSheetSourceFileId)
+        getSourceFileKey(userId, sourceId, cueSheetSourceFileId)
       );
       cueSheetSHA256 = createHash('sha256').update(buffer).digest('hex');
       strCueSheet = decodeText(buffer);
@@ -302,7 +308,7 @@ export async function processAudioRequest(
       ? parseCueSheet(strCueSheet)
       : undefined;
 
-    const tracks = createTracks(audioStream, tags, cueSheet);
+    const tracks = await createTracks(audioStream, tags, cueSheet);
 
     // トランスコード
     // TODO(perf)?: 並列化
@@ -376,6 +382,7 @@ export async function processAudioRequest(
 
         const key = getTranscodedAudioFileKey(
           userId,
+          track.id,
           transcodedAudioFileId,
           audioFormat.extension
         );
@@ -485,7 +492,7 @@ export async function processAudioRequest(
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));
-      await osDelete(os, uploadedTranscodedAudioKeys);
+      await retryS3NoReject(() => osDelete(os, uploadedTranscodedAudioKeys));
     } catch (_error: unknown) {
       // エラーになっても良い
     }

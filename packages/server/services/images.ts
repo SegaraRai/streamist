@@ -28,7 +28,12 @@ export async function imageDeleteFilesAndSourceFiles(
 
   // delete image files from S3
   await osDeleteImageFiles(
-    userId,
-    images.flatMap((image) => image.files)
+    images.flatMap((image) =>
+      image.files.map((imageFile) => ({
+        ...imageFile,
+        imageId: image.id,
+        userId,
+      }))
+    )
   );
 }

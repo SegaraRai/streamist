@@ -15,6 +15,7 @@ export function init(): Promise<void> {
             id: userId,
             name: `User.Clean.${userId}`,
             email: `${userId}@example.org`,
+            plan: 'free',
             createdAt: Date.now(),
             updatedAt: Date.now(),
           },

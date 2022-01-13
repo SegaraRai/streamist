@@ -272,7 +272,7 @@ async function onSourceFileUpdated(
 
     for (const sourceFile of uploadedSourceFiles) {
       const os = getSourceFileOS(sourceFile.region as OSRegion);
-      const key = getSourceFileKey(userId, sourceFile.id);
+      const key = getSourceFileKey(userId, sourceId, sourceFile.id);
       const s3 = createUserUploadS3Cached(os);
 
       await retryS3NoReject(() =>
@@ -348,7 +348,7 @@ export async function onSourceFileAborted(
   }
 
   const os = getSourceFileOS(sourceFile.region as OSRegion);
-  const key = getSourceFileKey(userId, sourceFileId);
+  const key = getSourceFileKey(userId, sourceId, sourceFileId);
   const s3 = createUserUploadS3Cached(os);
 
   const { uploadId } = sourceFile;
@@ -432,7 +432,7 @@ export async function onSourceFileUploaded(
 
     // complete multipart upload
     const os = getSourceFileOS(sourceFile.region as OSRegion);
-    const key = getSourceFileKey(userId, sourceFileId);
+    const key = getSourceFileKey(userId, sourceId, sourceFileId);
     const s3 = createUserUploadS3Cached(os);
 
     // TODO(prod): error handling

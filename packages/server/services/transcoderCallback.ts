@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
-import { generateImageId } from '$shared-server/generateId';
 import { osDelete } from '$shared-server/objectStorage';
 import { is } from '$shared/is';
 import {
@@ -8,6 +7,7 @@ import {
   getTranscodedImageFileOS,
 } from '$shared/objectStorage';
 import { parseDate } from '$shared/parseDate';
+import { retryS3NoReject } from '$shared/retry';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -283,7 +283,7 @@ function handleTranscoderResponseArtifactAudio(
     let albumId: string | undefined;
 
     for (const artifactTrack of artifact.tracks) {
-      const { duration, files, tags } = artifactTrack;
+      const { duration, files, id, tags } = artifactTrack;
 
       const date = tags.date ? parseDate(tags.date) : undefined;
       const [discNumber, trackNumber] = parseDiscAndTrackNumber(tags);
@@ -338,7 +338,7 @@ function handleTranscoderResponseArtifactAudio(
       }
 
       const { track, trackArtist, album, albumArtist, coArtists } =
-        await dbTrackCreateTx(txClient, userId, {
+        await dbTrackCreateTx(txClient, userId, id, {
           albumTitle: tagAlbumTitle || options.defaultUnknownAlbumTitle,
           albumArtistName: tagAlbumArtist || options.defaultUnknownAlbumArtist,
           albumArtistNameSort: tagAlbumArtistSort,
@@ -469,10 +469,17 @@ async function handleTranscoderResponseArtifactImage(
   const deleteTranscodedFiles = async () => {
     // NOTE(ximg): currently we don't upload raw extracted images to S3. Delete them if we do.
     const os = getTranscodedImageFileOS(artifact.source.region);
-    await osDelete(
-      os,
-      artifact.files.map((file) =>
-        getTranscodedImageFileKey(userId, file.fileId, file.extension)
+    await retryS3NoReject(() =>
+      osDelete(
+        os,
+        artifact.files.map((file) =>
+          getTranscodedImageFileKey(
+            userId,
+            artifact.id,
+            file.fileId,
+            file.extension
+          )
+        )
       )
     );
   };
@@ -564,12 +571,10 @@ async function handleTranscoderResponseArtifactImage(
         );
       }
 
-      const imageId = await generateImageId();
-
       await registerImage(
         txClient,
         artifact,
-        imageId,
+        artifact.id,
         attachToType,
         attachToId,
         attachPrepend,

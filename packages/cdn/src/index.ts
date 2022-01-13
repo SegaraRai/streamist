@@ -87,7 +87,7 @@ API.add('DELETE', '/api/cookies/token', (req, context) => {
 
 API.add(
   'GET',
-  '/files/:region/:type/:userId/:filename',
+  '/files/:region/:type/:userId/:entityId/:filename',
   async (req, context) => {
     const strJWT = parse(req.headers.get('Cookie') || '')[COOKIE_JWT_KEY];
     if (!strJWT) {
@@ -99,13 +99,17 @@ API.add(
       return send(401);
     }
 
-    const { userId, region, type, filename } = context.params;
+    const { entityId, filename, region, type, userId } = context.params;
 
     if (jwt.sub !== userId) {
       return send(401);
     }
 
     if (!isValidOSRegion(region)) {
+      return send(404);
+    }
+
+    if (!isId(entityId)) {
       return send(404);
     }
 
@@ -125,14 +129,14 @@ API.add(
       case 'audios':
         storageURL = getOSURL(
           getTranscodedAudioFileOS(region),
-          getTranscodedAudioFileKey(userId, fileId, extension)
+          getTranscodedAudioFileKey(userId, entityId, fileId, extension)
         );
         break;
 
       case 'images':
         storageURL = getOSURL(
           getTranscodedImageFileOS(region),
-          getTranscodedImageFileKey(userId, fileId, extension)
+          getTranscodedImageFileKey(userId, entityId, fileId, extension)
         );
         break;
     }

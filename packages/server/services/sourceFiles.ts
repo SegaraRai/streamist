@@ -45,6 +45,13 @@ export async function sourceFileDeleteFromOSIfUnreferenced(
       id: sourceFileId,
       userId,
     },
+    select: {
+      id: true,
+      region: true,
+      entityExists: true,
+      sourceId: true,
+      userId: true,
+    },
   });
 
   if (!sourceFile) {
@@ -76,7 +83,7 @@ export async function sourceFileDeleteFromOSIfUnreferenced(
   }
 
   // delete source files from S3
-  await osDeleteSourceFiles(userId, [sourceFile]);
+  await osDeleteSourceFiles([sourceFile]);
 
   return true;
 }

@@ -119,6 +119,8 @@ export interface TranscoderResponseArtifactImageProbe {
 }
 
 export interface TranscoderResponseArtifactAudioTrack {
+  /** トラックID */
+  id: string;
   /** ffprobeでのストリーム番号 */
   streamIndex: number;
   /** タグ情報 */
@@ -154,6 +156,7 @@ export interface TranscoderResponseArtifactAudio {
 export interface TranscoderResponseArtifactImage {
   type: 'image';
   source: TranscoderRequestFileImage | TranscoderRequestFileImageExtracted;
+  id: string;
   files: TranscoderResponseArtifactImageFile[];
   probe: TranscoderResponseArtifactImageProbe;
   sha256: string;

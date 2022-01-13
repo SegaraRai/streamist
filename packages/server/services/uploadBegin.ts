@@ -52,6 +52,7 @@ import { createUserUploadS3Cached } from './userOS';
  */
 async function createMultipartUploadId(
   userId: string,
+  sourceId: string,
   sourceFileId: string,
   region: OSRegion,
   fileSize: number
@@ -62,7 +63,7 @@ async function createMultipartUploadId(
   }
 
   const os = getSourceFileOS(region);
-  const key = getSourceFileKey(userId, sourceFileId);
+  const key = getSourceFileKey(userId, sourceId, sourceFileId);
   const s3 = createUserUploadS3Cached(os);
 
   const response = await retryS3(() =>
@@ -80,6 +81,7 @@ async function createMultipartUploadId(
 
 function createPresignedMultipartURLs(
   userId: string,
+  sourceId: string,
   sourceFileId: string,
   region: OSRegion,
   fileSize: number,
@@ -88,7 +90,7 @@ function createPresignedMultipartURLs(
   const partSizes = splitIntoParts(fileSize);
 
   const os = getSourceFileOS(region);
-  const key = getSourceFileKey(userId, sourceFileId);
+  const key = getSourceFileKey(userId, sourceId, sourceFileId);
   const s3 = createUserUploadS3Cached(os);
 
   return Promise.all(
@@ -115,12 +117,13 @@ function createPresignedMultipartURLs(
 
 function createPresignedURL(
   userId: string,
+  sourceId: string,
   sourceFileId: string,
   region: OSRegion,
   fileSize: number
 ): Promise<string> {
   const os = getSourceFileOS(region);
-  const key = getSourceFileKey(userId, sourceFileId);
+  const key = getSourceFileKey(userId, sourceId, sourceFileId);
   const s3 = createUserUploadS3Cached(os);
 
   return getSignedUrl(
@@ -149,6 +152,7 @@ function createPresignedURL(
  */
 async function createUploadURL(
   userId: string,
+  sourceId: string,
   sourceFileId: string,
   region: OSRegion,
   fileSize: number,
@@ -160,6 +164,7 @@ async function createUploadURL(
       size: fileSize,
       parts: await createPresignedMultipartURLs(
         userId,
+        sourceId,
         sourceFileId,
         region,
         fileSize,
@@ -169,7 +174,13 @@ async function createUploadURL(
   }
 
   return {
-    url: await createPresignedURL(userId, sourceFileId, region, fileSize),
+    url: await createPresignedURL(
+      userId,
+      sourceId,
+      sourceFileId,
+      region,
+      fileSize
+    ),
     size: fileSize,
     parts: null,
   };
@@ -224,6 +235,7 @@ export async function createAudioSource(
   const uploadId =
     (await createMultipartUploadId(
       userId,
+      sourceId,
       audioFileId,
       region,
       request.audioFile.fileSize
@@ -233,6 +245,7 @@ export async function createAudioSource(
     request.cueSheetFile && cueSheetFileId
       ? await createMultipartUploadId(
           userId,
+          sourceId,
           cueSheetFileId,
           region,
           request.cueSheetFile.fileSize
@@ -305,6 +318,7 @@ export async function createAudioSource(
         sourceFileId: audioFileId,
         uploadURL: await createUploadURL(
           userId,
+          sourceId,
           audioFileId,
           region,
           request.audioFile.fileSize,
@@ -318,6 +332,7 @@ export async function createAudioSource(
               sourceFileId: cueSheetFileId!,
               uploadURL: await createUploadURL(
                 userId,
+                sourceId,
                 cueSheetFileId!,
                 region,
                 request.cueSheetFile.fileSize,
@@ -400,6 +415,7 @@ export async function createImageSource(
   const uploadId =
     (await createMultipartUploadId(
       userId,
+      sourceId,
       imageFileId,
       region,
       request.imageFile.fileSize
@@ -449,6 +465,7 @@ export async function createImageSource(
         sourceFileId: imageFileId,
         uploadURL: await createUploadURL(
           userId,
+          sourceId,
           imageFileId,
           region,
           request.imageFile.fileSize,
@@ -488,6 +505,7 @@ export async function getUploadURLForSourceFile(
 
   return createUploadURL(
     userId,
+    sourceId,
     sourceFileId,
     sourceFile.region as OSRegion,
     sourceFile.fileSize,

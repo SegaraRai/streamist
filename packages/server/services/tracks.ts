@@ -233,6 +233,8 @@ export async function trackDelete(
         id: true,
         extension: true,
         region: true,
+        trackId: true,
+        userId: true,
       },
     });
 
@@ -291,5 +293,5 @@ export async function trackDelete(
 
   await dbResourceUpdateTimestamp(userId);
 
-  await osDeleteTrackFiles(userId, trackFiles);
+  await osDeleteTrackFiles(trackFiles);
 }

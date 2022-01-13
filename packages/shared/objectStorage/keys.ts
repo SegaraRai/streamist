@@ -1,21 +1,27 @@
-export function getSourceFileKey(userId: string, fileId: string): string {
-  return `src/${userId}/${fileId}`;
+export function getSourceFileKey(
+  userId: string,
+  sourceId: string,
+  sourceFileId: string
+): string {
+  return `src/${userId}/${sourceId}/${sourceFileId}`;
 }
 
 export function getTranscodedAudioFileKey(
   userId: string,
-  fileId: string,
+  trackId: string,
+  trackFileId: string,
   extension: string
 ): string {
-  return `tra/${userId}/${fileId}${extension}`;
+  return `tra/${userId}/${trackId}/${trackFileId}${extension}`;
 }
 
 export function getTranscodedImageFileKey(
   userId: string,
-  fileId: string,
+  imageId: string,
+  imageFileId: string,
   extension: string
 ): string {
-  return `tri/${userId}/${fileId}${extension}`;
+  return `tri/${userId}/${imageId}/${imageFileId}${extension}`;
 }
 
 export function getTranscodeLogFileKey(
