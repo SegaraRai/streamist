@@ -53,7 +53,7 @@ export default defineComponent({
       <template v-if="recentlyPlayedTracks$$q?.length">
         <div>
           <header
-            class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 py-2"
+            class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 pt-3 pb-2"
           >
             <div class="text-h5">{{ t('home.RecentlyPlayed') }}</div>
           </header>
@@ -76,7 +76,7 @@ export default defineComponent({
       <template v-if="recentlyUploadedTracks$$q?.length">
         <div>
           <header
-            class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 py-2"
+            class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 pt-3 pb-2"
           >
             <div class="text-h5">{{ t('home.RecentlyUploaded') }}</div>
           </header>
