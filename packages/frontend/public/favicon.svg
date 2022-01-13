@@ -1,9 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 256">
   <style>
-    path { fill: #222; }
+    path {
+      fill: #2a8dfe;
+    }
     @media (prefers-color-scheme: dark) {
-      path { fill: #ffffff; }
+      path {
+        fill: #2a8dfe;
+      }
     }
   </style>
-  <path d="M27.562 26L17.17 8.928l2.366-3.888L17.828 4L16 7.005L14.17 4l-1.708 1.04l2.366 3.888L4.438 26H2v2h28v-2zM16 10.85L25.22 26H17v-8h-2v8H6.78z" />
+  <path d="M 198 6.7564 L 142 103.7513 L 204.3538 139.7513 L 58 249.2436 L 114 152.2487 L 51.6462 116.2487 Z" />
 </svg>

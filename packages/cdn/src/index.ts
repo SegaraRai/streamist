@@ -5,6 +5,7 @@ import { Router } from 'worktop';
 import * as CORS from 'worktop/cors';
 import { reply } from 'worktop/module';
 import { send } from 'worktop/response';
+import { CACHE_CONTROL_NO_STORE } from '$shared/config/cacheControl';
 import { isId } from '$shared/id';
 import {
   getOSRawURL,
@@ -123,14 +124,18 @@ API.add(
       return send(404);
     }
 
-    let storageURL: string | undefined;
+    let storageURL: string | false | undefined;
     const getOSURL = getOSRawURL;
     switch (type) {
       case 'audios':
-        storageURL = getOSURL(
-          getTranscodedAudioFileOS(region),
-          getTranscodedAudioFileKey(userId, entityId, fileId, extension)
-        );
+        if (jwt.maxTrackId && fileId > jwt.maxTrackId) {
+          storageURL = false;
+        } else {
+          storageURL = getOSURL(
+            getTranscodedAudioFileOS(region),
+            getTranscodedAudioFileKey(userId, entityId, fileId, extension)
+          );
+        }
         break;
 
       case 'images':
@@ -139,6 +144,12 @@ API.add(
           getTranscodedImageFileKey(userId, entityId, fileId, extension)
         );
         break;
+    }
+
+    if (!storageURL) {
+      return send(storageURL === false ? 403 : 404, {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
+      });
     }
 
     // キャッシュしない設定か確認

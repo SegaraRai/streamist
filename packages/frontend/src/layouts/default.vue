@@ -1,6 +1,7 @@
-<script lang="ts" setup>
+<script lang="ts">
 import type { ScrollbarInst } from 'naive-ui';
 import { useDisplay } from 'vuetify';
+import logoSVG from '~/assets/logo_colored.svg';
 import { useSyncDB } from '~/db/sync';
 import { getNaiveUIScrollbarElements } from '~/logic/naive-ui/getScrollbarElements';
 import {
@@ -11,144 +12,165 @@ import {
 import { useThemeStore } from '~/stores/theme';
 import { useUploadStore } from '~/stores/upload';
 
-const { t } = useI18n();
-const router = useRouter();
-const isOnline = useOnline();
-const display = useDisplay();
-const syncDB = useSyncDB();
-const theme = useThemeStore();
+export default defineComponent({
+  setup() {
+    const { t } = useI18n();
+    const router = useRouter();
+    const isOnline = useOnline();
+    const display = useDisplay();
+    const syncDB = useSyncDB();
+    const theme = useThemeStore();
 
-interface NavItemLink {
-  type: 'link';
-  path: string;
-  icon: string;
-  text: string;
-}
+    interface NavItemLink {
+      type: 'link';
+      path: string;
+      icon: string;
+      text: string;
+    }
 
-interface NavItemDivider {
-  type: 'divider';
-}
+    interface NavItemDivider {
+      type: 'divider';
+    }
 
-type NavItem = NavItemLink | NavItemDivider;
+    type NavItem = NavItemLink | NavItemDivider;
 
-const navItems$$q = computed<readonly NavItem[]>(() => [
-  {
-    type: 'link',
-    icon: 'mdi-home',
-    path: '/',
-    text: t('sidebar.Home'),
-  },
-  {
-    type: 'divider',
-  },
-  {
-    type: 'link',
-    icon: 'mdi-album',
-    path: '/albums',
-    text: t('sidebar.Albums'),
-  },
-  {
-    type: 'link',
-    icon: 'mdi-account-music',
-    path: '/artists',
-    text: t('sidebar.Artists'),
-  },
-  {
-    type: 'link',
-    icon: 'mdi-music',
-    path: '/tracks',
-    text: t('sidebar.Tracks'),
-  },
-  {
-    type: 'link',
-    icon: 'mdi-playlist-music',
-    path: '/playlists',
-    text: t('sidebar.Playlists'),
-  },
-  // debug
-  {
-    type: 'divider',
-  },
-  {
-    type: 'link',
-    icon: 'mdi-play',
-    path: '/playing',
-    text: 'Playing',
-  },
-]);
+    const navItems$$q = computed<readonly NavItem[]>(() => [
+      {
+        type: 'link',
+        icon: 'mdi-home',
+        path: '/',
+        text: t('sidebar.Home'),
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'link',
+        icon: 'mdi-album',
+        path: '/albums',
+        text: t('sidebar.Albums'),
+      },
+      {
+        type: 'link',
+        icon: 'mdi-account-music',
+        path: '/artists',
+        text: t('sidebar.Artists'),
+      },
+      {
+        type: 'link',
+        icon: 'mdi-music',
+        path: '/tracks',
+        text: t('sidebar.Tracks'),
+      },
+      {
+        type: 'link',
+        icon: 'mdi-playlist-music',
+        path: '/playlists',
+        text: t('sidebar.Playlists'),
+      },
+      // debug
+      {
+        type: 'divider',
+      },
+      {
+        type: 'link',
+        icon: 'mdi-play',
+        path: '/playing',
+        text: 'Playing',
+      },
+    ]);
 
-const uploadStore$$q = useUploadStore();
+    const uploadStore$$q = useUploadStore();
 
-const rightSidebar$$q = ref(false);
-const _leftSidebar$$q = ref(false);
-const alwaysShowLeftSidebar$$q = eagerComputed(() => display.mdAndUp.value);
-const leftSidebar$$q = computed<boolean>({
-  get: (): boolean => {
-    return alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value;
-  },
-  set: (value: boolean): void => {
-    _leftSidebar$$q.value = !alwaysShowLeftSidebar$$q.value && value;
+    const rightSidebar$$q = ref(false);
+    const _leftSidebar$$q = ref(false);
+    const alwaysShowLeftSidebar$$q = eagerComputed(() => display.mdAndUp.value);
+    const leftSidebar$$q = computed<boolean>({
+      get: (): boolean => {
+        return alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value;
+      },
+      set: (value: boolean): void => {
+        _leftSidebar$$q.value = !alwaysShowLeftSidebar$$q.value && value;
+      },
+    });
+
+    watchEffect(() => {
+      if (alwaysShowLeftSidebar$$q.value) {
+        _leftSidebar$$q.value = false;
+      }
+    });
+
+    const devSync$$q = (event: MouseEvent) => {
+      syncDB(event.shiftKey);
+    };
+
+    const queueScroll$$q = ref(0);
+    const onQueueScroll$$q = (e: Event): void => {
+      queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
+    };
+
+    const hideShell$$q = eagerComputed(
+      () => !!router.currentRoute.value.meta.hideShell
+    );
+
+    const scrollRef$$q = ref<ScrollbarInst | undefined>();
+
+    onMounted(() => {
+      if (!scrollRef$$q.value) {
+        return;
+      }
+
+      const { container$$q, content$$q } = getNaiveUIScrollbarElements(
+        scrollRef$$q.value
+      );
+      if (!container$$q || !content$$q) {
+        return;
+      }
+
+      currentScrollContainerRef.value = container$$q;
+      currentScrollContentRef.value = content$$q;
+    });
+
+    onBeforeUnmount(() => {
+      currentScrollContainerRef.value = undefined;
+      currentScrollContentRef.value = undefined;
+    });
+
+    useEventListener(
+      currentScrollContainerRef,
+      'scroll',
+      (e) => {
+        currentScrollRef.value = (e.target as HTMLElement).scrollTop;
+      },
+      { passive: true }
+    );
+
+    return {
+      t,
+      router$$q: router,
+      scrollRef$$q,
+      searchDialog$$q: ref(false),
+      uploadDialog$$q: ref(false),
+      devSync$$q,
+      hideShell$$q,
+      queueScroll$$q,
+      onQueueScroll$$q,
+      uploadStore$$q,
+      rightSidebar$$q,
+      leftSidebar$$q,
+      navItems$$q,
+      isOnline$$q: isOnline,
+      theme$$q: theme,
+      alwaysShowLeftSidebar$$q,
+      logoSVG$$q: logoSVG,
+    };
   },
 });
-
-watchEffect(() => {
-  if (alwaysShowLeftSidebar$$q.value) {
-    _leftSidebar$$q.value = false;
-  }
-});
-
-const devSync$$q = (event: MouseEvent) => {
-  syncDB(event.shiftKey);
-};
-
-const queueScroll$$q = ref(0);
-const onQueueScroll$$q = (e: Event): void => {
-  queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
-};
-
-const hideShell$$q = eagerComputed(
-  () => !!router.currentRoute.value.meta.hideShell
-);
-
-const scrollRef$$q = ref<ScrollbarInst | undefined>();
-
-onMounted(() => {
-  if (!scrollRef$$q.value) {
-    return;
-  }
-
-  const { container$$q, content$$q } = getNaiveUIScrollbarElements(
-    scrollRef$$q.value
-  );
-  if (!container$$q || !content$$q) {
-    return;
-  }
-
-  currentScrollContainerRef.value = container$$q;
-  currentScrollContentRef.value = content$$q;
-});
-
-onBeforeUnmount(() => {
-  currentScrollContainerRef.value = undefined;
-  currentScrollContentRef.value = undefined;
-});
-
-useEventListener(
-  currentScrollContainerRef,
-  'scroll',
-  (e) => {
-    currentScrollRef.value = (e.target as HTMLElement).scrollTop;
-  },
-  { passive: true }
-);
-
-const searchDialog$$q = ref(false);
-const uploadDialog$$q = ref(false);
 </script>
 
 <template>
   <div
-    :class="isOnline ? 's-offline--online' : 's-offline--offline'"
+    :class="isOnline$$q ? 's-offline--online' : 's-offline--offline'"
     class="min-h-screen flex flex-col print:invisible"
   >
     <div
@@ -157,7 +179,7 @@ const uploadDialog$$q = ref(false);
       {{ t('header.NoInternetConnection') }}
     </div>
 
-    <v-app :theme="theme.theme" class="flex-1 !h-auto">
+    <v-app :theme="theme$$q.theme" class="flex-1 !h-auto">
       <!-- div
         class="bg-black z-2135 fixed top-0 left-0 w-full h-full transition-all"
         :class="rightSidebar$$q ? 'opacity-25' : 'opacity-0 invisible'"
@@ -170,7 +192,7 @@ const uploadDialog$$q = ref(false);
         :model-value="rightSidebar$$q"
         temporary
         position="right"
-        :theme="theme.rightSidebarTheme"
+        :theme="theme$$q.rightSidebarTheme"
         :width="400"
         hide-overlay
         class="s-offline-mod-mt select-none"
@@ -202,14 +224,14 @@ const uploadDialog$$q = ref(false);
         flat
         :border="1"
         density="compact"
-        :theme="theme.headerTheme"
+        :theme="theme$$q.headerTheme"
         class="s-offline-mod-mt"
       >
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">
             <div class="flex-none">
               <template v-if="hideShell$$q">
-                <v-btn flat icon text size="small" @click="router.back()">
+                <v-btn flat icon text size="small" @click="router$$q.back()">
                   <v-icon>mdi-arrow-left</v-icon>
                 </v-btn>
               </template>
@@ -219,14 +241,22 @@ const uploadDialog$$q = ref(false);
                   icon
                   text
                   size="small"
-                  @click="_leftSidebar$$q = !_leftSidebar$$q"
+                  @click="leftSidebar$$q = !leftSidebar$$q"
                 >
                   <v-icon>mdi-menu</v-icon>
                 </v-btn>
               </template>
             </div>
           </template>
-          <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
+          <div
+            class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none flex items-center gap-x-1"
+          >
+            <img
+              :src="logoSVG$$q"
+              width="128"
+              height="128"
+              class="block w-7 h-7"
+            />
             <router-link to="/">
               <span class="text-xl leading-none">streamist</span>
               <span class="text-sm leading-none">.app</span>
