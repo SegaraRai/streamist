@@ -47,7 +47,7 @@ artists:
 playlist:
   Play: Play
   Shuffle: Shuffle
-  n_items: 'no items | one item | {n} items'
+  n_tracks: 'no tracks | one track | {n} tracks'
 playlists:
   Playlists: Playlists
   n_items: 'no items | one item | {n} items'
