@@ -10,6 +10,7 @@ export default defineComponent({
       type: [String, Object] as PropType<string | ResourcePlaylist>,
       required: true,
     },
+    expandable: Boolean,
   },
   emits: {
     imageIds: (_imageIds: readonly string[] | undefined) => true,
@@ -19,7 +20,7 @@ export default defineComponent({
     watch(propPlaylistRef, () => {
       emit('imageIds', undefined);
     });
-    const { value: image, valueExists: fetched } = useLiveQuery(async () => {
+    const { value, valueExists: fetched } = useLiveQuery(async () => {
       const propPlaylist = propPlaylistRef.value;
       const playlist =
         typeof propPlaylist === 'string'
@@ -31,11 +32,16 @@ export default defineComponent({
       if (propPlaylist !== propPlaylistRef.value) {
         return;
       }
-      emit('imageIds', playlist.imageIds);
-      if (playlist.imageIds[0]) {
-        const imageId = playlist.imageIds[0];
+      const { imageIds } = playlist;
+      emit('imageIds', imageIds);
+      if (imageIds.length > 0) {
+        const imageId = imageIds[0];
         const image = await db.images.get(imageId);
-        return image;
+        return {
+          playlist$$q: playlist,
+          image$$q: image,
+          imageIds$$q: imageIds,
+        };
       }
 
       const tracks = await db.tracks.bulkGet(playlist.trackIds as string[]);
@@ -43,18 +49,26 @@ export default defineComponent({
         new Set(tracks.map((track) => track!.albumId))
       );
       const albums = await db.albums.bulkGet(albumIds);
-      const imageIds = albums
+      const albumImageIds = albums
         .map((album) => album!.imageIds[0])
         .filter((id) => id);
       const images = (await db.images.bulkGet(
-        imageIds.slice(0, 4)
+        albumImageIds.slice(0, 4)
       )) as ResourceImage[];
-      return images;
+      return {
+        playlist$$q: playlist,
+        image$$q: images,
+        imageIds$$q: [],
+      };
     }, [propPlaylistRef]);
 
+    const expanded$$q = ref(false);
+
     return {
-      image$$q: image,
+      value$$q: value,
+      image$$q: computed(() => value.value?.image$$q),
       fetched$$q: fetched,
+      expanded$$q,
     };
   },
 });
@@ -103,9 +117,16 @@ export default defineComponent({
     </template>
   </template>
   <template v-else>
-    <s-nullable-image
-      :image="image$$q"
-      class="select-none rounded-lg overflow-hidden"
-    />
+    <s-expandable
+      v-model="expanded$$q"
+      :alt-base="value$$q?.playlist$$q.title"
+      :image-ids="value$$q?.imageIds$$q"
+      :disabled="!expandable"
+    >
+      <s-nullable-image
+        :image="image$$q"
+        class="select-none rounded-lg overflow-hidden w-full h-full"
+      />
+    </s-expandable>
   </template>
 </template>

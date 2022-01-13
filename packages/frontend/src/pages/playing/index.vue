@@ -18,6 +18,10 @@ export default defineComponent({
 
     const { value: currentTrackInfo } = useCurrentTrackInfo();
 
+    useHead({
+      title: t('title.Playing.no_track'),
+    });
+
     const title = useTitle();
     watch(
       currentTrackInfo,
@@ -136,6 +140,7 @@ export default defineComponent({
               <s-album-image
                 class="aspect-square"
                 size="400"
+                expandable
                 :album="currentTrackInfo$$q.track$$q.albumId"
               />
             </router-link>

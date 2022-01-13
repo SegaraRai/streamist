@@ -11,6 +11,7 @@ export default defineComponent({
       type: [String, Object] as PropType<string | ResourceArtist>,
       required: true,
     },
+    expandable: Boolean,
   },
   emits: {
     imageIds: (_imageIds: readonly string[] | undefined) => true,
@@ -52,20 +53,43 @@ export default defineComponent({
       return {
         artist$$q: artist,
         image$$q: image,
+        imageIds$$q: artist.imageIds,
       };
     }, [propArtistRef]);
+
+    const expanded$$q = ref(false);
 
     return {
       value$$q: value,
       fetched$$q: fetched,
+      expanded$$q,
     };
   },
 });
 </script>
 
 <template>
-  <s-artist-image-x
-    :image="fetched$$q && value$$q?.image$$q"
-    :alt="value$$q?.artist$$q.name"
-  />
+  <s-expandable
+    v-model="expanded$$q"
+    :alt-base="value$$q?.artist$$q.name"
+    :image-ids="value$$q?.imageIds$$q"
+    :disabled="!expandable"
+  >
+    <s-artist-image-x
+      class="w-full h-full"
+      :image="fetched$$q && value$$q?.image$$q"
+      :alt="value$$q?.artist$$q.name"
+    />
+    <template #overlay="{ activate }">
+      <v-btn
+        class="absolute right-7 bottom-7 bg-opacity-80 bg-true-gray-900"
+        size="small"
+        flat
+        icon
+        @click.stop.prevent="activate()"
+      >
+        <v-icon>mdi-fullscreen</v-icon>
+      </v-btn>
+    </template>
+  </s-expandable>
 </template>

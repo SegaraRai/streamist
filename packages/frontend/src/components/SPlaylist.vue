@@ -155,6 +155,7 @@ export default defineComponent({
             <s-playlist-image
               class="w-50 h-50"
               size="200"
+              expandable
               :playlist="playlistId$$q"
               @image-ids="imageIds$$q = $event"
             />
@@ -165,6 +166,7 @@ export default defineComponent({
             <s-playlist-image
               class="w-50 h-50"
               size="200"
+              expandable
               :playlist="value$$q.playlist$$q"
               @image-ids="imageIds$$q = $event"
               @contextmenu.prevent="openMenu$$q($event)"

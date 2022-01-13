@@ -66,8 +66,14 @@ export async function syncDB(reconstruct = false): Promise<void> {
     console.log(since, r);
 
     if (r.updated) {
-      const oldUser: ResourceUser | undefined =
-        JSON.parse(localStorage.getItem('db.user') || 'null') || undefined;
+      let oldUser: ResourceUser | undefined;
+
+      try {
+        oldUser =
+          JSON.parse(localStorage.getItem('db.user') || 'null') || undefined;
+      } catch (error) {
+        console.warn(error);
+      }
 
       const d = {
         albumCoArtists: getDeletionIds(r.deletions, 'albumCoArtist'),

@@ -10,6 +10,7 @@ export default defineComponent({
       type: [String, Object] as PropType<string | ResourceAlbum>,
       required: true,
     },
+    expandable: Boolean,
   },
   emits: {
     imageIds: (_imageIds: readonly string[] | undefined) => true,
@@ -40,20 +41,31 @@ export default defineComponent({
         return;
       }
       const image = await db.images.get(imageId);
-      return { album$$q: album, image$$q: image };
+      return { album$$q: album, image$$q: image, imageIds$$q: album.imageIds };
     }, [propAlbumRef]);
+
+    const expanded$$q = ref(false);
 
     return {
       value$$q: value,
       fetched$$q: fetched,
+      expanded$$q,
     };
   },
 });
 </script>
 
 <template>
-  <s-album-image-x
-    :image="fetched$$q && value$$q?.image$$q"
-    :alt="value$$q?.album$$q.title"
-  />
+  <s-expandable
+    v-model="expanded$$q"
+    :alt-base="value$$q?.album$$q.title"
+    :image-ids="value$$q?.imageIds$$q"
+    :disabled="!expandable"
+  >
+    <s-album-image-x
+      class="w-full h-full"
+      :image="fetched$$q && value$$q?.image$$q"
+      :alt="value$$q?.album$$q.title"
+    />
+  </s-expandable>
 </template>
