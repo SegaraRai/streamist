@@ -11,7 +11,7 @@ import {
   getTranscodedImageFileOS,
 } from '$shared/objectStorage';
 import { retryS3NoReject } from '$shared/retry';
-import { uploadJSON } from '../execAndLog';
+import { UploadJSONStorage, uploadJSON } from '../execAndLog';
 import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
 import { getTempFilepath } from '../tempFile';
 import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig';
@@ -32,7 +32,14 @@ export async function processImageRequest(
 
   const { extracted, region, sourceFileId, sourceId, userId } = file;
 
-  await uploadJSON(userId, sourceFileId, region, 'image_request', {
+  const logStorage: UploadJSONStorage = {
+    userId,
+    sourceId,
+    sourceFileId,
+    region,
+  };
+
+  await uploadJSON('image_request', logStorage, {
     userId,
     input: file,
   });
@@ -65,12 +72,7 @@ export async function processImageRequest(
       )[1];
     }
 
-    const imageInfoList = await probeImage(
-      userId,
-      sourceFileId,
-      region,
-      sourceImageFilepath
-    );
+    const imageInfoList = await probeImage(sourceImageFilepath, logStorage);
     if (imageInfoList.length < 1) {
       throw new TranscodeError(
         'invalid image file. failed to retrieve image information. [1]'
@@ -116,16 +118,14 @@ export async function processImageRequest(
 
       createdFiles.push(transcodedImageFilepath);
       await transcodeImage(
-        userId,
-        sourceFileId,
-        region,
         imageFormat.name,
         sourceImageFilepath,
         transcodedImageFilepath,
         comment,
         width,
         height,
-        imageFormat.quality
+        imageFormat.quality,
+        logStorage
       );
 
       const key = getTranscodedImageFileKey(
@@ -162,12 +162,7 @@ export async function processImageRequest(
 
     // dHash計算
     // アップロード待機前に行うことで効率化を図る
-    const dHash = await calcImageDHash(
-      userId,
-      sourceFileId,
-      region,
-      sourceImageFilepath
-    );
+    const dHash = await calcImageDHash(sourceImageFilepath, logStorage);
 
     await unlink(sourceImageFilepath);
 
@@ -186,7 +181,7 @@ export async function processImageRequest(
       },
     };
 
-    await uploadJSON(userId, sourceFileId, region, 'image_result', {
+    await uploadJSON('image_result', logStorage, {
       userId,
       input: file,
       artifact,

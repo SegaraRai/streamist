@@ -22,7 +22,7 @@ import {
   getTranscodedAudioFileOS,
 } from '$shared/objectStorage';
 import { retryS3NoReject } from '$shared/retry';
-import { uploadJSON } from '../execAndLog';
+import { UploadJSONStorage, uploadJSON } from '../execAndLog';
 import { calcFileHash } from '../fileHash';
 import logger from '../logger';
 import {
@@ -231,7 +231,14 @@ export async function processAudioRequest(
     userId,
   } = file;
 
-  await uploadJSON(userId, sourceFileId, region, 'audio_request', {
+  const logStorage: UploadJSONStorage = {
+    userId,
+    sourceId,
+    sourceFileId,
+    region,
+  };
+
+  await uploadJSON('audio_request', logStorage, {
     userId,
     input: file,
   });
@@ -254,12 +261,7 @@ export async function processAudioRequest(
     );
 
     // 音楽ファイルの情報を解析
-    const audioInfo = await probeAudio(
-      userId,
-      sourceFileId,
-      region,
-      sourceAudioFilepath
-    );
+    const audioInfo = await probeAudio(sourceAudioFilepath, logStorage);
 
     // 音声ストリームのインデックスを取得
     // 複数ある場合は最初のものを用いる（そもそもあまり想定してない）
@@ -344,9 +346,6 @@ export async function processAudioRequest(
 
         createdFiles.push(transcodedAudioFilepath);
         await transcodeAudio(
-          userId,
-          sourceFileId,
-          region,
           trackIndex,
           audioFormat.name,
           sourceAudioFilepath,
@@ -354,7 +353,8 @@ export async function processAudioRequest(
           comment,
           audioStream.index,
           preArgs,
-          audioFormat.ffArgs
+          audioFormat.ffArgs,
+          logStorage
         );
 
         if (audioFormat.cleanArgs) {
@@ -366,14 +366,12 @@ export async function processAudioRequest(
 
           // mkcleanをかけて新たに音声ファイルを作成
           await cleanAudio(
-            userId,
-            sourceFileId,
-            region,
             trackIndex,
             audioFormat.name,
             tempFilepath,
             transcodedAudioFilepath,
-            audioFormat.cleanArgs
+            audioFormat.cleanArgs,
+            logStorage
           );
 
           // 元ファイルを削除
@@ -424,12 +422,10 @@ export async function processAudioRequest(
         // 画像を抽出
         createdFiles.push(imageFilepath);
         await extractImageFromAudio(
-          userId,
-          sourceFileId,
-          region,
           sourceAudioFilepath,
           imageFilepath,
-          imageStream.index
+          imageStream.index,
+          logStorage
         );
 
         imageFileStat = await stat(imageFilepath);
@@ -481,7 +477,7 @@ export async function processAudioRequest(
       cueSheetSHA256,
     };
 
-    await uploadJSON(userId, sourceFileId, region, 'audio_result', {
+    await uploadJSON('audio_result', logStorage, {
       userId,
       input: file,
       artifact,

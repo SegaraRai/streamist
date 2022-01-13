@@ -1,8 +1,7 @@
 import { existsSync } from 'node:fs';
 import { normalizeTextForSingleLine } from '$shared/normalize';
-import { OSRegion } from '$shared/objectStorage';
 import { calcDHash } from './dHash';
-import { execAndLog } from './execAndLog';
+import { UploadJSONStorage, execAndLog } from './execAndLog';
 import type { FFprobeResult, FFprobeTags } from './types/ffprobe';
 import type { ImageMagickResult } from './types/imageMagick';
 
@@ -66,10 +65,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 export async function probeAudio(
-  userId: string,
-  srcFileId: string,
-  region: OSRegion,
-  srcPath: string
+  srcPath: string,
+  logStorage: UploadJSONStorage
 ): Promise<FFprobeResult> {
   const execResult = await execAndLog(
     ffprobeFile,
@@ -90,10 +87,8 @@ export async function probeAudio(
       srcPath,
     ],
     ffprobeProbeAudioTimeout,
-    userId,
-    srcFileId,
-    region,
-    'audio_probe'
+    'audio_probe',
+    logStorage
   );
 
   const result = JSON.parse(execResult.stdout$$q) as FFprobeResult;
@@ -112,12 +107,10 @@ export async function probeAudio(
 }
 
 export async function extractImageFromAudio(
-  userId: string,
-  srcFileId: string,
-  region: OSRegion,
   srcPath: string,
   destPath: string,
-  index: number
+  index: number,
+  logStorage: UploadJSONStorage
 ): Promise<void> {
   await execAndLog(
     ffmpegFile,
@@ -149,25 +142,21 @@ export async function extractImageFromAudio(
       destPath,
     ],
     ffprobeExtractImageTimeout,
-    userId,
-    srcFileId,
-    region,
-    `audio_extract_s${index}`
+    `audio_extract_s${index}`,
+    logStorage
   );
 }
 
 export async function transcodeAudio(
-  userId: string,
-  srcFileId: string,
-  region: OSRegion,
   trackIndex: number,
   formatName: string,
   srcPath: string,
   destPath: string,
   comment: string | undefined,
   index: number,
-  preArgs: string[],
-  postArgs: string[]
+  preArgs: readonly string[],
+  postArgs: readonly string[],
+  logStorage: UploadJSONStorage
 ): Promise<void> {
   await execAndLog(
     ffmpegFile,
@@ -199,10 +188,8 @@ export async function transcodeAudio(
       destPath,
     ],
     ffprobeTranscodeAudioTimeout,
-    userId,
-    srcFileId,
-    region,
     `audio_transcode_s${index}_t${trackIndex}_${formatName}`,
+    logStorage,
     {
       index,
       trackIndex,
@@ -213,14 +200,12 @@ export async function transcodeAudio(
 // mkclean 関数
 
 export async function cleanAudio(
-  userId: string,
-  srcFileId: string,
-  region: OSRegion,
   trackIndex: number,
   formatName: string,
   srcPath: string,
   destPath: string,
-  preArgs: string[]
+  preArgs: readonly string[],
+  logStorage: UploadJSONStorage
 ): Promise<void> {
   await execAndLog(
     mkcleanFile,
@@ -233,20 +218,16 @@ export async function cleanAudio(
       destPath,
     ],
     mkcleanCleanAudioTimeout,
-    userId,
-    srcFileId,
-    region,
-    `audio_clean_t${trackIndex}_${formatName}`
+    `audio_clean_t${trackIndex}_${formatName}`,
+    logStorage
   );
 }
 
 // ImageMagick 関数
 
 export async function probeImage(
-  userId: string,
-  srcFileId: string,
-  region: OSRegion,
-  srcPath: string
+  srcPath: string,
+  logStorage: UploadJSONStorage
 ): Promise<ImageMagickResult> {
   const execResult = await execAndLog(
     imageMagickFile,
@@ -260,20 +241,16 @@ export async function probeImage(
       'json:-',
     ],
     imagemagickProbeImageTimeout,
-    userId,
-    srcFileId,
-    region,
-    'image_probe'
+    'image_probe',
+    logStorage
   );
 
   return JSON.parse(execResult.stdout$$q) as ImageMagickResult;
 }
 
 export async function calcImageDHash(
-  userId: string,
-  srcFileId: string,
-  region: OSRegion,
-  srcPath: string
+  srcPath: string,
+  logStorage: UploadJSONStorage
 ): Promise<string> {
   const execResult = await execAndLog(
     imageMagickFile,
@@ -311,26 +288,22 @@ export async function calcImageDHash(
       'pnm:-',
     ],
     imagemagickProbeImageTimeout,
-    userId,
-    srcFileId,
-    region,
-    'image_dhash'
+    'image_dhash',
+    logStorage
   );
 
   return calcDHash(execResult.stdout$$q.replace(/\r/g, '').trim());
 }
 
 export async function transcodeImage(
-  userId: string,
-  srcFileId: string,
-  region: OSRegion,
   formatName: string,
   srcPath: string,
   destPath: string,
   comment: string | undefined,
   width: number,
   height: number,
-  quality: number
+  quality: number,
+  logStorage: UploadJSONStorage
 ): Promise<void> {
   // 今のところ出力形式がJPEGで固定なので、それを前提にした仕様になっている
   await execAndLog(
@@ -378,9 +351,7 @@ export async function transcodeImage(
       destPath,
     ],
     imagemagickTranscodeImageTimeout,
-    userId,
-    srcFileId,
-    region,
-    `image_transcode_${formatName}`
+    `image_transcode_${formatName}`,
+    logStorage
   );
 }

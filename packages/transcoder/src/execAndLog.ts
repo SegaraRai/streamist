@@ -9,17 +9,22 @@ import {
 import { ExecFileResult, execFileAsync } from './execFileAsync';
 import logger from './logger';
 
+export interface UploadJSONStorage {
+  userId: string;
+  sourceId: string;
+  sourceFileId: string;
+  region: OSRegion;
+}
+
 export async function uploadJSON(
-  userId: string,
-  sourceFileId: string,
-  region: OSRegion,
   type: string,
+  { userId, sourceId, sourceFileId, region }: UploadJSONStorage,
   data: unknown
 ): Promise<void> {
   try {
     await osPutData(
       getTranscodeLogFileOS(region),
-      getTranscodeLogFileKey(userId, sourceFileId, type),
+      getTranscodeLogFileKey(userId, sourceId, sourceFileId, type),
       await brotliCompressAsync(Buffer.from(JSON.stringify(data, null, 2))),
       {
         cacheControl: CACHE_CONTROL_NO_STORE,
@@ -39,17 +44,15 @@ export async function execAndLog(
   file: string,
   args: string[],
   timeout: number,
-  userId: string,
-  sourceFileId: string,
-  region: OSRegion,
   type: string,
+  storage: UploadJSONStorage,
   additionalLogRecord: Record<string, unknown> = {}
 ): Promise<ExecFileResult> {
   const beginTimestamp = Date.now();
   const result = await execFileAsync(file, args, timeout);
   const endTimestamp = Date.now();
-  await uploadJSON(userId, sourceFileId, region, type, {
-    userId,
+  await uploadJSON(type, storage, {
+    userId: storage.userId,
     file,
     args,
     begin: beginTimestamp,

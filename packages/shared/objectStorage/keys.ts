@@ -26,9 +26,10 @@ export function getTranscodedImageFileKey(
 
 export function getTranscodeLogFileKey(
   userId: string,
+  sourceId: string,
   sourceFileId: string,
   type: string,
   extension = '.json'
 ): string {
-  return `trx/${userId}/${sourceFileId}/${type}${extension}`;
+  return `trx/${userId}/${sourceId}/${sourceFileId}/${type}${extension}`;
 }
