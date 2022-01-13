@@ -17,6 +17,7 @@ export async function updateMaxTrackId(
     }
 
     const numMaxTracks = MAX_TRACKS_PER_PLAN[user.plan as Plan] || 0;
+
     if (numMaxTracks === Infinity && !user.maxTrackId) {
       return;
     }
@@ -38,7 +39,20 @@ export async function updateMaxTrackId(
       where: {
         id: userId,
         plan: user.plan,
-        maxTrackId: { not: newMaxTrackId },
+        OR: newMaxTrackId
+          ? [
+              {
+                maxTrackId: { not: newMaxTrackId },
+              },
+              {
+                maxTrackId: null,
+              },
+            ]
+          : [
+              {
+                maxTrackId: { not: null },
+              },
+            ],
       },
       data: { maxTrackId: newMaxTrackId, updatedAt: Date.now() },
     });

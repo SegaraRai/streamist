@@ -4,7 +4,12 @@ import { useAllTracks } from './useDB';
 
 export function useTrackFilter() {
   const allTracks = useAllTracks();
-  const user = useLocalStorage<ResourceUser | undefined>('db.user', undefined);
+  const user = useLocalStorage<ResourceUser | undefined>('db.user', undefined, {
+    serializer: {
+      read: (v: any) => (v ? JSON.parse(v) : undefined),
+      write: (v: any) => (v ? JSON.stringify(v) : ''),
+    },
+  });
   const trackIds = computed<readonly string[] | undefined>(() =>
     allTracks.value.value?.map((track) => track.id)
   );
@@ -21,7 +26,6 @@ export function useTrackFilter() {
   const isTrackAvailable = (trackId: string): boolean =>
     doesTrackExist(trackId) &&
     (!maxTrackId.value || trackId <= maxTrackId.value);
-
   return {
     trackIds$$q: trackIds as Readonly<Ref<readonly string[] | undefined>>,
     doesTrackExist$$q: doesTrackExist,

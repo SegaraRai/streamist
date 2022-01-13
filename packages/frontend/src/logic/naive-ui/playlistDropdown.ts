@@ -3,6 +3,7 @@ import type { ComputedRef, Ref } from 'vue';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { usePlaybackStore } from '~/stores/playback';
 import { setRedirect } from '~/stores/redirect';
 import { nCreateDialogContentWithWarning } from './dialog';
@@ -32,6 +33,7 @@ export function createPlaylistDropdown({
   const message = useMessage();
   const syncDB = useSyncDB();
   const playbackStore = usePlaybackStore();
+  const { isTrackAvailable$$q } = useTrackFilter();
 
   return computed((): MenuOption[] => {
     if (!playlist$$q.value) {
@@ -41,6 +43,9 @@ export function createPlaylistDropdown({
     const playlist = playlist$$q.value;
     const playlistId = playlist$$q.value.id;
     const playlistTracks = playlistTracks$$q.value;
+    const availablePlaylistTracks = playlistTracks?.filter((track) =>
+      isTrackAvailable$$q(track.id)
+    );
 
     const menuItems: MenuOption[] = [];
 
@@ -49,11 +54,11 @@ export function createPlaylistDropdown({
       key: 'play',
       label: t('dropdown.playlist.Play'),
       icon: nCreateDropdownIcon('mdi-play'),
-      disabled: !playlistTracks?.length,
+      disabled: !availablePlaylistTracks?.length,
       props: {
         onClick: (): void => {
           closeMenu$$q();
-          if (!playlistTracks?.length) {
+          if (!availablePlaylistTracks?.length || !playlistTracks?.length) {
             return;
           }
           playbackStore.setSetListAndPlayAuto$$q(

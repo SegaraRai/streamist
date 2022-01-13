@@ -7,7 +7,7 @@ export const MAX_SOURCE_FILE_RETENTION_PER_PLAN: Record<Plan, number> = {
 };
 
 export const MAX_TRACKS_PER_PLAN: Record<Plan, number> = {
-  free: 1000,
+  free: 100,
   unlimited: Infinity,
 };
 

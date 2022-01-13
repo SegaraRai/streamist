@@ -215,7 +215,7 @@ exports[`VSourceFinishUploadBody > should reject malformed payloads 1`] = `
   ValidationError {
     "children": [],
     "constraints": {
-      "equals": "state must be equal to uploaded",
+      "isIn": "state must be one of the following values: aborted, uploaded",
     },
     "property": "state",
     "value": "uploadable",

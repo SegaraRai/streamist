@@ -284,6 +284,7 @@ function _usePlaybackStore(): PlaybackState {
     name: string,
     tracks: readonly ResourceTrack[]
   ): void => {
+    tracks = tracks.filter((track) => isTrackAvailable$$q(track.id));
     const trackIndex = shuffle.value
       ? Math.floor(Math.random() * tracks.length)
       : 0;

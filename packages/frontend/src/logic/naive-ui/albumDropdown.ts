@@ -1,6 +1,7 @@
 import { MenuOption, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { usePlaybackStore } from '~/stores/playback';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
@@ -24,6 +25,7 @@ export function createAlbumDropdown({
   const { t } = useI18n();
   const message = useMessage();
   const playbackStore = usePlaybackStore();
+  const { isTrackAvailable$$q } = useTrackFilter();
 
   return computed((): MenuOption[] => {
     if (!album$$q.value) {
@@ -32,6 +34,9 @@ export function createAlbumDropdown({
 
     const album = album$$q.value;
     const albumTracks = albumTracks$$q.value;
+    const availableAlbumTracks = albumTracks$$q.value?.filter((track) =>
+      isTrackAvailable$$q(track.id)
+    );
 
     const menuItems: MenuOption[] = [];
 
@@ -40,11 +45,11 @@ export function createAlbumDropdown({
       key: 'play',
       label: t('dropdown.playlist.Play'),
       icon: nCreateDropdownIcon('mdi-play'),
-      disabled: !albumTracks?.length,
+      disabled: !availableAlbumTracks?.length,
       props: {
         onClick: (): void => {
           closeMenu$$q();
-          if (!albumTracks?.length) {
+          if (!albumTracks?.length || !availableAlbumTracks?.length) {
             return;
           }
           playbackStore.setSetListAndPlayAuto$$q(

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { compareString } from '$shared/sort';
 import { useAllTracks } from '~/logic/useDB';
 
 export default defineComponent({
@@ -44,10 +45,12 @@ export default defineComponent({
 
     const items = computed(
       () =>
-        value.value?.map((item, index) => ({
-          key: index,
-          ...item,
-        })) || []
+        value.value
+          ?.map((item, index) => ({
+            key: index,
+            ...item,
+          }))
+          .sort((a, b) => compareString(a.id, b.id)) || []
     );
 
     return {

@@ -2,6 +2,7 @@
 import { compareTrack } from '$shared/sort';
 import { db } from '~/db';
 import type { AllItem } from '~/logic/allItem';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { useAllSearch } from '~/logic/useSearch';
 import { usePlaybackStore } from '~/stores/playback';
 
@@ -16,6 +17,7 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
+    const { isTrackAvailable$$q } = useTrackFilter();
 
     const show$$q = useVModel(props, 'modelValue', emit);
 
@@ -72,11 +74,12 @@ export default defineComponent({
       searchResults$$q,
       debouncedSearchQuery$$q,
       calcHref$$q,
+      isTrackAvailable$$q,
       onSelect$$q: (item: AllItem) => {
         show$$q.value = false;
         searchQuery$$q.value = '';
 
-        if (item.t === 'track') {
+        if (item.t === 'track' && isTrackAvailable$$q(item.i.id)) {
           (async () => {
             const tracks$$q = await db.tracks
               .where({ albumId: item.i.albumId })
@@ -126,13 +129,25 @@ export default defineComponent({
                 :to="calcHref$$q(item)"
                 @click.prevent="onSelect$$q(item)"
               >
-                <v-list-item class="flex gap-x-4 s-hover-container" link>
+                <v-list-item
+                  class="flex gap-x-4 s-hover-container"
+                  :class="
+                    item.t === 'track' &&
+                    !isTrackAvailable$$q(item.i.id) &&
+                    'opacity-60'
+                  "
+                  link
+                >
                   <v-list-item-avatar
                     icon
                     class="flex-none flex items-center justify-center"
                   >
                     <div class="w-10 h-10">
-                      <template v-if="item.t === 'track'">
+                      <template
+                        v-if="
+                          item.t === 'track' && isTrackAvailable$$q(item.i.id)
+                        "
+                      >
                         <s-album-image
                           class="w-full h-full s-hover-hidden"
                           size="40"
@@ -143,6 +158,13 @@ export default defineComponent({
                         >
                           <i-mdi-play-circle />
                         </div>
+                      </template>
+                      <template v-else-if="item.t === 'track'">
+                        <s-album-image
+                          class="w-full h-full"
+                          size="40"
+                          :album="item.i.albumId"
+                        />
                       </template>
                       <template v-else-if="item.t === 'album'">
                         <s-album-image

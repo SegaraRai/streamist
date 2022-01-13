@@ -138,7 +138,7 @@ API.add(
     const getOSURL = getOSRawURL;
     switch (type) {
       case 'audios':
-        if (jwt.maxTrackId && fileId > jwt.maxTrackId) {
+        if (jwt.maxTrackId && entityId > jwt.maxTrackId) {
           storageURL = false;
         } else {
           storageURL = getOSURL(
