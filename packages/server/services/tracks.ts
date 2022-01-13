@@ -217,8 +217,8 @@ export async function trackDelete(
     await dbArrayRemoveFromAllTx<typeof Prisma.PlaylistScalarFieldEnum>(
       txClient,
       userId,
+      Prisma.ModelName.APlaylistTrack,
       Prisma.ModelName.Playlist,
-      Prisma.ModelName.Track,
       'trackOrder',
       trackId
     );
