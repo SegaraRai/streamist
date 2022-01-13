@@ -8,7 +8,7 @@ interface RecentlyPlayedItem {
 }
 
 function _useRecentlyPlayed() {
-  const { doesTrackExist$$q, isTrackAvailable$$q, trackIds$$q } =
+  const { doesTrackExist$$q, isTrackAvailable$$q, serializedFilterKey$$q } =
     useTrackFilter();
   const store = useLocalStorage<RecentlyPlayedItem[]>('recentlyPlayed', []);
 
@@ -21,7 +21,7 @@ function _useRecentlyPlayed() {
     ];
   };
 
-  watch(trackIds$$q, () => {
+  watch(serializedFilterKey$$q, () => {
     filterAndAdd();
   });
 

@@ -122,7 +122,7 @@ async function createMetadataInit(
 
 function _usePlaybackStore(): PlaybackState {
   const volumeStore = useVolumeStore();
-  const { serializedFilterKey$$q, isTrackAvailable$$q } = useTrackFilter();
+  const { isTrackAvailable$$q, serializedFilterKey$$q } = useTrackFilter();
   const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
 
   let currentAudio: HTMLAudioElement | undefined;
