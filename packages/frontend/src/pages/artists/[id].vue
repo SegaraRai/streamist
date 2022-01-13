@@ -137,10 +137,11 @@ export default defineComponent({
         ) {
           return;
         }
-        playbackStore.setSetListAndPlayNoShuffle$$q(
+        playbackStore.setSetListAndPlay$$q(
           artist.name,
           setList$$q.value,
-          additionalTracks$$q.value[0]
+          additionalTracks$$q.value[0],
+          false
         );
       },
       dropdown$$q,

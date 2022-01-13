@@ -56,9 +56,10 @@ export function createPlaylistDropdown({
           if (!playlistTracks?.length) {
             return;
           }
-          playbackStore.setSetListAndPlayAutoNoShuffle$$q(
+          playbackStore.setSetListAndPlayAuto$$q(
             playlist.title,
-            playlistTracks
+            playlistTracks,
+            false
           );
         },
       },

@@ -6,6 +6,7 @@ import { db } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { TrackProvider2 } from '~/logic/trackProvider2';
 import { useAllTracks } from '~/logic/useDB';
 import {
@@ -41,15 +42,8 @@ export interface PlaybackState {
   readonly setSetListAndPlay$$q: (
     name: string,
     tracks: readonly ResourceTrack[],
-    track: ResourceTrack
-  ) => void;
-  /**
-   * シャッフルを無効化しトラックリストを設定して再生する
-   */
-  readonly setSetListAndPlayNoShuffle$$q: (
-    name: string,
-    tracks: readonly ResourceTrack[],
-    track: ResourceTrack
+    track: ResourceTrack,
+    shuffle?: boolean
   ) => void;
   /**
    * トラックリストを設定して再生する \
@@ -58,11 +52,8 @@ export interface PlaybackState {
    */
   readonly setSetListAndPlayAuto$$q: (
     name: string,
-    tracks: readonly ResourceTrack[]
-  ) => void;
-  readonly setSetListAndPlayAutoNoShuffle$$q: (
-    name: string,
-    tracks: readonly ResourceTrack[]
+    tracks: readonly ResourceTrack[],
+    shuffle?: boolean
   ) => void;
   /** リピート再生 */
   readonly repeat$$q: Ref<RepeatType>;
@@ -132,8 +123,8 @@ async function createMetadataInit(
 
 function _usePlaybackStore(): PlaybackState {
   const allTracks = useAllTracks();
-
   const volumeStore = useVolumeStore();
+  const { isTrackAvailable$$q } = useTrackFilter();
 
   let currentAudio: HTMLAudioElement | undefined;
 
@@ -267,6 +258,7 @@ function _usePlaybackStore(): PlaybackState {
     tracks: readonly ResourceTrack[],
     track?: ResourceTrack | null
   ): void => {
+    tracks = tracks.filter((track) => isTrackAvailable$$q(track.id));
     playing.value = false;
     currentSetListName.value = name;
     currentSetList.value = tracks;
@@ -332,13 +324,9 @@ function _usePlaybackStore(): PlaybackState {
       return;
     }
 
-    const newAllTrackIdSet = new Set(newAllTracks.map((track) => track.id));
-    const deletedTrackIdSet = new Set(
-      oldAllTracks
-        .map((track) => track.id)
-        .filter((trackId) => !newAllTrackIdSet.has(trackId))
-    );
-    const deletedTrackIds = Array.from(deletedTrackIdSet);
+    const deletedTrackIds = oldAllTracks
+      .map((track) => track.id)
+      .filter((trackId) => !isTrackAvailable$$q(trackId));
 
     if (deletedTrackIds.length === 0) {
       return;
@@ -536,29 +524,22 @@ function _usePlaybackStore(): PlaybackState {
     setSetListAndPlay$$q: (
       name: string,
       tracks: readonly ResourceTrack[],
-      track: ResourceTrack
+      track: ResourceTrack,
+      shuffleValue?: boolean
     ): void => {
-      setSetListAndPlay(name, tracks, track);
-    },
-    setSetListAndPlayNoShuffle$$q: (
-      name: string,
-      tracks: readonly ResourceTrack[],
-      track: ResourceTrack
-    ): void => {
-      shuffle.value = false;
+      if (shuffleValue != null) {
+        shuffle.value = shuffleValue;
+      }
       setSetListAndPlay(name, tracks, track);
     },
     setSetListAndPlayAuto$$q: (
       name: string,
-      tracks: readonly ResourceTrack[]
+      tracks: readonly ResourceTrack[],
+      shuffleValue?: boolean
     ): void => {
-      setSetListAndPlayAuto(name, tracks);
-    },
-    setSetListAndPlayAutoNoShuffle$$q: (
-      name: string,
-      tracks: readonly ResourceTrack[]
-    ): void => {
-      shuffle.value = false;
+      if (shuffleValue != null) {
+        shuffle.value = shuffleValue;
+      }
       setSetListAndPlayAuto(name, tracks);
     },
     repeat$$q: repeat,

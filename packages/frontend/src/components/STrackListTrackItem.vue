@@ -6,6 +6,7 @@ import type {
   ResourceImage,
   ResourceTrack,
 } from '$/types';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
 
@@ -58,6 +59,11 @@ export default defineComponent({
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const themeStore = useThemeStore();
+    const { isTrackAvailable$$q } = useTrackFilter();
+
+    const isAvailable$$q = eagerComputed(() =>
+      isTrackAvailable$$q(props.item.track$$q.id)
+    );
 
     const isCurrentPlayingTrack$$q = eagerComputed(
       () =>
@@ -67,6 +73,7 @@ export default defineComponent({
 
     return {
       t,
+      isAvailable$$q,
       indexContentNumber$$q: eagerComputed(() =>
         props.indexContent === 'trackNumber'
           ? props.item.track$$q.trackNumber
@@ -95,7 +102,10 @@ export default defineComponent({
   <v-list-item
     v-bind="$attrs"
     class="s-hover-container s-list-item w-full py-1 h-14 !<sm:px-2"
-    :class="selected ? 's-list-item--selected' : 's-list-item--unselected'"
+    :class="[
+      selected ? 's-list-item--selected' : 's-list-item--unselected',
+      !isAvailable$$q && 'opacity-60',
+    ]"
     :ripple="false"
     @contextmenu.stop.prevent="onContextMenu$$q($event)"
   >
@@ -121,7 +131,7 @@ export default defineComponent({
             </v-icon>
           </v-btn>
         </template>
-        <template v-else>
+        <template v-else-if="isAvailable$$q">
           <!-- それ以外の曲 -->
           <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
             <template v-if="indexContentNumber$$q != null">
@@ -140,6 +150,24 @@ export default defineComponent({
             <v-icon class="s-hover-visible" :class="$style.icon">
               mdi-play-circle-outline
             </v-icon>
+          </v-btn>
+        </template>
+        <template v-else>
+          <!-- それ以外の曲（再生不可） -->
+          <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
+            <template v-if="indexContentNumber$$q != null">
+              <div class="s-numeric font-bold tracking-[0.01em]">
+                {{ indexContentNumber$$q }}
+              </div>
+            </template>
+            <template v-else-if="indexContent === 'albumArtwork'">
+              <s-album-image-x
+                class="flex-none w-9 h-9"
+                size="36"
+                :image="item.image$$q"
+                :alt="item.album$$q.title"
+              />
+            </template>
           </v-btn>
         </template>
       </div>

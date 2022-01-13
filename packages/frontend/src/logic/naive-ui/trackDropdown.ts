@@ -5,6 +5,7 @@ import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import { usePlaybackStore } from '~/stores/playback';
 import { setRedirect } from '~/stores/redirect';
+import { useTrackFilter } from '../filterTracks';
 import { useAllPlaylists } from '../useDB';
 import { nCreateDialogContentWithWarning } from './dialog';
 import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
@@ -41,6 +42,7 @@ export function createTrackDropdown({
   const syncDB = useSyncDB();
   const playbackStore = usePlaybackStore();
   const allPlaylist = useAllPlaylists();
+  const { isTrackAvailable$$q } = useTrackFilter();
 
   return computed(() => {
     if (!selectedTrack$$q.value) {
@@ -49,6 +51,8 @@ export function createTrackDropdown({
 
     const track = selectedTrack$$q.value;
     const trackId = selectedTrack$$q.value.id;
+
+    const isAvailable = isTrackAvailable$$q(trackId);
 
     const currentPlayingTrackId = playbackStore.currentTrack$$q.value?.id;
     const isPlayingThisTrack =
@@ -67,6 +71,7 @@ export function createTrackDropdown({
       // Play
       menuItems.push({
         key: 'play',
+        disabled: !isAvailable,
         label: isPlayingThisTrack
           ? t('dropdown.trackList.Pause')
           : t('dropdown.trackList.Play'),
@@ -80,6 +85,10 @@ export function createTrackDropdown({
         ),
         props: {
           onClick: () => {
+            if (!isAvailable) {
+              return;
+            }
+
             play$$q(track);
             closeMenu$$q();
           },

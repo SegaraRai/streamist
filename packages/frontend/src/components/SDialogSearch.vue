@@ -84,10 +84,11 @@ export default defineComponent({
 
             tracks$$q.sort(compareTrack);
 
-            playbackStore.setSetListAndPlayNoShuffle$$q(
+            playbackStore.setSetListAndPlay$$q(
               item.i.title,
               tracks$$q,
-              item.i
+              item.i,
+              false
             );
           })();
         }

@@ -1,9 +1,11 @@
 import type { IndexableType, Table } from 'dexie';
 import { useMessage } from 'naive-ui';
 import type { DeletionEntityType } from '$shared/types/db';
-import type { ResourceDeletion } from '$/types';
+import type { ResourceDeletion, ResourceUser } from '$/types';
 import api from '~/logic/api';
-import { db } from '.';
+import { setCDNCookie } from '~/logic/cdnCookie';
+import { tokens } from '~/logic/tokens';
+import { db } from './db';
 
 async function clearAndAdd<T>(
   table: Table<T, IndexableType>,
@@ -64,6 +66,9 @@ export async function syncDB(reconstruct = false): Promise<void> {
     console.log(since, r);
 
     if (r.updated) {
+      const oldUser: ResourceUser | undefined =
+        JSON.parse(localStorage.getItem('db.user') || 'null') || undefined;
+
       const d = {
         albumCoArtists: getDeletionIds(r.deletions, 'albumCoArtist'),
         albums: getDeletionIds(r.deletions, 'album'),
@@ -120,6 +125,15 @@ export async function syncDB(reconstruct = false): Promise<void> {
           }
         }
       );
+
+      localStorage.setItem('db.user', JSON.stringify(r.user));
+
+      if (
+        r.user.plan !== oldUser?.plan ||
+        r.user.maxTrackId !== oldUser?.maxTrackId
+      ) {
+        tokens.renew(true).then((): Promise<void> => setCDNCookie());
+      }
     }
 
     localStorage.setItem('db.lastUpdate', r.timestamp.toString());

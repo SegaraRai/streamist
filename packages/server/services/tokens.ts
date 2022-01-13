@@ -1,3 +1,4 @@
+import { User } from '@prisma/client';
 import { createSigner, createVerifier } from 'fast-jwt';
 import { randomBytesAsync } from '$shared-server/randomBytesAsync';
 import { client } from '$/db/lib/client';
@@ -14,7 +15,7 @@ export const API_TOKEN_EXPIRES_IN = 60 * 1000;
 export const CDN_TOKEN_EXPIRES_IN = API_TOKEN_EXPIRES_IN;
 
 export async function issueRefreshToken(
-  userId: string,
+  user: User,
   timestamp: number
 ): Promise<string> {
   const signer = createSigner({
@@ -28,8 +29,8 @@ export async function issueRefreshToken(
   });
   return Promise.resolve(
     signer({
-      id: userId,
-      sub: userId,
+      id: user.id,
+      sub: user.id,
     })
   );
 }
@@ -49,10 +50,7 @@ export async function extractUserIdFromRefreshToken(
   } catch (_error: unknown) {}
 }
 
-export function issueAPIToken(
-  userId: string,
-  timestamp: number
-): Promise<string> {
+export function issueAPIToken(user: User, timestamp: number): Promise<string> {
   const signer = createSigner({
     algorithm: 'HS256',
     key: SECRET_API_JWT_SECRET,
@@ -63,16 +61,13 @@ export function issueAPIToken(
   });
   return Promise.resolve(
     signer({
-      id: userId,
-      sub: userId,
+      id: user.id,
+      sub: user.id,
     })
   );
 }
 
-export function issueCDNToken(
-  userId: string,
-  timestamp: number
-): Promise<string> {
+export function issueCDNToken(user: User, timestamp: number): Promise<string> {
   const signer = createSigner({
     algorithm: 'HS256',
     key: SECRET_CDN_JWT_SECRET,
@@ -83,8 +78,10 @@ export function issueCDNToken(
   });
   return Promise.resolve(
     signer({
-      id: userId,
-      sub: userId,
+      id: user.id,
+      sub: user.id,
+      plan: user.plan,
+      maxTrackId: user.maxTrackId,
     })
   );
 }
@@ -104,17 +101,17 @@ export async function extractPayloadFromCDNToken(
 }
 
 export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
-  let userId: string;
+  let user: User;
 
   switch (body.grant_type) {
     case 'password': {
-      const user = await client.user.findUnique({
+      const tempUser = await client.user.findUnique({
         where: {
           id: String(body.username),
         },
       });
 
-      if (!user) {
+      if (!tempUser) {
         throw new HTTPError(404, `User ${body.username} not found`);
       }
 
@@ -123,7 +120,7 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
         throw new HTTPError(401, 'Invalid password');
       }
 
-      userId = user.id;
+      user = tempUser;
 
       break;
     }
@@ -135,8 +132,21 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
       if (!extractedUserId) {
         throw new HTTPError(401, 'Invalid refresh token');
       }
+
       // TODO(auth): check if refresh token is not revoked
-      userId = extractedUserId;
+
+      const tempUser = await client.user.findUnique({
+        where: {
+          id: extractedUserId,
+        },
+      });
+
+      if (!tempUser) {
+        throw new HTTPError(404, `User ${extractedUserId} not found`);
+      }
+
+      user = tempUser;
+
       break;
     }
 
@@ -145,11 +155,11 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
   }
 
   const timestamp = Date.now();
-  const apiToken = await issueAPIToken(userId, timestamp);
-  const cdnToken = await issueCDNToken(userId, timestamp);
+  const apiToken = await issueAPIToken(user, timestamp);
+  const cdnToken = await issueCDNToken(user, timestamp);
   const refreshToken =
     body.grant_type === 'password'
-      ? await issueRefreshToken(userId, timestamp)
+      ? await issueRefreshToken(user, timestamp)
       : undefined;
 
   return {

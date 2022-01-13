@@ -47,9 +47,10 @@ export function createAlbumDropdown({
           if (!albumTracks?.length) {
             return;
           }
-          playbackStore.setSetListAndPlayAutoNoShuffle$$q(
+          playbackStore.setSetListAndPlayAuto$$q(
             album.title,
-            albumTracks
+            albumTracks,
+            false
           );
         },
       },

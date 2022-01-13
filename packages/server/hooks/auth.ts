@@ -1,9 +1,12 @@
+import type { Plan } from '$shared/config/plans';
 import { HTTPError } from '$/utils/httpError';
 import type { OnRequestHookHandler } from './types';
 
 export type AdditionalRequest = {
   user: {
     id: string;
+    plan: Plan;
+    maxTrackId: string | null;
   };
 };
 
