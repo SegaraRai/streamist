@@ -1,13 +1,15 @@
+import type { Ref } from 'vue';
 import type { ResourceUser } from '$/types';
 import { useAllTracks } from './useDB';
 
 export function useTrackFilter() {
   const allTracks = useAllTracks();
   const user = useLocalStorage<ResourceUser | undefined>('db.user', undefined);
+  const trackIds = computed<readonly string[] | undefined>(() =>
+    allTracks.value.value?.map((track) => track.id)
+  );
   const trackIdSet = computed<ReadonlySet<string> | undefined>(() =>
-    allTracks.value.value
-      ? new Set(allTracks.value.value.map((track) => track.id))
-      : undefined
+    trackIds.value ? new Set(trackIds.value) : undefined
   );
   const maxTrackId = eagerComputed<string | null>(
     () => user.value?.maxTrackId || null
@@ -21,6 +23,7 @@ export function useTrackFilter() {
     (!maxTrackId.value || trackId <= maxTrackId.value);
 
   return {
+    trackIds$$q: trackIds as Readonly<Ref<readonly string[] | undefined>>,
     doesTrackExist$$q: doesTrackExist,
     isTrackAvailable$$q: isTrackAvailable,
   };

@@ -199,7 +199,7 @@ export default defineComponent({
       >
         <div class="flex flex-col h-full">
           <v-sheet tile>
-            <div class="title flex items-center py-1">
+            <div class="title flex items-center py-1 -mb-1px">
               <v-icon class="mx-4">mdi-playlist-play</v-icon>
               <span class="flex-1">{{ t('queue.title') }}</span>
               <v-btn flat icon size="small" @click="rightSidebar$$q = false">
@@ -248,18 +248,18 @@ export default defineComponent({
               </template>
             </div>
           </template>
-          <div
-            class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none flex items-center gap-x-1"
-          >
-            <img
-              :src="logoSVG$$q"
-              width="128"
-              height="128"
-              class="block w-7 h-7"
-            />
-            <router-link to="/">
-              <span class="text-xl leading-none">streamist</span>
-              <span class="text-sm leading-none">.app</span>
+          <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
+            <router-link to="/" class="flex items-center gap-x-1">
+              <img
+                :src="logoSVG$$q"
+                width="128"
+                height="128"
+                class="block w-7 h-7"
+              />
+              <span class="inline-block <sm:hidden">
+                <span class="text-xl leading-none">streamist</span>
+                <span class="text-sm leading-none">.app</span>
+              </span>
             </router-link>
           </div>
           <div class="flex-1 flex gap-x-2 justify-end items-center">

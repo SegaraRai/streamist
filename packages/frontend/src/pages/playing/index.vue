@@ -112,7 +112,8 @@ export default defineComponent({
         <template v-if="currentTrackInfo$$q">
           <div class="w-full px-8">
             <router-link
-              class="block w-full max-w-80 flex-1 mx-auto"
+              class="block w-full flex-1 mx-auto"
+              style="max-width: min(20rem, calc(100vh - 20rem))"
               :to="`/albums/${currentTrackInfo$$q.track$$q.albumId}`"
             >
               <s-album-image

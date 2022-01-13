@@ -1,72 +1,46 @@
 <script lang="ts">
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$shared/sort';
-import type { ResourceAlbum, ResourceArtist } from '$/types';
-import { useAllAlbums, useAllArtists, useAllTracks } from '~/logic/useDB';
-import { usePlaybackStore } from '~/stores/playback';
+import type { ResourceTrack } from '$/types';
+import { useRecentlyPlayed } from '~/logic/recentlyPlayed';
+import { useAllTrackMap, useAllTracks } from '~/logic/useDB';
+
+const MAX_RECENTLY_UPLOADED_ENTRIES = 40;
 
 export default defineComponent({
   setup() {
     const { t } = useI18n();
     const display = useDisplay();
-    const playbackStore = usePlaybackStore();
+    const { tracks$$q: recentlyPlayedTrackItems } = useRecentlyPlayed();
+
+    const allTracks = useAllTracks();
+    const allTrackMap = useAllTrackMap();
 
     useHead({
       title: t('title.Home'),
     });
 
-    const allTracks = useAllTracks();
-    const allAlbums = useAllAlbums();
-    const allArtists = useAllArtists();
-
-    let unmounted = false;
-    onBeforeUnmount(() => {
-      unmounted = true;
-      playbackStore.clearDefaultSetList$$q();
+    const recentlyUploadedTracks = computed(() => {
+      const tracks = allTracks.value.value;
+      return Array.from(tracks || [])
+        .sort((a, b) => b.createdAt - a.createdAt || compareTrack(a, b))
+        .slice(0, MAX_RECENTLY_UPLOADED_ENTRIES);
     });
 
-    const items = asyncComputed(async () => {
-      const tracks = await allTracks.valueAsync.value;
-      const albums = await allAlbums.valueAsync.value;
-      const artists = await allArtists.valueAsync.value;
-
-      const albumMap = new Map<string, ResourceAlbum>(
-        albums.map((album) => [album.id, album])
-      );
-      const artistMap = new Map<string, ResourceArtist>(
-        artists.map((artist) => [artist.id, artist])
-      );
-
-      const sortedTracks = tracks
-        .map((track) => {
-          const album = albumMap.get(track.albumId)!;
-          const artist = artistMap.get(track.artistId)!;
-          const albumArtist = artistMap.get(album.artistId)!;
-          return {
-            ...track,
-            album: {
-              ...album,
-              artist: albumArtist,
-            },
-            artist,
-          };
-        })
-        .sort((a, b) => b.createdAt - a.createdAt || compareTrack(a, b))
-        .slice(0, 40);
-
-      if (!unmounted) {
-        playbackStore.setDefaultSetList$$q(
-          t('setListName.RecentlyUploaded'),
-          sortedTracks
-        );
+    const recentlyPlayedTracks = computed(() => {
+      const trackMap = allTrackMap.value.value;
+      if (!trackMap) {
+        return [];
       }
-
-      return sortedTracks;
-    }, []);
+      return recentlyPlayedTrackItems.value
+        .map((item) => trackMap.get(item.id))
+        .filter((item): item is ResourceTrack => !!item);
+    });
 
     return {
       t,
-      items$$q: items,
+      recentlyUploadedTracks$$q: recentlyUploadedTracks,
+      recentlyPlayedTracks$$q: recentlyPlayedTracks,
       isMobile$$q: display.smAndDown,
     };
   },
@@ -74,31 +48,54 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid>
-    <header class="mb-6 flex items-baseline gap-x-4">
-      <div class="text-h5">Home</div>
-    </header>
-
-    <header class="mb-6 flex items-baseline gap-x-4">
-      <div class="text-h5">Recently played</div>
-    </header>
-
-    <header class="mb-6 flex items-baseline gap-x-4">
-      <div class="text-h5">Recently uploaded</div>
-    </header>
-    <s-track-list
-      :show-disc-number="false"
-      :tracks="items$$q"
-      :loading="!items$$q"
-      :set-list="items$$q"
-      :set-list-name="t('setListName.Tracks')"
-      index-content="albumArtwork"
-      :show-album="!isMobile$$q"
-      show-artist
-      :hide-duration="isMobile$$q"
-      visit-album
-      visit-artist
-      show-delete
-    />
+  <v-container fluid class="pt-0">
+    <div class="flex flex-col gap-y-16">
+      <template v-if="recentlyPlayedTracks$$q?.length">
+        <div>
+          <header
+            class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 py-2"
+          >
+            <div class="text-h5">{{ t('home.RecentlyPlayed') }}</div>
+          </header>
+          <s-track-list
+            :show-disc-number="false"
+            :tracks="recentlyPlayedTracks$$q"
+            :loading="!recentlyPlayedTracks$$q"
+            :set-list="recentlyPlayedTracks$$q"
+            :set-list-name="t('setListName.RecentlyPlayed')"
+            index-content="albumArtwork"
+            :show-album="!isMobile$$q"
+            show-artist
+            :hide-duration="isMobile$$q"
+            visit-album
+            visit-artist
+            show-delete
+          />
+        </div>
+      </template>
+      <template v-if="recentlyUploadedTracks$$q?.length">
+        <div>
+          <header
+            class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 py-2"
+          >
+            <div class="text-h5">{{ t('home.RecentlyUploaded') }}</div>
+          </header>
+          <s-track-list
+            :show-disc-number="false"
+            :tracks="recentlyUploadedTracks$$q"
+            :loading="!recentlyUploadedTracks$$q"
+            :set-list="recentlyUploadedTracks$$q"
+            :set-list-name="t('setListName.RecentlyUploaded')"
+            index-content="albumArtwork"
+            :show-album="!isMobile$$q"
+            show-artist
+            :hide-duration="isMobile$$q"
+            visit-album
+            visit-artist
+            show-delete
+          />
+        </div>
+      </template>
+    </div>
   </v-container>
 </template>

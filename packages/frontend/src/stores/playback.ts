@@ -7,6 +7,7 @@ import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
 import { useTrackFilter } from '~/logic/filterTracks';
+import { useRecentlyPlayed } from '~/logic/recentlyPlayed';
 import { TrackProvider2 } from '~/logic/trackProvider2';
 import { useAllTracks } from '~/logic/useDB';
 import {
@@ -125,6 +126,7 @@ function _usePlaybackStore(): PlaybackState {
   const allTracks = useAllTracks();
   const volumeStore = useVolumeStore();
   const { isTrackAvailable$$q } = useTrackFilter();
+  const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
 
   let currentAudio: HTMLAudioElement | undefined;
 
@@ -258,7 +260,13 @@ function _usePlaybackStore(): PlaybackState {
     tracks: readonly ResourceTrack[],
     track?: ResourceTrack | null
   ): void => {
+    if (track && !isTrackAvailable$$q(track.id)) {
+      return;
+    }
     tracks = tracks.filter((track) => isTrackAvailable$$q(track.id));
+    if (track) {
+      addRecentlyPlayedTrack$$q(track.id);
+    }
     playing.value = false;
     currentSetListName.value = name;
     currentSetList.value = tracks;

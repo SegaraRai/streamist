@@ -18,6 +18,8 @@ header:
   Upload: Upload
   Queue: Queue
 setListName:
+  RecentlyPlayed: Recently played
+  RecentlyUploaded: Recently uploaded
   Albums: All albums
   Artists: All artists
   Tracks: All tracks
@@ -26,6 +28,9 @@ queue:
   NowPlaying: Now playing
   NextInQueue: Next in queue
   NextFrom: 'Next from: {0}'
+home:
+  RecentlyPlayed: Recently played
+  RecentlyUploaded: Recently uploaded
 album:
   Play: Play
   Shuffle: Shuffle
