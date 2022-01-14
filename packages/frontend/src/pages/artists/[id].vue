@@ -3,6 +3,7 @@ import { compareAlbum, compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
 import { db } from '~/db';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { tryRedirect } from '~/stores/redirect';
@@ -17,17 +18,21 @@ export default defineComponent({
   setup(props) {
     const router = useRouter();
     const { t } = useI18n();
+    const playbackStore = usePlaybackStore();
+    const { isTrackAvailable$$q } = useTrackFilter();
 
     const headTitleRef = ref(t('title.ArtistInit'));
     useHead({
       title: headTitleRef,
     });
 
-    const playbackStore = usePlaybackStore();
-
     onBeforeUnmount(() => {
       playbackStore.clearDefaultSetList$$q();
     });
+
+    const setList$$q = ref<readonly ResourceTrack[]>([]);
+    const filteredSetList$$q = ref<readonly ResourceTrack[]>([]);
+    const additionalTracks$$q = ref<readonly ResourceTrack[]>([]);
 
     let loadedTracksArtistId: string | undefined;
     const loadedTracksMap = new Map<string, readonly ResourceTrack[]>();
@@ -52,6 +57,9 @@ export default defineComponent({
       setList.push(...additionalTracks$$q.value);
       playbackStore.setDefaultSetList$$q(artist.name, setList);
       setList$$q.value = setList;
+      filteredSetList$$q.value = setList.filter((track) =>
+        isTrackAvailable$$q(track.id)
+      );
     };
 
     const propArtistIdRef = computed(() => props.id);
@@ -95,13 +103,11 @@ export default defineComponent({
       true
     );
 
-    const setList$$q = ref<readonly ResourceTrack[]>([]);
-    const additionalTracks$$q = ref<readonly ResourceTrack[]>([]);
-
     const dropdown$$q = ref<DropdownArtistInput | undefined>();
 
     return {
       t,
+      filteredSetList$$q,
       setList$$q,
       additionalTracks$$q,
       value$$q: value,
@@ -203,12 +209,16 @@ export default defineComponent({
         color="primary"
         flat
         icon
-        :disabled="!setList$$q.length"
+        :disabled="!filteredSetList$$q.length"
         @click="play$$q(false)"
       >
         <v-icon>mdi-play</v-icon>
       </v-btn>
-      <v-btn outlined :disabled="!setList$$q.length" @click="play$$q(true)">
+      <v-btn
+        outlined
+        :disabled="!filteredSetList$$q.length"
+        @click="play$$q(true)"
+      >
         <v-icon left>mdi-shuffle</v-icon>
         <span>
           {{ t('artist.Shuffle') }}

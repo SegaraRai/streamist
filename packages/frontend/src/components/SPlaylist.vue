@@ -6,6 +6,7 @@ import { db } from '~/db';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
 import { formatTracksTotalDuration } from '~/logic/duration';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import type { DropdownPlaylistInput } from './SDropdownPlaylist.vue';
@@ -34,6 +35,7 @@ export default defineComponent({
     const message = useMessage();
     const syncDB = useSyncDB();
     const playbackStore = usePlaybackStore();
+    const { isTrackAvailable$$q } = useTrackFilter();
 
     const playlistId$$q = eagerComputed(() =>
       typeof props.playlist === 'string' ? props.playlist : props.playlist.id
@@ -66,6 +68,10 @@ export default defineComponent({
       true
     );
 
+    const availableTracks = computed(() =>
+      value.value?.tracks$$q.filter((track) => isTrackAvailable$$q(track.id))
+    );
+
     const duration = eagerComputed(
       () =>
         value.value &&
@@ -82,6 +88,7 @@ export default defineComponent({
       playlistId$$q,
       imageIds$$q: ref<readonly string[] | undefined>(),
       value$$q: value,
+      availableTracks$$q: availableTracks,
       duration$$q: duration,
       play$$q: (shuffle?: boolean): void => {
         if (!value.value?.tracks$$q.length) {
@@ -201,14 +208,14 @@ export default defineComponent({
         color="primary"
         flat
         icon
-        :disabled="!value$$q?.tracks$$q.length"
+        :disabled="!availableTracks$$q?.length"
         @click="play$$q(false)"
       >
         <v-icon>mdi-play</v-icon>
       </v-btn>
       <v-btn
         outlined
-        :disabled="!value$$q?.tracks$$q.length"
+        :disabled="!availableTracks$$q?.length"
         @click="play$$q(true)"
       >
         <v-icon left>mdi-shuffle</v-icon>

@@ -4,6 +4,7 @@ import { compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
 import { db } from '~/db';
 import { formatTracksTotalDuration } from '~/logic/duration';
+import { useTrackFilter } from '~/logic/filterTracks';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import type { DropdownAlbumInput } from './SDropdownAlbum.vue';
@@ -36,6 +37,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
+    const { isTrackAvailable$$q } = useTrackFilter();
 
     const albumId$$q = eagerComputed(() =>
       typeof props.album === 'string' ? props.album : props.album.id
@@ -76,6 +78,10 @@ export default defineComponent({
       true
     );
 
+    const availableTracks = computed(() =>
+      value.value?.tracks$$q.filter((track) => isTrackAvailable$$q(track.id))
+    );
+
     const releaseDate = computed(() => {
       return (
         value.value?.tracks$$q
@@ -100,6 +106,7 @@ export default defineComponent({
       albumId$$q,
       imageIds$$q: ref<readonly string[] | undefined>(),
       value$$q: value,
+      availableTracks$$q: availableTracks,
       duration$$q: duration,
       releaseDate$$q: releaseDate,
       play$$q: (shuffle?: boolean): void => {
@@ -210,14 +217,14 @@ export default defineComponent({
         color="primary"
         flat
         icon
-        :disabled="!value$$q?.tracks$$q.length"
+        :disabled="!availableTracks$$q?.length"
         @click="play$$q(false)"
       >
         <v-icon>mdi-play</v-icon>
       </v-btn>
       <v-btn
         outlined
-        :disabled="!value$$q?.tracks$$q.length"
+        :disabled="!availableTracks$$q?.length"
         @click="play$$q(true)"
       >
         <v-icon left>mdi-shuffle</v-icon>
