@@ -84,6 +84,27 @@ imageManager:
     playlist: 'Playlist artwork of {0}'
 uploader:
   limitReached: "You have reached the upload limit for tracks.\nYou need to upgrade your plan or delete existing tracks to upload new tracks."
+  tooltip:
+    file:
+      ErrorAborted: Uploading aborted
+      ErrorInvalid: File too large
+      ErrorTranscodeFailed: Failed to convert
+      ErrorUploadFailed: Failed to upload
+      Pending: Waiting to upload
+      Queued: Waiting to upload
+      Skipped: Failed to process other files
+      Validated: Waiting to upload
+      Validating: Waiting to upload
+      Transcoded: Done
+      Transcoding: Converting
+      Uploaded: Waiting to convert
+      Uploading: Uploading
+      n_Uploading: 'Uploading ({0}% complete)'
+    stagedFile:
+      AudioFileWithCueSheet: Audio file with cue sheet
+      AudioFile: Audio file
+      ImageFile: Image file
+      UnknownFile: Unknown file
 dropdown:
   album:
     Play: Play
