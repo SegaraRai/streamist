@@ -32,7 +32,7 @@ export default defineComponent({
     @click.stop.prevent="$emit('click', query)"
   >
     <v-list-item-avatar icon class="flex-none flex items-center justify-center">
-      <v-icon>mdi-magnify</v-icon>
+      <v-icon>mdi-history</v-icon>
     </v-list-item-avatar>
     <v-list-item-header>
       <div class="flex-1 flex flex-col pl-2">
