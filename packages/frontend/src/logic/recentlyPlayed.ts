@@ -13,11 +13,15 @@ function _useRecentlyPlayed() {
   const store = useLocalStorage<RecentlyPlayedItem[]>('recentlyPlayed', []);
 
   const filterAndAdd = (trackId?: string) => {
+    if (trackId != null && !doesTrackExist$$q(trackId)) {
+      trackId = undefined;
+    }
+
     store.value = [
       ...(trackId ? [{ id: trackId, at: Date.now() }] : []),
       ...store.value
         .filter((item) => item.id !== trackId && doesTrackExist$$q(item.id))
-        .slice(0, RECENTLY_PLAYED_MAX_ENTRIES - 1),
+        .slice(0, RECENTLY_PLAYED_MAX_ENTRIES - (trackId ? 1 : 0)),
     ];
   };
 

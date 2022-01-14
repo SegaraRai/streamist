@@ -57,6 +57,7 @@ declare module 'vue' {
     SPlaylist: typeof import('./components/SPlaylist.vue')['default']
     SPlaylistImage: typeof import('./components/SPlaylistImage.vue')['default']
     SQueue: typeof import('./components/SQueue.vue')['default']
+    SSearchHistoryItem: typeof import('./components/SSearchHistoryItem.vue')['default']
     SSeekBar: typeof import('./components/SSeekBar.vue')['default']
     SSlider: typeof import('./components/SSlider.vue')['default']
     STrackList: typeof import('./components/STrackList.vue')['default']

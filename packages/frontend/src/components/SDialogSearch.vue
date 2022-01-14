@@ -1,14 +1,21 @@
 <script lang="ts">
 import { compareTrack } from '$shared/sort';
 import { ResourceTrack } from '$/types';
-import { SEARCH_DEBOUNCE_INTERVAL, SEARCH_DEBOUNCE_MAX_WAIT } from '~/config';
+import {
+  RECENTLY_SEARCHED_MAX_ENTRIES_DISPLAY,
+  SEARCH_DEBOUNCE_INTERVAL,
+  SEARCH_DEBOUNCE_MAX_WAIT,
+  SEARCH_MAX_ENTRIES_DISPLAY,
+} from '~/config';
 import { db } from '~/db';
 import type { AllItem } from '~/logic/allItem';
 import { useTrackFilter } from '~/logic/filterTracks';
+import { createFuse } from '~/logic/fuse';
 import { useMenu } from '~/logic/menu';
 import { createAlbumDropdown } from '~/logic/naive-ui/albumDropdown';
 import { createPlaylistDropdown } from '~/logic/naive-ui/playlistDropdown';
 import { createTrackDropdown } from '~/logic/naive-ui/trackDropdown';
+import { useRecentlySearched } from '~/logic/recentlySearched';
 import { useLiveQuery } from '~/logic/useLiveQuery';
 import { useAllSearch } from '~/logic/useSearch';
 import { usePlaybackStore } from '~/stores/playback';
@@ -25,6 +32,11 @@ export default defineComponent({
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const { isTrackAvailable$$q } = useTrackFilter();
+    const {
+      addRecentlySearchedQuery$$q,
+      removeRecentlySearchedQuery$$q,
+      queries$$q,
+    } = useRecentlySearched();
 
     const show$$q = useVModel(props, 'modelValue', emit);
 
@@ -38,9 +50,8 @@ export default defineComponent({
       }
     );
 
-    const allSearchResults$$q = useAllSearch()(debouncedSearchQuery$$q);
-    const searchResults$$q = computed(() =>
-      allSearchResults$$q.value.slice(0, 30)
+    const searchResults$$q = useAllSearch(SEARCH_MAX_ENTRIES_DISPLAY)(
+      debouncedSearchQuery$$q
     );
 
     watch(show$$q, (newShow) => {
@@ -180,6 +191,13 @@ export default defineComponent({
       }
     });
 
+    const rsFuse = createFuse(queries$$q, { keys: ['query'] });
+    const filteredRSQueries$$q = computed(() =>
+      rsFuse.value.search(searchQuery$$q.value, {
+        limit: RECENTLY_SEARCHED_MAX_ENTRIES_DISPLAY,
+      })
+    );
+
     return {
       t,
       show$$q,
@@ -189,6 +207,7 @@ export default defineComponent({
       calcHref$$q,
       isTrackAvailable$$q,
       onSelect$$q: (item: AllItem) => {
+        addRecentlySearchedQuery$$q(searchQuery$$q.value);
         show$$q.value = false;
 
         if (item.t === 'track') {
@@ -214,6 +233,8 @@ export default defineComponent({
           selectedItem.value = item;
         });
       },
+      filteredRSQueries$$q,
+      removeRecentlySearchedQuery$$q,
     };
   },
 });
@@ -225,16 +246,36 @@ export default defineComponent({
     transform-origin="center"
     class="select-none max-w-xl"
   >
-    <v-card class="w-full md:min-w-2xl p-2">
-      <v-text-field
-        v-model="searchQuery$$q"
-        class="s-v-input-hide-details w-full mb-4"
-        density="compact"
-        prepend-inner-icon="mdi-magnify"
-        hide-details
-      />
+    <v-card class="w-full md:min-w-2xl p-2 h-[75vh] flex flex-col">
+      <div>
+        <v-text-field
+          v-model="searchQuery$$q"
+          class="s-v-input-hide-details w-full"
+          density="compact"
+          prepend-inner-icon="mdi-magnify"
+          hide-details
+        />
+        <template v-if="filteredRSQueries$$q.length">
+          <v-list density="compact">
+            <template
+              v-for="({ item }, _index) in filteredRSQueries$$q"
+              :key="_index"
+            >
+              <s-search-history-item
+                :query="item.query"
+                :at="item.at"
+                @click="searchQuery$$q = item.query"
+                @remove="removeRecentlySearchedQuery$$q(item.query)"
+              />
+            </template>
+          </v-list>
+          <template v-if="searchResults$$q.length">
+            <v-divider />
+          </template>
+        </template>
+      </div>
       <n-scrollbar
-        class="flex-1 h-[80vh] s-n-scrollbar-min-h-full"
+        class="flex-1 s-n-scrollbar-min-h-full"
         @scroll="onScroll$$q"
       >
         <template v-if="searchResults$$q.length">
@@ -252,7 +293,7 @@ export default defineComponent({
                 @contextmenu.prevent="showMenu$$q($event, item)"
               >
                 <v-list-item
-                  class="flex gap-x-4 s-hover-container"
+                  class="s-hover-container flex gap-x-4"
                   :class="[
                     item.t === 'track' &&
                       !isTrackAvailable$$q(item.i.id) &&
@@ -274,12 +315,12 @@ export default defineComponent({
                         "
                       >
                         <s-album-image
-                          class="w-full h-full s-hover-hidden"
+                          class="s-hover-hidden w-full h-full"
                           size="40"
                           :album="item.i.albumId"
                         />
                         <div
-                          class="w-full h-full flex items-center justify-center s-hover-visible text-[2rem]"
+                          class="s-hover-visible w-full h-full flex items-center justify-center text-[2rem]"
                         >
                           <i-mdi-play-circle />
                         </div>
