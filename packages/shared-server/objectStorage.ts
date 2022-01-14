@@ -2,8 +2,8 @@ import { Hash, createHash } from 'crypto';
 import { createReadStream, createWriteStream } from 'fs';
 import { PassThrough, Readable } from 'stream';
 import { S3 } from '@aws-sdk/client-s3';
-import { OS_BATCH_DELETE_MAX_ITEMS } from 'config';
 import { retryS3, retryS3NoReject } from '$shared/retry';
+import { OS_BATCH_DELETE_MAX_ITEMS } from './config';
 import { decodeBuffer } from './contentEncoding';
 import { nodeReadableStreamToBuffer } from './stream';
 
