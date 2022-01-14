@@ -3,14 +3,17 @@ import {
   generateImageId,
   generateTranscodedImageFileId,
 } from '$shared-server/generateId';
-import { osDelete, osGetFile, osPutFile } from '$shared-server/objectStorage';
+import {
+  osDeleteManaged,
+  osGetFile,
+  osPutFile,
+} from '$shared-server/objectStorage';
 import {
   getSourceFileKey,
   getSourceFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
 } from '$shared/objectStorage';
-import { retryS3NoReject } from '$shared/retry';
 import { UploadJSONStorage, uploadJSON } from '../execAndLog';
 import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
 import { getTempFilepath } from '../tempFile';
@@ -191,7 +194,7 @@ export async function processImageRequest(
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));
-      await retryS3NoReject(() => osDelete(os, uploadedTranscodedImageKeys));
+      await osDeleteManaged(os, uploadedTranscodedImageKeys, true);
     } catch (_error: unknown) {
       // エラーになっても良い
     }

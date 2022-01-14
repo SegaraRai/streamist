@@ -2,6 +2,8 @@ import { Hash, createHash } from 'crypto';
 import { createReadStream, createWriteStream } from 'fs';
 import { PassThrough, Readable } from 'stream';
 import { S3 } from '@aws-sdk/client-s3';
+import { OS_BATCH_DELETE_MAX_ITEMS } from 'config';
+import { retryS3, retryS3NoReject } from '$shared/retry';
 import { decodeBuffer } from './contentEncoding';
 import { nodeReadableStreamToBuffer } from './stream';
 
@@ -201,13 +203,45 @@ export async function osDelete(
   if (typeof keys === 'string') {
     keys = [keys];
   }
+  if (keys.length === 0) {
+    return;
+  }
   const s3 = createS3Cached(objectStorage);
+  const objects = keys.map((key) => ({
+    Key: key,
+  }));
   await s3.deleteObjects({
     Bucket: objectStorage.bucket,
     Delete: {
-      Objects: keys.map((key) => ({
-        Key: key,
-      })),
+      Objects: objects,
     },
   });
+}
+
+export async function osDeleteManaged(
+  objectStorage: ObjectStorage,
+  keys: string | readonly string[],
+  noReject = false
+): Promise<void> {
+  if (typeof keys === 'string') {
+    keys = [keys];
+  }
+  if (keys.length === 0) {
+    return;
+  }
+  const s3 = createS3Cached(objectStorage);
+  const objects = keys.map((key) => ({
+    Key: key,
+  }));
+  while (objects.length) {
+    const currentObjects = objects.splice(0, OS_BATCH_DELETE_MAX_ITEMS);
+    await (noReject ? retryS3NoReject : retryS3)(() =>
+      s3.deleteObjects({
+        Bucket: objectStorage.bucket,
+        Delete: {
+          Objects: currentObjects,
+        },
+      })
+    );
+  }
 }

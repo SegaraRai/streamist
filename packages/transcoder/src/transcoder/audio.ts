@@ -7,7 +7,7 @@ import {
   generateTranscodedAudioFileId,
 } from '$shared-server/generateId';
 import {
-  osDelete,
+  osDeleteManaged,
   osGetData,
   osGetFile,
   osPutFile,
@@ -21,7 +21,6 @@ import {
   getTranscodedAudioFileKey,
   getTranscodedAudioFileOS,
 } from '$shared/objectStorage';
-import { retryS3NoReject } from '$shared/retry';
 import { UploadJSONStorage, uploadJSON } from '../execAndLog';
 import { calcFileHash } from '../fileHash';
 import logger from '../logger';
@@ -488,7 +487,7 @@ export async function processAudioRequest(
   } catch (error: unknown) {
     try {
       await Promise.allSettled(createdFiles.map(unlink));
-      await retryS3NoReject(() => osDelete(os, uploadedTranscodedAudioKeys));
+      await osDeleteManaged(os, uploadedTranscodedAudioKeys, true);
     } catch (_error: unknown) {
       // エラーになっても良い
     }

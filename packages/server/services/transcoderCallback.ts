@@ -1,13 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
-import { osDelete } from '$shared-server/objectStorage';
+import { osDeleteManaged } from '$shared-server/objectStorage';
 import { is } from '$shared/is';
 import {
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
 } from '$shared/objectStorage';
 import { parseDate } from '$shared/parseDate';
-import { retryS3NoReject } from '$shared/retry';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -470,18 +469,17 @@ async function handleTranscoderResponseArtifactImage(
   const deleteTranscodedFiles = async () => {
     // NOTE(ximg): currently we don't upload raw extracted images to S3. Delete them if we do.
     const os = getTranscodedImageFileOS(artifact.source.region);
-    await retryS3NoReject(() =>
-      osDelete(
-        os,
-        artifact.files.map((file) =>
-          getTranscodedImageFileKey(
-            userId,
-            artifact.id,
-            file.fileId,
-            file.extension
-          )
+    await osDeleteManaged(
+      os,
+      artifact.files.map((file) =>
+        getTranscodedImageFileKey(
+          userId,
+          artifact.id,
+          file.fileId,
+          file.extension
         )
-      )
+      ),
+      true
     );
   };
 
