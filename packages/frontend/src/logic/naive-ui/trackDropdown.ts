@@ -89,8 +89,8 @@ export function createTrackDropdown({
               return;
             }
 
-            play$$q(track);
             closeMenu$$q();
+            play$$q(track);
           },
         },
       });
@@ -98,10 +98,15 @@ export function createTrackDropdown({
       // Add To Play Next Queue
       menuItems.push({
         key: 'addToPNQueue',
+        disabled: !isAvailable,
         label: t('dropdown.trackList.AddToPlayNextQueue'),
         icon: nCreateDropdownIcon('mdi-playlist-play'),
         props: {
           onClick: () => {
+            if (!isAvailable) {
+              return;
+            }
+
             closeMenu$$q();
             playbackStore.appendTracksToPlayNextQueue$$q([track]);
             message.success(t('message.AddedToPlayNextQueue', [track.title]));

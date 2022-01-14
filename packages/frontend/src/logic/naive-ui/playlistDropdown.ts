@@ -75,11 +75,11 @@ export function createPlaylistDropdown({
       key: 'addToPNQueue',
       label: t('dropdown.playlist.AddToPlayNextQueue'),
       icon: nCreateDropdownIcon('mdi-playlist-play'),
-      disabled: !playlistTracks?.length,
+      disabled: !availablePlaylistTracks?.length,
       props: {
         onClick: (): void => {
           closeMenu$$q();
-          if (!playlistTracks?.length) {
+          if (!availablePlaylistTracks?.length || !playlistTracks?.length) {
             return;
           }
           playbackStore.appendTracksToPlayNextQueue$$q(playlistTracks);
