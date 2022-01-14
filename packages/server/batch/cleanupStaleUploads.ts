@@ -10,8 +10,7 @@ import { osDeleteSourceFiles } from '$/os/sourceFile';
 
 async function updateStaleSources(
   where: Prisma.SourceWhereInput,
-  postState: SourceFileState & SourceState,
-  timestamp: number
+  postState: SourceFileState & SourceState
 ): Promise<void> {
   const sources = await client.source.findMany({
     where,
@@ -37,7 +36,7 @@ async function updateStaleSources(
     },
     data: {
       state: postState,
-      updatedAt: timestamp,
+      updatedAt: Date.now(),
     },
   });
 
@@ -52,7 +51,7 @@ async function updateStaleSources(
     data: {
       state: postState,
       entityExists: false,
-      updatedAt: timestamp,
+      updatedAt: Date.now(),
     },
   });
 
@@ -60,9 +59,8 @@ async function updateStaleSources(
 }
 
 export async function cleanupStaleUploads(): Promise<void> {
-  const timestamp = Date.now();
   const staleCreatedAt =
-    timestamp - SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE;
+    Date.now() - SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE;
 
   await updateStaleSources(
     {
@@ -71,15 +69,13 @@ export async function cleanupStaleUploads(): Promise<void> {
         lt: staleCreatedAt,
       },
     },
-    'not_uploaded',
-    timestamp
+    'not_uploaded'
   );
 }
 
 export async function cleanupStaleTranscodes(): Promise<void> {
-  const timestamp = Date.now();
   const staleUploadedAt =
-    timestamp - SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD;
+    Date.now() - SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD;
 
   await updateStaleSources(
     {
@@ -102,7 +98,6 @@ export async function cleanupStaleTranscodes(): Promise<void> {
         },
       ],
     },
-    'not_transcoded',
-    timestamp
+    'not_transcoded'
   );
 }

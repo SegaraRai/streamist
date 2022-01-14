@@ -5,8 +5,7 @@ import { osDeleteSourceFiles } from '$/os/sourceFile';
 import { osDeleteTrackFiles } from '$/os/trackFile';
 
 export async function cleanupClosedAccounts(): Promise<void> {
-  const timestamp = Date.now();
-  const deleteClosedAt = timestamp - USER_TREAT_AS_DELETED_AFTER_CLOSE;
+  const deleteClosedAt = Date.now() - USER_TREAT_AS_DELETED_AFTER_CLOSE;
 
   const users = await client.user.findMany({
     where: {

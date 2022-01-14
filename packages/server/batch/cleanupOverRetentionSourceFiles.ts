@@ -6,15 +6,13 @@ import { client } from '$/db/lib/client';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 
 export async function cleanupOverRetentionSourceFiles(): Promise<void> {
-  const timestamp = Date.now();
-
   for (const plan of PLANS) {
     const retention = MAX_SOURCE_FILE_RETENTION_PER_PLAN[plan];
     if (retention === Infinity) {
       continue;
     }
 
-    const deleteUploadedAt = timestamp - retention;
+    const deleteUploadedAt = Date.now() - retention;
 
     const sourceFiles = await client.sourceFile.findMany({
       where: {
@@ -47,7 +45,7 @@ export async function cleanupOverRetentionSourceFiles(): Promise<void> {
       },
       data: {
         entityExists: false,
-        updatedAt: timestamp,
+        updatedAt: Date.now(),
       },
     });
 
