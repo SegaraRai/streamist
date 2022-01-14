@@ -1,6 +1,6 @@
 import { createAsyncCache } from '$shared/asyncCache';
 import { TOKEN_SHOULD_RENEW_TOLERANCE } from '~/config';
-import { isJWTNotExpired } from '~/logic/jwt';
+import { isJWTExpired } from '~/logic/jwt';
 import unAuthAPI from '~/logic/unAuthAPI';
 import { isAxiosError } from './axiosError';
 
@@ -44,10 +44,10 @@ export const tokens = createAsyncCache<Tokens>(
     }
   },
   (tokens): boolean =>
-    isJWTNotExpired(tokens.apiToken) && isJWTNotExpired(tokens.cdnToken),
+    !isJWTExpired(tokens.apiToken) && !isJWTExpired(tokens.cdnToken),
   (tokens): boolean =>
-    isJWTNotExpired(tokens.apiToken, TOKEN_SHOULD_RENEW_TOLERANCE) &&
-    isJWTNotExpired(tokens.cdnToken, TOKEN_SHOULD_RENEW_TOLERANCE)
+    isJWTExpired(tokens.apiToken, TOKEN_SHOULD_RENEW_TOLERANCE) ||
+    isJWTExpired(tokens.cdnToken, TOKEN_SHOULD_RENEW_TOLERANCE)
 );
 
 export async function authenticate(

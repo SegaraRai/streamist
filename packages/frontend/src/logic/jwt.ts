@@ -12,8 +12,8 @@ function parseJWTPayload(token: string): JWTPayload {
   return payload;
 }
 
-export function isJWTNotExpired(token: string, tolerance = 0): boolean {
+export function isJWTExpired(token: string, tolerance = 0): boolean {
   const payload = parseJWTPayload(token);
   const now = Date.now() / 1000 - tolerance;
-  return payload.exp > now;
+  return payload.exp <= now;
 }

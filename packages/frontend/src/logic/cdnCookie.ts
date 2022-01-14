@@ -1,6 +1,6 @@
 import { createAsyncCache } from '$shared/asyncCache';
 import { CDN_ENDPOINT } from '~/config';
-import { isJWTNotExpired } from '~/logic/jwt';
+import { isJWTExpired } from '~/logic/jwt';
 import { tokens } from '~/logic/tokens';
 
 async function setTokenCookie(token: string): Promise<void> {
@@ -30,7 +30,7 @@ const cdnCookieAsyncCache = createAsyncCache<string>(
     return (
       !tokens.renewing &&
       tokens.value?.cdnToken === token &&
-      isJWTNotExpired(token)
+      !isJWTExpired(token)
     );
   }
 );
