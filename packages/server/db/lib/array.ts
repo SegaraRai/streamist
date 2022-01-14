@@ -48,6 +48,14 @@ export interface ArrayJunctionTable {
   [COL_USER_ID]: typeof COL_USER_ID;
 }
 
+export type JunctionTableModelName = Prisma.ModelName &
+  (
+    | typeof Prisma.ModelName.AAlbumImage
+    | typeof Prisma.ModelName.AArtistImage
+    | typeof Prisma.ModelName.APlaylistImage
+    | typeof Prisma.ModelName.APlaylistTrack
+  );
+
 function isSameItems(a: readonly string[], b: readonly string[]): boolean {
   const setA = new Set(a);
   const setB = new Set(b);
@@ -75,7 +83,7 @@ function isSameItems(a: readonly string[], b: readonly string[]): boolean {
 export async function dbArrayAddTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
@@ -164,7 +172,7 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
  */
 export function dbArrayAdd<T extends ArrayMainTable>(
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
@@ -200,7 +208,7 @@ export function dbArrayAdd<T extends ArrayMainTable>(
 async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string,
@@ -296,7 +304,7 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
 function dbArrayRemoveByIdsTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string,
@@ -337,7 +345,7 @@ function dbArrayRemoveByIdsTx<T extends ArrayMainTable>(
 export function dbArrayRemoveTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string,
@@ -375,7 +383,7 @@ export function dbArrayRemoveTx<T extends ArrayMainTable>(
  */
 export function dbArrayRemove<T extends ArrayMainTable>(
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string,
@@ -406,7 +414,7 @@ export function dbArrayRemove<T extends ArrayMainTable>(
 export function dbArrayRemoveAllTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string
@@ -432,7 +440,7 @@ export function dbArrayRemoveAllTx<T extends ArrayMainTable>(
  */
 export function dbArrayRemoveAll<T extends ArrayMainTable>(
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   groupId: string
@@ -655,7 +663,7 @@ export function dbArrayCreateMoveAfterReorderCallback(
 export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
   txClient: TransactionalPrismaClient,
   userId: string,
-  junctionTable: Prisma.ModelName,
+  junctionTable: JunctionTableModelName,
   mainTable: Prisma.ModelName,
   itemOrderColumn: T[keyof T],
   itemId: string

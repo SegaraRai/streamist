@@ -1,6 +1,18 @@
 import { User } from '@prisma/client';
 import { createSigner, createVerifier } from 'fast-jwt';
 import { randomBytesAsync } from '$shared-server/randomBytesAsync';
+import {
+  JWT_ALGORITHM,
+  JWT_API_TOKEN_AUD,
+  JWT_API_TOKEN_EXPIRES_IN,
+  JWT_API_TOKEN_ISS,
+  JWT_CDN_TOKEN_AUD,
+  JWT_CDN_TOKEN_EXPIRES_IN,
+  JWT_CDN_TOKEN_ISS,
+  JWT_REFRESH_TOKEN_AUD,
+  JWT_REFRESH_TOKEN_EXPIRES_IN,
+  JWT_REFRESH_TOKEN_ISS,
+} from '$shared/config/jwt';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
 import type { IAuthRequest, IAuthResponse } from '$/validators';
@@ -10,22 +22,18 @@ import {
   SECRET_REFRESH_TOKEN_JWT_SECRET,
 } from './env';
 
-export const REFRESH_TOKEN_EXPIRES_IN = 1 * 24 * 60 * 60 * 1000;
-export const API_TOKEN_EXPIRES_IN = 60 * 1000;
-export const CDN_TOKEN_EXPIRES_IN = API_TOKEN_EXPIRES_IN;
-
 export async function issueRefreshToken(
   user: User,
   timestamp: number
 ): Promise<string> {
   const signer = createSigner({
-    algorithm: 'HS256',
+    algorithm: JWT_ALGORITHM,
     jti: `R.${(await randomBytesAsync(32)).toString('hex')}`,
     key: SECRET_REFRESH_TOKEN_JWT_SECRET,
-    aud: 'refresh',
-    iss: 'https://streamist.app',
+    aud: JWT_REFRESH_TOKEN_AUD,
+    iss: JWT_REFRESH_TOKEN_ISS,
     clockTimestamp: timestamp,
-    expiresIn: REFRESH_TOKEN_EXPIRES_IN,
+    expiresIn: JWT_REFRESH_TOKEN_EXPIRES_IN,
   });
   return Promise.resolve(
     signer({
@@ -39,9 +47,9 @@ export async function extractUserIdFromRefreshToken(
   token: string
 ): Promise<string | undefined> {
   const verifier = createVerifier({
-    algorithms: ['HS256'],
+    algorithms: [JWT_ALGORITHM],
     key: SECRET_REFRESH_TOKEN_JWT_SECRET,
-    allowedAud: 'refresh',
+    allowedAud: JWT_REFRESH_TOKEN_AUD,
   });
 
   try {
@@ -52,12 +60,12 @@ export async function extractUserIdFromRefreshToken(
 
 export function issueAPIToken(user: User, timestamp: number): Promise<string> {
   const signer = createSigner({
-    algorithm: 'HS256',
+    algorithm: JWT_ALGORITHM,
     key: SECRET_API_JWT_SECRET,
-    aud: 'api',
-    iss: 'https://streamist.app',
+    aud: JWT_API_TOKEN_AUD,
+    iss: JWT_API_TOKEN_ISS,
     clockTimestamp: timestamp,
-    expiresIn: API_TOKEN_EXPIRES_IN,
+    expiresIn: JWT_API_TOKEN_EXPIRES_IN,
   });
   return Promise.resolve(
     signer({
@@ -69,12 +77,12 @@ export function issueAPIToken(user: User, timestamp: number): Promise<string> {
 
 export function issueCDNToken(user: User, timestamp: number): Promise<string> {
   const signer = createSigner({
-    algorithm: 'HS256',
+    algorithm: JWT_ALGORITHM,
     key: SECRET_CDN_JWT_SECRET,
-    aud: 'cdn',
-    iss: 'https://streamist.app',
+    aud: JWT_CDN_TOKEN_AUD,
+    iss: JWT_CDN_TOKEN_ISS,
     clockTimestamp: timestamp,
-    expiresIn: CDN_TOKEN_EXPIRES_IN,
+    expiresIn: JWT_CDN_TOKEN_EXPIRES_IN,
   });
   return Promise.resolve(
     signer({
@@ -86,13 +94,14 @@ export function issueCDNToken(user: User, timestamp: number): Promise<string> {
   );
 }
 
+// for dev
 export async function extractPayloadFromCDNToken(
   token: string
 ): Promise<{ id: string; exp: number } | undefined> {
   const verifier = createVerifier({
-    algorithms: ['HS256'],
+    algorithms: [JWT_ALGORITHM],
     key: SECRET_CDN_JWT_SECRET,
-    allowedAud: 'cdn',
+    allowedAud: JWT_CDN_TOKEN_AUD,
   });
 
   try {
@@ -120,6 +129,17 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
         throw new HTTPError(401, 'Invalid password');
       }
 
+      if (tempUser.closedAt != null) {
+        await client.user.update({
+          where: {
+            id: tempUser.id,
+          },
+          data: {
+            closedAt: null,
+          },
+        });
+      }
+
       user = tempUser;
 
       break;
@@ -143,6 +163,13 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
 
       if (!tempUser) {
         throw new HTTPError(404, `User ${extractedUserId} not found`);
+      }
+
+      if (tempUser.closedAt != null) {
+        throw new HTTPError(
+          409,
+          `User ${extractedUserId} is closed. Please login again to restore access.`
+        );
       }
 
       user = tempUser;

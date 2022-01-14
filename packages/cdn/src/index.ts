@@ -12,6 +12,7 @@ import {
   CACHE_CONTROL_PRIVATE_IMMUTABLE,
   CACHE_CONTROL_PUBLIC_IMMUTABLE,
 } from '$shared/config/cacheControl';
+import { JWT_CDN_TOKEN_AUD } from '$shared/config/jwt';
 import { isId } from '$shared/id';
 import {
   getOSRawURL,
@@ -63,7 +64,7 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
 
   const jwt = await verifyJWT(strJWT, context);
 
-  if (!jwt || jwt.aud !== 'cdn') {
+  if (!jwt || jwt.aud !== JWT_CDN_TOKEN_AUD) {
     return send(401, null, NO_CACHE_HEADERS);
   }
 
@@ -106,7 +107,7 @@ API.add(
     }
 
     const jwt = await verifyJWT(strJWT, context);
-    if (!jwt || jwt.aud !== 'cdn') {
+    if (!jwt || jwt.aud !== JWT_CDN_TOKEN_AUD) {
       return send(401, null, NO_CACHE_HEADERS);
     }
 
@@ -124,7 +125,7 @@ API.add(
       return send(404, null, NO_CACHE_HEADERS);
     }
 
-    const match = filename.match(/([^.]+)(\.[\da-z]+)$/);
+    const match = filename.match(/^([^.]+)(\.[\da-z]+)$/);
     if (!match) {
       return send(404, null, NO_CACHE_HEADERS);
     }
