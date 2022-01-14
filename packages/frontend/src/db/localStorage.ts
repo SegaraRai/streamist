@@ -18,6 +18,13 @@ function _useLocalStorageDB() {
         write: (v: number): string => String(v),
       },
     }),
+    dbNextSince$$q: useLocalStorage<number>('db.nextSince', 0, {
+      writeDefaults: false,
+      serializer: {
+        read: (v: string): number => (v ? parseInt(v, 10) : 0),
+        write: (v: number): string => String(v),
+      },
+    }),
     dbUpdating$$q: useLocalStorage<boolean>('db.updating', false, {
       writeDefaults: true,
       serializer: {

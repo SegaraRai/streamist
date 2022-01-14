@@ -19,7 +19,8 @@ export default defineComponent({
   <v-list density="compact">
     <template v-for="(file, _index) in stagedFiles$$q" :key="_index">
       <s-uploader-list-item
-        :file="file.file"
+        :filename="file.file.name"
+        :filesize="file.file.size"
         :file-type="file.type"
         class="s-hover-container text-st-primary"
       >
@@ -39,7 +40,8 @@ export default defineComponent({
       <template v-if="file.type === 'audioWithCueSheet'">
         <s-uploader-list-item
           class="ml-6 text-st-info"
-          :file="file.cueSheetFile"
+          :filename="file.cueSheetFile.name"
+          :filesize="file.cueSheetFile.size"
           file-type="cueSheet"
         />
       </template>
@@ -47,7 +49,8 @@ export default defineComponent({
     <template v-for="(file, _index) in files$$q" :key="_index">
       <template v-if="file.status !== 'removed'">
         <s-uploader-list-item
-          :file="file.file"
+          :filename="file.filename"
+          :filesize="file.fileSize"
           :file-type="file.fileType"
           class="s-hover-container"
         >
@@ -72,16 +75,28 @@ export default defineComponent({
               class="s-hover-hidden"
               title="Waiting for upload..."
               indeterminate
+              size="28"
             />
           </template>
           <template v-else-if="file.status === 'uploading'">
-            <v-progress-circular
-              :model-value="((file.uploadedSize || 0) * 100) / file.fileSize"
-              :title="`Uploading... (${(
-                ((file.uploadedSize || 0) * 100) /
-                file.fileSize
-              ).toFixed(2)}% complete)`"
-            />
+            <template v-if="file.file">
+              <v-progress-circular
+                :model-value="((file.uploadedSize || 0) * 100) / file.fileSize"
+                :title="`Uploading... (${(
+                  ((file.uploadedSize || 0) * 100) /
+                  file.fileSize
+                ).toFixed(2)}% complete)`"
+                size="28"
+              />
+            </template>
+            <template v-else>
+              <v-progress-circular
+                color="primary"
+                title="Uploading..."
+                indeterminate
+                size="28"
+              />
+            </template>
           </template>
           <template
             v-else-if="
@@ -92,12 +107,14 @@ export default defineComponent({
               color="primary"
               title="Waiting for transcode..."
               indeterminate
+              size="28"
             />
           </template>
           <template
             v-else-if="
               file.status === 'skipped' ||
               file.status === 'error_invalid' ||
+              file.status === 'error_aborted' ||
               file.status === 'error_upload_failed' ||
               file.status === 'error_transcode_failed' ||
               file.status === 'transcoded'

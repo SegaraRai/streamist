@@ -22,9 +22,9 @@ export const SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE =
   ) *
     1000 +
   1 * 60 * 60;
-/** in msec. 6h */
+/** in msec. 1h (current max. Lambda execution time is 15 min.) */
 export const SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD =
-  6 * 60 * 60 * 1000;
+  1 * 60 * 60 * 1000;
 
 export const MIN_SOURCE_FILE_SIZE = 1; // forbid uploading empty files (due to multipart upload)
 

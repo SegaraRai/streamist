@@ -17,9 +17,13 @@ const typeToFileIcon: Record<FileType, string> = {
 
 export default defineComponent({
   props: {
-    file: {
-      type: Object as PropType<File>,
-      required: true,
+    filename: {
+      type: String,
+      default: undefined,
+    },
+    filesize: {
+      type: Number,
+      default: undefined,
     },
     fileType: {
       type: String as PropType<FileType>,
@@ -45,10 +49,10 @@ export default defineComponent({
         <div
           class="flex-1 text-sm whitespace-nowrap overflow-hidden overflow-ellipsis"
         >
-          {{ file?.name ?? '' }}
+          {{ filename ?? '' }}
         </div>
         <div class="flex-none text-sm w-24 text-right opacity-60">
-          {{ humanizeSize$$q(file?.size ?? 0) }}
+          {{ humanizeSize$$q(filesize ?? 0) }}
         </div>
       </div>
     </v-list-item-header>

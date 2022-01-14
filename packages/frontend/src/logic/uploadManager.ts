@@ -27,7 +27,10 @@ import type {
 } from '$/types';
 import type { CreateSourceResponseFile } from '$/types/createSource';
 import type { VSourceCreateBodyWrapper } from '$/validators';
-import { UPLOAD_MANAGER_DB_SYNC_INTERVAL } from '~/config';
+import {
+  UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL,
+  UPLOAD_MANAGER_DB_SYNC_INTERVAL,
+} from '~/config';
 import { db } from '~/db';
 import api from '~/logic/api';
 import type {
@@ -57,10 +60,12 @@ export type UploadStatus =
   | 'transcoded'
   // 最終状態: 事前チェックに失敗した
   | 'error_invalid'
-  // 最終状態: アップロードは完了したがトランスコードに失敗した
+  // 最終状態: アップロードに失敗した
   | 'error_upload_failed'
   // 最終状態: アップロードは完了したがトランスコードに失敗した
   | 'error_transcode_failed'
+  // 最終状態: ユーザーがアップロードを取り消した
+  | 'error_aborted'
   // 最終状態: 依存先ファイルがトランスコードに失敗したのでスキップされた（未対応ファイルはそもそも追加されない）
   // または、CUEシートが不正or未対応の形式であったため音声ファイルのアップロードがスキップされた
   | 'skipped'
@@ -86,7 +91,8 @@ export interface UploadFile {
    */
   groups: FileId[];
   status: UploadStatus;
-  file: File;
+  /** DBのSourceFileから取得した場合null */
+  file: File | null;
   filename: string;
   fileSize: number;
   fileType: SourceFileType | 'imageWithAttachTarget' | 'unknown';
@@ -309,7 +315,8 @@ function createUploadFilesFromResolvedFiles(
   );
   uploadFiles.sort(
     (a, b) =>
-      (fileToIndexMap.get(a.file) ?? 1e7) - (fileToIndexMap.get(b.file) ?? 1e7)
+      (fileToIndexMap.get(a.file!) ?? 1e7) -
+      (fileToIndexMap.get(b.file!) ?? 1e7)
   );
 
   return uploadFiles;
@@ -419,23 +426,27 @@ export class UploadManager extends EventTarget {
 
   private _checkFile(plan: Plan, file: UploadFile): void {
     let checkPromise: Promise<boolean>;
-    switch (file.fileType) {
-      case 'audio':
-        checkPromise = isValidAudioFile(plan, file.file);
-        break;
+    if (file.file) {
+      switch (file.fileType) {
+        case 'audio':
+          checkPromise = isValidAudioFile(plan, file.file);
+          break;
 
-      case 'cueSheet':
-        checkPromise = isValidCueSheetFile(plan, file.file);
-        break;
+        case 'cueSheet':
+          checkPromise = isValidCueSheetFile(plan, file.file);
+          break;
 
-      case 'image':
-      case 'imageWithAttachTarget':
-        checkPromise = isValidImageFile(plan, file.file);
-        break;
+        case 'image':
+        case 'imageWithAttachTarget':
+          checkPromise = isValidImageFile(plan, file.file);
+          break;
 
-      case 'unknown':
-        checkPromise = Promise.resolve(false);
-        break;
+        case 'unknown':
+          checkPromise = Promise.resolve(false);
+          break;
+      }
+    } else {
+      checkPromise = Promise.resolve(false);
     }
 
     checkPromise.then((isValid) => {
@@ -446,14 +457,15 @@ export class UploadManager extends EventTarget {
   }
 
   private async _sync(
-    syncDB: (reconstruct?: boolean) => Promise<void>,
-    force = false
+    syncDB: (reconstruct?: boolean) => Promise<void>
   ): Promise<void> {
-    if (!force && this._files.every((file) => file.status !== 'transcoding')) {
-      return;
+    const lastUpdate = parseInt(
+      localStorage.getItem('db.lastUpdate') || '0',
+      10
+    );
+    if (Date.now() - lastUpdate >= UPLOAD_MANAGER_DB_SYNC_INTERVAL) {
+      await syncDB();
     }
-
-    await syncDB();
 
     const sourceFiles = await db.sourceFiles.toArray();
     const sourceFileMap = new Map<string, ResourceSourceFile>(
@@ -482,8 +494,26 @@ export class UploadManager extends EventTarget {
           break;
 
         case 'failed':
+        case 'not_transcoded':
           newStatus = 'error_transcode_failed';
           break;
+      }
+
+      if (!file.file) {
+        switch (sourceFile.state as SourceFileState) {
+          case 'uploaded':
+          case 'transcoding':
+            newStatus = 'transcoding';
+            break;
+
+          case 'not_uploaded':
+            newStatus = 'error_upload_failed';
+            break;
+
+          case 'aborted':
+            newStatus = 'error_aborted';
+            break;
+        }
       }
 
       if (!newStatus || file.status === newStatus) {
@@ -491,6 +521,89 @@ export class UploadManager extends EventTarget {
       }
 
       file.status = newStatus;
+      changed = true;
+    }
+
+    // add unregistered files
+    const registeredSourceFileIdSet = new Set(
+      this._files.map((file) => file.uploadInfo?.sourceFileId)
+    );
+    for (const sourceFile of sourceFiles) {
+      if (registeredSourceFileIdSet.has(sourceFile.id)) {
+        continue;
+      }
+
+      const state = sourceFile.state as SourceFileState;
+      if (
+        state !== 'uploading' &&
+        state !== 'uploaded' &&
+        state !== 'transcoding'
+      ) {
+        continue;
+      }
+
+      const fileType = sourceFile.type as SourceFileType;
+      if (fileType === 'cueSheet') {
+        continue;
+      }
+
+      if (sourceFile.cueSheetFileId) {
+        const cueSheetSourceFile = sourceFileMap.get(sourceFile.cueSheetFileId);
+        if (cueSheetSourceFile) {
+          this._files.unshift({
+            id: generateFileId(),
+            dependsOn: null,
+            groups: [],
+            status: state,
+            file: null,
+            filename: cueSheetSourceFile.filename,
+            fileSize: cueSheetSourceFile.fileSize,
+            fileType: 'cueSheet',
+            createdAt: cueSheetSourceFile.createdAt,
+            uploadBeginAt: cueSheetSourceFile.createdAt,
+            uploadEndAt: cueSheetSourceFile.uploadedAt,
+            uploadInfo: {
+              sourceFileId: cueSheetSourceFile.id,
+              sourceId: cueSheetSourceFile.sourceId,
+              url: {
+                url: null,
+                size: cueSheetSourceFile.fileSize,
+                parts: [],
+              },
+            },
+            uploadedSize: null,
+            createSourcePromise: null,
+            attachTarget: null,
+          });
+        }
+      }
+
+      this._files.unshift({
+        id: generateFileId(),
+        dependsOn: null,
+        groups: [],
+        status: state,
+        file: null,
+        filename: sourceFile.filename,
+        fileSize: sourceFile.fileSize,
+        fileType,
+        createdAt: sourceFile.createdAt,
+        uploadBeginAt: sourceFile.createdAt,
+        uploadEndAt: sourceFile.uploadedAt,
+        uploadInfo: {
+          sourceFileId: sourceFile.id,
+          sourceId: sourceFile.sourceId,
+          url: {
+            url: null,
+            size: sourceFile.fileSize,
+            parts: [],
+          },
+        },
+        uploadedSize: null,
+        createSourcePromise: null,
+        attachTarget: null,
+      });
+
       changed = true;
     }
 
@@ -563,6 +676,11 @@ export class UploadManager extends EventTarget {
     while (true) {
       let changed = false;
       for (const file of this._files) {
+        // DBから取得したものについては一切処理しない（ここで切らなくても処理されることはないはずだが一応）
+        if (!file.file) {
+          continue;
+        }
+
         const dependency = file.dependsOn ? fileMap.get(file.dependsOn)! : null;
         const groups = file.groups.map((fileId) => fileMap.get(fileId)!);
 
@@ -809,7 +927,7 @@ export class UploadManager extends EventTarget {
 
                 const eTags = await this._upload(
                   uploadURL,
-                  file.file,
+                  file.file!,
                   (size: number) => {
                     file.uploadedSize = size;
                     this._dispatchUpdatedEvent();
@@ -862,8 +980,8 @@ export class UploadManager extends EventTarget {
     super();
 
     const sync = () => {
-      this._sync(syncDB).finally(() => {
-        setTimeout(sync, UPLOAD_MANAGER_DB_SYNC_INTERVAL);
+      this._sync(syncDB).finally((): void => {
+        setTimeout(sync, UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL);
       });
     };
     sync();
@@ -885,7 +1003,8 @@ export class UploadManager extends EventTarget {
 
   get ongoingUploadExists(): boolean {
     return this._files.some(
-      (file) => file.status === 'uploading' || file.status === 'uploaded'
+      (file) =>
+        file.file && (file.status === 'uploading' || file.status === 'uploaded')
     );
   }
 

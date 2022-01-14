@@ -48,12 +48,13 @@ function getDeletionIds(
 async function syncDB(
   {
     dbLastUpdate$$q,
+    dbNextSince$$q,
     dbUpdating$$q,
     dbUser$$q,
   }: ReturnType<typeof useLocalStorageDB>,
   reconstruct = false
 ): Promise<void> {
-  let since: number | undefined = reconstruct ? 0 : dbLastUpdate$$q.value;
+  let since: number | undefined = reconstruct ? 0 : dbNextSince$$q.value;
   dbUpdating$$q.value = true;
 
   if (!since || !isFinite(since) || since <= 0) {
@@ -62,6 +63,8 @@ async function syncDB(
   }
 
   try {
+    dbLastUpdate$$q.value = Date.now();
+
     const r = await api.my.resources.$get({
       query: {
         since,
@@ -100,7 +103,7 @@ async function syncDB(
         ],
         async (): Promise<void> => {
           if (reconstruct) {
-            dbLastUpdate$$q.value = undefined;
+            dbNextSince$$q.value = undefined;
             await Promise.all([
               clearAndAdd(db.albumCoArtists, r.albumCoArtists),
               clearAndAdd(db.albums, r.albums),
@@ -140,7 +143,7 @@ async function syncDB(
       }
     }
 
-    dbLastUpdate$$q.value = r.timestamp;
+    dbNextSince$$q.value = r.timestamp;
   } finally {
     dbUpdating$$q.value = undefined;
   }
