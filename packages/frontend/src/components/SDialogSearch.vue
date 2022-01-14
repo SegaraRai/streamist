@@ -211,7 +211,7 @@ export default defineComponent({
             <div class="text-4xl">
               <i-mdi-inbox />
             </div>
-            <div class="opacity-60">Nothing found</div>
+            <div class="opacity-60">{{ t('search.NoResultsFound') }}</div>
           </div>
         </template>
       </n-scrollbar>

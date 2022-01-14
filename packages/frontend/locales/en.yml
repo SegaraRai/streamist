@@ -75,11 +75,15 @@ title:
   Playing:
     track: "{0} by {1} {'|'} Streamist"
     no_track: 'Streamist'
+search:
+  NoResultsFound: No results found
 imageManager:
   title:
     album: "Album artwork of '{0}'"
     artist: "Artist artwork of '{0}'"
     playlist: "Playlist artwork of '{0}'"
+uploader:
+  limitReached: "You have reached the upload limit for tracks.\nYou need to upgrade your plan or delete existing tracks to upload new tracks."
 dropdown:
   album:
     Play: Play

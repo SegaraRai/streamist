@@ -5,6 +5,7 @@ import { useUploadStore } from '~/stores/upload';
 
 export default defineComponent({
   setup() {
+    const { t } = useI18n();
     const uploadStore = useUploadStore();
     const { dbUser$$q } = useLocalStorageDB();
 
@@ -24,6 +25,7 @@ export default defineComponent({
     const canUpload$$q = eagerComputed(() => !dbUser$$q.value?.maxTrackId);
 
     return {
+      t,
       inputFileElement$$q: inputFileElement,
       uploadStore$$q: uploadStore,
       canUpload$$q,
@@ -82,9 +84,8 @@ export default defineComponent({
       </div>
     </template>
     <template v-else>
-      <v-alert type="error" class="select-text">
-        You have reached your upload limit and cannot upload any more.<br />
-        You will need to upgrade your plan or delete tracks to continue.
+      <v-alert type="error" class="select-text whitespace-pre-line">
+        {{ t('uploader.limitReached') }}
       </v-alert>
     </template>
   </div>
