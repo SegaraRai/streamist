@@ -37,7 +37,9 @@ export default defineComponent({
       showVisitArtist$$q: ref(true),
       showPlayback$$q: ref(false),
       showDelete$$q: ref(false),
-      play$$q: () => {},
+      play$$q: () => {
+        // do nothing (as this is not shown in the menu)
+      },
       openEditTrackDialog$$q: (track: ResourceTrack) => {
         lastSelectedTrack$$q.value = track;
         dialog$$q.value = true;

@@ -46,6 +46,10 @@ export function createTrackDropdown({
   const allPlaylist = useAllPlaylists();
   const { isTrackAvailable$$q } = useTrackFilter();
 
+  const delayedCloseMenu = (): void => {
+    setTimeout((): void => closeMenu$$q(), 0);
+  };
+
   return computed(() => {
     if (!selectedTrack$$q.value) {
       return [];
@@ -91,7 +95,7 @@ export function createTrackDropdown({
               return;
             }
 
-            closeMenu$$q();
+            delayedCloseMenu();
             play$$q(track);
           },
         },
@@ -109,7 +113,7 @@ export function createTrackDropdown({
               return;
             }
 
-            closeMenu$$q();
+            delayedCloseMenu();
             playbackStore.appendTracksToPlayNextQueue$$q([track]);
             message.success(t('message.AddedToPlayNextQueue', [track.title]));
           },
@@ -134,7 +138,7 @@ export function createTrackDropdown({
         icon: nCreateDropdownIcon('mdi-album'),
         props: {
           onClick: () => {
-            closeMenu$$q();
+            delayedCloseMenu();
             router.push(`/albums/${track.albumId}`);
             onNavigate$$q?.();
           },
@@ -150,7 +154,7 @@ export function createTrackDropdown({
         icon: nCreateDropdownIcon('mdi-account-music'),
         props: {
           onClick: () => {
-            closeMenu$$q();
+            delayedCloseMenu();
             router.push(`/artists/${track.artistId}`);
             onNavigate$$q?.();
           },
@@ -178,7 +182,7 @@ export function createTrackDropdown({
           label: t('dropdown.trackList.AddToNewPlaylist'),
           props: {
             onClick: () => {
-              closeMenu$$q();
+              delayedCloseMenu();
 
               api.my.playlists
                 .$post({
@@ -219,7 +223,7 @@ export function createTrackDropdown({
                   return;
                 }
 
-                closeMenu$$q();
+                delayedCloseMenu();
 
                 api.my.playlists
                   ._playlistId(playlist.id)
@@ -262,6 +266,7 @@ export function createTrackDropdown({
         props: {
           style: nCreateDropdownTextColorStyle('warning'),
           onClick: () => {
+            delayedCloseMenu();
             dialog.warning({
               title: t('dialog.removeFromPlaylist.title'),
               content: t('dialog.removeFromPlaylist.content', [
@@ -295,7 +300,6 @@ export function createTrackDropdown({
                   });
               },
             });
-            closeMenu$$q();
           },
         },
       });
@@ -316,8 +320,8 @@ export function createTrackDropdown({
           icon: nCreateDropdownIcon('mdi-pencil'),
           props: {
             onClick: () => {
+              delayedCloseMenu();
               openEditTrackDialog$$q(track);
-              closeMenu$$q();
             },
           },
         });
@@ -332,6 +336,7 @@ export function createTrackDropdown({
           props: {
             style: nCreateDropdownTextColorStyle('error'),
             onClick: () => {
+              delayedCloseMenu();
               dialog.error({
                 icon: nCreateDropdownIcon('mdi-alert-circle', {
                   style: 'font-size: inherit',
@@ -363,7 +368,6 @@ export function createTrackDropdown({
                     });
                 },
               });
-              closeMenu$$q();
             },
           },
         });

@@ -27,6 +27,10 @@ export function createAlbumDropdown({
   const playbackStore = usePlaybackStore();
   const { isTrackAvailable$$q } = useTrackFilter();
 
+  const delayedCloseMenu = (): void => {
+    setTimeout((): void => closeMenu$$q(), 0);
+  };
+
   return computed((): MenuOption[] => {
     if (!album$$q.value) {
       return [];
@@ -48,7 +52,7 @@ export function createAlbumDropdown({
       disabled: !availableAlbumTracks?.length,
       props: {
         onClick: (): void => {
-          closeMenu$$q();
+          delayedCloseMenu();
           if (!albumTracks?.length || !availableAlbumTracks?.length) {
             return;
           }
@@ -69,7 +73,7 @@ export function createAlbumDropdown({
       disabled: !availableAlbumTracks?.length,
       props: {
         onClick: (): void => {
-          closeMenu$$q();
+          delayedCloseMenu();
           if (!albumTracks?.length || !availableAlbumTracks?.length) {
             return;
           }
@@ -96,8 +100,8 @@ export function createAlbumDropdown({
           icon: nCreateDropdownIcon('mdi-pencil'),
           props: {
             onClick: (): void => {
+              delayedCloseMenu();
               openEditAlbumDialog$$q();
-              closeMenu$$q();
             },
           },
         });
@@ -112,8 +116,8 @@ export function createAlbumDropdown({
           props: {
             style: nCreateDropdownTextColorStyle('warning'),
             onClick: (): void => {
+              delayedCloseMenu();
               openMergeAlbumDialog$$q();
-              closeMenu$$q();
             },
           },
         });

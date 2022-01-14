@@ -18,6 +18,10 @@ export function createArtistDropdown({
 }: ArtistDropdownCreateOptions): ComputedRef<MenuOption[]> {
   const { t } = useI18n();
 
+  const delayedCloseMenu = (): void => {
+    setTimeout((): void => closeMenu$$q(), 0);
+  };
+
   return computed((): MenuOption[] => {
     if (!artist$$q.value) {
       return [];
@@ -33,8 +37,8 @@ export function createArtistDropdown({
         icon: nCreateDropdownIcon('mdi-pencil'),
         props: {
           onClick: (): void => {
+            delayedCloseMenu();
             openEditArtistDialog$$q();
-            closeMenu$$q();
           },
         },
       });
@@ -49,8 +53,8 @@ export function createArtistDropdown({
         props: {
           style: nCreateDropdownTextColorStyle('warning'),
           onClick: (): void => {
+            delayedCloseMenu();
             openMergeArtistDialog$$q();
-            closeMenu$$q();
           },
         },
       });

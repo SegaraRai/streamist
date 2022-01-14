@@ -35,6 +35,10 @@ export function createPlaylistDropdown({
   const playbackStore = usePlaybackStore();
   const { isTrackAvailable$$q } = useTrackFilter();
 
+  const delayedCloseMenu = (): void => {
+    setTimeout((): void => closeMenu$$q(), 0);
+  };
+
   return computed((): MenuOption[] => {
     if (!playlist$$q.value) {
       return [];
@@ -57,7 +61,7 @@ export function createPlaylistDropdown({
       disabled: !availablePlaylistTracks?.length,
       props: {
         onClick: (): void => {
-          closeMenu$$q();
+          delayedCloseMenu();
           if (!availablePlaylistTracks?.length || !playlistTracks?.length) {
             return;
           }
@@ -78,7 +82,7 @@ export function createPlaylistDropdown({
       disabled: !availablePlaylistTracks?.length,
       props: {
         onClick: (): void => {
-          closeMenu$$q();
+          delayedCloseMenu();
           if (!availablePlaylistTracks?.length || !playlistTracks?.length) {
             return;
           }
@@ -104,8 +108,8 @@ export function createPlaylistDropdown({
         icon: nCreateDropdownIcon('mdi-pencil'),
         props: {
           onClick: (): void => {
+            delayedCloseMenu();
             openEditPlaylistDialog$$q();
-            closeMenu$$q();
           },
         },
       });
@@ -119,6 +123,7 @@ export function createPlaylistDropdown({
       props: {
         style: nCreateDropdownTextColorStyle('error'),
         onClick: (): void => {
+          delayedCloseMenu();
           dialog.error({
             title: t('dialog.deletePlaylist.title'),
             content: nCreateDialogContentWithWarning(
@@ -148,7 +153,6 @@ export function createPlaylistDropdown({
                 });
             },
           });
-          closeMenu$$q();
         },
       },
     });
@@ -167,8 +171,8 @@ export function createPlaylistDropdown({
         icon: nCreateDropdownIcon('mdi-plus'),
         props: {
           onClick: (): void => {
+            delayedCloseMenu();
             openCreatePlaylistDialog$$q();
-            closeMenu$$q();
           },
         },
       });
