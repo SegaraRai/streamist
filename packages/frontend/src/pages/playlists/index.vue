@@ -33,9 +33,12 @@ export default defineComponent({
     const allPlaylists = useAllPlaylists();
     const allTrackMap = useAllTrackMap();
 
-    const items = asyncComputed(async () => {
-      const playlists = await allPlaylists.valueAsync.value;
-      const trackMap = await allTrackMap.valueAsync.value;
+    const items = computed(() => {
+      const playlists = allPlaylists.value.value;
+      const trackMap = allTrackMap.value.value;
+      if (!playlists || !trackMap) {
+        return [];
+      }
 
       // NOTE: setDefaultSetList is intentionally not called because users will not want this behavior
 
@@ -59,7 +62,7 @@ export default defineComponent({
           isLast$$q: index === arr.length - 1,
         };
       });
-    }, []);
+    });
 
     const selectedPlaylist$$q = ref<ResourcePlaylist | undefined>();
     const dropdown$$q = ref<DropdownPlaylistInput | undefined>();

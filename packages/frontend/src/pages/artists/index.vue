@@ -42,11 +42,14 @@ export default defineComponent({
       playbackStore.clearDefaultSetList$$q();
     });
 
-    const items = asyncComputed(async () => {
-      const albums = await allAlbums.valueAsync.value;
-      const artists = await allArtists.valueAsync.value;
-      const tracks = await allTracks.valueAsync.value;
-      const imageMap = await allImageMap.valueAsync.value;
+    const items = computed(() => {
+      const albums = allAlbums.value.value;
+      const artists = allArtists.value.value;
+      const tracks = allTracks.value.value;
+      const imageMap = allImageMap.value.value;
+      if (!albums || !artists || !tracks || !imageMap) {
+        return [];
+      }
 
       const albumMultiMapByArtist: ReadonlyMap<string, ResourceAlbum[]> =
         createMultiMap(albums, 'artistId');
@@ -73,7 +76,7 @@ export default defineComponent({
       }
 
       return gridItems;
-    }, []);
+    });
 
     const dropdown$$q = ref<DropdownArtistInput | undefined>();
 
