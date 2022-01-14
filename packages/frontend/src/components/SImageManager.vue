@@ -253,8 +253,8 @@ export default defineComponent({
   <input
     ref="inputFileElement$$q"
     type="file"
-    multiple
     class="hidden"
+    :multiple="!disableDialog"
     :accept="accept$$q"
     @change="onFileSelected$$q"
   />
