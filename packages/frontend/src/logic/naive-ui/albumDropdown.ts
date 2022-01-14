@@ -10,8 +10,8 @@ export interface AlbumDropdownCreateOptions {
   readonly albumTracks$$q: Readonly<
     Ref<readonly ResourceTrack[] | null | undefined>
   >;
-  readonly openEditAlbumDialog$$q: () => void;
-  readonly openMergeAlbumDialog$$q: () => void;
+  readonly openEditAlbumDialog$$q?: () => void;
+  readonly openMergeAlbumDialog$$q?: () => void;
   readonly closeMenu$$q: () => void;
 }
 
@@ -81,38 +81,44 @@ export function createAlbumDropdown({
       },
     });
 
-    // --- divider ---
-    menuItems.push({
-      key: 'div1',
-      type: 'divider',
-    });
+    if (openEditAlbumDialog$$q || openMergeAlbumDialog$$q) {
+      // --- divider ---
+      menuItems.push({
+        key: 'div1',
+        type: 'divider',
+      });
 
-    // Edit
-    menuItems.push({
-      key: 'edit',
-      label: t('dropdown.album.Edit'),
-      icon: nCreateDropdownIcon('mdi-pencil'),
-      props: {
-        onClick: (): void => {
-          openEditAlbumDialog$$q();
-          closeMenu$$q();
-        },
-      },
-    });
+      // Edit
+      if (openEditAlbumDialog$$q) {
+        menuItems.push({
+          key: 'edit',
+          label: t('dropdown.album.Edit'),
+          icon: nCreateDropdownIcon('mdi-pencil'),
+          props: {
+            onClick: (): void => {
+              openEditAlbumDialog$$q();
+              closeMenu$$q();
+            },
+          },
+        });
+      }
 
-    // Merge
-    menuItems.push({
-      key: 'merge',
-      label: t('dropdown.album.Merge'),
-      icon: nCreateDropdownIcon('mdi-merge'),
-      props: {
-        style: nCreateDropdownTextColorStyle('warning'),
-        onClick: (): void => {
-          openMergeAlbumDialog$$q();
-          closeMenu$$q();
-        },
-      },
-    });
+      // Merge
+      if (openMergeAlbumDialog$$q) {
+        menuItems.push({
+          key: 'merge',
+          label: t('dropdown.album.Merge'),
+          icon: nCreateDropdownIcon('mdi-merge'),
+          props: {
+            style: nCreateDropdownTextColorStyle('warning'),
+            onClick: (): void => {
+              openMergeAlbumDialog$$q();
+              closeMenu$$q();
+            },
+          },
+        });
+      }
+    }
 
     return menuItems;
   });

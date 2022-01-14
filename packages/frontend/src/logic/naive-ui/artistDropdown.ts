@@ -5,8 +5,8 @@ import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
 
 export interface ArtistDropdownCreateOptions {
   readonly artist$$q: Readonly<Ref<ResourceArtist | null | undefined>>;
-  readonly openEditArtistDialog$$q: () => void;
-  readonly openMergeArtistDialog$$q: () => void;
+  readonly openEditArtistDialog$$q?: () => void;
+  readonly openMergeArtistDialog$$q?: () => void;
   readonly closeMenu$$q: () => void;
 }
 
@@ -26,31 +26,35 @@ export function createArtistDropdown({
     const menuItems: MenuOption[] = [];
 
     // Edit
-    menuItems.push({
-      key: 'edit',
-      label: t('dropdown.artist.Edit'),
-      icon: nCreateDropdownIcon('mdi-pencil'),
-      props: {
-        onClick: (): void => {
-          openEditArtistDialog$$q();
-          closeMenu$$q();
+    if (openEditArtistDialog$$q) {
+      menuItems.push({
+        key: 'edit',
+        label: t('dropdown.artist.Edit'),
+        icon: nCreateDropdownIcon('mdi-pencil'),
+        props: {
+          onClick: (): void => {
+            openEditArtistDialog$$q();
+            closeMenu$$q();
+          },
         },
-      },
-    });
+      });
+    }
 
     // Merge
-    menuItems.push({
-      key: 'merge',
-      label: t('dropdown.artist.Merge'),
-      icon: nCreateDropdownIcon('mdi-merge'),
-      props: {
-        style: nCreateDropdownTextColorStyle('warning'),
-        onClick: (): void => {
-          openMergeArtistDialog$$q();
-          closeMenu$$q();
+    if (openMergeArtistDialog$$q) {
+      menuItems.push({
+        key: 'merge',
+        label: t('dropdown.artist.Merge'),
+        icon: nCreateDropdownIcon('mdi-merge'),
+        props: {
+          style: nCreateDropdownTextColorStyle('warning'),
+          onClick: (): void => {
+            openMergeArtistDialog$$q();
+            closeMenu$$q();
+          },
         },
-      },
-    });
+      });
+    }
 
     return menuItems;
   });

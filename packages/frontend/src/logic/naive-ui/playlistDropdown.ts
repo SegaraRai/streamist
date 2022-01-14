@@ -15,8 +15,8 @@ export interface PlaylistDropdownCreateOptions {
     Ref<readonly ResourceTrack[] | null | undefined>
   >;
   readonly showCreatePlaylist$$q: Readonly<Ref<boolean>>;
-  readonly openEditPlaylistDialog$$q: () => void;
-  readonly openCreatePlaylistDialog$$q: () => void;
+  readonly openEditPlaylistDialog$$q?: () => void;
+  readonly openCreatePlaylistDialog$$q?: () => void;
   readonly closeMenu$$q: () => void;
 }
 
@@ -97,17 +97,19 @@ export function createPlaylistDropdown({
     });
 
     // Edit
-    menuItems.push({
-      key: 'edit',
-      label: t('dropdown.playlist.Edit'),
-      icon: nCreateDropdownIcon('mdi-pencil'),
-      props: {
-        onClick: (): void => {
-          openEditPlaylistDialog$$q();
-          closeMenu$$q();
+    if (openEditPlaylistDialog$$q) {
+      menuItems.push({
+        key: 'edit',
+        label: t('dropdown.playlist.Edit'),
+        icon: nCreateDropdownIcon('mdi-pencil'),
+        props: {
+          onClick: (): void => {
+            openEditPlaylistDialog$$q();
+            closeMenu$$q();
+          },
         },
-      },
-    });
+      });
+    }
 
     // Delete
     menuItems.push({
@@ -151,7 +153,7 @@ export function createPlaylistDropdown({
       },
     });
 
-    if (showCreatePlaylist$$q.value) {
+    if (openCreatePlaylistDialog$$q && showCreatePlaylist$$q.value) {
       // --- divider ---
       menuItems.push({
         key: 'div2',

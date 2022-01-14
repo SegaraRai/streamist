@@ -19,7 +19,8 @@ export interface TrackDropdownCreateOptions {
   readonly showPlayback$$q: Readonly<Ref<boolean>>;
   readonly showDelete$$q: Readonly<Ref<boolean>>;
   readonly play$$q: (track: ResourceTrack) => void;
-  readonly openEditTrackDialog$$q: (track: ResourceTrack) => void;
+  readonly openEditTrackDialog$$q?: (track: ResourceTrack) => void;
+  readonly onNavigate$$q?: () => void;
   readonly closeMenu$$q: () => void;
 }
 
@@ -33,6 +34,7 @@ export function createTrackDropdown({
   showDelete$$q,
   play$$q,
   openEditTrackDialog$$q,
+  onNavigate$$q,
   closeMenu$$q,
 }: TrackDropdownCreateOptions): ComputedRef<MenuOption[]> {
   const router = useRouter();
@@ -134,6 +136,7 @@ export function createTrackDropdown({
           onClick: () => {
             closeMenu$$q();
             router.push(`/albums/${track.albumId}`);
+            onNavigate$$q?.();
           },
         },
       });
@@ -149,6 +152,7 @@ export function createTrackDropdown({
           onClick: () => {
             closeMenu$$q();
             router.push(`/artists/${track.artistId}`);
+            onNavigate$$q?.();
           },
         },
       });
@@ -297,69 +301,73 @@ export function createTrackDropdown({
       });
     }
 
-    // --- divider ---
-    menuItems.push({
-      key: 'div3',
-      type: 'divider',
-    });
-
-    // Edit
-    menuItems.push({
-      key: 'edit',
-      label: t('dropdown.trackList.Edit'),
-      icon: nCreateDropdownIcon('mdi-pencil'),
-      props: {
-        onClick: () => {
-          openEditTrackDialog$$q(track);
-          closeMenu$$q();
-        },
-      },
-    });
-
-    if (showDelete$$q.value) {
-      // Delete
+    if (openEditTrackDialog$$q || showDelete$$q.value) {
+      // --- divider ---
       menuItems.push({
-        key: 'delete',
-        label: t('dropdown.trackList.Delete'),
-        icon: nCreateDropdownIcon('mdi-delete'),
-        props: {
-          style: nCreateDropdownTextColorStyle('error'),
-          onClick: () => {
-            dialog.error({
-              icon: nCreateDropdownIcon('mdi-alert-circle', {
-                style: 'font-size: inherit',
-              }),
-              title: t('dialog.deleteTrack.title'),
-              content: nCreateDialogContentWithWarning(
-                () => t('dialog.deleteTrack.content', [track.title]),
-                () => t('common.ThisActionCannotBeUndone')
-              ),
-              positiveText: t('dialog.deleteTrack.button.Delete'),
-              negativeText: t('dialog.deleteTrack.button.Cancel'),
-              onPositiveClick: () => {
-                api.my.tracks
-                  ._trackId(trackId)
-                  .$delete()
-                  .then(() => {
-                    setRedirect(`/albums/${track.albumId}`, '/albums');
-                    setRedirect(`/artists/${track.artistId}`, '/artists');
-                    message.success(t('message.DeletedTrack', [track.title]));
-                    syncDB();
-                  })
-                  .catch((error) => {
-                    message.error(
-                      t('message.FailedToDeleteTrack', [
-                        track.title,
-                        String(error),
-                      ])
-                    );
-                  });
-              },
-            });
-            closeMenu$$q();
-          },
-        },
+        key: 'div3',
+        type: 'divider',
       });
+
+      // Edit
+      if (openEditTrackDialog$$q) {
+        menuItems.push({
+          key: 'edit',
+          label: t('dropdown.trackList.Edit'),
+          icon: nCreateDropdownIcon('mdi-pencil'),
+          props: {
+            onClick: () => {
+              openEditTrackDialog$$q(track);
+              closeMenu$$q();
+            },
+          },
+        });
+      }
+
+      // Delete
+      if (showDelete$$q.value) {
+        menuItems.push({
+          key: 'delete',
+          label: t('dropdown.trackList.Delete'),
+          icon: nCreateDropdownIcon('mdi-delete'),
+          props: {
+            style: nCreateDropdownTextColorStyle('error'),
+            onClick: () => {
+              dialog.error({
+                icon: nCreateDropdownIcon('mdi-alert-circle', {
+                  style: 'font-size: inherit',
+                }),
+                title: t('dialog.deleteTrack.title'),
+                content: nCreateDialogContentWithWarning(
+                  () => t('dialog.deleteTrack.content', [track.title]),
+                  () => t('common.ThisActionCannotBeUndone')
+                ),
+                positiveText: t('dialog.deleteTrack.button.Delete'),
+                negativeText: t('dialog.deleteTrack.button.Cancel'),
+                onPositiveClick: () => {
+                  api.my.tracks
+                    ._trackId(trackId)
+                    .$delete()
+                    .then(() => {
+                      setRedirect(`/albums/${track.albumId}`, '/albums');
+                      setRedirect(`/artists/${track.artistId}`, '/artists');
+                      message.success(t('message.DeletedTrack', [track.title]));
+                      syncDB();
+                    })
+                    .catch((error) => {
+                      message.error(
+                        t('message.FailedToDeleteTrack', [
+                          track.title,
+                          String(error),
+                        ])
+                      );
+                    });
+                },
+              });
+              closeMenu$$q();
+            },
+          },
+        });
+      }
     }
 
     return menuItems;
