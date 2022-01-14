@@ -146,16 +146,16 @@ export default defineComponent({
             </router-link>
           </div>
           <div
-            class="overflow-hidden flex-grow-1 flex flex-col items-center gap-y-2"
+            class="w-full overflow-hidden flex-grow-1 flex flex-col items-center gap-y-2"
           >
             <router-link
-              class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-lg"
+              class="block max-w-full whitespace-nowrap overflow-hidden overflow-ellipsis text-lg"
               :to="`/albums/${currentTrackInfo$$q.track$$q.albumId}`"
             >
               {{ currentTrackInfo$$q.track$$q.title }}
             </router-link>
             <router-link
-              class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-sm"
+              class="block max-w-full whitespace-nowrap overflow-hidden overflow-ellipsis text-sm"
               :to="`/artists/${currentTrackInfo$$q.track$$q.artistId}`"
             >
               {{ currentTrackInfo$$q.trackArtist$$q.name }}
