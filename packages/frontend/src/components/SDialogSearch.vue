@@ -43,6 +43,12 @@ export default defineComponent({
       allSearchResults$$q.value.slice(0, 30)
     );
 
+    watch(show$$q, (newShow) => {
+      if (!newShow) {
+        searchQuery$$q.value = '';
+      }
+    });
+
     const calcHref$$q = (item: AllItem) => {
       switch (item.t) {
         case 'album':
@@ -184,7 +190,6 @@ export default defineComponent({
       isTrackAvailable$$q,
       onSelect$$q: (item: AllItem) => {
         show$$q.value = false;
-        searchQuery$$q.value = '';
 
         if (item.t === 'track') {
           playTrack(item.i);
