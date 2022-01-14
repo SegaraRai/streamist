@@ -1,7 +1,11 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { SourceFileAttachToType } from '$shared/types/db';
-import { UPLOAD_MANAGER_FILE_SYNC_THROTTLE } from '~/config';
-import { useSyncDB } from '~/db';
+import {
+  UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL,
+  UPLOAD_MANAGER_DB_SYNC_INTERVAL,
+  UPLOAD_MANAGER_FILE_SYNC_THROTTLE,
+} from '~/config';
+import { db, useSyncDB } from '~/db';
 import { FileId, UploadFile, UploadManager } from '~/logic/uploadManager';
 import {
   ResolvedFileId,
@@ -9,6 +13,7 @@ import {
   removeUploadFile,
   resolveUploadFiles,
 } from '~/logic/uploadResolver';
+import { useLiveQuery } from '~/logic/useLiveQuery';
 
 export const useUploadStore = defineStore('upload', () => {
   const syncDB = useSyncDB();
@@ -16,12 +21,36 @@ export const useUploadStore = defineStore('upload', () => {
   const stagedFiles = ref<ResolvedUploadFile[]>([]);
   const files = ref<readonly UploadFile[]>([]);
 
-  const manager = new UploadManager(syncDB);
+  const manager = new UploadManager();
+
+  const { value } = useLiveQuery(() => db.sourceFiles.toArray());
+  watch(value, (newSourceFiles) => {
+    if (!newSourceFiles) {
+      return;
+    }
+
+    manager.sync(newSourceFiles);
+  });
+
+  const updateDB = (): void => {
+    const lastUpdate = parseInt(
+      localStorage.getItem('db.lastUpdate') || '0',
+      10
+    );
+    const updatePromise =
+      manager.needsDBSync() &&
+      Date.now() - lastUpdate >= UPLOAD_MANAGER_DB_SYNC_INTERVAL
+        ? syncDB()
+        : Promise.resolve();
+    updatePromise.finally((): void => {
+      setTimeout(updateDB, UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL);
+    });
+  };
+  setTimeout(updateDB, UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL);
+
   const syncFiles = (): void => {
     files.value = manager.files.map((file) => ({ ...file }));
   };
-  syncFiles();
-
   const throttledSyncFiles = useThrottleFn(
     syncFiles,
     UPLOAD_MANAGER_FILE_SYNC_THROTTLE
@@ -30,12 +59,18 @@ export const useUploadStore = defineStore('upload', () => {
     throttledSyncFiles();
   });
 
+  manager.addEventListener('dbUpdate', (): void => {
+    syncDB();
+  });
+
   window.addEventListener('beforeunload', (event: BeforeUnloadEvent): void => {
     if (manager.ongoingUploadExists || manager.queuedUploadExists) {
       event.preventDefault();
       event.returnValue = '';
     }
   });
+
+  syncFiles();
 
   return {
     stagedFiles,

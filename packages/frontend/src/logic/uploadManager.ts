@@ -27,10 +27,6 @@ import type {
 } from '$/types';
 import type { CreateSourceResponseFile } from '$/types/createSource';
 import type { VSourceCreateBodyWrapper } from '$/validators';
-import {
-  UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL,
-  UPLOAD_MANAGER_DB_SYNC_INTERVAL,
-} from '~/config';
 import { db } from '~/db';
 import api from '~/logic/api';
 import type {
@@ -420,8 +416,12 @@ export class UploadManager extends EventTarget {
     concurrency: 4,
   });
 
-  private _dispatchUpdatedEvent(): void {
+  private _dispatchUpdateEvent(): void {
     this.dispatchEvent(new CustomEvent('update', { detail: this._files }));
+  }
+
+  private _dispatchDBUpdateEvent(): void {
+    this.dispatchEvent(new CustomEvent('dbUpdate'));
   }
 
   private _checkFile(plan: Plan, file: UploadFile): void {
@@ -451,23 +451,18 @@ export class UploadManager extends EventTarget {
 
     checkPromise.then((isValid) => {
       file.status = isValid ? 'validated' : 'error_invalid';
-      this._dispatchUpdatedEvent();
+      this._dispatchUpdateEvent();
       this._tick();
     });
   }
 
-  private async _sync(
-    syncDB: (reconstruct?: boolean) => Promise<void>
-  ): Promise<void> {
-    const lastUpdate = parseInt(
-      localStorage.getItem('db.lastUpdate') || '0',
-      10
-    );
-    if (Date.now() - lastUpdate >= UPLOAD_MANAGER_DB_SYNC_INTERVAL) {
-      await syncDB();
-    }
+  needsDBSync(): boolean {
+    // NOTE: アップロードについてはこのセッションが持つファイルについてのみ考慮する（他のセッションのファイルについてはそれらに更新を任せる）
+    // トランスコードについてはセッションを離れる可能性を考えてこのセッション以外のファイルについても考慮する
+    return this._files.some((file) => file.status === 'transcoding');
+  }
 
-    const sourceFiles = await db.sourceFiles.toArray();
+  sync(sourceFiles: readonly ResourceSourceFile[]): void {
     const sourceFileMap = new Map<string, ResourceSourceFile>(
       sourceFiles.map((sourceFile) => [sourceFile.id, sourceFile])
     );
@@ -478,16 +473,19 @@ export class UploadManager extends EventTarget {
       if (!sourceFileId) {
         continue;
       }
+
       const sourceFile = sourceFileMap.get(sourceFileId);
       if (!sourceFile) {
         // should not occur
         console.error(
-          'logic error: sourceFile does not exist on database @_sync'
+          'logic error: sourceFile does not exist on database @_sync',
+          sourceFileId
         );
         continue;
       }
 
       let newStatus: UploadStatus | undefined;
+
       switch (sourceFile.state as SourceFileState) {
         case 'transcoded':
           newStatus = 'transcoded';
@@ -608,7 +606,7 @@ export class UploadManager extends EventTarget {
     }
 
     if (changed) {
-      this._dispatchUpdatedEvent();
+      this._dispatchUpdateEvent();
       this._tick();
     }
   }
@@ -764,7 +762,7 @@ export class UploadManager extends EventTarget {
 
                 file.status = 'uploading';
                 file.uploadBeginAt = Date.now();
-                this._dispatchUpdatedEvent();
+                this._dispatchUpdateEvent();
 
                 let requestFileType:
                   | CreateSourceResponseFile['requestFile']['type']
@@ -906,6 +904,8 @@ export class UploadManager extends EventTarget {
 
                 const createSourceResponse = await createSourcePromise;
 
+                this._dispatchDBUpdateEvent();
+
                 const responseFile = createSourceResponse.files.find(
                   (resFile) => resFile.requestFile.type === requestFileType
                 );
@@ -930,13 +930,13 @@ export class UploadManager extends EventTarget {
                   file.file!,
                   (size: number) => {
                     file.uploadedSize = size;
-                    this._dispatchUpdatedEvent();
+                    this._dispatchUpdateEvent();
                   }
                 );
 
                 file.status = 'uploaded';
                 file.uploadEndAt = Date.now();
-                this._dispatchUpdatedEvent();
+                this._dispatchUpdateEvent();
 
                 await api.my.sources
                   ._sourceId(sourceId)
@@ -949,14 +949,15 @@ export class UploadManager extends EventTarget {
                   });
 
                 file.status = 'transcoding';
-                this._dispatchUpdatedEvent();
+                this._dispatchUpdateEvent();
+                this._dispatchDBUpdateEvent();
               } catch (error: unknown) {
                 console.error('failed to upload', file, error);
                 file.status =
                   error instanceof UploadError
                     ? error.newStatus
                     : 'error_upload_failed';
-                this._dispatchUpdatedEvent();
+                this._dispatchUpdateEvent();
               }
             });
 
@@ -972,19 +973,8 @@ export class UploadManager extends EventTarget {
     }
 
     if (outerChanged) {
-      this._dispatchUpdatedEvent();
+      this._dispatchUpdateEvent();
     }
-  }
-
-  constructor(syncDB: (reconstruct?: boolean) => Promise<void>) {
-    super();
-
-    const sync = () => {
-      this._sync(syncDB).finally((): void => {
-        setTimeout(sync, UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL);
-      });
-    };
-    sync();
   }
 
   get files(): readonly UploadFile[] {
@@ -1011,7 +1001,7 @@ export class UploadManager extends EventTarget {
   addAudioFile(audioFile: File): FileId {
     const uploadFile = createAudioUploadFile(audioFile);
     this._files.unshift(uploadFile);
-    this._dispatchUpdatedEvent();
+    this._dispatchUpdateEvent();
     this._tick();
     return uploadFile.id;
   }
@@ -1023,7 +1013,7 @@ export class UploadManager extends EventTarget {
     const [audioUploadFile, cueSheetUploadFile] =
       createAudioWithCueSheetUploadFile(audioFile, cueSheetFile);
     this._files.unshift(audioUploadFile, cueSheetUploadFile);
-    this._dispatchUpdatedEvent();
+    this._dispatchUpdateEvent();
     this._tick();
     return [audioUploadFile.id, cueSheetUploadFile.id];
   }
@@ -1034,7 +1024,7 @@ export class UploadManager extends EventTarget {
     }
     const uploadFile = createImageUploadFile(imageFile, dependsOn);
     this._files.unshift(uploadFile);
-    this._dispatchUpdatedEvent();
+    this._dispatchUpdateEvent();
     this._tick();
     return uploadFile.id;
   }
@@ -1052,7 +1042,7 @@ export class UploadManager extends EventTarget {
       attachPrepend
     );
     this._files.unshift(uploadFile);
-    this._dispatchUpdatedEvent();
+    this._dispatchUpdateEvent();
     this._tick();
     return uploadFile.id;
   }
@@ -1060,7 +1050,7 @@ export class UploadManager extends EventTarget {
   addUnknownFile(file: File): FileId {
     const uploadFile = createUnknownUploadFile(file);
     this._files.unshift(uploadFile);
-    this._dispatchUpdatedEvent();
+    this._dispatchUpdateEvent();
     this._tick();
     return uploadFile.id;
   }
@@ -1068,7 +1058,7 @@ export class UploadManager extends EventTarget {
   addResolvedFiles(files: readonly ResolvedUploadFile[]): void {
     const uploadFiles = createUploadFilesFromResolvedFiles(files);
     this._files.unshift(...uploadFiles);
-    this._dispatchUpdatedEvent();
+    this._dispatchUpdateEvent();
     this._tick();
   }
 
@@ -1104,7 +1094,7 @@ export class UploadManager extends EventTarget {
     }
 
     uploadFile.status = 'removed';
-    this._dispatchUpdatedEvent();
+    this._dispatchUpdateEvent();
     this._tick();
   }
 }
