@@ -85,6 +85,9 @@ export default defineComponent({
       playing$$q: playbackStore.playing$$q,
       isCurrentPlayingTrack$$q,
       play$$q: (): void => {
+        if (!isAvailable$$q.value) {
+          return;
+        }
         emit('play');
       },
       onContextMenu$$q: (event: MouseEvent): void => {
@@ -180,7 +183,11 @@ export default defineComponent({
         <span
           class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
           :class="
-            isCurrentPlayingTrack$$q ? 'text-st-primary' : 'cursor-pointer'
+            isCurrentPlayingTrack$$q
+              ? 'text-st-primary'
+              : isAvailable$$q
+              ? 'cursor-pointer'
+              : ''
           "
           @click.stop="!isCurrentPlayingTrack$$q && play$$q()"
         >
