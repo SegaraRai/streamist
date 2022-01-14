@@ -12,6 +12,9 @@ export const TOKEN_SHOULD_RENEW_TOLERANCE = -5 * 60;
 
 export const UPLOAD_MANAGER_DB_SYNC_INTERVAL = 20 * 1000;
 
+export const SEARCH_DEBOUNCE_INTERVAL = 200;
+export const SEARCH_DEBOUNCE_MAX_WAIT = 2000;
+
 export const LOSSLESS_AUDIO_FILE_EXTENSION_SET: ReadonlySet<string> =
   /* @__PURE__ */ new Set([
     '.aiff',

@@ -1,6 +1,6 @@
 <script lang="ts">
+import { MIN_QUEUE_SIZE } from '$shared/config/queue';
 import type { ResourceTrack } from '$/types';
-import { minQueueSize } from '~/config/queue';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
@@ -18,7 +18,7 @@ export default defineComponent({
       playbackStore.playNextQueue$$q.value.map(({ id }) => id)
     );
     const queue$$q = eagerComputed(() =>
-      playbackStore.queue$$q.value.slice(0, minQueueSize).map(({ id }) => id)
+      playbackStore.queue$$q.value.slice(0, MIN_QUEUE_SIZE).map(({ id }) => id)
     );
 
     const play$$q = (index: number): void => {

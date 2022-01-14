@@ -1,6 +1,7 @@
 <script lang="ts">
 import { compareTrack } from '$shared/sort';
 import { ResourceTrack } from '$/types';
+import { SEARCH_DEBOUNCE_INTERVAL, SEARCH_DEBOUNCE_MAX_WAIT } from '~/config';
 import { db } from '~/db';
 import type { AllItem } from '~/logic/allItem';
 import { useTrackFilter } from '~/logic/filterTracks';
@@ -29,9 +30,13 @@ export default defineComponent({
 
     const searchQuery$$q = ref('');
 
-    const debouncedSearchQuery$$q = useDebounce(searchQuery$$q, 200, {
-      maxWait: 2000,
-    });
+    const debouncedSearchQuery$$q = useDebounce(
+      searchQuery$$q,
+      SEARCH_DEBOUNCE_INTERVAL,
+      {
+        maxWait: SEARCH_DEBOUNCE_MAX_WAIT,
+      }
+    );
 
     const allSearchResults$$q = useAllSearch()(debouncedSearchQuery$$q);
     const searchResults$$q = computed(() =>

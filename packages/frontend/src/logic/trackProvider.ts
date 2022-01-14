@@ -1,6 +1,6 @@
+import { MAX_HISTORY_SIZE, MIN_QUEUE_SIZE } from '$shared/config/queue';
 import { shuffleArray } from '$shared/shuffle';
 import type { RepeatType } from '$shared/types/playback';
-import { maxHistorySize, minQueueSize } from '~/config/queue';
 
 /*
 ## 用語定義
@@ -111,7 +111,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * リピート用の再生キュー \
    * リピートが有効なときのみ要素を入れる \
    * `_queue$$q`に`_repeatQueue$$q`を結合したものが`_queueCache$$q`になる \
-   * 要素数は`_setList$$q`の要素数の倍数でかつ`minQueueSize`以上になるようにする \
+   * 要素数は`_setList$$q`の要素数の倍数でかつ`MIN_QUEUE_SIZE`以上になるようにする \
    * 各要素は必ず`_setList$$q`の要素の1つ（同一の参照）である \
    * 内部用
    */
@@ -198,7 +198,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
         }
       }
       this._repeatQueue$$q.push(...array);
-    } while (this._repeatQueue$$q.length < minQueueSize);
+    } while (this._repeatQueue$$q.length < MIN_QUEUE_SIZE);
   }
 
   /**
@@ -376,7 +376,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
       // トラックを履歴に追加
       if (this._currentTrack$$q) {
         this._history$$q.push(this._currentTrack$$q);
-        this._history$$q.splice(0, this._history$$q.length - maxHistorySize);
+        this._history$$q.splice(0, this._history$$q.length - MAX_HISTORY_SIZE);
       }
 
       // キューからトラックを1つ取り出す
