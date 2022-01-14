@@ -17,10 +17,13 @@ export default defineComponent({
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
+    const requestInProgress$$q = ref(false);
+
     const itemTitle$$q = ref('');
     const itemNotes$$q = ref('');
 
     const clearData = (): void => {
+      requestInProgress$$q.value = false;
       itemTitle$$q.value = '';
       itemNotes$$q.value = '';
     };
@@ -36,10 +39,17 @@ export default defineComponent({
     return {
       t,
       dialog$$q,
+      requestInProgress$$q,
       itemTitle$$q,
       itemNotes$$q,
       valid$$q,
       apply$$q: () => {
+        if (requestInProgress$$q.value) {
+          return;
+        }
+
+        requestInProgress$$q.value = true;
+
         api.my.playlists
           .$post({
             body: {
@@ -59,6 +69,9 @@ export default defineComponent({
                 String(error),
               ])
             );
+          })
+          .finally(() => {
+            requestInProgress$$q.value = false;
           });
       },
     };
@@ -113,8 +126,22 @@ export default defineComponent({
         <v-btn @click="dialog$$q = false">
           {{ t('dialogComponent.createPlaylist.button.Cancel') }}
         </v-btn>
-        <v-btn color="primary" :disabled="!valid$$q" @click="apply$$q">
-          {{ t('dialogComponent.createPlaylist.button.Create') }}
+        <v-btn
+          class="relative"
+          color="primary"
+          :disabled="requestInProgress$$q || !valid$$q"
+          @click="apply$$q"
+        >
+          <span :class="requestInProgress$$q && 'invisible'">
+            {{ t('dialogComponent.createPlaylist.button.Create') }}
+          </span>
+          <template v-if="requestInProgress$$q">
+            <v-progress-circular
+              class="absolute left-0 top-0 right-0 bottom-0 m-auto"
+              indeterminate
+              size="20"
+            />
+          </template>
         </v-btn>
       </v-card-actions>
     </v-card>

@@ -25,6 +25,8 @@ export default defineComponent({
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
+    const requestInProgress$$q = ref(false);
+
     const albumId$$q = ref('');
     const artistId$$q = ref<string | undefined>();
     const artistName$$q = ref('');
@@ -33,6 +35,7 @@ export default defineComponent({
     const itemDescription$$q = ref('');
 
     const reloadData = (newAlbum: ResourceAlbum): void => {
+      requestInProgress$$q.value = false;
       albumId$$q.value = newAlbum.id;
       artistId$$q.value = newAlbum.artistId;
       artistName$$q.value = '';
@@ -71,6 +74,7 @@ export default defineComponent({
       t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
+      requestInProgress$$q,
       isArtistEmpty$$q,
       artistId$$q,
       artistName$$q,
@@ -85,11 +89,17 @@ export default defineComponent({
         eagerComputed(() => props.album.updatedAt)
       ),
       apply$$q: () => {
+        if (requestInProgress$$q.value) {
+          return;
+        }
+
         const album = props.album;
         const albumId = albumId$$q.value;
         if (album.id !== albumId) {
           return;
         }
+
+        requestInProgress$$q.value = true;
 
         api.my.albums
           ._albumId(albumId)
@@ -117,6 +127,9 @@ export default defineComponent({
             message.error(
               t('message.FailedToModifyAlbum', [album.title, String(error)])
             );
+          })
+          .finally(() => {
+            requestInProgress$$q.value = false;
           });
       },
     };
@@ -214,11 +227,21 @@ export default defineComponent({
           {{ t('dialogComponent.editAlbum.button.Cancel') }}
         </v-btn>
         <v-btn
+          class="relative"
           color="primary"
-          :disabled="isArtistEmpty$$q || !modified$$q"
+          :disabled="requestInProgress$$q || isArtistEmpty$$q || !modified$$q"
           @click="apply$$q"
         >
-          {{ t('dialogComponent.editAlbum.button.OK') }}
+          <span :class="requestInProgress$$q && 'invisible'">
+            {{ t('dialogComponent.editAlbum.button.OK') }}
+          </span>
+          <template v-if="requestInProgress$$q">
+            <v-progress-circular
+              class="absolute left-0 top-0 right-0 bottom-0 m-auto"
+              indeterminate
+              size="20"
+            />
+          </template>
         </v-btn>
       </v-card-actions>
     </v-card>

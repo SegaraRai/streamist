@@ -24,11 +24,14 @@ export default defineComponent({
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
+    const requestInProgress$$q = ref(false);
+
     const albumId$$q = ref('');
     const newAlbumId$$q = ref<string | undefined>();
     const newAlbumTitle$$q = ref<string>('');
 
     const reloadData = (newAlbum: ResourceAlbum): void => {
+      requestInProgress$$q.value = false;
       albumId$$q.value = newAlbum.id;
       newAlbumId$$q.value = newAlbum.id;
       newAlbumTitle$$q.value = '';
@@ -56,10 +59,15 @@ export default defineComponent({
       t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
+      requestInProgress$$q,
       newAlbumId$$q,
       newAlbumTitle$$q,
       modified$$q,
       apply$$q: () => {
+        if (requestInProgress$$q.value) {
+          return;
+        }
+
         const album = props.album;
         const albumId = albumId$$q.value;
         if (album.id !== albumId) {
@@ -70,6 +78,8 @@ export default defineComponent({
         if (!newAlbumId) {
           return;
         }
+
+        requestInProgress$$q.value = true;
 
         api.my.albums
           ._albumId(albumId)
@@ -94,6 +104,9 @@ export default defineComponent({
                 String(error),
               ])
             );
+          })
+          .finally(() => {
+            requestInProgress$$q.value = false;
           });
       },
     };
@@ -151,8 +164,22 @@ export default defineComponent({
         <v-btn @click="dialog$$q = false">
           {{ t('dialogComponent.mergeAlbum.button.Cancel') }}
         </v-btn>
-        <v-btn color="warning" :disabled="!modified$$q" @click="apply$$q">
-          {{ t('dialogComponent.mergeAlbum.button.Merge') }}
+        <v-btn
+          class="relative"
+          color="warning"
+          :disabled="requestInProgress$$q || !modified$$q"
+          @click="apply$$q"
+        >
+          <span :class="requestInProgress$$q && 'invisible'">
+            {{ t('dialogComponent.mergeAlbum.button.Merge') }}
+          </span>
+          <template v-if="requestInProgress$$q">
+            <v-progress-circular
+              class="absolute left-0 top-0 right-0 bottom-0 m-auto"
+              indeterminate
+              size="20"
+            />
+          </template>
         </v-btn>
       </v-card-actions>
     </v-card>

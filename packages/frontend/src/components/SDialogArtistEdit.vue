@@ -25,12 +25,15 @@ export default defineComponent({
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
+    const requestInProgress$$q = ref(false);
+
     const artistId$$q = ref('');
     const itemName$$q = ref('');
     const itemNameSort$$q = ref('');
     const itemDescription$$q = ref('');
 
     const reloadData = (newArtist: ResourceArtist): void => {
+      requestInProgress$$q.value = false;
       artistId$$q.value = newArtist.id;
       itemName$$q.value = newArtist.name;
       itemNameSort$$q.value = newArtist.nameSort || '';
@@ -62,6 +65,7 @@ export default defineComponent({
       t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
+      requestInProgress$$q,
       artistId$$q,
       itemName$$q,
       itemNameSort$$q,
@@ -74,11 +78,17 @@ export default defineComponent({
         eagerComputed(() => props.artist.updatedAt)
       ),
       apply$$q: () => {
+        if (requestInProgress$$q.value) {
+          return;
+        }
+
         const artist = props.artist;
         const artistId = artistId$$q.value;
         if (artist.id !== artistId) {
           return;
         }
+
+        requestInProgress$$q.value = true;
 
         api.my.artists
           ._artistId(artistId)
@@ -101,6 +111,9 @@ export default defineComponent({
             message.error(
               t('message.FailedToModifyArtist', [artist.name, String(error)])
             );
+          })
+          .finally(() => {
+            requestInProgress$$q.value = false;
           });
       },
     };
@@ -191,8 +204,22 @@ export default defineComponent({
         <v-btn @click="dialog$$q = false">
           {{ t('dialogComponent.editArtist.button.Cancel') }}
         </v-btn>
-        <v-btn color="primary" :disabled="!modified$$q" @click="apply$$q">
-          {{ t('dialogComponent.editArtist.button.OK') }}
+        <v-btn
+          class="relative"
+          color="primary"
+          :disabled="requestInProgress$$q || !modified$$q"
+          @click="apply$$q"
+        >
+          <span :class="requestInProgress$$q && 'invisible'">
+            {{ t('dialogComponent.editArtist.button.OK') }}
+          </span>
+          <template v-if="requestInProgress$$q">
+            <v-progress-circular
+              class="absolute left-0 top-0 right-0 bottom-0 m-auto"
+              indeterminate
+              size="20"
+            />
+          </template>
         </v-btn>
       </v-card-actions>
     </v-card>
