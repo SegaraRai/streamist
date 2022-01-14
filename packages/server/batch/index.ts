@@ -8,35 +8,46 @@ import {
 } from './cleanupStaleSourceFiles';
 
 export function initBatch(): void {
-  const rule = new RecurrenceRule();
-  rule.tz = 'Asia/Tokyo';
-  rule.second = 0;
-  rule.minute = 10;
-  rule.hour = 4;
+  {
+    const rule = new RecurrenceRule();
+    rule.tz = 'Asia/Tokyo';
+    rule.second = 0;
+    rule.minute = 10;
 
-  scheduleJob(rule, async (): Promise<void> => {
-    try {
-      await cleanupStaleUploads();
-    } catch (error) {
-      logger.error(error, 'cleanupStaleUploads failed');
-    }
+    scheduleJob(rule, async (): Promise<void> => {
+      try {
+        await cleanupStaleUploads();
+      } catch (error) {
+        logger.error(error, 'cleanupStaleUploads failed');
+      }
 
-    try {
-      await cleanupStaleTranscodes();
-    } catch (error) {
-      logger.error(error, 'cleanupStaleTranscodes failed');
-    }
+      try {
+        await cleanupStaleTranscodes();
+      } catch (error) {
+        logger.error(error, 'cleanupStaleTranscodes failed');
+      }
+    });
+  }
 
-    try {
-      await cleanupOverRetentionSourceFiles();
-    } catch (error) {
-      logger.error(error, 'cleanupOverRetentionSourceFiles failed');
-    }
+  {
+    const rule = new RecurrenceRule();
+    rule.tz = 'Asia/Tokyo';
+    rule.second = 0;
+    rule.minute = 40;
+    rule.hour = 4;
 
-    try {
-      await cleanupClosedAccounts();
-    } catch (error) {
-      logger.error(error, 'cleanupClosedAccounts failed');
-    }
-  });
+    scheduleJob(rule, async (): Promise<void> => {
+      try {
+        await cleanupOverRetentionSourceFiles();
+      } catch (error) {
+        logger.error(error, 'cleanupOverRetentionSourceFiles failed');
+      }
+
+      try {
+        await cleanupClosedAccounts();
+      } catch (error) {
+        logger.error(error, 'cleanupClosedAccounts failed');
+      }
+    });
+  }
 }
