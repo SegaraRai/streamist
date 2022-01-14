@@ -21,6 +21,7 @@ import {
 import type { SourceFile } from '$prisma/client';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { osDeleteSourceFiles } from '$/os/sourceFile';
 import { HTTPError } from '$/utils/httpError';
 import { logger } from './logger';
 import {
@@ -256,7 +257,7 @@ async function onSourceFileUpdated(
     return;
   }
 
-  await client.source.updateMany({
+  const updated = await client.source.updateMany({
     where: {
       id: sourceId,
       userId,
@@ -268,6 +269,10 @@ async function onSourceFileUpdated(
       updatedAt: timestamp,
     },
   });
+  if (!updated.count) {
+    // updated by another process
+    return;
+  }
 
   if (allFilesUploaded) {
     // start transcode
@@ -276,43 +281,41 @@ async function onSourceFileUpdated(
     invokeTranscodeBySourceSync(userId, sourceId);
   } else {
     // delete uploaded files
-    await client.sourceFile.updateMany({
+    const sourceFiles = await client.sourceFile.findMany({
       where: {
         userId,
         sourceId,
-        entityExists: true,
-        state: is<SourceFileState>('uploaded'),
-      },
-      data: {
-        entityExists: false,
-        updatedAt: timestamp,
-      },
-    });
-
-    const uploadedSourceFiles = await client.sourceFile.findMany({
-      where: {
-        userId,
-        sourceId,
-        state: is<SourceFileState>('uploaded'),
       },
       select: {
         id: true,
+        state: true,
+        uploadId: true,
         region: true,
+        sourceId: true,
+        userId: true,
       },
     });
 
-    for (const sourceFile of uploadedSourceFiles) {
-      const os = getSourceFileOS(sourceFile.region as OSRegion);
-      const key = getSourceFileKey(userId, sourceId, sourceFile.id);
-      const s3 = createUserUploadS3Cached(os);
+    for (const sourceFile of sourceFiles) {
+      const { uploadId } = sourceFile;
 
-      await retryS3NoReject(() =>
-        s3.deleteObject({
-          Bucket: os.bucket,
-          Key: key,
-        })
-      );
+      if (uploadId) {
+        const os = getSourceFileOS(sourceFile.region as OSRegion);
+        const key = getSourceFileKey(userId, sourceId, sourceFile.id);
+        const s3 = createUserUploadS3Cached(os);
+
+        // abort multipart upload
+        await retryS3NoReject(() =>
+          s3.abortMultipartUpload({
+            Bucket: os.bucket,
+            Key: key,
+            UploadId: uploadId,
+          })
+        );
+      }
     }
+
+    await osDeleteSourceFiles(sourceFiles);
 
     await dbResourceUpdateTimestamp(userId);
   }
@@ -339,8 +342,6 @@ export async function onSourceFileAborted(
     },
     select: {
       state: true,
-      region: true,
-      uploadId: true,
       source: {
         select: {
           state: true,
@@ -383,30 +384,6 @@ export async function onSourceFileAborted(
   if (!updated.count) {
     // updated by another process
     return;
-  }
-
-  const os = getSourceFileOS(sourceFile.region as OSRegion);
-  const key = getSourceFileKey(userId, sourceId, sourceFileId);
-  const s3 = createUserUploadS3Cached(os);
-
-  const { uploadId } = sourceFile;
-
-  if (uploadId) {
-    // abort multipart upload
-    await retryS3NoReject(() =>
-      s3.abortMultipartUpload({
-        Bucket: os.bucket,
-        Key: key,
-        UploadId: uploadId,
-      })
-    );
-  } else {
-    await retryS3NoReject(() =>
-      s3.deleteObject({
-        Bucket: os.bucket,
-        Key: key,
-      })
-    );
   }
 
   await onSourceFileUpdated(userId, sourceId, timestamp);
