@@ -1,3 +1,4 @@
+import { CACHE_CONTROL_NO_STORE } from '$shared/config/cacheControl';
 import { fetchResources } from '$/services/resources';
 import { defineController } from './$relay';
 
@@ -7,6 +8,9 @@ export default defineController(() => ({
     return {
       status: 200,
       body: data,
+      headers: {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
+      },
     };
   },
 }));
