@@ -87,7 +87,7 @@ uploader:
   tooltip:
     file:
       ErrorAborted: Uploading aborted
-      ErrorInvalid: File too large
+      ErrorInvalid: Unsupported file
       ErrorTranscodeFailed: Failed to convert
       ErrorUploadFailed: Failed to upload
       Pending: Waiting to upload
