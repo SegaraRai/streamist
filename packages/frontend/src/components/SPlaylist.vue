@@ -2,8 +2,7 @@
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
-import { db } from '~/db';
-import { useSyncDB } from '~/db/sync';
+import { db, useSyncDB } from '~/db';
 import api from '~/logic/api';
 import { formatTracksTotalDuration } from '~/logic/duration';
 import { useTrackFilter } from '~/logic/filterTracks';

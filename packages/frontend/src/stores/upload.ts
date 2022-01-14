@@ -1,6 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { SourceFileAttachToType } from '$shared/types/db';
-import { useSyncDB } from '~/db/sync';
+import { useSyncDB } from '~/db';
 import { FileId, UploadFile, UploadManager } from '~/logic/uploadManager';
 import {
   ResolvedFileId,

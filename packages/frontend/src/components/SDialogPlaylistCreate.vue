@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
-import { useSyncDB } from '~/db/sync';
+import { useSyncDB } from '~/db';
 import api from '~/logic/api';
 
 export default defineComponent({

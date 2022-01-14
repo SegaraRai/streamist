@@ -1,7 +1,7 @@
 import { MenuOption, useDialog, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
-import { useSyncDB } from '~/db/sync';
+import { useSyncDB } from '~/db';
 import api from '~/logic/api';
 import { useTrackFilter } from '~/logic/filterTracks';
 import { usePlaybackStore } from '~/stores/playback';

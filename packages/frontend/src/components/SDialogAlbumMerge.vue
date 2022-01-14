@@ -2,7 +2,7 @@
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import type { ResourceAlbum } from '$/types';
-import { useSyncDB } from '~/db/sync';
+import { useSyncDB } from '~/db';
 import api from '~/logic/api';
 import { setRedirect } from '~/stores/redirect';
 

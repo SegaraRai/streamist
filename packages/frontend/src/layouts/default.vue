@@ -2,7 +2,7 @@
 import type { ScrollbarInst } from 'naive-ui';
 import { useDisplay } from 'vuetify';
 import logoSVG from '~/assets/logo_colored.svg';
-import { useSyncDB } from '~/db/sync';
+import { useSyncDB } from '~/db';
 import { getNaiveUIScrollbarElements } from '~/logic/naive-ui/getScrollbarElements';
 import {
   currentScrollContainerRef,
