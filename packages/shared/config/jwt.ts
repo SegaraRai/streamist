@@ -1,7 +1,7 @@
 export const JWT_ALGORITHM = 'HS256';
 
-export const JWT_REFRESH_TOKEN_EXPIRES_IN = 1 * 24 * 60 * 60 * 1000;
-export const JWT_API_TOKEN_EXPIRES_IN = 60 * 1000;
+export const JWT_REFRESH_TOKEN_EXPIRES_IN = 14 * 24 * 60 * 60 * 1000;
+export const JWT_API_TOKEN_EXPIRES_IN = 45 * 60 * 1000;
 export const JWT_CDN_TOKEN_EXPIRES_IN = JWT_API_TOKEN_EXPIRES_IN;
 
 const JWT_COMMON_ISS = 'https://streamist.app';
