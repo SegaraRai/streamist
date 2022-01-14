@@ -540,18 +540,26 @@ export async function createSource(
   userId: string,
   request: CreateSourceRequestAudio | CreateSourceRequestImage
 ): Promise<CreateSourceResponse> {
-  const user = await client.user.findFirst({
+  const user = await client.user.findUnique({
     where: {
       id: userId,
     },
     select: {
       plan: true,
       maxTrackId: true,
+      closedAt: true,
     },
   });
 
   if (!user) {
     throw new HTTPError(404, `user ${userId} not found`);
+  }
+
+  if (user.closedAt != null) {
+    throw new HTTPError(
+      409,
+      `User ${userId} is closed. Please login again to restore access.`
+    );
   }
 
   const plan = user.plan as Plan;
