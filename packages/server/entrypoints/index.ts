@@ -3,7 +3,6 @@ import { cpus } from 'os';
 import minimist from 'minimist';
 import { initBatch } from '$/batch';
 import { init } from '$/services/app';
-import { devMigrate } from '$/services/dev/migrate';
 import { API_SERVER_PORT } from '$/services/env';
 import { logger } from '$/services/logger';
 
@@ -47,12 +46,6 @@ function main(): void {
 
     case 'batch':
       mainBatch();
-      break;
-
-    case 'migrate':
-      devMigrate().then(() => {
-        console.log('finished');
-      });
       break;
 
     default:

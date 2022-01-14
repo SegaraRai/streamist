@@ -6,7 +6,6 @@ import Fastify, { FastifyServerFactory } from 'fastify';
 import helmet from 'fastify-helmet';
 import fastifyJwt from 'fastify-jwt';
 import server from '$/$server';
-import { devCDN } from '$/services/dev';
 import {
   API_BASE_PATH,
   SECRET_API_JWT_SECRET,
@@ -41,12 +40,6 @@ export const init = (serverFactory?: FastifyServerFactory) => {
   });
 
   app.register(transcoderCallback);
-
-  if (process.env.NODE_ENV === 'development') {
-    app.register(devCDN, {
-      prefix: '/dev/cdn',
-    });
-  }
 
   // NOTE: not setting custom error handler as fastify's default one works fine
   // TODO(prod): should be set in production to collect errors and send them to sentry or something
