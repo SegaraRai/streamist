@@ -40,7 +40,7 @@ albums:
   n_items: 'no items | one item | {n} items'
 artist:
   Shuffle: Shuffle
-  MoreTracks: More Tracks
+  MoreTracks: 'More tracks from {0}'
 artists:
   Artists: Artists
   n_items: 'no items | one item | {n} items'
@@ -79,9 +79,9 @@ search:
   NoResultsFound: No results found
 imageManager:
   title:
-    album: "Album artwork of '{0}'"
-    artist: "Artist artwork of '{0}'"
-    playlist: "Playlist artwork of '{0}'"
+    album: 'Album artwork of {0}'
+    artist: 'Artist artwork of {0}'
+    playlist: 'Playlist artwork of {0}'
 uploader:
   limitReached: "You have reached the upload limit for tracks.\nYou need to upgrade your plan or delete existing tracks to upload new tracks."
 dropdown:

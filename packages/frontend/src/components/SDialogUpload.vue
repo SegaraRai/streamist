@@ -41,7 +41,7 @@ export default defineComponent({
         </div>
       </v-card-title>
       <v-card-text class="opacity-100 flex-1">
-        <s-uploader />
+        <s-uploader class="h-140" />
       </v-card-text>
     </v-card>
   </n-modal>

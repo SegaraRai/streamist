@@ -233,9 +233,8 @@ export default defineComponent({
       <v-divider />
     </div>
     <template v-if="value$$q">
-      <div class="h-4"></div>
       <template v-if="value$$q.albums$$q.length">
-        <div class="mb-6">
+        <div class="mt-4 mb-6">
           <template v-for="album in value$$q.albums$$q" :key="album.id">
             <div class="my-12">
               <s-album
@@ -252,14 +251,13 @@ export default defineComponent({
       </template>
       <template v-if="additionalTracks$$q.length">
         <template v-if="value$$q.albums$$q.length">
-          <div class="flex-none flex flex-row items-center gap-x-8 my-8">
+          <div class="flex-none flex flex-row items-center gap-x-8 mb-4">
             <div class="flex-none text-3xl whitespace-nowrap">
-              {{ t('artist.MoreTracks') }}
+              {{ t('artist.MoreTracks', [value$$q.artist$$q.name]) }}
             </div>
             <!-- v-btn color="primary" flat icon @click="playAdditional$$q()">
               <v-icon>mdi-play</v-icon>
             </v-btn -->
-            <v-divider />
           </div>
         </template>
         <s-track-list
