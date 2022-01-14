@@ -48,7 +48,6 @@
     "vuetify": "^3.0.0-alpha.12"
   },
   "devDependencies": {
-    "@iconify-json/carbon": "^1.0.13",
     "@iconify-json/mdi": "^1.0.12",
     "@intlify/vite-plugin-vue-i18n": "^3.2.1",
     "@types/humanize-duration": "^3.27.1",
