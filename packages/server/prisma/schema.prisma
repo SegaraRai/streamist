@@ -36,6 +36,8 @@ model User {
   AAlbumImage     AAlbumImage[]
   AArtistImage    AArtistImage[]
   APlaylistImage  APlaylistImage[]
+
+  @@index([closedAt])
 }
 
 model Source {
@@ -89,6 +91,7 @@ model SourceFile {
   @@index([userId])
   @@index([sourceId])
   @@index([userId, updatedAt])
+  @@index([uploadedAt])
 }
 
 model Artist {
