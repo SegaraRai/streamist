@@ -272,6 +272,12 @@ export default defineConfig({
     fs: {
       strict: true,
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:43056',
+        changeOrigin: true,
+      },
+    },
   },
 
   // https://github.com/antfu/vite-ssg
