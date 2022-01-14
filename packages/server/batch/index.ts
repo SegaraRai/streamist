@@ -5,7 +5,7 @@ import { cleanupOverRetentionSourceFiles } from './cleanupOverRetentionSourceFil
 import {
   cleanupStaleTranscodes,
   cleanupStaleUploads,
-} from './cleanupStaleUploads';
+} from './cleanupStaleSourceFiles';
 
 export function initBatch(): void {
   const rule = new RecurrenceRule();

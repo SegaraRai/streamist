@@ -81,17 +81,13 @@ export async function cleanupStaleTranscodes(): Promise<void> {
     {
       OR: [
         {
-          state: {
-            in: is<SourceState>('uploaded'),
-          },
+          state: is<SourceState>('uploaded'),
           updatedAt: {
             lt: staleUploadedAt,
           },
         },
         {
-          state: {
-            in: is<SourceFileState>('transcoding'),
-          },
+          state: is<SourceFileState>('transcoding'),
           transcodeStartedAt: {
             lt: staleUploadedAt,
           },
