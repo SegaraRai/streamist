@@ -212,7 +212,7 @@ export default defineComponent({
           </v-sheet>
           <n-scrollbar
             class="flex-1 s-n-scrollbar-min-h-full"
-            @scroll.passive="onQueueScroll$$q"
+            @scroll="onQueueScroll$$q"
           >
             <s-queue :scroll-top="queueScroll$$q" />
           </n-scrollbar>
