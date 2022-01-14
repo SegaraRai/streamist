@@ -37,7 +37,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col h-140">
     <template v-if="canUpload$$q">
       <input
         ref="inputFileElement$$q"
@@ -69,7 +69,9 @@ export default defineComponent({
         </v-btn>
       </div>
       <v-divider />
-      <s-uploader-list class="flex-1" />
+      <n-scrollbar class="max-h-200">
+        <s-uploader-list />
+      </n-scrollbar>
       <v-divider />
       <div class="flex gap-x-4 mt-4 px-4 mb-4">
         <v-btn

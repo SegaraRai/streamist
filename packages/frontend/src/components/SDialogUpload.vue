@@ -23,7 +23,7 @@ export default defineComponent({
   <n-modal
     v-model:show="show$$q"
     transform-origin="center"
-    class="select-none max-w-2xl h-120 max-h-full"
+    class="select-none max-w-2xl max-h-full"
   >
     <v-card class="w-full flex flex-col">
       <v-card-title class="flex">
