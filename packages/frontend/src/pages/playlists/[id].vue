@@ -38,7 +38,6 @@ export default defineComponent({
     );
 
     return {
-      playlistId$$q: propPlaylistIdRef.value,
       onTrackLoad$$q: (tracks: readonly ResourceTrack[]) => {
         valueAsync.value.then((v) => {
           playbackStore.setDefaultSetList$$q(v.playlist$$q.title, tracks);
@@ -52,8 +51,8 @@ export default defineComponent({
 <template>
   <v-container fluid class="pt-8 px-6">
     <s-playlist
-      :playlist="playlistId$$q"
-      :link-excludes="[playlistId$$q]"
+      :playlist="id"
+      :link-excludes="[id]"
       @track-load="onTrackLoad$$q"
     />
   </v-container>
