@@ -140,7 +140,7 @@ async function syncDB(
       }
     }
 
-    dbLastUpdate$$q.value = r.updatedAt;
+    dbLastUpdate$$q.value = r.timestamp;
   } finally {
     dbUpdating$$q.value = undefined;
   }
