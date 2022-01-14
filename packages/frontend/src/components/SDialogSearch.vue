@@ -193,7 +193,7 @@ export default defineComponent({
 
     const rsFuse = createFuse(queries$$q, { keys: ['query'] });
     const filteredRSQueries$$q = computed(() =>
-      rsFuse.value.search(searchQuery$$q.value, {
+      rsFuse.value.search(debouncedSearchQuery$$q.value, {
         limit: RECENTLY_SEARCHED_MAX_ENTRIES_DISPLAY,
       })
     );
