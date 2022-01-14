@@ -1,5 +1,6 @@
 import { dbArrayDeserializeItemIds } from '$shared/dbArray';
 import type { Album, Artist, Playlist } from '$prisma/client';
+import { RESOURCE_TIMESTAMP_MARGIN } from '$/config';
 import { client } from '$/db/lib/client';
 import type {
   ResourceAlbum,
@@ -44,9 +45,6 @@ function convertPlaylist(playlist: Playlist): ResourcePlaylist {
 function convertPlaylists(playlists: readonly Playlist[]): ResourcePlaylist[] {
   return playlists.map(convertPlaylist);
 }
-
-// 10 sec.
-const RESOURCE_TIMESTAMP_MARGIN = 10_000;
 
 export function fetchResources(
   userId: string,
