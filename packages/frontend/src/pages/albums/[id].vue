@@ -68,7 +68,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-8 px-6">
+  <v-container fluid>
     <s-album
       :album="id"
       :link-excludes="[id]"

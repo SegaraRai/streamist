@@ -49,7 +49,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-8 px-6">
+  <v-container fluid>
     <s-playlist
       :playlist="id"
       :link-excludes="[id]"
