@@ -2,7 +2,11 @@ import '$/services/initOS';
 import '$/services/initCredentials';
 
 import closeWithGrace from 'close-with-grace';
-import Fastify, { FastifyServerFactory } from 'fastify';
+import Fastify, {
+  FastifyInstance,
+  FastifyPluginCallback,
+  FastifyServerFactory,
+} from 'fastify';
 import helmet from 'fastify-helmet';
 import fastifyJwt from 'fastify-jwt';
 import server from '$/$server';
@@ -14,6 +18,36 @@ import {
 import { fastPlainToInstance } from '$/services/fastClassTransformer';
 import { transcoderCallback } from '$/services/transcoderCallback';
 import { HTTPError } from '$/utils/httpError';
+
+const validateProxyRequestPlugin: FastifyPluginCallback = (
+  fastify: FastifyInstance,
+  _options: unknown,
+  done: (err?: Error) => void
+): void => {
+  const backendAuthorization = `Bearer ${SECRET_PROXY_AUTH_TOKEN}`;
+  fastify.addHook('onRequest', (request, _reply, done) => {
+    if (request.headers['x-backend-authorization'] !== backendAuthorization) {
+      return done(new HTTPError(401, 'Incorrect backend token'));
+    }
+    done();
+  });
+  done();
+};
+
+const appPlugin: FastifyPluginCallback = (
+  fastify: FastifyInstance,
+  _options: unknown,
+  done: (err?: Error) => void
+): void => {
+  // NOTE: not setting custom error handler as fastify's default one works fine
+  // TODO(prod): should be set in production to collect errors and send them to sentry or something
+  fastify.register(validateProxyRequestPlugin);
+  fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
+  server(fastify, {
+    plainToInstance: fastPlainToInstance,
+  });
+  done();
+};
 
 export const init = (serverFactory?: FastifyServerFactory) => {
   const app = Fastify({
@@ -41,32 +75,9 @@ export const init = (serverFactory?: FastifyServerFactory) => {
 
   app.register(transcoderCallback);
 
-  // NOTE: not setting custom error handler as fastify's default one works fine
-  // TODO(prod): should be set in production to collect errors and send them to sentry or something
-  app.register(
-    (fastify, _options, done): void => {
-      fastify.register((f, _options, done): void => {
-        const backendAuthorization = `Bearer ${SECRET_PROXY_AUTH_TOKEN}`;
-        f.addHook('onRequest', (request, _reply, done) => {
-          if (
-            request.headers['x-backend-authorization'] !== backendAuthorization
-          ) {
-            return done(new HTTPError(401, 'Incorrect backend token'));
-          }
-          done();
-        });
-        done();
-      });
-      fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
-      server(fastify, {
-        plainToInstance: fastPlainToInstance,
-      });
-      done();
-    },
-    {
-      prefix: API_BASE_PATH,
-    }
-  );
+  app.register(appPlugin, {
+    prefix: API_BASE_PATH,
+  });
 
   const closeListeners = closeWithGrace(
     { delay: 10000 },
