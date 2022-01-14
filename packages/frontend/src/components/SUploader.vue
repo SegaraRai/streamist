@@ -1,57 +1,91 @@
-<script lang="ts" setup>
+<script lang="ts">
+import { useLocalStorageDB } from '~/db';
+import { FILE_ACCEPT_AUDIO, FILE_ACCEPT_IMAGE } from '~/logic/fileAccept';
 import { useUploadStore } from '~/stores/upload';
 
-const uploadStore = useUploadStore();
+export default defineComponent({
+  setup() {
+    const uploadStore = useUploadStore();
+    const { dbUser$$q } = useLocalStorageDB();
 
-const onFileSelected = (event: Event) => {
-  const inputElement = event.target as HTMLInputElement;
-  const fileList = inputElement.files;
-  if (!fileList) {
-    return;
-  }
-  uploadStore.stageFiles(Array.from(fileList));
+    const onFileSelected = (event: Event) => {
+      const inputElement = event.target as HTMLInputElement;
+      const fileList = inputElement.files;
+      if (!fileList) {
+        return;
+      }
+      uploadStore.stageFiles(Array.from(fileList));
 
-  inputElement.files = new DataTransfer().files;
-};
+      inputElement.files = new DataTransfer().files;
+    };
 
-const inputFileElement = ref<HTMLInputElement | undefined>();
+    const inputFileElement = ref<HTMLInputElement | undefined>();
+
+    const canUpload$$q = eagerComputed(() => !dbUser$$q.value?.maxTrackId);
+
+    return {
+      inputFileElement$$q: inputFileElement,
+      uploadStore$$q: uploadStore,
+      canUpload$$q,
+      accept$$q: `${FILE_ACCEPT_AUDIO},${FILE_ACCEPT_IMAGE}`,
+      onFileSelected$$q: onFileSelected,
+    };
+  },
+});
 </script>
 
 <template>
-  <input
-    ref="inputFileElement"
-    type="file"
-    multiple
-    class="hidden"
-    @change="onFileSelected"
-  />
-  <div class="flex mb-4 px-4 justify-between">
-    <v-btn color="primary" text @click="inputFileElement?.click()">
-      <v-icon>mdi-plus</v-icon>
-      <span class="ml-2">Add File</span>
-    </v-btn>
-    <v-btn
-      color="red"
-      text
-      :disabled="!uploadStore.canClearAll"
-      @click="uploadStore.clearAll()"
-    >
-      <v-icon>mdi-close</v-icon>
-      <span class="ml-2">Clear All</span>
-    </v-btn>
-  </div>
-  <v-divider />
-  <s-uploader-list class="h-80" />
-  <v-divider />
-  <div class="flex gap-x-4 mt-4 px-4 mb-4">
-    <v-btn
-      color="primary"
-      text
-      :disabled="uploadStore.stagedFiles.length === 0"
-      @click="uploadStore.startUpload()"
-    >
-      <v-icon>mdi-cloud-upload</v-icon>
-      <span class="ml-2">Start Upload</span>
-    </v-btn>
+  <div class="flex flex-col h-full">
+    <template v-if="canUpload$$q">
+      <input
+        ref="inputFileElement$$q"
+        type="file"
+        multiple
+        class="hidden"
+        :accept="accept$$q"
+        :disabled="!canUpload$$q"
+        @change="onFileSelected$$q"
+      />
+      <div class="flex mb-4 px-4 justify-between">
+        <v-btn
+          color="primary"
+          text
+          :disabled="!canUpload$$q"
+          @click="inputFileElement$$q?.click()"
+        >
+          <v-icon>mdi-plus</v-icon>
+          <span class="ml-2">Add File</span>
+        </v-btn>
+        <v-btn
+          color="red"
+          text
+          :disabled="!uploadStore$$q.canClearAll"
+          @click="uploadStore$$q.clearAll()"
+        >
+          <v-icon>mdi-close</v-icon>
+          <span class="ml-2">Clear All</span>
+        </v-btn>
+      </div>
+      <v-divider />
+      <s-uploader-list class="flex-1" />
+      <v-divider />
+      <div class="flex gap-x-4 mt-4 px-4 mb-4">
+        <v-btn
+          color="primary"
+          text
+          :disabled="!canUpload$$q || uploadStore$$q.stagedFiles.length === 0"
+          @click="uploadStore$$q.startUpload()"
+        >
+          <v-icon>mdi-cloud-upload</v-icon>
+          <span class="ml-2">Start Upload</span>
+        </v-btn>
+      </div>
+    </template>
+    <template v-else>
+      <v-alert type="error" class="select-text">
+        You have reached your upload limit and cannot upload any more.<br />
+        You will need to upgrade your plan or delete tracks to continue.
+      </v-alert>
+    </template>
   </div>
 </template>

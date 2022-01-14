@@ -6,6 +6,7 @@ import type { ResourceImage } from '$/types';
 import { db } from '~/db';
 import { useSyncDB } from '~/db/sync';
 import api from '~/logic/api';
+import { FILE_ACCEPT_IMAGE } from '~/logic/fileAccept';
 import { getImageFileURL } from '~/logic/fileURL';
 import { NAIVE_UI_THEMES, createOverrideTheme } from '~/logic/theme';
 import type { FileId } from '~/logic/uploadManager';
@@ -129,6 +130,7 @@ export default defineComponent({
       hasImage$$q,
       images$$q,
       uploading$$q,
+      accept$$q: FILE_ACCEPT_IMAGE,
       dragging$$q: ref(false),
       getOriginalImageURL$$q: (
         image: ResourceImage | undefined
@@ -254,7 +256,7 @@ export default defineComponent({
     type="file"
     multiple
     class="hidden"
-    filter="image/*"
+    :accept="accept$$q"
     @change="onFileSelected$$q"
   />
   <n-modal v-model:show="dialog$$q" transform-origin="center">

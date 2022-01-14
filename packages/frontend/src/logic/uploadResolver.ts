@@ -1,6 +1,7 @@
 import { getSourceFileType } from '$shared/config/sourceFile';
 import { getExtension, getStem } from '$shared/path';
 import { compareString } from '$shared/sort';
+import { SourceFileType } from '$shared/types/db';
 import { LOSSLESS_AUDIO_FILE_EXTENSION_SET } from '~/config';
 
 export type ResolvedFileId = symbol;
@@ -110,9 +111,26 @@ function compareAudioForImage(
   );
 }
 
+function getSourceFileType2(file: File): SourceFileType | 'unknown' {
+  const typeByFilename = getSourceFileType(file.name);
+  if (typeByFilename) {
+    return typeByFilename;
+  }
+
+  if (file.type.startsWith('audio/')) {
+    return 'audio';
+  }
+
+  if (file.type.startsWith('image/')) {
+    return 'image';
+  }
+
+  return 'unknown';
+}
+
 function resolveUploadFilesImpl(files: readonly File[]): ResolvedUploadFile[] {
   const typeAndFiles = files.map(
-    (file) => [getSourceFileType(file.name) || 'unknown', file] as const
+    (file) => [getSourceFileType2(file), file] as const
   );
 
   const cueSheetFileSet = new Set(

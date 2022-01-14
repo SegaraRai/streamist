@@ -23,9 +23,9 @@ export default defineComponent({
   <n-modal
     v-model:show="show$$q"
     transform-origin="center"
-    class="select-none max-w-xl"
+    class="select-none max-w-2xl h-120 max-h-full"
   >
-    <v-card class="w-full">
+    <v-card class="w-full flex flex-col">
       <v-card-title class="flex">
         <div class="flex-1">{{ t('dialogComponent.upload.title') }}</div>
         <div class="flex-none">
@@ -40,7 +40,7 @@ export default defineComponent({
           </v-btn>
         </div>
       </v-card-title>
-      <v-card-text class="opacity-100">
+      <v-card-text class="opacity-100 flex-1">
         <s-uploader />
       </v-card-text>
     </v-card>
