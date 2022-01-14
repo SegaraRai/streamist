@@ -240,20 +240,20 @@ export default defineComponent({
       </button>
       <v-divider />
     </div>
+    <s-track-list
+      render-mode="virtual"
+      :show-album="false"
+      :show-artist="false"
+      :tracks="value$$q?.tracks$$q"
+      :link-excludes="linkExcludes"
+      show-disc-number
+      index-content="trackNumber"
+      :set-list="setList"
+      :set-list-name="setListName || value$$q?.album$$q.title"
+      :visit-album="visitAlbum"
+      :visit-artist="visitArtist"
+      show-delete
+    />
+    <s-dropdown-album v-model="dropdown$$q" />
   </template>
-  <s-track-list
-    render-mode="virtual"
-    :show-album="false"
-    :show-artist="false"
-    :tracks="value$$q?.tracks$$q"
-    :link-excludes="linkExcludes"
-    show-disc-number
-    index-content="trackNumber"
-    :set-list="setList"
-    :set-list-name="setListName || value$$q?.album$$q.title"
-    :visit-album="visitAlbum"
-    :visit-artist="visitArtist"
-    show-delete
-  />
-  <s-dropdown-album v-model="dropdown$$q" />
 </template>

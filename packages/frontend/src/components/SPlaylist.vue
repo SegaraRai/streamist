@@ -231,20 +231,20 @@ export default defineComponent({
       </button>
       <v-divider />
     </div>
+    <s-track-list
+      render-mode="draggable"
+      show-album
+      show-artist
+      :tracks="value$$q?.tracks$$q"
+      :link-excludes="linkExcludes"
+      index-content="index"
+      :set-list="value$$q?.tracks$$q"
+      :set-list-name="value$$q?.playlist$$q.title"
+      :playlist-id="playlistId$$q"
+      visit-album
+      visit-artist
+      :on-move="onMove$$q"
+    />
+    <s-dropdown-playlist v-model="dropdown$$q" />
   </template>
-  <s-track-list
-    render-mode="draggable"
-    show-album
-    show-artist
-    :tracks="value$$q?.tracks$$q"
-    :link-excludes="linkExcludes"
-    index-content="index"
-    :set-list="value$$q?.tracks$$q"
-    :set-list-name="value$$q?.playlist$$q.title"
-    :playlist-id="playlistId$$q"
-    visit-album
-    visit-artist
-    :on-move="onMove$$q"
-  />
-  <s-dropdown-playlist v-model="dropdown$$q" />
 </template>
