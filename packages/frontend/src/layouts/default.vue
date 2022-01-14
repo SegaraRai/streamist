@@ -145,6 +145,8 @@ export default defineComponent({
       { passive: true }
     );
 
+    syncDB();
+
     return {
       t,
       router$$q: router,
