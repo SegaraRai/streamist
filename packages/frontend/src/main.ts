@@ -6,6 +6,7 @@ import App from '~/App.vue';
 import {
   RESTORE_SCROLL_CHECK_INTERVAL,
   RESTORE_SCROLL_CHECK_TIMEOUT,
+  STORE_SCROLL_THROTTLE,
 } from '~/config';
 import { installLazySizes } from '~/lazyloading';
 import { activateTokenInterceptor } from '~/logic/api';
@@ -47,7 +48,7 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
 
     // we cannot use beforeEach as it shows navigated (backed) history.state on history back
     // there seems to be no way (except handling it explicitly on popstate) to deal with it
-    watch(
+    throttledWatch(
       [currentScrollRef, currentScrollContainerRef],
       ([scrollPosition, element]): void => {
         history.replaceState(
@@ -57,6 +58,9 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
           },
           ''
         );
+      },
+      {
+        throttle: STORE_SCROLL_THROTTLE,
       }
     );
 
