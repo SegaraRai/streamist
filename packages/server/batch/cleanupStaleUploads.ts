@@ -13,20 +13,10 @@ async function updateStaleSources(
   postState: SourceFileState & SourceState,
   timestamp: number
 ): Promise<void> {
-  await client.source.updateMany({
+  const sources = await client.source.findMany({
     where,
-    data: {
-      state: postState,
-      updatedAt: timestamp,
-    },
-  });
-
-  const updatedSources = await client.source.findMany({
-    where: {
-      state: postState,
-      updatedAt: timestamp,
-    },
     select: {
+      id: true,
       files: {
         select: {
           id: true,
@@ -39,7 +29,19 @@ async function updateStaleSources(
     },
   });
 
-  const sourceFiles = updatedSources.flatMap((s) => s.files);
+  await client.source.updateMany({
+    where: {
+      id: {
+        in: sources.map((s) => s.id),
+      },
+    },
+    data: {
+      state: postState,
+      updatedAt: timestamp,
+    },
+  });
+
+  const sourceFiles = sources.flatMap((s) => s.files);
 
   await client.sourceFile.updateMany({
     where: {
