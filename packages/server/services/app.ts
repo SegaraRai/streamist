@@ -3,14 +3,18 @@ import '$/services/initCredentials';
 
 import closeWithGrace from 'close-with-grace';
 import Fastify, { FastifyServerFactory } from 'fastify';
-import cors from 'fastify-cors';
 import helmet from 'fastify-helmet';
 import fastifyJwt from 'fastify-jwt';
 import server from '$/$server';
 import { devCDN } from '$/services/dev';
-import { API_BASE_PATH, SECRET_API_JWT_SECRET } from '$/services/env';
+import {
+  API_BASE_PATH,
+  SECRET_API_JWT_SECRET,
+  SECRET_PROXY_AUTH_TOKEN,
+} from '$/services/env';
 import { fastPlainToInstance } from '$/services/fastClassTransformer';
 import { transcoderCallback } from '$/services/transcoderCallback';
+import { HTTPError } from '$/utils/httpError';
 
 export const init = (serverFactory?: FastifyServerFactory) => {
   const app = Fastify({
@@ -48,14 +52,18 @@ export const init = (serverFactory?: FastifyServerFactory) => {
   // TODO(prod): should be set in production to collect errors and send them to sentry or something
   app.register(
     (fastify, _options, done): void => {
-      if (process.env.NODE_ENV === 'development') {
-        fastify.register(cors, {
-          origin: true,
+      fastify.register((f, _options, done): void => {
+        const backendAuthorization = `Bearer ${SECRET_PROXY_AUTH_TOKEN}`;
+        f.addHook('onRequest', (request, _reply, done) => {
+          if (
+            request.headers['x-backend-authorization'] !== backendAuthorization
+          ) {
+            return done(new HTTPError(401, 'Incorrect backend token'));
+          }
+          done();
         });
-      } else {
-        // TODO(prod): set allowed origins for production and staging environments
-        fastify.register(cors);
-      }
+        done();
+      });
       fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
       server(fastify, {
         plainToInstance: fastPlainToInstance,
