@@ -6,8 +6,8 @@ export default defineComponent({
     const uploadStore = useUploadStore();
 
     return {
-      stagedFiles$$q: uploadStore.stagedFiles,
-      files$$q: uploadStore.files,
+      stagedFiles$$q: computed(() => uploadStore.stagedFiles),
+      files$$q: computed(() => uploadStore.files),
       removeStagingFile$$q: uploadStore.removeStagingFile,
       removeFile$$q: uploadStore.removeFile,
     };
