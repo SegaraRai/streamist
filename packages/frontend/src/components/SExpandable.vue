@@ -106,9 +106,9 @@ export default defineComponent({
         <template v-for="image in resolvedImages$$q" :key="image.index$$q">
           <img
             class="w-screen h-screen object-contain"
+            :alt="`Image #${image.index$$q + 1} of ${altBase}`"
             :src="image.src$$q.src$$q"
             :srcset="image.src$$q.srcSet$$q"
-            :alt="`Image #${image.index$$q + 1} of ${altBase}`"
           />
         </template>
       </n-carousel>

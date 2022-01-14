@@ -37,8 +37,9 @@ export default defineComponent({
 <template>
   <template v-if="srcObject$$q == null">
     <img
+      :alt="alt"
       :src="noImageSrc$$q"
-      class="block object-cover overflow-hidden leading-none bg-true-gray-300 text-white"
+      class="block object-cover overflow-hidden leading-none bg-true-gray-300 text-white pointer-events-none"
     />
   </template>
   <template v-else>
@@ -49,9 +50,9 @@ export default defineComponent({
           data-sizes="auto"
           :data-src="srcObject$$q.src$$q"
           :data-srcset="srcObject$$q.srcSet$$q"
-          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII="
-          class="block object-cover absolute top-0 left-0 w-full h-full s-lazyload-image z-1"
           :alt="alt"
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII="
+          class="block object-cover absolute top-0 left-0 w-full h-full s-lazyload-image z-1 pointer-events-none"
         />
       </template>
       <template v-else-if="srcObject$$q === false">

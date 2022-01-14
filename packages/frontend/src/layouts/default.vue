@@ -254,7 +254,8 @@ export default defineComponent({
                 :src="logoSVG$$q"
                 width="128"
                 height="128"
-                class="block w-7 h-7"
+                class="block w-7 h-7 pointer-events-none"
+                alt="Streamist"
               />
               <span class="inline-block <sm:hidden">
                 <span class="text-xl leading-none">streamist</span>
