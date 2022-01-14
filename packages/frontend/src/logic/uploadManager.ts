@@ -26,6 +26,7 @@ import type {
   UploadURL,
 } from '$/types';
 import type { CreateSourceResponseFile } from '$/types/createSource';
+import type { VSourceCreateBodyWrapper } from '$/validators';
 import { UPLOAD_MANAGER_DB_SYNC_INTERVAL } from '~/config';
 import { db } from '~/db';
 import api from '~/logic/api';
@@ -400,6 +401,10 @@ function doUpload(
 export class UploadManager extends EventTarget {
   private _files: UploadFile[] = [];
 
+  private _createSourceQueue = new PQueue({
+    concurrency: 2,
+  });
+
   private _beginUploadQueue = new PQueue({
     concurrency: 4,
   });
@@ -666,40 +671,46 @@ export class UploadManager extends EventTarget {
                       file.fileType === 'audio' ? file : otherFile;
                     const cueSheetFile =
                       file.fileType === 'cueSheet' ? file : otherFile;
-                    createSourcePromise = api.my.sources.$post({
-                      body: {
-                        type: 'audio',
-                        // TODO(prod): set region
-                        region: 'ap-northeast-1',
-                        audioFile: {
-                          type: 'audio',
-                          filename: audioFile.filename,
-                          fileSize: audioFile.fileSize,
-                        },
-                        cueSheetFile: {
-                          type: 'cueSheet',
-                          filename: cueSheetFile.filename,
-                          fileSize: cueSheetFile.fileSize,
-                        },
-                      },
-                    });
-                    file.createSourcePromise = createSourcePromise;
-                  }
-                } else if (file.fileType === 'audio') {
-                  requestFileType = 'audio';
-                  createSourcePromise = api.my.sources.$post({
-                    body: {
+                    const body: VSourceCreateBodyWrapper['!payload'] = {
                       type: 'audio',
                       // TODO(prod): set region
                       region: 'ap-northeast-1',
                       audioFile: {
                         type: 'audio',
-                        filename: file.filename,
-                        fileSize: file.fileSize,
+                        filename: audioFile.filename,
+                        fileSize: audioFile.fileSize,
                       },
-                      cueSheetFile: null,
+                      cueSheetFile: {
+                        type: 'cueSheet',
+                        filename: cueSheetFile.filename,
+                        fileSize: cueSheetFile.fileSize,
+                      },
+                    };
+                    createSourcePromise = this._createSourceQueue.add(() =>
+                      api.my.sources.$post({
+                        body,
+                      })
+                    );
+                    file.createSourcePromise = createSourcePromise;
+                  }
+                } else if (file.fileType === 'audio') {
+                  requestFileType = 'audio';
+                  const body: VSourceCreateBodyWrapper['!payload'] = {
+                    type: 'audio',
+                    // TODO(prod): set region
+                    region: 'ap-northeast-1',
+                    audioFile: {
+                      type: 'audio',
+                      filename: file.filename,
+                      fileSize: file.fileSize,
                     },
-                  });
+                    cueSheetFile: null,
+                  };
+                  createSourcePromise = this._createSourceQueue.add(() =>
+                    api.my.sources.$post({
+                      body,
+                    })
+                  );
                 } else if (file.fileType === 'image') {
                   const targetAudioFileSourceFileId = fileMap.get(
                     file.dependsOn!
@@ -722,21 +733,24 @@ export class UploadManager extends EventTarget {
                   }
 
                   requestFileType = 'image';
-                  createSourcePromise = api.my.sources.$post({
-                    body: {
+                  const body: VSourceCreateBodyWrapper['!payload'] = {
+                    type: 'image',
+                    // TODO(prod): set region
+                    region: 'ap-northeast-1',
+                    imageFile: {
                       type: 'image',
-                      // TODO(prod): set region
-                      region: 'ap-northeast-1',
-                      imageFile: {
-                        type: 'image',
-                        filename: file.filename,
-                        fileSize: file.fileSize,
-                      },
-                      attachToType: 'album',
-                      attachToId: targetAlbumId,
-                      attachPrepend: false,
+                      filename: file.filename,
+                      fileSize: file.fileSize,
                     },
-                  });
+                    attachToType: 'album',
+                    attachToId: targetAlbumId,
+                    attachPrepend: false,
+                  };
+                  createSourcePromise = this._createSourceQueue.add(() =>
+                    api.my.sources.$post({
+                      body,
+                    })
+                  );
                 } else if (file.fileType === 'imageWithAttachTarget') {
                   if (!file.attachTarget) {
                     throw new UploadError(
@@ -745,21 +759,24 @@ export class UploadManager extends EventTarget {
                   }
 
                   requestFileType = 'image';
-                  createSourcePromise = api.my.sources.$post({
-                    body: {
+                  const body: VSourceCreateBodyWrapper['!payload'] = {
+                    type: 'image',
+                    // TODO(prod): set region
+                    region: 'ap-northeast-1',
+                    imageFile: {
                       type: 'image',
-                      // TODO(prod): set region
-                      region: 'ap-northeast-1',
-                      imageFile: {
-                        type: 'image',
-                        filename: file.filename,
-                        fileSize: file.fileSize,
-                      },
-                      attachToType: file.attachTarget.attachToType,
-                      attachToId: file.attachTarget.attachToId,
-                      attachPrepend: file.attachTarget.attachPrepend,
+                      filename: file.filename,
+                      fileSize: file.fileSize,
                     },
-                  });
+                    attachToType: file.attachTarget.attachToType,
+                    attachToId: file.attachTarget.attachToId,
+                    attachPrepend: file.attachTarget.attachPrepend,
+                  };
+                  createSourcePromise = this._createSourceQueue.add(() =>
+                    api.my.sources.$post({
+                      body,
+                    })
+                  );
                 }
 
                 if (!createSourcePromise || !requestFileType) {
