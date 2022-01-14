@@ -6,3 +6,5 @@ if (
 ) {
   throw new Error('env variable not defined');
 }
+
+export {};

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "isolatedModules": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
