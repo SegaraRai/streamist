@@ -9,7 +9,6 @@ export default defineController(() => ({
       params.sourceId,
       params.sourceFileId
     );
-
     return {
       status: 200,
       body,

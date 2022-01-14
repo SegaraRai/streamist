@@ -24,7 +24,6 @@ export default defineController(() => ({
         );
         break;
     }
-
     return { status: 202 };
   },
 }));

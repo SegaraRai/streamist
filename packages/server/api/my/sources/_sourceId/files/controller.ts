@@ -10,14 +10,12 @@ export default defineController(() => ({
         userId: user.id,
       },
     });
-
     if (!sourceFiles.length) {
       throw new HTTPError(
         404,
         `no source files found for source ${params.sourceId}`
       );
     }
-
     return {
       status: 200,
       body: sourceFiles,

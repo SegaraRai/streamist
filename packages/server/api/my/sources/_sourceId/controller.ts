@@ -13,11 +13,9 @@ export default defineController(() => ({
         files: true,
       },
     });
-
     if (!source) {
       throw new HTTPError(404, `source ${params.sourceId} not found`);
     }
-
     return {
       status: 200,
       body: source,
