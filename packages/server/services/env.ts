@@ -25,6 +25,11 @@ const SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY =
   process.env.SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY ?? '';
 const SECRET_PROXY_AUTH_TOKEN = process.env.SECRET_PROXY_AUTH_TOKEN ?? '';
 
+if (!API_ORIGIN) {
+  // this is needed for the transcoder to call back to the API server
+  throw new Error('API_ORIGIN is not defined');
+}
+
 if (!SECRET_API_JWT_SECRET) {
   throw new Error('SECRET_API_JWT_SECRET is not defined');
 }

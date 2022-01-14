@@ -20,6 +20,10 @@ import type {
   TranscoderResponseArtifactError,
   TranscoderResponseArtifactImage,
 } from '$transcoder/types/transcoder';
+import {
+  TRANSCODER_CALLBACK_API_PATH,
+  TRANSCODER_CALLBACK_API_TOKEN,
+} from '$/config';
 import { dbAlbumAddImageTx } from '$/db/album';
 import { dbArtistAddImageTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
@@ -27,13 +31,8 @@ import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import type { TransactionalPrismaClient } from '$/db/lib/types';
 import { dbPlaylistAddImageTx } from '$/db/playlist';
 import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
-import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from '$/services/env';
 import { logger } from '$/services/logger';
 import { updateMaxTrackId } from '$/services/maxTrack';
-
-export const DEV_TRANSCODER_CALLBACK_API_PATH = '/internal/transcoder/callback';
-export const DEV_TRANSCODER_CALLBACK_API_ENDPOINT = `${API_ORIGIN}${DEV_TRANSCODER_CALLBACK_API_PATH}`;
-export const DEV_TRANSCODER_CALLBACK_API_TOKEN = `Bearer ${SECRET_TRANSCODER_CALLBACK_SECRET}`;
 
 function numberOr<T>(
   str: string | null | undefined,
@@ -676,8 +675,8 @@ export const transcoderCallback: FastifyPluginCallback<{}> = (
   _options: {},
   done: (err?: Error) => void
 ): void => {
-  fastify.post(DEV_TRANSCODER_CALLBACK_API_PATH, (request, reply): void => {
-    if (request.headers.authorization !== DEV_TRANSCODER_CALLBACK_API_TOKEN) {
+  fastify.post(TRANSCODER_CALLBACK_API_PATH, (request, reply): void => {
+    if (request.headers.authorization !== TRANSCODER_CALLBACK_API_TOKEN) {
       reply.code(401).send();
       return;
     }

@@ -19,17 +19,17 @@ import {
   TranscoderRequestOptions,
 } from '$transcoder/types/transcoder';
 import type { SourceFile } from '$prisma/client';
+import {
+  TRANSCODER_CALLBACK_API_ENDPOINT,
+  TRANSCODER_CALLBACK_API_TOKEN,
+} from '$/config';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
+import { logger } from '$/services/logger';
+import { splitIntoParts } from '$/services/uploadUtils';
+import { createUserUploadS3Cached } from '$/services/userOS';
 import { HTTPError } from '$/utils/httpError';
-import { logger } from './logger';
-import {
-  DEV_TRANSCODER_CALLBACK_API_ENDPOINT,
-  DEV_TRANSCODER_CALLBACK_API_TOKEN,
-} from './transcoderCallback';
-import { splitIntoParts } from './uploadUtils';
-import { createUserUploadS3Cached } from './userOS';
 
 function createTranscoderRequestFiles(
   sourceFiles: readonly Pick<
@@ -203,8 +203,8 @@ async function invokeTranscoderBySource(
   const downloadAudioToNFS = maxSourceFileSize >= USE_NFS_SIZE_THRESHOLD;
 
   const request: TranscoderRequest = {
-    callbackURL: DEV_TRANSCODER_CALLBACK_API_ENDPOINT,
-    callbackToken: DEV_TRANSCODER_CALLBACK_API_TOKEN,
+    callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
+    callbackToken: TRANSCODER_CALLBACK_API_TOKEN,
     files: createTranscoderRequestFiles(source.files, {
       // TODO(prod): make this configurable
       defaultUnknownAlbumArtist: 'Unknown Artist',
