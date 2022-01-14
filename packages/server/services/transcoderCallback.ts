@@ -180,7 +180,6 @@ async function markSourceIdAsTranscodedTx(
     where: {
       id: sourceId,
       userId,
-      state: is<SourceState>('transcoding'),
     },
     data: {
       state: is<SourceState>('transcoded'),
@@ -203,7 +202,6 @@ async function markSourceFileIdAsTx(
       id: sourceFileId,
       userId,
       sourceId,
-      state: is<SourceFileState>('transcoding'),
     },
     data: {
       state: newState,
@@ -256,28 +254,6 @@ function handleTranscoderResponseArtifactAudio(
 
   return client.$transaction(async (txClient): Promise<string | undefined> => {
     const timestamp = Date.now();
-
-    await markSourceIdAsTranscodedTx(txClient, userId, sourceId, timestamp);
-
-    await markSourceFileIdAsTx(
-      txClient,
-      userId,
-      sourceId,
-      sourceFileId,
-      'transcoded',
-      timestamp
-    );
-
-    if (cueSheetSourceFileId) {
-      await markSourceFileIdAsTx(
-        txClient,
-        userId,
-        sourceId,
-        cueSheetSourceFileId,
-        'transcoded',
-        timestamp
-      );
-    }
 
     let albumId: string | undefined;
 
@@ -453,6 +429,28 @@ function handleTranscoderResponseArtifactAudio(
         });
       }
     }
+
+    await markSourceFileIdAsTx(
+      txClient,
+      userId,
+      sourceId,
+      sourceFileId,
+      'transcoded',
+      timestamp
+    );
+
+    if (cueSheetSourceFileId) {
+      await markSourceFileIdAsTx(
+        txClient,
+        userId,
+        sourceId,
+        cueSheetSourceFileId,
+        'transcoded',
+        timestamp
+      );
+    }
+
+    await markSourceIdAsTranscodedTx(txClient, userId, sourceId, timestamp);
 
     return albumId;
   });
