@@ -55,6 +55,9 @@ export async function artistMerge(
         id: artistId,
         userId,
       },
+      select: {
+        imageOrder: true,
+      },
     });
 
     if (!artist) {
@@ -65,6 +68,9 @@ export async function artistMerge(
       where: {
         id: toArtistId,
         userId,
+      },
+      select: {
+        imageOrder: true,
       },
     });
 

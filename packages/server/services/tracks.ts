@@ -66,6 +66,9 @@ export async function trackUpdate(
           id: data.artistId,
           userId,
         },
+        select: {
+          id: true,
+        },
       });
       if (!artist) {
         throw new HTTPError(400, `Artist ${data.artistId} not found`);
@@ -93,6 +96,9 @@ export async function trackUpdate(
         where: {
           id: data.albumId,
           userId,
+        },
+        select: {
+          id: true,
         },
       });
       if (!album) {

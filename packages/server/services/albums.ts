@@ -43,6 +43,9 @@ export async function albumUpdate(
           id: data.artistId,
           userId,
         },
+        select: {
+          id: true,
+        },
       });
       if (!artist) {
         throw new HTTPError(400, `Artist ${data.artistId} not found`);
@@ -57,6 +60,9 @@ export async function albumUpdate(
               userId,
               createdAt: timestamp,
               updatedAt: timestamp,
+            },
+            select: {
+              id: true,
             },
           })
         : await dbArtistGetOrCreateByNameTx(txClient, userId, data.artistName);
@@ -99,6 +105,9 @@ export async function albumMerge(
         id: albumId,
         userId,
       },
+      select: {
+        imageOrder: true,
+      },
     });
 
     if (!album) {
@@ -109,6 +118,9 @@ export async function albumMerge(
       where: {
         id: toAlbumId,
         userId,
+      },
+      select: {
+        imageOrder: true,
       },
     });
 

@@ -18,7 +18,7 @@ import {
   TranscoderRequestFile,
   TranscoderRequestOptions,
 } from '$transcoder/types/transcoder';
-import { Source, SourceFile } from '$prisma/client';
+import type { SourceFile } from '$prisma/client';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { HTTPError } from '$/utils/httpError';
@@ -31,10 +31,23 @@ import { splitIntoParts } from './uploadUtils';
 import { createUserUploadS3Cached } from './userOS';
 
 function createTranscoderRequestFiles(
-  source: Source & { files: SourceFile[] },
+  sourceFiles: readonly Pick<
+    SourceFile,
+    | 'id'
+    | 'region'
+    | 'type'
+    | 'filename'
+    | 'fileSize'
+    | 'cueSheetFileId'
+    | 'attachToId'
+    | 'attachToType'
+    | 'attachPrepend'
+    | 'sourceId'
+    | 'userId'
+  >[],
   options: TranscoderRequestOptions
 ): TranscoderRequestFile[] {
-  return source.files
+  return sourceFiles
     .map((file): TranscoderRequestFile | null => {
       switch (file.type) {
         case 'audio':
@@ -44,7 +57,7 @@ function createTranscoderRequestFiles(
             region: file.region as OSRegion,
             filename: file.filename,
             fileSize: file.fileSize,
-            sourceId: source.id,
+            sourceId: file.sourceId,
             userId: file.userId,
             options,
             cueSheetSourceFileId: file.cueSheetFileId,
@@ -63,7 +76,7 @@ function createTranscoderRequestFiles(
             region: file.region as OSRegion,
             filename: file.filename,
             fileSize: file.fileSize,
-            sourceId: source.id,
+            sourceId: file.sourceId,
             userId: file.userId,
             options,
             attachToType: file.attachToType as SourceFileAttachToType,
@@ -107,8 +120,23 @@ async function invokeTranscoderBySource(
       id: sourceId,
       userId,
     },
-    include: {
-      files: true,
+    select: {
+      state: true,
+      files: {
+        select: {
+          id: true,
+          region: true,
+          type: true,
+          filename: true,
+          fileSize: true,
+          cueSheetFileId: true,
+          attachToId: true,
+          attachToType: true,
+          attachPrepend: true,
+          sourceId: true,
+          userId: true,
+        },
+      },
     },
   });
 
@@ -176,7 +204,7 @@ async function invokeTranscoderBySource(
   const request: TranscoderRequest = {
     callbackURL: DEV_TRANSCODER_CALLBACK_API_ENDPOINT,
     callbackToken: DEV_TRANSCODER_CALLBACK_API_TOKEN,
-    files: createTranscoderRequestFiles(source, {
+    files: createTranscoderRequestFiles(source.files, {
       // TODO(prod): make this configurable
       defaultUnknownAlbumArtist: 'Unknown Artist',
       defaultUnknownAlbumTitle: 'Unknown Album',
@@ -210,6 +238,9 @@ async function onSourceFileUpdated(
     where: {
       sourceId,
       userId,
+    },
+    select: {
+      state: true,
     },
   });
 
@@ -306,8 +337,15 @@ export async function onSourceFileAborted(
       sourceId,
       userId,
     },
-    include: {
-      source: true,
+    select: {
+      state: true,
+      region: true,
+      uploadId: true,
+      source: {
+        select: {
+          state: true,
+        },
+      },
     },
   });
 
@@ -395,8 +433,16 @@ export async function onSourceFileUploaded(
       sourceId,
       userId,
     },
-    include: {
-      source: true,
+    select: {
+      state: true,
+      region: true,
+      fileSize: true,
+      uploadId: true,
+      source: {
+        select: {
+          state: true,
+        },
+      },
     },
   });
 

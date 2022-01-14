@@ -22,8 +22,10 @@ import {
   SECRET_REFRESH_TOKEN_JWT_SECRET,
 } from './env';
 
+type UserSubset = Pick<User, 'id' | 'maxTrackId' | 'plan'>;
+
 export async function issueRefreshToken(
-  user: User,
+  user: UserSubset,
   timestamp: number
 ): Promise<string> {
   const signer = createSigner({
@@ -58,7 +60,10 @@ export async function extractUserIdFromRefreshToken(
   } catch (_error: unknown) {}
 }
 
-export function issueAPIToken(user: User, timestamp: number): Promise<string> {
+export function issueAPIToken(
+  user: UserSubset,
+  timestamp: number
+): Promise<string> {
   const signer = createSigner({
     algorithm: JWT_ALGORITHM,
     key: SECRET_API_JWT_SECRET,
@@ -75,7 +80,10 @@ export function issueAPIToken(user: User, timestamp: number): Promise<string> {
   );
 }
 
-export function issueCDNToken(user: User, timestamp: number): Promise<string> {
+export function issueCDNToken(
+  user: UserSubset,
+  timestamp: number
+): Promise<string> {
   const signer = createSigner({
     algorithm: JWT_ALGORITHM,
     key: SECRET_CDN_JWT_SECRET,
@@ -110,13 +118,19 @@ export async function extractPayloadFromCDNToken(
 }
 
 export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
-  let user: User;
+  let user: UserSubset;
 
   switch (body.grant_type) {
     case 'password': {
       const tempUser = await client.user.findUnique({
         where: {
           id: String(body.username),
+        },
+        select: {
+          id: true,
+          closedAt: true,
+          plan: true,
+          maxTrackId: true,
         },
       });
 
@@ -158,6 +172,12 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
       const tempUser = await client.user.findUnique({
         where: {
           id: extractedUserId,
+        },
+        select: {
+          id: true,
+          closedAt: true,
+          plan: true,
+          maxTrackId: true,
         },
       });
 

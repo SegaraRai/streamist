@@ -88,18 +88,6 @@ export function dbArtistCreateCachedGetOrCreateByNameTx(
   };
 }
 
-export function dbArtistGetOrCreateByName(
-  userId: string,
-  artistName: string,
-  artistNameSort?: string
-): Promise<Artist> {
-  // resolve Promise in advance to reduce transaction processing time
-  return client.$transaction(
-    (txClient): Promise<Artist> =>
-      dbArtistGetOrCreateByNameTx(txClient, userId, artistName, artistNameSort)
-  );
-}
-
 export function dbArtistAddImageTx(
   txClient: TransactionalPrismaClient,
   userId: string,

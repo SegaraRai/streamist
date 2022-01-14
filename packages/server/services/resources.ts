@@ -65,6 +65,9 @@ export function fetchResources(
         where: {
           userId,
         },
+        select: {
+          updatedAt: true,
+        },
       });
 
       if (!resourceUpdate) {

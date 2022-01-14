@@ -8,7 +8,7 @@ export async function updateMaxTrackId(
   skipUpdateTimestamp = false
 ): Promise<void> {
   try {
-    const user = await client.user.findFirst({
+    const user = await client.user.findUnique({
       where: { id: userId },
       select: { maxTrackId: true, plan: true },
     });
