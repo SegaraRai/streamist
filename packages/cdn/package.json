@@ -20,7 +20,6 @@
     "@types/node": "^16.11.19",
     "esbuild": "^0.14.11",
     "miniflare": "^2.1.0",
-    "node-dev": "^7.1.0",
-    "typescript": "npm:@typescript-deploys/pr-build@4.6.0-pr-47183-2"
+    "node-dev": "^7.1.0"
   }
 }

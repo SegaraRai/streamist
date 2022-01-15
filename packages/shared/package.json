@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "devDependencies": {
-    "typescript": "npm:@typescript-deploys/pr-build@4.6.0-pr-47183-2"
-  },
   "dependencies": {
     "chardet": "^1.4.0",
     "iconv-lite": "^0.6.3"
