@@ -8,9 +8,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.46.0",
+    "@aws-sdk/client-s3": "^3.47.0",
     "cookie": "^0.4.1",
-    "dotenv": "^11.0.0",
+    "dotenv": "^12.0.3",
     "worktop": "^0.8.0-next.9"
   },
   "devDependencies": {
@@ -19,7 +19,7 @@
     "@types/cookie": "^0.4.1",
     "@types/node": "^16.11.19",
     "esbuild": "^0.14.11",
-    "miniflare": "^2.0.0",
+    "miniflare": "^2.1.0",
     "node-dev": "^7.1.0",
     "typescript": "npm:@typescript-deploys/pr-build@4.6.0-pr-47183-2"
   }
