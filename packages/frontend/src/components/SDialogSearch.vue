@@ -193,9 +193,15 @@ export default defineComponent({
 
     const rsFuse = createFuse(queries$$q, { keys: ['query'] });
     const filteredRSQueries$$q = computed(() =>
-      rsFuse.value.search(debouncedSearchQuery$$q.value, {
-        limit: RECENTLY_SEARCHED_MAX_ENTRIES_DISPLAY,
-      })
+      (debouncedSearchQuery$$q.value
+        ? rsFuse.value
+            .search(debouncedSearchQuery$$q.value, {
+              limit: RECENTLY_SEARCHED_MAX_ENTRIES_DISPLAY + 1,
+            })
+            .map(({ item }) => item)
+            .filter(({ query }) => query !== debouncedSearchQuery$$q.value)
+        : queries$$q.value
+      ).slice(0, RECENTLY_SEARCHED_MAX_ENTRIES_DISPLAY)
     );
 
     return {
@@ -258,7 +264,7 @@ export default defineComponent({
         <template v-if="filteredRSQueries$$q.length">
           <v-list density="compact">
             <template
-              v-for="({ item }, _index) in filteredRSQueries$$q"
+              v-for="(item, _index) in filteredRSQueries$$q"
               :key="_index"
             >
               <s-search-history-item
