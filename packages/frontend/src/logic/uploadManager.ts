@@ -14,6 +14,7 @@ import {
 import { parseCueSheet } from '$shared/cueParser';
 import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText';
+import { retryUpload } from '$shared/retry';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -361,6 +362,14 @@ function doUpload(
   blob: Blob,
   onProgress: (size: number) => void
 ): Promise<string> {
+  const onProgressNoThrow = (size: number) => {
+    try {
+      onProgress(size);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return new Promise((resolve, reject): void => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', url);
@@ -370,11 +379,7 @@ function doUpload(
       xhr.upload.onprogress = null;
 
       if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          onProgress(blob.size);
-        } catch (_error: unknown) {
-          // ignore
-        }
+        onProgressNoThrow(blob.size);
         resolve(xhr.getResponseHeader('ETag') || '');
       } else {
         reject(new Error(`Failed to upload file: ${xhr.status}`));
@@ -388,17 +393,21 @@ function doUpload(
       reject(new Error(`Failed to upload file: ${xhr.status} ${error}`));
     };
     xhr.upload.onprogress = (event): void => {
-      try {
-        onProgress(event.loaded);
-      } catch (_error: unknown) {
-        // ignore
-      }
+      onProgressNoThrow(event.loaded);
     };
     xhr.setRequestHeader('Cache-Control', SOURCE_FILE_CACHE_CONTROL);
     xhr.setRequestHeader('Content-Encoding', SOURCE_FILE_CONTENT_ENCODING);
     xhr.setRequestHeader('Content-Type', SOURCE_FILE_CONTENT_TYPE);
     xhr.send(blob);
   });
+}
+
+function doUploadWithRetry(
+  url: string,
+  blob: Blob,
+  onProgress: (size: number) => void
+): Promise<string> {
+  return retryUpload(() => doUpload(url, blob, onProgress));
 }
 
 export class UploadManager extends EventTarget {
@@ -632,7 +641,7 @@ export class UploadManager extends EventTarget {
             }
 
             try {
-              const eTag = await doUpload(
+              const eTag = await doUploadWithRetry(
                 part.url,
                 partBlob,
                 (size: number): void => {
@@ -656,7 +665,7 @@ export class UploadManager extends EventTarget {
       return Promise.all(eTagPromises);
     } else {
       return this.uploadQueue.add(async (): Promise<void> => {
-        await doUpload(url.url, file, onProgress);
+        await doUploadWithRetry(url.url, file, onProgress);
       });
     }
   }
