@@ -112,8 +112,9 @@ export default defineComponent({
         <v-list flat @contextmenu.prevent>
           <template v-for="(item, _index) in items$$q" :key="_index">
             <v-list-item
+              :disabled="!!selectedPlaylist$$q"
               :to="`/playlists/${item.id$$q}`"
-              class="flex gap-x-4 s-hover-container"
+              class="flex gap-x-4 s-hover-container opacity-100"
               :class="
                 selectedPlaylist$$q?.id === item.id$$q
                   ? 's-list-item--selected'

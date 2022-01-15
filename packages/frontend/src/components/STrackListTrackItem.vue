@@ -103,13 +103,13 @@ export default defineComponent({
 
 <template>
   <v-list-item
+    v-ripple
     v-bind="$attrs"
     class="s-hover-container s-list-item w-full py-1 h-14 !<sm:px-2"
     :class="[
       selected ? 's-list-item--selected' : 's-list-item--unselected',
       !isAvailable$$q && 'opacity-60',
     ]"
-    :ripple="false"
     @contextmenu.stop.prevent="onContextMenu$$q($event)"
   >
     <!-- Track Number -->
