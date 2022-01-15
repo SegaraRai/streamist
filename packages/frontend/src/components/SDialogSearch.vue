@@ -374,6 +374,7 @@ export default defineComponent({
                     </div>
                   </v-list-item-header>
                   <v-btn
+                    v-show="item.t !== 'artist'"
                     icon
                     flat
                     text
