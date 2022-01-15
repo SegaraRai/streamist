@@ -8,13 +8,13 @@ import type {
   ResourceTrack,
 } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
-import { getDefaultArtistImage } from '~/logic/image';
 import {
   useAllAlbums,
   useAllArtists,
   useAllImageMap,
   useAllTracks,
-} from '~/logic/useDB';
+} from '~/composables';
+import { getDefaultArtistImage } from '~/logic/image';
 import { usePlaybackStore } from '~/stores/playback';
 
 interface Item {

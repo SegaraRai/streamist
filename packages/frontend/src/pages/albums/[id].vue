@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { ResourceTrack } from '$/types';
+import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { tryRedirect } from '~/stores/redirect';
 

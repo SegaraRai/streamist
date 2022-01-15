@@ -1,8 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import type { ResourceTrack } from '$/types';
-import { useMenu } from '~/logic/menu';
-import { createTrackDropdown } from '~/logic/naive-ui/trackDropdown';
+import { useMenu, useNDropdownTrack } from '~/composables';
 
 export default defineComponent({
   props: {
@@ -29,7 +28,7 @@ export default defineComponent({
       closeOnScroll$$q: true,
       scrollRef$$q: ref(0),
     });
-    const menuOptions$$q = createTrackDropdown({
+    const menuOptions$$q = useNDropdownTrack({
       selectedTrack$$q: eagerComputed(() => props.track),
       isSameSetList$$q: ref(true),
       playlistId$$q: ref(),

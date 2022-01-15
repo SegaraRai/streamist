@@ -1,21 +1,24 @@
 import type { MenuOption } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import type { ResourceArtist } from '$/types';
-import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
+import {
+  nCreateDropdownIcon,
+  nCreateDropdownTextColorStyle,
+} from '~/logic/naiveUI/dropdown';
 
-export interface ArtistDropdownCreateOptions {
+export interface NDropdownArtistCreateOptions {
   readonly artist$$q: Readonly<Ref<ResourceArtist | null | undefined>>;
   readonly openEditArtistDialog$$q?: () => void;
   readonly openMergeArtistDialog$$q?: () => void;
   readonly closeMenu$$q: () => void;
 }
 
-export function createArtistDropdown({
+export function useNDropdownArtist({
   artist$$q,
   openEditArtistDialog$$q,
   openMergeArtistDialog$$q,
   closeMenu$$q,
-}: ArtistDropdownCreateOptions): ComputedRef<MenuOption[]> {
+}: NDropdownArtistCreateOptions): ComputedRef<MenuOption[]> {
   const { t } = useI18n();
 
   const delayedCloseMenu = (): void => {

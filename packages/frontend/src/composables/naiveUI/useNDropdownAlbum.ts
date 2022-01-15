@@ -1,11 +1,14 @@
 import { MenuOption, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
-import { useTrackFilter } from '~/logic/filterTracks';
+import {
+  nCreateDropdownIcon,
+  nCreateDropdownTextColorStyle,
+} from '~/logic/naiveUI/dropdown';
 import { usePlaybackStore } from '~/stores/playback';
-import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
+import { useTrackFilter } from '../useTrackFilter';
 
-export interface AlbumDropdownCreateOptions {
+export interface NDropdownAlbumCreateOptions {
   readonly album$$q: Readonly<Ref<ResourceAlbum | null | undefined>>;
   readonly albumTracks$$q: Readonly<
     Ref<readonly ResourceTrack[] | null | undefined>
@@ -15,13 +18,13 @@ export interface AlbumDropdownCreateOptions {
   readonly closeMenu$$q: () => void;
 }
 
-export function createAlbumDropdown({
+export function useNDropdownAlbum({
   album$$q,
   albumTracks$$q,
   openEditAlbumDialog$$q,
   openMergeAlbumDialog$$q,
   closeMenu$$q,
-}: AlbumDropdownCreateOptions): ComputedRef<MenuOption[]> {
+}: NDropdownAlbumCreateOptions): ComputedRef<MenuOption[]> {
   const { t } = useI18n();
   const message = useMessage();
   const playbackStore = usePlaybackStore();

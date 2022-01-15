@@ -13,7 +13,7 @@ import {
   useAllArtists,
   useAllImageMap,
   useAllTracks,
-} from '~/logic/useDB';
+} from '~/composables';
 import { usePlaybackStore } from '~/stores/playback';
 
 interface Item {

@@ -1,5 +1,6 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { SourceFileAttachToType } from '$shared/types/db';
+import { useLiveQuery } from '~/composables';
 import {
   UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL,
   UPLOAD_MANAGER_DB_SYNC_INTERVAL,
@@ -13,7 +14,6 @@ import {
   removeUploadFile,
   resolveUploadFiles,
 } from '~/logic/uploadResolver';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 
 export const useUploadStore = defineStore('upload', () => {
   const syncDB = useSyncDB();

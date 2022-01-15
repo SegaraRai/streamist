@@ -3,13 +3,16 @@ import type { ComputedRef, Ref } from 'vue';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db';
 import api from '~/logic/api';
-import { useTrackFilter } from '~/logic/filterTracks';
+import { nCreateDialogContentWithWarning } from '~/logic/naiveUI/dialog';
+import {
+  nCreateDropdownIcon,
+  nCreateDropdownTextColorStyle,
+} from '~/logic/naiveUI/dropdown';
 import { usePlaybackStore } from '~/stores/playback';
 import { setRedirect } from '~/stores/redirect';
-import { nCreateDialogContentWithWarning } from './dialog';
-import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
+import { useTrackFilter } from '../useTrackFilter';
 
-export interface PlaylistDropdownCreateOptions {
+export interface NDropdownPlaylistCreateOptions {
   readonly playlist$$q: Readonly<Ref<ResourcePlaylist | null | undefined>>;
   readonly playlistTracks$$q: Readonly<
     Ref<readonly ResourceTrack[] | null | undefined>
@@ -20,14 +23,14 @@ export interface PlaylistDropdownCreateOptions {
   readonly closeMenu$$q: () => void;
 }
 
-export function createPlaylistDropdown({
+export function useNDropdownPlaylist({
   playlist$$q,
   playlistTracks$$q,
   showCreatePlaylist$$q,
   openEditPlaylistDialog$$q,
   openCreatePlaylistDialog$$q,
   closeMenu$$q,
-}: PlaylistDropdownCreateOptions): ComputedRef<MenuOption[]> {
+}: NDropdownPlaylistCreateOptions): ComputedRef<MenuOption[]> {
   const { t } = useI18n();
   const dialog = useDialog();
   const message = useMessage();

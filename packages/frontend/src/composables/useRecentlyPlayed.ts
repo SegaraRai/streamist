@@ -1,6 +1,6 @@
 import type { Ref } from 'vue';
 import { RECENTLY_PLAYED_MAX_ENTRIES } from '~/config';
-import { useTrackFilter } from './filterTracks';
+import { useTrackFilter } from './useTrackFilter';
 
 interface RecentlyPlayedItem {
   id: string;

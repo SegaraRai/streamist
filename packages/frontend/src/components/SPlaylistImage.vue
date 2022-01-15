@@ -1,8 +1,8 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import type { ResourceImage, ResourcePlaylist } from '$/types';
+import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 
 export default defineComponent({
   props: {

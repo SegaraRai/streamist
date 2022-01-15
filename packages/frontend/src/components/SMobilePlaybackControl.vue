@@ -1,5 +1,5 @@
 <script lang="ts">
-import { useCurrentTrackInfo } from '~/logic/currentTrackInfo';
+import { useCurrentTrackInfo } from '~/composables';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({

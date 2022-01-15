@@ -2,10 +2,9 @@
 import type { PropType } from 'vue';
 import { compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
+import { useLiveQuery, useTrackFilter } from '~/composables';
 import { db } from '~/db';
 import { formatTracksTotalDuration } from '~/logic/duration';
-import { useTrackFilter } from '~/logic/filterTracks';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import type { DropdownAlbumInput } from './SDropdownAlbum.vue';
 

@@ -1,8 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
-import { useMenu } from '~/logic/menu';
-import { createAlbumDropdown } from '~/logic/naive-ui/albumDropdown';
+import { useMenu, useNDropdownAlbum } from '~/composables';
 
 export interface DropdownAlbumInput {
   target$$q: MouseEvent | HTMLElement;
@@ -36,7 +35,7 @@ export default defineComponent({
       closeOnScroll$$q: true,
     });
 
-    const menuOptions$$q = createAlbumDropdown({
+    const menuOptions$$q = useNDropdownAlbum({
       album$$q: selectedAlbum$$q,
       albumTracks$$q: selectedAlbumTracks$$q,
       openEditAlbumDialog$$q: () => {

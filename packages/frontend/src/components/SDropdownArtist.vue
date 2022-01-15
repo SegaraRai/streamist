@@ -1,8 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import type { ResourceArtist } from '$/types';
-import { useMenu } from '~/logic/menu';
-import { createArtistDropdown } from '~/logic/naive-ui/artistDropdown';
+import { useMenu, useNDropdownArtist } from '~/composables';
 
 export interface DropdownArtistInput {
   target$$q: MouseEvent | HTMLElement;
@@ -34,7 +33,7 @@ export default defineComponent({
       closeOnScroll$$q: true,
     });
 
-    const menuOptions$$q = createArtistDropdown({
+    const menuOptions$$q = useNDropdownArtist({
       artist$$q: selectedArtist$$q,
       openEditArtistDialog$$q: () => {
         dialogEdit$$q.value = true;

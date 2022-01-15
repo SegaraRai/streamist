@@ -5,7 +5,7 @@ meta:
 
 <script lang="ts">
 import type { RepeatType } from '$shared/types/playback';
-import { useCurrentTrackInfo } from '~/logic/currentTrackInfo';
+import { useCurrentTrackInfo } from '~/composables';
 import { findAncestor } from '~/logic/findAncestor';
 import { usePlaybackStore } from '~/stores/playback';
 import { useVolumeStore } from '~/stores/volume';

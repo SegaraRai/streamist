@@ -1,8 +1,8 @@
 <script lang="ts">
 import type { PropType } from 'vue';
+import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
 import { createSrc } from '~/logic/srcSet';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 
 export default defineComponent({
   props: {

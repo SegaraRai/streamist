@@ -2,8 +2,8 @@
 import { PropType } from 'vue';
 import { compareAlbum } from '$shared/sort';
 import { ResourceArtist } from '$/types';
+import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 
 export default defineComponent({
   props: {

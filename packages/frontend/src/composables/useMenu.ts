@@ -1,9 +1,9 @@
 import type { Ref } from 'vue';
-import { currentScrollRef } from '~/stores/scroll';
 import {
   calcMenuPositionByElement,
   calcMenuPositionByEvent,
-} from './menuPosition';
+} from '~/logic/menuPosition';
+import { currentScrollRef } from '~/stores/scroll';
 
 export interface UseMenuOptions {
   closeOnScroll$$q?: boolean;

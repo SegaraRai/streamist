@@ -6,7 +6,7 @@ import type {
   ResourceImage,
   ResourceTrack,
 } from '$/types';
-import { useTrackFilter } from '~/logic/filterTracks';
+import { useTrackFilter } from '~/composables';
 import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
 

@@ -1,12 +1,12 @@
 <script lang="ts">
-import { humanizeSize } from '~/logic/humanizeSize';
 import {
   useAllAlbums,
   useAllArtists,
   useAllImages,
   useAllSourceFiles,
   useAllTracks,
-} from '~/logic/useDB';
+} from '~/composables';
+import { humanizeSize } from '~/logic/humanizeSize';
 
 export default defineComponent({
   setup() {

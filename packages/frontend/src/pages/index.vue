@@ -2,9 +2,8 @@
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$shared/sort';
 import type { ResourceTrack } from '$/types';
+import { useAllTrackMap, useAllTracks, useRecentlyPlayed } from '~/composables';
 import { RECENTLY_UPLOADED_MAX_ENTRIES } from '~/config';
-import { useRecentlyPlayed } from '~/logic/recentlyPlayed';
-import { useAllTrackMap, useAllTracks } from '~/logic/useDB';
 
 export default defineComponent({
   setup() {

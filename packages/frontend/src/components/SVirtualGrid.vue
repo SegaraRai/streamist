@@ -1,5 +1,5 @@
 <script lang="ts">
-import { useVirtualScrollList } from '~/logic/virtualScroll';
+import { useVirtualScrollList } from '~/composables';
 import {
   currentScrollContainerRef,
   currentScrollContentRef,

@@ -2,22 +2,24 @@
 import { compareTrack } from '$shared/sort';
 import { ResourceTrack } from '$/types';
 import {
+  AllItem,
+  useAllSearch,
+  useFuse,
+  useLiveQuery,
+  useMenu,
+  useNDropdownAlbum,
+  useNDropdownPlaylist,
+  useNDropdownTrack,
+  useRecentlySearched,
+  useTrackFilter,
+} from '~/composables';
+import {
   RECENTLY_SEARCHED_MAX_ENTRIES_DISPLAY,
   SEARCH_DEBOUNCE_INTERVAL,
   SEARCH_DEBOUNCE_MAX_WAIT,
   SEARCH_MAX_ENTRIES_DISPLAY,
 } from '~/config';
 import { db } from '~/db';
-import type { AllItem } from '~/logic/allItem';
-import { useTrackFilter } from '~/logic/filterTracks';
-import { createFuse } from '~/logic/fuse';
-import { useMenu } from '~/logic/menu';
-import { createAlbumDropdown } from '~/logic/naive-ui/albumDropdown';
-import { createPlaylistDropdown } from '~/logic/naive-ui/playlistDropdown';
-import { createTrackDropdown } from '~/logic/naive-ui/trackDropdown';
-import { useRecentlySearched } from '~/logic/recentlySearched';
-import { useLiveQuery } from '~/logic/useLiveQuery';
-import { useAllSearch } from '~/logic/useSearch';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
@@ -126,7 +128,7 @@ export default defineComponent({
       },
     });
 
-    const menuOptionsAlbum = createAlbumDropdown({
+    const menuOptionsAlbum = useNDropdownAlbum({
       album$$q: computed(() =>
         selectedItem.value?.t === 'album' ? selectedItem.value.i : undefined
       ),
@@ -140,7 +142,7 @@ export default defineComponent({
       }).value,
       closeMenu$$q,
     });
-    const menuOptionsPlaylist = createPlaylistDropdown({
+    const menuOptionsPlaylist = useNDropdownPlaylist({
       playlist$$q: computed(() =>
         selectedItem.value?.t === 'playlist' ? selectedItem.value.i : undefined
       ),
@@ -157,7 +159,7 @@ export default defineComponent({
       showCreatePlaylist$$q: ref(false),
       closeMenu$$q,
     });
-    const menuOptionsTrack = createTrackDropdown({
+    const menuOptionsTrack = useNDropdownTrack({
       selectedTrack$$q: computed(() =>
         selectedItem.value?.t === 'track' ? selectedItem.value.i : undefined
       ),
@@ -191,7 +193,7 @@ export default defineComponent({
       }
     });
 
-    const rsFuse = createFuse(queries$$q, { keys: ['query'] });
+    const rsFuse = useFuse(queries$$q, { keys: ['query'] });
     const filteredRSQueries$$q = computed(() =>
       (debouncedSearchQuery$$q.value
         ? rsFuse.value

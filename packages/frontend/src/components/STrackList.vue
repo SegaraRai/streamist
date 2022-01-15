@@ -6,14 +6,16 @@ import type {
   ResourceImage,
   ResourceTrack,
 } from '$/types';
+import {
+  useLiveQuery,
+  useMenu,
+  useNDropdownTrack,
+  useTrackFilter,
+  useVirtualScrollList,
+} from '~/composables';
 import { db } from '~/db';
-import { useTrackFilter } from '~/logic/filterTracks';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
-import { useMenu } from '~/logic/menu';
-import { createTrackDropdown } from '~/logic/naive-ui/trackDropdown';
-import { useLiveQuery } from '~/logic/useLiveQuery';
-import { useVirtualScrollList } from '~/logic/virtualScroll';
 import { waitForChange } from '~/logic/waitForChange';
 import { usePlaybackStore } from '~/stores/playback';
 import {
@@ -272,7 +274,7 @@ export default defineComponent({
         selectedTrackIndex$$q.value = undefined;
       },
     });
-    const menuOptions$$q = createTrackDropdown({
+    const menuOptions$$q = useNDropdownTrack({
       selectedTrack$$q,
       isSameSetList$$q,
       playlistId$$q: eagerComputed(() => props.playlistId),

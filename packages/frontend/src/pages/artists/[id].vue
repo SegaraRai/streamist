@@ -2,9 +2,8 @@
 import { compareAlbum, compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
+import { useLiveQuery, useTrackFilter } from '~/composables';
 import { db } from '~/db';
-import { useTrackFilter } from '~/logic/filterTracks';
-import { useLiveQuery } from '~/logic/useLiveQuery';
 import { usePlaybackStore } from '~/stores/playback';
 import { tryRedirect } from '~/stores/redirect';
 

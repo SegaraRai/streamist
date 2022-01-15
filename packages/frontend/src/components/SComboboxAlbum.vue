@@ -1,6 +1,6 @@
 <script lang="ts">
+import { useAlbumSearch } from '~/composables';
 import { db } from '~/db';
-import { useAlbumSearch } from '~/logic/useSearch';
 
 export default defineComponent({
   props: {

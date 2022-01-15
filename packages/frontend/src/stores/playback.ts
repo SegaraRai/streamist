@@ -2,12 +2,11 @@ import type { Ref } from 'vue';
 import type { RepeatType } from '$shared/types/playback';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
+import { useRecentlyPlayed, useTrackFilter } from '~/composables';
 import { db } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
-import { useTrackFilter } from '~/logic/filterTracks';
-import { useRecentlyPlayed } from '~/logic/recentlyPlayed';
 import { TrackProvider2 } from '~/logic/trackProvider2';
 import {
   realVolumeToVisualVolume,

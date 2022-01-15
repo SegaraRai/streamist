@@ -2,7 +2,7 @@
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceArtist } from '$/types';
-import { useAllAlbums, useAllArtists, useAllTracks } from '~/logic/useDB';
+import { useAllAlbums, useAllArtists, useAllTracks } from '~/composables';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({

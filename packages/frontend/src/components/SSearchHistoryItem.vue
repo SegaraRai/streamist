@@ -1,5 +1,5 @@
 <script lang="ts">
-import { useTranslatedTimeAgo } from '~/composables/timeAgo';
+import { useTranslatedTimeAgo } from '~/composables';
 
 export default defineComponent({
   props: {

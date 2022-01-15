@@ -3,7 +3,7 @@ import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import { parseDate } from '$shared/parseDate';
 import type { ResourceTrack } from '$/types';
-import { useTranslatedTimeAgo } from '~/composables/timeAgo';
+import { useTranslatedTimeAgo } from '~/composables';
 import { useSyncDB } from '~/db';
 import api from '~/logic/api';
 import {

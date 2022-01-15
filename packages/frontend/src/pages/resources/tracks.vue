@@ -1,6 +1,6 @@
 <script lang="ts">
 import { compareString } from '$shared/sort';
-import { useAllTracks } from '~/logic/useDB';
+import { useAllTracks } from '~/composables';
 
 export default defineComponent({
   setup() {

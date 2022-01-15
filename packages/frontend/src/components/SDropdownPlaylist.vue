@@ -1,8 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
-import { useMenu } from '~/logic/menu';
-import { createPlaylistDropdown } from '~/logic/naive-ui/playlistDropdown';
+import { useMenu, useNDropdownPlaylist } from '~/composables';
 
 export interface DropdownPlaylistInput {
   target$$q: MouseEvent | HTMLElement;
@@ -48,7 +47,7 @@ export default defineComponent({
         emit('update:selectedPlaylist', undefined);
       },
     });
-    const menuOptions$$q = createPlaylistDropdown({
+    const menuOptions$$q = useNDropdownPlaylist({
       playlist$$q: selectedPlaylist$$q,
       playlistTracks$$q: selectedPlaylistTracks$$q,
       showCreatePlaylist$$q: eagerComputed(() => props.showCreateItem),

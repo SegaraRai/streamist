@@ -3,14 +3,17 @@ import type { ComputedRef, Ref } from 'vue';
 import type { ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db';
 import api from '~/logic/api';
+import { nCreateDialogContentWithWarning } from '~/logic/naiveUI/dialog';
+import {
+  nCreateDropdownIcon,
+  nCreateDropdownTextColorStyle,
+} from '~/logic/naiveUI/dropdown';
 import { usePlaybackStore } from '~/stores/playback';
 import { setRedirect } from '~/stores/redirect';
-import { useTrackFilter } from '../filterTracks';
 import { useAllPlaylists } from '../useDB';
-import { nCreateDialogContentWithWarning } from './dialog';
-import { nCreateDropdownIcon, nCreateDropdownTextColorStyle } from './dropdown';
+import { useTrackFilter } from '../useTrackFilter';
 
-export interface TrackDropdownCreateOptions {
+export interface NDropdownTrackCreateOptions {
   readonly selectedTrack$$q: Readonly<Ref<ResourceTrack | null | undefined>>;
   readonly isSameSetList$$q: Readonly<Ref<boolean>>;
   readonly playlistId$$q: Readonly<Ref<string | null | undefined>>;
@@ -24,7 +27,7 @@ export interface TrackDropdownCreateOptions {
   readonly closeMenu$$q: () => void;
 }
 
-export function createTrackDropdown({
+export function useNDropdownTrack({
   selectedTrack$$q,
   isSameSetList$$q,
   playlistId$$q,
@@ -36,7 +39,7 @@ export function createTrackDropdown({
   openEditTrackDialog$$q,
   onNavigate$$q,
   closeMenu$$q,
-}: TrackDropdownCreateOptions): ComputedRef<MenuOption[]> {
+}: NDropdownTrackCreateOptions): ComputedRef<MenuOption[]> {
   const router = useRouter();
   const { t } = useI18n();
   const dialog = useDialog();

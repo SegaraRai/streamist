@@ -1,8 +1,8 @@
 <script lang="ts">
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import type { DropdownPlaylistInput } from '~/components/SDropdownPlaylist.vue';
+import { useAllPlaylists, useAllTrackMap } from '~/composables';
 import { calcTracksTotalDuration, formatTotalDuration } from '~/logic/duration';
-import { useAllPlaylists, useAllTrackMap } from '~/logic/useDB';
 import { usePlaybackStore } from '~/stores/playback';
 
 interface Item {
