@@ -124,6 +124,9 @@ function _usePlaybackStore(): PlaybackState {
   const { isTrackAvailable$$q, serializedFilterKey$$q } = useTrackFilter();
   const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
 
+  const repeat = useLocalStorage<RepeatType>('playback.repeat', 'off');
+  const shuffle = useLocalStorage<boolean>('playback.shuffle', false);
+
   let currentAudio: HTMLAudioElement | undefined;
 
   const trackProvider = new TrackProvider2<ResourceTrack>();
@@ -143,8 +146,6 @@ function _usePlaybackStore(): PlaybackState {
     },
   });
 
-  const repeat = ref<RepeatType>('off');
-  const shuffle = ref<boolean>(false);
   const currentTrack = ref<ResourceTrack | undefined>();
   const queue = ref<ResourceTrack[]>([]);
   const playNextQueue = ref<ResourceTrack[]>([]);

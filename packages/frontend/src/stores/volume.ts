@@ -5,8 +5,8 @@ function normalize(volume: number): number {
 }
 
 export const useVolumeStore = defineStore('volume', () => {
-  const volume = ref(100);
-  const unmutedVolume = ref(100);
+  const volume = useLocalStorage('playback.volume', 100);
+  const unmutedVolume = useLocalStorage('playback.volumeUnmuted', 100);
 
   return {
     volume: computed<number>({
