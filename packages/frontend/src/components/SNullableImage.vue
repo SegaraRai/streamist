@@ -38,7 +38,7 @@ export default defineComponent({
       noImageSrc$$q: noImage,
       srcObject$$q: srcObject,
       src$$q: src,
-      loading$$q: loading.value,
+      loading$$q: loading,
     };
   },
 });
