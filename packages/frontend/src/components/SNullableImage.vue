@@ -7,8 +7,8 @@ import { SrcObject, createSrc } from '~/logic/srcSet';
 export default defineComponent({
   props: {
     image: {
-      type: [Boolean, Object] as PropType<
-        ResourceImage | null | undefined | false
+      type: [Boolean, String, Object] as PropType<
+        Pick<ResourceImage, 'files'> | string | null | undefined | false
       >,
       default: undefined,
     },
@@ -22,20 +22,30 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const srcObject = computed<SrcObject | null | undefined | false>(
-      () => props.image && createSrc(props.image.files, Number(props.size))
+    const srcObject = computed<SrcObject | undefined>(() =>
+      props.image != null && typeof props.image === 'object'
+        ? createSrc(props.image.files, Number(props.size))
+        : undefined
     );
+
+    const src = computed<string | undefined>(() =>
+      typeof props.image === 'string' ? props.image : undefined
+    );
+
+    const loading = computed<boolean>(() => props.image === false);
 
     return {
       noImageSrc$$q: noImage,
       srcObject$$q: srcObject,
+      src$$q: src,
+      loading$$q: loading.value,
     };
   },
 });
 </script>
 
 <template>
-  <template v-if="srcObject$$q == null">
+  <template v-if="!srcObject$$q && !src$$q && !loading$$q">
     <img
       :alt="alt"
       :src="noImageSrc$$q"
@@ -44,18 +54,18 @@ export default defineComponent({
   </template>
   <template v-else>
     <div class="overflow-hidden leading-none relative s-lazyload-container z-0">
-      <template v-if="srcObject$$q">
+      <template v-if="srcObject$$q || src$$q">
         <img
           v-lazysizes
           data-sizes="auto"
-          :data-src="srcObject$$q.src$$q"
-          :data-srcset="srcObject$$q.srcSet$$q"
+          :data-src="srcObject$$q?.src$$q ?? src$$q"
+          :data-srcset="srcObject$$q?.srcSet$$q"
           :alt="alt"
           src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQI12NgYAAAAAMAASDVlMcAAAAASUVORK5CYII="
           class="block object-cover absolute top-0 left-0 w-full h-full s-lazyload-image z-1 pointer-events-none"
         />
       </template>
-      <template v-else-if="srcObject$$q === false">
+      <template v-else-if="loading$$q">
         <div
           class="block object-cover absolute top-0 left-0 w-full h-full s-lazyload-image z-1"
         ></div>
@@ -63,7 +73,7 @@ export default defineComponent({
       <div
         class="absolute top-0 left-0 w-full h-full s-lazyload-background flex items-center justify-center"
       >
-        <!-- template v-if="srcObject$$q === false">
+        <!-- template v-if="loading$$q">
           <v-progress-circular indeterminate />
         </template -->
       </div>

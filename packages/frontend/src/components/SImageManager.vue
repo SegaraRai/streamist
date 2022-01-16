@@ -9,7 +9,6 @@ import { api } from '~/logic/api';
 import { FILE_ACCEPT_IMAGE } from '~/logic/fileAccept';
 import { getImageFileURL } from '~/logic/fileURL';
 import { NAIVE_UI_THEMES, createOverrideTheme } from '~/logic/theme';
-import type { FileId } from '~/logic/uploadManager';
 import { waitForChange } from '~/logic/waitForChange';
 import { useThemeStore } from '~/stores/theme';
 import { useUploadStore } from '~/stores/upload';
@@ -71,8 +70,6 @@ export default defineComponent({
 
         case 'playlist':
           return api.my.playlists._playlistId(props.attachToId);
-
-        default:
       }
     };
 
@@ -80,23 +77,31 @@ export default defineComponent({
       return getAPIRoot()?.images._imageId(imageId);
     };
 
-    const uploadingFileIds$$q = ref<readonly FileId[]>([]);
     const uploadingFiles$$q = computed(() => {
-      const map = new Map(uploadStore.files.map((file) => [file.id, file]));
-      return uploadingFileIds$$q.value.map((id) => map.get(id)!);
-    });
-    const uploading$$q = computed(() =>
-      uploadingFiles$$q.value.some(
+      return uploadStore.files.filter(
         (file) =>
-          file.status === 'pending' ||
-          file.status === 'validating' ||
-          file.status === 'validated' ||
-          file.status === 'queued' ||
-          file.status === 'uploading' ||
-          file.status === 'uploaded' ||
-          file.status === 'transcoding'
-      )
-    );
+          (file.status === 'pending' ||
+            file.status === 'validating' ||
+            file.status === 'validated' ||
+            file.status === 'queued' ||
+            file.status === 'uploading' ||
+            file.status === 'uploaded' ||
+            file.status === 'transcoding') &&
+          file.attachTarget?.attachToType === props.attachToType &&
+          file.attachTarget?.attachToId === props.attachToId
+      );
+    });
+    const uploadingFilesPrepend$$q = computed(() => {
+      return uploadingFiles$$q.value.filter(
+        (file) => file.attachTarget?.attachPrepend
+      );
+    });
+    const uploadingFilesAppend$$q = computed(() => {
+      return uploadingFiles$$q.value
+        .filter((file) => !file.attachTarget?.attachPrepend)
+        .reverse();
+    });
+    const uploading$$q = computed(() => uploadingFiles$$q.value.length > 0);
 
     const inputFileElement$$q = ref<HTMLInputElement | null>(null);
     const dialog$$q = ref(false);
@@ -110,7 +115,8 @@ export default defineComponent({
       if (imageIds$$q.value.length === 0) {
         return [];
       }
-      return await db.images.bulkGet([...imageIds$$q.value]);
+      const allImages = await db.images.bulkGet([...imageIds$$q.value]);
+      return allImages.filter((image): image is ResourceImage => !!image);
     }, [imageIds$$q]);
 
     watchEffect(() => {
@@ -131,6 +137,8 @@ export default defineComponent({
       uploading$$q,
       accept$$q: FILE_ACCEPT_IMAGE,
       dragging$$q: ref(false),
+      uploadingFilesPrepend$$q,
+      uploadingFilesAppend$$q,
       getOriginalImageURL$$q: (
         image: ResourceImage | undefined
       ): string | undefined => {
@@ -208,7 +216,7 @@ export default defineComponent({
           return;
         }
 
-        uploadingFileIds$$q.value = uploadStore.uploadImageFiles(
+        uploadStore.uploadImageFiles(
           Array.from(fileList),
           props.attachToType,
           props.attachToId,
@@ -285,73 +293,109 @@ export default defineComponent({
             x-scrollable
           >
             <template v-if="images$$q">
-              <s-draggable
-                :items="images$$q"
-                item-key="id"
-                class="flex gap-x-4 h-64 sm:h-80 pt-8"
-                :on-move="onImageOrderChanged$$q"
-                :disabled="images$$q.length <= 1"
-                @dragstart="dragging$$q = true"
-                @dragend="dragging$$q = false"
-              >
-                <template #item="{ element }">
-                  <div class="flex-none flex flex-col gap-y-4 items-center">
-                    <a
-                      class="block"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      :href="getOriginalImageURL$$q(element)"
+              <div class="py-8 !<sm:pb-16">
+                <s-draggable
+                  :items="images$$q"
+                  item-key="id"
+                  class="flex gap-x-4 h-48 sm:h-64"
+                  :on-move="onImageOrderChanged$$q"
+                  :disabled="images$$q.length <= 1"
+                  @dragstart="dragging$$q = true"
+                  @dragend="dragging$$q = false"
+                >
+                  <template #header>
+                    <template
+                      v-for="image in uploadingFilesPrepend$$q"
+                      :key="image.id"
                     >
-                      <s-nullable-image
-                        class="flex-none w-32 h-32 sm:w-48 sm:h-48"
-                        :image="element"
-                        :alt="attachToTitle"
-                        size="200"
+                      <s-uploading-image
+                        class="flex-none w-32 h-32 sm:w-48 sm:h-48 overflow-hidden"
+                        :file="image.file"
                       />
-                    </a>
-                    <n-config-provider :theme-overrides="errorOverrideTheme$$q">
-                      <n-popconfirm
-                        :positive-text="t('confirm.deleteImage.button.Delete')"
-                        :negative-text="t('confirm.deleteImage.button.Cancel')"
-                        @positive-click="removeImage$$q(element.id)"
+                    </template>
+                  </template>
+                  <template #item="{ element }">
+                    <div class="flex-none flex flex-col gap-y-4 items-center">
+                      <a
+                        class="block"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        :href="getOriginalImageURL$$q(element)"
                       >
-                        <template #trigger>
-                          <n-button
-                            tag="div"
-                            text
-                            class="select-none"
-                            :class="dragging$$q ? 'invisible' : ''"
-                            @dragstart.stop.prevent
-                          >
-                            <v-btn flat icon size="small" class="text-st-error">
-                              <v-icon>mdi-delete</v-icon>
-                            </v-btn>
-                          </n-button>
-                        </template>
-                        <div class="flex flex-col gap-y-2">
-                          <div class="flex-1">
-                            {{ t('confirm.deleteImage.text', [attachToTitle]) }}
+                        <s-nullable-image
+                          class="flex-none w-32 h-32 sm:w-48 sm:h-48"
+                          :image="element"
+                          :alt="attachToTitle"
+                          size="200"
+                        />
+                      </a>
+                      <n-config-provider
+                        :theme-overrides="errorOverrideTheme$$q"
+                      >
+                        <n-popconfirm
+                          :positive-text="
+                            t('confirm.deleteImage.button.Delete')
+                          "
+                          :negative-text="
+                            t('confirm.deleteImage.button.Cancel')
+                          "
+                          @positive-click="removeImage$$q(element.id)"
+                        >
+                          <template #trigger>
+                            <n-button
+                              tag="div"
+                              text
+                              class="select-none"
+                              :class="dragging$$q ? 'invisible' : ''"
+                              data-draggable="false"
+                              @dragstart.stop.prevent
+                            >
+                              <v-btn
+                                flat
+                                icon
+                                size="small"
+                                class="text-st-error"
+                              >
+                                <v-icon>mdi-delete</v-icon>
+                              </v-btn>
+                            </n-button>
+                          </template>
+                          <div class="flex flex-col gap-y-2">
+                            <div class="flex-1">
+                              {{
+                                t('confirm.deleteImage.text', [attachToTitle])
+                              }}
+                            </div>
+                            <div class="font-bold text-sm text-st-error">
+                              {{ t('common.ThisActionCannotBeUndone') }}
+                            </div>
                           </div>
-                          <div class="font-bold text-sm text-st-error">
-                            {{ t('common.ThisActionCannotBeUndone') }}
-                          </div>
-                        </div>
-                      </n-popconfirm>
-                    </n-config-provider>
-                  </div>
-                </template>
-                <template #footer>
-                  <div class="flex-none flex flex-col gap-y-4 items-center">
-                    <v-btn
-                      flat
-                      class="!w-32 !h-32 !sm:w-48 !sm:h-48 flex items-center justify-center border"
-                      @click="inputFileElement$$q?.click()"
+                        </n-popconfirm>
+                      </n-config-provider>
+                    </div>
+                  </template>
+                  <template #footer>
+                    <template
+                      v-for="image in uploadingFilesAppend$$q"
+                      :key="image.id"
                     >
-                      <v-icon size="48">mdi-image-plus</v-icon>
-                    </v-btn>
-                  </div>
-                </template>
-              </s-draggable>
+                      <s-uploading-image
+                        class="flex-none w-32 h-32 sm:w-48 sm:h-48 overflow-hidden"
+                        :file="image.file"
+                      />
+                    </template>
+                    <div class="flex-none flex flex-col gap-y-4 items-center">
+                      <v-btn
+                        flat
+                        class="!w-32 !h-32 !sm:w-48 !sm:h-48 flex items-center justify-center border"
+                        @click="inputFileElement$$q?.click()"
+                      >
+                        <v-icon size="48">mdi-image-plus</v-icon>
+                      </v-btn>
+                    </div>
+                  </template>
+                </s-draggable>
+              </div>
             </template>
           </n-scrollbar>
         </v-card-text>

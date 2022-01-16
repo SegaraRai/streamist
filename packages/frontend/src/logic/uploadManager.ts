@@ -606,7 +606,16 @@ export class UploadManager extends EventTarget {
         },
         uploadedSize: null,
         createSourcePromise: null,
-        attachTarget: null,
+        attachTarget:
+          fileType === 'image' &&
+          sourceFile.attachToType &&
+          sourceFile.attachToId
+            ? {
+                attachToType: sourceFile.attachToType as SourceFileAttachToType,
+                attachToId: sourceFile.attachToId,
+                attachPrepend: !!sourceFile.attachPrepend,
+              }
+            : null,
       });
 
       changed = true;

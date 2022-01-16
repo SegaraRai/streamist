@@ -9,6 +9,7 @@ import { COLOR_CSS_VAR_MAP, toKebabCase } from './theme';
 
 export default defineConfig({
   darkMode: 'class',
+
   // https://windicss.org/posts/v30.html#attributify-mode
   attributify: true,
 
