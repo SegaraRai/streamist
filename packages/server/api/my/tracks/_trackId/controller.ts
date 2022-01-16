@@ -26,7 +26,7 @@ export default defineController(() => ({
       preferAlbumArtist: !!query?.preferAlbumArtist,
       preferOldArtist: !!query?.preferOldArtist,
     });
-    return { status: 204, body: newTrack };
+    return { status: 200, body: newTrack };
   },
   delete: async ({ params, user }) => {
     await trackDelete(user.id, params.trackId, true);
