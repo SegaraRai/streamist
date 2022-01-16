@@ -1,4 +1,9 @@
-import { RETRY_WAITS_S3, RETRY_WAITS_UPLOAD } from './config';
+import {
+  RETRY_WAITS_API,
+  RETRY_WAITS_S3,
+  RETRY_WAITS_TRANSACTION,
+  RETRY_WAITS_UPLOAD,
+} from './config';
 import { sleep } from './sleep';
 
 export async function retry<T>(
@@ -30,3 +35,9 @@ export const retryS3NoReject = <T>(
 
 export const retryUpload = <T>(func: () => Promise<T>): Promise<T> =>
   retry<T>(func, RETRY_WAITS_UPLOAD);
+
+export const retryAPI = <T>(func: () => Promise<T>): Promise<T> =>
+  retry<T>(func, RETRY_WAITS_API);
+
+export const retryTransactionImpl = <T>(func: () => Promise<T>): Promise<T> =>
+  retry<T>(func, RETRY_WAITS_TRANSACTION);

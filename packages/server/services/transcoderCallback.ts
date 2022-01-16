@@ -26,11 +26,11 @@ import {
 } from '$/config';
 import { dbAlbumAddImageTx } from '$/db/album';
 import { dbArtistAddImageTx } from '$/db/artist';
-import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import type { TransactionalPrismaClient } from '$/db/lib/types';
 import { dbPlaylistAddImageTx } from '$/db/playlist';
 import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
+import { retryTransaction } from '$/services//transaction';
 import { logger } from '$/services/logger';
 import { updateMaxTrackId } from '$/services/maxTrack';
 
@@ -217,7 +217,7 @@ function handleTranscoderResponseArtifactError(
     source: { sourceFileId, sourceId, userId },
   } = artifact;
 
-  return client.$transaction(async (txClient): Promise<void> => {
+  return retryTransaction(async (txClient): Promise<void> => {
     const timestamp = Date.now();
 
     await markSourceFileIdAsTx(
@@ -252,7 +252,7 @@ function handleTranscoderResponseArtifactAudio(
     },
   } = artifact;
 
-  return client.$transaction(async (txClient): Promise<string | undefined> => {
+  return retryTransaction(async (txClient): Promise<string | undefined> => {
     const timestamp = Date.now();
 
     let albumId: string | undefined;
@@ -480,7 +480,7 @@ async function handleTranscoderResponseArtifactImage(
     );
   };
 
-  const succeeded = await client.$transaction(
+  const succeeded = await retryTransaction(
     async (txClient): Promise<boolean> => {
       const timestamp = Date.now();
 
