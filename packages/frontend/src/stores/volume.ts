@@ -1,41 +1,58 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { MAX_VOLUME, MIN_UNMUTED_VOLUME, MIN_VOLUME } from '$shared/config';
 
 function normalize(volume: number): number {
-  return Math.max(Math.min(Math.round(volume), 100), 0);
+  return Math.max(Math.min(Math.round(volume), MAX_VOLUME), MIN_VOLUME);
 }
 
+const createSerializer = (minVolume = MIN_VOLUME) => ({
+  read: (strVolume: string | null | undefined): number => {
+    const volume = strVolume ? parseInt(strVolume, 10) : MAX_VOLUME;
+    return isFinite(volume)
+      ? Math.max(normalize(volume), minVolume)
+      : MAX_VOLUME;
+  },
+  write: (volume: number): string => {
+    return Math.max(normalize(volume), minVolume).toString();
+  },
+});
+
 export const useVolumeStore = defineStore('volume', () => {
-  const volume = useLocalStorage('playback.volume', 100);
-  const unmutedVolume = useLocalStorage('playback.volumeUnmuted', 100);
+  const volume = useLocalStorage('playback.volume', MAX_VOLUME, {
+    serializer: createSerializer(),
+  });
+  const unmutedVolume = useLocalStorage('playback.volumeUnmuted', MAX_VOLUME, {
+    serializer: createSerializer(MIN_UNMUTED_VOLUME),
+  });
 
   return {
     volume: computed<number>({
-      get() {
+      get(): number {
         return volume.value;
       },
-      set(value) {
+      set(value: number): void {
         const normalizedValue = normalize(value);
-        if (normalizedValue !== 0) {
-          unmutedVolume.value = normalizedValue;
+        if (normalizedValue > MIN_VOLUME) {
+          unmutedVolume.value = Math.max(normalizedValue, MIN_UNMUTED_VOLUME);
         }
         volume.value = normalizedValue;
       },
     }),
-    setDraggingVolume: (value: number) => {
+    setDraggingVolume: (value: number): void => {
       const normalizedValue = normalize(value);
       if (normalizedValue === volume.value) {
         return;
       }
       volume.value = normalizedValue;
     },
-    muted: computed({
-      get() {
-        return volume.value === 0;
+    muted: computed<boolean>({
+      get(): boolean {
+        return volume.value === MIN_VOLUME;
       },
-      set(value) {
+      set(value: boolean): void {
         if (value) {
-          unmutedVolume.value = volume.value;
-          volume.value = 0;
+          unmutedVolume.value = Math.max(volume.value, MIN_UNMUTED_VOLUME);
+          volume.value = MIN_VOLUME;
         } else {
           volume.value = unmutedVolume.value;
         }

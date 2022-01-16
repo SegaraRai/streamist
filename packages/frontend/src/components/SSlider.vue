@@ -98,9 +98,7 @@ export default defineComponent({
     <div class="relative w-full h-full">
       <!-- track (bg) -->
       <div ref="e" class="absolute top-0 w-full h-full flex items-center">
-        <div
-          class="w-full h-1 text-st-text bg-current opacity-20 rounded-full"
-        ></div>
+        <div class="w-full h-1 bg-st-text opacity-20 rounded-full"></div>
       </div>
       <!-- track (progress) -->
       <div
@@ -109,9 +107,7 @@ export default defineComponent({
       >
         <div
           class="w-full h-1 rounded-full s-hover-hidden"
-          :class="
-            dragging$$q ? 'bg-primary' : 'text-st-text bg-current opacity-70'
-          "
+          :class="dragging$$q ? 'bg-primary' : 'bg-st-text opacity-70'"
         ></div>
         <div class="w-full h-1 rounded-full s-hover-visible bg-primary"></div>
       </div>

@@ -1,9 +1,11 @@
 <script lang="ts">
+import { HALF_VOLUME, MAX_VOLUME, MIN_VOLUME } from '$shared/config';
+
 export default defineComponent({
   props: {
     modelValue: {
       type: Number,
-      default: 100,
+      default: MAX_VOLUME,
     },
   },
   emits: {
@@ -21,13 +23,14 @@ export default defineComponent({
       }
     );
     return {
+      maxVolume$$q: MAX_VOLUME,
       volume$$q,
       icon$$q: computed(() => {
         const volume = draggingVolume$$q.value ?? volume$$q.value;
-        if (volume === 0) {
+        if (volume === MIN_VOLUME) {
           return 'mdi-volume-mute';
         }
-        if (volume <= 50) {
+        if (volume <= HALF_VOLUME) {
           return 'mdi-volume-medium';
         }
         return 'mdi-volume-high';
@@ -59,7 +62,7 @@ export default defineComponent({
     <div class="ml-2 flex-1">
       <s-slider
         :value="volume$$q"
-        :max="100"
+        :max="maxVolume$$q"
         @dragging="onDragging$$q"
         @update="onUpdate$$q"
       />

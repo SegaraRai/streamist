@@ -1,5 +1,7 @@
-const K = 1.5;
-const R = 100;
+import { MAX_VOLUME, VOLUME_EXP_FACTOR } from '$shared/config';
+
+const K = VOLUME_EXP_FACTOR;
+const R = MAX_VOLUME;
 
 const K_INV = 1 / K;
 const R_INV = 1 / R;

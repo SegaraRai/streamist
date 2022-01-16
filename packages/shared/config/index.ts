@@ -7,3 +7,4 @@ export * from './playback';
 export * from './retry';
 export * from './sourceFile';
 export * from './user';
+export * from './volume';
