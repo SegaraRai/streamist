@@ -135,7 +135,7 @@ export const useUploadStore = defineStore('upload', () => {
       if (stagedFiles.value.length > 0) {
         return true;
       }
-      return manager.files.some((file) => manager.canRemoveFile(file));
+      return files.value.some((file) => manager.canRemoveFile(file));
     }),
   };
 });
