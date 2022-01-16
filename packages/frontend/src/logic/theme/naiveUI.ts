@@ -88,6 +88,9 @@ export const NAIVE_UI_THEMES: Record<ThemeName, NaiveUITheme> =
             closeColorDisabled: createDisabled(theme.error, theme.dark),
             popoverColor: theme.tooltip,
           },
+          Dropdown: {
+            optionHeightMedium: '36px',
+          },
         },
       },
     ])
