@@ -12,7 +12,7 @@ import {
 import { parseCueSheet } from '$shared/cueParser';
 import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText';
-import { retryUpload } from '$shared/retry';
+import { retryAPI, retryUpload } from '$shared/retry';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -945,15 +945,17 @@ export class UploadManager extends EventTarget {
                 file.uploadEndAt = Date.now();
                 this._dispatchUpdateEvent();
 
-                await api.my.sources
-                  ._sourceId(sourceId)
-                  .files._sourceFileId(sourceFileId)
-                  .$patch({
-                    body: {
-                      state: 'uploaded',
-                      parts: eTags ?? undefined,
-                    },
-                  });
+                await retryAPI(() =>
+                  api.my.sources
+                    ._sourceId(sourceId)
+                    .files._sourceFileId(sourceFileId)
+                    .$patch({
+                      body: {
+                        state: 'uploaded',
+                        parts: eTags ?? undefined,
+                      },
+                    })
+                );
 
                 file.status = 'transcoding';
                 this._dispatchUpdateEvent();
