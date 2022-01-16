@@ -8,7 +8,7 @@ import Fastify, {
   FastifyServerFactory,
 } from 'fastify';
 import helmet from 'fastify-helmet';
-import fastifyJwt from 'fastify-jwt';
+import { fastifyJwt } from 'fastify-jwt';
 import server from '$/$server';
 import {
   API_BASE_PATH,

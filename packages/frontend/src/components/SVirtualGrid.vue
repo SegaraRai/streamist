@@ -102,16 +102,16 @@ export default defineComponent({
     :style="containerStyle$$q"
   >
     <template
-      v-for="{ data: items, index: _index } in listRows$$q"
+      v-for="{ data: [cols, dummyCols], index: _index } in listRows$$q"
       :key="_index"
     >
       <div class="flex w-full justify-between" :style="rowStyle$$q">
-        <template v-for="(item, _index2) in items[0]" :key="_index2">
+        <template v-for="(item, _index2) in cols" :key="_index2">
           <div :style="cellStyle$$q">
             <slot :data="item" :width="itemWidth"></slot>
           </div>
         </template>
-        <template v-for="(_item, _index2) in items[1]" :key="_index2">
+        <template v-for="(_item, _index2) in dummyCols" :key="_index2">
           <div :style="cellStyle$$q"></div>
         </template>
       </div>
