@@ -83,7 +83,7 @@ export default defineComponent({
       <div class="absolute w-full h-full top-0 left-0 right-0 bottom-0">
         <slot name="overlay" :activate="activate$$q">
           <v-btn
-            class="absolute right-2 bottom-2 bg-opacity-80 bg-true-gray-900"
+            class="absolute right-2 bottom-2 text-white bg-black/30 hover:bg-black/60 transition"
             size="small"
             flat
             icon
