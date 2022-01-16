@@ -1,21 +1,21 @@
 <script lang="ts">
 export default defineComponent({
   props: {
-    volume: {
+    modelValue: {
       type: Number,
       default: 100,
     },
   },
   emits: {
     dragging: (_newVolume: number) => true,
-    update: (_newVolume: number) => true,
+    'update:modelValue': (_newVolume: number) => true,
     mute: () => true,
   },
   setup(props, { emit }) {
     const draggingVolume$$q = ref<number | undefined>();
-    const volume$$q = ref(props.volume);
+    const volume$$q = ref(props.modelValue);
     watch(
-      computed(() => props.volume),
+      computed(() => props.modelValue),
       (newVolume) => {
         volume$$q.value = newVolume;
       }
@@ -40,7 +40,7 @@ export default defineComponent({
         volume$$q.value = newVolume;
       },
       onUpdate$$q(newVolume: number) {
-        emit('update', newVolume);
+        emit('update:modelValue', newVolume);
         volume$$q.value = newVolume;
       },
       toggleMute$$q() {

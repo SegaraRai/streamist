@@ -206,9 +206,8 @@ export default defineComponent({
     >
       <div class="flex-1 max-w-40">
         <s-volume-control
-          :volume="volumeStore$$q.volume"
+          v-model="volumeStore$$q.volume"
           @mute="volumeStore$$q.muted = !volumeStore$$q.muted"
-          @update="volumeStore$$q.volume = $event"
           @dragging="volumeStore$$q.setDraggingVolume($event)"
         />
       </div>
