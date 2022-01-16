@@ -4,7 +4,7 @@ import type { PropType } from 'vue';
 import type { ResourceArtist } from '$/types';
 import { useTranslatedTimeAgo } from '~/composables';
 import { useSyncDB } from '~/db';
-import api from '~/logic/api';
+import { api } from '~/logic/api';
 import { convertOptStr, convertReqStr } from '~/logic/editUtils';
 
 export default defineComponent({

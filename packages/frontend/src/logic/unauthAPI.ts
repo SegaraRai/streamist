@@ -4,6 +4,4 @@ import createAPI from '$/api/$api';
 
 const axiosInstance = axios.create();
 
-const unAuthAPI = createAPI(aspida(axiosInstance));
-
-export default unAuthAPI;
+export const unAuthAPI = createAPI(aspida(axiosInstance));

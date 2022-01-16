@@ -5,9 +5,7 @@ import { tokens } from './tokens';
 
 const axiosInstance = axios.create();
 
-const api = createAPI(aspida(axiosInstance));
-
-export default api;
+export const api = createAPI(aspida(axiosInstance));
 
 export function activateTokenInterceptor() {
   axiosInstance.interceptors.request.use(

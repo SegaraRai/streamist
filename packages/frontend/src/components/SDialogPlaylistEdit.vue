@@ -3,7 +3,7 @@ import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
 import type { ResourcePlaylist } from '$/types';
 import { useSyncDB } from '~/db';
-import api from '~/logic/api';
+import { api } from '~/logic/api';
 import { convertOptStr, convertReqStr } from '~/logic/editUtils';
 
 export default defineComponent({

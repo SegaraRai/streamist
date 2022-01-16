@@ -5,7 +5,7 @@ import type { SourceFileAttachToType } from '$shared/types';
 import type { ResourceImage } from '$/types';
 import { useLiveQuery } from '~/composables';
 import { db, useSyncDB } from '~/db';
-import api from '~/logic/api';
+import { api } from '~/logic/api';
 import { FILE_ACCEPT_IMAGE } from '~/logic/fileAccept';
 import { getImageFileURL } from '~/logic/fileURL';
 import { NAIVE_UI_THEMES, createOverrideTheme } from '~/logic/theme';

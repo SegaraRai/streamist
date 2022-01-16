@@ -2,7 +2,7 @@ import { MenuOption, useDialog, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db';
-import api from '~/logic/api';
+import { api } from '~/logic/api';
 import { nCreateDialogContentWithWarning } from '~/logic/naiveUI/dialog';
 import {
   nCreateDropdownIcon,

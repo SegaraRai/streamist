@@ -27,7 +27,7 @@ import type {
 } from '$/types';
 import type { VSourceCreateBodyWrapper } from '$/validators';
 import { db } from '~/db';
-import api from '~/logic/api';
+import { api } from '~/logic/api';
 import type {
   ResolvedFileId,
   ResolvedUploadFile,

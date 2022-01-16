@@ -4,7 +4,7 @@ import type { PropType } from 'vue';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useLiveQuery, useTrackFilter } from '~/composables';
 import { db, useSyncDB } from '~/db';
-import api from '~/logic/api';
+import { api } from '~/logic/api';
 import { formatTracksTotalDuration } from '~/logic/duration';
 import { usePlaybackStore } from '~/stores/playback';
 import type { DropdownPlaylistInput } from './SDropdownPlaylist.vue';

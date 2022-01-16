@@ -1,7 +1,7 @@
 import { createAsyncCache } from '$shared/asyncCache';
 import { TOKEN_SHOULD_RENEW_TOLERANCE } from '~/config';
 import { isJWTExpired } from '~/logic/jwt';
-import unAuthAPI from '~/logic/unAuthAPI';
+import { unAuthAPI } from '~/logic/unAuthAPI';
 import { isAxiosError } from './axiosError';
 
 export interface Tokens {
