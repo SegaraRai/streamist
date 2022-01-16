@@ -53,15 +53,14 @@ export default defineComponent({
         if (!album$$q) {
           throw new Error(`Album ${propAlbum} not found`);
         }
+        const albumId = album$$q.id;
         const artist$$q = await db.artists.get(album$$q.artistId);
         if (!artist$$q) {
           throw new Error(
             `Artist ${album$$q.artistId} not found. (database corrupted)`
           );
         }
-        const tracks$$q = await db.tracks
-          .where({ albumId: album$$q.id })
-          .toArray();
+        const tracks$$q = await db.tracks.where({ albumId }).toArray();
         tracks$$q.sort(compareTrack);
         if (propAlbumRef.value !== propAlbum) {
           throw new Error('operation aborted');

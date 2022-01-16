@@ -31,6 +31,7 @@ declare module 'vue' {
     SAlbum: typeof import('./components/SAlbum.vue')['default']
     SAlbumImage: typeof import('./components/SAlbumImage.vue')['default']
     SAlbumImageX: typeof import('./components/SAlbumImageX.vue')['default']
+    SArtist: typeof import('./components/SArtist.vue')['default']
     SArtistImage: typeof import('./components/SArtistImage.vue')['default']
     SArtistImageX: typeof import('./components/SArtistImageX.vue')['default']
     SCoArtistEdit: typeof import('./components/SCoArtistEdit.vue')['default']
