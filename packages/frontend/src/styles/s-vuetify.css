@@ -22,3 +22,8 @@
 .s-v-input-hide-details .v-input__details {
   @apply hidden;
 }
+
+.v-textarea textarea {
+  /* stylelint-disable-next-line color-function-notation */
+  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));
+}
