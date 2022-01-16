@@ -1,4 +1,4 @@
-import { MAX_TRACKS_PER_PLAN, Plan } from '$shared/config/plans';
+import { MAX_TRACKS_PER_PLAN, Plan } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { logger } from '$/services/logger';

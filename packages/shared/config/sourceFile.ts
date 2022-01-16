@@ -1,5 +1,3 @@
-import { getExtension } from '../path';
-import type { SourceFileType } from '../types/db';
 import { CACHE_CONTROL_PRIVATE_IMMUTABLE } from './cacheControl';
 
 export const SOURCE_FILE_CONTENT_ENCODING = 'identity';
@@ -71,21 +69,3 @@ export const SOURCE_IMAGE_FILE_EXTENSION_SET: ReadonlySet<string> =
   /* @__PURE__ */ new Set(SOURCE_IMAGE_FILE_EXTENSIONS);
 
 export const SOURCE_CUE_SHEET_FILE_EXTENSION = '.cue';
-
-export function getSourceFileType(
-  filename: string
-): SourceFileType | undefined {
-  const extension = getExtension(filename).toLowerCase();
-
-  if (extension === SOURCE_CUE_SHEET_FILE_EXTENSION) {
-    return 'cueSheet';
-  }
-
-  if (SOURCE_AUDIO_FILE_EXTENSION_SET.has(extension)) {
-    return 'audio';
-  }
-
-  if (SOURCE_IMAGE_FILE_EXTENSION_SET.has(extension)) {
-    return 'image';
-  }
-}

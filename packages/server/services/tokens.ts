@@ -12,7 +12,7 @@ import {
   JWT_REFRESH_TOKEN_AUD,
   JWT_REFRESH_TOKEN_EXPIRES_IN,
   JWT_REFRESH_TOKEN_ISS,
-} from '$shared/config/jwt';
+} from '$shared/config';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
 import type { IAuthRequest, IAuthResponse } from '$/validators';

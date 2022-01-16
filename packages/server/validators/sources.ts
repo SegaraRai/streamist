@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { is } from '$shared/is';
 import type { OSRegion } from '$shared/objectStorage';
-import type { SourceFileAttachToType, SourceFileState } from '$shared/types/db';
+import type { SourceFileAttachToType, SourceFileState } from '$shared/types';
 import {
   CreateSourceRequestAudio,
   CreateSourceRequestFileAudio,

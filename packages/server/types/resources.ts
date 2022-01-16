@@ -1,4 +1,4 @@
-import type { DeletionEntityType } from '$shared/types/db';
+import type { DeletionEntityType } from '$shared/types';
 import type {
   Album,
   AlbumCoArtist,

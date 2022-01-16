@@ -12,14 +12,14 @@ import type {
   SourceFileState,
   SourceFileType,
   SourceState,
-} from '$shared/types/db';
-import type { FFprobeTags } from '$transcoder/types/ffprobe';
+} from '$shared/types';
 import type {
+  FFprobeTags,
   TranscoderResponse,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactError,
   TranscoderResponseArtifactImage,
-} from '$transcoder/types/transcoder';
+} from '$transcoder/types';
 import {
   TRANSCODER_CALLBACK_API_PATH,
   TRANSCODER_CALLBACK_API_TOKEN,

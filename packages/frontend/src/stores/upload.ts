@@ -1,5 +1,5 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import type { SourceFileAttachToType } from '$shared/types/db';
+import type { SourceFileAttachToType } from '$shared/types';
 import { useLiveQuery } from '~/composables';
 import {
   UPLOAD_MANAGER_DB_SYNC_CHECK_INTERVAL,

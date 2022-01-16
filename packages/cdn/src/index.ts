@@ -11,8 +11,8 @@ import {
   CACHE_CONTROL_NO_STORE,
   CACHE_CONTROL_PRIVATE_IMMUTABLE,
   CACHE_CONTROL_PUBLIC_IMMUTABLE,
-} from '$shared/config/cacheControl';
-import { JWT_CDN_TOKEN_AUD } from '$shared/config/jwt';
+  JWT_CDN_TOKEN_AUD,
+} from '$shared/config';
 import { isId } from '$shared/id';
 import {
   getOSRawURL,

@@ -1,4 +1,4 @@
-import { CUE_SHEET_OFFSET_INDEX } from './config/cueSheet';
+import { CUE_SHEET_OFFSET_INDEX } from './config';
 import type { CueSheet } from './cueParser';
 
 export class CueSheetError extends Error {

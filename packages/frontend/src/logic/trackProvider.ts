@@ -1,6 +1,6 @@
-import { MAX_HISTORY_SIZE, MIN_QUEUE_SIZE } from '$shared/config/queue';
+import { MAX_HISTORY_SIZE, MIN_QUEUE_SIZE } from '$shared/config';
 import { shuffleArray } from '$shared/shuffle';
-import type { RepeatType } from '$shared/types/playback';
+import type { RepeatType } from '$shared/types';
 
 /*
 ## 用語定義

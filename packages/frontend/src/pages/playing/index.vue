@@ -4,7 +4,7 @@ meta:
 </route>
 
 <script lang="ts">
-import type { RepeatType } from '$shared/types/playback';
+import type { RepeatType } from '$shared/types';
 import { useCurrentTrackInfo } from '~/composables';
 import { findAncestor } from '~/logic/findAncestor';
 import { usePlaybackStore } from '~/stores/playback';

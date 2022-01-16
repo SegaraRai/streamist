@@ -1,4 +1,4 @@
-import { USER_TREAT_AS_DELETED_AFTER_CLOSE } from '$shared/config/user';
+import { USER_TREAT_AS_DELETED_AFTER_CLOSE } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { osDeleteImageFiles } from '$/os/imageFile';
 import { osDeleteSourceFiles } from '$/os/sourceFile';

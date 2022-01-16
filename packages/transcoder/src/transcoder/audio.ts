@@ -40,13 +40,11 @@ import type {
   FFprobeStreamAudio,
   FFprobeStreamVideo,
   FFprobeTags,
-} from '../types/ffprobe';
-import type {
   TranscoderRequestFileAudio,
   TranscoderRequestFileImageExtracted,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactAudioTrack,
-} from '../types/transcoder';
+} from '../types';
 import { getTranscodeAudioFormats } from './audioFormats';
 import { TranscodeError } from './error';
 

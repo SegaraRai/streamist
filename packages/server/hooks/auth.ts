@@ -1,4 +1,4 @@
-import type { Plan } from '$shared/config/plans';
+import type { Plan } from '$shared/config';
 import { HTTPError } from '$/utils/httpError';
 import type { OnRequestHookHandler } from './types';
 

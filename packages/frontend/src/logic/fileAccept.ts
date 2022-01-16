@@ -2,7 +2,7 @@ import {
   SOURCE_AUDIO_FILE_EXTENSIONS,
   SOURCE_CUE_SHEET_FILE_EXTENSION,
   SOURCE_IMAGE_FILE_EXTENSIONS,
-} from '$shared/config/sourceFile';
+} from '$shared/config';
 
 export const FILE_ACCEPT_IMAGE = [
   'image/*',

@@ -8,17 +8,15 @@ import {
   MAX_SOURCE_AUDIO_FILE_SIZE_PER_PLAN,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE_PER_PLAN,
   MAX_SOURCE_IMAGE_FILE_SIZE_PER_PLAN,
-  Plan,
-} from '$shared/config/plans';
-import {
   MIN_SOURCE_FILE_SIZE,
+  Plan,
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
   SOURCE_FILE_UPLOADABLE_AFTER_CREATE,
-} from '$shared/config/sourceFile';
+} from '$shared/config';
 import { is } from '$shared/is';
 import {
   OSRegion,
@@ -32,7 +30,7 @@ import {
   SourceFileType,
   SourceState,
   toSourceFileAttachToType,
-} from '$shared/types/db';
+} from '$shared/types';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import type {
@@ -41,7 +39,7 @@ import type {
   CreateSourceResponse,
   UploadURL,
   UploadURLPart,
-} from '$/types/index';
+} from '$/types';
 import { HTTPError } from '$/utils/httpError';
 import { splitIntoParts, useMultipartUpload } from './uploadUtils';
 import { createUserUploadS3Cached } from './userOS';

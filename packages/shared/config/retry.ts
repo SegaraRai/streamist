@@ -1,2 +1,2 @@
-export const S3_RETRY_WAITS = [1000, 2000, 5000] as const;
-export const UPLOAD_RETRY_WAITS = [1000, 2000, 5000] as const;
+export const RETRY_WAITS_S3 = [1000, 2000, 5000] as const;
+export const RETRY_WAITS_UPLOAD = [1000, 2000, 5000] as const;

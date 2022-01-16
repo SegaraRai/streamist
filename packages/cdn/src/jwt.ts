@@ -1,5 +1,5 @@
 import { HS256, JWT } from 'worktop/jwt';
-import type { Plan } from '$shared/config/plans';
+import type { Plan } from '$shared/config';
 import type { Bindings } from './types';
 
 export interface JWTPayload extends JWT.Claims {

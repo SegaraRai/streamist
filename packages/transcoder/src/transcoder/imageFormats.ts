@@ -1,5 +1,5 @@
 import { filterFalsy } from '$shared/filter';
-import type { ImageMagickImage, ImageMagickResult } from '../types/imageMagick';
+import type { ImageMagickImage, ImageMagickResult } from '../types';
 
 export interface ImageFormat {
   /** フォーマットのID */

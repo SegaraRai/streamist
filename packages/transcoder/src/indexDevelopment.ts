@@ -8,7 +8,7 @@ import { nodeReadableStreamToBuffer } from '$shared-server/stream';
 import { TRANSCODER_API_PATH, TRANSCODER_PORT } from './devConfig';
 import logger from './logger';
 import { transcode } from './transcode';
-import type { TranscoderRequest } from './types/transcoder';
+import type { TranscoderRequest } from './types';
 
 const server = createServer();
 

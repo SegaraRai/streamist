@@ -1,6 +1,6 @@
 import type { IndexableType, Table } from 'dexie';
 import { useMessage } from 'naive-ui';
-import type { DeletionEntityType } from '$shared/types/db';
+import type { DeletionEntityType } from '$shared/types';
 import type { ResourceDeletion, ResourceUser } from '$/types';
 import api from '~/logic/api';
 import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';

@@ -1,5 +1,5 @@
 import type { Ref } from 'vue';
-import type { RepeatType } from '$shared/types/playback';
+import type { RepeatType } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
 import { useRecentlyPlayed, useTrackFilter } from '~/composables';

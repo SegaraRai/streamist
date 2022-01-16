@@ -23,7 +23,7 @@ import type {
   TranscoderRequestFileImageExtracted,
   TranscoderResponseArtifactImage,
   TranscoderResponseArtifactImageFile,
-} from '../types/transcoder';
+} from '../types';
 import { TranscodeError } from './error';
 import { getTranscodeImageFormats } from './imageFormats';
 

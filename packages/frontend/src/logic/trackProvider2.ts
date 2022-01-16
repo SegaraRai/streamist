@@ -1,4 +1,4 @@
-import { MAX_HISTORY_SIZE } from '$shared/config/queue';
+import { MAX_HISTORY_SIZE } from '$shared/config';
 import { TrackBase, TrackProvider } from './trackProvider';
 
 /**

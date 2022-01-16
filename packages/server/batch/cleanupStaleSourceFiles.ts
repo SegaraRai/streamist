@@ -2,9 +2,9 @@ import type { Prisma } from '@prisma/client';
 import {
   SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD,
   SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE,
-} from '$shared/config/sourceFile';
+} from '$shared/config';
 import { is } from '$shared/is';
-import type { SourceFileState, SourceState } from '$shared/types/db';
+import type { SourceFileState, SourceState } from '$shared/types';
 import { client } from '$/db/lib/client';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 

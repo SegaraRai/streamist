@@ -1,5 +1,5 @@
 import type { OSRegion } from '$shared/objectStorage';
-import type { SourceFileAttachToType } from '$shared/types/db';
+import type { SourceFileAttachToType } from '$shared/types';
 import type { UploadURL } from './upload';
 
 export interface CreateSourceRequestFileAudio {

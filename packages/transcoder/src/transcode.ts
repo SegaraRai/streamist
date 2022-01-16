@@ -5,7 +5,7 @@ import type {
   TranscoderRequestFileInternal,
   TranscoderResponse,
   TranscoderResponseArtifact,
-} from './types/transcoder';
+} from './types';
 
 export async function transcode(
   request: TranscoderRequest

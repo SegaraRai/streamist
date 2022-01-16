@@ -1,4 +1,4 @@
-import { CACHE_CONTROL_NO_STORE } from '$shared/config/cacheControl';
+import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { fetchResources } from '$/services/resources';
 import { defineController } from './$relay';
 

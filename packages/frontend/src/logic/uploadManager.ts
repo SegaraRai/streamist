@@ -3,14 +3,12 @@ import {
   MAX_SOURCE_AUDIO_FILE_SIZE_PER_PLAN,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE_PER_PLAN,
   MAX_SOURCE_IMAGE_FILE_SIZE_PER_PLAN,
-  Plan,
-} from '$shared/config/plans';
-import {
   MIN_SOURCE_FILE_SIZE,
+  Plan,
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
-} from '$shared/config/sourceFile';
+} from '$shared/config';
 import { parseCueSheet } from '$shared/cueParser';
 import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText';
@@ -19,14 +17,14 @@ import type {
   SourceFileAttachToType,
   SourceFileState,
   SourceFileType,
-} from '$shared/types/db';
+} from '$shared/types';
 import type {
   CreateSourceResponse,
+  CreateSourceResponseFile,
   ResourceSourceFile,
   ResourceUser,
   UploadURL,
 } from '$/types';
-import type { CreateSourceResponseFile } from '$/types/createSource';
 import type { VSourceCreateBodyWrapper } from '$/validators';
 import { db } from '~/db';
 import api from '~/logic/api';

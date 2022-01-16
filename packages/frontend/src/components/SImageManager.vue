@@ -1,7 +1,7 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
-import type { SourceFileAttachToType } from '$shared/types/db';
+import type { SourceFileAttachToType } from '$shared/types';
 import type { ResourceImage } from '$/types';
 import { useLiveQuery } from '~/composables';
 import { db, useSyncDB } from '~/db';

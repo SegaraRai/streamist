@@ -2,8 +2,7 @@ import { existsSync } from 'node:fs';
 import { normalizeTextForSingleLine } from '$shared/normalize';
 import { calcDHash } from './dHash';
 import { UploadJSONStorage, execAndLog } from './execAndLog';
-import type { FFprobeResult, FFprobeTags } from './types/ffprobe';
-import type { ImageMagickResult } from './types/imageMagick';
+import type { FFprobeResult, FFprobeTags, ImageMagickResult } from './types';
 
 const isProductionOrStagingEnv =
   process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';

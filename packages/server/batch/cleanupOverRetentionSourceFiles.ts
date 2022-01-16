@@ -1,7 +1,4 @@
-import {
-  MAX_SOURCE_FILE_RETENTION_PER_PLAN,
-  PLANS,
-} from '$shared/config/plans';
+import { MAX_SOURCE_FILE_RETENTION_PER_PLAN, PLANS } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 

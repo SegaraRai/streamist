@@ -1,5 +1,5 @@
+import type { DeletionEntityType } from '$shared/types';
 import { logger } from '$/services/logger';
-import type { DeletionEntityType } from '../../types/db';
 import { client } from './client';
 import type { TransactionalPrismaClient } from './types';
 

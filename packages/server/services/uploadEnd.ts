@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { USE_NFS_SIZE_THRESHOLD } from '$shared/config/sourceFile';
+import { USE_NFS_SIZE_THRESHOLD } from '$shared/config';
 import { is } from '$shared/is';
 import {
   OSRegion,
@@ -11,13 +11,13 @@ import type {
   SourceFileAttachToType,
   SourceFileState,
   SourceState,
-} from '$shared/types/db';
+} from '$shared/types';
 import { TRANSCODER_API_ENDPOINT } from '$transcoder/devConfig';
 import {
   TranscoderRequest,
   TranscoderRequestFile,
   TranscoderRequestOptions,
-} from '$transcoder/types/transcoder';
+} from '$transcoder/types';
 import type { SourceFile } from '$prisma/client';
 import {
   TRANSCODER_CALLBACK_API_ENDPOINT,

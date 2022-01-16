@@ -1,5 +1,5 @@
 <script lang="ts">
-import { MIN_QUEUE_SIZE } from '$shared/config/queue';
+import { MIN_QUEUE_SIZE } from '$shared/config';
 import type { ResourceTrack } from '$/types';
 import { usePlaybackStore } from '~/stores/playback';
 
