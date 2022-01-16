@@ -75,6 +75,16 @@ title:
   Playing:
     track: "{0} by {1} {'|'} Streamist"
     no_track: 'Streamist'
+coArtist:
+  label:
+    Artist: Artist
+  role:
+    '#artist': Artist
+    '#vocal': Vocal
+    '#arranger': Arranger
+    '#composer': Composer
+    '#lyricist': Lyricist
+    '#producer': Producer
 search:
   NoResultsFound: No results found
 imageManager:
@@ -153,6 +163,7 @@ dialogComponent:
     button:
       OK: OK
       Cancel: Cancel
+    creators: Creators
     label:
       Title: Title
       TitleSort: Title sort
@@ -202,6 +213,7 @@ dialogComponent:
     button:
       OK: OK
       Cancel: Cancel
+    creators: Creators
     more: More
     label:
       Title: Title

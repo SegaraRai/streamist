@@ -1,11 +1,18 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
+import type { CoArtistRole } from '$shared/coArtist';
 import { parseDate } from '$shared/parseDate';
+import { compareCoArtist } from '$shared/sort';
 import type { ResourceTrack } from '$/types';
-import { useTranslatedTimeAgo } from '~/composables';
-import { useSyncDB } from '~/db';
+import { useLiveQuery, useTranslatedTimeAgo } from '~/composables';
+import { db, useSyncDB } from '~/db';
 import { api } from '~/logic/api';
+import {
+  CoArtist,
+  createCoArtistUpdate,
+  isSameCoArtists,
+} from '~/logic/coArtist';
 import {
   convertOptId,
   convertOptNum,
@@ -34,6 +41,12 @@ export default defineComponent({
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
+    const requestInProgress$$q = ref(false);
+
+    const { valueAsync: allTrackCoArtistsPromise } = useLiveQuery(() =>
+      db.trackCoArtists.toArray()
+    );
+
     const trackId$$q = ref('');
     const albumId$$q = ref<string | undefined>();
     const albumTitle$$q = ref('');
@@ -48,8 +61,11 @@ export default defineComponent({
     const itemBPM$$q = createIntegerRef();
     const itemComment$$q = ref('');
     const itemLyrics$$q = ref('');
+    const itemOrgCoArtists$$q = ref<CoArtist[] | undefined>();
+    const itemCoArtists$$q = ref<CoArtist[] | undefined>();
 
     const reloadData = (newTrack: ResourceTrack): void => {
+      requestInProgress$$q.value = false;
       trackId$$q.value = newTrack.id;
       albumId$$q.value = newTrack.albumId;
       albumTitle$$q.value = '';
@@ -64,6 +80,19 @@ export default defineComponent({
       itemBPM$$q.value = newTrack.bpm ?? undefined;
       itemComment$$q.value = newTrack.comment || '';
       itemLyrics$$q.value = newTrack.lyrics || '';
+      itemOrgCoArtists$$q.value = undefined;
+      itemCoArtists$$q.value = undefined;
+      allTrackCoArtistsPromise.value.then((allTrackCoArtists) => {
+        if (trackId$$q.value !== newTrack.id) {
+          return;
+        }
+        const coArtists: CoArtist[] = allTrackCoArtists
+          .filter((item) => item.trackId === newTrack.id)
+          .sort(compareCoArtist)
+          .map((item) => [item.role as CoArtistRole, item.artistId, '']);
+        itemOrgCoArtists$$q.value = JSON.parse(JSON.stringify(coArtists));
+        itemCoArtists$$q.value = coArtists;
+      });
     };
 
     watch(
@@ -140,13 +169,18 @@ export default defineComponent({
         ((itemLyrics$$q.value || null) &&
           itemLyrics$$q.value !== props.track.lyrics) ||
         (!isAlbumEmpty$$q.value && albumId$$q.value !== props.track.albumId) ||
-        (!isArtistEmpty$$q.value && artistId$$q.value !== props.track.artistId)
+        (!isArtistEmpty$$q.value &&
+          artistId$$q.value !== props.track.artistId) ||
+        (itemOrgCoArtists$$q.value &&
+          itemCoArtists$$q.value &&
+          !isSameCoArtists(itemOrgCoArtists$$q.value, itemCoArtists$$q.value))
     );
 
     return {
       t,
       imageIds$$q: ref<readonly string[] | undefined>(),
       dialog$$q,
+      requestInProgress$$q,
       isAlbumEmpty$$q,
       albumId$$q,
       albumName$$q: albumTitle$$q,
@@ -165,6 +199,7 @@ export default defineComponent({
       itemBPM$$q,
       itemComment$$q,
       itemLyrics$$q,
+      itemCoArtists$$q,
       modified$$q,
       strCreatedAt$$q: useTranslatedTimeAgo(
         eagerComputed(() => props.track.createdAt)
@@ -173,6 +208,10 @@ export default defineComponent({
         eagerComputed(() => props.track.updatedAt)
       ),
       apply$$q: () => {
+        if (requestInProgress$$q.value) {
+          return;
+        }
+
         const track = props.track;
         const trackId = trackId$$q.value;
         if (track.id !== trackId) {
@@ -181,6 +220,8 @@ export default defineComponent({
 
         const oldAlbumId = track.albumId;
         const oldArtistId = track.artistId;
+
+        requestInProgress$$q.value = true;
 
         api.my.tracks
           ._trackId(trackId)
@@ -212,6 +253,13 @@ export default defineComponent({
               artistName: artistId$$q.value
                 ? undefined
                 : artistName$$q.value.trim(),
+              coArtists:
+                itemOrgCoArtists$$q.value && itemCoArtists$$q.value
+                  ? createCoArtistUpdate(
+                      itemOrgCoArtists$$q.value,
+                      itemCoArtists$$q.value
+                    )
+                  : undefined,
             },
           })
           .then((newTrack) => {
@@ -237,6 +285,9 @@ export default defineComponent({
             message.error(
               t('message.FailedToModifyTrack', [track.title, String(error)])
             );
+          })
+          .finally(() => {
+            requestInProgress$$q.value = false;
           });
       },
     };
@@ -298,7 +349,14 @@ export default defineComponent({
               create
             />
             <n-collapse>
-              <n-collapse-item title="More">
+              <n-collapse-item :title="t('dialogComponent.editTrack.creators')">
+                <template v-if="itemCoArtists$$q">
+                  <s-co-artist-edit v-model="itemCoArtists$$q" />
+                </template>
+              </n-collapse-item>
+            </n-collapse>
+            <n-collapse>
+              <n-collapse-item :title="t('dialogComponent.editTrack.more')">
                 <div class="flex flex-col gap-y-6">
                   <div class="flex gap-6 flex-col sm:flex-row">
                     <div class="flex-1 flex-grow-[2] flex gap-6">
@@ -384,11 +442,26 @@ export default defineComponent({
           {{ t('dialogComponent.editTrack.button.Cancel') }}
         </v-btn>
         <v-btn
+          class="relative"
           color="primary"
-          :disabled="isAlbumEmpty$$q || isArtistEmpty$$q || !modified$$q"
+          :disabled="
+            requestInProgress$$q ||
+            isAlbumEmpty$$q ||
+            isArtistEmpty$$q ||
+            !modified$$q
+          "
           @click="apply$$q"
         >
-          {{ t('dialogComponent.editTrack.button.OK') }}
+          <span :class="requestInProgress$$q && 'invisible'">
+            {{ t('dialogComponent.editTrack.button.OK') }}
+          </span>
+          <template v-if="requestInProgress$$q">
+            <v-progress-circular
+              class="absolute left-0 top-0 right-0 bottom-0 m-auto"
+              indeterminate
+              size="20"
+            />
+          </template>
         </v-btn>
       </v-card-actions>
     </v-card>

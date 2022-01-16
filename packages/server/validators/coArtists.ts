@@ -14,7 +14,13 @@ import {
   tStringNormalizeSingleLine,
 } from './utils';
 
-export class VCoArtistUpdateAdd {
+export interface ICoArtistUpdateAdd {
+  role: CoArtistRole;
+  artistId?: string;
+  artistName?: string;
+}
+
+export class VCoArtistUpdateAdd implements ICoArtistUpdateAdd {
   @IsCoArtistRole()
   @Transform(({ value }) => tStringNormalizeSingleLine(value))
   role!: CoArtistRole;
@@ -30,7 +36,12 @@ export class VCoArtistUpdateAdd {
   artistName?: string;
 }
 
-export class VCoArtistUpdateRemove {
+export interface ICoArtistUpdateRemove {
+  role: CoArtistRole;
+  artistId: string;
+}
+
+export class VCoArtistUpdateRemove implements ICoArtistUpdateRemove {
   @IsCoArtistRole()
   @Transform(({ value }) => tStringNormalizeSingleLine(value))
   role!: CoArtistRole;
@@ -40,8 +51,8 @@ export class VCoArtistUpdateRemove {
 }
 
 export interface ICoArtistUpdate {
-  add?: VCoArtistUpdateAdd[];
-  remove?: VCoArtistUpdateRemove[];
+  add?: ICoArtistUpdateAdd[];
+  remove?: ICoArtistUpdateRemove[];
 }
 
 export class VCoArtistUpdate implements ICoArtistUpdate {

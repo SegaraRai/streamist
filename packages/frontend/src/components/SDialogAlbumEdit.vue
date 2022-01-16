@@ -1,10 +1,17 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
+import { CoArtistRole } from '$shared/coArtist';
+import { compareCoArtist } from '$shared/sort';
 import type { ResourceAlbum } from '$/types';
-import { useTranslatedTimeAgo } from '~/composables';
-import { useSyncDB } from '~/db';
+import { useLiveQuery, useTranslatedTimeAgo } from '~/composables';
+import { db, useSyncDB } from '~/db';
 import { api } from '~/logic/api';
+import {
+  CoArtist,
+  createCoArtistUpdate,
+  isSameCoArtists,
+} from '~/logic/coArtist';
 import { convertOptId, convertOptStr, convertReqStr } from '~/logic/editUtils';
 
 export default defineComponent({
@@ -27,12 +34,18 @@ export default defineComponent({
 
     const requestInProgress$$q = ref(false);
 
+    const { valueAsync: allAlbumCoArtistsPromise } = useLiveQuery(() =>
+      db.albumCoArtists.toArray()
+    );
+
     const albumId$$q = ref('');
     const artistId$$q = ref<string | undefined>();
     const artistName$$q = ref('');
     const itemTitle$$q = ref('');
     const itemTitleSort$$q = ref('');
     const itemDescription$$q = ref('');
+    const itemOrgCoArtists$$q = ref<CoArtist[] | undefined>();
+    const itemCoArtists$$q = ref<CoArtist[] | undefined>();
 
     const reloadData = (newAlbum: ResourceAlbum): void => {
       requestInProgress$$q.value = false;
@@ -42,6 +55,19 @@ export default defineComponent({
       itemTitle$$q.value = newAlbum.title;
       itemTitleSort$$q.value = newAlbum.titleSort || '';
       itemDescription$$q.value = newAlbum.description || '';
+      itemOrgCoArtists$$q.value = undefined;
+      itemCoArtists$$q.value = undefined;
+      allAlbumCoArtistsPromise.value.then((allAlbumCoArtists) => {
+        if (albumId$$q.value !== newAlbum.id) {
+          return;
+        }
+        const coArtists: CoArtist[] = allAlbumCoArtists
+          .filter((item) => item.albumId === newAlbum.id)
+          .sort(compareCoArtist)
+          .map((item) => [item.role as CoArtistRole, item.artistId, '']);
+        itemOrgCoArtists$$q.value = JSON.parse(JSON.stringify(coArtists));
+        itemCoArtists$$q.value = coArtists;
+      });
     };
 
     watch(
@@ -67,7 +93,11 @@ export default defineComponent({
         (itemTitle$$q.value && itemTitle$$q.value !== props.album.title) ||
         (itemTitleSort$$q.value || null) !== props.album.titleSort ||
         itemDescription$$q.value !== props.album.description ||
-        (!isArtistEmpty$$q.value && artistId$$q.value !== props.album.artistId)
+        (!isArtistEmpty$$q.value &&
+          artistId$$q.value !== props.album.artistId) ||
+        (itemOrgCoArtists$$q.value &&
+          itemCoArtists$$q.value &&
+          !isSameCoArtists(itemOrgCoArtists$$q.value, itemCoArtists$$q.value))
     );
 
     return {
@@ -81,6 +111,7 @@ export default defineComponent({
       itemTitle$$q,
       itemTitleSort$$q,
       itemDescription$$q,
+      itemCoArtists$$q,
       modified$$q,
       strCreatedAt$$q: useTranslatedTimeAgo(
         eagerComputed(() => props.album.createdAt)
@@ -115,6 +146,13 @@ export default defineComponent({
               artistName: artistId$$q.value
                 ? undefined
                 : artistName$$q.value.trim(),
+              coArtists:
+                itemOrgCoArtists$$q.value && itemCoArtists$$q.value
+                  ? createCoArtistUpdate(
+                      itemOrgCoArtists$$q.value,
+                      itemCoArtists$$q.value
+                    )
+                  : undefined,
             },
           })
           .then(() => {
@@ -201,6 +239,13 @@ export default defineComponent({
               :label="t('dialogComponent.editAlbum.label.Artist')"
               create
             />
+            <n-collapse>
+              <n-collapse-item :title="t('dialogComponent.editAlbum.creators')">
+                <template v-if="itemCoArtists$$q">
+                  <s-co-artist-edit v-model="itemCoArtists$$q" />
+                </template>
+              </n-collapse-item>
+            </n-collapse>
             <v-textarea
               v-model="itemDescription$$q"
               hide-details

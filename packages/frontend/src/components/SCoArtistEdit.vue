@@ -1,0 +1,90 @@
+<script lang="ts">
+import type { PropType } from 'vue';
+import { builtinCoArtistRoles } from '$shared/coArtist';
+import type { CoArtist } from '~/logic/coArtist';
+
+export default defineComponent({
+  props: {
+    modelValue: {
+      type: Array as PropType<CoArtist[]>,
+      default: () => [],
+    },
+  },
+  emits: {
+    'update:modelValue': (_modelValue: CoArtist[]) => true,
+  },
+  setup(props, { emit }) {
+    const { t } = useI18n();
+    const modelValue$$q = useVModel(props, 'modelValue', emit);
+
+    const roleOptions$$q = eagerComputed(() =>
+      builtinCoArtistRoles.map((role) => ({
+        label: t(`coArtist.role.${role}`),
+        value: role,
+      }))
+    );
+
+    return {
+      t,
+      modelValue$$q,
+      roleOptions$$q,
+      remove$$q: (index: number): void => {
+        // NOTE: calling .splice directly on the modelValue$$q.value array makes a null value in the array (I don't know why)
+        const temp = Array.from(modelValue$$q.value);
+        temp.splice(index, 1);
+        modelValue$$q.value = temp;
+      },
+    };
+  },
+});
+</script>
+
+<template>
+  <div class="flex flex-col gap-y-4">
+    <template v-for="(item, index) in modelValue$$q" :key="index">
+      <div class="flex items-center gap-x-2">
+        <div class="w-32">
+          <!-- TODO: migrate to v-combobox -->
+          <n-select
+            :options="roleOptions$$q"
+            :value="item[0]"
+            @update:value="modelValue$$q[index][0] = $event"
+          />
+        </div>
+        <s-combobox-artist
+          class="flex-1"
+          create
+          :label="t('coArtist.label.Artist')"
+          :artist-id="item[1]"
+          :model-value="item[2]"
+          @update:artist-id="modelValue$$q[index][1] = $event"
+          @update:model-value="modelValue$$q[index][2] = $event"
+        />
+        <div>
+          <v-btn
+            icon
+            flat
+            text
+            size="18"
+            class="bg-transparent text-st-error"
+            @click="remove$$q(index)"
+          >
+            <v-icon class="s-hover-visible"> mdi-close </v-icon>
+          </v-btn>
+        </div>
+      </div>
+    </template>
+    <div>
+      <v-btn
+        icon
+        flat
+        text
+        size="18"
+        class="bg-transparent text-st-primary"
+        @click="modelValue$$q.push(['#composer', undefined, ''])"
+      >
+        <v-icon class="s-hover-visible"> mdi-plus </v-icon>
+      </v-btn>
+    </div>
+  </div>
+</template>

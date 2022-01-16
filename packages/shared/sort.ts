@@ -1,4 +1,12 @@
-import type { Album, Artist, Playlist, Track } from '$prisma/client';
+import type {
+  Album,
+  AlbumCoArtist,
+  Artist,
+  Playlist,
+  Track,
+  TrackCoArtist,
+} from '$prisma/client';
+import { CO_ARTIST_ROLE_PREFIX_BUILTIN } from './coArtist';
 
 /* eslint-disable no-use-before-define */
 
@@ -20,6 +28,8 @@ interface TrackLike extends Readonly<Track> {
 interface PlaylistLike extends Readonly<Playlist> {
   readonly tracks?: readonly TrackLike[];
 }
+
+type CoArtist = AlbumCoArtist | TrackCoArtist;
 
 /* eslint-enable no-use-before-define */
 
@@ -102,4 +112,17 @@ export function compareTrack(a: TrackLike, b: TrackLike): number {
 
 export function comparePlaylist(a: PlaylistLike, b: PlaylistLike): number {
   return compareLocaleString(a.title, b.title) || compareString(a.id, b.id);
+}
+
+export function compareCoArtist(a: CoArtist, b: CoArtist): number {
+  const isBuiltinA = a.role[0] === CO_ARTIST_ROLE_PREFIX_BUILTIN ? 1 : 0;
+  const isBuiltinB = b.role[0] === CO_ARTIST_ROLE_PREFIX_BUILTIN ? 1 : 0;
+  return (
+    isBuiltinB - isBuiltinA ||
+    (isBuiltinA
+      ? compareString(a.role, b.role)
+      : compareLocaleString(a.role, b.role)) ||
+    compareString(a.artistId, b.artistId) ||
+    compareString(a.id, b.id)
+  );
 }
