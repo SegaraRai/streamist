@@ -4,12 +4,12 @@ export const CO_ARTIST_ROLE_PREFIX_BUILTIN = '#' as const;
 export const CO_ARTIST_ROLE_PREFIX_USER_DEFINED = '=' as const;
 
 export const unPrefixedBuiltinCoArtistRoles = [
-  'artist',
-  'vocal',
   'arranger',
+  'artist',
   'composer',
   'lyricist',
   'producer',
+  'vocal',
 ] as const;
 
 export const builtinCoArtistRoles = unPrefixedBuiltinCoArtistRoles.map(
@@ -32,26 +32,28 @@ export type CoArtistRole =
   | `${BuiltinCoArtistRole}`
   | `${UserDefinedCoArtistRole}`;
 
-export function isValidUserDefinedCoArtistRole(text: string): boolean {
+export function isValidUserDefinedCoArtistRoleText(text: string): boolean {
   return text.length > 0 && text === normalizeTextForSingleLine(text);
 }
 
-export function isValidCoArtistRole(
-  coArtistRole: unknown
-): coArtistRole is CoArtistRole {
-  if (typeof coArtistRole !== 'string') {
+export function isValidCoArtistRole(role: unknown): role is CoArtistRole {
+  if (typeof role !== 'string') {
     return false;
   }
 
-  const content = coArtistRole.slice(1);
+  const content = role.slice(1);
 
-  switch (coArtistRole[0]) {
+  switch (role[0]) {
     case CO_ARTIST_ROLE_PREFIX_BUILTIN:
-      return builtinCoArtistRoleSet.has(coArtistRole);
+      return builtinCoArtistRoleSet.has(role);
 
     case CO_ARTIST_ROLE_PREFIX_USER_DEFINED:
-      return isValidUserDefinedCoArtistRole(content);
+      return isValidUserDefinedCoArtistRoleText(content);
   }
 
   return false;
+}
+
+export function isBuiltinCoArtistRole(role: CoArtistRole): boolean {
+  return role[0] === CO_ARTIST_ROLE_PREFIX_BUILTIN;
 }

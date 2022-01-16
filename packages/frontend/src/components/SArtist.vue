@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { compareAlbum, compareTrack } from '$shared/sort';
+import { CoArtistRole, isBuiltinCoArtistRole } from '$shared/coArtist';
+import { compareAlbum, compareCoArtistRole, compareTrack } from '$shared/sort';
 import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
 import { useLiveQuery, useTrackFilter } from '~/composables';
@@ -72,8 +73,34 @@ export default defineComponent({
           throw new Error(`Artist ${propArtist} not found`);
         }
         const artistId = artist$$q.id;
-        const albums$$q = await db.albums.where({ artistId }).toArray();
-        const tracks$$q = await db.tracks.where({ artistId }).toArray();
+        const albums = await db.albums.where({ artistId }).toArray();
+        const tracks = await db.tracks.where({ artistId }).toArray();
+        const albumIdSet = new Set(albums.map((album) => album.id));
+        const trackIdSet = new Set(tracks.map((track) => track.id));
+        const albumCoArtists = await db.albumCoArtists
+          .where({
+            artistId,
+          })
+          .toArray();
+        const trackCoArtists = await db.trackCoArtists
+          .where({
+            artistId,
+          })
+          .toArray();
+        const coArtistAlbums = (
+          await db.albums.bulkGet(
+            albumCoArtists
+              .map((album) => album.albumId)
+              .filter((albumId) => !albumIdSet.has(albumId))
+          )
+        ).filter((album): album is ResourceAlbum => !!album);
+        const coArtistTracks = (
+          await db.tracks.bulkGet(
+            trackCoArtists
+              .map((track) => track.trackId)
+              .filter((trackId) => !trackIdSet.has(trackId))
+          )
+        ).filter((track): track is ResourceTrack => !!track);
         if (propArtistRef.value !== propArtist) {
           throw new Error('operation aborted');
         }
@@ -81,25 +108,47 @@ export default defineComponent({
         if (loadedTracksArtistId !== artistId) {
           loadedTracksArtistId = artistId;
           loadedTracksMap.clear();
-          for (const album of albums$$q) {
+          for (const album of albums) {
             loadedTracksMap.set(album.id, []);
             notLoadedAlbumIdSet.add(album.id);
           }
         }
 
-        albums$$q.sort(compareAlbum);
-        tracks$$q.sort(compareTrack);
+        albums.sort(compareAlbum);
+        tracks.sort(compareTrack);
+        coArtistAlbums.sort(compareAlbum);
+        coArtistTracks.sort(compareTrack);
 
-        updateSetList(artist$$q, albums$$q, tracks$$q);
+        const mergedAlbums = [...albums, ...coArtistAlbums];
+        const mergedTracks = [...tracks, ...coArtistTracks];
+
+        updateSetList(artist$$q, mergedAlbums, mergedTracks);
+
+        const roles$$q = Array.from(
+          new Set(
+            [...albumCoArtists, ...trackCoArtists].map(
+              (coArtist) => coArtist.role as CoArtistRole
+            )
+          )
+        ).sort(compareCoArtistRole);
 
         return {
           artist$$q,
-          albums$$q,
-          tracks$$q,
+          albums$$q: mergedAlbums,
+          tracks$$q: mergedTracks,
+          roles$$q,
         };
       },
       [propArtistRef],
       true
+    );
+
+    const strRoles$$q = computed(() =>
+      value.value?.roles$$q
+        .map((role) =>
+          isBuiltinCoArtistRole(role) ? t(`coArtist.role.${role}`) : role
+        )
+        .join(', ')
     );
 
     const dropdown$$q = ref<DropdownArtistInput | undefined>();
@@ -109,6 +158,7 @@ export default defineComponent({
       artistId$$q,
       imageIds$$q: ref<readonly string[] | undefined>(),
       value$$q: value,
+      strRoles$$q,
       filteredSetList$$q,
       setList$$q,
       additionalTracks$$q,
@@ -201,7 +251,10 @@ export default defineComponent({
             </span>
           </div>
         </div>
-        <div>{{ value$$q?.artist$$q.description }}</div>
+        <div class="flex-1">{{ value$$q?.artist$$q.description }}</div>
+        <template v-if="strRoles$$q">
+          <div class="opacity-60">{{ strRoles$$q }}</div>
+        </template>
       </div>
     </div>
     <div class="flex-none flex flex-row items-center gap-x-8 my-8">
