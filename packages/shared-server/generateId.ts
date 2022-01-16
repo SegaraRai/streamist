@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { encodeBase32 } from './base32';
 import { randomBytesAsync } from './randomBytesAsync';
 
@@ -17,19 +18,21 @@ const enum IdTypeCode {
   User = 'us',
 }
 
-export const idLength = 32;
+export const ID_LENGTH = 32;
 
-async function generateRandomPart(): Promise<string> {
-  return encodeBase32(await randomBytesAsync(10)).slice(-16);
-}
+const ID_TIMESTAMP_COUNTER_MOD = 1000;
 
-let gCounter = 0;
+let gCounter = randomBytes(4).readUInt32LE(0) % ID_TIMESTAMP_COUNTER_MOD;
 function generateTimestampPart(): string {
-  gCounter = (gCounter + 1) % 1000;
-  return (Date.now() * 1000 + gCounter)
+  gCounter = (gCounter + 1) % ID_TIMESTAMP_COUNTER_MOD;
+  return (Date.now() * ID_TIMESTAMP_COUNTER_MOD + gCounter)
     .toString(32)
     .padStart(12, '0')
     .slice(-12);
+}
+
+async function generateRandomPart(): Promise<string> {
+  return encodeBase32(await randomBytesAsync(10)).slice(-16);
 }
 
 async function generateId(type: IdTypeCode): Promise<string> {
