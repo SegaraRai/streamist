@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { USE_NFS_SIZE_THRESHOLD } from '$shared/config';
 import { is } from '$shared/is';
 import {
@@ -12,7 +11,6 @@ import type {
   SourceFileState,
   SourceState,
 } from '$shared/types';
-import { TRANSCODER_API_ENDPOINT } from '$transcoder/devConfig';
 import {
   TranscoderRequest,
   TranscoderRequestFile,
@@ -27,6 +25,7 @@ import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 import { logger } from '$/services/logger';
+import { invokeTranscoder } from '$/services/transcoder';
 import { splitIntoParts } from '$/services/uploadUtils';
 import { createUserUploadS3Cached } from '$/services/userOS';
 import { HTTPError } from '$/utils/httpError';
@@ -89,27 +88,6 @@ function createTranscoderRequestFiles(
       return null;
     })
     .filter((file): file is TranscoderRequestFile => !!file);
-}
-
-async function invokeTranscoder(request: TranscoderRequest): Promise<void> {
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      const response = await fetch(TRANSCODER_API_ENDPOINT, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(request),
-      });
-      if (!response.ok) {
-        logger.error('failed to invoke transcoder (%d)', response.status);
-      }
-    } catch (error: unknown) {
-      logger.error(error, 'failed to invoke transcoder');
-    }
-  } else {
-    // TODO(prod): call AWS Lambda
-  }
 }
 
 async function invokeTranscoderBySource(

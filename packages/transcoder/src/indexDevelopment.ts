@@ -4,8 +4,11 @@ import './initCredentials';
 
 import { createServer } from 'http';
 import fetch from 'node-fetch';
+import {
+  DEV_TRANSCODER_API_PATH,
+  DEV_TRANSCODER_PORT,
+} from '$shared-server/config/dev';
 import { nodeReadableStreamToBuffer } from '$shared-server/stream';
-import { TRANSCODER_API_PATH, TRANSCODER_PORT } from './devConfig';
 import logger from './logger';
 import { transcode } from './transcode';
 import type { TranscoderRequest } from './types';
@@ -14,7 +17,7 @@ const server = createServer();
 
 server.on('request', (req, res) => {
   (async () => {
-    if (req.method === 'POST' && req.url === TRANSCODER_API_PATH) {
+    if (req.method === 'POST' && req.url === DEV_TRANSCODER_API_PATH) {
       if (!/^application\/json;?/.test(req.headers['content-type'] || '')) {
         res.statusCode = 400;
         res.setHeader('Content-Type', 'text/plain');
@@ -64,4 +67,4 @@ server.on('request', (req, res) => {
   });
 });
 
-server.listen(TRANSCODER_PORT);
+server.listen(DEV_TRANSCODER_PORT);

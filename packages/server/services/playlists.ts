@@ -11,9 +11,9 @@ import {
   dbPlaylistRemoveImageTx,
   dbPlaylistRemoveTrack,
 } from '$/db/playlist';
+import { imageDeleteFilesAndSourceFiles } from '$/services/images';
 import { HTTPError } from '$/utils/httpError';
 import type { IPlaylistCreateData, IPlaylistUpdateData } from '$/validators';
-import { imageDeleteFilesAndSourceFiles } from './images';
 
 export async function playlistCreate(
   userId: string,

@@ -1,7 +1,7 @@
 import { Image, ImageFile } from '@prisma/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { osDeleteImageFiles } from '$/os/imageFile';
-import { sourceFileDeleteFromOSIfUnreferenced } from './sourceFiles';
+import { sourceFileDeleteFromOSIfUnreferenced } from '$/services/sourceFiles';
 
 export async function imageDeleteFilesAndSourceFiles(
   userId: string,

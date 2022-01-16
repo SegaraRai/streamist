@@ -14,13 +14,13 @@ import {
   JWT_REFRESH_TOKEN_ISS,
 } from '$shared/config';
 import { client } from '$/db/lib/client';
-import { HTTPError } from '$/utils/httpError';
-import type { IAuthRequest, IAuthResponse } from '$/validators';
 import {
   SECRET_API_JWT_SECRET,
   SECRET_CDN_JWT_SECRET,
   SECRET_REFRESH_TOKEN_JWT_SECRET,
-} from './env';
+} from '$/services/env';
+import { HTTPError } from '$/utils/httpError';
+import type { IAuthRequest, IAuthResponse } from '$/validators';
 
 type UserSubset = Pick<User, 'id' | 'maxTrackId' | 'plan'>;
 

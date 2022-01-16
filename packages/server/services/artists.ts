@@ -4,9 +4,9 @@ import { client } from '$/db/lib/client';
 import { dbCoArtistMergeArtistTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { imageDeleteFilesAndSourceFiles } from '$/services/images';
 import { HTTPError } from '$/utils/httpError';
 import type { IArtistUpdateData } from '$/validators';
-import { imageDeleteFilesAndSourceFiles } from './images';
 
 export async function artistUpdate(
   userId: string,

@@ -33,6 +33,8 @@ import {
 } from '$shared/types';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { splitIntoParts, useMultipartUpload } from '$/services/uploadUtils';
+import { createUserUploadS3Cached } from '$/services/userOS';
 import type {
   CreateSourceRequestAudio,
   CreateSourceRequestImage,
@@ -41,8 +43,6 @@ import type {
   UploadURLPart,
 } from '$/types';
 import { HTTPError } from '$/utils/httpError';
-import { splitIntoParts, useMultipartUpload } from './uploadUtils';
-import { createUserUploadS3Cached } from './userOS';
 
 /**
  * @note mutates S3

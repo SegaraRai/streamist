@@ -5,7 +5,7 @@ import {
   SECRET_USER_DOWNLOAD_WASABI_SECRET_ACCESS_KEY,
   SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID,
   SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY,
-} from './env';
+} from '$/services/env';
 
 const gUserDownloadS3CacheMap = new Map<string, S3>();
 

@@ -7,10 +7,10 @@ import { client } from '$/db/lib/client';
 import { dbCoArtistMergeTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { artistDeleteIfUnreferenced } from '$/services/artists';
+import { imageDeleteFilesAndSourceFiles } from '$/services/images';
 import { HTTPError } from '$/utils/httpError';
 import type { IAlbumUpdateData } from '$/validators';
-import { artistDeleteIfUnreferenced } from './artists';
-import { imageDeleteFilesAndSourceFiles } from './images';
 
 export interface UpdateAlbumOptions {
   readonly forceNewArtist?: boolean;
