@@ -2,7 +2,7 @@ import {
   generateAlbumId,
   generateTrackCoArtistId,
 } from '$shared-server/generateId';
-import { CoArtistType, isValidCoArtistType } from '$shared/coArtist';
+import { CoArtistRole, isValidCoArtistRole } from '$shared/coArtist';
 import { Album, Artist, Prisma, Track } from '$prisma/client';
 import { dbAlbumGetOrCreateByNameTx } from './album';
 import { dbArtistCreateCachedGetOrCreateByNameTx } from './artist';
@@ -26,7 +26,7 @@ export type CreateTrackData = Omit<
 >;
 
 export interface CreateTrackInputCoArtist {
-  role: CoArtistType;
+  role: CoArtistRole;
   artistName: string;
   artistNameSort: string | undefined;
 }
@@ -97,7 +97,7 @@ export async function dbTrackCreateTx(
 
   const createdCoArtists = await Promise.all(
     coArtists
-      .filter((coArtist) => isValidCoArtistType(coArtist.role))
+      .filter((coArtist) => isValidCoArtistRole(coArtist.role))
       .map(async (input) => ({
         id: await generateTrackCoArtistId(),
         artist: await artistGetOrCreateTx(

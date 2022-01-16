@@ -7,11 +7,12 @@ import {
   IsString,
   Validate,
 } from 'class-validator';
-import { IsIdConstraint, IsUndefinable } from './utils';
 import {
+  IsIdConstraint,
+  IsUndefinable,
   tStringNormalizeMultipleLines,
   tStringNormalizeSingleLine,
-} from './utils/transform';
+} from './utils';
 
 export type IPlaylistCreateData = Pick<Playlist, 'title' | 'description'> & {
   trackIds?: string[];

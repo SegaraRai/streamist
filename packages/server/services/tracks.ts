@@ -1,9 +1,14 @@
-import { Prisma, Track } from '@prisma/client';
-import { generateAlbumId, generateArtistId } from '$shared-server/generateId';
+import { Prisma, Track, TrackCoArtist } from '@prisma/client';
+import PQueue from 'p-queue';
+import {
+  generateAlbumId,
+  generateArtistId,
+  generateTrackCoArtistId,
+} from '$shared-server/generateId';
 import { parseDate } from '$shared/parseDate';
 import { emptyToNull } from '$shared/transform';
 import { dbAlbumGetOrCreateByNameTx } from '$/db/album';
-import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
+import { dbArtistCreateCachedGetOrCreateByNameTx } from '$/db/artist';
 import { dbArrayRemoveFromAllTx } from '$/db/lib/array';
 import { client } from '$/db/lib/client';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
@@ -38,6 +43,11 @@ export async function trackUpdate(
 
   const [oldTrack, newTrack] = await client.$transaction(async (txClient) => {
     const timestamp = Date.now();
+
+    const artistGetOrCreateTx = dbArtistCreateCachedGetOrCreateByNameTx(
+      txClient,
+      userId
+    );
 
     const track = await txClient.track.findFirst({
       where: {
@@ -85,7 +95,7 @@ export async function trackUpdate(
               updatedAt: timestamp,
             },
           })
-        : await dbArtistGetOrCreateByNameTx(txClient, userId, data.artistName);
+        : await artistGetOrCreateTx(data.artistName);
       artistId = artist.id;
     }
 
@@ -128,6 +138,70 @@ export async function trackUpdate(
             await generateAlbumId()
           );
       albumId = album.id;
+    }
+
+    // update coArtists
+    if (data.coArtists) {
+      if (data.coArtists.remove?.length) {
+        const coArtists = await txClient.trackCoArtist.findMany({
+          where: {
+            OR: data.coArtists.remove.map(({ artistId, role }) => ({
+              artistId,
+              role,
+            })),
+            AND: {
+              trackId,
+              userId,
+            },
+          },
+        });
+        const coArtistIds = coArtists.map((coArtist) => coArtist.id);
+        const deleted = await txClient.trackCoArtist.deleteMany({
+          where: {
+            id: {
+              in: coArtistIds,
+            },
+          },
+        });
+        if (deleted.count !== coArtistIds.length) {
+          throw new HTTPError(409, 'coArtists was deleted during track update');
+        }
+        await dbDeletionAddTx(txClient, userId, 'trackCoArtist', coArtistIds);
+      }
+      if (data.coArtists.add?.length) {
+        const queue = new PQueue({ concurrency: 1 });
+        const resolvedCoArtists = await Promise.all(
+          data.coArtists.add
+            .filter(({ artistName, artistId }) => artistName || artistId)
+            .map(({ artistName, artistId, role }) =>
+              queue.add(async () =>
+                artistId
+                  ? { role, artistId }
+                  : {
+                      role,
+                      artistId: (await artistGetOrCreateTx(artistName!)).id,
+                    }
+              )
+            )
+        );
+        const newCoArtists: TrackCoArtist[] = await Promise.all(
+          resolvedCoArtists.map(async ({ role, artistId }) => ({
+            id: await generateTrackCoArtistId(),
+            trackId,
+            userId,
+            artistId,
+            role,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          }))
+        );
+        // TODO(db): use createMany for PostgreSQL
+        for (const coArtist of newCoArtists) {
+          await txClient.trackCoArtist.create({
+            data: coArtist,
+          });
+        }
+      }
     }
 
     // update track
@@ -181,6 +255,13 @@ export async function trackUpdate(
     oldTrack.artistId !== checkedArtistId
   ) {
     await artistDeleteIfUnreferenced(userId, oldTrack.artistId, true);
+  }
+
+  for (const { artistId } of data.coArtists?.remove ?? []) {
+    if (artistId === checkedArtistId || artistId === oldTrack.artistId) {
+      continue;
+    }
+    await artistDeleteIfUnreferenced(userId, artistId, true);
   }
 
   await dbResourceUpdateTimestamp(userId);

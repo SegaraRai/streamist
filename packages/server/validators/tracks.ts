@@ -1,11 +1,20 @@
 import type { Track } from '@prisma/client';
-import { Transform } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
-import { IsId, IsNullable, IsUndefinable } from './utils';
+import { Transform, Type } from 'class-transformer';
 import {
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
+import { ICoArtistUpdate, VCoArtistUpdate } from './coArtists';
+import {
+  IsId,
+  IsNullable,
+  IsUndefinable,
   tStringNormalizeMultipleLines,
   tStringNormalizeSingleLine,
-} from './utils/transform';
+} from './utils';
 
 export type ITrackUpdateData = Partial<
   Pick<
@@ -25,6 +34,7 @@ export type ITrackUpdateData = Partial<
 > & {
   artistName?: string;
   albumTitle?: string;
+  coArtists?: ICoArtistUpdate;
 };
 
 export class VTrackOrderUpdateBody {
@@ -92,10 +102,17 @@ export class VTrackUpdateBody implements ITrackUpdateData {
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => tStringNormalizeSingleLine(value))
   albumTitle?: string;
 
   @IsUndefinable()
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => tStringNormalizeSingleLine(value))
   artistName?: string;
+
+  @IsUndefinable()
+  @ValidateNested()
+  @Type(() => VCoArtistUpdate)
+  coArtists?: VCoArtistUpdate;
 }

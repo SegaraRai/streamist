@@ -1,13 +1,14 @@
 import type { Album } from '@prisma/client';
-import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString } from 'class-validator';
-import { IsId, IsUndefinable } from './utils';
-import { tStringNormalizeSingleLine } from './utils/transform';
+import { Transform, Type } from 'class-transformer';
+import { IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { ICoArtistUpdate, VCoArtistUpdate } from './coArtists';
+import { IsId, IsUndefinable, tStringNormalizeSingleLine } from './utils';
 
 export type IAlbumUpdateData = Partial<
   Pick<Album, 'title' | 'titleSort' | 'description' | 'artistId'>
 > & {
   artistName?: string;
+  coArtists?: ICoArtistUpdate;
 };
 
 export class VAlbumUpdateBody implements IAlbumUpdateData {
@@ -36,6 +37,11 @@ export class VAlbumUpdateBody implements IAlbumUpdateData {
   @IsNotEmpty()
   @Transform(({ value }) => tStringNormalizeSingleLine(value))
   artistName?: string;
+
+  @IsUndefinable()
+  @ValidateNested()
+  @Type(() => VCoArtistUpdate)
+  coArtists?: VCoArtistUpdate;
 }
 
 export class VAlbumMergeBody {

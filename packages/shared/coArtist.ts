@@ -1,9 +1,9 @@
 import { normalizeTextForSingleLine } from './normalize';
 
-export const CO_ARTIST_PREFIX_BUILTIN = '#' as const;
-export const CO_ARTIST_PREFIX_USER_DEFINED = '=' as const;
+export const CO_ARTIST_ROLE_PREFIX_BUILTIN = '#' as const;
+export const CO_ARTIST_ROLE_PREFIX_USER_DEFINED = '=' as const;
 
-export const builtinCoArtistTypes = [
+export const builtinCoArtistRoles = [
   'artist',
   'vocal',
   'arranger',
@@ -12,31 +12,35 @@ export const builtinCoArtistTypes = [
   'producer',
 ] as const;
 
-export type BuiltinCoArtistType = typeof builtinCoArtistTypes[number];
+export type BuiltinCoArtistRole = typeof builtinCoArtistRoles[number];
 
-const builtinCoArtistTypeSet: ReadonlySet<string> = new Set(
-  builtinCoArtistTypes
+const builtinCoArtistRoleSet: ReadonlySet<string> = new Set(
+  builtinCoArtistRoles
 );
 
-export type CoArtistType =
-  | `${typeof CO_ARTIST_PREFIX_BUILTIN}${BuiltinCoArtistType}`
-  | `${typeof CO_ARTIST_PREFIX_USER_DEFINED}${string}`;
+export type CoArtistRole =
+  | `${typeof CO_ARTIST_ROLE_PREFIX_BUILTIN}${BuiltinCoArtistRole}`
+  | `${typeof CO_ARTIST_ROLE_PREFIX_USER_DEFINED}${string}`;
 
-export function isValidUserDefinedCoArtistText(text: string): boolean {
+export function isValidUserDefinedCoArtistRole(text: string): boolean {
   return text.length > 0 && text === normalizeTextForSingleLine(text);
 }
 
-export function isValidCoArtistType(
-  coArtistType: string
-): coArtistType is CoArtistType {
-  const content = coArtistType.slice(1);
+export function isValidCoArtistRole(
+  coArtistRole: unknown
+): coArtistRole is CoArtistRole {
+  if (typeof coArtistRole !== 'string') {
+    return false;
+  }
 
-  switch (coArtistType[0]) {
-    case CO_ARTIST_PREFIX_BUILTIN:
-      return builtinCoArtistTypeSet.has(content);
+  const content = coArtistRole.slice(1);
 
-    case CO_ARTIST_PREFIX_USER_DEFINED:
-      return isValidUserDefinedCoArtistText(content);
+  switch (coArtistRole[0]) {
+    case CO_ARTIST_ROLE_PREFIX_BUILTIN:
+      return builtinCoArtistRoleSet.has(content);
+
+    case CO_ARTIST_ROLE_PREFIX_USER_DEFINED:
+      return isValidUserDefinedCoArtistRole(content);
   }
 
   return false;

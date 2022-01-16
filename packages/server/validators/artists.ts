@@ -1,11 +1,12 @@
 import type { Artist } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString } from 'class-validator';
-import { IsId, IsUndefinable } from './utils';
 import {
+  IsId,
+  IsUndefinable,
   tStringNormalizeMultipleLines,
   tStringNormalizeSingleLine,
-} from './utils/transform';
+} from './utils';
 
 export type IArtistUpdateData = Partial<
   Pick<Artist, 'name' | 'nameSort' | 'description'>

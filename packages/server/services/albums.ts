@@ -1,8 +1,12 @@
-import { Prisma } from '@prisma/client';
-import { generateArtistId } from '$shared-server/generateId';
+import { AlbumCoArtist, Prisma } from '@prisma/client';
+import PQueue from 'p-queue';
+import {
+  generateAlbumCoArtistId,
+  generateArtistId,
+} from '$shared-server/generateId';
 import { emptyToNull } from '$shared/transform';
 import { dbAlbumMoveImageBefore, dbAlbumRemoveImageTx } from '$/db/album';
-import { dbArtistGetOrCreateByNameTx } from '$/db/artist';
+import { dbArtistCreateCachedGetOrCreateByNameTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
 import { dbCoArtistMergeTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
@@ -24,6 +28,11 @@ export async function albumUpdate(
 ): Promise<void> {
   const [oldAlbum, newAlbum] = await client.$transaction(async (txClient) => {
     const timestamp = Date.now();
+
+    const artistGetOrCreateTx = dbArtistCreateCachedGetOrCreateByNameTx(
+      txClient,
+      userId
+    );
 
     const album = await txClient.album.findFirst({
       where: {
@@ -65,8 +74,72 @@ export async function albumUpdate(
               id: true,
             },
           })
-        : await dbArtistGetOrCreateByNameTx(txClient, userId, data.artistName);
+        : await artistGetOrCreateTx(data.artistName);
       artistId = artist.id;
+    }
+
+    // update coArtists
+    if (data.coArtists) {
+      if (data.coArtists.remove?.length) {
+        const coArtists = await txClient.albumCoArtist.findMany({
+          where: {
+            OR: data.coArtists.remove.map(({ artistId, role }) => ({
+              artistId,
+              role,
+            })),
+            AND: {
+              albumId,
+              userId,
+            },
+          },
+        });
+        const coArtistIds = coArtists.map((coArtist) => coArtist.id);
+        const deleted = await txClient.albumCoArtist.deleteMany({
+          where: {
+            id: {
+              in: coArtistIds,
+            },
+          },
+        });
+        if (deleted.count !== coArtistIds.length) {
+          throw new HTTPError(409, 'coArtists was deleted during album update');
+        }
+        await dbDeletionAddTx(txClient, userId, 'albumCoArtist', coArtistIds);
+      }
+      if (data.coArtists.add?.length) {
+        const queue = new PQueue({ concurrency: 1 });
+        const resolvedCoArtists = await Promise.all(
+          data.coArtists.add
+            .filter(({ artistName, artistId }) => artistName || artistId)
+            .map(({ artistName, artistId, role }) =>
+              queue.add(async () =>
+                artistId
+                  ? { role, artistId }
+                  : {
+                      role,
+                      artistId: (await artistGetOrCreateTx(artistName!)).id,
+                    }
+              )
+            )
+        );
+        const newCoArtists: AlbumCoArtist[] = await Promise.all(
+          resolvedCoArtists.map(async ({ role, artistId }) => ({
+            id: await generateAlbumCoArtistId(),
+            albumId,
+            userId,
+            artistId,
+            role,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          }))
+        );
+        // TODO(db): use createMany for PostgreSQL
+        for (const coArtist of newCoArtists) {
+          await txClient.albumCoArtist.create({
+            data: coArtist,
+          });
+        }
+      }
     }
 
     const newAlbum = await txClient.album.update({
@@ -87,6 +160,13 @@ export async function albumUpdate(
 
   if (newAlbum.artistId !== oldAlbum.artistId) {
     await artistDeleteIfUnreferenced(userId, oldAlbum.artistId, true);
+  }
+
+  for (const { artistId } of data.coArtists?.remove ?? []) {
+    if (artistId === oldAlbum.artistId) {
+      continue;
+    }
+    await artistDeleteIfUnreferenced(userId, artistId, true);
   }
 
   await dbResourceUpdateTimestamp(userId);
