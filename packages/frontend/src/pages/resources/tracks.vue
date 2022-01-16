@@ -4,10 +4,8 @@ import { useAllTracks } from '~/composables';
 
 export default defineComponent({
   setup() {
-    const { t } = useI18n();
-
     useHead({
-      title: t('title.Resources.Tracks'),
+      title: 'Resources/Tracks | Streamist',
     });
 
     const { value } = useAllTracks();
@@ -54,7 +52,6 @@ export default defineComponent({
     );
 
     return {
-      t,
       columns$$q: columns,
       items$$q: items,
     };
@@ -65,13 +62,9 @@ export default defineComponent({
 <template>
   <v-container fluid>
     <header class="mb-6 flex items-baseline gap-x-4">
-      <div class="text-h5">
-        {{ t('resources.Tracks') }}
-      </div>
+      <div class="text-h5">Resources/Tracks</div>
       <template v-if="items$$q?.length">
-        <div class="opacity-60">
-          {{ t('tracks.n_items', items$$q.length) }}
-        </div>
+        <div class="opacity-60">{{ items$$q.length }} item(s)</div>
       </template>
     </header>
     <n-data-table :columns="columns$$q" :data="items$$q" virtual-scroll />
