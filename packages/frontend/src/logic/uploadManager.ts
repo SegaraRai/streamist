@@ -465,8 +465,11 @@ export class UploadManager extends EventTarget {
 
   needsDBSync(): boolean {
     // NOTE: アップロードについてはこのセッションが持つファイルについてのみ考慮する（他のセッションのファイルについてはそれらに更新を任せる）
-    // トランスコードについてはセッションを離れる可能性を考えてこのセッション以外のファイルについても考慮する
-    return this._files.some((file) => file.status === 'transcoding');
+    // ~~トランスコードについてはセッションを離れる可能性を考えてこのセッション以外のファイルについても考慮する~~
+    // 未完了のものがあるときにうざいのでやっぱりこのセッションのファイルのみを考慮する
+    return this._files.some(
+      (file) => !!file.file && file.status === 'transcoding'
+    );
   }
 
   sync(sourceFiles: readonly ResourceSourceFile[]): void {
@@ -485,7 +488,7 @@ export class UploadManager extends EventTarget {
       if (!sourceFile) {
         // should not occur
         console.error(
-          'logic error: sourceFile does not exist on database @_sync',
+          'logic error: sourceFile does not exist on database @sync',
           sourceFileId
         );
         continue;
