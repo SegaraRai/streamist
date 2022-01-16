@@ -54,6 +54,7 @@ declare module 'vue' {
     SExpandable: typeof import('./components/SExpandable.vue')['default']
     SImageManager: typeof import('./components/SImageManager.vue')['default']
     SMobilePlaybackControl: typeof import('./components/SMobilePlaybackControl.vue')['default']
+    SNavigation: typeof import('./components/SNavigation.vue')['default']
     SNullableImage: typeof import('./components/SNullableImage.vue')['default']
     SPlaybackControl: typeof import('./components/SPlaybackControl.vue')['default']
     SPlaybackTrackView: typeof import('./components/SPlaybackTrackView.vue')['default']

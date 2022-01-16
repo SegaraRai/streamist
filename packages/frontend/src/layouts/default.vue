@@ -21,65 +21,6 @@ export default defineComponent({
     const syncDB = useSyncDB();
     const theme = useThemeStore();
 
-    interface NavItemLink {
-      type: 'link';
-      path: string;
-      icon: string;
-      text: string;
-    }
-
-    interface NavItemDivider {
-      type: 'divider';
-    }
-
-    type NavItem = NavItemLink | NavItemDivider;
-
-    const navItems$$q = computed<readonly NavItem[]>(() => [
-      {
-        type: 'link',
-        icon: 'mdi-home',
-        path: '/',
-        text: t('sidebar.Home'),
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'link',
-        icon: 'mdi-album',
-        path: '/albums',
-        text: t('sidebar.Albums'),
-      },
-      {
-        type: 'link',
-        icon: 'mdi-account-music',
-        path: '/artists',
-        text: t('sidebar.Artists'),
-      },
-      {
-        type: 'link',
-        icon: 'mdi-music',
-        path: '/tracks',
-        text: t('sidebar.Tracks'),
-      },
-      {
-        type: 'link',
-        icon: 'mdi-playlist-music',
-        path: '/playlists',
-        text: t('sidebar.Playlists'),
-      },
-      // debug
-      {
-        type: 'divider',
-      },
-      {
-        type: 'link',
-        icon: 'mdi-play',
-        path: '/playing',
-        text: 'Playing',
-      },
-    ]);
-
     const uploadStore$$q = useUploadStore();
 
     const rightSidebar$$q = ref(false);
@@ -160,7 +101,6 @@ export default defineComponent({
       uploadStore$$q,
       rightSidebar$$q,
       leftSidebar$$q,
-      navItems$$q,
       isOnline$$q: isOnline,
       theme$$q: theme,
       alwaysShowLeftSidebar$$q,
@@ -173,7 +113,7 @@ export default defineComponent({
 <template>
   <div
     :class="isOnline$$q ? 's-offline--online' : 's-offline--offline'"
-    class="min-h-screen flex flex-col print:invisible"
+    class="min-h-screen flex flex-col"
   >
     <div
       class="s-offline-bar bg-yellow-400 h-0 text-white font-weight-bold text-md flex items-center px-4 leading-none z-1000 overflow-hidden"
@@ -251,15 +191,19 @@ export default defineComponent({
             </div>
           </template>
           <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
-            <router-link to="/" class="flex items-center gap-x-1">
+            <router-link
+              to="/"
+              class="flex items-center gap-x-1"
+              aria-label="Streamist Logo"
+            >
               <img
                 :src="logoSVG$$q"
                 width="128"
                 height="128"
                 class="block w-7 h-7 pointer-events-none"
-                alt="Streamist"
+                alt="Streamist Logo"
               />
-              <span class="inline-block <sm:hidden">
+              <span class="inline-block <sm:hidden" aria-hidden="true">
                 <span class="text-xl leading-none">streamist</span>
                 <span class="text-sm leading-none">.app</span>
               </span>
@@ -320,31 +264,7 @@ export default defineComponent({
           class="h-full s-n-scrollbar-min-h-full s-n-scrollbar-flex-col"
         >
           <div class="flex-1 flex flex-col h-full">
-            <v-list dense class="overflow-x-hidden">
-              <template v-for="(item, _index) in navItems$$q" :key="_index">
-                <template v-if="item.type === 'link'">
-                  <v-list-item link :to="item.path">
-                    <v-list-item-avatar
-                      icon
-                      class="flex items-center justify-center"
-                    >
-                      <v-icon>{{ item.icon }}</v-icon>
-                    </v-list-item-avatar>
-                    <v-list-item-header>
-                      {{ item.text }}
-                    </v-list-item-header>
-                  </v-list-item>
-                </template>
-                <template v-else-if="item.type === 'divider'">
-                  <v-divider />
-                </template>
-              </template>
-            </v-list>
-            <div class="flex-1"></div>
-            <div class="text-xs ml-2 text-right text-st-error p-2">
-              ALPHA VERSION<br />
-              no warranty / use with caution
-            </div>
+            <s-navigation />
             <div class="s-offline-mod-h"></div>
             <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
           </div>
