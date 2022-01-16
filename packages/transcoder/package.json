@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.47.0",
-    "dotenv": "^12.0.3",
+    "dotenv": "^12.0.4",
     "log4js": "^6.3.0",
-    "node-fetch": "^3.1.0"
+    "node-fetch": "^3.1.1"
   },
   "devDependencies": {
     "@esbuild-plugins/node-resolve": "^0.1.4",
