@@ -121,6 +121,9 @@ export const useUploadStore = defineStore('upload', () => {
     removeFile(fileId: FileId): void {
       manager.removeFile(fileId);
     },
+    abortFile(fileId: FileId): void {
+      manager.abortFile(fileId);
+    },
     clearAll(): void {
       stagedFiles.value.splice(0);
       for (const file of manager.files) {

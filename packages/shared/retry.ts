@@ -8,7 +8,8 @@ import { sleep } from './sleep';
 
 export async function retry<T>(
   func: (count: number) => Promise<T>,
-  waits: readonly number[]
+  waits: readonly number[],
+  isNoRetryError?: (error: unknown) => boolean
 ): Promise<T> {
   let error: unknown;
   for (let count = 0; count <= waits.length; count++) {
@@ -19,6 +20,9 @@ export async function retry<T>(
     try {
       return await func(count);
     } catch (e) {
+      if (isNoRetryError?.(e)) {
+        return Promise.reject(e);
+      }
       error = e;
     }
   }
@@ -33,8 +37,10 @@ export const retryS3NoReject = <T>(
 ): Promise<T | undefined> =>
   retry<T>(func, RETRY_WAITS_S3).catch(() => undefined);
 
-export const retryUpload = <T>(func: () => Promise<T>): Promise<T> =>
-  retry<T>(func, RETRY_WAITS_UPLOAD);
+export const retryUpload = <T>(
+  func: () => Promise<T>,
+  isAbortError?: (error: unknown) => boolean
+): Promise<T> => retry<T>(func, RETRY_WAITS_UPLOAD, isAbortError);
 
 export const retryAPI = <T>(func: () => Promise<T>): Promise<T> =>
   retry<T>(func, RETRY_WAITS_API);

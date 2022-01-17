@@ -224,12 +224,16 @@ async function onSourceFileUpdated(
   });
 
   const someFilesAborted = sourceFiles.some(
-    (file) => file.state === is<SourceFileState>('aborted')
+    (file) => file.state === is<SourceFileState>('upload_aborted')
+  );
+  const someFilesFailed = sourceFiles.some(
+    (file) => file.state === is<SourceFileState>('upload_failed')
   );
   const allFilesUploaded =
     !someFilesAborted &&
+    !someFilesFailed &&
     sourceFiles.every((file) => file.state === is<SourceFileState>('uploaded'));
-  if (!someFilesAborted && !allFilesUploaded) {
+  if (!someFilesAborted && !someFilesFailed && !allFilesUploaded) {
     // upload in progress
     await dbResourceUpdateTimestamp(userId);
     return;
@@ -243,7 +247,13 @@ async function onSourceFileUpdated(
       state: is<SourceState>('uploading'),
     },
     data: {
-      state: is<SourceState>(allFilesUploaded ? 'uploaded' : 'aborted'),
+      state: is<SourceState>(
+        allFilesUploaded
+          ? 'uploaded'
+          : someFilesAborted
+          ? 'upload_aborted'
+          : 'upload_failed'
+      ),
       updatedAt: timestamp,
     },
   });
@@ -307,10 +317,11 @@ async function onSourceFileUpdated(
  * @param sourceFileId
  * @returns
  */
-export async function onSourceFileAborted(
+export async function onSourceFileFailed(
   userId: string,
   sourceId: string,
-  sourceFileId: string
+  sourceFileId: string,
+  aborted: boolean
 ): Promise<void> {
   const sourceFile = await client.sourceFile.findFirst({
     where: {
@@ -335,7 +346,7 @@ export async function onSourceFileAborted(
   if (sourceFile.state !== is<SourceFileState>('uploading')) {
     throw new HTTPError(
       409,
-      `source file ${sourceFileId} already aborted or uploaded`
+      `source file ${sourceFileId} already aborted, failed or uploaded`
     );
   }
 
@@ -353,7 +364,7 @@ export async function onSourceFileAborted(
       state: is<SourceFileState>('uploading'),
     },
     data: {
-      state: is<SourceFileState>('aborted'),
+      state: is<SourceFileState>(aborted ? 'upload_aborted' : 'upload_failed'),
       entityExists: false,
       uploadedAt: timestamp,
       updatedAt: timestamp,

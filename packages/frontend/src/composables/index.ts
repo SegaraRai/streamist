@@ -1,4 +1,3 @@
-export * from './dark';
 export * from './naiveUI';
 export * from './useAllItem';
 export * from './useCurrentTrackInfo';

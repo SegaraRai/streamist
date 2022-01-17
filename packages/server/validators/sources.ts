@@ -117,8 +117,8 @@ export class VSourceCreateBodyWrapper {
 
 export class VSourceFinishUploadBody {
   @IsString()
-  @IsIn(['aborted', 'uploaded'])
-  state!: SourceFileState & ('aborted' | 'uploaded');
+  @IsIn(['upload_aborted', 'upload_failed', 'uploaded'])
+  state!: SourceFileState & ('upload_aborted' | 'upload_failed' | 'uploaded');
 
   @IsUndefinable()
   @IsArray()

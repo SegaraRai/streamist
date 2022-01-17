@@ -1,17 +1,24 @@
-import {
-  onSourceFileAborted,
-  onSourceFileUploaded,
-} from '$/services/uploadEnd';
+import { onSourceFileFailed, onSourceFileUploaded } from '$/services/uploadEnd';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
   patch: async ({ params, user, body }) => {
     switch (body.state) {
-      case 'aborted':
-        await onSourceFileAborted(
+      case 'upload_aborted':
+        await onSourceFileFailed(
           user.id,
           params.sourceId,
-          params.sourceFileId
+          params.sourceFileId,
+          true
+        );
+        break;
+
+      case 'upload_failed':
+        await onSourceFileFailed(
+          user.id,
+          params.sourceId,
+          params.sourceFileId,
+          false
         );
         break;
 

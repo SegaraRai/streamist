@@ -258,6 +258,11 @@ dialog:
       Delete: Delete
       Cancel: Cancel
 confirm:
+  abortUpload:
+    text: 'Are you sure you want to abort uploading?'
+    button:
+      Abort: Abort
+      Cancel: Cancel
   deleteImage:
     text: "Are you sure you want to delete image of '{0}'?"
     button:

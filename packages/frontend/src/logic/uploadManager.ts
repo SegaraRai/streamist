@@ -60,7 +60,7 @@ export type UploadStatus =
   // 最終状態: アップロードは完了したがトランスコードに失敗した
   | 'error_transcode_failed'
   // 最終状態: ユーザーがアップロードを取り消した
-  | 'error_aborted'
+  | 'error_upload_aborted'
   // 最終状態: 依存先ファイルがトランスコードに失敗したのでスキップされた（未対応ファイルはそもそも追加されない）
   // または、CUEシートが不正or未対応の形式であったため音声ファイルのアップロードがスキップされた
   | 'skipped'
@@ -74,6 +74,7 @@ export interface UploadInfo {
   sourceId: string;
   sourceFileId: string;
   url: UploadURL;
+  abortController: AbortController | null;
 }
 
 export interface UploadFile {
@@ -358,7 +359,8 @@ function isValidImageFile(plan: Plan, imageFile: File): Promise<boolean> {
 function doUpload(
   url: string,
   blob: Blob,
-  onProgress: (size: number) => void
+  onProgress: (size: number) => void,
+  abortSignal?: AbortSignal
 ): Promise<string> {
   const onProgressNoThrow = (size: number) => {
     try {
@@ -370,12 +372,28 @@ function doUpload(
 
   return new Promise((resolve, reject): void => {
     const xhr = new XMLHttpRequest();
-    xhr.open('PUT', url);
-    xhr.onload = (): void => {
+
+    const abortHandler = (): void => {
+      xhr.abort();
+    };
+    const removeAbortHandler = (): void => {
+      abortSignal?.removeEventListener('abort', abortHandler);
+    };
+    abortSignal?.addEventListener('abort', abortHandler, {
+      once: true,
+    });
+
+    const cleanupXHR = (): void => {
       xhr.onload = null;
+      xhr.onabort = null;
       xhr.onerror = null;
       xhr.upload.onprogress = null;
+      removeAbortHandler();
+    };
 
+    xhr.open('PUT', url);
+    xhr.onload = (): void => {
+      cleanupXHR();
       if (xhr.status >= 200 && xhr.status < 300) {
         onProgressNoThrow(blob.size);
         resolve(xhr.getResponseHeader('ETag') || '');
@@ -383,11 +401,12 @@ function doUpload(
         reject(new Error(`Failed to upload file: ${xhr.status}`));
       }
     };
+    xhr.onabort = (error): void => {
+      cleanupXHR();
+      reject(new Error(`upload aborted: ${xhr.status} ${error}`));
+    };
     xhr.onerror = (error): void => {
-      xhr.onload = null;
-      xhr.onerror = null;
-      xhr.upload.onprogress = null;
-
+      cleanupXHR();
       reject(new Error(`Failed to upload file: ${xhr.status} ${error}`));
     };
     xhr.upload.onprogress = (event): void => {
@@ -403,9 +422,13 @@ function doUpload(
 function doUploadWithRetry(
   url: string,
   blob: Blob,
-  onProgress: (size: number) => void
+  onProgress: (size: number) => void,
+  abortSignal?: AbortSignal
 ): Promise<string> {
-  return retryUpload(() => doUpload(url, blob, onProgress));
+  return retryUpload(
+    (): Promise<string> => doUpload(url, blob, onProgress, abortSignal),
+    (): boolean => !!abortSignal?.aborted
+  );
 }
 
 export class UploadManager extends EventTarget {
@@ -515,11 +538,12 @@ export class UploadManager extends EventTarget {
             break;
 
           case 'not_uploaded':
+          case 'upload_failed':
             newStatus = 'error_upload_failed';
             break;
 
-          case 'aborted':
-            newStatus = 'error_aborted';
+          case 'upload_aborted':
+            newStatus = 'error_upload_aborted';
             break;
         }
       }
@@ -578,6 +602,7 @@ export class UploadManager extends EventTarget {
                 size: cueSheetSourceFile.fileSize,
                 parts: [],
               },
+              abortController: null,
             },
             uploadedSize: null,
             createSourcePromise: null,
@@ -606,6 +631,7 @@ export class UploadManager extends EventTarget {
             size: sourceFile.fileSize,
             parts: [],
           },
+          abortController: null,
         },
         uploadedSize: null,
         createSourcePromise: null,
@@ -633,7 +659,8 @@ export class UploadManager extends EventTarget {
   private _upload(
     url: UploadURL,
     file: Blob,
-    onProgress: (size: number) => void
+    onProgress: (size: number) => void,
+    abortSignal?: AbortSignal
   ): Promise<string[] | void> {
     if (url.parts) {
       const uploadedSizes: number[] = new Array(url.parts.length).fill(0);
@@ -646,8 +673,8 @@ export class UploadManager extends EventTarget {
 
         eTagPromises.push(
           this.uploadQueue.add(async () => {
-            if (failed) {
-              return '';
+            if (failed || abortSignal?.aborted) {
+              throw new Error('uploading failed or aborted');
             }
 
             try {
@@ -659,7 +686,8 @@ export class UploadManager extends EventTarget {
                   onProgress(
                     uploadedSizes.reduce((acc, cur): number => acc + cur, 0)
                   );
-                }
+                },
+                abortSignal
               );
 
               uploadedSizes[partIndex] = part.size;
@@ -675,7 +703,7 @@ export class UploadManager extends EventTarget {
       return Promise.all(eTagPromises);
     } else {
       return this.uploadQueue.add(async (): Promise<void> => {
-        await doUploadWithRetry(url.url, file, onProgress);
+        await doUploadWithRetry(url.url, file, onProgress, abortSignal);
       });
     }
   }
@@ -935,6 +963,8 @@ export class UploadManager extends EventTarget {
                   );
                 }
 
+                const abortController = new AbortController();
+
                 const { sourceId } = createSourceResponse;
                 const { sourceFileId, uploadURL } = responseFile;
 
@@ -942,6 +972,7 @@ export class UploadManager extends EventTarget {
                   sourceId,
                   sourceFileId,
                   url: uploadURL,
+                  abortController,
                 };
 
                 const eTags = await this._upload(
@@ -950,8 +981,16 @@ export class UploadManager extends EventTarget {
                   (size: number): void => {
                     file.uploadedSize = size;
                     this._dispatchUpdateEvent();
-                  }
+                  },
+                  abortController.signal
                 ).catch(async (error): Promise<void> => {
+                  const aborted =
+                    !!file.uploadInfo?.abortController?.signal.aborted;
+
+                  if (file.uploadInfo) {
+                    file.uploadInfo.abortController = null;
+                  }
+
                   await retryAPI(
                     (): Promise<void> =>
                       api.my.sources
@@ -959,13 +998,22 @@ export class UploadManager extends EventTarget {
                         .files._sourceFileId(sourceFileId)
                         .$patch({
                           body: {
-                            state: 'aborted',
+                            state: aborted ? 'upload_aborted' : 'upload_failed',
                           },
                         })
                   );
 
+                  if (aborted) {
+                    throw new UploadError(
+                      'uploading aborted',
+                      'error_upload_aborted'
+                    );
+                  }
+
                   throw error;
                 });
+
+                file.uploadInfo.abortController = null;
 
                 file.status = 'uploaded';
                 file.uploadEndAt = Date.now();
@@ -1115,6 +1163,14 @@ export class UploadManager extends EventTarget {
     return false;
   }
 
+  canAbortFile(file: UploadFile): boolean {
+    return (
+      file.status === 'uploading' &&
+      !!file.uploadInfo?.abortController &&
+      !file.uploadInfo.abortController.signal.aborted
+    );
+  }
+
   /**
    * @note `status`がpending, validating, validated, queued, transcoded, error_invalid, error_upload_failed, error_transcode_failed, skippedのいずれかでないといけない
    */
@@ -1132,5 +1188,15 @@ export class UploadManager extends EventTarget {
     uploadFile.status = 'removed';
     this._dispatchUpdateEvent();
     this._tick();
+  }
+
+  abortFile(fileId: FileId): void {
+    const uploadFileIndex = this._files.findIndex((x) => x.id === fileId);
+    if (uploadFileIndex < 0) {
+      return;
+    }
+
+    const uploadFile = this._files[uploadFileIndex];
+    uploadFile.uploadInfo?.abortController?.abort();
   }
 }

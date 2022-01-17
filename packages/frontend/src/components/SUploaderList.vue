@@ -9,10 +9,8 @@ export default defineComponent({
     const uploadStore = useUploadStore();
 
     return {
-      stagedFiles$$q: computed(() => uploadStore.stagedFiles),
-      files$$q: computed(() => uploadStore.files),
-      removeStagingFile$$q: uploadStore.removeStagingFile,
-      removeFile$$q: uploadStore.removeFile,
+      t,
+      uploadStore$$q: uploadStore,
       getStagedFileTooltipText$$q: (file: ResolvedUploadFile): string => {
         switch (file.type) {
           case 'audio':
@@ -34,7 +32,7 @@ export default defineComponent({
           case 'removed':
             return '';
 
-          case 'error_aborted':
+          case 'error_upload_aborted':
             return t('uploader.tooltip.file.ErrorAborted');
 
           case 'error_invalid':
@@ -86,7 +84,10 @@ export default defineComponent({
 
 <template>
   <v-list density="compact">
-    <template v-for="(file, _index) in stagedFiles$$q" :key="_index">
+    <template
+      v-for="(file, _index) in uploadStore$$q.stagedFiles"
+      :key="_index"
+    >
       <s-uploader-list-item
         :filename="file.file.name"
         :filesize="file.file.size"
@@ -102,7 +103,7 @@ export default defineComponent({
                   icon
                   size="small"
                   class="s-hover-visible text-st-error"
-                  @click="removeStagingFile$$q(file.id)"
+                  @click="uploadStore$$q.removeStagingFile(file.id)"
                 >
                   <v-icon>mdi-delete</v-icon>
                 </v-btn>
@@ -126,7 +127,7 @@ export default defineComponent({
         />
       </template>
     </template>
-    <template v-for="(file, _index) in files$$q" :key="_index">
+    <template v-for="(file, _index) in uploadStore$$q.files" :key="_index">
       <template v-if="file.status !== 'removed'">
         <s-uploader-list-item
           :filename="file.filename"
@@ -151,7 +152,7 @@ export default defineComponent({
                       icon
                       size="small"
                       class="s-hover-visible text-st-error"
-                      @click="removeFile$$q(file.id)"
+                      @click="uploadStore$$q.removeFile(file.id)"
                     >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
@@ -168,7 +169,32 @@ export default defineComponent({
                           ((file.uploadedSize || 0) * 100) / file.fileSize
                         "
                         size="28"
+                        class="s-hover-hidden"
                       />
+                      <n-popconfirm
+                        :positive-text="t('confirm.abortUpload.button.Abort')"
+                        :negative-text="t('confirm.abortUpload.button.Cancel')"
+                        @positive-click="uploadStore$$q.abortFile(file.id)"
+                      >
+                        <template #trigger>
+                          <n-button
+                            tag="div"
+                            text
+                            class="s-hover-visible select-none"
+                            data-draggable="false"
+                            @dragstart.stop.prevent
+                          >
+                            <v-btn flat icon size="small" class="text-st-error">
+                              <v-icon>mdi-cancel</v-icon>
+                            </v-btn>
+                          </n-button>
+                        </template>
+                        <div class="flex flex-col gap-y-2">
+                          <div class="flex-1">
+                            {{ t('confirm.abortUpload.text') }}
+                          </div>
+                        </div>
+                      </n-popconfirm>
                     </template>
                     <template v-else>
                       <v-progress-circular
@@ -194,7 +220,7 @@ export default defineComponent({
                     v-else-if="
                       file.status === 'skipped' ||
                       file.status === 'error_invalid' ||
-                      file.status === 'error_aborted' ||
+                      file.status === 'error_upload_aborted' ||
                       file.status === 'error_upload_failed' ||
                       file.status === 'error_transcode_failed' ||
                       file.status === 'transcoded'
