@@ -1,5 +1,6 @@
 import type { IndexableType, Table } from 'dexie';
 import { useMessage } from 'naive-ui';
+import { createPromise } from '$shared/promise';
 import type { DeletionEntityType } from '$shared/types';
 import type { ResourceDeletion, ResourceUser } from '$/types';
 import { SYNC_DB_THROTTLE } from '~/config';
@@ -155,14 +156,31 @@ export function useSyncDB(): (reconstruct?: boolean) => Promise<void> {
   const message = useMessage();
   const localStorageDB = useLocalStorageDB();
 
-  const throttledSyncDB = useThrottleFn(syncDB, SYNC_DB_THROTTLE);
-
-  return (reconstruct = false): Promise<void> =>
-    throttledSyncDB(localStorageDB, reconstruct)
-      ?.then((): void => {
-        message.success(t('message.SyncedDatabase'));
-      })
-      .catch((error): void => {
-        message.error(t('message.FailedToSyncDatabase', [String(error)]));
-      });
+  let gNextInvocation = -Infinity;
+  let gReconstruct = false;
+  let [gPromise, pResolve, pReject] = createPromise<void>();
+  return (reconstruct = false): Promise<void> => {
+    const timestamp = Date.now();
+    if (reconstruct) {
+      gReconstruct = true;
+    }
+    if (gNextInvocation <= timestamp) {
+      gNextInvocation = Infinity;
+      syncDB(localStorageDB, gReconstruct)
+        .then((): void => {
+          message.success(t('message.SyncedDatabase'));
+          pResolve(undefined);
+        })
+        .catch((error): void => {
+          message.error(t('message.FailedToSyncDatabase', [String(error)]));
+          pReject(error);
+        })
+        .finally((): void => {
+          gNextInvocation = timestamp + SYNC_DB_THROTTLE;
+          gReconstruct = false;
+          [gPromise, pResolve, pReject] = createPromise();
+        });
+    }
+    return gPromise;
+  };
 }
