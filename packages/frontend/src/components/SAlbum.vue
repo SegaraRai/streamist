@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { compareTrack } from '$shared/sort';
+import { compareTrack } from '$/shared/sort';
 import type { ResourceAlbum, ResourceTrack } from '$/types';
 import { useLiveQuery, useTrackFilter } from '~/composables';
 import { db } from '~/db';

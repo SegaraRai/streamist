@@ -1,4 +1,4 @@
-import type { TrackFile } from '$prisma/client';
+import type { ResourceTrack } from '$/types';
 import { canPlayAudioType } from './canPlayAudioType';
 import { getTrackFileURL } from './fileURL';
 
@@ -9,7 +9,9 @@ import { getTrackFileURL } from './fileURL';
  * @param trackFile `TrackFileDTO`
  * @returns スコア
  */
-export function calcTrackFileScore(trackFile: TrackFile): number {
+export function calcTrackFileScore(
+  trackFile: ResourceTrack['files'][number]
+): number {
   // 再生不可なら-1
   if (!canPlayAudioType(trackFile.mimeType)) {
     return -1;
@@ -21,7 +23,12 @@ export function calcTrackFileScore(trackFile: TrackFile): number {
   return 1 / trackFile.fileSize + addition;
 }
 
-export function getBestTrackFileURL(trackFiles: readonly TrackFile[]): string {
+export function getBestTrackFileURL(
+  userId: string,
+  track: ResourceTrack
+): string {
+  const trackFiles = track.files;
+
   // スコア降順でTrackFileDTOとスコアの配列を用意
   let trackFilesWithScore = trackFiles
     .map((item) => ({
@@ -43,5 +50,5 @@ export function getBestTrackFileURL(trackFiles: readonly TrackFile[]): string {
   // 一番いいやつを選択
   const trackFile = trackFilesWithScore[0].trackFile$$q;
 
-  return getTrackFileURL(trackFile);
+  return getTrackFileURL(userId, track.id, trackFile);
 }

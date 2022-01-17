@@ -1,5 +1,5 @@
 <script lang="ts">
-import { compareString } from '$shared/sort';
+import { compareString } from '$/shared/sort';
 import { useAllTracks } from '~/composables';
 
 export default defineComponent({

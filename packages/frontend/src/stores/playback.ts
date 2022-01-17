@@ -3,7 +3,7 @@ import type { RepeatType } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
 import { useRecentlyPlayed, useTrackFilter } from '~/composables';
-import { db } from '~/db';
+import { db, useLocalStorageDB } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
@@ -83,10 +83,15 @@ export interface PlaybackState {
 const audioContainer = document.body;
 
 async function createMetadataInit(
+  userId: string,
   track: ResourceTrack
 ): Promise<MediaMetadataInit> {
   const album = await db.albums.get(track.albumId);
   const artist = await db.artists.get(track.artistId);
+
+  if (!userId) {
+    throw new Error('userId not found (db corrupted)');
+  }
 
   if (!album || !artist) {
     throw new Error('album or artist not found (db corrupted)');
@@ -99,7 +104,7 @@ async function createMetadataInit(
 
   const artwork: MediaImage[] | undefined = image
     ? image.files.map((imageFile) => ({
-        src: getImageFileURL(imageFile),
+        src: getImageFileURL(userId, image.id, imageFile),
         sizes: `${imageFile.width}x${imageFile.height}`,
         type: imageFile.mimeType,
       }))
@@ -123,6 +128,7 @@ function _usePlaybackStore(): PlaybackState {
   const volumeStore = useVolumeStore();
   const { isTrackAvailable$$q, serializedFilterKey$$q } = useTrackFilter();
   const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
+  const { dbUserId$$q } = useLocalStorageDB();
 
   const repeat = useLocalStorage<RepeatType>('playback.repeat', 'off');
   const shuffle = useLocalStorage<boolean>('playback.shuffle', false);
@@ -333,6 +339,8 @@ function _usePlaybackStore(): PlaybackState {
   });
 
   trackProvider.addEventListener('trackChange', () => {
+    const userId = dbUserId$$q.value;
+
     const track = trackProvider.currentTrack$$q;
     currentTrack.value = track;
 
@@ -348,6 +356,10 @@ function _usePlaybackStore(): PlaybackState {
 
     // load audio here because watching currentTrack does not trigger if the previous track is the same
     if (track) {
+      if (!userId) {
+        return;
+      }
+
       const newAudio = createAudio();
       currentAudio = newAudio;
 
@@ -356,13 +368,13 @@ function _usePlaybackStore(): PlaybackState {
       internalPosition.value = 0;
 
       (async (): Promise<void> => {
-        const url = getBestTrackFileURL(track.files);
+        const url = getBestTrackFileURL(userId, track);
 
         if (needsCDNCookie(url)) {
           await setCDNCookie();
         }
 
-        const metadataInit = await createMetadataInit(track);
+        const metadataInit = await createMetadataInit(userId, track);
 
         if (currentAudio !== newAudio) {
           return;

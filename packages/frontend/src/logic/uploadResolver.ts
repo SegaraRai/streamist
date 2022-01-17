@@ -1,7 +1,7 @@
 import { getExtension, getStem } from '$shared/path';
-import { compareString } from '$shared/sort';
 import { getSourceFileType } from '$shared/sourceFileType';
 import { SourceFileType } from '$shared/types';
+import { compareString } from '$/shared/sort';
 import { LOSSLESS_AUDIO_FILE_EXTENSION_SET } from '~/config';
 
 export type ResolvedFileId = symbol;

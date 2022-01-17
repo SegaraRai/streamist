@@ -1,13 +1,11 @@
 import type { Ref } from 'vue';
-import { compareString } from '$shared/sort';
+import { compareString } from '$/shared/sort';
 import { useLocalStorageDB } from '~/db';
 import { useAllTracks } from './useDB';
 
 function _useTrackFilter() {
   const allTracks = useAllTracks();
-  const { dbUser$$q } = useLocalStorageDB();
-
-  const maxTrackId = eagerComputed(() => dbUser$$q.value?.maxTrackId ?? null);
+  const { dbMaxTrackId$$q } = useLocalStorageDB();
 
   const trackIds = computed<readonly string[] | undefined>(() =>
     allTracks.value.value
@@ -19,8 +17,8 @@ function _useTrackFilter() {
   );
 
   const serializedFilterKey = computed<string | undefined>(() =>
-    dbUser$$q.value && trackIds.value
-      ? `${maxTrackId.value}:${trackIds.value.join()}`
+    trackIds.value
+      ? `${dbMaxTrackId$$q.value}:${trackIds.value.join()}`
       : undefined
   );
 
@@ -29,7 +27,7 @@ function _useTrackFilter() {
 
   const isTrackAvailable = (trackId: string): boolean =>
     doesTrackExist(trackId) &&
-    (!maxTrackId.value || trackId <= maxTrackId.value);
+    (!dbMaxTrackId$$q.value || trackId <= dbMaxTrackId$$q.value);
 
   return {
     serializedFilterKey$$q: serializedFilterKey as Readonly<Ref<string>>,

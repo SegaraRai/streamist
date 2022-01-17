@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useDisplay } from 'vuetify';
-import { compareTrack } from '$shared/sort';
+import { compareTrack } from '$/shared/sort';
 import type {
   ResourceAlbum,
   ResourceArtist,

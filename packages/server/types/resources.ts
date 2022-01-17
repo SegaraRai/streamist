@@ -1,4 +1,12 @@
-import type { DeletionEntityType } from '$shared/types';
+import type { CoArtistRole } from '$shared/coArtist';
+import type { OSRegion } from '$shared/objectStorage';
+import type {
+  DeletionEntityType,
+  SourceFileAttachToType,
+  SourceFileState,
+  SourceFileType,
+  SourceState,
+} from '$shared/types';
 import type {
   Album,
   AlbumCoArtist,
@@ -15,41 +23,69 @@ import type {
   User,
 } from '$prisma/client';
 
-export interface ResourceAlbum extends Readonly<Album> {
+export interface ResourceAlbum
+  extends Readonly<Omit<Album, 'imageOrder' | 'userId'>> {
   readonly imageIds: readonly string[];
 }
 
-export interface ResourceAlbumCoArtist extends Readonly<AlbumCoArtist> {}
+export interface ResourceAlbumCoArtist
+  extends Readonly<Omit<AlbumCoArtist, 'userId'>> {
+  readonly role: CoArtistRole;
+}
 
-export interface ResourceArtist extends Readonly<Artist> {
+export interface ResourceArtist
+  extends Readonly<Omit<Artist, 'imageOrder' | 'userId'>> {
   readonly imageIds: readonly string[];
 }
 
-export interface ResourceImage extends Readonly<Image> {
-  readonly files: readonly Readonly<ImageFile>[];
+interface ResourceImageFile
+  extends Readonly<Omit<ImageFile, 'imageId' | 'userId'>> {
+  readonly region: OSRegion;
 }
 
-export interface ResourcePlaylist extends Readonly<Playlist> {
+export interface ResourceImage extends Readonly<Omit<Image, 'userId'>> {
+  readonly files: readonly ResourceImageFile[];
+}
+
+export interface ResourcePlaylist
+  extends Readonly<Omit<Playlist, 'imageOrder' | 'trackOrder' | 'userId'>> {
   readonly imageIds: readonly string[];
   readonly trackIds: readonly string[];
 }
 
-export interface ResourceSource extends Readonly<Source> {}
-
-// sourceFileId単体で索引できるようにするためにSourceの中に入れない
-export interface ResourceSourceFile extends Readonly<SourceFile> {}
-
-export interface ResourceTrack extends Readonly<Track> {
-  readonly files: readonly Readonly<TrackFile>[];
+export interface ResourceSource extends Readonly<Omit<Source, 'userId'>> {
+  readonly state: SourceState;
 }
 
-export interface ResourceTrackCoArtist extends Readonly<TrackCoArtist> {}
+// sourceFileId単体で索引できるようにするためにSourceの中に入れない
+export interface ResourceSourceFile
+  extends Readonly<Omit<SourceFile, 'userId'>> {
+  readonly attachToType: SourceFileAttachToType | null;
+  readonly region: OSRegion;
+  readonly state: SourceFileState;
+  readonly type: SourceFileType;
+}
 
-export interface ResourceUser extends Omit<Readonly<User>, ''> {}
+interface ResourceTrackFile
+  extends Readonly<Omit<TrackFile, 'trackId' | 'userId'>> {
+  readonly region: OSRegion;
+}
 
-export type ResourceDeletion = Omit<Readonly<Deletion>, 'entityType'> & {
+export interface ResourceTrack extends Readonly<Omit<Track, 'userId'>> {
+  readonly files: readonly ResourceTrackFile[];
+}
+
+export interface ResourceTrackCoArtist
+  extends Readonly<Omit<TrackCoArtist, 'userId'>> {
+  readonly role: CoArtistRole;
+}
+
+export interface ResourceDeletion
+  extends Readonly<Omit<Deletion, 'entityType' | 'userId'>> {
   readonly entityType: DeletionEntityType;
-};
+}
+
+export interface ResourceUser extends Readonly<User> {}
 
 export interface ResourcesUpdated {
   readonly updated: true;

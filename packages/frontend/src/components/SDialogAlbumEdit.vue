@@ -1,8 +1,7 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
-import { CoArtistRole } from '$shared/coArtist';
-import { compareCoArtist } from '$shared/sort';
+import { compareCoArtist } from '$/shared/sort';
 import type { ResourceAlbum } from '$/types';
 import { useLiveQuery, useTranslatedTimeAgo } from '~/composables';
 import { db, useSyncDB } from '~/db';
@@ -64,7 +63,7 @@ export default defineComponent({
         const coArtists: CoArtist[] = allAlbumCoArtists
           .filter((item) => item.albumId === newAlbum.id)
           .sort(compareCoArtist)
-          .map((item) => [item.role as CoArtistRole, item.artistId, '']);
+          .map((item) => [item.role, item.artistId, '']);
         itemOrgCoArtists$$q.value = JSON.parse(JSON.stringify(coArtists));
         itemCoArtists$$q.value = coArtists;
       });

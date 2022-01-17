@@ -6,11 +6,14 @@ function _useLocalStorageDB() {
     read: (v: string): any => (v ? JSON.parse(v) : undefined),
     write: (v: any): string => (v !== undefined ? JSON.stringify(v) : ''),
   };
+  const dbUser = useLocalStorage<ResourceUser | null>('db.user', null, {
+    writeDefaults: false,
+    serializer,
+  });
   return {
-    dbUser$$q: useLocalStorage<ResourceUser | null>('db.user', null, {
-      writeDefaults: false,
-      serializer,
-    }),
+    dbUser$$q: dbUser,
+    dbUserId$$q: eagerComputed(() => dbUser.value?.id ?? null),
+    dbMaxTrackId$$q: eagerComputed(() => dbUser.value?.maxTrackId ?? null),
     dbLastUpdate$$q: useLocalStorage<number>('db.lastUpdate', 0, {
       writeDefaults: false,
       serializer: {

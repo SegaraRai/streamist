@@ -2,13 +2,14 @@
 import type { PropType } from 'vue';
 import type { ResourceImage } from '$/types';
 import noImage from '~/assets/no_image.svg';
+import { useLocalStorageDB } from '~/db';
 import { SrcObject, createSrc } from '~/logic/srcSet';
 
 export default defineComponent({
   props: {
     image: {
       type: [Boolean, String, Object] as PropType<
-        Pick<ResourceImage, 'files'> | string | null | undefined | false
+        Pick<ResourceImage, 'id' | 'files'> | string | null | undefined | false
       >,
       default: undefined,
     },
@@ -22,9 +23,13 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const { dbUserId$$q } = useLocalStorageDB();
+
     const srcObject = computed<SrcObject | undefined>(() =>
-      props.image != null && typeof props.image === 'object'
-        ? createSrc(props.image.files, Number(props.size))
+      dbUserId$$q.value &&
+      props.image != null &&
+      typeof props.image === 'object'
+        ? createSrc(dbUserId$$q.value, props.image, Number(props.size))
         : undefined
     );
 

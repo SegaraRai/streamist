@@ -4,7 +4,7 @@ import type { PropType } from 'vue';
 import type { SourceFileAttachToType } from '$shared/types';
 import type { ResourceImage } from '$/types';
 import { useLiveQuery } from '~/composables';
-import { db, useSyncDB } from '~/db';
+import { db, useLocalStorageDB, useSyncDB } from '~/db';
 import { api } from '~/logic/api';
 import { FILE_ACCEPT_IMAGE } from '~/logic/fileAccept';
 import { getImageFileURL } from '~/logic/fileURL';
@@ -39,6 +39,7 @@ export default defineComponent({
     const syncDB = useSyncDB();
     const uploadStore = useUploadStore();
     const themeStore$$q = useThemeStore();
+    const { dbUserId$$q } = useLocalStorageDB();
 
     const errorOverrideTheme$$q = eagerComputed(() =>
       createOverrideTheme(
@@ -151,7 +152,11 @@ export default defineComponent({
         if (!imageFile) {
           return;
         }
-        return getImageFileURL(imageFile);
+        const userId = dbUserId$$q.value;
+        if (!userId) {
+          return;
+        }
+        return getImageFileURL(userId, image.id, imageFile);
       },
       removeImage$$q: (imageId: string) => {
         getAPIImageRoot(imageId)

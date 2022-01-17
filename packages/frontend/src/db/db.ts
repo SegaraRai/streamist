@@ -28,7 +28,7 @@ type DBResources = Pick<
 >;
 
 type DBResourcesValueKeys<T> = T extends keyof DBResources
-  ? keyof DBResources[T][0]
+  ? keyof DBResources[T][number]
   : never;
 
 type DBResourcesSchemaInputSubset<T> = T extends keyof DBResources
@@ -51,15 +51,15 @@ function createSchema(schema: DBResourcesSchemaInput): DBResourcesSchema {
 }
 
 export class ResourcesDexie extends Dexie {
-  readonly albumCoArtists!: Table<DBResources['albumCoArtists'][0]>;
-  readonly albums!: Table<DBResources['albums'][0]>;
-  readonly artists!: Table<DBResources['artists'][0]>;
-  readonly images!: Table<DBResources['images'][0]>;
-  readonly playlists!: Table<DBResources['playlists'][0]>;
-  readonly sourceFiles!: Table<DBResources['sourceFiles'][0]>;
-  readonly sources!: Table<DBResources['sources'][0]>;
-  readonly trackCoArtists!: Table<DBResources['trackCoArtists'][0]>;
-  readonly tracks!: Table<DBResources['tracks'][0]>;
+  readonly albumCoArtists!: Table<DBResources['albumCoArtists'][number]>;
+  readonly albums!: Table<DBResources['albums'][number]>;
+  readonly artists!: Table<DBResources['artists'][number]>;
+  readonly images!: Table<DBResources['images'][number]>;
+  readonly playlists!: Table<DBResources['playlists'][number]>;
+  readonly sourceFiles!: Table<DBResources['sourceFiles'][number]>;
+  readonly sources!: Table<DBResources['sources'][number]>;
+  readonly trackCoArtists!: Table<DBResources['trackCoArtists'][number]>;
+  readonly tracks!: Table<DBResources['tracks'][number]>;
 
   constructor() {
     super('resources');

@@ -1,12 +1,33 @@
 import { dbArrayDeserializeItemIds } from '$shared/dbArray';
-import type { Album, Artist, Playlist } from '$prisma/client';
+import type {
+  Album,
+  AlbumCoArtist,
+  Artist,
+  Deletion,
+  Image,
+  ImageFile,
+  Playlist,
+  Source,
+  SourceFile,
+  Track,
+  TrackCoArtist,
+  TrackFile,
+  User,
+} from '$prisma/client';
 import { RESOURCE_TIMESTAMP_MARGIN } from '$/config';
 import { client } from '$/db/lib/client';
 import type {
   ResourceAlbum,
+  ResourceAlbumCoArtist,
   ResourceArtist,
   ResourceDeletion,
+  ResourceImage,
   ResourcePlaylist,
+  ResourceSource,
+  ResourceSourceFile,
+  ResourceTrack,
+  ResourceTrackCoArtist,
+  ResourceUser,
   ResourcesNotUpdated,
   ResourcesUpdated,
 } from '$/types';
@@ -16,22 +37,39 @@ function convertAlbum(album: Album): ResourceAlbum {
   return {
     ...album,
     imageIds: dbArrayDeserializeItemIds(album.imageOrder),
-  };
+    imageOrder: undefined,
+    userId: undefined,
+  } as ResourceAlbum;
 }
 
-function convertAlbums(albums: readonly Album[]): ResourceAlbum[] {
-  return albums.map(convertAlbum);
+function convertAlbumCoArtist(
+  albumCoArtist: AlbumCoArtist
+): ResourceAlbumCoArtist {
+  return {
+    ...albumCoArtist,
+    userId: undefined,
+  } as ResourceAlbumCoArtist;
 }
 
 function convertArtist(artist: Artist): ResourceArtist {
   return {
     ...artist,
     imageIds: dbArrayDeserializeItemIds(artist.imageOrder),
-  };
+    imageOrder: undefined,
+    userId: undefined,
+  } as ResourceArtist;
 }
 
-function convertArtists(artists: readonly Artist[]): ResourceArtist[] {
-  return artists.map(convertArtist);
+function convertImage(image: Image & { files: ImageFile[] }): ResourceImage {
+  return {
+    ...image,
+    files: image.files.map((file) => ({
+      ...file,
+      imageId: undefined,
+      userId: undefined,
+    })),
+    userId: undefined,
+  } as ResourceImage;
 }
 
 function convertPlaylist(playlist: Playlist): ResourcePlaylist {
@@ -39,11 +77,56 @@ function convertPlaylist(playlist: Playlist): ResourcePlaylist {
     ...playlist,
     imageIds: dbArrayDeserializeItemIds(playlist.imageOrder),
     trackIds: dbArrayDeserializeItemIds(playlist.trackOrder),
-  };
+    imageOrder: undefined,
+    trackOrder: undefined,
+    userId: undefined,
+  } as ResourcePlaylist;
 }
 
-function convertPlaylists(playlists: readonly Playlist[]): ResourcePlaylist[] {
-  return playlists.map(convertPlaylist);
+function convertTrack(track: Track & { files: TrackFile[] }): ResourceTrack {
+  return {
+    ...track,
+    files: track.files.map((file) => ({
+      ...file,
+      trackId: undefined,
+      userId: undefined,
+    })),
+    userId: undefined,
+  } as ResourceTrack;
+}
+
+function convertSource(source: Source): ResourceSource {
+  return {
+    ...source,
+    userId: undefined,
+  } as ResourceSource;
+}
+
+function convertSourceFile(sourceFile: SourceFile): ResourceSourceFile {
+  return {
+    ...sourceFile,
+    userId: undefined,
+  } as ResourceSourceFile;
+}
+
+function convertTrackCoArtist(
+  trackCoArtist: TrackCoArtist
+): ResourceTrackCoArtist {
+  return {
+    ...trackCoArtist,
+    userId: undefined,
+  } as ResourceTrackCoArtist;
+}
+
+function convertDeletion(deletion: Deletion): ResourceDeletion {
+  return {
+    ...deletion,
+    userId: undefined,
+  } as ResourceDeletion;
+}
+
+function convertUser(user: User): ResourceUser {
+  return user as ResourceUser;
 }
 
 export function fetchResources(
@@ -128,19 +211,25 @@ export function fetchResources(
         updated: true,
         timestamp,
         updatedAt,
-        user: dbUser,
-        albumCoArtists: await txClient.albumCoArtist.findMany(q),
-        albums: convertAlbums(await txClient.album.findMany(q)),
-        artists: convertArtists(await txClient.artist.findMany(q)),
-        images: await txClient.image.findMany(qFiles),
-        playlists: convertPlaylists(await txClient.playlist.findMany(q)),
-        sourceFiles: await txClient.sourceFile.findMany(q),
-        sources: await txClient.source.findMany(q),
-        trackCoArtists: await txClient.trackCoArtist.findMany(q),
-        tracks: await txClient.track.findMany(qFiles),
-        deletions: (await txClient.deletion.findMany(
-          qDel
-        )) as ResourceDeletion[],
+        user: convertUser(dbUser),
+        albumCoArtists: (await txClient.albumCoArtist.findMany(q)).map(
+          convertAlbumCoArtist
+        ),
+        albums: (await txClient.album.findMany(q)).map(convertAlbum),
+        artists: (await txClient.artist.findMany(q)).map(convertArtist),
+        images: (await txClient.image.findMany(qFiles)).map(convertImage),
+        playlists: (await txClient.playlist.findMany(q)).map(convertPlaylist),
+        sourceFiles: (await txClient.sourceFile.findMany(q)).map(
+          convertSourceFile
+        ),
+        sources: (await txClient.source.findMany(q)).map(convertSource),
+        trackCoArtists: (await txClient.trackCoArtist.findMany(q)).map(
+          convertTrackCoArtist
+        ),
+        tracks: (await txClient.track.findMany(qFiles)).map(convertTrack),
+        deletions: (await txClient.deletion.findMany(qDel)).map(
+          convertDeletion
+        ),
       };
     }
   );

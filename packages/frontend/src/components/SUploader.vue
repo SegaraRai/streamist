@@ -7,7 +7,7 @@ export default defineComponent({
   setup() {
     const { t } = useI18n();
     const uploadStore = useUploadStore();
-    const { dbUser$$q } = useLocalStorageDB();
+    const { dbMaxTrackId$$q } = useLocalStorageDB();
 
     const onFileSelected = (event: Event) => {
       const inputElement = event.target as HTMLInputElement;
@@ -22,7 +22,7 @@ export default defineComponent({
 
     const inputFileElement = ref<HTMLInputElement | undefined>();
 
-    const canUpload$$q = eagerComputed(() => !dbUser$$q.value?.maxTrackId);
+    const canUpload$$q = eagerComputed(() => !dbMaxTrackId$$q.value);
 
     return {
       t,

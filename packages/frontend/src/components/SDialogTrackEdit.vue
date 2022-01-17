@@ -1,9 +1,8 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
-import type { CoArtistRole } from '$shared/coArtist';
 import { parseDate } from '$shared/parseDate';
-import { compareCoArtist } from '$shared/sort';
+import { compareCoArtist } from '$/shared/sort';
 import type { ResourceTrack } from '$/types';
 import { useLiveQuery, useTranslatedTimeAgo } from '~/composables';
 import { db, useSyncDB } from '~/db';
@@ -89,7 +88,7 @@ export default defineComponent({
         const coArtists: CoArtist[] = allTrackCoArtists
           .filter((item) => item.trackId === newTrack.id)
           .sort(compareCoArtist)
-          .map((item) => [item.role as CoArtistRole, item.artistId, '']);
+          .map((item) => [item.role, item.artistId, '']);
         itemOrgCoArtists$$q.value = JSON.parse(JSON.stringify(coArtists));
         itemCoArtists$$q.value = coArtists;
       });

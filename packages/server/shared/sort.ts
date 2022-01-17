@@ -1,35 +1,35 @@
+import { CO_ARTIST_ROLE_PREFIX_BUILTIN, CoArtistRole } from '$shared/coArtist';
 import type {
-  Album,
-  AlbumCoArtist,
-  Artist,
-  Playlist,
-  Track,
-  TrackCoArtist,
-} from '$prisma/client';
-import { CO_ARTIST_ROLE_PREFIX_BUILTIN, CoArtistRole } from './coArtist';
+  ResourceAlbum,
+  ResourceAlbumCoArtist,
+  ResourceArtist,
+  ResourcePlaylist,
+  ResourceTrack,
+  ResourceTrackCoArtist,
+} from '$/types';
 
 /* eslint-disable no-use-before-define */
 
-interface AlbumLike extends Readonly<Album> {
+interface AlbumLike extends Omit<ResourceAlbum, 'imageIds'> {
   readonly artist?: ArtistLike;
   readonly tracks?: readonly TrackLike[];
 }
 
-interface ArtistLike extends Readonly<Artist> {
+interface ArtistLike extends Omit<ResourceArtist, 'imageIds'> {
   readonly albums?: readonly AlbumLike[];
   readonly tracks?: readonly TrackLike[];
 }
 
-interface TrackLike extends Readonly<Track> {
+interface TrackLike extends Omit<ResourceTrack, 'files'> {
   readonly artist?: ArtistLike;
   readonly album?: AlbumLike;
 }
 
-interface PlaylistLike extends Readonly<Playlist> {
+interface PlaylistLike extends Omit<ResourcePlaylist, 'trackIds'> {
   readonly tracks?: readonly TrackLike[];
 }
 
-type CoArtist = AlbumCoArtist | TrackCoArtist;
+type CoArtist = ResourceAlbumCoArtist | ResourceTrackCoArtist;
 
 /* eslint-enable no-use-before-define */
 

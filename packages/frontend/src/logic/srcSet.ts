@@ -1,4 +1,4 @@
-import type { ImageFile } from '$prisma/client';
+import type { ResourceImage } from '$/types';
 import { getImageFileURL } from './fileURL';
 
 export interface SrcObject {
@@ -14,16 +14,19 @@ export interface SrcObject {
  * @returns `SrcObject`または`undefined`（`ImageFileDTO`の配列の大きさが0のとき）
  */
 export function createSrc(
-  imageFiles: readonly Readonly<ImageFile>[],
+  userId: string,
+  image: Pick<ResourceImage, 'id' | 'files'>,
   targetSize: number
 ): SrcObject | undefined {
+  const imageFiles = image.files;
+
   if (imageFiles.length === 0) {
     return;
   }
 
   const imageFileWithURLs = imageFiles.map((imageFile) => ({
     ...imageFile,
-    url: getImageFileURL(imageFile),
+    url: getImageFileURL(userId, image.id, imageFile),
   }));
 
   // 小さい順

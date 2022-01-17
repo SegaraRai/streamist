@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import { useLiveQuery } from '~/composables';
-import { db } from '~/db';
+import { db, useLocalStorageDB } from '~/db';
 import { createSrc } from '~/logic/srcSet';
 
 export default defineComponent({
@@ -21,6 +21,7 @@ export default defineComponent({
     'update:modelValue': (_modelValue: boolean) => true,
   },
   setup(props, { emit }) {
+    const { dbUserId$$q } = useLocalStorageDB();
     const modelValue$$q = useVModel(props, 'modelValue', emit);
 
     const imageIds$$q = computed(() => props.imageIds);
@@ -38,12 +39,16 @@ export default defineComponent({
       if (!images$$q.value) {
         return [];
       }
+      const userId = dbUserId$$q.value;
+      if (!userId) {
+        return [];
+      }
       return images$$q.value
         .map((image, index) => {
           if (!image) {
             return undefined;
           }
-          const src = createSrc(image.files, Infinity);
+          const src = createSrc(userId, image, Infinity);
           if (!src) {
             return undefined;
           }

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useDisplay } from 'vuetify';
-import { compareTrack } from '$shared/sort';
+import { compareTrack } from '$/shared/sort';
 import type { ResourceTrack } from '$/types';
 import { useAllTrackMap, useAllTracks, useRecentlyPlayed } from '~/composables';
 import { RECENTLY_UPLOADED_MAX_ENTRIES } from '~/config';

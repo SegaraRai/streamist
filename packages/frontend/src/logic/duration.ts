@@ -1,5 +1,5 @@
 import humanizeDuration from 'humanize-duration';
-import type { Track } from '$prisma/client';
+import type { ResourceTrack } from '$/types';
 
 /**
  * 合計トラック長（秒）を分単位でフォーマットした文字列に変換する
@@ -25,7 +25,7 @@ export function formatTotalDuration(
  * @returns トラック長の合計（秒）
  */
 export function calcTracksTotalDuration(
-  tracks: readonly Readonly<Track>[]
+  tracks: readonly Pick<ResourceTrack, 'duration'>[]
 ): number {
   return tracks.reduce((acc, track) => acc + track.duration, 0);
 }
@@ -36,7 +36,7 @@ export function calcTracksTotalDuration(
  * @returns 合計トラック長を分単位でフォーマットした文字列
  */
 export function formatTracksTotalDuration(
-  tracks: readonly Readonly<Track>[],
+  tracks: readonly Pick<ResourceTrack, 'duration'>[],
   language: string
 ): string {
   return formatTotalDuration(calcTracksTotalDuration(tracks), language);

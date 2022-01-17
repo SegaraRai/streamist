@@ -3,7 +3,7 @@ import {
   compareArtist,
   comparePlaylist,
   compareTrack,
-} from '$shared/sort';
+} from '$/shared/sort';
 import type {
   ResourceAlbum,
   ResourceArtist,

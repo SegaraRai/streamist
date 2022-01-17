@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { CoArtistRole, isBuiltinCoArtistRole } from '$shared/coArtist';
-import { compareAlbum, compareCoArtistRole, compareTrack } from '$shared/sort';
+import { isBuiltinCoArtistRole } from '$shared/coArtist';
+import { compareAlbum, compareCoArtistRole, compareTrack } from '$/shared/sort';
 import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
 import { useLiveQuery, useTrackFilter } from '~/composables';
@@ -127,7 +127,7 @@ export default defineComponent({
         const roles$$q = Array.from(
           new Set(
             [...albumCoArtists, ...trackCoArtists].map(
-              (coArtist) => coArtist.role as CoArtistRole
+              (coArtist) => coArtist.role
             )
           )
         ).sort(compareCoArtistRole);

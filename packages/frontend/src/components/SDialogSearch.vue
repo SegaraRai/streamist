@@ -1,5 +1,5 @@
 <script lang="ts">
-import { compareTrack } from '$shared/sort';
+import { compareTrack } from '$/shared/sort';
 import { ResourceTrack } from '$/types';
 import {
   AllItem,
