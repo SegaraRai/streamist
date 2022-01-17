@@ -947,26 +947,41 @@ export class UploadManager extends EventTarget {
                 const eTags = await this._upload(
                   uploadURL,
                   file.file!,
-                  (size: number) => {
+                  (size: number): void => {
                     file.uploadedSize = size;
                     this._dispatchUpdateEvent();
                   }
-                );
+                ).catch(async (error): Promise<void> => {
+                  await retryAPI(
+                    (): Promise<void> =>
+                      api.my.sources
+                        ._sourceId(sourceId)
+                        .files._sourceFileId(sourceFileId)
+                        .$patch({
+                          body: {
+                            state: 'aborted',
+                          },
+                        })
+                  );
+
+                  throw error;
+                });
 
                 file.status = 'uploaded';
                 file.uploadEndAt = Date.now();
                 this._dispatchUpdateEvent();
 
-                await retryAPI(() =>
-                  api.my.sources
-                    ._sourceId(sourceId)
-                    .files._sourceFileId(sourceFileId)
-                    .$patch({
-                      body: {
-                        state: 'uploaded',
-                        parts: eTags ?? undefined,
-                      },
-                    })
+                await retryAPI(
+                  (): Promise<void> =>
+                    api.my.sources
+                      ._sourceId(sourceId)
+                      .files._sourceFileId(sourceFileId)
+                      .$patch({
+                        body: {
+                          state: 'uploaded',
+                          parts: eTags ?? undefined,
+                        },
+                      })
                 );
 
                 file.status = 'transcoding';
