@@ -1,9 +1,11 @@
 export const IDLE_TIMEOUT = 1 * 60 * 1000;
 export const COOKIE_CHECK_INTERVAL = 30 * 1000;
 
-export const RESTORE_SCROLL_CHECK_TIMEOUT = 5000;
+export const SYNC_DB_THROTTLE = 5 * 1000;
+
+export const RESTORE_SCROLL_CHECK_TIMEOUT = 5 * 1000;
 export const RESTORE_SCROLL_CHECK_INTERVAL = 100;
-export const STORE_SCROLL_THROTTLE = 200;
+export const STORE_SCROLL_THROTTLE = 100;
 
 export const RECENTLY_PLAYED_MAX_ENTRIES = 50;
 export const RECENTLY_UPLOADED_MAX_ENTRIES = 50;
@@ -36,3 +38,30 @@ export const LOSSLESS_AUDIO_FILE_EXTENSION_SET: ReadonlySet<string> =
   ]);
 
 export const CDN_ENDPOINT = import.meta.env.VITE_CDN_ORIGIN;
+
+//
+
+export const PREFERENCE_LANGUAGES = [
+  ['en', 'English (English)'],
+  ['ja', 'Japanese (日本語)'],
+] as const;
+
+export type LanguageCode = typeof PREFERENCE_LANGUAGES[number][0];
+
+export const PREFERENCE_LANGUAGE_CODE_DEFAULT: LanguageCode = 'en';
+
+//
+
+export const PREFERENCE_THEMES = ['system', 'dark', 'light'];
+
+export type Theme = typeof PREFERENCE_THEMES[number];
+
+export const PREFERENCE_THEME_DEFAULT: Theme = 'system';
+
+//
+
+export const PREFERENCE_AUDIO_QUALITIES = ['medium', 'veryHigh'];
+
+export type AudioQuality = typeof PREFERENCE_AUDIO_QUALITIES[number];
+
+export const PREFERENCE_AUDIO_QUALITY_DEFAULT: AudioQuality = 'medium';

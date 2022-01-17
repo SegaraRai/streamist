@@ -2,6 +2,7 @@ import type { IndexableType, Table } from 'dexie';
 import { useMessage } from 'naive-ui';
 import type { DeletionEntityType } from '$shared/types';
 import type { ResourceDeletion, ResourceUser } from '$/types';
+import { SYNC_DB_THROTTLE } from '~/config';
 import { api } from '~/logic/api';
 import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
 import { db } from './db';
@@ -154,8 +155,10 @@ export function useSyncDB(): (reconstruct?: boolean) => Promise<void> {
   const message = useMessage();
   const localStorageDB = useLocalStorageDB();
 
+  const throttledSyncDB = useThrottleFn(syncDB, SYNC_DB_THROTTLE);
+
   return (reconstruct = false): Promise<void> =>
-    syncDB(localStorageDB, reconstruct)
+    throttledSyncDB(localStorageDB, reconstruct)
       .then((): void => {
         message.success(t('message.SyncedDatabase'));
       })
