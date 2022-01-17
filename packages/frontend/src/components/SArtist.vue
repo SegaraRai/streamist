@@ -218,7 +218,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid>
+  <template v-if="value$$q">
     <div
       class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-6 md:gap-y-4"
     >
@@ -327,5 +327,5 @@ export default defineComponent({
       </template>
     </template>
     <s-dropdown-artist v-model="dropdown$$q" />
-  </v-container>
+  </template>
 </template>
