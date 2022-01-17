@@ -405,16 +405,31 @@ function _usePlaybackStore(): PlaybackState {
       if (currentAudio) {
         currentAudio.volume = visualVolumeToRealVolume(newVolume);
       }
+    },
+    {
+      immediate: true,
     }
   );
 
-  watch(repeat, (newRepeat) => {
-    trackProvider.repeat$$q = newRepeat;
-  });
+  watch(
+    repeat,
+    (newRepeat) => {
+      trackProvider.repeat$$q = newRepeat;
+    },
+    {
+      immediate: true,
+    }
+  );
 
-  watch(shuffle, (newShuffle) => {
-    trackProvider.shuffle$$q = newShuffle;
-  });
+  watch(
+    shuffle,
+    (newShuffle) => {
+      trackProvider.shuffle$$q = newShuffle;
+    },
+    {
+      immediate: true,
+    }
+  );
 
   //
 
