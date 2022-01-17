@@ -94,14 +94,16 @@ function themePlugin() {
   const virtualModuleId = 'virtual:theme.css';
   const resolvedVirtualModuleId = '\0' + virtualModuleId;
 
-  const content = THEMES.map(
-    (theme) =>
-      `.s-theme--${theme.name} {\n` +
-      COLOR_KEYS.map(
-        (key) => `${COLOR_CSS_VAR_MAP[key]}: ${theme[key]};\n`
-      ).join('') +
-      '}\n'
-  ).join('');
+  const content = Object.values(THEMES)
+    .map(
+      (theme) =>
+        `.s-theme--${theme.name} {\n` +
+        COLOR_KEYS.map(
+          (key) => `${COLOR_CSS_VAR_MAP[key]}: ${theme[key]};\n`
+        ).join('') +
+        '}\n'
+    )
+    .join('');
 
   return {
     name: 'theme-plugin',

@@ -20,6 +20,7 @@ declare module 'vue' {
     NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDialogProvider: typeof import('naive-ui')['NDialogProvider']
     NDropdown: typeof import('naive-ui')['NDropdown']
+    NGlobalStyle: typeof import('naive-ui')['NGlobalStyle']
     NIcon: typeof import('naive-ui')['NIcon']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
     NModal: typeof import('naive-ui')['NModal']

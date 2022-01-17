@@ -119,7 +119,7 @@ export default defineComponent({
       </n-carousel>
       <div class="absolute top-1 right-1">
         <v-btn
-          class="text-st-error bg-opacity-80 bg-true-gray-900"
+          class="text-st-error bg-true-gray-500/60 dark:bg-true-gray-900/80"
           flat
           icon
           size="x-small"

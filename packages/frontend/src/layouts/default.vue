@@ -26,6 +26,7 @@ export default defineComponent({
     const rightSidebar$$q = ref(false);
     const _leftSidebar$$q = ref(false);
     const alwaysShowLeftSidebar$$q = eagerComputed(() => display.mdAndUp.value);
+    const desktopPlaybackControl$$q = alwaysShowLeftSidebar$$q;
     const leftSidebar$$q = computed<boolean>({
       get: (): boolean => {
         return alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value;
@@ -104,6 +105,7 @@ export default defineComponent({
       isOnline$$q: isOnline,
       theme$$q: theme,
       alwaysShowLeftSidebar$$q,
+      desktopPlaybackControl$$q,
       logoSVG$$q: logoSVG,
     };
   },
@@ -116,12 +118,16 @@ export default defineComponent({
     class="min-h-screen flex flex-col"
   >
     <div
-      class="s-offline-bar bg-yellow-400 h-0 text-white font-weight-bold text-md flex items-center px-4 leading-none z-1000 overflow-hidden"
+      class="s-offline-bar bg-yellow-400 h-0 text-light-900 font-weight-bold text-md flex items-center px-4 leading-none z-1000 overflow-hidden"
     >
       {{ t('header.NoInternetConnection') }}
     </div>
 
     <v-app :theme="theme$$q.theme" class="flex-1 !h-auto">
+      <!-- we have to place this inside the app to apply theme -->
+      <s-dialog-search v-model="searchDialog$$q" />
+      <s-dialog-upload v-model="uploadDialog$$q" />
+
       <!-- div
         class="bg-black z-2135 fixed top-0 left-0 w-full h-full transition-all"
         :class="rightSidebar$$q ? 'opacity-25' : 'opacity-0 invisible'"
@@ -283,19 +289,23 @@ export default defineComponent({
     </v-app>
 
     <footer
-      class="select-none playback-sheet fixed bottom-0 z-100 w-full m-0 p-0 h-24"
+      class="select-none fixed bottom-0 z-100 w-full m-0 p-0 h-24"
       :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >
-      <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
+      <v-sheet
+        :theme="theme$$q.theme"
+        class="m-0 p-0 w-full h-full flex flex-col"
+      >
         <v-divider />
-        <s-playback-control class="<md:hidden" />
-        <s-mobile-playback-control class="md:hidden" />
+        <template v-if="desktopPlaybackControl$$q">
+          <s-playback-control />
+        </template>
+        <template v-else>
+          <s-mobile-playback-control />
+        </template>
       </v-sheet>
     </footer>
-
-    <s-dialog-search v-model="searchDialog$$q" />
-    <s-dialog-upload v-model="uploadDialog$$q" />
   </div>
 </template>
 

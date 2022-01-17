@@ -223,7 +223,7 @@ export default defineComponent({
         </span>
       </v-btn>
       <button
-        class="rounded-full"
+        class="rounded-full transition-colors"
         @click="openMenu$$q($event.target as HTMLElement)"
       >
         <v-icon>mdi-dots-vertical</v-icon>

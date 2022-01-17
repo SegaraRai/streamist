@@ -142,7 +142,9 @@ export default defineComponent({
     const strRoles$$q = computed(() =>
       value.value?.roles$$q
         .map((role) =>
-          isBuiltinCoArtistRole(role) ? t(`coArtist.role.${role}`) : role
+          isBuiltinCoArtistRole(role)
+            ? t(`coArtist.role.${role}`)
+            : role.slice(1)
         )
         .join(', ')
     );
@@ -274,7 +276,7 @@ export default defineComponent({
         </span>
       </v-btn>
       <button
-        class="rounded-full"
+        class="rounded-full transition-colors"
         @click="openMenu$$q($event.target as HTMLElement)"
       >
         <v-icon>mdi-dots-vertical</v-icon>

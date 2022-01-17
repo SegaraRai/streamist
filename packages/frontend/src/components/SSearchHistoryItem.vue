@@ -40,11 +40,11 @@ export default defineComponent({
     <v-list-item-header>
       <div class="flex-1 flex flex-col pl-2">
         <div
-          class="text-sm whitespace-nowrap overflow-hidden overflow-ellipsis"
+          class="text-sm whitespace-nowrap overflow-hidden overflow-ellipsis leading-tight"
         >
           {{ query }}
         </div>
-        <div class="text-xs opacity-60">
+        <div class="text-xs opacity-60 leading-tight">
           {{ strAt$$q }}
         </div>
       </div>

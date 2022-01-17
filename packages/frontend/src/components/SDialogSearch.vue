@@ -329,7 +329,7 @@ export default defineComponent({
                           :album="item.i.albumId"
                         />
                         <div
-                          class="s-hover-visible w-full h-full flex items-center justify-center text-[2rem]"
+                          class="s-hover-visible w-full h-full flex items-center justify-center text-[2rem] light:opacity-80"
                         >
                           <i-mdi-play-circle />
                         </div>
@@ -367,11 +367,11 @@ export default defineComponent({
                   <v-list-item-header>
                     <div class="flex-1 flex flex-col">
                       <div
-                        class="text-sm whitespace-nowrap overflow-hidden overflow-ellipsis"
+                        class="text-sm whitespace-nowrap overflow-hidden overflow-ellipsis leading-tight"
                       >
                         {{ item.l }}
                       </div>
-                      <div class="text-xs opacity-60">
+                      <div class="text-xs opacity-60 leading-tight">
                         {{ t(`dialogComponent.search.type.${item.t}`) }}
                       </div>
                     </div>

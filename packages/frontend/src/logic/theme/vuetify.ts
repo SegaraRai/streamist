@@ -3,7 +3,7 @@ import { THEMES, ThemeName } from './definitions';
 
 export const VUETIFY_THEMES: Record<ThemeName, ThemeDefinition> =
   Object.fromEntries(
-    THEMES.map((theme): [ThemeName, ThemeDefinition] => [
+    Object.values(THEMES).map((theme): [ThemeName, ThemeDefinition] => [
       theme.name,
       {
         dark: theme.dark,
@@ -18,6 +18,14 @@ export const VUETIFY_THEMES: Record<ThemeName, ThemeDefinition> =
           info: theme.info,
           success: theme.success,
           warning: theme.warning,
+          'on-background': theme.text,
+          'on-error': theme.onError || theme.text,
+          'on-info': theme.onInfo || theme.text,
+          'on-primary': theme.onPrimary || theme.text,
+          'on-secondary': theme.onSecondary || theme.text,
+          'on-success': theme.onSuccess || theme.text,
+          'on-warning': theme.onWarning || theme.text,
+          'on-surface': theme.text,
         },
         variables: {},
       },

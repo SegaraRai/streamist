@@ -16,47 +16,74 @@ export interface ThemeDefinitionColor {
   readonly info: string;
   readonly success: string;
   readonly warning: string;
+  readonly onPrimary: string;
+  readonly onSecondary: string;
+  readonly onError: string;
+  readonly onInfo: string;
+  readonly onSuccess: string;
+  readonly onWarning: string;
 }
 
-const THEME_DARK: ThemeDefinitionColor = {
-  name: 'dark',
-  dark: true,
-  background: '#101010',
-  surface: '#1b1b1c',
-  tooltip: '#343437',
-  onTooltip: '#ffffff',
-  text: '#ffffff',
-  primary: '#4a8af2',
-  secondary: '#4a8af2',
-  error: '#f2444a',
-  info: '#1f94ed',
-  success: '#4bad4e',
-  warning: '#f28a0a',
+export const THEMES: Readonly<Record<ThemeName, ThemeDefinitionColor>> = {
+  dark: {
+    name: 'dark',
+    dark: true,
+    background: '#101011',
+    surface: '#1b1b1c',
+    tooltip: '#343437',
+    onTooltip: '#f9f9fc',
+    text: '#f9f9fc',
+    primary: '#2b78fa',
+    secondary: '#2b78fa',
+    error: '#f2444a',
+    info: '#1f94ed',
+    success: '#4bad4e',
+    warning: '#f28a0a',
+    onPrimary: '',
+    onSecondary: '',
+    onError: '',
+    onWarning: '',
+    onInfo: '',
+    onSuccess: '',
+  },
+  light: {
+    name: 'light',
+    dark: false,
+    background: '#fdfdfe',
+    surface: '#f4f5f8',
+    tooltip: '#f7f7f9',
+    onTooltip: '#0d0d0f',
+    text: '#0d0d0f',
+    primary: '#3187fe',
+    secondary: '#3187fe',
+    error: '#fe5359',
+    info: '#3fadfe',
+    success: '#4bad4e',
+    warning: '#fea236',
+    onPrimary: '#fdfdfe',
+    onSecondary: '#fdfdfe',
+    onError: '#fdfdfe',
+    onWarning: '#fdfdfe',
+    onInfo: '#fdfdfe',
+    onSuccess: '#fdfdfe',
+  },
 };
 
-// TODO: create theme
-const THEME_LIGHT: ThemeDefinitionColor = {
-  ...THEME_DARK,
-  name: 'light',
-  dark: false,
-};
+export const THEME_NAMES = Object.keys(THEMES) as ThemeName[];
 
-export const THEME_KEYS = Object.keys(THEME_DARK) as readonly ThemeName[];
-
-export const THEMES: readonly ThemeDefinitionColor[] = [
-  THEME_DARK,
-  THEME_LIGHT,
-];
+export const THEME_KEYS = Object.keys(
+  THEMES.dark
+) as readonly (keyof ThemeDefinitionColor)[];
 
 export function toKebabCase(str: string): string {
   return str
-    .replace(/[A-Z]/g, (match) => `-${match.toLowerCase()}`)
+    .replace(/[A-Z]/g, (match): string => `-${match.toLowerCase()}`)
     .replace(/^-+/, '');
 }
 
 export type ThemeColor = Exclude<keyof ThemeDefinitionColor, 'dark' | 'name'>;
 
-export const COLOR_KEYS = Object.keys(THEME_DARK).filter(
+export const COLOR_KEYS = THEME_KEYS.filter(
   (key) => key !== 'dark' && key !== 'name'
 ) as readonly ThemeColor[];
 

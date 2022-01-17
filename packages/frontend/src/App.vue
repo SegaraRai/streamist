@@ -75,5 +75,6 @@ export default defineComponent({
         </n-dialog-provider>
       </n-notification-provider>
     </n-message-provider>
+    <n-global-style />
   </n-config-provider>
 </template>

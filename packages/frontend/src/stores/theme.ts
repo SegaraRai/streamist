@@ -1,11 +1,14 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import type { ThemeName } from '~/logic/theme';
+import { THEMES, THEME_NAMES, ThemeName } from '~/logic/theme';
 import { createInSerializer } from './utils';
 
 export type InternalTheme = ThemeName | 'system';
 
 export const PREFERENCE_THEME_DEFAULT: InternalTheme = 'system';
-export const PREFERENCE_THEMES = ['system', 'dark', 'light'] as const;
+export const PREFERENCE_THEMES: readonly InternalTheme[] = [
+  'system',
+  ...THEME_NAMES,
+];
 
 const THEME_NO_PREFERENCE: ThemeName = 'light';
 
@@ -38,6 +41,24 @@ export const useThemeStore = defineStore('theme', () => {
       rawTheme.value = theme;
     },
   });
+
+  watch(
+    theme,
+    (newTheme): void => {
+      const isDark = THEMES[newTheme].dark;
+      document.documentElement.classList.toggle('dark', isDark);
+      document.documentElement.classList.toggle('light', !isDark);
+      for (const themeName of THEME_NAMES) {
+        document.documentElement.classList.toggle(
+          `s-theme--${themeName}`,
+          themeName === newTheme
+        );
+      }
+    },
+    {
+      immediate: true,
+    }
+  );
 
   return {
     rawTheme,

@@ -48,7 +48,7 @@ function createDisabled(color: string, _dark: boolean): string {
 
 export const NAIVE_UI_THEMES: Record<ThemeName, NaiveUITheme> =
   Object.fromEntries(
-    THEMES.map((theme): [ThemeName, NaiveUITheme] => [
+    Object.values(THEMES).map((theme): [ThemeName, NaiveUITheme] => [
       theme.name,
       {
         name: theme.name,

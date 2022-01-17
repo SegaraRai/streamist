@@ -119,7 +119,7 @@ export default defineComponent({
       <div class="flex flex-row justify-center px-12">
         <!-- clickではなくmouseupでblurButtonを呼んでいるのはキーで操作されたときにblurしないようにするため -->
         <button
-          class="mx-5 rounded-full"
+          class="mx-5 rounded-full transition-colors"
           :class="shuffleEnabled$$q && 'text-shadow'"
           @click="switchShuffle$$q"
           @mouseup="blurButton$$q"
@@ -152,7 +152,7 @@ export default defineComponent({
           <v-icon>mdi-skip-next</v-icon>
         </v-btn>
         <button
-          class="mx-5 rounded-full"
+          class="mx-5 rounded-full transition-colors"
           :class="repeatEnabled$$q && 'text-shadow'"
           @click="switchRepeat$$q"
           @mouseup="blurButton$$q"
