@@ -28,6 +28,14 @@ queue:
   NowPlaying: Now playing
   NextInQueue: Next in queue
   NextFrom: 'Next from: {0}'
+settings:
+  audioQuality:
+    medium: Medium
+    veryHigh: Very High
+  theme:
+    dark: Dark
+    light: Light
+    system: Use system theme
 home:
   RecentlyPlayed: Recently played
   RecentlyUploaded: Recently uploaded

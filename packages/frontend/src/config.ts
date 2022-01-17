@@ -52,14 +52,6 @@ export const PREFERENCE_LANGUAGE_CODE_DEFAULT: LanguageCode = 'en';
 
 //
 
-export const PREFERENCE_THEMES = ['system', 'dark', 'light'];
-
-export type Theme = typeof PREFERENCE_THEMES[number];
-
-export const PREFERENCE_THEME_DEFAULT: Theme = 'system';
-
-//
-
 export const PREFERENCE_AUDIO_QUALITIES = ['medium', 'veryHigh'];
 
 export type AudioQuality = typeof PREFERENCE_AUDIO_QUALITIES[number];

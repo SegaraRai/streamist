@@ -159,7 +159,7 @@ export function useSyncDB(): (reconstruct?: boolean) => Promise<void> {
 
   return (reconstruct = false): Promise<void> =>
     throttledSyncDB(localStorageDB, reconstruct)
-      .then((): void => {
+      ?.then((): void => {
         message.success(t('message.SyncedDatabase'));
       })
       .catch((error): void => {

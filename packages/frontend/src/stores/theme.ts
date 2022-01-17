@@ -1,29 +1,44 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import type { ThemeName } from '~/logic/theme';
+import { createInSerializer } from './utils';
 
-export type InternalTheme = ThemeName | 'auto';
+export type InternalTheme = ThemeName | 'system';
 
-const defaultTheme: InternalTheme = 'auto';
-const noPreferenceTheme: ThemeName = 'light';
+export const PREFERENCE_THEME_DEFAULT: InternalTheme = 'system';
+export const PREFERENCE_THEMES = ['system', 'dark', 'light'] as const;
+
+const THEME_NO_PREFERENCE: ThemeName = 'light';
 
 const COLOR_SCHEMA_TO_THEME_NAME = {
   dark: 'dark',
   light: 'light',
-  'no-preference': noPreferenceTheme,
+  'no-preference': THEME_NO_PREFERENCE,
 } as const;
 
 export const useThemeStore = defineStore('theme', () => {
-  const rawTheme = useLocalStorage<InternalTheme>('theme', defaultTheme);
+  const rawTheme = useLocalStorage<InternalTheme>(
+    'preference.theme',
+    PREFERENCE_THEME_DEFAULT,
+    {
+      serializer: createInSerializer(
+        PREFERENCE_THEMES,
+        PREFERENCE_THEME_DEFAULT
+      ),
+    }
+  );
+
   const colorSchema = usePreferredColorScheme();
+
   const theme = computed<ThemeName>({
     get: (): ThemeName =>
-      rawTheme.value === 'auto'
+      rawTheme.value === 'system'
         ? COLOR_SCHEMA_TO_THEME_NAME[colorSchema.value]
         : rawTheme.value,
     set: (theme: ThemeName) => {
       rawTheme.value = theme;
     },
   });
+
   return {
     rawTheme,
     theme,
