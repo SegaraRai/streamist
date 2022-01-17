@@ -156,30 +156,46 @@ export function useSyncDB(): (reconstruct?: boolean) => Promise<void> {
   const message = useMessage();
   const localStorageDB = useLocalStorageDB();
 
+  let gTimer: ReturnType<typeof setTimeout> | undefined;
   let gNextInvocation = -Infinity;
   let gReconstruct = false;
   let [gPromise, pResolve, pReject] = createPromise<void>();
-  return (reconstruct = false): Promise<void> => {
+  const invoke = (): void => {
+    if (gTimer != null) {
+      clearTimeout(gTimer);
+      gTimer = undefined;
+    }
     const timestamp = Date.now();
+    gNextInvocation = Infinity;
+    syncDB(localStorageDB, gReconstruct)
+      .then((): void => {
+        message.success(t('message.SyncedDatabase'));
+        pResolve(undefined);
+      })
+      .catch((error): void => {
+        message.error(t('message.FailedToSyncDatabase', [String(error)]));
+        pReject(error);
+      })
+      .finally((): void => {
+        gNextInvocation = timestamp + SYNC_DB_THROTTLE;
+        gReconstruct = false;
+        [gPromise, pResolve, pReject] = createPromise();
+      });
+  };
+  return (reconstruct = false): Promise<void> => {
     if (reconstruct) {
       gReconstruct = true;
     }
-    if (gNextInvocation <= timestamp) {
-      gNextInvocation = Infinity;
-      syncDB(localStorageDB, gReconstruct)
-        .then((): void => {
-          message.success(t('message.SyncedDatabase'));
-          pResolve(undefined);
-        })
-        .catch((error): void => {
-          message.error(t('message.FailedToSyncDatabase', [String(error)]));
-          pReject(error);
-        })
-        .finally((): void => {
-          gNextInvocation = timestamp + SYNC_DB_THROTTLE;
-          gReconstruct = false;
-          [gPromise, pResolve, pReject] = createPromise();
-        });
+    if (gNextInvocation <= Date.now()) {
+      invoke();
+    } else if (isFinite(gNextInvocation)) {
+      // throttling完了後に呼ぶ
+      if (gTimer == null) {
+        gTimer = setTimeout((): void => {
+          gTimer = undefined;
+          invoke();
+        }, gNextInvocation - Date.now());
+      }
     }
     return gPromise;
   };
