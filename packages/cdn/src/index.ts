@@ -52,12 +52,12 @@ API.prepare = (req, context) => {
 
 API.add('POST', '/api/cookies/token', async (req, context) => {
   if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
-    return send(403, null, NO_CACHE_HEADERS);
+    return send(403, 'Invalid origin', NO_CACHE_HEADERS);
   }
 
   const auth = req.headers.get('Authorization');
   if (!auth || !auth.startsWith('Bearer ')) {
-    return send(401, null, NO_CACHE_HEADERS);
+    return send(401, 'Malformed token', NO_CACHE_HEADERS);
   }
 
   const strJWT = auth.slice(7).trim();
@@ -65,7 +65,7 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
   const jwt = await verifyJWT(strJWT, context);
 
   if (!jwt || jwt.aud !== JWT_CDN_TOKEN_AUD) {
-    return send(401, null, NO_CACHE_HEADERS);
+    return send(401, 'Invalid token', NO_CACHE_HEADERS);
   }
 
   return send(204, null, {
@@ -103,36 +103,36 @@ API.add(
   async (req, context) => {
     const strJWT = parse(req.headers.get('Cookie') || '')[COOKIE_JWT_KEY];
     if (!strJWT) {
-      return send(401, null, NO_CACHE_HEADERS);
+      return send(401, 'Cookie not set', NO_CACHE_HEADERS);
     }
 
     const jwt = await verifyJWT(strJWT, context);
     if (!jwt || jwt.aud !== JWT_CDN_TOKEN_AUD) {
-      return send(401, null, NO_CACHE_HEADERS);
+      return send(401, 'Invalid cookie', NO_CACHE_HEADERS);
     }
 
     const { entityId, filename, region, type, userId } = context.params;
 
     if (jwt.sub !== userId) {
-      return send(401, null, NO_CACHE_HEADERS);
+      return send(401, 'Token subject mismatch', NO_CACHE_HEADERS);
     }
 
     if (!isValidOSRegion(region)) {
-      return send(404, null, NO_CACHE_HEADERS);
+      return send(404, 'Unknown region', NO_CACHE_HEADERS);
     }
 
     if (!isId(entityId)) {
-      return send(404, null, NO_CACHE_HEADERS);
+      return send(404, 'Malformed id', NO_CACHE_HEADERS);
     }
 
     const match = filename.match(/^([^.]+)(\.[\da-z]+)$/);
     if (!match) {
-      return send(404, null, NO_CACHE_HEADERS);
+      return send(404, 'Malformed filename', NO_CACHE_HEADERS);
     }
 
     const [, fileId, extension] = match;
     if (!isId(fileId)) {
-      return send(404, null, NO_CACHE_HEADERS);
+      return send(404, 'Malformed file id', NO_CACHE_HEADERS);
     }
 
     let storageURL: string | false | undefined;
