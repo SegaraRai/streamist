@@ -3,6 +3,9 @@ import type { FastifyInstance, FastifyPluginCallback } from 'fastify';
 import { osDeleteManaged } from '$shared-server/objectStorage';
 import { is } from '$shared/is';
 import {
+  OSRegion,
+  getTranscodedAudioFileKey,
+  getTranscodedAudioFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
 } from '$shared/objectStorage';
@@ -26,10 +29,12 @@ import {
 } from '$/config';
 import { dbAlbumAddImageTx } from '$/db/album';
 import { dbArtistAddImageTx } from '$/db/artist';
+import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import type { TransactionalPrismaClient } from '$/db/lib/types';
 import { dbPlaylistAddImageTx } from '$/db/playlist';
 import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
+import { osDeleteSourceFiles } from '$/os/sourceFile';
 import { retryTransaction } from '$/services//transaction';
 import { logger } from '$/services/logger';
 import { updateMaxTrackId } from '$/services/maxTrack';
@@ -102,7 +107,7 @@ async function registerImage(
   const { sourceFileId, region, userId } = artifact.source;
 
   // register image
-  // DO NOT connect to target here, as it will be connected later
+  // DO NOT connect to attach target here, as it will be connected later
   await txClient.image.create({
     data: {
       id: imageId,
@@ -210,14 +215,48 @@ async function markSourceFileIdAsTx(
   });
 }
 
-function handleTranscoderResponseArtifactError(
+async function deleteSourceFile(
+  userId: string,
+  sourceId: string,
+  sourceFileId: string,
+  region: OSRegion
+): Promise<void> {
+  try {
+    await client.sourceFile.updateMany({
+      where: {
+        id: sourceFileId,
+        sourceId,
+        userId,
+      },
+      data: {
+        entityExists: false,
+      },
+    });
+  } catch (error) {
+    logger.error(
+      error,
+      `deleteSourceFile: Failed to update sourceFile ${sourceFileId}`
+    );
+  }
+
+  await osDeleteSourceFiles([
+    {
+      id: sourceFileId,
+      sourceId,
+      userId,
+      region,
+    },
+  ]);
+}
+
+async function handleTranscoderResponseArtifactError(
   artifact: TranscoderResponseArtifactError
 ): Promise<void> {
   const {
-    source: { sourceFileId, sourceId, userId },
+    source: { region, sourceFileId, sourceId, userId },
   } = artifact;
 
-  return retryTransaction(async (txClient): Promise<void> => {
+  await retryTransaction(async (txClient): Promise<void> => {
     const timestamp = Date.now();
 
     await markSourceFileIdAsTx(
@@ -230,14 +269,18 @@ function handleTranscoderResponseArtifactError(
     );
 
     await markSourceIdAsTranscodedTx(txClient, userId, sourceId, timestamp);
+  }).catch((error) => {
+    logger.error(error, 'handleTranscoderResponseArtifactError');
   });
+
+  await deleteSourceFile(userId, sourceId, sourceFileId, region);
 }
 
 /**
  * @param artifact
  * @returns albumId
  */
-function handleTranscoderResponseArtifactAudio(
+async function handleTranscoderResponseArtifactAudio(
   artifact: TranscoderResponseArtifactAudio
 ): Promise<string | undefined> {
   const {
@@ -252,208 +295,241 @@ function handleTranscoderResponseArtifactAudio(
     },
   } = artifact;
 
-  return retryTransaction(async (txClient): Promise<string | undefined> => {
-    const timestamp = Date.now();
-
-    let albumId: string | undefined;
-
-    for (const artifactTrack of artifact.tracks) {
-      const { duration, files, id, tags } = artifactTrack;
-
-      const date = tags.date ? parseDate(tags.date) : undefined;
-      const [discNumber, trackNumber] = parseDiscAndTrackNumber(tags);
-
-      const defaultUnknownTrackTitle = options.useFilenameAsUnknownTrackTitle
-        ? filename
-        : options.defaultUnknownTrackTitle;
-
-      const tagTrackArtist = tags.artist;
-      const tagTrackArtistSort = tags.artistsort;
-      const tagAlbumArtist =
-        tags.albumartist ||
-        (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtist) ||
-        undefined;
-      const tagAlbumArtistSort =
-        tags.albumartistsort ||
-        (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtistSort) ||
-        undefined;
-
-      const tagTrackTitle = tags.title;
-      const tagTrackTitleSort = tags.titlesort;
-      const tagAlbumTitle =
-        tags.album ||
-        (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitle) ||
-        undefined;
-      const tagAlbumTitleSort =
-        tags.albumtitlesort ||
-        (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitleSort) ||
-        undefined;
-
-      const tagCoArtists: CreateTrackInputCoArtist[] = [];
-      if (tags.arranger) {
-        tagCoArtists.push({
-          role: '#arranger',
-          artistName: tags.arranger,
-          artistNameSort: tags.arrangersort,
-        });
-      }
-      if (tags.composer) {
-        tagCoArtists.push({
-          role: '#composer',
-          artistName: tags.composer,
-          artistNameSort: tags.composersort,
-        });
-      }
-      if (tags.lyricist) {
-        tagCoArtists.push({
-          role: '#lyricist',
-          artistName: tags.lyricist,
-          artistNameSort: tags.lyricistsort,
-        });
-      }
-
-      const { track, trackArtist, album, albumArtist, coArtists } =
-        await dbTrackCreateTx(txClient, userId, id, {
-          albumTitle: tagAlbumTitle || options.defaultUnknownAlbumTitle,
-          albumArtistName: tagAlbumArtist || options.defaultUnknownAlbumArtist,
-          albumArtistNameSort: tagAlbumArtistSort,
-          trackArtistName: tagTrackArtist || options.defaultUnknownTrackArtist,
-          trackArtistNameSort: tagTrackArtistSort,
-          coArtists: tagCoArtists,
-          data: {
-            title: tagTrackTitle || defaultUnknownTrackTitle,
-            titleSort: tagTrackTitleSort || null,
-            discNumber,
-            trackNumber,
-            duration,
-            comment: tags.comment || null,
-            lyrics: tags.lyrics || tags.lyric || null,
-            releaseDate: date?.dateString$$q ?? null,
-            releaseDatePrecision: date?.precision$$q ?? null,
-            releaseDateText: date?.text$$q ?? null,
-            genre: tags.genre || null,
-            bpm: numberOr(tags.bpm, null, 1),
-            replayGainGain: floatOr(tags.replaygain_track_gain, null),
-            replayGainPeak: floatOr(tags.replaygain_track_peak, null),
-            sourceFile: { connect: { id: artifact.source.sourceFileId } },
-          },
-        });
-
-      // last write wins
-      albumId = album.id;
-
-      // update album
-      {
-        const newAlbumGain: number | null = !album.replayGainGain
-          ? floatOr(tags.replaygain_album_gain, null)
-          : null;
-        const newAlbumPeak: number | null = !album.replayGainPeak
-          ? floatOr(tags.replaygain_album_peak, null)
-          : null;
-        const newAlbumTitleSort: string | null = !album.titleSort
-          ? tagAlbumTitleSort || null
-          : null;
-        if (
-          newAlbumGain != null ||
-          newAlbumPeak != null ||
-          newAlbumTitleSort != null
-        ) {
-          await txClient.album.updateMany({
-            where: { id: album.id, userId },
-            data: {
-              ...(newAlbumTitleSort != null
-                ? { albumTitleSort: newAlbumTitleSort }
-                : {}),
-              ...(newAlbumGain != null ? { replayGainGain: newAlbumGain } : {}),
-              ...(newAlbumPeak != null ? { replayGainPeak: newAlbumPeak } : {}),
-              updatedAt: timestamp,
-            },
-          });
-        }
-      }
-
-      // update artists' sort names
-      {
-        const artistAndNameSorts = [
-          [trackArtist, tagTrackArtistSort] as const,
-          [albumArtist, tagAlbumArtistSort] as const,
-          ...coArtists.map(
-            ({ artist, input: { artistNameSort } }) =>
-              [artist, artistNameSort] as const
-          ),
-        ];
-
-        const processedArtistIdSet = new Set<string>();
-        for (const [artist, nameSort] of artistAndNameSorts) {
-          if (processedArtistIdSet.has(artist.id)) {
-            continue;
-          }
-
-          if (artist.nameSort) {
-            processedArtistIdSet.add(artist.id);
-            continue;
-          }
-
-          if (!nameSort) {
-            continue;
-          }
-
-          await txClient.artist.updateMany({
-            where: { id: artist.id, userId },
-            data: {
-              nameSort,
-              updatedAt: timestamp,
-            },
-          });
-        }
-      }
-
-      // register track files
-      // TODO(prod): use createMany
-      for (const file of files) {
-        await txClient.trackFile.create({
-          data: {
-            id: file.fileId,
-            region,
-            format: file.formatName,
-            mimeType: file.mimeType,
-            extension: file.extension,
-            fileSize: file.fileSize,
-            sha256: file.sha256,
-            duration: file.duration,
-            trackId: track.id,
-            userId,
-            createdAt: timestamp,
-            updatedAt: timestamp,
-          },
-        });
-      }
-    }
-
-    await markSourceFileIdAsTx(
-      txClient,
-      userId,
-      sourceId,
-      sourceFileId,
-      'transcoded',
-      timestamp
+  const deleteTranscodedFiles = async () => {
+    const os = getTranscodedAudioFileOS(artifact.source.region);
+    await osDeleteManaged(
+      os,
+      artifact.tracks.flatMap(({ files, id }) =>
+        files.map((file) =>
+          getTranscodedAudioFileKey(userId, id, file.fileId, file.extension)
+        )
+      ),
+      true
     );
 
-    if (cueSheetSourceFileId) {
+    await deleteSourceFile(userId, sourceId, sourceFileId, region);
+  };
+
+  const albumId = await retryTransaction(
+    async (txClient): Promise<string | undefined> => {
+      const timestamp = Date.now();
+
+      let albumId: string | undefined;
+
+      for (const artifactTrack of artifact.tracks) {
+        const { duration, files, id, tags } = artifactTrack;
+
+        const date = tags.date ? parseDate(tags.date) : undefined;
+        const [discNumber, trackNumber] = parseDiscAndTrackNumber(tags);
+
+        const defaultUnknownTrackTitle = options.useFilenameAsUnknownTrackTitle
+          ? filename
+          : options.defaultUnknownTrackTitle;
+
+        const tagTrackArtist = tags.artist;
+        const tagTrackArtistSort = tags.artistsort;
+        const tagAlbumArtist =
+          tags.albumartist ||
+          (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtist) ||
+          undefined;
+        const tagAlbumArtistSort =
+          tags.albumartistsort ||
+          (options.useTrackArtistAsUnknownAlbumArtist && tagTrackArtistSort) ||
+          undefined;
+
+        const tagTrackTitle = tags.title;
+        const tagTrackTitleSort = tags.titlesort;
+        const tagAlbumTitle =
+          tags.album ||
+          (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitle) ||
+          undefined;
+        const tagAlbumTitleSort =
+          tags.albumtitlesort ||
+          (options.useTrackTitleAsUnknownAlbumTitle && tagTrackTitleSort) ||
+          undefined;
+
+        const tagCoArtists: CreateTrackInputCoArtist[] = [];
+        if (tags.arranger) {
+          tagCoArtists.push({
+            role: '#arranger',
+            artistName: tags.arranger,
+            artistNameSort: tags.arrangersort,
+          });
+        }
+        if (tags.composer) {
+          tagCoArtists.push({
+            role: '#composer',
+            artistName: tags.composer,
+            artistNameSort: tags.composersort,
+          });
+        }
+        if (tags.lyricist) {
+          tagCoArtists.push({
+            role: '#lyricist',
+            artistName: tags.lyricist,
+            artistNameSort: tags.lyricistsort,
+          });
+        }
+
+        const { track, trackArtist, album, albumArtist, coArtists } =
+          await dbTrackCreateTx(txClient, userId, id, {
+            albumTitle: tagAlbumTitle || options.defaultUnknownAlbumTitle,
+            albumArtistName:
+              tagAlbumArtist || options.defaultUnknownAlbumArtist,
+            albumArtistNameSort: tagAlbumArtistSort,
+            trackArtistName:
+              tagTrackArtist || options.defaultUnknownTrackArtist,
+            trackArtistNameSort: tagTrackArtistSort,
+            coArtists: tagCoArtists,
+            data: {
+              title: tagTrackTitle || defaultUnknownTrackTitle,
+              titleSort: tagTrackTitleSort || null,
+              discNumber,
+              trackNumber,
+              duration,
+              comment: tags.comment || null,
+              lyrics: tags.lyrics || tags.lyric || null,
+              releaseDate: date?.dateString$$q ?? null,
+              releaseDatePrecision: date?.precision$$q ?? null,
+              releaseDateText: date?.text$$q ?? null,
+              genre: tags.genre || null,
+              bpm: numberOr(tags.bpm, null, 1),
+              replayGainGain: floatOr(tags.replaygain_track_gain, null),
+              replayGainPeak: floatOr(tags.replaygain_track_peak, null),
+              sourceFile: { connect: { id: artifact.source.sourceFileId } },
+            },
+          });
+
+        // last write wins
+        albumId = album.id;
+
+        // update album
+        {
+          const newAlbumGain: number | null = !album.replayGainGain
+            ? floatOr(tags.replaygain_album_gain, null)
+            : null;
+          const newAlbumPeak: number | null = !album.replayGainPeak
+            ? floatOr(tags.replaygain_album_peak, null)
+            : null;
+          const newAlbumTitleSort: string | null = !album.titleSort
+            ? tagAlbumTitleSort || null
+            : null;
+          if (
+            newAlbumGain != null ||
+            newAlbumPeak != null ||
+            newAlbumTitleSort != null
+          ) {
+            await txClient.album.updateMany({
+              where: { id: album.id, userId },
+              data: {
+                ...(newAlbumTitleSort != null
+                  ? { albumTitleSort: newAlbumTitleSort }
+                  : {}),
+                ...(newAlbumGain != null
+                  ? { replayGainGain: newAlbumGain }
+                  : {}),
+                ...(newAlbumPeak != null
+                  ? { replayGainPeak: newAlbumPeak }
+                  : {}),
+                updatedAt: timestamp,
+              },
+            });
+          }
+        }
+
+        // update artists' sort names
+        {
+          const artistAndNameSorts = [
+            [trackArtist, tagTrackArtistSort] as const,
+            [albumArtist, tagAlbumArtistSort] as const,
+            ...coArtists.map(
+              ({ artist, input: { artistNameSort } }) =>
+                [artist, artistNameSort] as const
+            ),
+          ];
+
+          const processedArtistIdSet = new Set<string>();
+          for (const [artist, nameSort] of artistAndNameSorts) {
+            if (processedArtistIdSet.has(artist.id)) {
+              continue;
+            }
+
+            if (artist.nameSort) {
+              processedArtistIdSet.add(artist.id);
+              continue;
+            }
+
+            if (!nameSort) {
+              continue;
+            }
+
+            await txClient.artist.updateMany({
+              where: { id: artist.id, userId },
+              data: {
+                nameSort,
+                updatedAt: timestamp,
+              },
+            });
+          }
+        }
+
+        // register track files
+        // TODO(prod): use createMany
+        for (const file of files) {
+          await txClient.trackFile.create({
+            data: {
+              id: file.fileId,
+              region,
+              format: file.formatName,
+              mimeType: file.mimeType,
+              extension: file.extension,
+              fileSize: file.fileSize,
+              sha256: file.sha256,
+              duration: file.duration,
+              trackId: track.id,
+              userId,
+              createdAt: timestamp,
+              updatedAt: timestamp,
+            },
+          });
+        }
+      }
+
       await markSourceFileIdAsTx(
         txClient,
         userId,
         sourceId,
-        cueSheetSourceFileId,
+        sourceFileId,
         'transcoded',
         timestamp
       );
+
+      if (cueSheetSourceFileId) {
+        await markSourceFileIdAsTx(
+          txClient,
+          userId,
+          sourceId,
+          cueSheetSourceFileId,
+          'transcoded',
+          timestamp
+        );
+      }
+
+      await markSourceIdAsTranscodedTx(txClient, userId, sourceId, timestamp);
+
+      return albumId;
     }
-
-    await markSourceIdAsTranscodedTx(txClient, userId, sourceId, timestamp);
-
-    return albumId;
+  ).catch((error) => {
+    logger.error(error, 'handleTranscoderResponseArtifactAudio');
+    return undefined;
   });
+
+  if (!albumId) {
+    // transaction failed
+    await deleteTranscodedFiles();
+  }
+
+  return albumId;
 }
 
 async function handleTranscoderResponseArtifactImage(
@@ -461,7 +537,7 @@ async function handleTranscoderResponseArtifactImage(
   extractedFromAlbumId: string | undefined
 ): Promise<void> {
   const { source } = artifact;
-  const { extracted, region, sourceId, userId } = source;
+  const { extracted, region, sourceId, sourceFileId, userId } = source;
 
   const deleteTranscodedFiles = async () => {
     // NOTE(ximg): currently we don't upload raw extracted images to S3. Delete them if we do.
@@ -478,6 +554,8 @@ async function handleTranscoderResponseArtifactImage(
       ),
       true
     );
+
+    await deleteSourceFile(userId, sourceId, sourceFileId, region);
   };
 
   const succeeded = await retryTransaction(
@@ -495,7 +573,7 @@ async function handleTranscoderResponseArtifactImage(
         attachToId = extractedFromAlbumId;
         if (!attachToId) {
           // something went wrong with transcoding audio
-          // this will not happen because the image file will not be extracted when the audio transcoding fails
+          // this may happen when we failed to register the album
           return false;
         }
 
@@ -581,9 +659,13 @@ async function handleTranscoderResponseArtifactImage(
 
       return true;
     }
-  );
+  ).catch((error) => {
+    logger.error(error, 'handleTranscoderResponseArtifactImage');
+    return false;
+  });
 
   if (!succeeded) {
+    // transaction failed
     await deleteTranscodedFiles();
   }
 }
