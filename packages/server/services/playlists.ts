@@ -1,6 +1,7 @@
 import { Playlist } from '@prisma/client';
 import { generatePlaylistId } from '$shared-server/generateId';
 import { dbArraySerializeItemIds } from '$shared/dbArray';
+import { toUnique } from '$shared/unique';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
@@ -22,7 +23,7 @@ export async function playlistCreate(
   const { title, description } = data;
 
   const trackIds = data.trackIds || [];
-  if (Array.from(new Set(trackIds)).length !== trackIds.length) {
+  if (toUnique(trackIds).length !== trackIds.length) {
     throw new HTTPError(400, 'trackIds must be unique');
   }
 

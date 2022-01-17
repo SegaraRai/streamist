@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import { filterNullAndUndefined } from '$shared/filter';
+import { toUnique } from '$shared/unique';
 import type {
   ResourceAlbum,
   ResourceArtist,
@@ -130,19 +131,17 @@ export default defineComponent({
       const albumMap = new Map<string, ResourceAlbum>(
         filterNullAndUndefined(
           await db.albums.bulkGet(
-            Array.from(new Set(tracks.map((track) => track.albumId)))
+            toUnique(tracks.map((track) => track.albumId))
           )
         ).map((album) => [album.id, album])
       );
       const artistMap = new Map<string, ResourceArtist>(
         filterNullAndUndefined(
           await db.artists.bulkGet(
-            Array.from(
-              new Set([
-                ...tracks.map((track) => track.artistId),
-                ...Array.from(albumMap.values()).map((album) => album.artistId),
-              ])
-            )
+            toUnique([
+              ...tracks.map((track) => track.artistId),
+              ...Array.from(albumMap.values()).map((album) => album.artistId),
+            ])
           )
         ).map((artist) => [artist.id, artist])
       );

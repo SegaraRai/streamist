@@ -153,7 +153,7 @@ export default defineComponent({
         }
         const playlist = selectedItem.value.i;
         const tracks = filterNullAndUndefined(
-          await db.tracks.bulkGet(Array.from(playlist.trackIds))
+          await db.tracks.bulkGet(playlist.trackIds as string[])
         );
         return tracks;
       }).value,

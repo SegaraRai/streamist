@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import { filterNullAndUndefined } from '$shared/filter';
+import { toUnique } from '$shared/unique';
 import type { ResourcePlaylist } from '$/types';
 import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
@@ -48,9 +49,7 @@ export default defineComponent({
       const tracks = filterNullAndUndefined(
         await db.tracks.bulkGet(playlist.trackIds as string[])
       );
-      const albumIds = Array.from(
-        new Set(tracks.map((track) => track.albumId))
-      );
+      const albumIds = toUnique(tracks.map((track) => track.albumId));
       const albums = filterNullAndUndefined(await db.albums.bulkGet(albumIds));
       const albumImageIds = filterNullAndUndefined(
         albums.map((album) => album.imageIds[0])

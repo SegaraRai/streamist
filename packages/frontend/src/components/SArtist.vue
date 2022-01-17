@@ -2,6 +2,7 @@
 import type { PropType } from 'vue';
 import { isBuiltinCoArtistRole } from '$shared/coArtist';
 import { filterNullAndUndefined } from '$shared/filter';
+import { toUnique, toUniqueByProp } from '$shared/unique';
 import { compareAlbum, compareCoArtistRole, compareTrack } from '$/shared/sort';
 import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
@@ -101,15 +102,13 @@ export default defineComponent({
         coArtistAlbums.sort(compareAlbum);
         coArtistTracks.sort(compareTrack);
 
-        const mergedAlbums = Array.from(
-          new Map(
-            [...albums, ...coArtistAlbums].map((item) => [item.id, item])
-          ).values()
+        const mergedAlbums = toUniqueByProp(
+          [...albums, ...coArtistAlbums],
+          'id'
         );
-        const mergedTracks = Array.from(
-          new Map(
-            [...tracks, ...coArtistTracks].map((item) => [item.id, item])
-          ).values()
+        const mergedTracks = toUniqueByProp(
+          [...tracks, ...coArtistTracks],
+          'id'
         );
 
         if (loadedTracksArtistId !== artistId) {
@@ -123,11 +122,9 @@ export default defineComponent({
 
         updateSetList(artist$$q, mergedAlbums, mergedTracks);
 
-        const roles$$q = Array.from(
-          new Set(
-            [...albumCoArtists, ...trackCoArtists].map(
-              (coArtist) => coArtist.role
-            )
+        const roles$$q = toUnique(
+          [...albumCoArtists, ...trackCoArtists].map(
+            (coArtist) => coArtist.role
           )
         ).sort(compareCoArtistRole);
 
