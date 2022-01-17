@@ -251,7 +251,7 @@ export default defineComponent({
         @click.stop="onMenu$$q($event)"
         @dragstart.stop.prevent
       >
-        <v-icon class="s-hover-visible"> mdi-dots-vertical </v-icon>
+        <v-icon class="s-hover-visible">mdi-dots-vertical</v-icon>
       </v-btn>
     </div>
   </v-list-item>

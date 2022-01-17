@@ -241,7 +241,9 @@ export default defineComponent({
             <n-collapse>
               <n-collapse-item :title="t('dialogComponent.editAlbum.creators')">
                 <template v-if="itemCoArtists$$q">
-                  <s-co-artist-edit v-model="itemCoArtists$$q" />
+                  <n-scrollbar class="s-n-scrollbar-p max-h-64">
+                    <s-co-artist-edit v-model="itemCoArtists$$q" />
+                  </n-scrollbar>
                 </template>
               </n-collapse-item>
             </n-collapse>

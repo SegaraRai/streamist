@@ -57,7 +57,7 @@ export default defineComponent({
       class="bg-transparent text-st-error"
       @click.prevent.stop="$emit('remove', query)"
     >
-      <v-icon class="s-hover-visible"> mdi-close </v-icon>
+      <v-icon class="s-hover-visible">mdi-close</v-icon>
     </v-btn>
   </v-list-item>
 </template>

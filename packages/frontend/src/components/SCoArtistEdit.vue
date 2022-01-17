@@ -78,7 +78,7 @@ export default defineComponent({
             class="bg-transparent text-st-error"
             @click="remove$$q(index)"
           >
-            <v-icon class="s-hover-visible"> mdi-close </v-icon>
+            <v-icon class="s-hover-visible">mdi-close</v-icon>
           </v-btn>
         </div>
       </div>
@@ -92,7 +92,7 @@ export default defineComponent({
         class="bg-transparent text-st-primary"
         @click="modelValue$$q.push(['#composer', undefined, ''])"
       >
-        <v-icon class="s-hover-visible"> mdi-plus </v-icon>
+        <v-icon class="s-hover-visible">mdi-plus</v-icon>
       </v-btn>
     </div>
   </div>
