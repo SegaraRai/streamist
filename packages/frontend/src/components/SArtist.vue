@@ -76,8 +76,6 @@ export default defineComponent({
         const artistId = artist$$q.id;
         const albums = await db.albums.where({ artistId }).toArray();
         const tracks = await db.tracks.where({ artistId }).toArray();
-        const albumIdSet = new Set(albums.map((album) => album.id));
-        const trackIdSet = new Set(tracks.map((track) => track.id));
         const albumCoArtists = await db.albumCoArtists
           .where({
             artistId,
@@ -89,30 +87,13 @@ export default defineComponent({
           })
           .toArray();
         const coArtistAlbums = filterNullAndUndefined(
-          await db.albums.bulkGet(
-            albumCoArtists
-              .map((album) => album.albumId)
-              .filter((albumId) => !albumIdSet.has(albumId))
-          )
+          await db.albums.bulkGet(albumCoArtists.map((album) => album.albumId))
         );
         const coArtistTracks = filterNullAndUndefined(
-          await db.tracks.bulkGet(
-            trackCoArtists
-              .map((track) => track.trackId)
-              .filter((trackId) => !trackIdSet.has(trackId))
-          )
+          await db.tracks.bulkGet(trackCoArtists.map((track) => track.trackId))
         );
         if (propArtistRef.value !== propArtist) {
           throw new Error('operation aborted');
-        }
-
-        if (loadedTracksArtistId !== artistId) {
-          loadedTracksArtistId = artistId;
-          loadedTracksMap.clear();
-          for (const album of albums) {
-            loadedTracksMap.set(album.id, []);
-            notLoadedAlbumIdSet.add(album.id);
-          }
         }
 
         albums.sort(compareAlbum);
@@ -120,8 +101,25 @@ export default defineComponent({
         coArtistAlbums.sort(compareAlbum);
         coArtistTracks.sort(compareTrack);
 
-        const mergedAlbums = [...albums, ...coArtistAlbums];
-        const mergedTracks = [...tracks, ...coArtistTracks];
+        const mergedAlbums = Array.from(
+          new Map(
+            [...albums, ...coArtistAlbums].map((item) => [item.id, item])
+          ).values()
+        );
+        const mergedTracks = Array.from(
+          new Map(
+            [...tracks, ...coArtistTracks].map((item) => [item.id, item])
+          ).values()
+        );
+
+        if (loadedTracksArtistId !== artistId) {
+          loadedTracksArtistId = artistId;
+          loadedTracksMap.clear();
+          for (const album of mergedAlbums) {
+            loadedTracksMap.set(album.id, []);
+            notLoadedAlbumIdSet.add(album.id);
+          }
+        }
 
         updateSetList(artist$$q, mergedAlbums, mergedTracks);
 
