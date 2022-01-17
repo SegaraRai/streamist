@@ -118,7 +118,7 @@ export default defineComponent({
         :class="[$style.thumb, dragging$$q ? '' : 's-hover-visible']"
       >
         <div
-          class="w-3 -ml-1.5 h-3 bg-gray-200 border-1 border-gray-300 rounded-full"
+          class="w-3 -ml-1.5 h-3 border-1 bg-white/100 dark:bg-gray-200 border-gray-300 dark:border-gray-300 rounded-full"
         ></div>
       </div>
     </div>
