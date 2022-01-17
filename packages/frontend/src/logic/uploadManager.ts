@@ -55,12 +55,12 @@ export type UploadStatus =
   | 'transcoded'
   // 最終状態: 事前チェックに失敗した
   | 'error_invalid'
+  // 最終状態: ユーザーがアップロードを取り消した
+  | 'error_upload_aborted'
   // 最終状態: アップロードに失敗した
   | 'error_upload_failed'
   // 最終状態: アップロードは完了したがトランスコードに失敗した
   | 'error_transcode_failed'
-  // 最終状態: ユーザーがアップロードを取り消した
-  | 'error_upload_aborted'
   // 最終状態: 依存先ファイルがトランスコードに失敗したのでスキップされた（未対応ファイルはそもそも追加されない）
   // または、CUEシートが不正or未対応の形式であったため音声ファイルのアップロードがスキップされた
   | 'skipped'
@@ -1155,6 +1155,7 @@ export class UploadManager extends EventTarget {
       case 'transcoded':
       case 'skipped':
       case 'error_invalid':
+      case 'error_upload_aborted':
       case 'error_upload_failed':
       case 'error_transcode_failed':
         return true;

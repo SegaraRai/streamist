@@ -32,14 +32,14 @@ export default defineComponent({
           case 'removed':
             return '';
 
-          case 'error_upload_aborted':
-            return t('uploader.tooltip.file.ErrorAborted');
-
           case 'error_invalid':
             return t('uploader.tooltip.file.ErrorInvalid');
 
           case 'error_transcode_failed':
             return t('uploader.tooltip.file.ErrorTranscodeFailed');
+
+          case 'error_upload_aborted':
+            return t('uploader.tooltip.file.ErrorAborted');
 
           case 'error_upload_failed':
             return t('uploader.tooltip.file.ErrorUploadFailed');
