@@ -1,4 +1,10 @@
 import type { ResourceTrack } from '$/types';
+import {
+  AUDIO_SCORE_BASE,
+  AUDIO_SCORE_BY_EXTENSION,
+  AUDIO_SCORE_BY_FORMAT_PER_PREFERENCE,
+  AudioQuality,
+} from '~/config';
 import { canPlayAudioType } from './canPlayAudioType';
 import { getTrackFileURL } from './fileURL';
 
@@ -10,32 +16,38 @@ import { getTrackFileURL } from './fileURL';
  * @returns スコア
  */
 export function calcTrackFileScore(
-  trackFile: ResourceTrack['files'][number]
+  trackFile: ResourceTrack['files'][number],
+  preference: AudioQuality
 ): number {
   // 再生不可なら-1
   if (!canPlayAudioType(trackFile.mimeType)) {
     return -1;
   }
 
-  const addition = trackFile.extension === '.weba' ? 1_000_000_000 : 0;
+  const score =
+    AUDIO_SCORE_BASE +
+    (AUDIO_SCORE_BY_EXTENSION[trackFile.extension] ?? 0) +
+    (AUDIO_SCORE_BY_FORMAT_PER_PREFERENCE[preference]?.[trackFile.format] ?? 0);
 
-  // TODO: ユーザーの音質設定に応じて適切なスコアを出す
-  return 1 / trackFile.fileSize + addition;
+  return score;
 }
 
 export function getBestTrackFileURL(
   userId: string,
-  track: ResourceTrack
+  track: Pick<ResourceTrack, 'id' | 'files'>,
+  preference: AudioQuality
 ): string {
   const trackFiles = track.files;
 
-  // スコア降順でTrackFileDTOとスコアの配列を用意
+  // スコア降順でTrackFileとスコアの配列を用意
   let trackFilesWithScore = trackFiles
     .map((item) => ({
-      score$$q: calcTrackFileScore(item),
+      score$$q: calcTrackFileScore(item, preference),
       trackFile$$q: item,
     }))
     .sort((a, b) => b.score$$q - a.score$$q);
+
+  console.log(trackFilesWithScore, preference);
 
   // 利用不可なものを除く
   trackFilesWithScore = trackFilesWithScore.filter(

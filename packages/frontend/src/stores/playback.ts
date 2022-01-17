@@ -12,6 +12,7 @@ import {
   realVolumeToVisualVolume,
   visualVolumeToRealVolume,
 } from '~/logic/volume';
+import { usePreferenceStore } from './preference';
 import { useVolumeStore } from './volume';
 
 // TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる
@@ -129,6 +130,7 @@ function _usePlaybackStore(): PlaybackState {
   const { isTrackAvailable$$q, serializedFilterKey$$q } = useTrackFilter();
   const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
   const { dbUserId$$q } = useLocalStorageDB();
+  const preferenceStore = usePreferenceStore();
 
   const repeat = useLocalStorage<RepeatType>('playback.repeat', 'off');
   const shuffle = useLocalStorage<boolean>('playback.shuffle', false);
@@ -368,7 +370,11 @@ function _usePlaybackStore(): PlaybackState {
       internalPosition.value = 0;
 
       (async (): Promise<void> => {
-        const url = getBestTrackFileURL(userId, track);
+        const url = getBestTrackFileURL(
+          userId,
+          track,
+          preferenceStore.audioQuality
+        );
 
         if (needsCDNCookie(url)) {
           await setCDNCookie();

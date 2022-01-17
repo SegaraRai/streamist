@@ -57,3 +57,30 @@ export const PREFERENCE_AUDIO_QUALITIES = ['medium', 'veryHigh'];
 export type AudioQuality = typeof PREFERENCE_AUDIO_QUALITIES[number];
 
 export const PREFERENCE_AUDIO_QUALITY_DEFAULT: AudioQuality = 'medium';
+
+//
+
+export const AUDIO_SCORE_BASE = 100;
+
+export const AUDIO_SCORE_BY_EXTENSION: Record<string, number> = {
+  '.weba': 200,
+  '.m4a': 100,
+};
+
+export const AUDIO_SCORE_BY_FORMAT_PER_PREFERENCE: Record<
+  AudioQuality,
+  Record<string, number>
+> = {
+  medium: {
+    'v1-aac-96k': 2000,
+    'v1-opus-96k': 2000,
+    'v1-aac-256k': 1000,
+    'v1-opus-256k': 1000,
+  },
+  veryHigh: {
+    'v1-aac-96k': 1000,
+    'v1-opus-96k': 1000,
+    'v1-aac-256k': 2000,
+    'v1-opus-256k': 2000,
+  },
+};
