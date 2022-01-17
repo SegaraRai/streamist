@@ -1,6 +1,7 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
+import { filterNullAndUndefined } from '$shared/filter';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import { useLiveQuery, useTrackFilter } from '~/composables';
 import { db, useSyncDB } from '~/db';
@@ -50,9 +51,9 @@ export default defineComponent({
         if (!playlist$$q) {
           throw new Error(`Playlist ${propPlaylist} not found`);
         }
-        const tracks$$q = (await db.tracks.bulkGet(
-          playlist$$q.trackIds as string[]
-        )) as readonly ResourceTrack[];
+        const tracks$$q = filterNullAndUndefined(
+          await db.tracks.bulkGet(playlist$$q.trackIds as string[])
+        );
         if (propPlaylistRef.value !== propPlaylist) {
           throw new Error('operation aborted');
         }

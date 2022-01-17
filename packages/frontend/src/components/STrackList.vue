@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { PropType } from 'vue';
+import { filterNullAndUndefined } from '$shared/filter';
 import type {
   ResourceAlbum,
   ResourceArtist,
@@ -120,20 +121,21 @@ export default defineComponent({
       if (propTracks.length === 0) {
         return [];
       }
-      const tracks = (
+      const tracks =
         typeof propTracks[0] === 'string'
-          ? await db.tracks.bulkGet([...(propTracks as readonly string[])])
-          : propTracks
-      ) as readonly ResourceTrack[];
+          ? filterNullAndUndefined(
+              await db.tracks.bulkGet(propTracks as string[])
+            )
+          : (propTracks as readonly ResourceTrack[]);
       const albumMap = new Map<string, ResourceAlbum>(
-        (
+        filterNullAndUndefined(
           await db.albums.bulkGet(
             Array.from(new Set(tracks.map((track) => track.albumId)))
           )
-        ).map((album) => [album!.id, album!])
+        ).map((album) => [album.id, album])
       );
       const artistMap = new Map<string, ResourceArtist>(
-        (
+        filterNullAndUndefined(
           await db.artists.bulkGet(
             Array.from(
               new Set([
@@ -142,7 +144,7 @@ export default defineComponent({
               ])
             )
           )
-        ).map((artist) => [artist!.id, artist!])
+        ).map((artist) => [artist.id, artist])
       );
       const imageMap = new Map<string, ResourceImage>(
         (await db.images.toArray()).map((image) => [image.id, image])

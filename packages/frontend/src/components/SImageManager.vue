@@ -1,6 +1,7 @@
 <script lang="ts">
 import { useMessage } from 'naive-ui';
 import type { PropType } from 'vue';
+import { filterNullAndUndefined } from '$shared/filter';
 import type { SourceFileAttachToType } from '$shared/types';
 import type { ResourceImage } from '$/types';
 import { useLiveQuery } from '~/composables';
@@ -116,8 +117,9 @@ export default defineComponent({
       if (imageIds$$q.value.length === 0) {
         return [];
       }
-      const allImages = await db.images.bulkGet([...imageIds$$q.value]);
-      return allImages.filter((image): image is ResourceImage => !!image);
+      return filterNullAndUndefined(
+        await db.images.bulkGet([...imageIds$$q.value])
+      );
     }, [imageIds$$q]);
 
     watchEffect(() => {

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { useDisplay } from 'vuetify';
+import { filterNullAndUndefined } from '$/shared/filter';
 import { compareTrack } from '$/shared/sort';
-import type { ResourceTrack } from '$/types';
 import { useAllTrackMap, useAllTracks, useRecentlyPlayed } from '~/composables';
 import { RECENTLY_UPLOADED_MAX_ENTRIES } from '~/config';
 
@@ -30,9 +30,9 @@ export default defineComponent({
       if (!trackMap) {
         return [];
       }
-      return recentlyPlayedTrackItems.value
-        .map((item) => trackMap.get(item.id))
-        .filter((item): item is ResourceTrack => !!item);
+      return filterNullAndUndefined(
+        recentlyPlayedTrackItems.value.map((item) => trackMap.get(item.id))
+      );
     });
 
     return {

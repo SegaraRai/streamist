@@ -1,6 +1,7 @@
 <script lang="ts">
+import { filterNullAndUndefined } from '$shared/filter';
 import { compareTrack } from '$/shared/sort';
-import { ResourceTrack } from '$/types';
+import type { ResourceTrack } from '$/types';
 import {
   AllItem,
   useAllSearch,
@@ -151,9 +152,9 @@ export default defineComponent({
           return [];
         }
         const playlist = selectedItem.value.i;
-        const tracks = (await db.tracks.bulkGet(
-          Array.from(playlist.trackIds)
-        )) as ResourceTrack[];
+        const tracks = filterNullAndUndefined(
+          await db.tracks.bulkGet(Array.from(playlist.trackIds))
+        );
         return tracks;
       }).value,
       showCreatePlaylist$$q: ref(false),

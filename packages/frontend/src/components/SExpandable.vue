@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { PropType } from 'vue';
+import { filterNullAndUndefined } from '$shared/filter';
 import { useLiveQuery } from '~/composables';
 import { db, useLocalStorageDB } from '~/db';
 import { createSrc } from '~/logic/srcSet';
@@ -32,7 +33,9 @@ export default defineComponent({
       if (imageIds$$q.value.length === 0) {
         return [];
       }
-      return await db.images.bulkGet([...imageIds$$q.value]);
+      return filterNullAndUndefined(
+        await db.images.bulkGet([...imageIds$$q.value])
+      );
     }, [imageIds$$q]);
 
     const resolvedImages = computed(() => {
@@ -43,11 +46,8 @@ export default defineComponent({
       if (!userId) {
         return [];
       }
-      return images$$q.value
-        .map((image, index) => {
-          if (!image) {
-            return undefined;
-          }
+      return filterNullAndUndefined(
+        images$$q.value.map((image, index) => {
           const src = createSrc(userId, image, Infinity);
           if (!src) {
             return undefined;
@@ -57,7 +57,7 @@ export default defineComponent({
             src$$q: src,
           };
         })
-        .filter((item): item is NonNullable<typeof item> => !!item);
+      );
     });
 
     const enabled = eagerComputed(

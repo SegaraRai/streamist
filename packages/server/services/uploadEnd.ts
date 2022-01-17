@@ -1,4 +1,5 @@
 import { USE_NFS_SIZE_THRESHOLD } from '$shared/config';
+import { filterNullAndUndefined } from '$shared/filter';
 import { is } from '$shared/is';
 import {
   OSRegion,
@@ -47,8 +48,8 @@ function createTranscoderRequestFiles(
   >[],
   options: TranscoderRequestOptions
 ): TranscoderRequestFile[] {
-  return sourceFiles
-    .map((file): TranscoderRequestFile | null => {
+  return filterNullAndUndefined(
+    sourceFiles.map((file): TranscoderRequestFile | null => {
       switch (file.type) {
         case 'audio':
           return {
@@ -87,7 +88,7 @@ function createTranscoderRequestFiles(
       }
       return null;
     })
-    .filter((file): file is TranscoderRequestFile => !!file);
+  );
 }
 
 async function invokeTranscoderBySource(

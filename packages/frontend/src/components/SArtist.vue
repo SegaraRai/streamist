@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
 import { isBuiltinCoArtistRole } from '$shared/coArtist';
+import { filterNullAndUndefined } from '$shared/filter';
 import { compareAlbum, compareCoArtistRole, compareTrack } from '$/shared/sort';
 import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
@@ -87,20 +88,20 @@ export default defineComponent({
             artistId,
           })
           .toArray();
-        const coArtistAlbums = (
+        const coArtistAlbums = filterNullAndUndefined(
           await db.albums.bulkGet(
             albumCoArtists
               .map((album) => album.albumId)
               .filter((albumId) => !albumIdSet.has(albumId))
           )
-        ).filter((album): album is ResourceAlbum => !!album);
-        const coArtistTracks = (
+        );
+        const coArtistTracks = filterNullAndUndefined(
           await db.tracks.bulkGet(
             trackCoArtists
               .map((track) => track.trackId)
               .filter((trackId) => !trackIdSet.has(trackId))
           )
-        ).filter((track): track is ResourceTrack => !!track);
+        );
         if (propArtistRef.value !== propArtist) {
           throw new Error('operation aborted');
         }

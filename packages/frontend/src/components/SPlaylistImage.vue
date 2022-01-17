@@ -1,6 +1,7 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import type { ResourceImage, ResourcePlaylist } from '$/types';
+import { filterNullAndUndefined } from '$shared/filter';
+import type { ResourcePlaylist } from '$/types';
 import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
 
@@ -44,17 +45,19 @@ export default defineComponent({
         };
       }
 
-      const tracks = await db.tracks.bulkGet(playlist.trackIds as string[]);
-      const albumIds = Array.from(
-        new Set(tracks.map((track) => track!.albumId))
+      const tracks = filterNullAndUndefined(
+        await db.tracks.bulkGet(playlist.trackIds as string[])
       );
-      const albums = await db.albums.bulkGet(albumIds);
-      const albumImageIds = albums
-        .map((album) => album!.imageIds[0])
-        .filter((id) => id);
-      const images = (await db.images.bulkGet(
-        albumImageIds.slice(0, 4)
-      )) as ResourceImage[];
+      const albumIds = Array.from(
+        new Set(tracks.map((track) => track.albumId))
+      );
+      const albums = filterNullAndUndefined(await db.albums.bulkGet(albumIds));
+      const albumImageIds = filterNullAndUndefined(
+        albums.map((album) => album.imageIds[0])
+      );
+      const images = filterNullAndUndefined(
+        await db.images.bulkGet(albumImageIds.slice(0, 4))
+      );
       return {
         playlist$$q: playlist,
         image$$q: images,
