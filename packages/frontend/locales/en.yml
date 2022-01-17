@@ -84,8 +84,6 @@ title:
     track: "{0} by {1} {'|'} Streamist"
     no_track: 'Streamist'
 coArtist:
-  label:
-    Artist: Artist
   role:
     '#artist': Artist
     '#vocal': Vocal

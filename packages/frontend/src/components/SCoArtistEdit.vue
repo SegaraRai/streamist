@@ -1,6 +1,10 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { builtinCoArtistRoles } from '$shared/coArtist';
+import {
+  CoArtistRole,
+  builtinCoArtistRoles,
+  isBuiltinCoArtistRole,
+} from '$shared/coArtist';
 import type { CoArtist } from '~/logic/coArtist';
 
 export default defineComponent({
@@ -34,6 +38,11 @@ export default defineComponent({
         temp.splice(index, 1);
         modelValue$$q.value = temp;
       },
+      roleToLabel$$q: (role: CoArtistRole): string => {
+        return isBuiltinCoArtistRole(role)
+          ? t(`coArtist.role.${role}`)
+          : role.slice(1);
+      },
     };
   },
 });
@@ -54,7 +63,7 @@ export default defineComponent({
         <s-combobox-artist
           class="flex-1"
           create
-          :label="t('coArtist.label.Artist')"
+          :label="roleToLabel$$q(item[0])"
           :artist-id="item[1]"
           :model-value="item[2]"
           @update:artist-id="modelValue$$q[index][1] = $event"
