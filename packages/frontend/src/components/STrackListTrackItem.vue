@@ -177,7 +177,7 @@ export default defineComponent({
     </div>
     <!-- Track Title -->
     <v-list-item-header
-      class="s-track-list-column-title flex flex-col flex-nowrap justify-center gap-y-1"
+      class="s-track-list-column-title flex flex-col flex-nowrap justify-center"
     >
       <v-list-item-title class="leading-tight">
         <span
@@ -211,7 +211,7 @@ export default defineComponent({
     <!-- Album Title -->
     <template v-if="showAlbum">
       <v-list-item-header
-        class="s-track-list-column-album flex flex-col flex-nowrap justify-center ml-6 gap-y-1 !<md:hidden"
+        class="s-track-list-column-album flex flex-col flex-nowrap justify-center ml-6 !<md:hidden"
       >
         <v-list-item-title class="leading-tight">
           <s-conditional-link
