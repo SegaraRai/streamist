@@ -9,10 +9,10 @@ import { canPlayAudioType } from './canPlayAudioType';
 import { getTrackFileURL } from './fileURL';
 
 /**
- * `TrackFileDTO`のスコアを計算する \
+ * `TrackFile`のスコアを計算する \
  * スコアが高いほどユーザーの設定とブラウザの対応状況に即した`TrackFileDTO`であることを表す \
  * 負数は使用不可の（ブラウザが対応していない）フォーマット
- * @param trackFile `TrackFileDTO`
+ * @param trackFile `TrackFile`
  * @returns スコア
  */
 export function calcTrackFileScore(

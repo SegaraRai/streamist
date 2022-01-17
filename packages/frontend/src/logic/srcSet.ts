@@ -7,11 +7,11 @@ export interface SrcObject {
 }
 
 /**
- * `ImageFileDTO`の配列から要求された大きさに合う`SrcObject`を返す \
+ * `ImageFile`の配列から要求された大きさに合う`SrcObject`を返す \
  * `src`に指定されるのは、要求された大きさ以上で最小のものか、それがなければ指定された画像のうち一番大きいものとなる
- * @param imageFiles 使用できる`ImageFileDTO`の配列
+ * @param imageFiles 使用できる`ImageFile`の配列
  * @param targetSize 必要な大きさ（px）
- * @returns `SrcObject`または`undefined`（`ImageFileDTO`の配列の大きさが0のとき）
+ * @returns `SrcObject`または`undefined`（`ImageFile`の配列の大きさが0のとき）
  */
 export function createSrc(
   userId: string,
