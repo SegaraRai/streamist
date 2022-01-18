@@ -18,7 +18,7 @@ export function waitForChange(
 
   scope.run((): void => {
     watchOnce(watchSource, (): void => {
-      timer && clearTimeout(timer);
+      timer != null && clearTimeout(timer);
       resolve();
     });
   });

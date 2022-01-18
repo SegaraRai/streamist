@@ -78,6 +78,9 @@ export function useLiveQuery<T>(
   tryOnScopeDispose((): void => {
     subscription?.unsubscribe();
     subscription = undefined;
+    (initialPromise as any) = undefined;
+    (initialResolve as any) = undefined;
+    (initialReject as any) = undefined;
   });
 
   return {
@@ -101,6 +104,10 @@ export function transformObservableComputed<T, U>(
     }
     return transformCache[1];
   };
+
+  tryOnScopeDispose(() => {
+    transformCache = undefined;
+  });
 
   return {
     value: comp((): U | undefined =>

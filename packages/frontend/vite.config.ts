@@ -287,6 +287,20 @@ export default defineConfig({
     },
   },
 
+  preview: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:43056',
+        changeOrigin: true,
+        headers: {
+          'X-Backend-Authorization':
+            'Bearer development_proxy_auth_token_secret',
+          'X-Backend-CF-Connecting-IP': '127.0.0.1',
+        },
+      },
+    },
+  },
+
   // https://github.com/antfu/vite-ssg
   ssgOptions: {
     script: 'async',
