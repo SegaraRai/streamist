@@ -147,8 +147,10 @@ export default defineComponent({
               />
             </div>
             <!-- right pane -->
-            <div class="flex-1 flex flex-col select-none overflow-hidden">
-              <div class="flex-1 flex flex-col select-text mb-4">
+            <div
+              class="flex-1 flex flex-col gap-y-4 select-none overflow-hidden"
+            >
+              <div class="flex flex-col select-text">
                 <div
                   class="text-2xl leading-tight"
                   :title="value$$q.track$$q.titleSort || undefined"
