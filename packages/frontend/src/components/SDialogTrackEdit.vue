@@ -60,7 +60,9 @@ export default defineComponent({
     const itemBPM$$q = createIntegerRef();
     const itemComment$$q = ref('');
     const itemLyrics$$q = ref('');
-    const itemOrgCoArtists$$q = ref<CoArtist[] | undefined>();
+    const itemOrgCoArtists$$q = ref<
+      readonly Readonly<CoArtist>[] | undefined
+    >();
     const itemCoArtists$$q = ref<CoArtist[] | undefined>();
 
     const reloadData = (newTrack: ResourceTrack): void => {
@@ -85,12 +87,12 @@ export default defineComponent({
         if (trackId$$q.value !== newTrack.id) {
           return;
         }
-        const coArtists: CoArtist[] = allTrackCoArtists
+        const coArtists: readonly Readonly<CoArtist>[] = allTrackCoArtists
           .filter((item) => item.trackId === newTrack.id)
           .sort(compareCoArtist)
           .map((item) => [item.role, item.artistId, '']);
-        itemOrgCoArtists$$q.value = JSON.parse(JSON.stringify(coArtists));
-        itemCoArtists$$q.value = coArtists;
+        itemOrgCoArtists$$q.value = coArtists;
+        itemCoArtists$$q.value = JSON.parse(JSON.stringify(coArtists));
       });
     };
 

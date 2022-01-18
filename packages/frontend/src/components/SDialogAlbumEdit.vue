@@ -43,7 +43,9 @@ export default defineComponent({
     const itemTitle$$q = ref('');
     const itemTitleSort$$q = ref('');
     const itemDescription$$q = ref('');
-    const itemOrgCoArtists$$q = ref<CoArtist[] | undefined>();
+    const itemOrgCoArtists$$q = ref<
+      readonly Readonly<CoArtist>[] | undefined
+    >();
     const itemCoArtists$$q = ref<CoArtist[] | undefined>();
 
     const reloadData = (newAlbum: ResourceAlbum): void => {
@@ -60,12 +62,12 @@ export default defineComponent({
         if (albumId$$q.value !== newAlbum.id) {
           return;
         }
-        const coArtists: CoArtist[] = allAlbumCoArtists
+        const coArtists: readonly Readonly<CoArtist>[] = allAlbumCoArtists
           .filter((item) => item.albumId === newAlbum.id)
           .sort(compareCoArtist)
           .map((item) => [item.role, item.artistId, '']);
-        itemOrgCoArtists$$q.value = JSON.parse(JSON.stringify(coArtists));
-        itemCoArtists$$q.value = coArtists;
+        itemOrgCoArtists$$q.value = coArtists;
+        itemCoArtists$$q.value = JSON.parse(JSON.stringify(coArtists));
       });
     };
 
