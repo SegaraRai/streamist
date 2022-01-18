@@ -157,7 +157,7 @@ export default defineComponent({
         {{ t('albums.Albums') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="opacity-60">
+        <div class="light:font-medium opacity-60">
           {{ t('albums.n_items', items$$q.length) }}
         </div>
       </template>
@@ -193,13 +193,15 @@ export default defineComponent({
             />
           </router-link>
           <v-card-title
-            class="p-0 my-1 text-base sm:text-lg font-medium !leading-tight flex flex-col items-start line-clamp-2 break-words"
+            class="p-0 my-1 text-base sm:text-lg font-bold !leading-tight flex flex-col items-start line-clamp-2 break-words"
           >
             <router-link :to="`/albums/${item.album$$q.id}`">
               {{ item.album$$q.title }}
             </router-link>
           </v-card-title>
-          <v-card-subtitle class="px-0 text-sm flex justify-between">
+          <v-card-subtitle
+            class="px-0 text-sm flex justify-between light:font-medium"
+          >
             <router-link
               :to="`/artists/${item.artist$$q.id}`"
               class="overflow-hidden overflow-ellipsis whitespace-nowrap"

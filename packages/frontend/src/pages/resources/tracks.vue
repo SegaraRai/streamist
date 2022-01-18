@@ -64,7 +64,9 @@ export default defineComponent({
     <header class="mb-6 flex items-baseline gap-x-4">
       <div class="text-h5">Resources/Tracks</div>
       <template v-if="items$$q?.length">
-        <div class="opacity-60">{{ items$$q.length }} item(s)</div>
+        <div class="light:font-medium opacity-60">
+          {{ items$$q.length }} item(s)
+        </div>
       </template>
     </header>
     <n-data-table :columns="columns$$q" :data="items$$q" virtual-scroll />

@@ -7,6 +7,7 @@ import { compareCoArtist } from '$/shared/sort';
 import type { ResourceTrack } from '$/types';
 import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
+import { formatTime } from '~/logic/formatTime';
 import { roleToText } from '~/logic/role';
 
 export default defineComponent({
@@ -103,6 +104,7 @@ export default defineComponent({
       dialog$$q,
       value$$q: value,
       roleToText$$q: roleToText,
+      formatTime$$q: formatTime,
     };
   },
 });
@@ -113,7 +115,7 @@ export default defineComponent({
     <n-modal
       v-model:show="dialog$$q"
       transform-origin="center"
-      class="select-none max-w-4xl"
+      class="select-none max-w-3xl"
     >
       <v-card class="w-full md:min-w-2xl">
         <v-card-title class="flex">
@@ -143,20 +145,58 @@ export default defineComponent({
                 :album="value$$q.album$$q"
               />
             </div>
-            <div class="flex-1 flex flex-col gap-y-4 select-text">
+            <div
+              class="flex-1 flex flex-col gap-y-4 select-text overflow-hidden"
+            >
               <div class="flex-1 flex flex-col">
-                <div class="flex flex-col leading-none gap-y-0.5">
+                <div class="flex flex-col leading-tight gap-y-1">
                   <div
-                    class="flex items-center gap-x-2 opacity-60 font-bold select-none"
+                    class="flex items-center gap-x-3 opacity-60 font-medium select-none"
                   >
-                    <div class="flex items-center">
-                      <i-mdi-disc />
-                      <span>{{ value$$q.track$$q.discNumber }}</span>
+                    <div class="flex items-center gap-x-2.5">
+                      <div class="flex items-center">
+                        <i-mdi-disc />
+                        <span class="s-numeric">
+                          {{ value$$q.track$$q.discNumber }}
+                        </span>
+                      </div>
+                      <div class="flex items-center">
+                        <i-mdi-playlist-music />
+                        <span class="s-numeric">
+                          {{ value$$q.track$$q.trackNumber }}
+                        </span>
+                      </div>
                     </div>
-                    <div class="flex items-center">
-                      <i-mdi-playlist-music />
-                      <span>{{ value$$q.track$$q.trackNumber }}</span>
+                    <div class="flex items-center gap-x-0.5">
+                      <i-mdi-clock-outline />
+                      <span class="s-duration">
+                        {{ formatTime$$q(value$$q.track$$q.duration) }}
+                      </span>
                     </div>
+                    <template v-if="value$$q.track$$q.releaseDateText">
+                      <div class="flex items-center gap-x-0.5">
+                        <i-mdi-calendar-outline />
+                        <span class="s-numeric">
+                          {{ value$$q.track$$q.releaseDateText }}
+                        </span>
+                      </div>
+                    </template>
+                    <template v-if="value$$q.track$$q.genre">
+                      <div class="flex items-center gap-x-0.5">
+                        <i-mdi-file-music />
+                        <span class="s-numeric">
+                          {{ value$$q.track$$q.genre }}
+                        </span>
+                      </div>
+                    </template>
+                    <template v-if="value$$q.track$$q.bpm">
+                      <div class="flex items-center">
+                        <i-mdi-music-note-quarter />
+                        <span class="s-numeric">
+                          {{ value$$q.track$$q.bpm }} BPM
+                        </span>
+                      </div>
+                    </template>
                   </div>
                   <div
                     class="text-2xl leading-tight"
@@ -167,7 +207,7 @@ export default defineComponent({
                 </div>
                 <div>
                   <router-link
-                    class="font-bold opacity-60 leading-tight"
+                    class="light:font-medium opacity-60 leading-tight"
                     :to="`/albums/${value$$q.track$$q.albumId}`"
                   >
                     {{ value$$q.album$$q.title }}
@@ -180,7 +220,7 @@ export default defineComponent({
                   :key="role"
                 >
                   <div class="flex flex-col gap-y-0.5">
-                    <dt class="text-xs font-bold opacity-60">
+                    <dt class="text-xs light:font-medium opacity-60">
                       {{
                         role
                           ? roleToText$$q(
@@ -199,14 +239,16 @@ export default defineComponent({
                       >
                         <div class="flex items-center gap-x-2">
                           <router-link
-                            class="inline-flex items-center gap-x-1"
+                            class="inline-flex items-center gap-x-1 max-w-full"
                             :to="`/artists/${coArtist.artistId}`"
                           >
                             <s-artist-image
-                              class="w-6 h-6"
+                              class="flex-none w-6 h-6"
                               :artist="coArtist.artistId"
                             />
-                            <div class="flex-shrink-1">
+                            <div
+                              class="flex-shrink-1 leading-tight whitespace-nowrap overflow-hidden overflow-ellipsis"
+                            >
                               {{ coArtist.artist?.name }}
                             </div>
                           </router-link>

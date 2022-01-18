@@ -141,7 +141,7 @@ export default defineComponent({
         {{ t('artists.Artists') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="opacity-60">
+        <div class="light:font-medium opacity-60">
           {{ t('artists.n_items', items$$q.length) }}
         </div>
       </template>
@@ -177,7 +177,7 @@ export default defineComponent({
             />
           </router-link>
           <v-card-title
-            class="p-0 my-1 text-base sm:text-lg font-weight-medium !leading-tight text-center flex-1 flex flex-col line-clamp-2 break-words"
+            class="p-0 my-1 text-base sm:text-lg font-bold !leading-tight text-center flex-1 flex flex-col line-clamp-2 break-words"
           >
             <router-link :to="`/artists/${item.artist$$q.id}`">
               {{ item.artist$$q.name }}

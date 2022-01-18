@@ -371,7 +371,9 @@ export default defineComponent({
                       >
                         {{ item.l }}
                       </div>
-                      <div class="text-xs opacity-60 leading-tight">
+                      <div
+                        class="text-xs light:font-medium opacity-60 leading-tight"
+                      >
                         {{ t(`dialogComponent.search.type.${item.t}`) }}
                       </div>
                     </div>

@@ -84,7 +84,7 @@ export default defineComponent({
         {{ t('tracks.Tracks') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="opacity-60">
+        <div class="light:font-medium opacity-60">
           {{ t('tracks.n_items', items$$q.length) }}
         </div>
       </template>

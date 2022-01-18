@@ -7,7 +7,7 @@ export interface ListItemDiscNumberHeader {
   height$$q: number;
 }
 
-export const discHeaderHeight = 44;
+export const discHeaderHeight = 32;
 
 export default defineComponent({
   props: {
@@ -23,15 +23,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="w-full h-11 flex items-center py-2">
-    <v-sheet
-      tile
-      class="w-full flex items-center gap-x-1 px-3 h-full rounded-sm"
-    >
-      <v-icon>mdi-disc</v-icon>
-      <span class="s-numeric font-semibold">
-        {{ item.discNumber$$q }}
-      </span>
-    </v-sheet>
+  <div class="w-full h-8 flex items-center gap-x-1 px-1">
+    <v-icon>mdi-disc</v-icon>
+    <span class="s-numeric font-medium">{{ item.discNumber$$q }}</span>
   </div>
 </template>

@@ -138,7 +138,9 @@ export default defineComponent({
           <!-- それ以外の曲 -->
           <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
             <template v-if="indexContentNumber$$q != null">
-              <div class="s-hover-hidden s-numeric font-bold tracking-[0.01em]">
+              <div
+                class="s-hover-hidden s-numeric font-medium tracking-[0.01em]"
+              >
                 {{ indexContentNumber$$q }}
               </div>
             </template>
@@ -159,7 +161,7 @@ export default defineComponent({
           <!-- それ以外の曲（再生不可） -->
           <div>
             <template v-if="indexContentNumber$$q != null">
-              <div class="s-numeric font-bold tracking-[0.01em]">
+              <div class="s-numeric font-medium tracking-[0.01em]">
                 {{ indexContentNumber$$q }}
               </div>
             </template>
@@ -197,7 +199,7 @@ export default defineComponent({
       <template
         v-if="showArtist || item.artist$$q.id !== item.albumArtist$$q.id"
       >
-        <v-list-item-subtitle class="leading-tight">
+        <v-list-item-subtitle class="light:font-medium leading-tight">
           <s-conditional-link
             class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max text-xs"
             :to="`/artists/${item.artist$$q.id}`"
@@ -222,7 +224,7 @@ export default defineComponent({
             {{ item.album$$q.title }}
           </s-conditional-link>
         </v-list-item-title>
-        <v-list-item-subtitle class="leading-tight">
+        <v-list-item-subtitle class="light:font-medium leading-tight">
           <s-conditional-link
             class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max text-xs"
             :to="`/artists/${item.albumArtist$$q.id}`"

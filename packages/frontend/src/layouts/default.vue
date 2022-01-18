@@ -118,7 +118,7 @@ export default defineComponent({
     class="min-h-screen flex flex-col"
   >
     <div
-      class="s-offline-bar bg-yellow-400 h-0 text-light-900 font-weight-bold text-md flex items-center px-4 leading-none z-1000 overflow-hidden"
+      class="s-offline-bar bg-yellow-400 h-0 text-light-900 font-medium text-md flex items-center px-4 leading-none z-1000 overflow-hidden"
     >
       {{ t('header.NoInternetConnection') }}
     </div>

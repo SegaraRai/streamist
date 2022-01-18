@@ -82,7 +82,7 @@ export default defineComponent({
         {{ track.title }}
       </router-link>
       <router-link
-        class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-xs leading-tight opacity-80 dark:opacity-60"
+        class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-xs leading-tight light:font-medium opacity-60"
         :to="`/artists/${track.artistId}`"
       >
         {{ artistName || '\u200b' /* to prevent layout shift */ }}

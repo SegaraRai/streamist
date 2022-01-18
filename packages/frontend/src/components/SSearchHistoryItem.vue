@@ -44,7 +44,7 @@ export default defineComponent({
         >
           {{ query }}
         </div>
-        <div class="text-xs opacity-60 leading-tight">
+        <div class="text-xs light:font-medium opacity-60 leading-tight">
           {{ strAt$$q }}
         </div>
       </div>
