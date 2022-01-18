@@ -16,7 +16,8 @@ export default defineComponent({
     navigatePlaying: Boolean,
   },
   setup(props) {
-    const dialog$$q = ref(false);
+    const dialogEdit$$q = ref(false);
+    const dialogDetails$$q = ref(false);
     const lastSelectedTrack$$q = ref<ResourceTrack | undefined>();
     const {
       x$$q: menuX$$q,
@@ -41,13 +42,18 @@ export default defineComponent({
       },
       openEditTrackDialog$$q: (track: ResourceTrack) => {
         lastSelectedTrack$$q.value = track;
-        dialog$$q.value = true;
+        dialogEdit$$q.value = true;
+      },
+      openTrackDetailsDialog$$q: (track: ResourceTrack) => {
+        lastSelectedTrack$$q.value = track;
+        dialogDetails$$q.value = true;
       },
       closeMenu$$q,
     });
     return {
       lastSelectedTrack$$q,
-      dialog$$q,
+      dialogEdit$$q,
+      dialogDetails$$q,
       menuX$$q,
       menuY$$q,
       menuOptions$$q,
@@ -95,6 +101,13 @@ export default defineComponent({
     @contextmenu.prevent
   />
   <template v-if="lastSelectedTrack$$q">
-    <s-dialog-track-edit v-model="dialog$$q" :track="lastSelectedTrack$$q" />
+    <s-dialog-track-edit
+      v-model="dialogEdit$$q"
+      :track="lastSelectedTrack$$q"
+    />
+    <s-dialog-track-details
+      v-model="dialogDetails$$q"
+      :track="lastSelectedTrack$$q"
+    />
   </template>
 </template>

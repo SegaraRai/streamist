@@ -255,7 +255,8 @@ export default defineComponent({
       );
     };
 
-    const dialog$$q = ref(false);
+    const dialogEdit$$q = ref(false);
+    const dialogDetails$$q = ref(false);
     const lastSelectedTrack$$q = ref<ResourceTrack | undefined>();
     const selectedTrack$$q = ref<ResourceTrack | undefined>();
     const selectedTrackIndex$$q = ref<number | undefined>();
@@ -294,7 +295,10 @@ export default defineComponent({
         play$$q(selectedTrack$$q.value, selectedTrackIndex$$q.value);
       },
       openEditTrackDialog$$q: (_track: ResourceTrack) => {
-        dialog$$q.value = true;
+        dialogEdit$$q.value = true;
+      },
+      openTrackDetailsDialog$$q: (_track: ResourceTrack) => {
+        dialogDetails$$q.value = true;
       },
       closeMenu$$q,
     });
@@ -346,7 +350,8 @@ export default defineComponent({
       selectedTrackIndex$$q,
       selectedTrack$$q,
       lastSelectedTrack$$q,
-      dialog$$q,
+      dialogEdit$$q,
+      dialogDetails$$q,
       menuOptions$$q,
       menuIsOpen$$q,
       menuX$$q,
@@ -539,6 +544,13 @@ export default defineComponent({
       :on-clickoutside="closeMenu$$q"
       @contextmenu.prevent
     />
-    <s-dialog-track-edit v-model="dialog$$q" :track="lastSelectedTrack$$q" />
+    <s-dialog-track-edit
+      v-model="dialogEdit$$q"
+      :track="lastSelectedTrack$$q"
+    />
+    <s-dialog-track-details
+      v-model="dialogDetails$$q"
+      :track="lastSelectedTrack$$q"
+    />
   </template>
 </template>

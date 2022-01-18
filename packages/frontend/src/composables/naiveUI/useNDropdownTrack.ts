@@ -23,6 +23,7 @@ export interface NDropdownTrackCreateOptions {
   readonly showDelete$$q: Readonly<Ref<boolean>>;
   readonly play$$q: (track: ResourceTrack) => void;
   readonly openEditTrackDialog$$q?: (track: ResourceTrack) => void;
+  readonly openTrackDetailsDialog$$q?: (track: ResourceTrack) => void;
   readonly onNavigate$$q?: () => void;
   readonly closeMenu$$q: () => void;
 }
@@ -37,6 +38,7 @@ export function useNDropdownTrack({
   showDelete$$q,
   play$$q,
   openEditTrackDialog$$q,
+  openTrackDetailsDialog$$q,
   onNavigate$$q,
   closeMenu$$q,
 }: NDropdownTrackCreateOptions): ComputedRef<MenuOption[]> {
@@ -82,8 +84,8 @@ export function useNDropdownTrack({
         key: 'play',
         disabled: !isAvailable,
         label: isPlayingThisTrack
-          ? t('dropdown.trackList.Pause')
-          : t('dropdown.trackList.Play'),
+          ? t('dropdown.track.Pause')
+          : t('dropdown.track.Play'),
         icon: nCreateDropdownIcon(() =>
           // NOTE: we have to access to ref directly in the render function to make icon reactive
           isSameSetList$$q.value &&
@@ -108,7 +110,7 @@ export function useNDropdownTrack({
       menuItems.push({
         key: 'addToPNQueue',
         disabled: !isAvailable,
-        label: t('dropdown.trackList.AddToPlayNextQueue'),
+        label: t('dropdown.track.AddToPlayNextQueue'),
         icon: nCreateDropdownIcon('mdi-playlist-play'),
         props: {
           onClick: () => {
@@ -133,40 +135,58 @@ export function useNDropdownTrack({
       });
     }
 
-    // Visit Album
-    if (showVisitAlbum$$q.value) {
-      menuItems.push({
-        key: 'goToAlbum',
-        label: t('dropdown.trackList.GoToAlbum'),
-        icon: nCreateDropdownIcon('mdi-album'),
-        props: {
-          onClick: () => {
-            delayedCloseMenu();
-            router.push(`/albums/${track.albumId}`);
-            onNavigate$$q?.();
+    if (
+      showVisitAlbum$$q.value ||
+      showVisitArtist$$q.value ||
+      openTrackDetailsDialog$$q
+    ) {
+      // Visit Album
+      if (showVisitAlbum$$q.value) {
+        menuItems.push({
+          key: 'goToAlbum',
+          label: t('dropdown.track.GoToAlbum'),
+          icon: nCreateDropdownIcon('mdi-album'),
+          props: {
+            onClick: () => {
+              delayedCloseMenu();
+              router.push(`/albums/${track.albumId}`);
+              onNavigate$$q?.();
+            },
           },
-        },
-      });
-    }
+        });
+      }
 
-    // Visit Artist
-    if (showVisitArtist$$q.value) {
-      menuItems.push({
-        key: 'goToArtist',
-        label: t('dropdown.trackList.GoToArtist'),
-        icon: nCreateDropdownIcon('mdi-account-music'),
-        props: {
-          onClick: () => {
-            delayedCloseMenu();
-            router.push(`/artists/${track.artistId}`);
-            onNavigate$$q?.();
+      // Visit Artist
+      if (showVisitArtist$$q.value) {
+        menuItems.push({
+          key: 'goToArtist',
+          label: t('dropdown.track.GoToArtist'),
+          icon: nCreateDropdownIcon('mdi-account-music'),
+          props: {
+            onClick: () => {
+              delayedCloseMenu();
+              router.push(`/artists/${track.artistId}`);
+              onNavigate$$q?.();
+            },
           },
-        },
-      });
-    }
+        });
+      }
 
-    // --- divider ---
-    if (showVisitAlbum$$q.value || showVisitArtist$$q.value) {
+      if (openTrackDetailsDialog$$q) {
+        menuItems.push({
+          key: 'details',
+          label: t('dropdown.track.ShowDetails'),
+          icon: nCreateDropdownIcon('mdi-menu'),
+          props: {
+            onClick: () => {
+              delayedCloseMenu();
+              openTrackDetailsDialog$$q?.(track);
+            },
+          },
+        });
+      }
+
+      // --- divider ---
       menuItems.push({
         key: 'div2',
         type: 'divider',
@@ -176,13 +196,13 @@ export function useNDropdownTrack({
     // Add to Playlist
     menuItems.push({
       key: 'addToPlaylist',
-      label: t('dropdown.trackList.AddToPlaylist'),
+      label: t('dropdown.track.AddToPlaylist'),
       icon: nCreateDropdownIcon('mdi-playlist-plus'),
       disabled: !playlists.length,
       children: [
         {
           key: 'addToPlaylist.createNew',
-          label: t('dropdown.trackList.AddToNewPlaylist'),
+          label: t('dropdown.track.AddToNewPlaylist'),
           props: {
             onClick: () => {
               delayedCloseMenu();
@@ -264,7 +284,7 @@ export function useNDropdownTrack({
     if (removeFromPlaylist) {
       menuItems.push({
         key: `removeFromPlaylist.${removeFromPlaylist.id}`,
-        label: t('dropdown.trackList.RemoveFromPlaylist'),
+        label: t('dropdown.track.RemoveFromPlaylist'),
         icon: nCreateDropdownIcon('mdi-playlist-remove'),
         props: {
           style: nCreateDropdownTextColorStyle('warning'),
@@ -319,7 +339,7 @@ export function useNDropdownTrack({
       if (openEditTrackDialog$$q) {
         menuItems.push({
           key: 'edit',
-          label: t('dropdown.trackList.Edit'),
+          label: t('dropdown.track.Edit'),
           icon: nCreateDropdownIcon('mdi-pencil'),
           props: {
             onClick: () => {
@@ -334,7 +354,7 @@ export function useNDropdownTrack({
       if (showDelete$$q.value) {
         menuItems.push({
           key: 'delete',
-          label: t('dropdown.trackList.Delete'),
+          label: t('dropdown.track.Delete'),
           icon: nCreateDropdownIcon('mdi-delete'),
           props: {
             style: nCreateDropdownTextColorStyle('error'),

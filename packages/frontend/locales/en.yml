@@ -91,6 +91,13 @@ coArtist:
     '#composer': Composer
     '#lyricist': Lyricist
     '#producer': Producer
+  n_role:
+    '#artist': 'Artist | Artist | Artists'
+    '#vocal': 'Vocal | Vocal | Vocals'
+    '#arranger': 'Arranger | Arranger | Arrangers'
+    '#composer': 'Composer | Composer | Composers'
+    '#lyricist': 'Lyricist | Lyricist | Lyricists'
+    '#producer': 'Producer | Producer | Producers'
 search:
   NoResultsFound: No results found
 imageManager:
@@ -136,11 +143,12 @@ dropdown:
     Edit: Edit
     Delete: Delete
     Create: Create playlist
-  trackList:
+  track:
     Play: Play
     Pause: Pause
     GoToAlbum: Go to album
     GoToArtist: Go to artist
+    ShowDetails: Show details
     AddToPlayNextQueue: Add to queue
     RemoveFromPlayNextQueue: Remove from queue
     AddToQueue: Add to queue
@@ -164,6 +172,9 @@ dialogComponent:
       track: Track
   upload:
     title: Upload
+  trackDetails:
+    title: Details
+    artist: Artist
   editAlbum:
     title: Edit {0}
     button:

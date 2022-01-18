@@ -1,6 +1,5 @@
 <script lang="ts">
 import type { PropType } from 'vue';
-import { isBuiltinCoArtistRole } from '$shared/coArtist';
 import { filterNullAndUndefined } from '$shared/filter';
 import { toUnique, toUniqueByProp } from '$shared/unique';
 import { compareAlbum, compareCoArtistRole, compareTrack } from '$/shared/sort';
@@ -8,6 +7,7 @@ import type { ResourceAlbum, ResourceArtist, ResourceTrack } from '$/types';
 import type { DropdownArtistInput } from '~/components/SDropdownArtist.vue';
 import { useLiveQuery, useTrackFilter } from '~/composables';
 import { db } from '~/db';
+import { roleToText } from '~/logic/role';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
@@ -140,13 +140,7 @@ export default defineComponent({
     );
 
     const strRoles$$q = computed(() =>
-      value.value?.roles$$q
-        .map((role) =>
-          isBuiltinCoArtistRole(role)
-            ? t(`coArtist.role.${role}`)
-            : role.slice(1)
-        )
-        .join(', ')
+      value.value?.roles$$q.map((role) => roleToText(role, t)).join(', ')
     );
 
     const dropdown$$q = ref<DropdownArtistInput | undefined>();
