@@ -3,8 +3,12 @@ import type { PropType } from 'vue';
 import { filterNullAndUndefined } from '$shared/filter';
 import { createMultiMap } from '$shared/multiMap';
 import { toUnique } from '$shared/unique';
-import { compareCoArtist } from '$/shared/sort';
-import type { ResourceTrack } from '$/types';
+import { compareArtist, compareCoArtist } from '$/shared/sort';
+import type {
+  ResourceArtist,
+  ResourceTrack,
+  ResourceTrackCoArtist,
+} from '$/types';
 import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
 import { formatTime } from '~/logic/formatTime';
@@ -76,13 +80,27 @@ export default defineComponent({
               },
             ],
           ] as const,
-          ...createMultiMap(
-            coArtist.map((coArtist) => ({
-              ...coArtist,
-              artist: artistMap.get(coArtist.artistId),
-            })),
-            'role'
-          ).entries(),
+          ...Array.from(
+            createMultiMap(
+              coArtist.map((coArtist) => ({
+                ...coArtist,
+                artist: artistMap.get(coArtist.artistId),
+              })),
+              'role'
+            ).entries()
+          ).map(([role, coArtists]) => {
+            return [
+              role,
+              coArtists
+                .filter(
+                  (
+                    v
+                  ): v is ResourceTrackCoArtist & { artist: ResourceArtist } =>
+                    !!v.artist
+                )
+                .sort((a, b) => compareArtist(a.artist, b.artist)),
+            ] as const;
+          }),
         ];
         if (propTrackRef.value !== propTrack) {
           throw new Error('operation aborted');
