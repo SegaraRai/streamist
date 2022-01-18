@@ -138,6 +138,7 @@ export default defineComponent({
         </v-card-title>
         <v-card-text class="opacity-100">
           <div class="flex gap-x-4">
+            <!-- left pane (image) -->
             <div class="<sm:w-full text-center leading-none">
               <s-album-image
                 class="w-40 h-40"
@@ -145,76 +146,23 @@ export default defineComponent({
                 :album="value$$q.album$$q"
               />
             </div>
-            <div
-              class="flex-1 flex flex-col gap-y-4 select-text overflow-hidden"
-            >
-              <div class="flex-1 flex flex-col">
-                <div class="flex flex-col leading-tight gap-y-1">
-                  <div
-                    class="flex items-center gap-x-3 opacity-60 font-medium select-none"
-                  >
-                    <div class="flex items-center gap-x-2.5">
-                      <div class="flex items-center">
-                        <i-mdi-disc />
-                        <span class="s-numeric">
-                          {{ value$$q.track$$q.discNumber }}
-                        </span>
-                      </div>
-                      <div class="flex items-center">
-                        <i-mdi-playlist-music />
-                        <span class="s-numeric">
-                          {{ value$$q.track$$q.trackNumber }}
-                        </span>
-                      </div>
-                    </div>
-                    <div class="flex items-center gap-x-0.5">
-                      <i-mdi-clock-outline />
-                      <span class="s-duration">
-                        {{ formatTime$$q(value$$q.track$$q.duration) }}
-                      </span>
-                    </div>
-                    <template v-if="value$$q.track$$q.releaseDateText">
-                      <div class="flex items-center gap-x-0.5">
-                        <i-mdi-calendar-outline />
-                        <span class="s-numeric">
-                          {{ value$$q.track$$q.releaseDateText }}
-                        </span>
-                      </div>
-                    </template>
-                    <template v-if="value$$q.track$$q.genre">
-                      <div class="flex items-center gap-x-0.5">
-                        <i-mdi-file-music />
-                        <span class="s-numeric">
-                          {{ value$$q.track$$q.genre }}
-                        </span>
-                      </div>
-                    </template>
-                    <template v-if="value$$q.track$$q.bpm">
-                      <div class="flex items-center">
-                        <i-mdi-music-note-quarter />
-                        <span class="s-numeric">
-                          {{ value$$q.track$$q.bpm }} BPM
-                        </span>
-                      </div>
-                    </template>
-                  </div>
-                  <div
-                    class="text-2xl leading-tight"
-                    :title="value$$q.track$$q.titleSort || undefined"
-                  >
-                    {{ value$$q.track$$q.title }}
-                  </div>
+            <!-- right pane -->
+            <div class="flex-1 flex flex-col select-none overflow-hidden">
+              <div class="flex-1 flex flex-col select-text mb-4">
+                <div
+                  class="text-2xl leading-tight"
+                  :title="value$$q.track$$q.titleSort || undefined"
+                >
+                  {{ value$$q.track$$q.title }}
                 </div>
-                <div>
-                  <router-link
-                    class="light:font-medium opacity-60 leading-tight"
-                    :to="`/albums/${value$$q.track$$q.albumId}`"
-                  >
-                    {{ value$$q.album$$q.title }}
-                  </router-link>
-                </div>
+                <router-link
+                  class="light:font-medium opacity-60 leading-tight"
+                  :to="`/albums/${value$$q.track$$q.albumId}`"
+                >
+                  {{ value$$q.album$$q.title }}
+                </router-link>
               </div>
-              <dl class="flex-1 flex flex-col gap-y-4">
+              <dl class="flex-1 flex flex-col gap-y-4 select-text">
                 <template
                   v-for="[role, coArtists] in value$$q.groupedCoArtists$$q"
                   :key="role"
@@ -259,6 +207,52 @@ export default defineComponent({
                 </template>
               </dl>
             </div>
+          </div>
+          <div
+            class="flex items-center gap-x-3 opacity-60 font-medium leading-tight mt-4"
+          >
+            <div class="flex items-center gap-x-2.5">
+              <div class="flex items-center">
+                <i-mdi-disc />
+                <span class="s-numeric">
+                  {{ value$$q.track$$q.discNumber }}
+                </span>
+              </div>
+              <div class="flex items-center">
+                <i-mdi-playlist-music />
+                <span class="s-numeric">
+                  {{ value$$q.track$$q.trackNumber }}
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center gap-x-0.5">
+              <i-mdi-clock-outline />
+              <span class="s-duration">
+                {{ formatTime$$q(value$$q.track$$q.duration) }}
+              </span>
+            </div>
+            <template v-if="value$$q.track$$q.releaseDateText">
+              <div class="flex items-center gap-x-0.5">
+                <i-mdi-calendar-outline />
+                <span class="s-numeric">
+                  {{ value$$q.track$$q.releaseDateText }}
+                </span>
+              </div>
+            </template>
+            <template v-if="value$$q.track$$q.genre">
+              <div class="flex items-center gap-x-0.5">
+                <i-mdi-file-music />
+                <span class="s-numeric">
+                  {{ value$$q.track$$q.genre }}
+                </span>
+              </div>
+            </template>
+            <template v-if="value$$q.track$$q.bpm">
+              <div class="flex items-center">
+                <i-mdi-music-note-quarter />
+                <span class="s-numeric"> {{ value$$q.track$$q.bpm }} BPM </span>
+              </div>
+            </template>
           </div>
         </v-card-text>
       </v-card>

@@ -11,6 +11,7 @@ declare module 'vue' {
     IMdiClockOutline: typeof import('~icons/mdi/clock-outline')['default']
     IMdiDisc: typeof import('~icons/mdi/disc')['default']
     IMdiFileMusic: typeof import('~icons/mdi/file-music')['default']
+    IMdiFileMusicOutline: typeof import('~icons/mdi/file-music-outline')['default']
     IMdiImagePlus: typeof import('~icons/mdi/image-plus')['default']
     IMdiInbox: typeof import('~icons/mdi/inbox')['default']
     IMdiMagnify: typeof import('~icons/mdi/magnify')['default']
