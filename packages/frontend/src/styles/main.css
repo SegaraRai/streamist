@@ -40,8 +40,8 @@
   @apply bg-st-background;
   @apply pt-3;
   @apply pb-1;
-  @apply -mx-4;
-  @apply px-4;
+  @apply -mx-2px;
+  @apply px-2px;
 }
 
 .s-title > div {
