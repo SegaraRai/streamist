@@ -160,7 +160,7 @@ export default defineComponent({
         {{ t('albums.Albums') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="s-subheading">
+        <div class="s-subheading-sl">
           {{ t('albums.n_items', items$$q.length) }}
         </div>
       </template>

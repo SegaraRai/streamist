@@ -184,7 +184,7 @@ export default defineComponent({
   >
     <v-card class="w-full md:min-w-2xl">
       <v-card-title class="flex">
-        <div class="flex-1 line-clamp-2 overflow-hidden">
+        <div class="s-dialog-title">
           {{ t('dialogComponent.editAlbum.title', [album.title]) }}
         </div>
         <div class="flex-none">

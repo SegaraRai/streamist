@@ -144,7 +144,7 @@ export default defineComponent({
         {{ t('artists.Artists') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="s-subheading">
+        <div class="s-subheading-sl">
           {{ t('artists.n_items', items$$q.length) }}
         </div>
       </template>

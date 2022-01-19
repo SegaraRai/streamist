@@ -366,12 +366,10 @@ export default defineComponent({
                   </v-list-item-avatar>
                   <v-list-item-header>
                     <div class="flex-1 flex flex-col">
-                      <div
-                        class="s-heading text-sm whitespace-nowrap overflow-hidden overflow-ellipsis"
-                      >
+                      <div class="s-heading-sl text-sm">
                         {{ item.l }}
                       </div>
-                      <div class="s-subheading text-xs">
+                      <div class="s-subheading-sl text-xs">
                         {{ t(`dialogComponent.search.type.${item.t}`) }}
                       </div>
                     </div>

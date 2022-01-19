@@ -274,12 +274,10 @@ export default defineComponent({
     @change="onFileSelected$$q"
   />
   <n-modal v-model:show="dialog$$q" transform-origin="center">
-    <div
-      class="pt-12 w-screen h-screen !sm:pt-0 sm:w-auto sm:h-auto sm:min-w-xl sm:max-w-180 md:min-w-180 md:max-w-220 lg:min-w-220 lg:max-w-260"
-    >
+    <div class="pt-12 max-w-full !sm:pt-0 sm:w-xl md:w-180 lg:w-220">
       <v-card class="w-full h-full">
         <v-card-title class="flex">
-          <div class="flex-1 line-clamp-2 overflow-hidden">
+          <div class="s-dialog-title">
             <slot name="title"></slot>
           </div>
           <div class="flex-none">
@@ -300,7 +298,7 @@ export default defineComponent({
             x-scrollable
           >
             <template v-if="images$$q">
-              <div class="py-8 !<sm:pb-16">
+              <div class="py-8">
                 <s-draggable
                   :items="images$$q"
                   item-key="id"

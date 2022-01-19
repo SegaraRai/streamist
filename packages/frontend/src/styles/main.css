@@ -44,21 +44,26 @@
   @apply px-2px;
 }
 
+.s-dialog-title {
+  @apply flex-1;
+  @apply break-words;
+  @apply line-clamp-2;
+}
+
+.s-dialog-title,
+.s-heading,
+.s-heading-sl,
+.s-subheading,
+.s-subheading-sl,
 .s-title > div {
   @apply leading-tight !important;
   @apply tracking-tight !important;
-}
-
-.s-heading,
-.s-heading-sl {
-  @apply leading-tight !important;
-  @apply tracking-tight !important;
+  @apply overflow-hidden !important;
+  @apply overflow-ellipsis !important;
 }
 
 .s-subheading,
 .s-subheading-sl {
-  @apply leading-tight !important;
-  @apply tracking-tight !important;
   @apply light:font-medium;
   @apply opacity-60 !important;
 }
@@ -66,6 +71,4 @@
 .s-heading-sl,
 .s-subheading-sl {
   @apply whitespace-nowrap !important;
-  @apply overflow-hidden !important;
-  @apply overflow-ellipsis !important;
 }

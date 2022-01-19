@@ -87,7 +87,7 @@ export default defineComponent({
         {{ t('tracks.Tracks') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="s-subheading">
+        <div class="s-subheading-sl">
           {{ t('tracks.n_items', items$$q.length) }}
         </div>
       </template>

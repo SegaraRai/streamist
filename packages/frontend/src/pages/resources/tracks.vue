@@ -69,7 +69,7 @@ export default defineComponent({
     <header class="s-title">
       <div class="text-h5">Resources/Tracks</div>
       <template v-if="items$$q?.length">
-        <div class="s-subheading">{{ items$$q.length }} item(s)</div>
+        <div class="s-subheading-sl">{{ items$$q.length }} item(s)</div>
       </template>
     </header>
     <n-data-table :columns="columns$$q" :data="items$$q" virtual-scroll />
