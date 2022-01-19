@@ -5,7 +5,7 @@ meta:
 
 <template>
   <v-container fluid>
-    <header class="mb-6 flex items-baseline gap-x-4">
+    <header class="s-title mb-4">
       <div class="text-h5">Resources</div>
     </header>
     <div class="flex flex-col gap-y-4">

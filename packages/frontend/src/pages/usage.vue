@@ -72,7 +72,7 @@ export default defineComponent({
 
 <template>
   <v-container fluid>
-    <header class="mb-6">
+    <header class="s-title mb-4">
       <div class="text-h5">
         {{ t('usage.Usage') }}
       </div>

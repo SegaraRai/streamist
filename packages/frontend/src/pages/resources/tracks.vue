@@ -66,7 +66,7 @@ export default defineComponent({
 
 <template>
   <v-container fluid>
-    <header class="mb-6 flex items-baseline gap-x-4">
+    <header class="s-title">
       <div class="text-h5">Resources/Tracks</div>
       <template v-if="items$$q?.length">
         <div class="s-subheading">{{ items$$q.length }} item(s)</div>

@@ -82,9 +82,7 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-0">
-    <header
-      class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 pt-3 pb-2 -mx-2 px-2"
-    >
+    <header class="s-title">
       <div class="text-h5">
         {{ t('tracks.Tracks') }}
       </div>

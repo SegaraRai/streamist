@@ -55,9 +55,7 @@ export default defineComponent({
     <div class="flex flex-col gap-y-16">
       <template v-if="recentlyPlayedTracks$$q?.length">
         <div>
-          <header
-            class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 pt-3 pb-2 -mx-2 px-2"
-          >
+          <header class="s-title">
             <div class="text-h5">{{ t('home.RecentlyPlayed') }}</div>
           </header>
           <s-track-list
@@ -78,9 +76,7 @@ export default defineComponent({
       </template>
       <template v-if="recentlyUploadedTracks$$q?.length">
         <div>
-          <header
-            class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 pt-3 pb-2"
-          >
+          <header class="s-title">
             <div class="text-h5">{{ t('home.RecentlyUploaded') }}</div>
           </header>
           <s-track-list

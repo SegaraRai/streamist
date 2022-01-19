@@ -155,9 +155,7 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-0">
-    <header
-      class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 pt-3 pb-2 -mx-2 px-2 mb-4"
-    >
+    <header class="s-title mb-4">
       <div class="text-h5">
         {{ t('albums.Albums') }}
       </div>

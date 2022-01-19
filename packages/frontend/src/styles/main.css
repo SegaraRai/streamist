@@ -30,6 +30,25 @@
   color: var(--s-autofill-text);
 }
 
+.s-title {
+  @apply sticky;
+  @apply top-0;
+  @apply z-1;
+  @apply flex;
+  @apply items-baseline;
+  @apply gap-x-4;
+  @apply bg-st-background;
+  @apply pt-3;
+  @apply pb-1;
+  @apply -mx-4;
+  @apply px-4;
+}
+
+.s-title > div {
+  @apply leading-tight !important;
+  @apply tracking-tight !important;
+}
+
 .s-heading,
 .s-heading-sl {
   @apply leading-tight !important;

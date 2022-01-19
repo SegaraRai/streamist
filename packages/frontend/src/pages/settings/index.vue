@@ -48,9 +48,7 @@ export default defineComponent({
   <v-container fluid class="pt-0">
     <div class="flex flex-col gap-y-16">
       <div class="flex flex-col gap-y-4">
-        <header
-          class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 pt-3 pb-2"
-        >
+        <header class="s-title">
           <h1 class="text-h5">Device Settings</h1>
         </header>
         <div class="flex flex-col gap-y-8">
@@ -84,9 +82,7 @@ export default defineComponent({
         </div>
       </div>
       <!-- div class="flex flex-col gap-y-4">
-        <header
-          class="flex items-baseline gap-x-4 sticky top-0 bg-st-background z-1 pt-3 pb-2 -mx-2 px-2"
-        >
+        <header class="s-title">
           <h1 class="text-h5">Account Settings</h1>
         </header>
         <div class="flex flex-col gap-y-8">
