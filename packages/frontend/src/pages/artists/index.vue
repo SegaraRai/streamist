@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  layout: app
+</route>
+
 <script lang="ts">
 import { useDisplay } from 'vuetify';
 import { createMultiMap } from '$shared/multiMap';
@@ -141,7 +146,7 @@ export default defineComponent({
         {{ t('artists.Artists') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="light:font-medium opacity-60">
+        <div class="s-subheading">
           {{ t('artists.n_items', items$$q.length) }}
         </div>
       </template>
@@ -176,10 +181,11 @@ export default defineComponent({
               :alt="item.artist$$q.name"
             />
           </router-link>
-          <v-card-title
-            class="p-0 my-1 text-base sm:text-lg font-bold !leading-tight text-center flex-1 flex flex-col line-clamp-2 break-words"
-          >
-            <router-link :to="`/artists/${item.artist$$q.id}`">
+          <v-card-title class="p-0 my-1 flex flex-col">
+            <router-link
+              class="s-heading block text-base sm:text-lg font-bold line-clamp-2 break-words text-center"
+              :to="`/artists/${item.artist$$q.id}`"
+            >
               {{ item.artist$$q.name }}
             </router-link>
           </v-card-title>

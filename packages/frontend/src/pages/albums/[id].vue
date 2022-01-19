@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  layout: app
+</route>
+
 <script lang="ts">
 import type { ResourceTrack } from '$/types';
 import { useLiveQuery } from '~/composables';

@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  layout: app
+</route>
+
 <script lang="ts">
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$/shared/sort';
@@ -84,7 +89,7 @@ export default defineComponent({
         {{ t('tracks.Tracks') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="light:font-medium opacity-60">
+        <div class="s-subheading">
           {{ t('tracks.n_items', items$$q.length) }}
         </div>
       </template>

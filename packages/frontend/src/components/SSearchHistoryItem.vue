@@ -39,12 +39,10 @@ export default defineComponent({
     </v-list-item-avatar>
     <v-list-item-header>
       <div class="flex-1 flex flex-col pl-2">
-        <div
-          class="text-sm whitespace-nowrap overflow-hidden overflow-ellipsis leading-tight"
-        >
+        <div class="s-heading-sl text-sm">
           {{ query }}
         </div>
-        <div class="text-xs light:font-medium opacity-60 leading-tight">
+        <div class="s-subheading-sl text-xs">
           {{ strAt$$q }}
         </div>
       </div>

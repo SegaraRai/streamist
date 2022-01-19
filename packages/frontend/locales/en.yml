@@ -1,4 +1,8 @@
 not-found: Not found
+login:
+  title: Login
+  button:
+    Login: Login
 sidebar:
   Home: Home
   Albums: Albums

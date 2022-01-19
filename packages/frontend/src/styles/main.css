@@ -29,3 +29,24 @@
   background-image: none;
   color: var(--s-autofill-text);
 }
+
+.s-heading,
+.s-heading-sl {
+  @apply leading-tight !important;
+  @apply tracking-tight !important;
+}
+
+.s-subheading,
+.s-subheading-sl {
+  @apply leading-tight !important;
+  @apply tracking-tight !important;
+  @apply light:font-medium;
+  @apply opacity-60 !important;
+}
+
+.s-heading-sl,
+.s-subheading-sl {
+  @apply whitespace-nowrap !important;
+  @apply overflow-hidden !important;
+  @apply overflow-ellipsis !important;
+}

@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  layout: app
+</route>
+
 <script lang="ts">
 import { useDisplay } from 'vuetify';
 import { compareTrack } from '$/shared/sort';
@@ -157,7 +162,7 @@ export default defineComponent({
         {{ t('albums.Albums') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="light:font-medium opacity-60">
+        <div class="s-subheading">
           {{ t('albums.n_items', items$$q.length) }}
         </div>
       </template>
@@ -192,24 +197,25 @@ export default defineComponent({
               :alt="item.album$$q.title"
             />
           </router-link>
-          <v-card-title
-            class="p-0 my-1 text-base sm:text-lg font-bold !leading-tight flex flex-col items-start line-clamp-2 break-words"
-          >
-            <router-link :to="`/albums/${item.album$$q.id}`">
+          <v-card-title class="p-0 my-1 flex flex-col items-start">
+            <router-link
+              class="s-heading block text-base sm:text-lg font-bold line-clamp-2 break-words"
+              :to="`/albums/${item.album$$q.id}`"
+            >
               {{ item.album$$q.title }}
             </router-link>
           </v-card-title>
           <v-card-subtitle
-            class="px-0 text-sm flex justify-between light:font-medium"
+            class="s-subheading-sl px-0 text-sm flex justify-between gap-x-2"
           >
             <router-link
               :to="`/artists/${item.artist$$q.id}`"
-              class="overflow-hidden overflow-ellipsis whitespace-nowrap"
+              class="flex-1 overflow-hidden overflow-ellipsis whitespace-nowrap"
             >
               {{ item.artist$$q.name }}
             </router-link>
             <template v-if="item.releaseYear$$q">
-              <div class="flex-none pl-2">
+              <div class="flex-none">
                 {{ item.releaseYear$$q }}
               </div>
             </template>

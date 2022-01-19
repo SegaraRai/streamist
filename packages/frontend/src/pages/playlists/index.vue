@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  layout: app
+</route>
+
 <script lang="ts">
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import type { DropdownPlaylistInput } from '~/components/SDropdownPlaylist.vue';
@@ -94,7 +99,7 @@ export default defineComponent({
         {{ t('playlists.Playlists') }}
       </div>
       <template v-if="items$$q.length">
-        <div class="light:font-medium opacity-60">
+        <div class="s-subheading">
           {{ t('playlists.n_items', items$$q.length || 0) }}
         </div>
       </template>

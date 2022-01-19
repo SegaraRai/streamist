@@ -245,7 +245,7 @@ export default defineComponent({
         </div>
         <div class="flex-1">{{ value$$q?.artist$$q.description }}</div>
         <template v-if="strRoles$$q">
-          <div class="light:font-medium opacity-60">{{ strRoles$$q }}</div>
+          <div class="s-subheading">{{ strRoles$$q }}</div>
         </template>
       </div>
     </div>

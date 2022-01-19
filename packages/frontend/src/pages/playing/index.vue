@@ -1,5 +1,6 @@
 <route lang="yaml">
 meta:
+  layout: app
   hideShell: true
 </route>
 

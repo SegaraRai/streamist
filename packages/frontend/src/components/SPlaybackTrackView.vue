@@ -76,13 +76,13 @@ export default defineComponent({
     </router-link>
     <div class="flex-1 flex flex-col gap-y-1 overflow-hidden">
       <router-link
-        class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-base leading-tight"
+        class="s-heading-sl block max-w-max text-base"
         :to="navigatePlaying ? '/playing' : `/albums/${track.albumId}`"
       >
         {{ track.title }}
       </router-link>
       <router-link
-        class="block max-w-max whitespace-nowrap overflow-hidden overflow-ellipsis text-xs leading-tight light:font-medium opacity-60"
+        class="s-subheading-sl block max-w-max text-xs"
         :to="`/artists/${track.artistId}`"
       >
         {{ artistName || '\u200b' /* to prevent layout shift */ }}

@@ -170,13 +170,13 @@ export default defineComponent({
             >
               <div class="flex flex-col select-text">
                 <div
-                  class="text-2xl leading-tight"
+                  class="s-heading-sl text-2xl"
                   :title="value$$q.track$$q.titleSort || undefined"
                 >
                   {{ value$$q.track$$q.title }}
                 </div>
                 <router-link
-                  class="light:font-medium opacity-60 leading-tight"
+                  class="s-subheading-sl"
                   :to="`/albums/${value$$q.track$$q.albumId}`"
                 >
                   {{ value$$q.album$$q.title }}
@@ -188,7 +188,7 @@ export default defineComponent({
                   :key="role"
                 >
                   <div class="flex flex-col gap-y-0.5">
-                    <dt class="text-xs light:font-medium opacity-60">
+                    <dt class="s-subheading-sl text-xs">
                       {{
                         role
                           ? roleToText$$q(
@@ -214,9 +214,7 @@ export default defineComponent({
                               class="flex-none w-6 h-6"
                               :artist="coArtist.artistId"
                             />
-                            <div
-                              class="flex-shrink-1 leading-tight whitespace-nowrap overflow-hidden overflow-ellipsis"
-                            >
+                            <div class="s-heading-sl flex-shrink-1">
                               {{ coArtist.artist?.name }}
                             </div>
                           </router-link>
@@ -228,9 +226,7 @@ export default defineComponent({
               </dl>
             </div>
           </div>
-          <div
-            class="flex items-center gap-x-3 opacity-60 font-medium leading-tight mt-4"
-          >
+          <div class="s-subheading-sl flex items-center gap-x-3 mt-4">
             <div class="flex items-center gap-x-2.5">
               <div class="flex items-center">
                 <i-mdi-disc />

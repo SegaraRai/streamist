@@ -48,7 +48,7 @@ export default defineComponent({
   <div :class="repeatOne$$q ? 'opacity-60' : ''" class="py-2">
     <!-- TODO: make list draggable -->
     <template v-if="playNextQueue$$q.length">
-      <div class="text-lg leading-tight px-2 pb-1 opacity-80">
+      <div class="s-heading-sl text-lg opacity-80 px-2 pb-1">
         {{ t('queue.NextInQueue') }}
       </div>
       <s-track-list
@@ -68,7 +68,7 @@ export default defineComponent({
       <template v-if="playNextQueue$$q.length">
         <div class="h-8"></div>
       </template>
-      <div class="text-lg leading-tight px-2 pb-1 opacity-80">
+      <div class="s-heading-sl text-lg opacity-80 px-2 pb-1">
         {{ t('queue.NextFrom', [currentSetListName$$q]) }}
       </div>
       <s-track-list

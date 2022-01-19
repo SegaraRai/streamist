@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  layout: app
+</route>
+
 <script lang="ts">
 import { useDisplay } from 'vuetify';
 import { filterNullAndUndefined } from '$shared/filter';

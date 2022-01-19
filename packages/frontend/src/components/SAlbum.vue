@@ -188,9 +188,7 @@ export default defineComponent({
               {{ value$$q.album$$q.title }}
             </s-conditional-link>
           </div>
-          <div
-            class="flex-none line-clamp-2 overflow-hidden light:font-medium opacity-60"
-          >
+          <div class="s-subheading flex-none line-clamp-2 overflow-hidden">
             <s-conditional-link
               :to="`/artists/${value$$q.artist$$q.id}`"
               :disabled="linkExcludes.includes(value$$q.artist$$q.id)"
@@ -201,7 +199,7 @@ export default defineComponent({
         </div>
         <div>{{ value$$q?.album$$q.description }}</div>
         <div class="flex-1 <md:hidden"></div>
-        <div class="flex-none text-sm light:font-medium opacity-60">
+        <div class="s-subheading flex-none text-sm">
           <span>
             {{ t('album.n_tracks', value$$q.tracks$$q.length) }}
           </span>

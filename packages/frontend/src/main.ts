@@ -10,6 +10,7 @@ import {
 } from '~/config';
 import { installLazySizes } from '~/lazyloading';
 import { activateTokenInterceptor } from '~/logic/api';
+import { parseRedirectTo } from '~/logic/parseRedirectTo';
 import { isAuthenticated } from '~/logic/tokens';
 import { currentScrollContainerRef, currentScrollRef } from '~/stores/scroll';
 
@@ -37,10 +38,13 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
   if (ctx.isClient) {
     ctx.router.beforeEach(async (to, _from, next) => {
       const authenticated = await isAuthenticated();
-      const isLoginPage = to.path === '/login';
-      if (authenticated === isLoginPage) {
+      const isAppPage = to.meta.layout === 'app';
+      const isAuthPage = to.meta.layout === 'auth';
+      if ((authenticated && isAuthPage) || (!authenticated && isAppPage)) {
         return next(
-          authenticated ? '/' : `/login?to=${encodeURIComponent(to.path)}`
+          authenticated
+            ? parseRedirectTo(to.path === '/login' ? to.query.to : '/')
+            : `/login?to=${encodeURIComponent(to.path)}`
         );
       }
       next();

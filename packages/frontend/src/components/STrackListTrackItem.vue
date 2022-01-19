@@ -181,9 +181,9 @@ export default defineComponent({
     <v-list-item-header
       class="s-track-list-column-title flex flex-col flex-nowrap justify-center"
     >
-      <v-list-item-title class="leading-tight">
+      <v-list-item-title>
         <span
-          class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
+          class="s-heading-sl block max-w-max"
           :class="
             isCurrentPlayingTrack$$q
               ? 'text-st-primary'
@@ -199,9 +199,9 @@ export default defineComponent({
       <template
         v-if="showArtist || item.artist$$q.id !== item.albumArtist$$q.id"
       >
-        <v-list-item-subtitle class="light:font-medium leading-tight">
+        <v-list-item-subtitle class="!opacity-100">
           <s-conditional-link
-            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max text-xs"
+            class="s-subheading-sl text-xs block max-w-max"
             :to="`/artists/${item.artist$$q.id}`"
             :disabled="linkExcludes?.includes(item.artist$$q.id)"
           >
@@ -215,18 +215,18 @@ export default defineComponent({
       <v-list-item-header
         class="s-track-list-column-album flex flex-col flex-nowrap justify-center ml-6 !<md:hidden"
       >
-        <v-list-item-title class="leading-tight">
+        <v-list-item-title>
           <s-conditional-link
-            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max"
+            class="s-heading-sl block max-w-max"
             :to="`/albums/${item.album$$q.id}`"
             :disabled="linkExcludes?.includes(item.album$$q.id)"
           >
             {{ item.album$$q.title }}
           </s-conditional-link>
         </v-list-item-title>
-        <v-list-item-subtitle class="light:font-medium leading-tight">
+        <v-list-item-subtitle class="!opacity-100">
           <s-conditional-link
-            class="block whitespace-nowrap overflow-hidden overflow-ellipsis max-w-max text-xs"
+            class="s-subheading-sl text-xs block max-w-max"
             :to="`/artists/${item.albumArtist$$q.id}`"
             :disabled="linkExcludes?.includes(item.albumArtist$$q.id)"
           >

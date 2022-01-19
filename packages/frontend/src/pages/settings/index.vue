@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  layout: app
+</route>
+
 <script lang="ts">
 import { PREFERENCE_AUDIO_QUALITIES, PREFERENCE_LANGUAGES } from '~/config';
 import { usePreferenceStore } from '~/stores/preference';

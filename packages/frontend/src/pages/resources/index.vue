@@ -1,3 +1,8 @@
+<route lang="yaml">
+meta:
+  layout: app
+</route>
+
 <template>
   <v-container fluid>
     <header class="mb-6 flex items-baseline gap-x-4">

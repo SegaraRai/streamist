@@ -1,9 +1,11 @@
 <route lang="yaml">
 meta:
-  layout: login
+  layout: auth
 </route>
 
 <script lang="ts">
+import logoSVG from '~/assets/logo_colored.svg';
+import { parseRedirectTo } from '~/logic/parseRedirectTo';
 import { authenticate } from '~/logic/tokens';
 
 export default defineComponent({
@@ -20,12 +22,12 @@ export default defineComponent({
 
     return {
       t,
+      logoSVG$$q: logoSVG,
       username$$q,
       password$$q,
       login$$q() {
         authenticate(username$$q.value, password$$q.value).then(() => {
-          const to = router.currentRoute.value.query.to;
-          router.push((typeof to === 'string' ? to : '') || '/');
+          router.push(parseRedirectTo(router.currentRoute.value.query.to));
         });
       },
     };
@@ -37,7 +39,16 @@ export default defineComponent({
   <div class="flex items-center justify-center h-full">
     <v-card class="elevation-4 max-w-xl flex-1">
       <v-card-header>
-        <v-card-header-text class="text-2xl">Login</v-card-header-text>
+        <v-card-header-text class="flex items-center gap-x-2 text-2xl">
+          <img
+            :src="logoSVG$$q"
+            width="128"
+            height="128"
+            class="block w-7 h-7 pointer-events-none select-none"
+            alt="Streamist Logo"
+          />
+          <span>{{ t('login.title') }}</span>
+        </v-card-header-text>
       </v-card-header>
       <v-card-text>
         <v-form
@@ -60,7 +71,9 @@ export default defineComponent({
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn flat text color="transparent" @click="login$$q">Login</v-btn>
+        <v-btn flat text color="transparent" @click="login$$q">
+          {{ t('login.button.Login') }}
+        </v-btn>
       </v-card-actions>
     </v-card>
   </div>

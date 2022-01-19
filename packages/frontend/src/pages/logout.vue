@@ -1,6 +1,6 @@
 <route lang="yaml">
 meta:
-  layout: login
+  layout: auth
 </route>
 
 <script lang="ts">
