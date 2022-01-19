@@ -47,6 +47,7 @@ export default defineComponent({
     showAlbum: Boolean,
     showArtist: Boolean,
     hideDuration: Boolean,
+    removable: Boolean,
     selected: Boolean,
     disableCurrentPlaying: Boolean,
   },
@@ -54,6 +55,7 @@ export default defineComponent({
     menu: (_event: MouseEvent) => true,
     ctxMenu: (_event: MouseEvent) => true,
     play: () => true,
+    remove: () => true,
   },
   setup(props, { emit }) {
     const { t } = useI18n();
@@ -95,6 +97,9 @@ export default defineComponent({
       },
       onMenu$$q: (event: MouseEvent): void => {
         emit('menu', event);
+      },
+      remove$$q: () => {
+        emit('remove');
       },
     };
   },
@@ -241,6 +246,23 @@ export default defineComponent({
         {{ item.formattedDuration$$q }}
       </div>
     </template>
+    <!-- Remove icon -->
+    <template v-if="removable">
+      <div class="s-track-list-column-menu py-1">
+        <v-btn
+          icon
+          flat
+          text
+          size="small"
+          class="bg-transparent"
+          data-draggable="false"
+          @click.stop="remove$$q()"
+          @dragstart.stop.prevent
+        >
+          <v-icon color="error" class="s-hover-visible">mdi-close</v-icon>
+        </v-btn>
+      </div>
+    </template>
     <!-- Menu -->
     <div class="s-track-list-column-menu py-1">
       <v-btn
@@ -250,7 +272,7 @@ export default defineComponent({
         size="small"
         class="bg-transparent"
         data-draggable="false"
-        @click.stop="onMenu$$q($event)"
+        @click.stop="!selected && onMenu$$q($event)"
         @dragstart.stop.prevent
       >
         <v-icon class="s-hover-visible">mdi-dots-vertical</v-icon>

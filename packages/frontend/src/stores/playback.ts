@@ -103,7 +103,7 @@ async function createMetadataInit(
       ? await db.images.get(album.imageIds[0])
       : undefined;
 
-  const artwork: MediaImage[] | undefined = image
+  const artwork: MediaImage[] = image
     ? image.files.map((imageFile) => ({
         src: getImageFileURL(userId, image.id, imageFile),
         sizes: `${imageFile.width}x${imageFile.height}`,
@@ -142,10 +142,10 @@ function _usePlaybackStore(): PlaybackState {
   const internalSeekingPosition = ref<number | undefined>();
   const internalPosition = ref<number | undefined>();
   const position = computed<number | undefined>({
-    get: () => {
+    get: (): number | undefined => {
       return internalSeekingPosition.value ?? internalPosition.value;
     },
-    set: (value: number | undefined) => {
+    set: (value: number | undefined): void => {
       if (value == null || !currentAudio) {
         return;
       }
@@ -165,10 +165,10 @@ function _usePlaybackStore(): PlaybackState {
 
   const internalPlaying = ref<boolean>(false);
   const playing = computed<boolean>({
-    get: () => {
+    get: (): boolean => {
       return internalPlaying.value;
     },
-    set: (value: boolean) => {
+    set: (value: boolean): void => {
       if (value === internalPlaying.value) {
         return;
       }
@@ -193,7 +193,7 @@ function _usePlaybackStore(): PlaybackState {
     audio.classList.add('currentTrack');
     audio.volume = visualVolumeToRealVolume(volumeStore.volume);
 
-    audio.onplay = () => {
+    audio.onplay = (): void => {
       if (currentAudio !== audio) {
         return;
       }
@@ -201,7 +201,7 @@ function _usePlaybackStore(): PlaybackState {
       internalPlaying.value = true;
     };
 
-    audio.onpause = () => {
+    audio.onpause = (): void => {
       if (currentAudio !== audio) {
         return;
       }
@@ -209,7 +209,7 @@ function _usePlaybackStore(): PlaybackState {
       internalPlaying.value = false;
     };
 
-    audio.onseeked = () => {
+    audio.onseeked = (): void => {
       if (currentAudio !== audio) {
         return;
       }
@@ -218,7 +218,7 @@ function _usePlaybackStore(): PlaybackState {
       internalPosition.value = audio.currentTime;
     };
 
-    audio.ontimeupdate = () => {
+    audio.ontimeupdate = (): void => {
       if (currentAudio !== audio || audio.seeking) {
         return;
       }
@@ -226,7 +226,7 @@ function _usePlaybackStore(): PlaybackState {
       internalPosition.value = audio.currentTime;
     };
 
-    audio.onended = () => {
+    audio.onended = (): void => {
       if (currentAudio !== audio) {
         return;
       }
@@ -234,7 +234,7 @@ function _usePlaybackStore(): PlaybackState {
       trackProvider.next$$q();
     };
 
-    audio.onvolumechange = () => {
+    audio.onvolumechange = (): void => {
       if (currentAudio !== audio) {
         return;
       }
@@ -251,7 +251,7 @@ function _usePlaybackStore(): PlaybackState {
     return audio;
   };
 
-  const cleanupAudio = (audio: HTMLAudioElement) => {
+  const cleanupAudio = (audio: HTMLAudioElement): void => {
     audio.onplay = null;
     audio.onpause = null;
     audio.onseeked = null;
@@ -340,7 +340,7 @@ function _usePlaybackStore(): PlaybackState {
     removeTracks(isTrackAvailable$$q);
   });
 
-  trackProvider.addEventListener('trackChange', () => {
+  trackProvider.addEventListener('trackChange', (): void => {
     const userId = dbUserId$$q.value;
 
     const track = trackProvider.currentTrack$$q;
@@ -401,25 +401,25 @@ function _usePlaybackStore(): PlaybackState {
     }
   });
 
-  trackProvider.addEventListener('playNextQueueChange', () => {
+  trackProvider.addEventListener('playNextQueueChange', (): void => {
     playNextQueue.value = [...trackProvider.playNextQueue$$q];
   });
 
-  trackProvider.addEventListener('queueChange', () => {
+  trackProvider.addEventListener('queueChange', (): void => {
     queue.value = [...trackProvider.queue$$q];
   });
 
-  trackProvider.addEventListener('repeatChange', () => {
+  trackProvider.addEventListener('repeatChange', (): void => {
     repeat.value = trackProvider.repeat$$q;
   });
 
-  trackProvider.addEventListener('shuffleChange', () => {
+  trackProvider.addEventListener('shuffleChange', (): void => {
     shuffle.value = trackProvider.shuffle$$q;
   });
 
   watch(
     computed(() => volumeStore.volume),
-    (newVolume) => {
+    (newVolume): void => {
       if (currentAudio) {
         currentAudio.volume = visualVolumeToRealVolume(newVolume);
       }
@@ -431,7 +431,7 @@ function _usePlaybackStore(): PlaybackState {
 
   watch(
     repeat,
-    (newRepeat) => {
+    (newRepeat): void => {
       trackProvider.repeat$$q = newRepeat;
     },
     {
@@ -441,7 +441,7 @@ function _usePlaybackStore(): PlaybackState {
 
   watch(
     shuffle,
-    (newShuffle) => {
+    (newShuffle): void => {
       trackProvider.shuffle$$q = newShuffle;
     },
     {
@@ -454,36 +454,36 @@ function _usePlaybackStore(): PlaybackState {
   if ('mediaSession' in navigator) {
     console.log('init mediaSession');
 
-    watch(currentTrack, (newTrack) => {
+    watch(currentTrack, (newTrack): void => {
       if (!newTrack) {
         navigator.mediaSession.metadata = null;
         console.log('mediaSession updated B');
       }
     });
 
-    navigator.mediaSession.setActionHandler('play', () => {
+    navigator.mediaSession.setActionHandler('play', (): void => {
       playing.value = true;
     });
 
-    navigator.mediaSession.setActionHandler('pause', () => {
+    navigator.mediaSession.setActionHandler('pause', (): void => {
       playing.value = false;
     });
 
-    navigator.mediaSession.setActionHandler('stop', () => {
+    navigator.mediaSession.setActionHandler('stop', (): void => {
       playing.value = false;
       position.value = 0;
     });
 
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
+    navigator.mediaSession.setActionHandler('previoustrack', (): void => {
       trackProvider.skipPrevious$$q();
     });
 
-    navigator.mediaSession.setActionHandler('nexttrack', () => {
+    navigator.mediaSession.setActionHandler('nexttrack', (): void => {
       trackProvider.skipNext$$q();
     });
 
     try {
-      navigator.mediaSession.setActionHandler('seekto', function (event) {
+      navigator.mediaSession.setActionHandler('seekto', (event): void => {
         const { seekTime } = event;
         if (!currentAudio || seekTime == null) {
           return;
@@ -509,7 +509,7 @@ function _usePlaybackStore(): PlaybackState {
   }
 
   if (import.meta.hot) {
-    const cleanup = () => {
+    const cleanup = (): void => {
       currentAudio?.pause();
       currentAudio?.remove();
       currentAudio = undefined;
@@ -520,11 +520,11 @@ function _usePlaybackStore(): PlaybackState {
       }
     };
 
-    import.meta.hot.accept(() => {
+    import.meta.hot.accept((): void => {
       cleanup();
     });
 
-    import.meta.hot.dispose(() => {
+    import.meta.hot.dispose((): void => {
       cleanup();
     });
   }

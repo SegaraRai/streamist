@@ -39,6 +39,9 @@ export default defineComponent({
       playFromQueue$$q: (_track: ResourceTrack, index: number): void => {
         play$$q(playNextQueue$$q.value.length + index);
       },
+      removeFromPNQueue$$q: (_track: ResourceTrack, index: number): void => {
+        playbackStore.removeTracksFromPlayNextQueue$$q(index);
+      },
     };
   },
 });
@@ -60,8 +63,10 @@ export default defineComponent({
         visit-album
         visit-artist
         disable-current-playing
+        removable
         :scroll-top="scrollTop"
         @play="playFromPNQueue$$q"
+        @remove="removeFromPNQueue$$q"
       />
     </template>
     <template v-if="currentSetListName$$q && queue$$q.length">

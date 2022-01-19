@@ -74,6 +74,7 @@ export default defineComponent({
     showAlbum: Boolean,
     showArtist: Boolean,
     hideDuration: Boolean,
+    removable: Boolean,
     playlistId: {
       type: String as PropType<string | null | undefined>,
       default: undefined,
@@ -106,6 +107,7 @@ export default defineComponent({
   },
   emits: {
     play: (_track: ResourceTrack, _index: number) => true,
+    remove: (_track: ResourceTrack, _index: number) => true,
   },
   setup(props, { emit }) {
     const { t } = useI18n();
@@ -365,6 +367,9 @@ export default defineComponent({
         await props.onMove?.(item.track$$q, nextItem?.track$$q);
         await waitForChange(trackOnlyItems$$q, 1000);
       },
+      remove$$q: (track: ResourceTrack, index: number): void => {
+        emit('remove', track, index);
+      },
     };
   },
 });
@@ -417,6 +422,9 @@ export default defineComponent({
             </div>
           </template>
           <div class="s-track-list-column-menu py-1"></div>
+          <template v-if="removable">
+            <div class="s-track-list-column-menu py-1"></div>
+          </template>
         </v-list-item>
         <v-divider
           class="mx-1"
@@ -451,7 +459,9 @@ export default defineComponent({
                 :disable-current-playing="
                   disableCurrentPlaying || !isSameSetList$$q
                 "
+                :removable="removable"
                 @play="play$$q(item.track$$q, item.index$$q)"
+                @remove="remove$$q(item.track$$q, item.index$$q)"
                 @menu="showMenu$$q($event.target as HTMLElement, item)"
                 @ctx-menu="showMenu$$q($event, item)"
               />
@@ -487,7 +497,9 @@ export default defineComponent({
               :disable-current-playing="
                 disableCurrentPlaying || !isSameSetList$$q
               "
+              :removable="removable"
               @play="play$$q(element.track$$q, element.index$$q)"
+              @remove="remove$$q(item.track$$q, item.index$$q)"
               @menu="showMenu$$q($event.target as HTMLElement, element)"
               @ctx-menu="showMenu$$q($event, element)"
             />
@@ -522,7 +534,9 @@ export default defineComponent({
                 :disable-current-playing="
                   disableCurrentPlaying || !isSameSetList$$q
                 "
+                :removable="removable"
                 @play="play$$q(item.track$$q, item.index$$q)"
+                @remove="remove$$q(item.track$$q, item.index$$q)"
                 @menu="showMenu$$q($event.target as HTMLElement, item)"
                 @ctx-menu="showMenu$$q($event, item)"
               />
