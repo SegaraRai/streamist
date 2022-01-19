@@ -30,7 +30,7 @@ export const THEMES: Readonly<Record<ThemeName, ThemeDefinitionColor>> = {
     dark: true,
     background: '#101011',
     surface: '#101011',
-    tooltip: '#343437',
+    tooltip: '#252528',
     onTooltip: '#f9f9fc',
     text: '#f9f9fc',
     primary: '#2b78fa',
