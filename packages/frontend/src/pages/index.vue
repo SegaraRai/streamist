@@ -70,7 +70,6 @@ export default defineComponent({
             :hide-duration="isMobile$$q"
             visit-album
             visit-artist
-            show-delete
           />
         </div>
       </template>
@@ -91,7 +90,6 @@ export default defineComponent({
             :hide-duration="isMobile$$q"
             visit-album
             visit-artist
-            show-delete
           />
         </div>
       </template>
