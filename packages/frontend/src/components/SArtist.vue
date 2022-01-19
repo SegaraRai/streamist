@@ -211,7 +211,7 @@ export default defineComponent({
 <template>
   <template v-if="value$$q">
     <div
-      class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-6 md:gap-y-4"
+      class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-5"
     >
       <div class="p-0 m-0 leading-none flex-none">
         <s-image-manager
@@ -233,19 +233,20 @@ export default defineComponent({
           />
         </s-image-manager>
       </div>
-      <div class="flex flex-col gap-y-6 md:gap-y-4 <md:text-center">
+      <div class="flex flex-col <md:gap-y-3 <md:text-center">
         <div>
-          <div
-            class="flex-none font-bold text-2xl line-clamp-2 overflow-hidden"
-          >
+          <div class="s-heading font-bold text-xl flex-none line-clamp-2">
             <span @contextmenu.prevent="openMenu$$q($event)">
               {{ value$$q?.artist$$q.name }}
             </span>
           </div>
         </div>
-        <div class="flex-1">{{ value$$q?.artist$$q.description }}</div>
+        <template v-if="value$$q?.artist$$q.description">
+          <div class="md:my-2">{{ value$$q?.artist$$q.description }}</div>
+        </template>
+        <div class="flex-1 <md:hidden"></div>
         <template v-if="strRoles$$q">
-          <div class="s-subheading">{{ strRoles$$q }}</div>
+          <div class="s-subheading-sl">{{ strRoles$$q }}</div>
         </template>
       </div>
     </div>

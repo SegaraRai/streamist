@@ -132,7 +132,7 @@ export default defineComponent({
     <div class="flex flex-col h-full px-6 pt-8 max-w-xl mx-auto">
       <div class="flex-1 flex flex-col items-center justify-start gap-y-4">
         <template v-if="currentTrackInfo$$q">
-          <div class="w-full px-8">
+          <div class="w-full px-4">
             <router-link
               class="block w-full flex-1 mx-auto"
               style="max-width: min(20rem, calc(100vh - 20rem))"
@@ -147,16 +147,16 @@ export default defineComponent({
             </router-link>
           </div>
           <div
-            class="w-full overflow-hidden flex-grow-1 flex flex-col items-center gap-y-2"
+            class="w-full overflow-hidden flex-grow-1 flex flex-col items-center gap-y-2 text-center"
           >
             <router-link
-              class="block max-w-full whitespace-nowrap overflow-hidden overflow-ellipsis text-lg"
+              class="s-heading-sl text-lg block max-w-full"
               :to="`/albums/${currentTrackInfo$$q.track$$q.albumId}`"
             >
               {{ currentTrackInfo$$q.track$$q.title }}
             </router-link>
             <router-link
-              class="block max-w-full whitespace-nowrap overflow-hidden overflow-ellipsis text-sm"
+              class="s-subheading-sl text-sm block max-w-full"
               :to="`/artists/${currentTrackInfo$$q.track$$q.artistId}`"
             >
               {{ currentTrackInfo$$q.trackArtist$$q.name }}

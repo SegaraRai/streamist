@@ -142,7 +142,7 @@ export default defineComponent({
 <template>
   <template v-if="value$$q">
     <div
-      class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-6 md:gap-y-4"
+      class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-5"
     >
       <div class="p-0 m-0 leading-none flex-none">
         <template v-if="linkExcludes.includes(playlistId$$q)">
@@ -180,8 +180,8 @@ export default defineComponent({
           </router-link>
         </template>
       </div>
-      <div class="flex flex-col gap-y-6 md:gap-y-4 <md:text-center">
-        <div class="flex-none font-bold text-xl line-clamp-2 overflow-hidden">
+      <div class="flex flex-col <md:gap-y-3 <md:text-center">
+        <div class="s-heading font-bold text-xl flex-none line-clamp-2">
           <s-conditional-link
             :to="`/playlists/${playlistId$$q}`"
             :disabled="linkExcludes.includes(playlistId$$q)"
@@ -190,9 +190,11 @@ export default defineComponent({
             {{ value$$q?.playlist$$q.title }}
           </s-conditional-link>
         </div>
-        <div>{{ value$$q?.playlist$$q.description }}</div>
+        <template v-if="value$$q?.playlist$$q.description">
+          <div>{{ value$$q?.playlist$$q.description }}</div>
+        </template>
         <div class="flex-1 <md:hidden"></div>
-        <div class="s-subheading flex-none text-sm">
+        <div class="s-subheading-sl flex-none text-sm">
           <span>
             {{ t('playlist.n_tracks', value$$q.tracks$$q.length) }}
           </span>
