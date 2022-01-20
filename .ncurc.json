@@ -1,5 +1,5 @@
 {
   "upgrade": true,
   "deep": true,
-  "reject": ["@types/node", "typescript"]
+  "reject": ["@types/node"]
 }
