@@ -6,6 +6,8 @@ import type { ResourceDeletion, ResourceUser } from '$/types';
 import { SYNC_DB_THROTTLE } from '~/config';
 import { api } from '~/logic/api';
 import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
+import { extractSubFromJWT } from '~/logic/jwt';
+import { tokens } from '~/logic/tokens';
 import { db } from './db';
 import { useLocalStorageDB } from './localStorage';
 
@@ -65,6 +67,12 @@ async function syncDB(
   }
 
   try {
+    const currentUserId = extractSubFromJWT((await tokens.valueAsync).apiToken);
+    if (dbUser$$q.value?.id !== currentUserId) {
+      since = undefined;
+      reconstruct = true;
+    }
+
     dbLastUpdate$$q.value = Date.now();
 
     const r = await api.my.resources.$get({

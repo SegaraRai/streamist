@@ -17,3 +17,7 @@ export function isJWTExpired(token: string, tolerance = 0): boolean {
   const now = Date.now() / 1000 - tolerance;
   return payload.exp <= now;
 }
+
+export function extractSubFromJWT(token: string): string {
+  return parseJWTPayload(token).sub;
+}
