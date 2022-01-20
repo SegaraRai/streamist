@@ -1,3 +1,8 @@
+import { configDevelopment, setOS } from '$shared/objectStorage';
+
+// TODO(prod): change definition
+setOS(configDevelopment);
+
 export const IDLE_TIMEOUT = 1 * 60 * 1000;
 export const COOKIE_CHECK_INTERVAL = 30 * 1000;
 
@@ -46,9 +51,21 @@ export const PREFERENCE_LANGUAGES = [
   ['ja', 'Japanese (日本語)'],
 ] as const;
 
-export type LanguageCode = typeof PREFERENCE_LANGUAGES[number][0];
+export const PREFERENCE_LANGUAGE_CODES = PREFERENCE_LANGUAGES.map(
+  ([code]) => code
+);
+
+export type LanguageCode = typeof PREFERENCE_LANGUAGE_CODES[number];
 
 export const PREFERENCE_LANGUAGE_CODE_DEFAULT: LanguageCode = 'en';
+export const PREFERENCE_LANGUAGE_CODE_FALLBACK: LanguageCode = 'en';
+
+export const PREFERENCE_LANGUAGE_OPTIONS = PREFERENCE_LANGUAGES.map(
+  ([code, name]) => ({
+    value: code,
+    label: name,
+  })
+);
 
 //
 

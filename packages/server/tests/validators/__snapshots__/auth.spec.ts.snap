@@ -52,6 +52,9 @@ exports[`VAuthBodyWrapper > should reject malformed payloads 3`] = `
         "children": [],
         "constraints": {
           "isString": "password must be a string",
+          "matches": "password must match /^[\\\\w !\\"#$%&'()*+,./:;<=>?@[\\\\\\\\\\\\]^\`{|}~-]+$/ regular expression",
+          "maxLength": "password must be shorter than or equal to 1024 characters",
+          "minLength": "password must be longer than or equal to 8 characters",
         },
         "property": "password",
         "value": 123,
@@ -76,6 +79,9 @@ exports[`VAuthBodyWrapper > should reject malformed payloads 4`] = `
         "constraints": {
           "isNotEmpty": "password should not be empty",
           "isString": "password must be a string",
+          "matches": "password must match /^[\\\\w !\\"#$%&'()*+,./:;<=>?@[\\\\\\\\\\\\]^\`{|}~-]+$/ regular expression",
+          "maxLength": "password must be shorter than or equal to 1024 characters",
+          "minLength": "password must be longer than or equal to 8 characters",
         },
         "property": "password",
         "value": undefined,

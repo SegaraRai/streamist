@@ -33,8 +33,6 @@ export function createAsyncCache<T>(
 
   if (initialValue !== undefined && isValid(initialValue)) {
     cacheValue = initialValue;
-  } else {
-    renewInternal(true);
   }
 
   return {

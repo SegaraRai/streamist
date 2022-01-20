@@ -1,5 +1,6 @@
 import humanizeDuration from 'humanize-duration';
 import type { ResourceTrack } from '$/types';
+import { PREFERENCE_LANGUAGE_CODE_FALLBACK } from '~/config';
 
 /**
  * 合計トラック長（秒）を分単位でフォーマットした文字列に変換する
@@ -12,7 +13,7 @@ export function formatTotalDuration(
 ): string {
   return humanizeDuration(duration * 1000, {
     language,
-    fallbacks: ['en'],
+    fallbacks: [PREFERENCE_LANGUAGE_CODE_FALLBACK],
     units: ['h', 'm'],
     delimiter: ' ',
     round: true,

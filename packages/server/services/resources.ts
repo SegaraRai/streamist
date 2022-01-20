@@ -1,4 +1,6 @@
+import type { Plan } from '$shared/config';
 import { dbArrayDeserializeItemIds } from '$shared/dbArray';
+import type { OSRegion } from '$shared/objectStorage';
 import type {
   Album,
   AlbumCoArtist,
@@ -126,7 +128,16 @@ function convertDeletion(deletion: Deletion): ResourceDeletion {
 }
 
 function convertUser(user: User): ResourceUser {
-  return user as ResourceUser;
+  // since user has very sensitive information such as passwords, we explicitly include required fields only
+  return {
+    id: user.id,
+    displayName: user.displayName,
+    region: user.region as OSRegion,
+    plan: user.plan as Plan,
+    maxTrackId: user.maxTrackId,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
 }
 
 export function fetchResources(

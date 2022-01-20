@@ -1,6 +1,8 @@
 export const PLANS = ['free', 'unlimited'] as const;
 export type Plan = typeof PLANS[number];
 
+export const INITIAL_PLAN: Plan = 'free';
+
 export const MAX_SOURCE_FILE_RETENTION_PER_PLAN: Record<Plan, number> = {
   free: 30 * 24 * 60 * 60 * 1000,
   unlimited: Infinity,

@@ -1,26 +1,20 @@
 <script lang="ts">
-import { COOKIE_CHECK_INTERVAL, IDLE_TIMEOUT } from '~/config';
-import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
+import { storeToRefs } from 'pinia';
+import type { Ref } from 'vue';
 import { NAIVE_UI_THEMES } from '~/logic/theme';
-import { usePlaybackStore } from '~/stores/playback';
 import { useThemeStore } from '~/stores/theme';
+import { LanguageCode } from './config';
+import { usePreferenceStore } from './stores/preference';
 
 export default defineComponent({
   setup() {
+    const preferenceStore = storeToRefs(usePreferenceStore());
     const themeStore = useThemeStore();
+
     const naiveUITheme = eagerComputed(() => NAIVE_UI_THEMES[themeStore.theme]);
-    const playbackStore = usePlaybackStore();
 
-    const { idle } = useIdle(IDLE_TIMEOUT);
-
-    useIntervalFn(() => {
-      const active = !idle.value || playbackStore.playing$$q.value;
-      if (!active) {
-        return;
-      }
-
-      renewTokensAndSetCDNCookie();
-    }, COOKIE_CHECK_INTERVAL);
+    const { locale } = useI18n();
+    biSyncRef(preferenceStore.language, locale as Ref<LanguageCode>);
 
     const themeClass = eagerComputed(() => `s-theme--${themeStore.theme}`);
 

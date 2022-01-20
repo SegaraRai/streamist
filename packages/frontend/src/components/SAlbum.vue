@@ -208,7 +208,7 @@ export default defineComponent({
           <template v-if="value$$q.tracks$$q.length">
             <span>, {{ duration$$q }}</span>
             <template v-if="releaseDate$$q">
-              <span class="s-numeric !inline-flex">, {{ releaseDate$$q }}</span>
+              <span>, {{ releaseDate$$q }}</span>
             </template>
           </template>
         </div>

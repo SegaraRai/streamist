@@ -4,6 +4,7 @@
     "dexie",
     "fastify",
     "ffprobe",
+    "hcaptcha",
     "magick",
     "mkclean",
     "streamist",

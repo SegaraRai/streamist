@@ -431,6 +431,15 @@ function doUploadWithRetry(
   );
 }
 
+function getUser(): ResourceUser {
+  const strUser = localStorage.getItem('db.user');
+  const user = strUser ? (JSON.parse(strUser) as ResourceUser) : null;
+  if (!user) {
+    throw new Error('User is not set');
+  }
+  return user;
+}
+
 export class UploadManager extends EventTarget {
   private _files: UploadFile[] = [];
 
@@ -732,17 +741,7 @@ export class UploadManager extends EventTarget {
         switch (file.status) {
           case 'pending':
             file.status = 'validating';
-            {
-              let user: ResourceUser | undefined;
-              try {
-                user =
-                  JSON.parse(localStorage.getItem('db.user') || 'null') ||
-                  undefined;
-              } catch (error) {
-                console.warn(error);
-              }
-              this._checkFile((user?.plan as Plan | undefined) ?? 'free', file);
-            }
+            this._checkFile(getUser().plan, file);
             changed = true;
             break;
 
@@ -807,6 +806,8 @@ export class UploadManager extends EventTarget {
                   return;
                 }
 
+                const region = getUser().region;
+
                 file.status = 'uploading';
                 file.uploadBeginAt = Date.now();
                 this._dispatchUpdateEvent();
@@ -836,8 +837,7 @@ export class UploadManager extends EventTarget {
                       file.fileType === 'cueSheet' ? file : otherFile;
                     const body: VSourceCreateBodyWrapper['!payload'] = {
                       type: 'audio',
-                      // TODO(prod): set region
-                      region: 'ap-northeast-1',
+                      region,
                       audioFile: {
                         type: 'audio',
                         filename: audioFile.filename,
@@ -860,8 +860,7 @@ export class UploadManager extends EventTarget {
                   requestFileType = 'audio';
                   const body: VSourceCreateBodyWrapper['!payload'] = {
                     type: 'audio',
-                    // TODO(prod): set region
-                    region: 'ap-northeast-1',
+                    region,
                     audioFile: {
                       type: 'audio',
                       filename: file.filename,
@@ -898,8 +897,7 @@ export class UploadManager extends EventTarget {
                   requestFileType = 'image';
                   const body: VSourceCreateBodyWrapper['!payload'] = {
                     type: 'image',
-                    // TODO(prod): set region
-                    region: 'ap-northeast-1',
+                    region,
                     imageFile: {
                       type: 'image',
                       filename: file.filename,
@@ -924,8 +922,7 @@ export class UploadManager extends EventTarget {
                   requestFileType = 'image';
                   const body: VSourceCreateBodyWrapper['!payload'] = {
                     type: 'image',
-                    // TODO(prod): set region
-                    region: 'ap-northeast-1',
+                    region,
                     imageFile: {
                       type: 'image',
                       filename: file.filename,

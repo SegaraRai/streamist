@@ -4,7 +4,10 @@ meta:
 </route>
 
 <script lang="ts">
-import { PREFERENCE_AUDIO_QUALITIES, PREFERENCE_LANGUAGES } from '~/config';
+import {
+  PREFERENCE_AUDIO_QUALITIES,
+  PREFERENCE_LANGUAGE_OPTIONS,
+} from '~/config';
 import { usePreferenceStore } from '~/stores/preference';
 import { PREFERENCE_THEMES, useThemeStore } from '~/stores/theme';
 
@@ -13,11 +16,6 @@ export default defineComponent({
     const { t } = useI18n();
     const preferenceStore = usePreferenceStore();
     const themeStore = useThemeStore();
-
-    const languageOptions$$q = PREFERENCE_LANGUAGES.map(([code, name]) => ({
-      value: code,
-      label: name,
-    }));
 
     const themeOptions$$q = eagerComputed(() =>
       PREFERENCE_THEMES.map((code) => ({
@@ -35,7 +33,7 @@ export default defineComponent({
 
     return {
       audioQualityOptions$$q,
-      languageOptions$$q,
+      languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
       themeOptions$$q,
       preferenceStore$$q: preferenceStore,
       themeStore$$q: themeStore,
@@ -55,6 +53,7 @@ export default defineComponent({
           <div class="flex flex-col gap-y-4">
             <h2 class="text-xl">Language</h2>
             <div class="w-64">
+              <!-- TODO: migrate to v-select -->
               <n-select
                 v-model:value="preferenceStore$$q.language"
                 :options="languageOptions$$q"
@@ -64,6 +63,7 @@ export default defineComponent({
           <div class="flex flex-col gap-y-4">
             <h2 class="text-xl">Theme</h2>
             <div class="w-64">
+              <!-- TODO: migrate to v-select -->
               <n-select
                 v-model:value="themeStore$$q.rawTheme"
                 :options="themeOptions$$q"
@@ -73,6 +73,7 @@ export default defineComponent({
           <div class="flex flex-col gap-y-4">
             <h2 class="text-xl">Audio quality</h2>
             <div class="w-64">
+              <!-- TODO: migrate to v-select -->
               <n-select
                 v-model:value="preferenceStore$$q.audioQuality"
                 :options="audioQualityOptions$$q"

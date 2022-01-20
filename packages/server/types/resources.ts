@@ -1,4 +1,5 @@
 import type { CoArtistRole } from '$shared/coArtist';
+import type { Plan } from '$shared/config';
 import type { OSRegion } from '$shared/objectStorage';
 import type {
   DeletionEntityType,
@@ -85,7 +86,22 @@ export interface ResourceDeletion
   readonly entityType: DeletionEntityType;
 }
 
-export interface ResourceUser extends Readonly<User> {}
+export interface ResourceUser
+  extends Readonly<
+    Pick<
+      User,
+      | 'id'
+      | 'displayName'
+      | 'region'
+      | 'plan'
+      | 'maxTrackId'
+      | 'createdAt'
+      | 'updatedAt'
+    >
+  > {
+  readonly region: OSRegion;
+  readonly plan: Plan;
+}
 
 export interface ResourcesUpdated {
   readonly updated: true;

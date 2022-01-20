@@ -17,18 +17,30 @@ export default defineComponent({
       title: t('title.Login'),
     });
 
+    const requestInProgress$$q = ref(false);
+
     const username$$q = ref('');
     const password$$q = ref('');
 
     return {
       t,
       logoSVG$$q: logoSVG,
+      requestInProgress$$q,
       username$$q,
       password$$q,
       login$$q() {
-        authenticate(username$$q.value, password$$q.value).then(() => {
-          router.push(parseRedirectTo(router.currentRoute.value.query.to));
-        });
+        if (requestInProgress$$q.value) {
+          return;
+        }
+
+        requestInProgress$$q.value = true;
+        authenticate(username$$q.value, password$$q.value)
+          .then(() => {
+            router.push(parseRedirectTo(router.currentRoute.value.query.to));
+          })
+          .finally(() => {
+            requestInProgress$$q.value = false;
+          });
       },
     };
   },
@@ -57,13 +69,17 @@ export default defineComponent({
         >
           <v-text-field
             v-model="username$$q"
-            prepend-inner-icon="mdi-account"
             type="text"
+            name="username"
+            required
+            prepend-inner-icon="mdi-account"
             hide-details
           />
           <v-text-field
             v-model="password$$q"
             type="password"
+            name="password"
+            required
             prepend-inner-icon="mdi-lock"
             hide-details
           />
@@ -72,7 +88,16 @@ export default defineComponent({
       <v-card-actions>
         <v-spacer />
         <v-btn flat text color="transparent" @click="login$$q">
-          {{ t('login.button.Login') }}
+          <span :class="requestInProgress$$q && 'invisible'">
+            {{ t('login.button.Login') }}
+          </span>
+          <template v-if="requestInProgress$$q">
+            <v-progress-circular
+              class="absolute left-0 top-0 right-0 bottom-0 m-auto"
+              indeterminate
+              size="20"
+            />
+          </template>
         </v-btn>
       </v-card-actions>
     </v-card>

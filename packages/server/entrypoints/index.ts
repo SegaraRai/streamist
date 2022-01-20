@@ -10,7 +10,10 @@ function mainAPI(): void {
   if (cluster.isPrimary) {
     logger.info('primary: started');
 
-    const numWorkers = Math.max(cpus().length - 2, 2);
+    const numWorkers =
+      process.env.NODE_ENV === 'development'
+        ? 2
+        : Math.max(cpus().length - 2, 2);
     for (let i = 0; i < numWorkers; i++) {
       cluster.fork();
     }

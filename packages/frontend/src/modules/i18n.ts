@@ -1,4 +1,6 @@
 import { createI18n } from 'vue-i18n';
+import { PREFERENCE_LANGUAGE_CODE_FALLBACK } from '~/config';
+import { getLanguageFromNavigator } from '~/logic/language';
 import { UserModule } from '~/types';
 
 // Import i18n resources
@@ -17,7 +19,8 @@ const messages = Object.fromEntries(
 export const install: UserModule = ({ app }) => {
   const i18n = createI18n({
     legacy: false,
-    locale: 'en',
+    locale: getLanguageFromNavigator(),
+    fallbackLocale: PREFERENCE_LANGUAGE_CODE_FALLBACK,
     messages,
   });
 

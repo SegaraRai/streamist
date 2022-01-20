@@ -2,8 +2,11 @@
 import type { ScrollbarInst } from 'naive-ui';
 import { useDisplay } from 'vuetify';
 import logoSVG from '~/assets/logo_colored.svg';
+import { COOKIE_CHECK_INTERVAL, IDLE_TIMEOUT } from '~/config';
 import { useSyncDB } from '~/db';
+import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
 import { getNaiveUIScrollbarElements } from '~/logic/naiveUI/getScrollbarElements';
+import { usePlaybackStore } from '~/stores/playback';
 import {
   currentScrollContainerRef,
   currentScrollContentRef,
@@ -20,8 +23,25 @@ export default defineComponent({
     const display = useDisplay();
     const syncDB = useSyncDB();
     const theme = useThemeStore();
-
     const uploadStore$$q = useUploadStore();
+    const playbackStore = usePlaybackStore();
+
+    const { idle } = useIdle(IDLE_TIMEOUT);
+
+    useIntervalFn(
+      () => {
+        const active = !idle.value || playbackStore.playing$$q.value;
+        if (!active) {
+          return;
+        }
+
+        renewTokensAndSetCDNCookie();
+      },
+      COOKIE_CHECK_INTERVAL,
+      {
+        immediate: true,
+      }
+    );
 
     const rightSidebar$$q = ref(false);
     const _leftSidebar$$q = ref(false);
@@ -91,6 +111,7 @@ export default defineComponent({
 
     return {
       t,
+      logoSVG$$q: logoSVG,
       router$$q: router,
       scrollRef$$q,
       searchDialog$$q: ref(false),
@@ -106,7 +127,6 @@ export default defineComponent({
       theme$$q: theme,
       alwaysShowLeftSidebar$$q,
       desktopPlaybackControl$$q,
-      logoSVG$$q: logoSVG,
     };
   },
 });

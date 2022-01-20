@@ -100,6 +100,7 @@ importers:
       '@vueuse/head': ^0.7.4
       aspida: ^1.7.1
       axios: ^0.24.0
+      bcp-47-match: ^2.0.1
       buffer: ^6.0.3
       class-validator: ^0.13.2
       core-js: ^3.20.3
@@ -148,6 +149,7 @@ importers:
       '@vueuse/core': 7.5.3_vue@3.2.27
       '@vueuse/head': 0.7.4_vue@3.2.27
       axios: 0.24.0
+      bcp-47-match: 2.0.1
       buffer: 6.0.3
       class-validator: 0.13.2
       core-js: 3.20.3
@@ -158,7 +160,7 @@ importers:
       naive-ui: 2.24.1_vue@3.2.27
       nprogress: 0.2.0
       p-queue: 7.1.0
-      pinia: 2.0.9_vue@3.2.27
+      pinia: 2.0.9_08914fd4378c954daec0dc9a141e34bd
       prism-theme-vars: 0.2.2
       prisma: 3.8.1
       tsd: 0.19.1
@@ -199,7 +201,7 @@ importers:
       vite-plugin-vue-layouts: 0.5.0_d32ab7bd715fe4d9089b5c18a29a2f11
       vite-plugin-windicss: 1.6.2_vite@2.7.12
       vite-ssg: 0.17.6_9c7f907fef8f28d7d58f5b422e523ccb
-      vue-tsc: 0.30.4
+      vue-tsc: 0.30.4_typescript@4.6.0-dev.20220117
       windicss: 3.4.2
 
   packages/server:
@@ -4664,6 +4666,10 @@ packages:
 
   /base64-js/1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+    dev: false
+
+  /bcp-47-match/2.0.1:
+    resolution: {integrity: sha512-+8o7axFDN/h8xATDM87FhnU1eod87dX0eZz1+cW3gggcicBqrmkZc33KBPWoE49qt5Asi5OhcxSOMOzp3opTfg==}
     dev: false
 
   /bcrypt-pbkdf/1.0.2:
@@ -9732,7 +9738,7 @@ packages:
     engines: {node: '>=4'}
     dev: true
 
-  /pinia/2.0.9_vue@3.2.27:
+  /pinia/2.0.9_08914fd4378c954daec0dc9a141e34bd:
     resolution: {integrity: sha512-iuYdxLJKQ07YPyOHYH05wNG9eKWqkP/4y4GE8+RqEYtz5fwHgPA5kr6zQbg/DoEJGnR2XCm1w1vdt6ppzL9ATg==}
     peerDependencies:
       '@vue/composition-api': ^1.4.0
@@ -9745,6 +9751,7 @@ packages:
         optional: true
     dependencies:
       '@vue/devtools-api': 6.0.0-beta.21.1
+      typescript: 4.6.0-dev.20220117
       vue: 3.2.27
       vue-demi: 0.12.1_vue@3.2.27
     dev: false
@@ -12248,13 +12255,14 @@ packages:
       vue: 3.2.27
     dev: false
 
-  /vue-tsc/0.30.4:
+  /vue-tsc/0.30.4_typescript@4.6.0-dev.20220117:
     resolution: {integrity: sha512-JSgBKy/V5n1cGWr4+rtXr+f04FBIJl3tX4u24SLDvUJhVMXKvMMyygjHKs9mg0w8vhdLPvv+/JK3qHi9V7MR5w==}
     hasBin: true
     peerDependencies:
       typescript: '*'
     dependencies:
       '@volar/shared': 0.30.4
+      typescript: 4.6.0-dev.20220117
       vscode-vue-languageservice: 0.30.4
     dev: true
 

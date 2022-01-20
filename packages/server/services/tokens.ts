@@ -21,6 +21,7 @@ import {
 } from '$/services/env';
 import { HTTPError } from '$/utils/httpError';
 import type { IAuthRequest, IAuthResponse } from '$/validators';
+import { verifyPasswordHashAsync } from './password';
 
 type UserSubset = Pick<User, 'id' | 'maxTrackId' | 'plan'>;
 
@@ -124,22 +125,25 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
     case 'password': {
       const tempUser = await client.user.findUnique({
         where: {
-          id: String(body.username),
+          username: String(body.username),
         },
         select: {
           id: true,
+          password: true,
           closedAt: true,
           plan: true,
           maxTrackId: true,
         },
       });
-
       if (!tempUser) {
         throw new HTTPError(404, `User ${body.username} not found`);
       }
 
-      // TODO(auth): check if password is correct
-      if (String(body.password) !== 'password') {
+      const isOk = await verifyPasswordHashAsync(
+        String(body.password),
+        tempUser.password
+      );
+      if (!isOk) {
         throw new HTTPError(401, 'Invalid password');
       }
 

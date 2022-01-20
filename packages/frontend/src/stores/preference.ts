@@ -1,18 +1,15 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import type { Ref } from 'vue';
 import {
   AudioQuality,
   LanguageCode,
   PREFERENCE_AUDIO_QUALITIES,
   PREFERENCE_AUDIO_QUALITY_DEFAULT,
-  PREFERENCE_LANGUAGES,
-  PREFERENCE_LANGUAGE_CODE_DEFAULT,
+  PREFERENCE_LANGUAGE_CODES,
 } from '~/config';
+import { getLanguageFromNavigator } from '~/logic/language';
 import { createInSerializer } from './utils';
 
 export const usePreferenceStore = defineStore('preference', () => {
-  const { locale } = useI18n();
-
   const audioQuality = useLocalStorage<AudioQuality>(
     'preference.audioQuality',
     PREFERENCE_AUDIO_QUALITY_DEFAULT,
@@ -26,16 +23,14 @@ export const usePreferenceStore = defineStore('preference', () => {
 
   const language = useLocalStorage<LanguageCode>(
     'preference.language',
-    PREFERENCE_LANGUAGE_CODE_DEFAULT,
+    getLanguageFromNavigator(),
     {
       serializer: createInSerializer(
-        PREFERENCE_LANGUAGES.map(([code]) => code),
-        PREFERENCE_LANGUAGE_CODE_DEFAULT
+        PREFERENCE_LANGUAGE_CODES,
+        getLanguageFromNavigator()
       ),
     }
   );
-
-  biSyncRef<Ref<string>>(language, locale);
 
   return {
     audioQuality,

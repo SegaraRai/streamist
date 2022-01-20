@@ -1,8 +1,7 @@
-not-found: Not found
-login:
-  title: Login
-  button:
-    Login: Login
+common:
+  ThisActionCannotBeUndone: This action cannot be undone.
+regions:
+  'ap-northeast-1': ap-northeast-1 (Tokyo, Japan)
 sidebar:
   Home: Home
   Albums: Albums
@@ -14,8 +13,6 @@ sidebar:
   Downloads: Downloads
   Uploads: Uploads
   Settings: Settings
-common:
-  ThisActionCannotBeUndone: This action cannot be undone.
 header:
   NoInternetConnection: No Internet connection
   Search: Search
@@ -32,6 +29,25 @@ queue:
   NowPlaying: Now playing
   NextInQueue: Next in queue
   NextFrom: 'Next from: {0}'
+login:
+  title: Login
+  label:
+    Username: Username
+    Password: Password
+  button:
+    Login: Login
+register:
+  title: Register
+  label:
+    Username: Username
+    Password: Password
+    DisplayName: Display name
+    Region: Region
+  description:
+    Username: Login username
+    Region: Location to store your data
+  button:
+    Register: Register
 settings:
   audioQuality:
     medium: Medium
@@ -72,6 +88,7 @@ trackList:
   Title: Title
 title:
   Home: 'Streamist'
+  Register: "Register {'|'} Streamist"
   Login: "Login {'|'} Streamist"
   Logout: "Logout {'|'} Streamist"
   Albums: "Albums {'|'} Streamist"

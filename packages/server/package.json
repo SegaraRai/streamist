@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "pnpm run migrate:dev && run-p dev:*",
+    "dev:generate": "frourio -w",
     "dev:build": "node ./build.dev.js",
     "dev:start": "node-dev --respawn ./index.js -- --type=api",
     "dev:start_batch": "node-dev --respawn ./index.js -- --type=batch",

@@ -230,27 +230,27 @@ export default defineComponent({
             <div class="flex items-center gap-x-2.5">
               <div class="flex items-center">
                 <i-mdi-disc />
-                <span class="s-numeric">
+                <span>
                   {{ value$$q.track$$q.discNumber }}
                 </span>
               </div>
               <div class="flex items-center">
                 <i-mdi-playlist-music />
-                <span class="s-numeric">
+                <span>
                   {{ value$$q.track$$q.trackNumber }}
                 </span>
               </div>
             </div>
             <div class="flex items-center gap-x-0.5">
               <i-mdi-clock-outline />
-              <span class="s-duration">
+              <span>
                 {{ formatTime$$q(value$$q.track$$q.duration) }}
               </span>
             </div>
             <template v-if="value$$q.track$$q.releaseDateText">
               <div class="flex items-center gap-x-0.5">
                 <i-mdi-calendar-outline />
-                <span class="s-numeric">
+                <span>
                   {{ value$$q.track$$q.releaseDateText }}
                 </span>
               </div>
@@ -258,7 +258,7 @@ export default defineComponent({
             <template v-if="value$$q.track$$q.genre">
               <div class="flex items-center gap-x-0.5">
                 <i-mdi-file-music />
-                <span class="s-numeric">
+                <span>
                   {{ value$$q.track$$q.genre }}
                 </span>
               </div>
@@ -266,7 +266,7 @@ export default defineComponent({
             <template v-if="value$$q.track$$q.bpm">
               <div class="flex items-center">
                 <i-mdi-music-note-quarter />
-                <span class="s-numeric"> {{ value$$q.track$$q.bpm }} BPM </span>
+                <span> {{ value$$q.track$$q.bpm }} BPM </span>
               </div>
             </template>
           </div>

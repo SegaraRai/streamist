@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 
+export * from './account';
+export * from './accountRegister';
 export * from './albums';
 export * from './artists';
 export * from './auth';
