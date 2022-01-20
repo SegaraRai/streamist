@@ -11,10 +11,10 @@ export default defineController(() => ({
     );
     return {
       status: 200,
-      body,
       headers: {
         'Cache-Control': CACHE_CONTROL_NO_STORE,
       },
+      body,
     };
   },
 }));

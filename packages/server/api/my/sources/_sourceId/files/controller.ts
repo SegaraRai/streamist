@@ -1,3 +1,4 @@
+import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
@@ -18,6 +19,9 @@ export default defineController(() => ({
     }
     return {
       status: 200,
+      headers: {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
+      },
       body: sourceFiles,
     };
   },

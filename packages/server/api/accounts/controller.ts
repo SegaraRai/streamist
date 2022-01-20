@@ -7,11 +7,11 @@ export default defineController(() => ({
     const exists = await userDoesExist(query.username);
     return {
       status: 200,
-      body: {
-        exists,
-      },
       headers: {
         'Cache-Control': CACHE_CONTROL_NO_STORE,
+      },
+      body: {
+        exists,
       },
     };
   },

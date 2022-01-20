@@ -1,3 +1,4 @@
+import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { dbPlaylistGetTracks } from '$/db/playlist';
 import { playlistTrackAdd } from '$/services/playlists';
@@ -18,6 +19,7 @@ export default defineController(() => ({
     const tracks = await dbPlaylistGetTracks(user.id, params.playlistId);
     return {
       status: 200,
+      headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
       body: tracks,
     };
   },
@@ -26,6 +28,7 @@ export default defineController(() => ({
     return {
       status: 201,
       headers: {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
         Location: body.trackIds.map(
           (trackId): string =>
             `/api/my/playlists/${params.playlistId}/tracks/${trackId}`

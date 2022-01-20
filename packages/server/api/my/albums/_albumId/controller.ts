@@ -1,3 +1,4 @@
+import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { albumMerge, albumUpdate } from '$/services/albums';
 import { HTTPError } from '$/utils/httpError';
@@ -16,6 +17,7 @@ export default defineController(() => ({
     }
     return {
       status: 200,
+      headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
       body: album,
     };
   },
@@ -23,10 +25,16 @@ export default defineController(() => ({
     await albumUpdate(user.id, params.albumId, body, {
       forceNewArtist: !!query?.forceNewArtist,
     });
-    return { status: 204 };
+    return {
+      status: 204,
+      headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
+    };
   },
   post: async ({ body, params, user }) => {
     await albumMerge(user.id, params.albumId, body.toAlbumId);
-    return { status: 204 };
+    return {
+      status: 204,
+      headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
+    };
   },
 }));

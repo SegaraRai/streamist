@@ -1,3 +1,4 @@
+import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { onSourceFileFailed, onSourceFileUploaded } from '$/services/uploadEnd';
 import { defineController } from './$relay';
 
@@ -31,6 +32,11 @@ export default defineController(() => ({
         );
         break;
     }
-    return { status: 202 };
+    return {
+      status: 202,
+      headers: {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
+      },
+    };
   },
 }));

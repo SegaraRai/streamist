@@ -1,3 +1,4 @@
+import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import {
   playlistImageDelete,
   playlistImageMoveBefore,
@@ -12,10 +13,16 @@ export default defineController(() => ({
       params.imageId,
       body.nextImageId || undefined
     );
-    return { status: 204 };
+    return {
+      status: 204,
+      headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
+    };
   },
   delete: async ({ params, user }) => {
     await playlistImageDelete(user.id, params.playlistId, params.imageId);
-    return { status: 204 };
+    return {
+      status: 204,
+      headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
+    };
   },
 }));

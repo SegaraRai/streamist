@@ -1,3 +1,4 @@
+import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import {
   playlistTrackMoveBefore,
   playlistTrackRemove,
@@ -12,10 +13,16 @@ export default defineController(() => ({
       params.trackId,
       body.nextTrackId
     );
-    return { status: 204 };
+    return {
+      status: 204,
+      headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
+    };
   },
   delete: async ({ params, user }) => {
     await playlistTrackRemove(user.id, params.playlistId, [params.trackId]);
-    return { status: 204 };
+    return {
+      status: 204,
+      headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
+    };
   },
 }));

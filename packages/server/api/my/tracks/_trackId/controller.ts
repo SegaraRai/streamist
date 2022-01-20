@@ -1,3 +1,4 @@
+import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { trackDelete, trackUpdate } from '$/services/tracks';
 import { HTTPError } from '$/utils/httpError';
@@ -16,6 +17,9 @@ export default defineController(() => ({
     }
     return {
       status: 200,
+      headers: {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
+      },
       body: track,
     };
   },
@@ -26,12 +30,21 @@ export default defineController(() => ({
       preferAlbumArtist: !!query?.preferAlbumArtist,
       preferOldArtist: !!query?.preferOldArtist,
     });
-    return { status: 200, body: newTrack };
+    return {
+      status: 200,
+      headers: {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
+      },
+      body: newTrack,
+    };
   },
   delete: async ({ params, user }) => {
     await trackDelete(user.id, params.trackId, true);
     return {
       status: 204,
+      headers: {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
+      },
     };
   },
 }));
