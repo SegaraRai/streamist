@@ -392,7 +392,7 @@ export async function onSourceFileUploaded(
   userId: string,
   sourceId: string,
   sourceFileId: string,
-  eTags?: string[]
+  eTags: readonly string[]
 ): Promise<void> {
   const sourceFile = await client.sourceFile.findFirst({
     where: {
@@ -428,41 +428,33 @@ export async function onSourceFileUploaded(
     throw new HTTPError(500, `state of the source ${sourceId} is inconsistent`);
   }
 
-  const { uploadId } = sourceFile;
-
-  if (uploadId) {
-    if (!eTags) {
-      throw new HTTPError(400, `ETags must be specified for multipart upload`);
-    }
-
-    const partLength = splitIntoParts(sourceFile.fileSize).length;
-    if (eTags.length !== partLength) {
-      throw new HTTPError(
-        400,
-        `ETag count of the source file ${sourceFileId} is inconsistent`
-      );
-    }
-
-    // complete multipart upload
-    const os = getSourceFileOS(sourceFile.region as OSRegion);
-    const key = getSourceFileKey(userId, sourceId, sourceFileId);
-    const s3 = createUserUploadS3Cached(os);
-
-    // TODO(prod): error handling
-    await retryS3(() =>
-      s3.completeMultipartUpload({
-        Bucket: os.bucket,
-        Key: key,
-        UploadId: uploadId,
-        MultipartUpload: {
-          Parts: eTags!.map((eTag, index) => ({
-            PartNumber: index + 1,
-            ETag: eTag,
-          })),
-        },
-      })
+  const partLength = splitIntoParts(sourceFile.fileSize).length;
+  if (eTags.length !== partLength) {
+    throw new HTTPError(
+      400,
+      `ETag count of the source file ${sourceFileId} is inconsistent`
     );
   }
+
+  // complete multipart upload
+  const os = getSourceFileOS(sourceFile.region as OSRegion);
+  const key = getSourceFileKey(userId, sourceId, sourceFileId);
+  const s3 = createUserUploadS3Cached(os);
+
+  // TODO(prod): error handling
+  await retryS3(() =>
+    s3.completeMultipartUpload({
+      Bucket: os.bucket,
+      Key: key,
+      UploadId: sourceFile.uploadId,
+      MultipartUpload: {
+        Parts: eTags.map((eTag, index) => ({
+          PartNumber: index + 1,
+          ETag: eTag,
+        })),
+      },
+    })
+  );
 
   const timestamp = Date.now();
 

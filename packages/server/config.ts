@@ -1,9 +1,8 @@
 import { API_ORIGIN, SECRET_TRANSCODER_CALLBACK_SECRET } from '$/services/env';
 
-export const MULTIPART_UPLOAD_THRESHOLD = -1; // all
-
-// this must be larger than 5MiB
-// c.f. https://wasabi-support.zendesk.com/hc/en-us/articles/360033859411-How-do-I-clean-up-my-failed-multipart-uploads-
+// this must be larger than or equal to 5MiB. see
+// - https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html
+// - https://wasabi-support.zendesk.com/hc/en-us/articles/360033859411-How-do-I-clean-up-my-failed-multipart-uploads-
 export const MULTIPART_UPLOAD_MIN_CHUNK_SIZE = 8 * 1024 * 1024; // 8MiB
 
 // 10 sec.

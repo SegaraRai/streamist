@@ -4,8 +4,6 @@ export const SOURCE_FILE_CONTENT_ENCODING = 'identity';
 export const SOURCE_FILE_CONTENT_TYPE = 'application/octet-stream';
 export const SOURCE_FILE_CACHE_CONTROL = CACHE_CONTROL_PRIVATE_IMMUTABLE;
 
-/** in sec. 15m (not used as all upload is multipart) */
-export const SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN = 15 * 60;
 /** in sec. 4h (transfer 800MiB in 500kbps) */
 export const SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART = 4 * 60 * 60;
 
@@ -14,11 +12,7 @@ export const SOURCE_FILE_UPLOADABLE_AFTER_CREATE = 12 * 60 * 60 * 1000;
 /** in msec. 17h */
 export const SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE =
   SOURCE_FILE_UPLOADABLE_AFTER_CREATE +
-  Math.max(
-    SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
-    SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART
-  ) *
-    1000 +
+  SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART * 1000 +
   1 * 60 * 60;
 /** in msec. 1h (current max. Lambda execution time is 15 min.) */
 export const SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD =

@@ -1,5 +1,6 @@
 import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { onSourceFileFailed, onSourceFileUploaded } from '$/services/uploadEnd';
+import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
@@ -24,6 +25,9 @@ export default defineController(() => ({
         break;
 
       case 'uploaded':
+        if (!body.parts) {
+          throw new HTTPError(400, 'parts is required');
+        }
         await onSourceFileUploaded(
           user.id,
           params.sourceId,

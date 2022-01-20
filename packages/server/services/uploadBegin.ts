@@ -1,4 +1,4 @@
-import { PutObjectCommand, UploadPartCommand } from '@aws-sdk/client-s3';
+import { UploadPartCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import {
   generateSourceFileId,
@@ -13,7 +13,6 @@ import {
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
-  SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
   SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
   SOURCE_FILE_UPLOADABLE_AFTER_CREATE,
 } from '$shared/config';
@@ -33,7 +32,7 @@ import {
 } from '$shared/types';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
-import { splitIntoParts, useMultipartUpload } from '$/services/uploadUtils';
+import { splitIntoParts } from '$/services/uploadUtils';
 import { createUserUploadS3Cached } from '$/services/userOS';
 import type {
   CreateSourceRequestAudio,
@@ -49,21 +48,14 @@ import { HTTPError } from '$/utils/httpError';
  * @param userId
  * @param sourceFileId
  * @param region
- * @param fileSize
- * @returns uploadId (`undefined` if fileSize is too small so that multipart upload is not needed)
+ * @returns uploadId
  */
 async function createMultipartUploadId(
   userId: string,
   sourceId: string,
   sourceFileId: string,
-  region: OSRegion,
-  fileSize: number
-): Promise<string | undefined> {
-  const useMultipart = useMultipartUpload(fileSize);
-  if (!useMultipart) {
-    return;
-  }
-
+  region: OSRegion
+): Promise<string> {
   const os = getSourceFileOS(region);
   const key = getSourceFileKey(userId, sourceId, sourceFileId);
   const s3 = createUserUploadS3Cached(os);
@@ -77,6 +69,11 @@ async function createMultipartUploadId(
       ContentType: SOURCE_FILE_CONTENT_TYPE,
     })
   );
+
+  if (!response.UploadId) {
+    // should not happen
+    throw new Error('No uploadId returned');
+  }
 
   return response.UploadId;
 }
@@ -117,33 +114,6 @@ function createPresignedMultipartURLs(
   );
 }
 
-function createPresignedURL(
-  userId: string,
-  sourceId: string,
-  sourceFileId: string,
-  region: OSRegion,
-  fileSize: number
-): Promise<string> {
-  const os = getSourceFileOS(region);
-  const key = getSourceFileKey(userId, sourceId, sourceFileId);
-  const s3 = createUserUploadS3Cached(os);
-
-  return getSignedUrl(
-    s3,
-    new PutObjectCommand({
-      Bucket: os.bucket,
-      Key: key,
-      ContentLength: fileSize,
-      CacheControl: SOURCE_FILE_CACHE_CONTROL,
-      ContentType: SOURCE_FILE_CONTENT_TYPE,
-      ContentEncoding: SOURCE_FILE_CONTENT_ENCODING,
-    }),
-    {
-      expiresIn: SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN,
-    }
-  );
-}
-
 /**
  * @param userId
  * @param sourceFileId
@@ -158,33 +128,18 @@ async function createUploadURL(
   sourceFileId: string,
   region: OSRegion,
   fileSize: number,
-  uploadId?: string | null
+  uploadId: string
 ): Promise<UploadURL> {
-  if (uploadId) {
-    return {
-      url: null,
-      size: fileSize,
-      parts: await createPresignedMultipartURLs(
-        userId,
-        sourceId,
-        sourceFileId,
-        region,
-        fileSize,
-        uploadId
-      ),
-    };
-  }
-
   return {
-    url: await createPresignedURL(
+    size: fileSize,
+    parts: await createPresignedMultipartURLs(
       userId,
       sourceId,
       sourceFileId,
       region,
-      fileSize
+      fileSize,
+      uploadId
     ),
-    size: fileSize,
-    parts: null,
   };
 }
 
@@ -236,25 +191,16 @@ export async function createAudioSource(
     ? await generateSourceFileId()
     : null;
 
-  const uploadId =
-    (await createMultipartUploadId(
-      userId,
-      sourceId,
-      audioFileId,
-      region,
-      request.audioFile.fileSize
-    )) ?? null;
+  const uploadId = await createMultipartUploadId(
+    userId,
+    sourceId,
+    audioFileId,
+    region
+  );
 
-  const cueSheetUploadId =
-    request.cueSheetFile && cueSheetFileId
-      ? await createMultipartUploadId(
-          userId,
-          sourceId,
-          cueSheetFileId,
-          region,
-          request.cueSheetFile.fileSize
-        )
-      : null;
+  const cueSheetUploadId = cueSheetFileId
+    ? await createMultipartUploadId(userId, sourceId, cueSheetFileId, region)
+    : null;
 
   const timestamp = Date.now();
 
@@ -300,7 +246,7 @@ export async function createAudioSource(
                   attachToId: null,
                   attachPrepend: null,
                   entityExists: false,
-                  uploadId: cueSheetUploadId,
+                  uploadId: cueSheetUploadId!,
                   createdAt: timestamp,
                   updatedAt: timestamp,
                   user: { connect: { id: userId } },
@@ -340,7 +286,7 @@ export async function createAudioSource(
                 cueSheetFileId!,
                 region,
                 request.cueSheetFile.fileSize,
-                cueSheetUploadId
+                cueSheetUploadId!
               ),
             },
           ]
@@ -417,14 +363,12 @@ export async function createImageSource(
   const sourceId = await generateSourceId();
   const imageFileId = await generateSourceFileId();
 
-  const uploadId =
-    (await createMultipartUploadId(
-      userId,
-      sourceId,
-      imageFileId,
-      region,
-      request.imageFile.fileSize
-    )) ?? null;
+  const uploadId = await createMultipartUploadId(
+    userId,
+    sourceId,
+    imageFileId,
+    region
+  );
 
   const timestamp = Date.now();
 

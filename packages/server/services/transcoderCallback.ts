@@ -624,7 +624,7 @@ async function handleTranscoderResponseArtifactImage(
             attachToId,
             attachPrepend,
             entityExists: false,
-            uploadId: null,
+            uploadId: '',
             sourceId,
             userId,
             createdAt: timestamp,

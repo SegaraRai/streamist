@@ -607,7 +607,6 @@ export class UploadManager extends EventTarget {
               sourceFileId: cueSheetSourceFile.id,
               sourceId: cueSheetSourceFile.sourceId,
               url: {
-                url: null,
                 size: cueSheetSourceFile.fileSize,
                 parts: [],
               },
@@ -636,7 +635,6 @@ export class UploadManager extends EventTarget {
           sourceFileId: sourceFile.id,
           sourceId: sourceFile.sourceId,
           url: {
-            url: null,
             size: sourceFile.fileSize,
             parts: [],
           },
@@ -670,51 +668,45 @@ export class UploadManager extends EventTarget {
     file: Blob,
     onProgress: (size: number) => void,
     abortSignal?: AbortSignal
-  ): Promise<string[] | void> {
-    if (url.parts) {
-      const uploadedSizes: number[] = new Array(url.parts.length).fill(0);
-      const eTagPromises: Promise<string>[] = [];
-      let failed = false;
-      let offset = 0;
-      for (const [partIndex, part] of url.parts.entries()) {
-        const partBlob = file.slice(offset, offset + part.size);
-        offset += part.size;
+  ): Promise<string[]> {
+    const uploadedSizes: number[] = new Array(url.parts.length).fill(0);
+    const eTagPromises: Promise<string>[] = [];
+    let failed = false;
+    let offset = 0;
+    for (const [partIndex, part] of url.parts.entries()) {
+      const partBlob = file.slice(offset, offset + part.size);
+      offset += part.size;
 
-        eTagPromises.push(
-          this.uploadQueue.add(async () => {
-            if (failed || abortSignal?.aborted) {
-              throw new Error('uploading failed or aborted');
-            }
+      eTagPromises.push(
+        this.uploadQueue.add(async () => {
+          if (failed || abortSignal?.aborted) {
+            throw new Error('uploading failed or aborted');
+          }
 
-            try {
-              const eTag = await doUploadWithRetry(
-                part.url,
-                partBlob,
-                (size: number): void => {
-                  uploadedSizes[partIndex] = size;
-                  onProgress(
-                    uploadedSizes.reduce((acc, cur): number => acc + cur, 0)
-                  );
-                },
-                abortSignal
-              );
+          try {
+            const eTag = await doUploadWithRetry(
+              part.url,
+              partBlob,
+              (size: number): void => {
+                uploadedSizes[partIndex] = size;
+                onProgress(
+                  uploadedSizes.reduce((acc, cur): number => acc + cur, 0)
+                );
+              },
+              abortSignal
+            );
 
-              uploadedSizes[partIndex] = part.size;
+            uploadedSizes[partIndex] = part.size;
 
-              return eTag;
-            } catch (error: unknown) {
-              failed = true;
-              throw error;
-            }
-          })
-        );
-      }
-      return Promise.all(eTagPromises);
-    } else {
-      return this.uploadQueue.add(async (): Promise<void> => {
-        await doUploadWithRetry(url.url, file, onProgress, abortSignal);
-      });
+            return eTag;
+          } catch (error: unknown) {
+            failed = true;
+            throw error;
+          }
+        })
+      );
     }
+    return Promise.all(eTagPromises);
   }
 
   /**
@@ -980,7 +972,7 @@ export class UploadManager extends EventTarget {
                     this._dispatchUpdateEvent();
                   },
                   abortController.signal
-                ).catch(async (error): Promise<void> => {
+                ).catch(async (error): Promise<never> => {
                   const aborted =
                     !!file.uploadInfo?.abortController?.signal.aborted;
 
@@ -1024,7 +1016,7 @@ export class UploadManager extends EventTarget {
                       .$patch({
                         body: {
                           state: 'uploaded',
-                          parts: eTags ?? undefined,
+                          parts: eTags,
                         },
                       })
                 );
