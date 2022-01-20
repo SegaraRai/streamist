@@ -69,6 +69,7 @@ export default defineComponent({
         >
           <v-text-field
             v-model="username$$q"
+            class="s-v-input-hide-details"
             type="text"
             name="username"
             required
@@ -77,6 +78,7 @@ export default defineComponent({
           />
           <v-text-field
             v-model="password$$q"
+            class="s-v-input-hide-details"
             type="password"
             name="password"
             required

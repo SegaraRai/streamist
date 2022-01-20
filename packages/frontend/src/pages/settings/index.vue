@@ -32,6 +32,7 @@ export default defineComponent({
     );
 
     return {
+      t,
       audioQualityOptions$$q,
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
       themeOptions$$q,
@@ -44,57 +45,58 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-0">
-    <div class="flex flex-col gap-y-16">
-      <div class="flex flex-col gap-y-4">
-        <header class="s-title">
-          <h1 class="text-h5">Device Settings</h1>
-        </header>
-        <div class="flex flex-col gap-y-8">
-          <div class="flex flex-col gap-y-4">
-            <h2 class="text-xl">Language</h2>
-            <div class="w-64">
-              <!-- TODO: migrate to v-select -->
-              <n-select
-                v-model:value="preferenceStore$$q.language"
-                :options="languageOptions$$q"
-              />
-            </div>
+    <div class="flex flex-col gap-y-4">
+      <header class="s-title">
+        <h1 class="text-h5">
+          {{ t('settings.device.title') }}
+        </h1>
+      </header>
+      <div class="flex flex-col gap-y-8">
+        <div class="flex flex-col gap-y-4">
+          <h2 class="text-xl">
+            {{ t('settings.device.header.Language') }}
+          </h2>
+          <div class="w-64">
+            <!-- TODO: migrate to v-select -->
+            <n-select
+              v-model:value="preferenceStore$$q.language"
+              :options="languageOptions$$q"
+            />
           </div>
-          <div class="flex flex-col gap-y-4">
-            <h2 class="text-xl">Theme</h2>
-            <div class="w-64">
-              <!-- TODO: migrate to v-select -->
-              <n-select
-                v-model:value="themeStore$$q.rawTheme"
-                :options="themeOptions$$q"
-              />
-            </div>
+        </div>
+        <div class="flex flex-col gap-y-4">
+          <h2 class="text-xl">
+            {{ t('settings.device.header.Theme') }}
+          </h2>
+          <div class="w-64">
+            <!-- TODO: migrate to v-select -->
+            <n-select
+              v-model:value="themeStore$$q.rawTheme"
+              :options="themeOptions$$q"
+            />
           </div>
-          <div class="flex flex-col gap-y-4">
-            <h2 class="text-xl">Audio quality</h2>
-            <div class="w-64">
-              <!-- TODO: migrate to v-select -->
-              <n-select
-                v-model:value="preferenceStore$$q.audioQuality"
-                :options="audioQualityOptions$$q"
-              />
-            </div>
+        </div>
+        <div class="flex flex-col gap-y-4">
+          <h2 class="text-xl">
+            {{ t('settings.device.header.AudioQuality') }}
+          </h2>
+          <div class="w-64">
+            <!-- TODO: migrate to v-select -->
+            <n-select
+              v-model:value="preferenceStore$$q.audioQuality"
+              :options="audioQualityOptions$$q"
+            />
           </div>
         </div>
       </div>
-      <!-- div class="flex flex-col gap-y-4">
-        <header class="s-title">
-          <h1 class="text-h5">Account Settings</h1>
-        </header>
-        <div class="flex flex-col gap-y-8">
-          <div class="flex flex-col gap-y-4">
-            <h2 class="text-xl">Display Name</h2>
-            <div class="w-64">
-              <n-input type="text" placeholder="Display Name" class="w-full" />
-            </div>
-          </div>
-        </div>
-      </div -->
+      <div class="mt-4">
+        <router-link
+          class="inline-flex items-center gap-x-1 text-st-primary text-base"
+          to="/settings/account"
+        >
+          {{ t('settings.device.link.AccountSettings') }}
+        </router-link>
+      </div>
     </div>
   </v-container>
 </template>

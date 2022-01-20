@@ -51,6 +51,7 @@ export class VAccountUpdateData implements IAccountUpdateData {
   @Transform(({ value }) => tStringNormalizeSingleLine(value))
   displayName?: string;
 
+  @IsUndefinable()
   @IsRegion()
   region?: OSRegion;
 

@@ -4,6 +4,7 @@ export interface AsyncCache<T> {
   readonly renewing: boolean;
   // same as reading valueAsync (if force is false or omitted), but this is needed to prevent optimizer from removing it
   readonly renew: (force?: boolean) => Promise<T>;
+  readonly clear: () => void;
 }
 
 export function createAsyncCache<T>(
@@ -78,5 +79,9 @@ export function createAsyncCache<T>(
       return !!renewPromise;
     },
     renew: (force = false): Promise<T> => renewInternal(force),
+    clear: (): void => {
+      cacheValue = undefined;
+      renewPromise = undefined;
+    },
   };
 }

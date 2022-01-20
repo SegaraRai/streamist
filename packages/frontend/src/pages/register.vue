@@ -271,6 +271,7 @@ export default defineComponent({
           />
           <v-text-field
             v-model="displayName$$q"
+            class="s-v-input-hide-details"
             type="text"
             autocomplete="off"
             required
