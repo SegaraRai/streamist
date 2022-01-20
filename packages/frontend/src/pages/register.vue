@@ -171,6 +171,8 @@ export default defineComponent({
               password,
               displayName: displayName$$q.value,
               region: region$$q.value,
+            },
+            query: {
               captchaResponse: hCaptchaResponse$$q.value,
             },
           })

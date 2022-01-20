@@ -8,6 +8,9 @@ export type Methods = {
     };
   };
   post: {
+    query: {
+      captchaResponse: string;
+    };
     reqBody: VAccountCreateData;
   };
 };

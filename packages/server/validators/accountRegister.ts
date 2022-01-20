@@ -21,7 +21,6 @@ import { IsRegion, tStringNormalizeSingleLine } from './utils';
 export type IAccountCreateData = Pick<User, 'username' | 'displayName'> & {
   region: OSRegion;
   password: string;
-  captchaResponse: string;
 };
 
 export class VAccountCreateData implements IAccountCreateData {
@@ -48,10 +47,6 @@ export class VAccountCreateData implements IAccountCreateData {
 
   @IsRegion()
   region!: OSRegion;
-
-  @IsString()
-  @IsNotEmpty()
-  captchaResponse!: string;
 }
 
 export class VAccountCheckQuery {

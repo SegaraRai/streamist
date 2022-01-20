@@ -12,7 +12,6 @@ declare module 'vue' {
     IMdiClose: typeof import('~icons/mdi/close')['default']
     IMdiDisc: typeof import('~icons/mdi/disc')['default']
     IMdiFileMusic: typeof import('~icons/mdi/file-music')['default']
-    IMdiImagePlus: typeof import('~icons/mdi/image-plus')['default']
     IMdiInbox: typeof import('~icons/mdi/inbox')['default']
     IMdiMagnify: typeof import('~icons/mdi/magnify')['default']
     IMdiMusicNoteQuarter: typeof import('~icons/mdi/music-note-quarter')['default']

@@ -16,8 +16,14 @@ export async function verifyHCaptcha(
   sitekey: string,
   captchaResponse: string
 ): Promise<boolean> {
+  if (typeof captchaResponse !== 'string') {
+    return false;
+  }
+
   if (process.env.NODE_ENV === 'development') {
-    logger.info('Skipping hCaptcha verification in development mode');
+    logger.info(
+      `Skipping hCaptcha verification in development mode (response = ${captchaResponse})`
+    );
     return true;
   }
 
