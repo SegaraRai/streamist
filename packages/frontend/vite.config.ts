@@ -135,7 +135,7 @@ export default defineConfig({
         __dirname,
         '../server/node_modules/.prisma'
       )}/`,
-      '$shared/': `${path.resolve(__dirname, '../shared')}/`,
+      '$shared/': `${path.resolve(__dirname, '../shared/src')}/`,
     },
   },
   plugins: [
