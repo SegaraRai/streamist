@@ -19,8 +19,7 @@
           setting === 'dark' || (prefersDark && setting !== 'light');
         const themeName = isDark ? 'dark' : 'light';
         const rootElement = document.documentElement;
-        rootElement.classList.toggle('dark', isDark);
-        rootElement.classList.toggle('light', !isDark);
+        rootElement.classList.add(isDark ? 'dark' : 'light');
         rootElement.dataset.sTheme = themeName;
       })();
     </script>
