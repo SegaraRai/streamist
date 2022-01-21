@@ -122,6 +122,7 @@ importers:
       vite-plugin-vue-layouts: ^0.5.0
       vite-plugin-windicss: ^1.6.3
       vite-ssg: ^0.17.6
+      vitest: ^0.1.26
       vue: ^3.2.28
       vue-demi: ^0.12.1
       vue-i18n: ^9.2.0-beta.23
@@ -185,6 +186,7 @@ importers:
       vite-plugin-vue-layouts: 0.5.0_fd87e02f4ca017bf2dd6f0f7031e5587
       vite-plugin-windicss: 1.6.3_vite@2.7.13
       vite-ssg: 0.17.6_0fbea241bbe499c40aa30c136c6804ec
+      vitest: 0.1.26
       vue-tsc: 0.30.6_typescript@4.5.5
       windicss: 3.4.3
 

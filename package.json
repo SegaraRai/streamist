@@ -25,7 +25,7 @@
     "start:client": "npm start --prefix packages/frontend",
     "start:server": "npm start --prefix packages/server",
     "pretest": "pnpm run generate",
-    "test": "",
+    "test": "run-s test:*",
     "test:server": "pnpm run test --prefix packages/server",
     "pretypecheck": "pnpm run generate",
     "typecheck": "run-s typecheck:*",
