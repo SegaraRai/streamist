@@ -21,7 +21,6 @@
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "types": [
-      "cypress",
       "vite/client",
       "vite-plugin-pages/client",
       "vite-plugin-vue-layouts/client"
