@@ -1,7 +1,7 @@
 import type { GlobalTheme, GlobalThemeOverrides } from 'naive-ui';
 import { darkTheme } from 'naive-ui/lib/themes/dark';
 import { lightTheme } from 'naive-ui/lib/themes/light';
-import { THEMES, ThemeName } from './definitions';
+import { THEMES, ThemeName } from '~/config';
 
 export interface NaiveUITheme {
   readonly name: ThemeName;

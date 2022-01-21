@@ -1,6 +1,6 @@
 import { storeToRefs } from 'pinia';
-import { THEMES, ThemeName } from '~/logic/theme';
-import { PREFERENCE_THEME_DEFAULT, useThemeStore } from '~/stores/theme';
+import { PREFERENCE_THEME_DEFAULT, THEMES, ThemeName } from '~/config';
+import { useThemeStore } from '~/stores/theme';
 
 const THEME_NO_PREFERENCE: ThemeName = 'light';
 

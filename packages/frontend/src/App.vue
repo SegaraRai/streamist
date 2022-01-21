@@ -2,8 +2,8 @@
 import { storeToRefs } from 'pinia';
 import type { Ref } from 'vue';
 import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
-import type { LanguageCode } from '~/config';
-import { NAIVE_UI_THEMES, THEMES } from '~/logic/theme';
+import { LanguageCode, THEMES } from '~/config';
+import { NAIVE_UI_THEMES } from '~/logic/theme';
 import { loggedInRef } from '~/stores/auth';
 import { usePreferenceStore } from '~/stores/preference';
 

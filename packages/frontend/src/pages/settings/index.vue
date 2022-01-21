@@ -9,11 +9,12 @@ import { useDialog } from 'naive-ui';
 import {
   PREFERENCE_AUDIO_QUALITIES,
   PREFERENCE_LANGUAGE_OPTIONS,
+  PREFERENCE_THEMES,
 } from '~/config';
 import { useSyncDB } from '~/db';
 import { logout } from '~/logic/logout';
 import { usePreferenceStore } from '~/stores/preference';
-import { PREFERENCE_THEMES, useThemeStore } from '~/stores/theme';
+import { useThemeStore } from '~/stores/theme';
 
 export default defineComponent({
   setup() {

@@ -1,6 +1,6 @@
 import type { VNode } from 'vue';
 import { VIcon } from 'vuetify/lib/components/index';
-import { COLOR_CSS_VAR_MAP, ThemeColor } from '../theme';
+import { COLOR_CSS_VAR_MAP, ThemeColor } from '~/config';
 
 export function nCreateDropdownIcon(
   icon: string | (() => string),

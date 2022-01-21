@@ -1,17 +1,13 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import { THEME_NAMES, ThemeName } from '~/logic/theme';
+import {
+  PREFERENCE_THEMES,
+  PREFERENCE_THEME_DEFAULT,
+  PreferenceThemeName,
+} from '~/config';
 import { createInSerializer } from './utils';
 
-export type InternalTheme = ThemeName | 'system';
-
-export const PREFERENCE_THEME_DEFAULT: InternalTheme = 'system';
-export const PREFERENCE_THEMES: readonly InternalTheme[] = [
-  'system',
-  ...THEME_NAMES,
-];
-
 export const useThemeStore = defineStore('theme', () => {
-  const rawTheme = useLocalStorage<InternalTheme>(
+  const rawTheme = useLocalStorage<PreferenceThemeName>(
     'preference.theme',
     PREFERENCE_THEME_DEFAULT,
     {

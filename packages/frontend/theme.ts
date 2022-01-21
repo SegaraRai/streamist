@@ -1,1 +1,1 @@
-export * from './src/logic/theme/definitions';
+export * from './src/config/theme';
