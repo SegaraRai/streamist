@@ -107,12 +107,15 @@ export default defineComponent({
     >
       <div class="flex w-full justify-between" :style="rowStyle$$q">
         <template v-for="(item, _index2) in cols" :key="_index2">
-          <div :style="cellStyle$$q">
+          <div :_="(_index2 || undefined) && undefined" :style="cellStyle$$q">
             <slot :data="item" :width="itemWidth"></slot>
           </div>
         </template>
         <template v-for="(_item, _index2) in dummyCols" :key="_index2">
-          <div :style="cellStyle$$q"></div>
+          <div
+            :_="(_item || _index2 || undefined) && undefined"
+            :style="cellStyle$$q"
+          ></div>
         </template>
       </div>
     </template>

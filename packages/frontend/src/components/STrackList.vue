@@ -439,7 +439,10 @@ export default defineComponent({
         <div class="flex flex-col">
           <template v-for="(item, _index) in items$$q" :key="_index">
             <template v-if="item.type$$q === 'discNumberHeader'">
-              <STrackListDiscHeaderItem :item="item" />
+              <STrackListDiscHeaderItem
+                :_="(_index || undefined) && undefined"
+                :item="item"
+              />
             </template>
             <template v-else>
               <STrackListTrackItem

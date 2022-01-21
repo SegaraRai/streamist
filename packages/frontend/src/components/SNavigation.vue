@@ -82,7 +82,7 @@ export default defineComponent({
   <VList dense class="overflow-x-hidden">
     <template v-for="(item, _index) in navItems$$q" :key="_index">
       <template v-if="item.type === 'link'">
-        <VListItem link :to="item.path">
+        <VListItem link :to="item.path" :_="(_index || undefined) && undefined">
           <VListItemAvatar icon class="flex items-center justify-center">
             <VIcon>{{ item.icon }}</VIcon>
           </VListItemAvatar>

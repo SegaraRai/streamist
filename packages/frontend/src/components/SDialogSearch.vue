@@ -271,6 +271,7 @@ export default defineComponent({
               :key="_index"
             >
               <SSearchHistoryItem
+                :_="(_index || undefined) && undefined"
                 :query="item.query"
                 :at="item.at"
                 @click="searchQuery$$q = item.query"
@@ -293,6 +294,7 @@ export default defineComponent({
               :key="_index"
             >
               <RouterLink
+                :_="(_index || undefined) && undefined"
                 class="block"
                 :to="calcHref$$q(item)"
                 @click.prevent="onSelect$$q(item)"

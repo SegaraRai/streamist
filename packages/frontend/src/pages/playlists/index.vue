@@ -119,6 +119,7 @@ export default defineComponent({
           <VList flat @contextmenu.prevent>
             <template v-for="(item, _index) in items$$q" :key="_index">
               <VListItem
+                :_="(_index || undefined) && undefined"
                 :disabled="!!selectedPlaylist$$q"
                 :to="`/playlists/${item.id$$q}`"
                 class="flex gap-x-4 s-hover-container opacity-100"

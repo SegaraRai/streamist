@@ -89,6 +89,7 @@ export default defineComponent({
       :key="_index"
     >
       <SUploaderListItem
+        :_="(_index || undefined) && undefined"
         :filename="file.file.name"
         :filesize="file.file.size"
         :file-type="file.type"
@@ -130,6 +131,7 @@ export default defineComponent({
     <template v-for="(file, _index) in uploadStore$$q.files" :key="_index">
       <template v-if="file.status !== 'removed'">
         <SUploaderListItem
+          :_="(_index || undefined) && undefined"
           :filename="file.filename"
           :filesize="file.fileSize"
           :file-type="file.fileType"
