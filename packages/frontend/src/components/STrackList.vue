@@ -380,14 +380,14 @@ export default defineComponent({
         : 's-list--unselected'
     "
   >
-    <v-list
+    <VList
       flat
       density="compact"
       class="s-list select-none"
       @contextmenu.prevent
     >
       <template v-if="!hideHeader">
-        <v-list-item
+        <VListItem
           class="w-full py-0 h-8 !min-h-0 flex items-center !<sm:px-2 select-none font-bold text-sm"
         >
           <div class="s-track-list-column-icon mr-4 py-2">
@@ -397,33 +397,33 @@ export default defineComponent({
                 : ''
             }}
           </div>
-          <v-list-item-header
+          <VListItemHeader
             class="s-track-list-column-title flex items-center py-2"
           >
-            <v-list-item-title>
+            <VListItemTitle>
               {{ t('trackList.Title') }}
-            </v-list-item-title>
-          </v-list-item-header>
+            </VListItemTitle>
+          </VListItemHeader>
           <template v-if="showAlbum">
-            <v-list-item-header
+            <VListItemHeader
               class="s-track-list-column-album flex items-center ml-6 py-2 !<md:hidden"
             >
-              <v-list-item-title>
+              <VListItemTitle>
                 {{ t('trackList.Album') }}
-              </v-list-item-title>
-            </v-list-item-header>
+              </VListItemTitle>
+            </VListItemHeader>
           </template>
           <template v-if="!hideDuration">
             <div class="s-track-list-column-duration py-1 !<sm:hidden">
-              <v-icon>mdi-clock-outline</v-icon>
+              <VIcon>mdi-clock-outline</VIcon>
             </div>
           </template>
           <div class="s-track-list-column-menu py-1"></div>
           <template v-if="removable">
             <div class="s-track-list-column-menu py-1"></div>
           </template>
-        </v-list-item>
-        <v-divider
+        </VListItem>
+        <VDivider
           class="mx-1"
           :class="
             renderMode !== 'draggable' &&
@@ -439,10 +439,10 @@ export default defineComponent({
         <div class="flex flex-col">
           <template v-for="(item, _index) in items$$q" :key="_index">
             <template v-if="item.type$$q === 'discNumberHeader'">
-              <s-track-list-disc-header-item :item="item" />
+              <STrackListDiscHeaderItem :item="item" />
             </template>
             <template v-else>
-              <s-track-list-track-item
+              <STrackListTrackItem
                 :item="item"
                 :index-content="indexContent"
                 :link-excludes="linkExcludes"
@@ -468,7 +468,7 @@ export default defineComponent({
       </template>
       <template v-else-if="renderMode === 'draggable'">
         <!-- discNumberHeader is not supported with 'draggable' render mode -->
-        <s-draggable
+        <SDraggable
           :items="trackOnlyItems$$q"
           item-key="id"
           class="flex flex-col"
@@ -479,7 +479,7 @@ export default defineComponent({
           @dragend="dragging$$q = false"
         >
           <template #item="{ element }">
-            <s-track-list-track-item
+            <STrackListTrackItem
               :class="trackOnlyItems$$q.length > 1 && 'active:cursor-move'"
               :item="element"
               :index-content="indexContent"
@@ -501,7 +501,7 @@ export default defineComponent({
               @ctx-menu="showMenu$$q($event, element)"
             />
           </template>
-        </s-draggable>
+        </SDraggable>
       </template>
       <template v-else-if="renderMode === 'virtual'">
         <div
@@ -514,10 +514,10 @@ export default defineComponent({
             :key="_index"
           >
             <template v-if="item.type$$q === 'discNumberHeader'">
-              <s-track-list-disc-header-item :item="item" />
+              <STrackListDiscHeaderItem :item="item" />
             </template>
             <template v-else>
-              <s-track-list-track-item
+              <STrackListTrackItem
                 :item="item"
                 :index-content="indexContent"
                 :link-excludes="linkExcludes"
@@ -541,10 +541,10 @@ export default defineComponent({
           </template>
         </div>
       </template>
-    </v-list>
+    </VList>
   </div>
   <template v-if="lastSelectedTrack$$q">
-    <n-dropdown
+    <NDropdown
       class="select-none"
       placement="bottom-start"
       trigger="manual"
@@ -555,11 +555,8 @@ export default defineComponent({
       :on-clickoutside="closeMenu$$q"
       @contextmenu.prevent
     />
-    <s-dialog-track-edit
-      v-model="dialogEdit$$q"
-      :track="lastSelectedTrack$$q"
-    />
-    <s-dialog-track-details
+    <SDialogTrackEdit v-model="dialogEdit$$q" :track="lastSelectedTrack$$q" />
+    <SDialogTrackDetails
       v-model="dialogDetails$$q"
       :track="lastSelectedTrack$$q"
     />

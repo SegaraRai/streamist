@@ -115,32 +115,32 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-modal
+  <NModal
     v-model:show="dialog$$q"
     transform-origin="center"
     class="select-none max-w-xl"
   >
-    <v-card class="w-full md:min-w-2xl">
-      <v-card-title class="flex">
+    <VCard class="w-full md:min-w-2xl">
+      <VCardTitle class="flex">
         <div class="s-dialog-title">
           {{ t('dialogComponent.mergeArtist.title', [artist.name]) }}
         </div>
         <div class="flex-none">
-          <v-btn
+          <VBtn
             flat
             icon
             size="x-small"
             class="text-st-error"
             @click="dialog$$q = false"
           >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+            <VIcon>mdi-close</VIcon>
+          </VBtn>
         </div>
-      </v-card-title>
-      <v-card-text class="opacity-100">
+      </VCardTitle>
+      <VCardText class="opacity-100">
         <div class="flex gap-x-4">
           <div>
-            <s-artist-image
+            <SArtistImage
               class="w-40 h-40"
               size="160"
               :artist="artist"
@@ -151,20 +151,20 @@ export default defineComponent({
             <div>
               Merging artist <strong>{{ artist.name }}</strong> to
             </div>
-            <s-combobox-artist
+            <SComboboxArtist
               v-model="newArtistName$$q"
               v-model:artistId="newArtistId$$q"
               :label="t('dialogComponent.mergeArtist.label.Artist')"
             />
           </div>
         </div>
-      </v-card-text>
-      <v-card-actions class="gap-x-4 pb-4 px-4">
-        <v-spacer />
-        <v-btn @click="dialog$$q = false">
+      </VCardText>
+      <VCardActions class="gap-x-4 pb-4 px-4">
+        <VSpacer />
+        <VBtn @click="dialog$$q = false">
           {{ t('dialogComponent.mergeArtist.button.Cancel') }}
-        </v-btn>
-        <v-btn
+        </VBtn>
+        <VBtn
           class="relative"
           color="warning"
           :disabled="requestInProgress$$q || !modified$$q"
@@ -174,14 +174,14 @@ export default defineComponent({
             {{ t('dialogComponent.mergeArtist.button.Merge') }}
           </span>
           <template v-if="requestInProgress$$q">
-            <v-progress-circular
+            <VProgressCircular
               class="absolute left-0 top-0 right-0 bottom-0 m-auto"
               indeterminate
               size="20"
             />
           </template>
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </n-modal>
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </NModal>
 </template>

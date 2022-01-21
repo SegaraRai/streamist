@@ -252,7 +252,7 @@ export default defineComponent({
           class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl bg-black/50"
           :class="roundClass$$q"
         >
-          <v-progress-circular indeterminate />
+          <VProgressCircular indeterminate />
         </div>
       </template>
       <template v-else>
@@ -260,7 +260,7 @@ export default defineComponent({
           class="s-hover-visible absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl bg-black/50"
           :class="roundClass$$q"
         >
-          <i-mdi-image-plus class="w-16 h-16" />
+          <IMdiImagePlus class="w-16 h-16" />
         </div>
       </template>
     </template>
@@ -273,33 +273,30 @@ export default defineComponent({
     :accept="accept$$q"
     @change="onFileSelected$$q"
   />
-  <n-modal v-model:show="dialog$$q" transform-origin="center">
+  <NModal v-model:show="dialog$$q" transform-origin="center">
     <div class="pt-12 max-w-full !sm:pt-0 sm:w-xl md:w-180 lg:w-220">
-      <v-card class="w-full h-full">
-        <v-card-title class="flex">
+      <VCard class="w-full h-full">
+        <VCardTitle class="flex">
           <div class="s-dialog-title">
             <slot name="title"></slot>
           </div>
           <div class="flex-none">
-            <v-btn
+            <VBtn
               flat
               icon
               size="x-small"
               class="text-st-error"
               @click="dialog$$q = false"
             >
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
+              <VIcon>mdi-close</VIcon>
+            </VBtn>
           </div>
-        </v-card-title>
-        <v-card-text class="opacity-100 flex flex-col items-center">
-          <n-scrollbar
-            class="flex-1 s-n-scrollbar-flex-col-center"
-            x-scrollable
-          >
+        </VCardTitle>
+        <VCardText class="opacity-100 flex flex-col items-center">
+          <NScrollbar class="flex-1 s-n-scrollbar-flex-col-center" x-scrollable>
             <template v-if="images$$q">
               <div class="py-8">
-                <s-draggable
+                <SDraggable
                   :items="images$$q"
                   item-key="id"
                   class="flex gap-x-4 h-48 sm:h-64"
@@ -313,7 +310,7 @@ export default defineComponent({
                       v-for="image in uploadingFilesPrepend$$q"
                       :key="image.id"
                     >
-                      <s-uploading-image
+                      <SUploadingImage
                         class="flex-none w-32 h-32 sm:w-48 sm:h-48 overflow-hidden"
                         :file="image.file"
                       />
@@ -327,17 +324,15 @@ export default defineComponent({
                         rel="noopener noreferrer"
                         :href="getOriginalImageURL$$q(element)"
                       >
-                        <s-nullable-image
+                        <SNullableImage
                           class="flex-none w-32 h-32 sm:w-48 sm:h-48"
                           :image="element"
                           :alt="attachToTitle"
                           size="200"
                         />
                       </a>
-                      <n-config-provider
-                        :theme-overrides="errorOverrideTheme$$q"
-                      >
-                        <n-popconfirm
+                      <NConfigProvider :theme-overrides="errorOverrideTheme$$q">
+                        <NPopconfirm
                           :positive-text="
                             t('confirm.deleteImage.button.Delete')
                           "
@@ -347,7 +342,7 @@ export default defineComponent({
                           @positive-click="removeImage$$q(element.id)"
                         >
                           <template #trigger>
-                            <n-button
+                            <NButton
                               tag="div"
                               text
                               class="select-none"
@@ -355,15 +350,15 @@ export default defineComponent({
                               data-draggable="false"
                               @dragstart.stop.prevent
                             >
-                              <v-btn
+                              <VBtn
                                 flat
                                 icon
                                 size="small"
                                 class="text-st-error"
                               >
-                                <v-icon>mdi-delete</v-icon>
-                              </v-btn>
-                            </n-button>
+                                <VIcon>mdi-delete</VIcon>
+                              </VBtn>
+                            </NButton>
                           </template>
                           <div class="flex flex-col gap-y-2">
                             <div class="flex-1">
@@ -375,8 +370,8 @@ export default defineComponent({
                               {{ t('common.ThisActionCannotBeUndone') }}
                             </div>
                           </div>
-                        </n-popconfirm>
-                      </n-config-provider>
+                        </NPopconfirm>
+                      </NConfigProvider>
                     </div>
                   </template>
                   <template #footer>
@@ -384,27 +379,27 @@ export default defineComponent({
                       v-for="image in uploadingFilesAppend$$q"
                       :key="image.id"
                     >
-                      <s-uploading-image
+                      <SUploadingImage
                         class="flex-none w-32 h-32 sm:w-48 sm:h-48 overflow-hidden"
                         :file="image.file"
                       />
                     </template>
                     <div class="flex-none flex flex-col gap-y-4 items-center">
-                      <v-btn
+                      <VBtn
                         flat
                         class="!w-32 !h-32 !sm:w-48 !sm:h-48 flex items-center justify-center border"
                         @click="inputFileElement$$q?.click()"
                       >
-                        <v-icon size="48">mdi-image-plus</v-icon>
-                      </v-btn>
+                        <VIcon size="48">mdi-image-plus</VIcon>
+                      </VBtn>
                     </div>
                   </template>
-                </s-draggable>
+                </SDraggable>
               </div>
             </template>
-          </n-scrollbar>
-        </v-card-text>
-      </v-card>
+          </NScrollbar>
+        </VCardText>
+      </VCard>
     </div>
-  </n-modal>
+  </NModal>
 </template>

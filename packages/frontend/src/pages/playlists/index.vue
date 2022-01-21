@@ -91,7 +91,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-0">
+  <VContainer fluid class="pt-0">
     <header class="s-title mb-4">
       <div class="text-h5">
         {{ t('playlists.Playlists') }}
@@ -103,10 +103,10 @@ export default defineComponent({
       </template>
     </header>
     <div class="mb-6 flex items-center gap-x-8">
-      <v-btn color="primary" flat icon @click="showCreateDialog$$q = true">
-        <v-icon>mdi-plus</v-icon>
-      </v-btn>
-      <v-divider />
+      <VBtn color="primary" flat icon @click="showCreateDialog$$q = true">
+        <VIcon>mdi-plus</VIcon>
+      </VBtn>
+      <VDivider />
     </div>
     <template v-if="items$$q">
       <template v-if="items$$q.length">
@@ -115,9 +115,9 @@ export default defineComponent({
             selectedPlaylist$$q ? 's-list--selected' : 's-list--unselected'
           "
         >
-          <v-list flat @contextmenu.prevent>
+          <VList flat @contextmenu.prevent>
             <template v-for="(item, _index) in items$$q" :key="_index">
-              <v-list-item
+              <VListItem
                 :disabled="!!selectedPlaylist$$q"
                 :to="`/playlists/${item.id$$q}`"
                 class="flex gap-x-4 s-hover-container opacity-100"
@@ -128,23 +128,23 @@ export default defineComponent({
                 "
                 @contextmenu.prevent="showMenu$$q($event, item)"
               >
-                <s-playlist-image
+                <SPlaylistImage
                   class="flex-none w-9 h-9"
                   size="36"
                   :playlist="item.playlist$$q"
                 />
-                <v-list-item-header class="flex-1">
-                  <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
-                  <v-list-item-subtitle>
+                <VListItemHeader class="flex-1">
+                  <VListItemTitle>{{ item.title$$q }}</VListItemTitle>
+                  <VListItemSubtitle>
                     <span>{{
                       t('playlists.n_tracks', item.trackCount$$q)
                     }}</span>
                     <template v-if="item.trackCount$$q">
                       <span>, {{ item.formattedDuration$$q }}</span>
                     </template>
-                  </v-list-item-subtitle>
-                </v-list-item-header>
-                <v-btn
+                  </VListItemSubtitle>
+                </VListItemHeader>
+                <VBtn
                   icon
                   flat
                   text
@@ -152,13 +152,13 @@ export default defineComponent({
                   class="bg-transparent"
                   @click.prevent.stop="showMenu$$q($event.target as HTMLElement, item)"
                 >
-                  <v-icon class="s-hover-visible">mdi-dots-vertical</v-icon>
-                </v-btn>
-              </v-list-item>
+                  <VIcon class="s-hover-visible">mdi-dots-vertical</VIcon>
+                </VBtn>
+              </VListItem>
             </template>
-          </v-list>
+          </VList>
         </div>
-        <s-dropdown-playlist
+        <SDropdownPlaylist
           v-model="dropdown$$q"
           v-model:show-create-dialog="showCreateDialog$$q"
           show-create-item
@@ -171,5 +171,5 @@ export default defineComponent({
         </div>
       </template>
     </template>
-  </v-container>
+  </VContainer>
 </template>

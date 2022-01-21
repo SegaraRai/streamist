@@ -75,7 +75,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-dropdown
+  <NDropdown
     class="select-none"
     placement="bottom-start"
     trigger="manual"
@@ -87,7 +87,7 @@ export default defineComponent({
     @contextmenu.prevent
   />
   <template v-if="selectedAlbum$$q">
-    <s-dialog-album-edit v-model="dialogEdit$$q" :album="selectedAlbum$$q" />
-    <s-dialog-album-merge v-model="dialogMerge$$q" :album="selectedAlbum$$q" />
+    <SDialogAlbumEdit v-model="dialogEdit$$q" :album="selectedAlbum$$q" />
+    <SDialogAlbumMerge v-model="dialogMerge$$q" :album="selectedAlbum$$q" />
   </template>
 </template>

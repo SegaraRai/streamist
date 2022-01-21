@@ -49,46 +49,46 @@ export default defineComponent({
         @change="onFileSelected$$q"
       />
       <div class="flex mb-4 px-4 justify-between">
-        <v-btn
+        <VBtn
           color="primary"
           text
           :disabled="!canUpload$$q"
           @click="inputFileElement$$q?.click()"
         >
-          <v-icon>mdi-plus</v-icon>
+          <VIcon>mdi-plus</VIcon>
           <span class="ml-2">Add File</span>
-        </v-btn>
-        <v-btn
+        </VBtn>
+        <VBtn
           color="red"
           text
           :disabled="!uploadStore$$q.canClearAll"
           @click="uploadStore$$q.clearAll()"
         >
-          <v-icon>mdi-close</v-icon>
+          <VIcon>mdi-close</VIcon>
           <span class="ml-2">Clear All</span>
-        </v-btn>
+        </VBtn>
       </div>
-      <v-divider />
-      <n-scrollbar class="max-h-screen">
-        <s-uploader-list />
-      </n-scrollbar>
-      <v-divider />
+      <VDivider />
+      <NScrollbar class="max-h-screen">
+        <SUploaderList />
+      </NScrollbar>
+      <VDivider />
       <div class="flex gap-x-4 mt-4 px-4 mb-4">
-        <v-btn
+        <VBtn
           color="primary"
           text
           :disabled="!canUpload$$q || uploadStore$$q.stagedFiles.length === 0"
           @click="uploadStore$$q.startUpload()"
         >
-          <v-icon>mdi-cloud-upload</v-icon>
+          <VIcon>mdi-cloud-upload</VIcon>
           <span class="ml-2">Start Upload</span>
-        </v-btn>
+        </VBtn>
       </div>
     </template>
     <template v-else>
-      <v-alert type="error" class="select-text whitespace-pre-line">
+      <VAlert type="error" class="select-text whitespace-pre-line">
         {{ t('uploader.limitReached') }}
-      </v-alert>
+      </VAlert>
     </template>
   </div>
 </template>

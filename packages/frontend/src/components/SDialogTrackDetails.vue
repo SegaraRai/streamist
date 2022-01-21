@@ -130,35 +130,35 @@ export default defineComponent({
 
 <template>
   <template v-if="value$$q">
-    <n-modal
+    <NModal
       v-model:show="dialog$$q"
       transform-origin="center"
       class="select-none max-w-3xl"
     >
-      <v-card class="w-full md:min-w-2xl">
-        <v-card-title class="flex">
+      <VCard class="w-full md:min-w-2xl">
+        <VCardTitle class="flex">
           <div class="s-dialog-title">
             {{
               t('dialogComponent.trackDetails.title', [value$$q.track$$q.title])
             }}
           </div>
           <div class="flex-none">
-            <v-btn
+            <VBtn
               flat
               icon
               size="x-small"
               class="text-st-error"
               @click="dialog$$q = false"
             >
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
+              <VIcon>mdi-close</VIcon>
+            </VBtn>
           </div>
-        </v-card-title>
-        <v-card-text class="opacity-100">
+        </VCardTitle>
+        <VCardText class="opacity-100">
           <div class="flex gap-x-4">
             <!-- left pane (image) -->
             <div class="<sm:w-full text-center leading-none">
-              <s-album-image
+              <SAlbumImage
                 class="w-40 h-40"
                 size="160"
                 :album="value$$q.album$$q"
@@ -175,12 +175,12 @@ export default defineComponent({
                 >
                   {{ value$$q.track$$q.title }}
                 </div>
-                <router-link
+                <RouterLink
                   class="s-subheading-sl"
                   :to="`/albums/${value$$q.track$$q.albumId}`"
                 >
                   {{ value$$q.album$$q.title }}
-                </router-link>
+                </RouterLink>
               </div>
               <dl class="flex-1 flex flex-col gap-y-4 select-text">
                 <template
@@ -206,18 +206,18 @@ export default defineComponent({
                         :key="coArtist.artistId"
                       >
                         <div class="flex items-center gap-x-2">
-                          <router-link
+                          <RouterLink
                             class="inline-flex items-center gap-x-1 max-w-full"
                             :to="`/artists/${coArtist.artistId}`"
                           >
-                            <s-artist-image
+                            <SArtistImage
                               class="flex-none w-6 h-6"
                               :artist="coArtist.artistId"
                             />
                             <div class="s-heading-sl flex-shrink-1">
                               {{ coArtist.artist?.name }}
                             </div>
-                          </router-link>
+                          </RouterLink>
                         </div>
                       </template>
                     </dd>
@@ -229,27 +229,27 @@ export default defineComponent({
           <div class="s-subheading-sl flex items-center gap-x-3 mt-4">
             <div class="flex items-center gap-x-2.5">
               <div class="flex items-center">
-                <i-mdi-disc />
+                <IMdiDisc />
                 <span>
                   {{ value$$q.track$$q.discNumber }}
                 </span>
               </div>
               <div class="flex items-center">
-                <i-mdi-playlist-music />
+                <IMdiPlaylistMusic />
                 <span>
                   {{ value$$q.track$$q.trackNumber }}
                 </span>
               </div>
             </div>
             <div class="flex items-center gap-x-0.5">
-              <i-mdi-clock-outline />
+              <IMdiClockOutline />
               <span>
                 {{ formatTime$$q(value$$q.track$$q.duration) }}
               </span>
             </div>
             <template v-if="value$$q.track$$q.releaseDateText">
               <div class="flex items-center gap-x-0.5">
-                <i-mdi-calendar-outline />
+                <IMdiCalendarOutline />
                 <span>
                   {{ value$$q.track$$q.releaseDateText }}
                 </span>
@@ -257,7 +257,7 @@ export default defineComponent({
             </template>
             <template v-if="value$$q.track$$q.genre">
               <div class="flex items-center gap-x-0.5">
-                <i-mdi-file-music />
+                <IMdiFileMusic />
                 <span>
                   {{ value$$q.track$$q.genre }}
                 </span>
@@ -265,13 +265,13 @@ export default defineComponent({
             </template>
             <template v-if="value$$q.track$$q.bpm">
               <div class="flex items-center">
-                <i-mdi-music-note-quarter />
+                <IMdiMusicNoteQuarter />
                 <span> {{ value$$q.track$$q.bpm }} BPM </span>
               </div>
             </template>
           </div>
-        </v-card-text>
-      </v-card>
-    </n-modal>
+        </VCardText>
+      </VCard>
+    </NModal>
   </template>
 </template>

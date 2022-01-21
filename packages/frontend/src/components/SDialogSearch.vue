@@ -250,14 +250,14 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-modal
+  <NModal
     v-model:show="show$$q"
     transform-origin="center"
     class="select-none max-w-xl"
   >
-    <v-card class="w-full md:min-w-2xl p-2 h-[75vh] flex flex-col">
+    <VCard class="w-full md:min-w-2xl p-2 h-[75vh] flex flex-col">
       <div>
-        <v-text-field
+        <VTextField
           v-model="searchQuery$$q"
           class="s-v-input-hide-details w-full"
           density="compact"
@@ -265,43 +265,40 @@ export default defineComponent({
           hide-details
         />
         <template v-if="filteredRSQueries$$q.length">
-          <v-list density="compact">
+          <VList density="compact">
             <template
               v-for="(item, _index) in filteredRSQueries$$q"
               :key="_index"
             >
-              <s-search-history-item
+              <SSearchHistoryItem
                 :query="item.query"
                 :at="item.at"
                 @click="searchQuery$$q = item.query"
                 @remove="removeRecentlySearchedQuery$$q(item.query)"
               />
             </template>
-          </v-list>
+          </VList>
           <template v-if="searchResults$$q.length">
-            <v-divider />
+            <VDivider />
           </template>
         </template>
       </div>
-      <n-scrollbar
-        class="flex-1 s-n-scrollbar-min-h-full"
-        @scroll="onScroll$$q"
-      >
+      <NScrollbar class="flex-1 s-n-scrollbar-min-h-full" @scroll="onScroll$$q">
         <template v-if="searchResults$$q.length">
-          <v-list
+          <VList
             :class="selectedItem$$q ? 's-list--selected' : 's-list--unselected'"
           >
             <template
               v-for="({ item }, _index) in searchResults$$q"
               :key="_index"
             >
-              <router-link
+              <RouterLink
                 class="block"
                 :to="calcHref$$q(item)"
                 @click.prevent="onSelect$$q(item)"
                 @contextmenu.prevent="showMenu$$q($event, item)"
               >
-                <v-list-item
+                <VListItem
                   class="s-hover-container flex gap-x-4"
                   :class="[
                     item.t === 'track' &&
@@ -313,7 +310,7 @@ export default defineComponent({
                   ]"
                   link
                 >
-                  <v-list-item-avatar
+                  <VListItemAvatar
                     icon
                     class="flex-none flex items-center justify-center"
                   >
@@ -323,7 +320,7 @@ export default defineComponent({
                           item.t === 'track' && isTrackAvailable$$q(item.i.id)
                         "
                       >
-                        <s-album-image
+                        <SAlbumImage
                           class="s-hover-hidden w-full h-full"
                           size="40"
                           :album="item.i.albumId"
@@ -331,40 +328,40 @@ export default defineComponent({
                         <div
                           class="s-hover-visible w-full h-full flex items-center justify-center text-[2rem] light:opacity-80"
                         >
-                          <i-mdi-play-circle />
+                          <IMdiPlayCircle />
                         </div>
                       </template>
                       <template v-else-if="item.t === 'track'">
-                        <s-album-image
+                        <SAlbumImage
                           class="w-full h-full"
                           size="40"
                           :album="item.i.albumId"
                         />
                       </template>
                       <template v-else-if="item.t === 'album'">
-                        <s-album-image
+                        <SAlbumImage
                           class="w-full h-full"
                           size="40"
                           :album="item.i"
                         />
                       </template>
                       <template v-else-if="item.t === 'artist'">
-                        <s-artist-image
+                        <SArtistImage
                           class="w-full h-full"
                           size="40"
                           :artist="item.i"
                         />
                       </template>
                       <template v-else-if="item.t === 'playlist'">
-                        <s-playlist-image
+                        <SPlaylistImage
                           class="w-full h-full"
                           size="40"
                           :playlist="item.i"
                         />
                       </template>
                     </div>
-                  </v-list-item-avatar>
-                  <v-list-item-header>
+                  </VListItemAvatar>
+                  <VListItemHeader>
                     <div class="flex-1 flex flex-col">
                       <div class="s-heading-sl text-sm">
                         {{ item.l }}
@@ -373,8 +370,8 @@ export default defineComponent({
                         {{ t(`dialogComponent.search.type.${item.t}`) }}
                       </div>
                     </div>
-                  </v-list-item-header>
-                  <v-btn
+                  </VListItemHeader>
+                  <VBtn
                     v-show="item.t !== 'artist'"
                     icon
                     flat
@@ -383,25 +380,25 @@ export default defineComponent({
                     class="bg-transparent"
                     @click.prevent.stop="showMenu$$q($event.target as HTMLElement, item)"
                   >
-                    <v-icon class="s-hover-visible">mdi-dots-vertical</v-icon>
-                  </v-btn>
-                </v-list-item>
-              </router-link>
+                    <VIcon class="s-hover-visible">mdi-dots-vertical</VIcon>
+                  </VBtn>
+                </VListItem>
+              </RouterLink>
             </template>
-          </v-list>
+          </VList>
         </template>
         <template v-else-if="debouncedSearchQuery$$q">
           <div class="flex flex-col items-center gap-4 justify-center py-4">
             <div class="text-4xl">
-              <i-mdi-inbox />
+              <IMdiInbox />
             </div>
             <div class="opacity-60">{{ t('search.NoResultsFound') }}</div>
           </div>
         </template>
-      </n-scrollbar>
-    </v-card>
-  </n-modal>
-  <n-dropdown
+      </NScrollbar>
+    </VCard>
+  </NModal>
+  <NDropdown
     class="select-none"
     placement="bottom-start"
     trigger="manual"

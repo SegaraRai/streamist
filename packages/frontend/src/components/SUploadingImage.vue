@@ -44,7 +44,7 @@ export default defineComponent({
 
 <template>
   <div class="relative">
-    <s-nullable-image
+    <SNullableImage
       class="w-full h-full"
       :image="url$$q"
       :alt="t('alt.UploadingImage')"
@@ -52,7 +52,7 @@ export default defineComponent({
     <div
       class="absolute w-full h-full top-0 left-0 flex items-center justify-center bg-black/60"
     >
-      <v-progress-circular indeterminate size="32" />
+      <VProgressCircular indeterminate size="32" />
     </div>
   </div>
 </template>

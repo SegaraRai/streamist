@@ -60,7 +60,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-0">
+  <VContainer fluid class="pt-0">
     <div class="flex flex-col gap-y-4">
       <header class="s-title">
         <h1 class="text-h5">
@@ -74,7 +74,7 @@ export default defineComponent({
           </h2>
           <div class="w-64">
             <!-- TODO: migrate to v-select -->
-            <n-select
+            <NSelect
               v-model:value="preferenceStore$$q.language"
               :options="languageOptions$$q"
             />
@@ -86,7 +86,7 @@ export default defineComponent({
           </h2>
           <div class="w-64">
             <!-- TODO: migrate to v-select -->
-            <n-select
+            <NSelect
               v-model:value="themeStore$$q.rawTheme"
               :options="themeOptions$$q"
             />
@@ -98,7 +98,7 @@ export default defineComponent({
           </h2>
           <div class="w-64">
             <!-- TODO: migrate to v-select -->
-            <n-select
+            <NSelect
               v-model:value="preferenceStore$$q.audioQuality"
               :options="audioQualityOptions$$q"
             />
@@ -106,20 +106,20 @@ export default defineComponent({
         </div>
         <div class="mt-4 flex flex-col gap-y-8">
           <div>
-            <v-btn color="error" @click="logout$$q">
+            <VBtn color="error" @click="logout$$q">
               {{ t('common.SignOut') }}
-            </v-btn>
+            </VBtn>
           </div>
         </div>
       </div>
       <div class="mt-8">
-        <router-link
+        <RouterLink
           class="inline-flex items-center gap-x-1 text-st-primary text-lg"
           to="/settings/account"
         >
           {{ t('settings.device.link.AccountSettings') }}
-        </router-link>
+        </RouterLink>
       </div>
     </div>
-  </v-container>
+  </VContainer>
 </template>

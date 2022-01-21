@@ -214,7 +214,7 @@ export default defineComponent({
       class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-5"
     >
       <div class="p-0 m-0 leading-none flex-none">
-        <s-image-manager
+        <SImageManager
           attach-to-type="artist"
           :attach-to-id="artistId$$q"
           :attach-to-title="value$$q?.artist$$q.name"
@@ -224,14 +224,14 @@ export default defineComponent({
           <template #title>
             {{ t('imageManager.title.artist', [value$$q?.artist$$q.name]) }}
           </template>
-          <s-artist-image
+          <SArtistImage
             class="w-50 h-50"
             size="200"
             expandable
             :artist="artistId$$q"
             @image-ids="imageIds$$q = $event"
           />
-        </s-image-manager>
+        </SImageManager>
       </div>
       <div class="flex flex-col <md:gap-y-3 <md:text-center">
         <div>
@@ -251,39 +251,39 @@ export default defineComponent({
       </div>
     </div>
     <div class="flex-none flex flex-row items-center gap-x-8 my-8">
-      <v-btn
+      <VBtn
         color="primary"
         flat
         icon
         :disabled="!filteredSetList$$q.length"
         @click="play$$q(false)"
       >
-        <v-icon>mdi-play</v-icon>
-      </v-btn>
-      <v-btn
+        <VIcon>mdi-play</VIcon>
+      </VBtn>
+      <VBtn
         outlined
         :disabled="!filteredSetList$$q.length"
         @click="play$$q(true)"
       >
-        <v-icon left>mdi-shuffle</v-icon>
+        <VIcon left>mdi-shuffle</VIcon>
         <span>
           {{ t('artist.Shuffle') }}
         </span>
-      </v-btn>
+      </VBtn>
       <button
         class="rounded-full transition-colors"
         @click="openMenu$$q($event.target as HTMLElement)"
       >
-        <v-icon>mdi-dots-vertical</v-icon>
+        <VIcon>mdi-dots-vertical</VIcon>
       </button>
-      <v-divider />
+      <VDivider />
     </div>
     <template v-if="value$$q">
       <template v-if="value$$q.albums$$q.length">
         <div class="mt-4 mb-6">
           <template v-for="album in value$$q.albums$$q" :key="album.id">
             <div class="my-12">
-              <s-album
+              <SAlbum
                 :album="album.id"
                 :link-excludes="[artistId$$q]"
                 :set-list="setList$$q"
@@ -306,7 +306,7 @@ export default defineComponent({
             </v-btn -->
           </div>
         </template>
-        <s-track-list
+        <STrackList
           :link-excludes="[artistId$$q]"
           :tracks="additionalTracks$$q"
           :set-list="setList$$q"
@@ -318,6 +318,6 @@ export default defineComponent({
         />
       </template>
     </template>
-    <s-dropdown-artist v-model="dropdown$$q" />
+    <SDropdownArtist v-model="dropdown$$q" />
   </template>
 </template>

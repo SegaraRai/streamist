@@ -101,7 +101,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-sheet
+  <VSheet
     class="flex-1 w-full flex flex-row px-8 py-0 select-none"
     @click="preventXButton$$q"
     @mousedown="preventXButton$$q"
@@ -109,7 +109,7 @@ export default defineComponent({
   >
     <div class="w-20vw xl:w-25vw min-w-50 flex-none flex items-center">
       <template v-if="currentTrackInfo$$q">
-        <s-playback-track-view
+        <SPlaybackTrackView
           :track="currentTrackInfo$$q.track$$q"
           :artist-name="currentTrackInfo$$q.trackArtist$$q.name"
         />
@@ -124,45 +124,45 @@ export default defineComponent({
           @click="switchShuffle$$q"
           @mouseup="blurButton$$q"
         >
-          <v-icon :color="(shuffleEnabled$$q && 'primary') || undefined">
+          <VIcon :color="(shuffleEnabled$$q && 'primary') || undefined">
             {{ shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled' }}
-          </v-icon>
+          </VIcon>
         </button>
-        <v-btn
+        <VBtn
           class="mx-5"
           flat
           icon
           @click="skipPrevious$$q"
           @mouseup="blurButton$$q"
         >
-          <v-icon>mdi-skip-previous</v-icon>
-        </v-btn>
-        <v-btn class="mx-3" icon @click="play$$q" @mouseup="blurButton$$q">
-          <v-icon>
+          <VIcon>mdi-skip-previous</VIcon>
+        </VBtn>
+        <VBtn class="mx-3" icon @click="play$$q" @mouseup="blurButton$$q">
+          <VIcon>
             {{ playing$$q ? 'mdi-pause' : 'mdi-play' }}
-          </v-icon>
-        </v-btn>
-        <v-btn
+          </VIcon>
+        </VBtn>
+        <VBtn
           flat
           class="mx-5"
           icon
           @click="skipNext$$q"
           @mouseup="blurButton$$q"
         >
-          <v-icon>mdi-skip-next</v-icon>
-        </v-btn>
+          <VIcon>mdi-skip-next</VIcon>
+        </VBtn>
         <button
           class="mx-5 rounded-full transition-colors"
           :class="repeatEnabled$$q && 'text-shadow'"
           @click="switchRepeat$$q"
           @mouseup="blurButton$$q"
         >
-          <v-icon :color="(repeatEnabled$$q && 'primary') || undefined">
+          <VIcon :color="(repeatEnabled$$q && 'primary') || undefined">
             {{ repeatIcon$$q }}
-          </v-icon>
+          </VIcon>
         </button>
       </div>
-      <s-seek-bar
+      <SSeekBar
         class="pt-2"
         :current-time="position$$q"
         :duration="duration$$q"
@@ -173,12 +173,12 @@ export default defineComponent({
       class="w-20vw xl:w-25vw min-w-50 flex-none flex items-center justify-end"
     >
       <div class="flex-1 max-w-40">
-        <s-volume-control
+        <SVolumeControl
           v-model="volumeStore$$q.volume"
           @mute="volumeStore$$q.muted = !volumeStore$$q.muted"
           @dragging="volumeStore$$q.setDraggingVolume($event)"
         />
       </div>
     </div>
-  </v-sheet>
+  </VSheet>
 </template>

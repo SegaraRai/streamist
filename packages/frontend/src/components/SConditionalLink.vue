@@ -17,8 +17,8 @@ export default defineComponent({
     </span>
   </template>
   <template v-else>
-    <router-link :to="to">
+    <RouterLink :to="to">
       <slot></slot>
-    </router-link>
+    </RouterLink>
   </template>
 </template>

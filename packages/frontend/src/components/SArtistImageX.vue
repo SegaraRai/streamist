@@ -19,9 +19,5 @@ export default defineComponent({
 </script>
 
 <template>
-  <s-nullable-image
-    class="rounded-full select-none"
-    :image="image"
-    :alt="alt"
-  />
+  <SNullableImage class="rounded-full select-none" :image="image" :alt="alt" />
 </template>

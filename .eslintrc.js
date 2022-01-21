@@ -25,6 +25,13 @@ module.exports = defineConfig({
         math: 'always',
       },
     ],
+    'vue/component-name-in-template-casing': [
+      'error',
+      'PascalCase',
+      {
+        registeredComponentsOnly: false,
+      },
+    ],
     'no-redeclare': 'off',
     '@typescript-eslint/no-redeclare': ['error'],
     'spaced-comment': [

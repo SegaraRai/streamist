@@ -114,32 +114,32 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-modal
+  <NModal
     v-model:show="dialog$$q"
     transform-origin="center"
     class="select-none max-w-xl"
   >
-    <v-card class="w-full md:min-w-2xl">
-      <v-card-title class="flex">
+    <VCard class="w-full md:min-w-2xl">
+      <VCardTitle class="flex">
         <div class="s-dialog-title">
           {{ t('dialogComponent.editPlaylist.title', [playlist.title]) }}
         </div>
         <div class="flex-none">
-          <v-btn
+          <VBtn
             flat
             icon
             size="x-small"
             class="text-st-error"
             @click="dialog$$q = false"
           >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+            <VIcon>mdi-close</VIcon>
+          </VBtn>
         </div>
-      </v-card-title>
-      <v-card-text class="opacity-100">
+      </VCardTitle>
+      <VCardText class="opacity-100">
         <div class="flex <sm:flex-col gap-x-4 gap-y-6">
           <div class="<sm:w-full text-center leading-none">
-            <s-image-manager
+            <SImageManager
               attach-to-type="playlist"
               :attach-to-id="playlist.id"
               :attach-to-title="playlist.title"
@@ -147,23 +147,23 @@ export default defineComponent({
               disable-dialog
               @contextmenu.prevent
             >
-              <s-playlist-image
+              <SPlaylistImage
                 class="w-40 h-40"
                 size="160"
                 :playlist="playlist.id"
                 @image-ids="imageIds$$q = $event"
               />
-            </s-image-manager>
+            </SImageManager>
           </div>
           <div class="flex-1 flex flex-col gap-y-6">
-            <v-text-field
+            <VTextField
               v-model="itemTitle$$q"
               hide-details
               class="s-v-input-hide-details"
               :label="t('dialogComponent.editPlaylist.label.Title')"
               required
             />
-            <v-textarea
+            <VTextarea
               v-model="itemDescription$$q"
               hide-details
               class="s-v-input-hide-details"
@@ -171,13 +171,13 @@ export default defineComponent({
             />
           </div>
         </div>
-      </v-card-text>
-      <v-card-actions class="gap-x-4 pb-4 px-6">
-        <v-spacer />
-        <v-btn @click="dialog$$q = false">
+      </VCardText>
+      <VCardActions class="gap-x-4 pb-4 px-6">
+        <VSpacer />
+        <VBtn @click="dialog$$q = false">
           {{ t('dialogComponent.editPlaylist.button.Cancel') }}
-        </v-btn>
-        <v-btn
+        </VBtn>
+        <VBtn
           class="relative"
           color="primary"
           :disabled="requestInProgress$$q || !modified$$q"
@@ -187,14 +187,14 @@ export default defineComponent({
             {{ t('dialogComponent.editPlaylist.button.OK') }}
           </span>
           <template v-if="requestInProgress$$q">
-            <v-progress-circular
+            <VProgressCircular
               class="absolute left-0 top-0 right-0 bottom-0 m-auto"
               indeterminate
               size="20"
             />
           </template>
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </n-modal>
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </NModal>
 </template>

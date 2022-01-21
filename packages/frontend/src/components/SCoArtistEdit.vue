@@ -47,13 +47,13 @@ export default defineComponent({
       <div class="flex items-center gap-x-2">
         <div class="w-32">
           <!-- TODO: migrate to v-combobox -->
-          <n-select
+          <NSelect
             :options="roleOptions$$q"
             :value="item[0]"
             @update:value="modelValue$$q[index][0] = $event"
           />
         </div>
-        <s-combobox-artist
+        <SComboboxArtist
           class="flex-1"
           create
           :label="roleToText$$q(item[0], t)"
@@ -63,7 +63,7 @@ export default defineComponent({
           @update:model-value="modelValue$$q[index][2] = $event"
         />
         <div>
-          <v-btn
+          <VBtn
             icon
             flat
             text
@@ -71,13 +71,13 @@ export default defineComponent({
             class="bg-transparent text-st-error"
             @click="remove$$q(index)"
           >
-            <v-icon class="s-hover-visible">mdi-close</v-icon>
-          </v-btn>
+            <VIcon class="s-hover-visible">mdi-close</VIcon>
+          </VBtn>
         </div>
       </div>
     </template>
     <div>
-      <v-btn
+      <VBtn
         icon
         flat
         text
@@ -85,8 +85,8 @@ export default defineComponent({
         class="bg-transparent text-st-primary"
         @click="modelValue$$q.push(['#composer', undefined, ''])"
       >
-        <v-icon class="s-hover-visible">mdi-plus</v-icon>
-      </v-btn>
+        <VIcon class="s-hover-visible">mdi-plus</VIcon>
+      </VBtn>
     </div>
   </div>
 </template>

@@ -20,29 +20,29 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-modal
+  <NModal
     v-model:show="show$$q"
     transform-origin="center"
     class="select-none max-w-2xl max-h-full"
   >
-    <v-card class="w-full flex flex-col">
-      <v-card-title class="flex">
+    <VCard class="w-full flex flex-col">
+      <VCardTitle class="flex">
         <div class="flex-1">{{ t('dialogComponent.upload.title') }}</div>
         <div class="flex-none">
-          <v-btn
+          <VBtn
             flat
             icon
             size="x-small"
             class="text-st-error"
             @click="show$$q = false"
           >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+            <VIcon>mdi-close</VIcon>
+          </VBtn>
         </div>
-      </v-card-title>
-      <v-card-text class="opacity-100 flex-1">
-        <s-uploader class="h-140" />
-      </v-card-text>
-    </v-card>
-  </n-modal>
+      </VCardTitle>
+      <VCardText class="opacity-100 flex-1">
+        <SUploader class="h-140" />
+      </VCardText>
+    </VCard>
+  </NModal>
 </template>

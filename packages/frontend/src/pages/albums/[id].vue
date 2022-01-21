@@ -73,8 +73,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid>
-    <s-album
+  <VContainer fluid>
+    <SAlbum
       :album="id"
       :link-excludes="[id]"
       :set-list="setList$$q"
@@ -82,5 +82,5 @@ export default defineComponent({
       visit-artist
       @track-load="onTrackLoad$$q"
     />
-  </v-container>
+  </VContainer>
 </template>

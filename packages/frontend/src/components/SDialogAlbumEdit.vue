@@ -177,32 +177,32 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-modal
+  <NModal
     v-model:show="dialog$$q"
     transform-origin="center"
     class="select-none max-w-xl"
   >
-    <v-card class="w-full md:min-w-2xl">
-      <v-card-title class="flex">
+    <VCard class="w-full md:min-w-2xl">
+      <VCardTitle class="flex">
         <div class="s-dialog-title">
           {{ t('dialogComponent.editAlbum.title', [album.title]) }}
         </div>
         <div class="flex-none">
-          <v-btn
+          <VBtn
             flat
             icon
             size="x-small"
             class="text-st-error"
             @click="dialog$$q = false"
           >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+            <VIcon>mdi-close</VIcon>
+          </VBtn>
         </div>
-      </v-card-title>
-      <v-card-text class="opacity-100">
+      </VCardTitle>
+      <VCardText class="opacity-100">
         <div class="flex <sm:flex-col gap-x-4 gap-y-6">
           <div class="<sm:w-full text-center leading-none">
-            <s-image-manager
+            <SImageManager
               attach-to-type="album"
               :attach-to-id="album.id"
               :attach-to-title="album.title"
@@ -210,46 +210,46 @@ export default defineComponent({
               disable-dialog
               @contextmenu.prevent
             >
-              <s-album-image
+              <SAlbumImage
                 class="w-40 h-40"
                 size="160"
                 :album="album.id"
                 @image-ids="imageIds$$q = $event"
               />
-            </s-image-manager>
+            </SImageManager>
           </div>
           <div class="flex-1 flex flex-col gap-y-6">
             <div class="flex gap-x-6">
-              <v-text-field
+              <VTextField
                 v-model="itemTitle$$q"
                 hide-details
                 class="flex-1 s-v-input-hide-details"
                 :label="t('dialogComponent.editAlbum.label.Title')"
                 required
               />
-              <v-text-field
+              <VTextField
                 v-model="itemTitleSort$$q"
                 hide-details
                 class="flex-1 s-v-input-hide-details"
                 :label="t('dialogComponent.editAlbum.label.TitleSort')"
               />
             </div>
-            <s-combobox-artist
+            <SComboboxArtist
               v-model="artistName$$q"
               v-model:artistId="artistId$$q"
               :label="t('dialogComponent.editAlbum.label.Artist')"
               create
             />
-            <n-collapse>
-              <n-collapse-item :title="t('dialogComponent.editAlbum.creators')">
+            <NCollapse>
+              <NCollapseItem :title="t('dialogComponent.editAlbum.creators')">
                 <template v-if="itemCoArtists$$q">
-                  <n-scrollbar class="s-n-scrollbar-p max-h-64">
-                    <s-co-artist-edit v-model="itemCoArtists$$q" />
-                  </n-scrollbar>
+                  <NScrollbar class="s-n-scrollbar-p max-h-64">
+                    <SCoArtistEdit v-model="itemCoArtists$$q" />
+                  </NScrollbar>
                 </template>
-              </n-collapse-item>
-            </n-collapse>
-            <v-textarea
+              </NCollapseItem>
+            </NCollapse>
+            <VTextarea
               v-model="itemDescription$$q"
               hide-details
               class="s-v-input-hide-details"
@@ -268,13 +268,13 @@ export default defineComponent({
             </footer>
           </div>
         </div>
-      </v-card-text>
-      <v-card-actions class="gap-x-4 pb-4 px-4">
-        <v-spacer />
-        <v-btn @click="dialog$$q = false">
+      </VCardText>
+      <VCardActions class="gap-x-4 pb-4 px-4">
+        <VSpacer />
+        <VBtn @click="dialog$$q = false">
           {{ t('dialogComponent.editAlbum.button.Cancel') }}
-        </v-btn>
-        <v-btn
+        </VBtn>
+        <VBtn
           class="relative"
           color="primary"
           :disabled="requestInProgress$$q || isArtistEmpty$$q || !modified$$q"
@@ -284,14 +284,14 @@ export default defineComponent({
             {{ t('dialogComponent.editAlbum.button.OK') }}
           </span>
           <template v-if="requestInProgress$$q">
-            <v-progress-circular
+            <VProgressCircular
               class="absolute left-0 top-0 right-0 bottom-0 m-auto"
               indeterminate
               size="20"
             />
           </template>
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </n-modal>
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </NModal>
 </template>

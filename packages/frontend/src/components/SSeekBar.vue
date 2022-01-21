@@ -69,7 +69,7 @@ export default defineComponent({
       {{ positionDisplay$$q }}
     </div>
     <div class="seek-bar flex-1 flex flex-col justify-center">
-      <s-slider
+      <SSlider
         :value="currentTime"
         :max="duration"
         @dragging="onDragging$$q"

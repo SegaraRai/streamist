@@ -133,34 +133,34 @@ export default defineComponent({
       <div class="flex-1 flex flex-col items-center justify-start gap-y-4">
         <template v-if="currentTrackInfo$$q">
           <div class="w-full px-4">
-            <router-link
+            <RouterLink
               class="block w-full flex-1 mx-auto"
               style="max-width: min(20rem, calc(100vh - 20rem))"
               :to="`/albums/${currentTrackInfo$$q.track$$q.albumId}`"
             >
-              <s-album-image
+              <SAlbumImage
                 class="aspect-square"
                 size="400"
                 expandable
                 :album="currentTrackInfo$$q.track$$q.albumId"
               />
-            </router-link>
+            </RouterLink>
           </div>
           <div
             class="w-full overflow-hidden flex-grow-1 flex flex-col items-center gap-y-2 text-center"
           >
-            <router-link
+            <RouterLink
               class="s-heading-sl text-lg block max-w-full"
               :to="`/albums/${currentTrackInfo$$q.track$$q.albumId}`"
             >
               {{ currentTrackInfo$$q.track$$q.title }}
-            </router-link>
-            <router-link
+            </RouterLink>
+            <RouterLink
               class="s-subheading-sl text-sm block max-w-full"
               :to="`/artists/${currentTrackInfo$$q.track$$q.artistId}`"
             >
               {{ currentTrackInfo$$q.trackArtist$$q.name }}
-            </router-link>
+            </RouterLink>
           </div>
         </template>
       </div>
@@ -168,7 +168,7 @@ export default defineComponent({
       <div
         class="flex flex-col justify-center gap-y-8 fixed left-0 right-0 bottom-0 w-full max-w-md mx-auto pb-8"
       >
-        <s-seek-bar
+        <SSeekBar
           class="pt-2"
           :current-time="position$$q"
           :duration="duration$$q"
@@ -181,7 +181,7 @@ export default defineComponent({
           @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
         >
           <!-- clickではなくmouseupでblurButtonを呼んでいるのはキーで操作されたときにblurしないようにするため -->
-          <v-btn
+          <VBtn
             class="bg-transparent"
             :class="shuffleEnabled$$q ? 'active-button' : ''"
             flat
@@ -190,36 +190,36 @@ export default defineComponent({
             @click="switchShuffle$$q"
             @mouseup="blurButton$$q"
           >
-            <v-icon :color="shuffleEnabled$$q ? 'primary' : ''">
+            <VIcon :color="shuffleEnabled$$q ? 'primary' : ''">
               {{ shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled' }}
-            </v-icon>
-          </v-btn>
+            </VIcon>
+          </VBtn>
           <div class="flex-1"></div>
-          <v-btn
+          <VBtn
             class="mx-2 bg-transparent"
             flat
             icon
             @click="skipPrevious$$q"
             @mouseup="blurButton$$q"
           >
-            <v-icon>mdi-skip-previous</v-icon>
-          </v-btn>
-          <v-btn class="mx-2" icon @click="play$$q" @mouseup="blurButton$$q">
-            <v-icon>
+            <VIcon>mdi-skip-previous</VIcon>
+          </VBtn>
+          <VBtn class="mx-2" icon @click="play$$q" @mouseup="blurButton$$q">
+            <VIcon>
               {{ playing$$q ? 'mdi-pause' : 'mdi-play' }}
-            </v-icon>
-          </v-btn>
-          <v-btn
+            </VIcon>
+          </VBtn>
+          <VBtn
             flat
             class="mx-2 bg-transparent"
             icon
             @click="skipNext$$q"
             @mouseup="blurButton$$q"
           >
-            <v-icon>mdi-skip-next</v-icon>
-          </v-btn>
+            <VIcon>mdi-skip-next</VIcon>
+          </VBtn>
           <div class="flex-1"></div>
-          <v-btn
+          <VBtn
             class="bg-transparent"
             :class="repeatEnabled$$q ? 'active-button' : ''"
             flat
@@ -228,10 +228,10 @@ export default defineComponent({
             @click="switchRepeat$$q"
             @mouseup="blurButton$$q"
           >
-            <v-icon :color="repeatEnabled$$q ? 'primary' : ''">
+            <VIcon :color="repeatEnabled$$q ? 'primary' : ''">
               {{ repeatIcon$$q }}
-            </v-icon>
-          </v-btn>
+            </VIcon>
+          </VBtn>
         </div>
       </div>
     </div>

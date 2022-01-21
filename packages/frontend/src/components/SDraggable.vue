@@ -77,7 +77,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <g-draggable
+  <GDraggable
     :model-value="items$$q"
     :item-key="itemKey"
     :disabled="disabled || tentative$$q"
@@ -95,5 +95,5 @@ export default defineComponent({
     <template #footer>
       <slot name="footer"></slot>
     </template>
-  </g-draggable>
+  </GDraggable>
 </template>

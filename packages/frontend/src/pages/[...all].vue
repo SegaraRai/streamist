@@ -20,9 +20,9 @@ export default defineComponent({
       {{ t('notFound.message') }}
     </div>
     <div class="mt-8">
-      <v-btn color="primary" @click="back$$q()">
+      <VBtn color="primary" @click="back$$q()">
         {{ t('notFound.button.Back') }}
-      </v-btn>
+      </VBtn>
     </div>
   </div>
 </template>

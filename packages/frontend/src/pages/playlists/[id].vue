@@ -54,11 +54,11 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid>
-    <s-playlist
+  <VContainer fluid>
+    <SPlaylist
       :playlist="id"
       :link-excludes="[id]"
       @track-load="onTrackLoad$$q"
     />
-  </v-container>
+  </VContainer>
 </template>

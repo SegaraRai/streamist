@@ -62,20 +62,20 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-config-provider
+  <NConfigProvider
     :theme="naiveUITheme$$q.base"
     :theme-overrides="naiveUITheme$$q.overrides"
   >
-    <n-message-provider>
-      <n-notification-provider>
-        <n-dialog-provider>
-          <router-view />
-        </n-dialog-provider>
-      </n-notification-provider>
-    </n-message-provider>
-    <n-global-style />
+    <NMessageProvider>
+      <NNotificationProvider>
+        <NDialogProvider>
+          <RouterView />
+        </NDialogProvider>
+      </NNotificationProvider>
+    </NMessageProvider>
+    <NGlobalStyle />
     <template v-if="isLoggedIn$$q">
-      <s-playback-persistor />
+      <SPlaybackPersistor />
     </template>
-  </n-config-provider>
+  </NConfigProvider>
 </template>

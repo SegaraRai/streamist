@@ -147,7 +147,7 @@ export default defineComponent({
       <!-- w-50 h-50 is needed to prevent layout shift -->
       <div class="p-0 m-0 w-50 h-50 leading-none flex-none">
         <template v-if="linkExcludes.includes(playlistId$$q)">
-          <s-image-manager
+          <SImageManager
             attach-to-type="playlist"
             :attach-to-id="playlistId$$q"
             :attach-to-title="value$$q.playlist$$q.title"
@@ -159,18 +159,18 @@ export default defineComponent({
                 t('imageManager.title.playlist', [value$$q.playlist$$q.title])
               }}
             </template>
-            <s-playlist-image
+            <SPlaylistImage
               class="w-50 h-50"
               size="200"
               expandable
               :playlist="playlistId$$q"
               @image-ids="imageIds$$q = $event"
             />
-          </s-image-manager>
+          </SImageManager>
         </template>
         <template v-else>
-          <router-link :to="`/playlists/${playlistId$$q}`" class="block">
-            <s-playlist-image
+          <RouterLink :to="`/playlists/${playlistId$$q}`" class="block">
+            <SPlaylistImage
               class="w-50 h-50"
               size="200"
               expandable
@@ -178,18 +178,18 @@ export default defineComponent({
               @image-ids="imageIds$$q = $event"
               @contextmenu.prevent="openMenu$$q($event)"
             />
-          </router-link>
+          </RouterLink>
         </template>
       </div>
       <div class="flex flex-col <md:gap-y-3 <md:text-center">
         <div class="s-heading font-bold text-xl flex-none line-clamp-2">
-          <s-conditional-link
+          <SConditionalLink
             :to="`/playlists/${playlistId$$q}`"
             :disabled="linkExcludes.includes(playlistId$$q)"
             @contextmenu.prevent="openMenu$$q($event)"
           >
             {{ value$$q?.playlist$$q.title }}
-          </s-conditional-link>
+          </SConditionalLink>
         </div>
         <template v-if="value$$q?.playlist$$q.description">
           <div>{{ value$$q?.playlist$$q.description }}</div>
@@ -206,34 +206,34 @@ export default defineComponent({
       </div>
     </div>
     <div class="flex-none flex flex-row items-center gap-x-8 my-8">
-      <v-btn
+      <VBtn
         color="primary"
         flat
         icon
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(false)"
       >
-        <v-icon>mdi-play</v-icon>
-      </v-btn>
-      <v-btn
+        <VIcon>mdi-play</VIcon>
+      </VBtn>
+      <VBtn
         outlined
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(true)"
       >
-        <v-icon left>mdi-shuffle</v-icon>
+        <VIcon left>mdi-shuffle</VIcon>
         <span>
           {{ t('playlist.Shuffle') }}
         </span>
-      </v-btn>
+      </VBtn>
       <button
         class="rounded-full transition-colors"
         @click="openMenu$$q($event.target as HTMLElement)"
       >
-        <v-icon>mdi-dots-vertical</v-icon>
+        <VIcon>mdi-dots-vertical</VIcon>
       </button>
-      <v-divider />
+      <VDivider />
     </div>
-    <s-track-list
+    <STrackList
       render-mode="draggable"
       show-album
       show-artist
@@ -247,6 +247,6 @@ export default defineComponent({
       visit-artist
       :on-move="onMove$$q"
     />
-    <s-dropdown-playlist v-model="dropdown$$q" />
+    <SDropdownPlaylist v-model="dropdown$$q" />
   </template>
 </template>

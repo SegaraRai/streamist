@@ -33,11 +33,11 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-app :theme="themeName$$q">
-    <v-app-bar flat :border="1" density="compact" class="s-offline-mod-mt">
+  <VApp :theme="themeName$$q">
+    <VAppBar flat :border="1" density="compact" class="s-offline-mod-mt">
       <div class="w-full flex justify-between items-center">
         <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
-          <router-link
+          <RouterLink
             to="/"
             class="flex items-center gap-x-1"
             aria-label="Streamist Logo"
@@ -53,33 +53,33 @@ export default defineComponent({
               <span class="text-xl leading-none">streamist</span>
               <span class="text-sm leading-none">.app</span>
             </span>
-          </router-link>
+          </RouterLink>
         </div>
         <div class="flex-1"></div>
         <div class="flex items-center gap-x-2">
           <div v-show="!isSignInPage$$q">
-            <v-btn class="whitespace-nowrap" to="/login">
+            <VBtn class="whitespace-nowrap" to="/login">
               {{ t('appBar.button.SignIn') }}
-            </v-btn>
+            </VBtn>
           </div>
           <div v-show="!isSignUpPage$$q">
-            <v-btn class="whitespace-nowrap border" to="/signup">
+            <VBtn class="whitespace-nowrap border" to="/signup">
               {{ t('appBar.button.SignUp') }}
-            </v-btn>
+            </VBtn>
           </div>
-          <n-select
+          <NSelect
             v-model:value="preferenceStore$$q.language"
             :options="languageOptions$$q"
             class="max-w-64"
           />
-          <v-btn icon size="small" @click="switchTheme$$q()">
-            <v-icon>mdi-invert-colors</v-icon>
-          </v-btn>
+          <VBtn icon size="small" @click="switchTheme$$q()">
+            <VIcon>mdi-invert-colors</VIcon>
+          </VBtn>
         </div>
       </div>
-    </v-app-bar>
-    <v-main>
-      <router-view class="px-4" />
-    </v-main>
-  </v-app>
+    </VAppBar>
+    <VMain>
+      <RouterView class="px-4" />
+    </VMain>
+  </VApp>
 </template>

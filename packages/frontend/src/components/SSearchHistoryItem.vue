@@ -26,18 +26,18 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-list-item
+  <VListItem
     class="s-hover-container flex"
     link
     @click.stop.prevent="$emit('click', query)"
   >
-    <v-list-item-avatar
+    <VListItemAvatar
       icon
       class="flex-none flex items-center justify-center opacity-60"
     >
-      <v-icon>mdi-history</v-icon>
-    </v-list-item-avatar>
-    <v-list-item-header>
+      <VIcon>mdi-history</VIcon>
+    </VListItemAvatar>
+    <VListItemHeader>
       <div class="flex-1 flex flex-col pl-2">
         <div class="s-heading-sl text-sm">
           {{ query }}
@@ -46,8 +46,8 @@ export default defineComponent({
           {{ strAt$$q }}
         </div>
       </div>
-    </v-list-item-header>
-    <v-btn
+    </VListItemHeader>
+    <VBtn
       icon
       flat
       text
@@ -55,7 +55,7 @@ export default defineComponent({
       class="bg-transparent text-st-error"
       @click.prevent.stop="$emit('remove', query)"
     >
-      <v-icon class="s-hover-visible">mdi-close</v-icon>
-    </v-btn>
-  </v-list-item>
+      <VIcon class="s-hover-visible">mdi-close</VIcon>
+    </VBtn>
+  </VListItem>
 </template>

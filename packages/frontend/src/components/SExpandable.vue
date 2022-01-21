@@ -87,15 +87,15 @@ export default defineComponent({
       <slot></slot>
       <div class="absolute w-full h-full top-0 left-0 right-0 bottom-0">
         <slot name="overlay" :activate="activate$$q">
-          <v-btn
+          <VBtn
             class="absolute right-2 bottom-2 text-white bg-black/30 hover:bg-black/60 transition"
             size="small"
             flat
             icon
             @click.stop.prevent="activate$$q()"
           >
-            <v-icon>mdi-fullscreen</v-icon>
-          </v-btn>
+            <VIcon>mdi-fullscreen</VIcon>
+          </VBtn>
         </slot>
       </div>
     </div>
@@ -106,9 +106,9 @@ export default defineComponent({
     </div>
   </template>
   <template v-if="resolvedImages$$q">
-    <n-modal v-model:show="modelValue$$q" class="select-none w-full h-full">
+    <NModal v-model:show="modelValue$$q" class="select-none w-full h-full">
       <div class="relative w-full h-full">
-        <n-carousel draggable show-arrow keyboard>
+        <NCarousel draggable show-arrow keyboard>
           <template v-for="image in resolvedImages$$q" :key="image.index$$q">
             <img
               class="w-screen h-screen object-contain"
@@ -117,19 +117,19 @@ export default defineComponent({
               :srcset="image.src$$q.srcSet$$q"
             />
           </template>
-        </n-carousel>
+        </NCarousel>
         <div class="absolute top-1 right-1">
-          <v-btn
+          <VBtn
             class="text-st-error bg-true-gray-500/60 dark:bg-true-gray-900/80"
             flat
             icon
             size="x-small"
             @click="modelValue$$q = false"
           >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+            <VIcon>mdi-close</VIcon>
+          </VBtn>
         </div>
       </div>
-    </n-modal>
+    </NModal>
   </template>
 </template>

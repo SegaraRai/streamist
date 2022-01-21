@@ -66,7 +66,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid>
-    <s-artist :artist="id" @track-load="onTrackLoad$$q" />
-  </v-container>
+  <VContainer fluid>
+    <SArtist :artist="id" @track-load="onTrackLoad$$q" />
+  </VContainer>
 </template>

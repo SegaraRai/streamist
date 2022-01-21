@@ -138,7 +138,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-0">
+  <VContainer fluid class="pt-0">
     <header class="s-title mb-4">
       <div class="text-h5">
         {{ t('artists.Artists') }}
@@ -151,7 +151,7 @@ export default defineComponent({
     </header>
     <template v-if="items$$q">
       <template v-if="items$$q.length">
-        <s-virtual-grid
+        <SVirtualGrid
           :items="items$$q"
           :item-width="displayObj$$q.width$$q"
           :item-height="displayObj$$q.height$$q"
@@ -159,19 +159,19 @@ export default defineComponent({
           :item-margin-height="displayObj$$q.marginHeight$$q"
         >
           <template #default="{ data: item, width }">
-            <v-card
+            <VCard
               flat
               tile
               :width="`${width}px`"
               class="bg-transparent flex flex-col"
               @contextmenu.prevent="showMenu$$q($event, item)"
             >
-              <router-link
+              <RouterLink
                 v-ripple
                 :to="`/artists/${item.artist$$q.id}`"
                 class="block rounded-full"
               >
-                <s-artist-image-x
+                <SArtistImageX
                   :style="{
                     width: `${width}px`,
                     height: `${width}px`,
@@ -180,19 +180,19 @@ export default defineComponent({
                   :size="width"
                   :alt="item.artist$$q.name"
                 />
-              </router-link>
-              <v-card-title class="p-0 my-1 flex flex-col">
-                <router-link
+              </RouterLink>
+              <VCardTitle class="p-0 my-1 flex flex-col">
+                <RouterLink
                   class="s-heading block text-base sm:text-lg font-bold line-clamp-2 break-words text-center"
                   :to="`/artists/${item.artist$$q.id}`"
                 >
                   {{ item.artist$$q.name }}
-                </router-link>
-              </v-card-title>
-            </v-card>
+                </RouterLink>
+              </VCardTitle>
+            </VCard>
           </template>
-        </s-virtual-grid>
-        <s-dropdown-artist v-model="dropdown$$q" />
+        </SVirtualGrid>
+        <SDropdownArtist v-model="dropdown$$q" />
       </template>
       <template v-else>
         <div class="text-base">
@@ -200,5 +200,5 @@ export default defineComponent({
         </div>
       </template>
     </template>
-  </v-container>
+  </VContainer>
 </template>

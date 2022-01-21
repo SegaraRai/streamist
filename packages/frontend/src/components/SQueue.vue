@@ -54,7 +54,7 @@ export default defineComponent({
       <div class="s-heading-sl text-lg opacity-80 px-2 pb-1">
         {{ t('queue.NextInQueue') }}
       </div>
-      <s-track-list
+      <STrackList
         :tracks="playNextQueue$$q"
         render-mode="plain"
         index-content="albumArtwork"
@@ -76,7 +76,7 @@ export default defineComponent({
       <div class="s-heading-sl text-lg opacity-80 px-2 pb-1">
         {{ t('queue.NextFrom', [currentSetListName$$q]) }}
       </div>
-      <s-track-list
+      <STrackList
         :tracks="queue$$q"
         render-mode="plain"
         index-content="albumArtwork"

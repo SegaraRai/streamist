@@ -46,40 +46,40 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-sheet
+  <VSheet
     class="flex-1 w-full h-full flex flex-col m-0 p-0! select-none"
     @click="preventXButton$$q"
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
   >
     <div class="w-full flex-1 flex flex-row px-4 items-center">
-      <router-link
+      <RouterLink
         class="flex-1 flex items-center overflow-hidden"
         to="/playing"
       >
         <template v-if="currentTrackInfo$$q">
-          <s-playback-track-view
+          <SPlaybackTrackView
             :track="currentTrackInfo$$q.track$$q"
             :artist-name="currentTrackInfo$$q.trackArtist$$q.name"
             navigate-playing
           />
         </template>
-      </router-link>
+      </RouterLink>
       <div class="flex-none items-center">
         <!-- TODO: implement vertical volume control -->
-        <v-btn flat icon @click="play$$q">
-          <v-icon>
+        <VBtn flat icon @click="play$$q">
+          <VIcon>
             {{ playing$$q ? 'mdi-pause' : 'mdi-play' }}
-          </v-icon>
-        </v-btn>
+          </VIcon>
+        </VBtn>
       </div>
     </div>
-    <v-progress-linear
+    <VProgressLinear
       class="flex-none w-full"
       :model-value="progress$$q"
       color="primary"
       rounded
       rounded-bar
     />
-  </v-sheet>
+  </VSheet>
 </template>

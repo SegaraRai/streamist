@@ -26,12 +26,12 @@ export default defineComponent({
 
 <template>
   <template v-if="loggedIn$$q">
-    <v-container fluid class="pt-0">
-      <s-home />
-    </v-container>
+    <VContainer fluid class="pt-0">
+      <SHome />
+    </VContainer>
   </template>
   <template v-else>
-    <v-container>
+    <VContainer>
       <div class="flex flex-col text-center items-center pt-16">
         <img
           :src="logoSVG$$q"
@@ -47,11 +47,11 @@ export default defineComponent({
           {{ t('landing.description') }}
         </div>
         <div class="mt-8">
-          <v-btn color="primary" href="/signup">
+          <VBtn color="primary" href="/signup">
             {{ t('landing.button.SignUp') }}
-          </v-btn>
+          </VBtn>
         </div>
       </div>
-    </v-container>
+    </VContainer>
   </template>
 </template>

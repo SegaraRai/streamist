@@ -143,10 +143,10 @@ export default defineComponent({
       {{ t('header.NoInternetConnection') }}
     </div>
 
-    <v-app :theme="themeName$$q" class="flex-1 !h-auto">
+    <VApp :theme="themeName$$q" class="flex-1 !h-auto">
       <!-- we have to place this inside the app to apply theme -->
-      <s-dialog-search v-model="searchDialog$$q" />
-      <s-dialog-upload v-model="uploadDialog$$q" />
+      <SDialogSearch v-model="searchDialog$$q" />
+      <SDialogUpload v-model="uploadDialog$$q" />
 
       <!-- div
         class="bg-black z-2135 fixed top-0 left-0 w-full h-full transition-all"
@@ -156,7 +156,7 @@ export default defineComponent({
       ></div -->
 
       <!-- Right Sidebar: Queue -->
-      <v-navigation-drawer
+      <VNavigationDrawer
         :model-value="rightSidebar$$q"
         temporary
         position="right"
@@ -165,52 +165,52 @@ export default defineComponent({
         class="s-offline-mod-mt select-none"
       >
         <div class="flex flex-col h-full">
-          <v-sheet tile>
+          <VSheet tile>
             <div class="title flex items-center py-1 -mb-1px">
-              <v-icon class="mx-4">mdi-playlist-play</v-icon>
+              <VIcon class="mx-4">mdi-playlist-play</VIcon>
               <span class="flex-1">{{ t('queue.title') }}</span>
-              <v-btn flat icon size="small" @click="rightSidebar$$q = false">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
+              <VBtn flat icon size="small" @click="rightSidebar$$q = false">
+                <VIcon>mdi-close</VIcon>
+              </VBtn>
             </div>
-            <v-divider />
-          </v-sheet>
-          <n-scrollbar
+            <VDivider />
+          </VSheet>
+          <NScrollbar
             class="flex-1 s-n-scrollbar-min-h-full"
             @scroll="onQueueScroll$$q"
           >
-            <s-queue :scroll-top="queueScroll$$q" />
-          </n-scrollbar>
+            <SQueue :scroll-top="queueScroll$$q" />
+          </NScrollbar>
           <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
           <div class="s-offline-mod-h"></div>
         </div>
-      </v-navigation-drawer>
+      </VNavigationDrawer>
 
       <!-- Header -->
-      <v-app-bar flat :border="1" density="compact" class="s-offline-mod-mt">
+      <VAppBar flat :border="1" density="compact" class="s-offline-mod-mt">
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">
             <div class="flex-none">
               <template v-if="hideShell$$q">
-                <v-btn flat icon text size="small" @click="router$$q.back()">
-                  <v-icon>mdi-arrow-left</v-icon>
-                </v-btn>
+                <VBtn flat icon text size="small" @click="router$$q.back()">
+                  <VIcon>mdi-arrow-left</VIcon>
+                </VBtn>
               </template>
               <template v-else>
-                <v-btn
+                <VBtn
                   flat
                   icon
                   text
                   size="small"
                   @click="leftSidebar$$q = !leftSidebar$$q"
                 >
-                  <v-icon>mdi-menu</v-icon>
-                </v-btn>
+                  <VIcon>mdi-menu</VIcon>
+                </VBtn>
               </template>
             </div>
           </template>
           <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
-            <router-link
+            <RouterLink
               to="/"
               class="flex items-center gap-x-1"
               aria-label="Streamist Logo"
@@ -226,52 +226,52 @@ export default defineComponent({
                 <span class="text-xl leading-none">streamist</span>
                 <span class="text-sm leading-none">.app</span>
               </span>
-            </router-link>
+            </RouterLink>
           </div>
           <div class="flex-1 flex gap-x-2 justify-end items-center">
-            <n-button
+            <NButton
               class="<sm:hidden"
               ghost
               round
               @click="searchDialog$$q = true"
             >
               <template #icon>
-                <n-icon>
-                  <i-mdi-magnify />
-                </n-icon>
+                <NIcon>
+                  <IMdiMagnify />
+                </NIcon>
               </template>
-              <v-kbd>Ctrl+K</v-kbd>
-            </n-button>
-            <v-btn
+              <VKbd>Ctrl+K</VKbd>
+            </NButton>
+            <VBtn
               class="sm:hidden"
               icon
               size="small"
               @click="searchDialog$$q = true"
             >
-              <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-            <v-btn icon size="small" @click="devSync$$q">
-              <v-icon>mdi-sync</v-icon>
-            </v-btn>
-            <v-btn icon size="small" @click="uploadDialog$$q = true">
-              <n-badge
+              <VIcon>mdi-magnify</VIcon>
+            </VBtn>
+            <VBtn icon size="small" @click="devSync$$q">
+              <VIcon>mdi-sync</VIcon>
+            </VBtn>
+            <VBtn icon size="small" @click="uploadDialog$$q = true">
+              <NBadge
                 :value="uploadStore$$q.badge"
                 :dot="!!uploadStore$$q.badge"
                 :processing="!!uploadStore$$q.badge"
               >
-                <v-icon class="text-st-text">mdi-cloud-upload</v-icon>
-              </n-badge>
-            </v-btn>
-            <v-btn icon size="small" @click="rightSidebar$$q = true">
-              <v-icon>mdi-playlist-play</v-icon>
-            </v-btn>
+                <VIcon class="text-st-text">mdi-cloud-upload</VIcon>
+              </NBadge>
+            </VBtn>
+            <VBtn icon size="small" @click="rightSidebar$$q = true">
+              <VIcon>mdi-playlist-play</VIcon>
+            </VBtn>
           </div>
         </div>
-      </v-app-bar>
+      </VAppBar>
 
       <!-- Left Sidebar: Navigation -->
       <!-- TODO: hide sidebar on click outside -->
-      <v-navigation-drawer
+      <VNavigationDrawer
         :model-value="leftSidebar$$q && !hideShell$$q"
         :permanent="alwaysShowLeftSidebar$$q"
         position="left"
@@ -279,44 +279,44 @@ export default defineComponent({
         class="s-offline-mod-mt select-none"
         @update:model-value="leftSidebar$$q = $event"
       >
-        <n-scrollbar
+        <NScrollbar
           class="h-full s-n-scrollbar-min-h-full s-n-scrollbar-flex-col"
         >
           <div class="flex-1 flex flex-col h-full">
-            <s-navigation />
+            <SNavigation />
             <div class="s-offline-mod-h"></div>
             <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
           </div>
-        </n-scrollbar>
-      </v-navigation-drawer>
+        </NScrollbar>
+      </VNavigationDrawer>
 
-      <v-main class="s-v-main w-full">
-        <n-scrollbar
+      <VMain class="s-v-main w-full">
+        <NScrollbar
           ref="scrollRef$$q"
           class="s-scroll-target s-n-scrollbar-min-h-full flex-1 !h-auto"
         >
-          <router-view class="px-4" />
-        </n-scrollbar>
+          <RouterView class="px-4" />
+        </NScrollbar>
         <div class="flex-none h-24" :class="hideShell$$q && '!hidden'"></div>
-      </v-main>
-    </v-app>
+      </VMain>
+    </VApp>
 
     <footer
       class="select-none fixed bottom-0 z-100 w-full m-0 p-0 h-24"
       :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >
-      <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
-        <v-divider />
-        <keep-alive>
+      <VSheet class="m-0 p-0 w-full h-full flex flex-col">
+        <VDivider />
+        <KeepAlive>
           <template v-if="desktopPlaybackControl$$q">
-            <s-playback-control />
+            <SPlaybackControl />
           </template>
           <template v-else>
-            <s-mobile-playback-control />
+            <SMobilePlaybackControl />
           </template>
-        </keep-alive>
-      </v-sheet>
+        </KeepAlive>
+      </VSheet>
     </footer>
   </div>
 </template>

@@ -80,39 +80,39 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-modal
+  <NModal
     v-model:show="dialog$$q"
     transform-origin="center"
     class="select-none max-w-xl"
   >
-    <v-card class="w-full md:min-w-2xl">
-      <v-card-title class="flex">
+    <VCard class="w-full md:min-w-2xl">
+      <VCardTitle class="flex">
         <div class="s-dialog-title">
           {{ t('dialogComponent.createPlaylist.title') }}
         </div>
         <div class="flex-none">
-          <v-btn
+          <VBtn
             flat
             icon
             size="x-small"
             class="text-st-error"
             @click="dialog$$q = false"
           >
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
+            <VIcon>mdi-close</VIcon>
+          </VBtn>
         </div>
-      </v-card-title>
-      <v-card-text class="opacity-100">
+      </VCardTitle>
+      <VCardText class="opacity-100">
         <div class="flex gap-x-6">
           <div class="flex-1 flex flex-col gap-y-6">
-            <v-text-field
+            <VTextField
               v-model="itemTitle$$q"
               hide-details
               class="s-v-input-hide-details"
               :label="t('dialogComponent.createPlaylist.label.Title')"
               required
             />
-            <v-textarea
+            <VTextarea
               v-model="itemNotes$$q"
               hide-details
               class="s-v-input-hide-details"
@@ -120,13 +120,13 @@ export default defineComponent({
             />
           </div>
         </div>
-      </v-card-text>
-      <v-card-actions class="gap-x-4 pb-4 px-6">
-        <v-spacer />
-        <v-btn @click="dialog$$q = false">
+      </VCardText>
+      <VCardActions class="gap-x-4 pb-4 px-6">
+        <VSpacer />
+        <VBtn @click="dialog$$q = false">
           {{ t('dialogComponent.createPlaylist.button.Cancel') }}
-        </v-btn>
-        <v-btn
+        </VBtn>
+        <VBtn
           class="relative"
           color="primary"
           :disabled="requestInProgress$$q || !valid$$q"
@@ -136,14 +136,14 @@ export default defineComponent({
             {{ t('dialogComponent.createPlaylist.button.Create') }}
           </span>
           <template v-if="requestInProgress$$q">
-            <v-progress-circular
+            <VProgressCircular
               class="absolute left-0 top-0 right-0 bottom-0 m-auto"
               indeterminate
               size="20"
             />
           </template>
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </n-modal>
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </NModal>
 </template>

@@ -154,7 +154,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-0">
+  <VContainer fluid class="pt-0">
     <header class="s-title mb-4">
       <div class="text-h5">
         {{ t('albums.Albums') }}
@@ -167,7 +167,7 @@ export default defineComponent({
     </header>
     <template v-if="items$$q">
       <template v-if="items$$q.length">
-        <s-virtual-grid
+        <SVirtualGrid
           :items="items$$q"
           :item-width="displayObj$$q.width$$q"
           :item-height="displayObj$$q.height$$q"
@@ -175,19 +175,19 @@ export default defineComponent({
           :item-margin-height="displayObj$$q.marginHeight$$q"
         >
           <template #default="{ data: item, width }">
-            <v-card
+            <VCard
               flat
               tile
               :width="`${width}px`"
               class="bg-transparent flex flex-col"
               @contextmenu.prevent="showMenu$$q($event, item)"
             >
-              <router-link
+              <RouterLink
                 v-ripple
                 :to="`/albums/${item.album$$q.id}`"
                 class="block"
               >
-                <s-album-image-x
+                <SAlbumImageX
                   :style="{
                     width: `${width}px`,
                     height: `${width}px`,
@@ -196,34 +196,34 @@ export default defineComponent({
                   :size="width"
                   :alt="item.album$$q.title"
                 />
-              </router-link>
-              <v-card-title class="p-0 my-1 flex flex-col items-start">
-                <router-link
+              </RouterLink>
+              <VCardTitle class="p-0 my-1 flex flex-col items-start">
+                <RouterLink
                   class="s-heading block text-base sm:text-lg font-bold line-clamp-2 break-words"
                   :to="`/albums/${item.album$$q.id}`"
                 >
                   {{ item.album$$q.title }}
-                </router-link>
-              </v-card-title>
-              <v-card-subtitle
+                </RouterLink>
+              </VCardTitle>
+              <VCardSubtitle
                 class="s-subheading-sl px-0 text-sm flex justify-between gap-x-2"
               >
-                <router-link
+                <RouterLink
                   :to="`/artists/${item.artist$$q.id}`"
                   class="flex-1 overflow-hidden overflow-ellipsis whitespace-nowrap"
                 >
                   {{ item.artist$$q.name }}
-                </router-link>
+                </RouterLink>
                 <template v-if="item.releaseYear$$q">
                   <div class="flex-none">
                     {{ item.releaseYear$$q }}
                   </div>
                 </template>
-              </v-card-subtitle>
-            </v-card>
+              </VCardSubtitle>
+            </VCard>
           </template>
-        </s-virtual-grid>
-        <s-dropdown-album v-model="dropdown$$q" />
+        </SVirtualGrid>
+        <SDropdownAlbum v-model="dropdown$$q" />
       </template>
       <template v-else>
         <div class="text-base">
@@ -231,5 +231,5 @@ export default defineComponent({
         </div>
       </template>
     </template>
-  </v-container>
+  </VContainer>
 </template>

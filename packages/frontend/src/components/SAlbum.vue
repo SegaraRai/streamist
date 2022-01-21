@@ -143,7 +143,7 @@ export default defineComponent({
     >
       <div class="p-0 m-0 leading-none flex-none">
         <template v-if="linkExcludes.includes(albumId$$q)">
-          <s-image-manager
+          <SImageManager
             attach-to-type="album"
             :attach-to-id="albumId$$q"
             :attach-to-title="value$$q.album$$q.title"
@@ -154,7 +154,7 @@ export default defineComponent({
               {{ t('imageManager.title.album', [value$$q.album$$q.title]) }}
             </template>
             <template #default>
-              <s-album-image
+              <SAlbumImage
                 class="w-50 h-50"
                 size="200"
                 expandable
@@ -162,11 +162,11 @@ export default defineComponent({
                 @image-ids="imageIds$$q = $event"
               />
             </template>
-          </s-image-manager>
+          </SImageManager>
         </template>
         <template v-else>
-          <router-link :to="`/albums/${albumId$$q}`" class="block">
-            <s-album-image
+          <RouterLink :to="`/albums/${albumId$$q}`" class="block">
+            <SAlbumImage
               class="w-50 h-50"
               size="200"
               expandable
@@ -174,27 +174,27 @@ export default defineComponent({
               @image-ids="imageIds$$q = $event"
               @contextmenu.prevent="openMenu$$q($event)"
             />
-          </router-link>
+          </RouterLink>
         </template>
       </div>
       <div class="flex flex-col <md:gap-y-3 <md:text-center">
         <div>
           <div class="s-heading font-bold text-xl flex-none line-clamp-2">
-            <s-conditional-link
+            <SConditionalLink
               :to="`/albums/${albumId$$q}`"
               :disabled="linkExcludes.includes(albumId$$q)"
               @contextmenu.prevent="openMenu$$q($event)"
             >
               {{ value$$q.album$$q.title }}
-            </s-conditional-link>
+            </SConditionalLink>
           </div>
           <div class="s-subheading flex-none line-clamp-2">
-            <s-conditional-link
+            <SConditionalLink
               :to="`/artists/${value$$q.artist$$q.id}`"
               :disabled="linkExcludes.includes(value$$q.artist$$q.id)"
             >
               {{ value$$q.artist$$q.name }}
-            </s-conditional-link>
+            </SConditionalLink>
           </div>
         </div>
         <template v-if="value$$q?.album$$q.description">
@@ -215,34 +215,34 @@ export default defineComponent({
       </div>
     </div>
     <div class="flex-none flex flex-row items-center gap-x-8 my-8">
-      <v-btn
+      <VBtn
         color="primary"
         flat
         icon
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(false)"
       >
-        <v-icon>mdi-play</v-icon>
-      </v-btn>
-      <v-btn
+        <VIcon>mdi-play</VIcon>
+      </VBtn>
+      <VBtn
         outlined
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(true)"
       >
-        <v-icon left>mdi-shuffle</v-icon>
+        <VIcon left>mdi-shuffle</VIcon>
         <span>
           {{ t('album.Shuffle') }}
         </span>
-      </v-btn>
+      </VBtn>
       <button
         class="rounded-full transition-colors"
         @click="openMenu$$q($event.target as HTMLElement)"
       >
-        <v-icon>mdi-dots-vertical</v-icon>
+        <VIcon>mdi-dots-vertical</VIcon>
       </button>
-      <v-divider />
+      <VDivider />
     </div>
-    <s-track-list
+    <STrackList
       render-mode="virtual"
       :show-album="false"
       :show-artist="false"
@@ -256,6 +256,6 @@ export default defineComponent({
       :visit-artist="visitArtist"
       show-delete
     />
-    <s-dropdown-album v-model="dropdown$$q" />
+    <SDropdownAlbum v-model="dropdown$$q" />
   </template>
 </template>

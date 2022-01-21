@@ -79,21 +79,21 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-list dense class="overflow-x-hidden">
+  <VList dense class="overflow-x-hidden">
     <template v-for="(item, _index) in navItems$$q" :key="_index">
       <template v-if="item.type === 'link'">
-        <v-list-item link :to="item.path">
-          <v-list-item-avatar icon class="flex items-center justify-center">
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-avatar>
-          <v-list-item-header>
+        <VListItem link :to="item.path">
+          <VListItemAvatar icon class="flex items-center justify-center">
+            <VIcon>{{ item.icon }}</VIcon>
+          </VListItemAvatar>
+          <VListItemHeader>
             {{ item.text }}
-          </v-list-item-header>
-        </v-list-item>
+          </VListItemHeader>
+        </VListItem>
       </template>
       <template v-else-if="item.type === 'divider'">
-        <v-divider />
+        <VDivider />
       </template>
     </template>
-  </v-list>
+  </VList>
 </template>

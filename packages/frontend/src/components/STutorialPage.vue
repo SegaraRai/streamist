@@ -24,13 +24,13 @@ export default defineComponent({
       <div class="text-2xl mb-6 leading-tight">
         {{ t('tutorial.title') }}
       </div>
-      <i18n-t
+      <I18nT
         keypath="tutorial.message"
         tag="div"
         class="text-base leading-normal whitespace-pre-line"
       >
-        <i-mdi-cloud-upload />
-      </i18n-t>
+        <IMdiCloudUpload />
+      </I18nT>
     </div>
   </template>
   <template v-else>

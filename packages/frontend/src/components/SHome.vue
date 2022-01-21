@@ -42,14 +42,14 @@ export default defineComponent({
 </script>
 
 <template>
-  <s-tutorial-page>
+  <STutorialPage>
     <div class="flex flex-col gap-y-16">
       <template v-if="recentlyPlayedTracks$$q?.length">
         <div>
           <header class="s-title">
             <div class="text-h5">{{ t('home.RecentlyPlayed') }}</div>
           </header>
-          <s-track-list
+          <STrackList
             :show-disc-number="false"
             :tracks="recentlyPlayedTracks$$q"
             :loading="!recentlyPlayedTracks$$q"
@@ -69,7 +69,7 @@ export default defineComponent({
           <header class="s-title">
             <div class="text-h5">{{ t('home.RecentlyUploaded') }}</div>
           </header>
-          <s-track-list
+          <STrackList
             :show-disc-number="false"
             :tracks="recentlyUploadedTracks$$q"
             :loading="!recentlyUploadedTracks$$q"
@@ -85,5 +85,5 @@ export default defineComponent({
         </div>
       </template>
     </div>
-  </s-tutorial-page>
+  </STutorialPage>
 </template>

@@ -78,57 +78,57 @@ export default defineComponent({
 
 <template>
   <template v-if="!fetched$$q">
-    <s-nullable-image
+    <SNullableImage
       :image="false"
       class="select-none rounded-lg overflow-hidden"
     />
   </template>
   <template v-else-if="Array.isArray(image$$q)">
     <template v-if="image$$q.length === 0">
-      <s-nullable-image class="select-none rounded-lg overflow-hidden" />
+      <SNullableImage class="select-none rounded-lg overflow-hidden" />
     </template>
     <template v-else-if="image$$q.length === 1">
-      <s-nullable-image
+      <SNullableImage
         :image="image$$q[0]"
         class="select-none rounded-lg overflow-hidden"
       />
     </template>
     <template v-else-if="image$$q.length === 2">
       <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[0]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" />
         <div class="w-1/2 h-1/2"></div>
         <div class="w-1/2 h-1/2"></div>
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[1]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" />
       </div>
     </template>
     <template v-else-if="image$$q.length === 3">
       <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[0]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[1]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[2]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[2]" />
         <div class="w-1/2 h-1/2"></div>
       </div>
     </template>
     <template v-else>
       <div class="flex flex-wrap select-none rounded-lg overflow-hidden">
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[0]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[1]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[2]" />
-        <s-nullable-image class="w-1/2 h-1/2" :image="image$$q[3]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[2]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[3]" />
       </div>
     </template>
   </template>
   <template v-else>
-    <s-expandable
+    <SExpandable
       v-model="expanded$$q"
       :alt-base="value$$q?.playlist$$q.title"
       :image-ids="value$$q?.imageIds$$q"
       :disabled="!expandable"
     >
-      <s-nullable-image
+      <SNullableImage
         :image="image$$q"
         class="select-none rounded-lg overflow-hidden w-full h-full"
       />
-    </s-expandable>
+    </SExpandable>
   </template>
 </template>

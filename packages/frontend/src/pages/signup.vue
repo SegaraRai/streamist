@@ -191,9 +191,9 @@ export default defineComponent({
 
 <template>
   <div class="flex items-center justify-center h-full">
-    <v-card class="elevation-4 max-w-xl flex-1">
-      <v-card-header>
-        <v-card-header-text class="flex items-center gap-x-2 text-2xl">
+    <VCard class="elevation-4 max-w-xl flex-1">
+      <VCardHeader>
+        <VCardHeaderText class="flex items-center gap-x-2 text-2xl">
           <img
             :src="logoSVG$$q"
             width="128"
@@ -202,11 +202,11 @@ export default defineComponent({
             alt="Streamist Logo"
           />
           <span>{{ t('signUp.title') }}</span>
-        </v-card-header-text>
-      </v-card-header>
-      <v-card-text>
-        <v-form style="--s-autofill-bg: #0003; --s-autofill-text: inherit">
-          <v-text-field
+        </VCardHeaderText>
+      </VCardHeader>
+      <VCardText>
+        <VForm style="--s-autofill-bg: #0003; --s-autofill-text: inherit">
+          <VTextField
             v-model="username$$q"
             name="username"
             type="text"
@@ -225,7 +225,7 @@ export default defineComponent({
               <template v-if="usernameAvailability$$q != null">
                 <div class="w-4 h-4 flex items-center justify-center">
                   <template v-if="usernameAvailability$$q === 'checking'">
-                    <v-progress-circular
+                    <VProgressCircular
                       class="absolute"
                       indeterminate
                       size="16"
@@ -233,30 +233,30 @@ export default defineComponent({
                     />
                   </template>
                   <template v-else-if="usernameAvailability$$q">
-                    <n-popover placement="top" trigger="hover">
+                    <NPopover placement="top" trigger="hover">
                       <template #trigger>
-                        <i-mdi-check class="w-4 h-4 text-st-success" />
+                        <IMdiCheck class="w-4 h-4 text-st-success" />
                       </template>
                       <div>
                         {{ t('signUp.tooltip.UsernameAvailable') }}
                       </div>
-                    </n-popover>
+                    </NPopover>
                   </template>
                   <template v-else>
-                    <n-popover placement="top" trigger="hover">
+                    <NPopover placement="top" trigger="hover">
                       <template #trigger>
-                        <i-mdi-close class="w-4 h-4 text-st-error" />
+                        <IMdiClose class="w-4 h-4 text-st-error" />
                       </template>
                       <div>
                         {{ t('signUp.tooltip.UsernameAlreadyTaken') }}
                       </div>
-                    </n-popover>
+                    </NPopover>
                   </template>
                 </div>
               </template>
             </template>
-          </v-text-field>
-          <v-text-field
+          </VTextField>
+          <VTextField
             v-model="password$$q"
             name="password"
             type="password"
@@ -269,7 +269,7 @@ export default defineComponent({
             :rules="passwordRules$$q"
             counter
           />
-          <v-text-field
+          <VTextField
             v-model="displayName$$q"
             class="s-v-input-hide-details"
             type="text"
@@ -281,14 +281,14 @@ export default defineComponent({
           />
           <!-- TODO: migrate to v-select -->
           <div class="my-10">
-            <n-select v-model:value="region$$q" :options="regionOptions$$q" />
+            <NSelect v-model:value="region$$q" :options="regionOptions$$q" />
           </div>
-          <s-h-captcha site-key="x" @update="updateHCaptchaResponse$$q" />
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn
+          <SHCaptcha site-key="x" @update="updateHCaptchaResponse$$q" />
+        </VForm>
+      </VCardText>
+      <VCardActions>
+        <VSpacer />
+        <VBtn
           flat
           text
           color="primary"
@@ -299,14 +299,14 @@ export default defineComponent({
             {{ t('signUp.button.SignUp') }}
           </span>
           <template v-if="requestInProgress$$q">
-            <v-progress-circular
+            <VProgressCircular
               class="absolute left-0 top-0 right-0 bottom-0 m-auto"
               indeterminate
               size="20"
             />
           </template>
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+        </VBtn>
+      </VCardActions>
+    </VCard>
   </div>
 </template>

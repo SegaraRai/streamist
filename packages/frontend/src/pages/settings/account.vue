@@ -102,7 +102,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-0">
+  <VContainer fluid class="pt-0">
     <div class="flex flex-col gap-y-4">
       <header class="s-title">
         <h1 class="text-h5">
@@ -115,7 +115,7 @@ export default defineComponent({
             {{ t('settings.account.header.DisplayName') }}
           </h2>
           <div class="w-64">
-            <n-input
+            <NInput
               v-model:value="itemDisplayName$$q"
               type="text"
               autocomplete="off"
@@ -129,7 +129,7 @@ export default defineComponent({
           </h2>
           <div class="w-64">
             <!-- TODO: migrate to v-select -->
-            <n-select
+            <NSelect
               v-model:value="itemRegion$$q"
               :options="regionOptions$$q"
             />
@@ -137,7 +137,7 @@ export default defineComponent({
         </div>
       </div>
       <div class="mt-8">
-        <v-btn
+        <VBtn
           class="relative"
           color="primary"
           :disabled="requestInProgress$$q || !modified$$q"
@@ -147,14 +147,14 @@ export default defineComponent({
             {{ t('settings.account.button.Save') }}
           </span>
           <template v-if="requestInProgress$$q">
-            <v-progress-circular
+            <VProgressCircular
               class="absolute left-0 top-0 right-0 bottom-0 m-auto"
               indeterminate
               size="20"
             />
           </template>
-        </v-btn>
+        </VBtn>
       </div>
     </div>
-  </v-container>
+  </VContainer>
 </template>

@@ -69,27 +69,27 @@ export default defineComponent({
 </script>
 
 <template>
-  <s-expandable
+  <SExpandable
     v-model="expanded$$q"
     :alt-base="value$$q?.artist$$q.name"
     :image-ids="value$$q?.imageIds$$q"
     :disabled="!expandable"
   >
-    <s-artist-image-x
+    <SArtistImageX
       class="w-full h-full"
       :image="fetched$$q && value$$q?.image$$q"
       :alt="value$$q?.artist$$q.name"
     />
     <template #overlay="{ activate }">
-      <v-btn
+      <VBtn
         class="absolute right-7 bottom-7 bg-opacity-80 bg-true-gray-900"
         size="small"
         flat
         icon
         @click.stop.prevent="activate()"
       >
-        <v-icon>mdi-fullscreen</v-icon>
-      </v-btn>
+        <VIcon>mdi-fullscreen</VIcon>
+      </VBtn>
     </template>
-  </s-expandable>
+  </SExpandable>
 </template>

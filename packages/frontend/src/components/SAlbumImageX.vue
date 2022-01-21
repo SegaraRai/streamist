@@ -19,5 +19,5 @@ export default defineComponent({
 </script>
 
 <template>
-  <s-nullable-image class="select-none" :image="image" :alt="alt" />
+  <SNullableImage class="select-none" :image="image" :alt="alt" />
 </template>

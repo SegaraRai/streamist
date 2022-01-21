@@ -100,7 +100,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <n-dropdown
+  <NDropdown
     class="select-none"
     placement="bottom-start"
     trigger="manual"
@@ -112,10 +112,10 @@ export default defineComponent({
     @contextmenu.prevent
   />
   <template v-if="selectedPlaylist$$q">
-    <s-dialog-playlist-edit
+    <SDialogPlaylistEdit
       v-model="dialogEdit$$q"
       :playlist="selectedPlaylist$$q"
     />
   </template>
-  <s-dialog-playlist-create v-model="dialogCreate$$q" />
+  <SDialogPlaylistCreate v-model="dialogCreate$$q" />
 </template>

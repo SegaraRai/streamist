@@ -4,7 +4,7 @@ meta:
 </route>
 
 <template>
-  <v-container fluid>
+  <VContainer fluid>
     <header class="s-title mb-4">
       <div class="text-h5">Resources</div>
     </header>
@@ -15,21 +15,21 @@ meta:
       </p>
       <ul class="text-st-info">
         <li>
-          <router-link to="/resources/tracks">Tracks</router-link>
+          <RouterLink to="/resources/tracks">Tracks</RouterLink>
         </li>
         <li>
-          <router-link to="/resources/albums">Albums</router-link>
+          <RouterLink to="/resources/albums">Albums</RouterLink>
         </li>
         <li>
-          <router-link to="/resources/artists">Artists</router-link>
+          <RouterLink to="/resources/artists">Artists</RouterLink>
         </li>
         <li>
-          <router-link to="/resources/playlists">Playlists</router-link>
+          <RouterLink to="/resources/playlists">Playlists</RouterLink>
         </li>
         <li>
-          <router-link to="/resources/sources">Sources</router-link>
+          <RouterLink to="/resources/sources">Sources</RouterLink>
         </li>
       </ul>
     </div>
-  </v-container>
+  </VContainer>
 </template>

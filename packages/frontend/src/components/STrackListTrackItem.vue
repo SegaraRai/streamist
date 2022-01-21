@@ -104,7 +104,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-list-item
+  <VListItem
     v-ripple
     v-bind="$attrs"
     class="s-hover-container s-list-item w-full py-1 h-14 !<sm:px-2"
@@ -123,22 +123,22 @@ export default defineComponent({
       >
         <template v-if="isCurrentPlayingTrack$$q">
           <!-- 再生中（または一時停止中）の曲 -->
-          <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
-            <v-icon class="s-hover-visible" :class="$style.icon">
+          <VBtn icon flat text class="bg-transparent" @click.stop="play$$q()">
+            <VIcon class="s-hover-visible" :class="$style.icon">
               {{
                 playing$$q
                   ? 'mdi-pause-circle-outline'
                   : 'mdi-play-circle-outline'
               }}
-            </v-icon>
-            <v-icon class="s-hover-hidden" :class="$style.icon">
+            </VIcon>
+            <VIcon class="s-hover-hidden" :class="$style.icon">
               {{ playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle' }}
-            </v-icon>
-          </v-btn>
+            </VIcon>
+          </VBtn>
         </template>
         <template v-else-if="isAvailable$$q">
           <!-- それ以外の曲 -->
-          <v-btn icon flat text class="bg-transparent" @click.stop="play$$q()">
+          <VBtn icon flat text class="bg-transparent" @click.stop="play$$q()">
             <template v-if="indexContentNumber$$q != null">
               <div
                 class="s-hover-hidden s-numeric font-medium tracking-[0.01em]"
@@ -147,17 +147,17 @@ export default defineComponent({
               </div>
             </template>
             <template v-else-if="indexContent === 'albumArtwork'">
-              <s-album-image-x
+              <SAlbumImageX
                 class="s-hover-hidden flex-none w-9 h-9"
                 size="36"
                 :image="item.image$$q"
                 :alt="item.album$$q.title"
               />
             </template>
-            <v-icon class="s-hover-visible" :class="$style.icon">
+            <VIcon class="s-hover-visible" :class="$style.icon">
               mdi-play-circle-outline
-            </v-icon>
-          </v-btn>
+            </VIcon>
+          </VBtn>
         </template>
         <template v-else>
           <!-- それ以外の曲（再生不可） -->
@@ -168,7 +168,7 @@ export default defineComponent({
               </div>
             </template>
             <template v-else-if="indexContent === 'albumArtwork'">
-              <s-album-image-x
+              <SAlbumImageX
                 class="flex-none w-9 h-9"
                 size="36"
                 :image="item.image$$q"
@@ -180,10 +180,10 @@ export default defineComponent({
       </div>
     </div>
     <!-- Track Title -->
-    <v-list-item-header
+    <VListItemHeader
       class="s-track-list-column-title flex flex-col flex-nowrap justify-center"
     >
-      <v-list-item-title>
+      <VListItemTitle>
         <span
           class="s-heading-sl block max-w-max"
           :class="
@@ -197,45 +197,45 @@ export default defineComponent({
         >
           {{ item.track$$q.title }}
         </span>
-      </v-list-item-title>
+      </VListItemTitle>
       <template
         v-if="showArtist || item.artist$$q.id !== item.albumArtist$$q.id"
       >
-        <v-list-item-subtitle class="!opacity-100">
-          <s-conditional-link
+        <VListItemSubtitle class="!opacity-100">
+          <SConditionalLink
             class="s-subheading-sl text-xs block max-w-max"
             :to="`/artists/${item.artist$$q.id}`"
             :disabled="linkExcludes?.includes(item.artist$$q.id)"
           >
             {{ item.artist$$q.name }}
-          </s-conditional-link>
-        </v-list-item-subtitle>
+          </SConditionalLink>
+        </VListItemSubtitle>
       </template>
-    </v-list-item-header>
+    </VListItemHeader>
     <!-- Album Title -->
     <template v-if="showAlbum">
-      <v-list-item-header
+      <VListItemHeader
         class="s-track-list-column-album flex flex-col flex-nowrap justify-center ml-6 !<md:hidden"
       >
-        <v-list-item-title>
-          <s-conditional-link
+        <VListItemTitle>
+          <SConditionalLink
             class="s-heading-sl block max-w-max"
             :to="`/albums/${item.album$$q.id}`"
             :disabled="linkExcludes?.includes(item.album$$q.id)"
           >
             {{ item.album$$q.title }}
-          </s-conditional-link>
-        </v-list-item-title>
-        <v-list-item-subtitle class="!opacity-100">
-          <s-conditional-link
+          </SConditionalLink>
+        </VListItemTitle>
+        <VListItemSubtitle class="!opacity-100">
+          <SConditionalLink
             class="s-subheading-sl text-xs block max-w-max"
             :to="`/artists/${item.albumArtist$$q.id}`"
             :disabled="linkExcludes?.includes(item.albumArtist$$q.id)"
           >
             {{ item.albumArtist$$q.name }}
-          </s-conditional-link>
-        </v-list-item-subtitle>
-      </v-list-item-header>
+          </SConditionalLink>
+        </VListItemSubtitle>
+      </VListItemHeader>
     </template>
     <!-- Duration -->
     <template v-if="!hideDuration">
@@ -246,7 +246,7 @@ export default defineComponent({
     <!-- Remove icon -->
     <template v-if="removable">
       <div class="s-track-list-column-menu py-1">
-        <v-btn
+        <VBtn
           icon
           flat
           text
@@ -256,13 +256,13 @@ export default defineComponent({
           @click.stop="remove$$q()"
           @dragstart.stop.prevent
         >
-          <v-icon color="error" class="s-hover-visible">mdi-close</v-icon>
-        </v-btn>
+          <VIcon color="error" class="s-hover-visible">mdi-close</VIcon>
+        </VBtn>
       </div>
     </template>
     <!-- Menu -->
     <div class="s-track-list-column-menu py-1">
-      <v-btn
+      <VBtn
         icon
         flat
         text
@@ -272,10 +272,10 @@ export default defineComponent({
         @click.stop="!selected && onMenu$$q($event)"
         @dragstart.stop.prevent
       >
-        <v-icon class="s-hover-visible">mdi-dots-vertical</v-icon>
-      </v-btn>
+        <VIcon class="s-hover-visible">mdi-dots-vertical</VIcon>
+      </VBtn>
     </div>
-  </v-list-item>
+  </VListItem>
 </template>
 
 <style module>

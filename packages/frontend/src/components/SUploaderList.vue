@@ -83,43 +83,43 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-list density="compact">
+  <VList density="compact">
     <template
       v-for="(file, _index) in uploadStore$$q.stagedFiles"
       :key="_index"
     >
-      <s-uploader-list-item
+      <SUploaderListItem
         :filename="file.file.name"
         :filesize="file.file.size"
         :file-type="file.type"
         class="s-hover-container text-st-primary"
       >
         <div>
-          <n-popover placement="right" trigger="hover">
+          <NPopover placement="right" trigger="hover">
             <template #trigger>
               <div>
-                <v-btn
+                <VBtn
                   flat
                   icon
                   size="small"
                   class="s-hover-visible text-st-error"
                   @click="uploadStore$$q.removeStagingFile(file.id)"
                 >
-                  <v-icon>mdi-delete</v-icon>
-                </v-btn>
+                  <VIcon>mdi-delete</VIcon>
+                </VBtn>
                 <template v-if="file.type === 'unknown'">
-                  <v-icon class="s-hover-hidden text-st-error"
-                    >mdi-alert-circle</v-icon
+                  <VIcon class="s-hover-hidden text-st-error"
+                    >mdi-alert-circle</VIcon
                   >
                 </template>
               </div>
             </template>
             <div>{{ getStagedFileTooltipText$$q(file) }}</div>
-          </n-popover>
+          </NPopover>
         </div>
-      </s-uploader-list-item>
+      </SUploaderListItem>
       <template v-if="file.type === 'audioWithCueSheet'">
-        <s-uploader-list-item
+        <SUploaderListItem
           class="ml-6 text-st-info"
           :filename="file.cueSheetFile.name"
           :filesize="file.cueSheetFile.size"
@@ -129,14 +129,14 @@ export default defineComponent({
     </template>
     <template v-for="(file, _index) in uploadStore$$q.files" :key="_index">
       <template v-if="file.status !== 'removed'">
-        <s-uploader-list-item
+        <SUploaderListItem
           :filename="file.filename"
           :filesize="file.fileSize"
           :file-type="file.fileType"
           class="s-hover-container"
         >
           <div>
-            <n-popover placement="right" trigger="hover">
+            <NPopover placement="right" trigger="hover">
               <template #trigger>
                 <div>
                   <template
@@ -147,16 +147,16 @@ export default defineComponent({
                       file.status === 'queued'
                     "
                   >
-                    <v-btn
+                    <VBtn
                       flat
                       icon
                       size="small"
                       class="s-hover-visible text-st-error"
                       @click="uploadStore$$q.removeFile(file.id)"
                     >
-                      <v-icon>mdi-delete</v-icon>
-                    </v-btn>
-                    <v-progress-circular
+                      <VIcon>mdi-delete</VIcon>
+                    </VBtn>
+                    <VProgressCircular
                       class="s-hover-hidden"
                       indeterminate
                       size="28"
@@ -164,40 +164,40 @@ export default defineComponent({
                   </template>
                   <template v-else-if="file.status === 'uploading'">
                     <template v-if="file.file">
-                      <v-progress-circular
+                      <VProgressCircular
                         :model-value="
                           ((file.uploadedSize || 0) * 100) / file.fileSize
                         "
                         size="28"
                         class="s-hover-hidden"
                       />
-                      <n-popconfirm
+                      <NPopconfirm
                         :positive-text="t('confirm.abortUpload.button.Abort')"
                         :negative-text="t('confirm.abortUpload.button.Cancel')"
                         @positive-click="uploadStore$$q.abortFile(file.id)"
                       >
                         <template #trigger>
-                          <n-button
+                          <NButton
                             tag="div"
                             text
                             class="s-hover-visible select-none"
                             data-draggable="false"
                             @dragstart.stop.prevent
                           >
-                            <v-btn flat icon size="small" class="text-st-error">
-                              <v-icon>mdi-cancel</v-icon>
-                            </v-btn>
-                          </n-button>
+                            <VBtn flat icon size="small" class="text-st-error">
+                              <VIcon>mdi-cancel</VIcon>
+                            </VBtn>
+                          </NButton>
                         </template>
                         <div class="flex flex-col gap-y-2">
                           <div class="flex-1">
                             {{ t('confirm.abortUpload.text') }}
                           </div>
                         </div>
-                      </n-popconfirm>
+                      </NPopconfirm>
                     </template>
                     <template v-else>
-                      <v-progress-circular
+                      <VProgressCircular
                         color="primary"
                         indeterminate
                         size="28"
@@ -210,7 +210,7 @@ export default defineComponent({
                       file.status === 'transcoding'
                     "
                   >
-                    <v-progress-circular
+                    <VProgressCircular
                       color="primary"
                       indeterminate
                       size="28"
@@ -226,33 +226,33 @@ export default defineComponent({
                       file.status === 'transcoded'
                     "
                   >
-                    <v-btn
+                    <VBtn
                       flat
                       icon
                       size="small"
                       class="s-hover-visible text-st-success"
                       @click="removeFile$$q(file.id)"
                     >
-                      <v-icon>mdi-check</v-icon>
-                    </v-btn>
+                      <VIcon>mdi-check</VIcon>
+                    </VBtn>
                     <template v-if="file.status === 'transcoded'">
-                      <v-icon class="s-hover-hidden text-st-success">
+                      <VIcon class="s-hover-hidden text-st-success">
                         mdi-check-circle
-                      </v-icon>
+                      </VIcon>
                     </template>
                     <template v-else>
-                      <v-icon class="s-hover-hidden text-st-error">
+                      <VIcon class="s-hover-hidden text-st-error">
                         mdi-alert-circle
-                      </v-icon>
+                      </VIcon>
                     </template>
                   </template>
                 </div>
               </template>
               <div>{{ getFileTooltipText$$q(file) }}</div>
-            </n-popover>
+            </NPopover>
           </div>
-        </s-uploader-list-item>
+        </SUploaderListItem>
       </template>
     </template>
-  </v-list>
+  </VList>
 </template>

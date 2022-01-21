@@ -71,7 +71,7 @@ export default defineComponent({
 
 <template>
   <div class="flex gap-x-4 items-center">
-    <n-auto-complete
+    <NAutoComplete
       v-model:value="modelValue$$q"
       class="flex-1"
       :options="options$$q"
@@ -79,7 +79,7 @@ export default defineComponent({
       @update-value="albumId$$q = undefined"
     >
       <template #default="{ handleInput }">
-        <v-text-field
+        <VTextField
           class="s-v-input-hide-details"
           :label="label"
           hide-details
@@ -88,17 +88,12 @@ export default defineComponent({
         >
           <template #prependInner>
             <template v-if="albumId$$q">
-              <s-album-image
-                class="flex-none mr-2 w-6 h-6"
-                :album="albumId$$q"
-              />
+              <SAlbumImage class="flex-none mr-2 w-6 h-6" :album="albumId$$q" />
             </template>
             <template v-else-if="create && modelValue$$q">
-              <n-popover placement="top" trigger="hover">
+              <NPopover placement="top" trigger="hover">
                 <template #trigger>
-                  <i-mdi-plus-circle
-                    class="flex-none mr-2 w-6 h-6 text-st-info"
-                  />
+                  <IMdiPlusCircle class="flex-none mr-2 w-6 h-6 text-st-info" />
                 </template>
                 <div>
                   {{
@@ -108,14 +103,14 @@ export default defineComponent({
                     ])
                   }}
                 </div>
-              </n-popover>
+              </NPopover>
             </template>
             <template v-else>
               <div class="mr-2 w-6 h-6"></div>
             </template>
           </template>
-        </v-text-field>
+        </VTextField>
       </template>
-    </n-auto-complete>
+    </NAutoComplete>
   </div>
 </template>

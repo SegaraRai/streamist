@@ -67,7 +67,7 @@ export default defineComponent({
 
 <template>
   <div class="flex gap-x-4 items-center">
-    <n-auto-complete
+    <NAutoComplete
       v-model:value="modelValue$$q"
       class="flex-1"
       :options="options$$q"
@@ -75,7 +75,7 @@ export default defineComponent({
       @update-value="artistId$$q = undefined"
     >
       <template #default="{ handleInput }">
-        <v-text-field
+        <VTextField
           class="s-v-input-hide-details"
           :label="label"
           hide-details
@@ -84,29 +84,29 @@ export default defineComponent({
         >
           <template #prependInner>
             <template v-if="artistId$$q">
-              <s-artist-image
+              <SArtistImage
                 class="flex-none mr-2 w-6 h-6"
                 :artist="artistId$$q"
               />
             </template>
             <template v-else-if="create && modelValue$$q">
-              <n-popover placement="top" trigger="hover">
+              <NPopover placement="top" trigger="hover">
                 <template #trigger>
-                  <i-mdi-account-plus
+                  <IMdiAccountPlus
                     class="flex-none mr-2 w-6 h-6 text-st-info"
                   />
                 </template>
                 <div>
                   {{ t('combobox.artist.CreateNewArtist', [modelValue$$q]) }}
                 </div>
-              </n-popover>
+              </NPopover>
             </template>
             <template v-else>
               <div class="mr-2 w-6 h-6"></div>
             </template>
           </template>
-        </v-text-field>
+        </VTextField>
       </template>
-    </n-auto-complete>
+    </NAutoComplete>
   </div>
 </template>

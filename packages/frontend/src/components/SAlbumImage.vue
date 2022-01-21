@@ -56,16 +56,16 @@ export default defineComponent({
 </script>
 
 <template>
-  <s-expandable
+  <SExpandable
     v-model="expanded$$q"
     :alt-base="value$$q?.album$$q.title"
     :image-ids="value$$q?.imageIds$$q"
     :disabled="!expandable"
   >
-    <s-album-image-x
+    <SAlbumImageX
       class="w-full h-full"
       :image="fetched$$q && value$$q?.image$$q"
       :alt="value$$q?.album$$q.title"
     />
-  </s-expandable>
+  </SExpandable>
 </template>

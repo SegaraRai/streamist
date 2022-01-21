@@ -71,7 +71,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid>
+  <VContainer fluid>
     <header class="s-title mb-4">
       <div class="text-h5">
         {{ t('usage.Usage') }}
@@ -99,5 +99,5 @@ export default defineComponent({
         {{ h(inUseSourceFileSizeCount$$q || 0) }}
       </div>
     </div>
-  </v-container>
+  </VContainer>
 </template>

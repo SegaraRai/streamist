@@ -71,25 +71,25 @@ export default defineComponent({
     class="flex gap-x-4 items-center overflow-hidden"
     @contextmenu.prevent="openMenu$$q($event)"
   >
-    <router-link class="block" :to="`/albums/${track.albumId}`">
-      <s-album-image class="w-16 h-16" size="64" :album="track.albumId" />
-    </router-link>
+    <RouterLink class="block" :to="`/albums/${track.albumId}`">
+      <SAlbumImage class="w-16 h-16" size="64" :album="track.albumId" />
+    </RouterLink>
     <div class="flex-1 flex flex-col gap-y-1 overflow-hidden">
-      <router-link
+      <RouterLink
         class="s-heading-sl block max-w-max text-base"
         :to="navigatePlaying ? '/playing' : `/albums/${track.albumId}`"
       >
         {{ track.title }}
-      </router-link>
-      <router-link
+      </RouterLink>
+      <RouterLink
         class="s-subheading-sl block max-w-max text-xs"
         :to="`/artists/${track.artistId}`"
       >
         {{ artistName || '\u200b' /* to prevent layout shift */ }}
-      </router-link>
+      </RouterLink>
     </div>
   </div>
-  <n-dropdown
+  <NDropdown
     class="select-none"
     placement="bottom-start"
     trigger="manual"
@@ -101,11 +101,8 @@ export default defineComponent({
     @contextmenu.prevent
   />
   <template v-if="lastSelectedTrack$$q">
-    <s-dialog-track-edit
-      v-model="dialogEdit$$q"
-      :track="lastSelectedTrack$$q"
-    />
-    <s-dialog-track-details
+    <SDialogTrackEdit v-model="dialogEdit$$q" :track="lastSelectedTrack$$q" />
+    <SDialogTrackDetails
       v-model="dialogDetails$$q"
       :track="lastSelectedTrack$$q"
     />

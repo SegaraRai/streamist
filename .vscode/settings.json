@@ -46,5 +46,7 @@
     "vue"
   ],
   "javascript.preferences.importModuleSpecifierEnding": "minimal",
-  "typescript.preferences.importModuleSpecifierEnding": "minimal"
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "volar.completion.preferredAttrNameCase": "kebab",
+  "volar.completion.preferredTagNameCase": "pascal"
 }

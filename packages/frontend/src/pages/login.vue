@@ -49,9 +49,9 @@ export default defineComponent({
 
 <template>
   <div class="flex items-center justify-center h-full">
-    <v-card class="elevation-4 max-w-xl flex-1">
-      <v-card-header>
-        <v-card-header-text class="flex items-center gap-x-2 text-2xl">
+    <VCard class="elevation-4 max-w-xl flex-1">
+      <VCardHeader>
+        <VCardHeaderText class="flex items-center gap-x-2 text-2xl">
           <img
             :src="logoSVG$$q"
             width="128"
@@ -60,14 +60,14 @@ export default defineComponent({
             alt="Streamist Logo"
           />
           <span>{{ t('signIn.title') }}</span>
-        </v-card-header-text>
-      </v-card-header>
-      <v-card-text>
-        <v-form
+        </VCardHeaderText>
+      </VCardHeader>
+      <VCardText>
+        <VForm
           class="s-autofill-color flex flex-col gap-y-8"
           style="--s-autofill-bg: #0003; --s-autofill-text: inherit"
         >
-          <v-text-field
+          <VTextField
             v-model="username$$q"
             class="s-v-input-hide-details"
             type="text"
@@ -77,7 +77,7 @@ export default defineComponent({
             hide-details
             :label="t('signIn.label.Username')"
           />
-          <v-text-field
+          <VTextField
             v-model="password$$q"
             class="s-v-input-hide-details"
             type="password"
@@ -87,23 +87,23 @@ export default defineComponent({
             hide-details
             :label="t('signIn.label.Password')"
           />
-        </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn flat text color="transparent" @click="login$$q">
+        </VForm>
+      </VCardText>
+      <VCardActions>
+        <VSpacer />
+        <VBtn flat text color="transparent" @click="login$$q">
           <span :class="requestInProgress$$q && 'invisible'">
             {{ t('signIn.button.SignIn') }}
           </span>
           <template v-if="requestInProgress$$q">
-            <v-progress-circular
+            <VProgressCircular
               class="absolute left-0 top-0 right-0 bottom-0 m-auto"
               indeterminate
               size="20"
             />
           </template>
-        </v-btn>
-      </v-card-actions>
-    </v-card>
+        </VBtn>
+      </VCardActions>
+    </VCard>
   </div>
 </template>

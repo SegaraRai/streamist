@@ -81,7 +81,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-container fluid class="pt-0">
+  <VContainer fluid class="pt-0">
     <header class="s-title">
       <div class="text-h5">
         {{ t('tracks.Tracks') }}
@@ -94,7 +94,7 @@ export default defineComponent({
     </header>
     <template v-if="items$$q">
       <template v-if="items$$q.length">
-        <s-track-list
+        <STrackList
           :show-disc-number="false"
           :tracks="items$$q"
           :loading="!items$$q"
@@ -116,5 +116,5 @@ export default defineComponent({
         </div>
       </template>
     </template>
-  </v-container>
+  </VContainer>
 </template>
