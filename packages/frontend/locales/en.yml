@@ -1,3 +1,7 @@
+notFound:
+  message: Page not found.
+  button:
+    Back: Back
 common:
   Logout: Logout
   ThisActionCannotBeUndone: This action cannot be undone.
