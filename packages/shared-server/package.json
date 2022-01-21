@@ -7,6 +7,6 @@
     "@types/node": "^16.11.19"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.47.0"
+    "@aws-sdk/client-s3": "^3.47.1"
   }
 }
