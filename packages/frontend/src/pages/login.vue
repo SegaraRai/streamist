@@ -64,7 +64,7 @@ export default defineComponent({
       </v-card-header>
       <v-card-text>
         <v-form
-          class="s-autofill-color"
+          class="s-autofill-color flex flex-col gap-y-8"
           style="--s-autofill-bg: #0003; --s-autofill-text: inherit"
         >
           <v-text-field
