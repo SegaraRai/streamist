@@ -4,16 +4,20 @@ meta:
 </route>
 
 <script lang="ts">
+import { useDialog } from 'naive-ui';
 import {
   PREFERENCE_AUDIO_QUALITIES,
   PREFERENCE_LANGUAGE_OPTIONS,
 } from '~/config';
+import { logout } from '~/logic/logout';
 import { usePreferenceStore } from '~/stores/preference';
 import { PREFERENCE_THEMES, useThemeStore } from '~/stores/theme';
 
 export default defineComponent({
   setup() {
+    const router = useRouter();
     const { t } = useI18n();
+    const dialog = useDialog();
     const preferenceStore = usePreferenceStore();
     const themeStore = useThemeStore();
 
@@ -38,6 +42,18 @@ export default defineComponent({
       themeOptions$$q,
       preferenceStore$$q: preferenceStore,
       themeStore$$q: themeStore,
+      logout$$q: () => {
+        dialog.warning({
+          title: t('dialog.logout.title'),
+          content: t('dialog.logout.content'),
+          positiveText: t('dialog.logout.button.Logout'),
+          negativeText: t('dialog.logout.button.Cancel'),
+          onPositiveClick: () => {
+            logout();
+            router.push('/login');
+          },
+        });
+      },
     };
   },
 });
@@ -88,10 +104,17 @@ export default defineComponent({
             />
           </div>
         </div>
+        <div class="mt-4 flex flex-col gap-y-8">
+          <div>
+            <v-btn color="error" @click="logout$$q">
+              {{ t('common.Logout') }}
+            </v-btn>
+          </div>
+        </div>
       </div>
-      <div class="mt-4">
+      <div class="mt-8">
         <router-link
-          class="inline-flex items-center gap-x-1 text-st-primary text-base"
+          class="inline-flex items-center gap-x-1 text-st-primary text-lg"
           to="/settings/account"
         >
           {{ t('settings.device.link.AccountSettings') }}

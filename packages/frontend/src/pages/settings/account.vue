@@ -4,20 +4,17 @@ meta:
 </route>
 
 <script lang="ts">
-import { useDialog, useMessage } from 'naive-ui';
+import { useMessage } from 'naive-ui';
 import { ACCOUNT_PREFERENCE_DEFAULT_REGION } from '$shared/config';
 import { OSRegion, getOSRegions } from '$shared/objectStorage';
 import type { ResourceUser } from '$/types';
 import { useLocalStorageDB, useSyncDB } from '~/db';
 import { api } from '~/logic/api';
 import { convertReqStr } from '~/logic/editUtils';
-import { logout } from '~/logic/logout';
 
 export default defineComponent({
   setup() {
-    const router = useRouter();
     const { t } = useI18n();
-    const dialog = useDialog();
     const message = useMessage();
     const syncDB = useSyncDB();
     const { dbUser$$q } = useLocalStorageDB();
@@ -99,18 +96,6 @@ export default defineComponent({
             requestInProgress$$q.value = false;
           });
       },
-      logout$$q: () => {
-        dialog.warning({
-          title: t('dialog.logout.title'),
-          content: t('dialog.logout.content'),
-          positiveText: t('dialog.logout.button.Logout'),
-          negativeText: t('dialog.logout.button.Cancel'),
-          onPositiveClick: () => {
-            logout();
-            router.push('/login');
-          },
-        });
-      },
     };
   },
 });
@@ -169,14 +154,6 @@ export default defineComponent({
             />
           </template>
         </v-btn>
-      </div>
-      <div class="mt-8 flex flex-col gap-y-8">
-        <v-divider />
-        <div>
-          <v-btn color="error" @click="logout$$q">
-            {{ t('common.Logout') }}
-          </v-btn>
-        </div>
       </div>
     </div>
   </v-container>
