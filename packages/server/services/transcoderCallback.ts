@@ -624,6 +624,7 @@ async function handleTranscoderResponseArtifactImage(
             attachToId,
             attachPrepend,
             entityExists: false,
+            sourceFileId: source.audioSourceFileId,
             uploadId: '',
             sourceId,
             userId,
