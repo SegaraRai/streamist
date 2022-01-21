@@ -75,6 +75,7 @@ export default defineComponent({
             required
             prepend-inner-icon="mdi-account"
             hide-details
+            :label="t('login.label.Username')"
           />
           <v-text-field
             v-model="password$$q"
@@ -84,6 +85,7 @@ export default defineComponent({
             required
             prepend-inner-icon="mdi-lock"
             hide-details
+            :label="t('login.label.Password')"
           />
         </v-form>
       </v-card-text>
