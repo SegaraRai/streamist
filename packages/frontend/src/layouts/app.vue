@@ -300,7 +300,8 @@ export default defineComponent({
       :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >
-      <VSheet class="m-0 p-0 w-full h-full flex flex-col">
+      <!-- we have to explicitly provide theme as this is outside of VApp -->
+      <VSheet class="m-0 p-0 w-full h-full flex flex-col" :theme="themeName$$q">
         <VDivider />
         <KeepAlive>
           <template v-if="desktopPlaybackControl$$q">
