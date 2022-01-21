@@ -35,7 +35,7 @@ export default defineComponent({
       const albums = allAlbums.value.value;
       const artists = allArtists.value.value;
       if (!tracks || !albums || !artists) {
-        return [];
+        return;
       }
 
       const albumMap = new Map<string, ResourceAlbum>(
@@ -86,26 +86,35 @@ export default defineComponent({
       <div class="text-h5">
         {{ t('tracks.Tracks') }}
       </div>
-      <template v-if="items$$q.length">
+      <template v-if="items$$q?.length">
         <div class="s-subheading-sl">
           {{ t('tracks.n_items', items$$q.length) }}
         </div>
       </template>
     </header>
-    <s-track-list
-      :show-disc-number="false"
-      :tracks="items$$q"
-      :loading="!items$$q"
-      :set-list="items$$q"
-      :set-list-name="t('setListName.Tracks')"
-      skip-set-list-check
-      index-content="albumArtwork"
-      :show-album="!isMobile$$q"
-      show-artist
-      :hide-duration="isMobile$$q"
-      visit-album
-      visit-artist
-      show-delete
-    />
+    <template v-if="items$$q">
+      <template v-if="items$$q.length">
+        <s-track-list
+          :show-disc-number="false"
+          :tracks="items$$q"
+          :loading="!items$$q"
+          :set-list="items$$q"
+          :set-list-name="t('setListName.Tracks')"
+          skip-set-list-check
+          index-content="albumArtwork"
+          :show-album="!isMobile$$q"
+          show-artist
+          :hide-duration="isMobile$$q"
+          visit-album
+          visit-artist
+          show-delete
+        />
+      </template>
+      <template v-else>
+        <div class="text-base mt-4">
+          {{ t('tracks.no_items') }}
+        </div>
+      </template>
+    </template>
   </v-container>
 </template>

@@ -42,7 +42,7 @@ export default defineComponent({
       const playlists = allPlaylists.value.value;
       const trackMap = allTrackMap.value.value;
       if (!playlists || !trackMap) {
-        return [];
+        return;
       }
 
       // NOTE: setDefaultSetList is intentionally not called because users will not want this behavior
@@ -96,7 +96,7 @@ export default defineComponent({
       <div class="text-h5">
         {{ t('playlists.Playlists') }}
       </div>
-      <template v-if="items$$q.length">
+      <template v-if="items$$q?.length">
         <div class="s-subheading-sl">
           {{ t('playlists.n_items', items$$q.length || 0) }}
         </div>
@@ -108,60 +108,68 @@ export default defineComponent({
       </v-btn>
       <v-divider />
     </div>
-    <div
-      :class="selectedPlaylist$$q ? 's-list--selected' : 's-list--unselected'"
-    >
+    <template v-if="items$$q">
       <template v-if="items$$q.length">
-        <v-list flat @contextmenu.prevent>
-          <template v-for="(item, _index) in items$$q" :key="_index">
-            <v-list-item
-              :disabled="!!selectedPlaylist$$q"
-              :to="`/playlists/${item.id$$q}`"
-              class="flex gap-x-4 s-hover-container opacity-100"
-              :class="
-                selectedPlaylist$$q?.id === item.id$$q
-                  ? 's-list-item--selected'
-                  : 's-list-item--unselected'
-              "
-              @contextmenu.prevent="showMenu$$q($event, item)"
-            >
-              <s-playlist-image
-                class="flex-none w-9 h-9"
-                size="36"
-                :playlist="item.playlist$$q"
-              />
-              <v-list-item-header class="flex-1">
-                <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
-                <v-list-item-subtitle>
-                  <span>{{ t('playlists.n_tracks', item.trackCount$$q) }}</span>
-                  <template v-if="item.trackCount$$q">
-                    <span>, {{ item.formattedDuration$$q }}</span>
-                  </template>
-                </v-list-item-subtitle>
-              </v-list-item-header>
-              <v-btn
-                icon
-                flat
-                text
-                size="small"
-                class="bg-transparent"
-                @click.prevent.stop="showMenu$$q($event.target as HTMLElement, item)"
+        <div
+          :class="
+            selectedPlaylist$$q ? 's-list--selected' : 's-list--unselected'
+          "
+        >
+          <v-list flat @contextmenu.prevent>
+            <template v-for="(item, _index) in items$$q" :key="_index">
+              <v-list-item
+                :disabled="!!selectedPlaylist$$q"
+                :to="`/playlists/${item.id$$q}`"
+                class="flex gap-x-4 s-hover-container opacity-100"
+                :class="
+                  selectedPlaylist$$q?.id === item.id$$q
+                    ? 's-list-item--selected'
+                    : 's-list-item--unselected'
+                "
+                @contextmenu.prevent="showMenu$$q($event, item)"
               >
-                <v-icon class="s-hover-visible">mdi-dots-vertical</v-icon>
-              </v-btn>
-            </v-list-item>
-          </template>
-        </v-list>
+                <s-playlist-image
+                  class="flex-none w-9 h-9"
+                  size="36"
+                  :playlist="item.playlist$$q"
+                />
+                <v-list-item-header class="flex-1">
+                  <v-list-item-title>{{ item.title$$q }}</v-list-item-title>
+                  <v-list-item-subtitle>
+                    <span>{{
+                      t('playlists.n_tracks', item.trackCount$$q)
+                    }}</span>
+                    <template v-if="item.trackCount$$q">
+                      <span>, {{ item.formattedDuration$$q }}</span>
+                    </template>
+                  </v-list-item-subtitle>
+                </v-list-item-header>
+                <v-btn
+                  icon
+                  flat
+                  text
+                  size="small"
+                  class="bg-transparent"
+                  @click.prevent.stop="showMenu$$q($event.target as HTMLElement, item)"
+                >
+                  <v-icon class="s-hover-visible">mdi-dots-vertical</v-icon>
+                </v-btn>
+              </v-list-item>
+            </template>
+          </v-list>
+        </div>
+        <s-dropdown-playlist
+          v-model="dropdown$$q"
+          v-model:show-create-dialog="showCreateDialog$$q"
+          show-create-item
+          @update:selected-playlist="selectedPlaylist$$q = $event"
+        />
       </template>
       <template v-else>
-        <div>No playlists here</div>
+        <div class="text-base">
+          {{ t('playlists.no_items') }}
+        </div>
       </template>
-    </div>
-    <s-dropdown-playlist
-      v-model="dropdown$$q"
-      v-model:show-create-dialog="showCreateDialog$$q"
-      show-create-item
-      @update:selected-playlist="selectedPlaylist$$q = $event"
-    />
+    </template>
   </v-container>
 </template>

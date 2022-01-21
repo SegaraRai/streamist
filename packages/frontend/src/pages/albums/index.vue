@@ -56,7 +56,7 @@ export default defineComponent({
       const tracks = allTracks.value.value;
       const imageMap = allImageMap.value.value;
       if (!albums || !artists || !tracks || !imageMap) {
-        return [];
+        return;
       }
 
       const artistMap = new Map<string, ResourceArtist>(
@@ -159,68 +159,77 @@ export default defineComponent({
       <div class="text-h5">
         {{ t('albums.Albums') }}
       </div>
-      <template v-if="items$$q.length">
+      <template v-if="items$$q?.length">
         <div class="s-subheading-sl">
           {{ t('albums.n_items', items$$q.length) }}
         </div>
       </template>
     </header>
-    <s-virtual-grid
-      :items="items$$q"
-      :item-width="displayObj$$q.width$$q"
-      :item-height="displayObj$$q.height$$q"
-      :item-margin-width="displayObj$$q.marginWidth$$q"
-      :item-margin-height="displayObj$$q.marginHeight$$q"
-    >
-      <template #default="{ data: item, width }">
-        <v-card
-          flat
-          tile
-          :width="`${width}px`"
-          class="bg-transparent flex flex-col"
-          @contextmenu.prevent="showMenu$$q($event, item)"
+    <template v-if="items$$q">
+      <template v-if="items$$q.length">
+        <s-virtual-grid
+          :items="items$$q"
+          :item-width="displayObj$$q.width$$q"
+          :item-height="displayObj$$q.height$$q"
+          :item-margin-width="displayObj$$q.marginWidth$$q"
+          :item-margin-height="displayObj$$q.marginHeight$$q"
         >
-          <router-link
-            v-ripple
-            :to="`/albums/${item.album$$q.id}`"
-            class="block"
-          >
-            <s-album-image-x
-              :style="{
-                width: `${width}px`,
-                height: `${width}px`,
-              }"
-              :image="item.image$$q"
-              :size="width"
-              :alt="item.album$$q.title"
-            />
-          </router-link>
-          <v-card-title class="p-0 my-1 flex flex-col items-start">
-            <router-link
-              class="s-heading block text-base sm:text-lg font-bold line-clamp-2 break-words"
-              :to="`/albums/${item.album$$q.id}`"
+          <template #default="{ data: item, width }">
+            <v-card
+              flat
+              tile
+              :width="`${width}px`"
+              class="bg-transparent flex flex-col"
+              @contextmenu.prevent="showMenu$$q($event, item)"
             >
-              {{ item.album$$q.title }}
-            </router-link>
-          </v-card-title>
-          <v-card-subtitle
-            class="s-subheading-sl px-0 text-sm flex justify-between gap-x-2"
-          >
-            <router-link
-              :to="`/artists/${item.artist$$q.id}`"
-              class="flex-1 overflow-hidden overflow-ellipsis whitespace-nowrap"
-            >
-              {{ item.artist$$q.name }}
-            </router-link>
-            <template v-if="item.releaseYear$$q">
-              <div class="flex-none">
-                {{ item.releaseYear$$q }}
-              </div>
-            </template>
-          </v-card-subtitle>
-        </v-card>
+              <router-link
+                v-ripple
+                :to="`/albums/${item.album$$q.id}`"
+                class="block"
+              >
+                <s-album-image-x
+                  :style="{
+                    width: `${width}px`,
+                    height: `${width}px`,
+                  }"
+                  :image="item.image$$q"
+                  :size="width"
+                  :alt="item.album$$q.title"
+                />
+              </router-link>
+              <v-card-title class="p-0 my-1 flex flex-col items-start">
+                <router-link
+                  class="s-heading block text-base sm:text-lg font-bold line-clamp-2 break-words"
+                  :to="`/albums/${item.album$$q.id}`"
+                >
+                  {{ item.album$$q.title }}
+                </router-link>
+              </v-card-title>
+              <v-card-subtitle
+                class="s-subheading-sl px-0 text-sm flex justify-between gap-x-2"
+              >
+                <router-link
+                  :to="`/artists/${item.artist$$q.id}`"
+                  class="flex-1 overflow-hidden overflow-ellipsis whitespace-nowrap"
+                >
+                  {{ item.artist$$q.name }}
+                </router-link>
+                <template v-if="item.releaseYear$$q">
+                  <div class="flex-none">
+                    {{ item.releaseYear$$q }}
+                  </div>
+                </template>
+              </v-card-subtitle>
+            </v-card>
+          </template>
+        </s-virtual-grid>
+        <s-dropdown-album v-model="dropdown$$q" />
       </template>
-    </s-virtual-grid>
-    <s-dropdown-album v-model="dropdown$$q" />
+      <template v-else>
+        <div class="text-base">
+          {{ t('albums.no_items') }}
+        </div>
+      </template>
+    </template>
   </v-container>
 </template>

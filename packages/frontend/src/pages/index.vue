@@ -52,47 +52,49 @@ export default defineComponent({
 
 <template>
   <v-container fluid class="pt-0">
-    <div class="flex flex-col gap-y-16">
-      <template v-if="recentlyPlayedTracks$$q?.length">
-        <div>
-          <header class="s-title">
-            <div class="text-h5">{{ t('home.RecentlyPlayed') }}</div>
-          </header>
-          <s-track-list
-            :show-disc-number="false"
-            :tracks="recentlyPlayedTracks$$q"
-            :loading="!recentlyPlayedTracks$$q"
-            :set-list="recentlyPlayedTracks$$q"
-            :set-list-name="t('setListName.RecentlyPlayed')"
-            index-content="albumArtwork"
-            :show-album="!isMobile$$q"
-            show-artist
-            :hide-duration="isMobile$$q"
-            visit-album
-            visit-artist
-          />
-        </div>
-      </template>
-      <template v-if="recentlyUploadedTracks$$q?.length">
-        <div>
-          <header class="s-title">
-            <div class="text-h5">{{ t('home.RecentlyUploaded') }}</div>
-          </header>
-          <s-track-list
-            :show-disc-number="false"
-            :tracks="recentlyUploadedTracks$$q"
-            :loading="!recentlyUploadedTracks$$q"
-            :set-list="recentlyUploadedTracks$$q"
-            :set-list-name="t('setListName.RecentlyUploaded')"
-            index-content="albumArtwork"
-            :show-album="!isMobile$$q"
-            show-artist
-            :hide-duration="isMobile$$q"
-            visit-album
-            visit-artist
-          />
-        </div>
-      </template>
-    </div>
+    <s-tutorial-page>
+      <div class="flex flex-col gap-y-16">
+        <template v-if="recentlyPlayedTracks$$q?.length">
+          <div>
+            <header class="s-title">
+              <div class="text-h5">{{ t('home.RecentlyPlayed') }}</div>
+            </header>
+            <s-track-list
+              :show-disc-number="false"
+              :tracks="recentlyPlayedTracks$$q"
+              :loading="!recentlyPlayedTracks$$q"
+              :set-list="recentlyPlayedTracks$$q"
+              :set-list-name="t('setListName.RecentlyPlayed')"
+              index-content="albumArtwork"
+              :show-album="!isMobile$$q"
+              show-artist
+              :hide-duration="isMobile$$q"
+              visit-album
+              visit-artist
+            />
+          </div>
+        </template>
+        <template v-if="recentlyUploadedTracks$$q?.length">
+          <div>
+            <header class="s-title">
+              <div class="text-h5">{{ t('home.RecentlyUploaded') }}</div>
+            </header>
+            <s-track-list
+              :show-disc-number="false"
+              :tracks="recentlyUploadedTracks$$q"
+              :loading="!recentlyUploadedTracks$$q"
+              :set-list="recentlyUploadedTracks$$q"
+              :set-list-name="t('setListName.RecentlyUploaded')"
+              index-content="albumArtwork"
+              :show-album="!isMobile$$q"
+              show-artist
+              :hide-duration="isMobile$$q"
+              visit-album
+              visit-artist
+            />
+          </div>
+        </template>
+      </div>
+    </s-tutorial-page>
   </v-container>
 </template>

@@ -72,6 +72,9 @@ settings:
     dark: Dark
     light: Light
     system: Use system theme
+tutorial:
+  title: Welcome to Streamist!
+  message: "Let's get started by uploading some tracks.\nClick {0} button in the top right corner and start uploading."
 home:
   RecentlyPlayed: Recently played
   RecentlyUploaded: Recently uploaded
@@ -82,12 +85,14 @@ album:
 albums:
   Albums: Albums
   n_items: 'no items | one item | {n} items'
+  no_items: No items found.
 artist:
   Shuffle: Shuffle
   MoreTracks: 'More tracks from {0}'
 artists:
   Artists: Artists
   n_items: 'no items | one item | {n} items'
+  no_items: No items found.
 playlist:
   Play: Play
   Shuffle: Shuffle
@@ -96,9 +101,11 @@ playlists:
   Playlists: Playlists
   n_items: 'no items | one item | {n} items'
   n_tracks: 'no tracks | one track | {n} tracks'
+  no_items: No items found.
 tracks:
   Tracks: Tracks
   n_items: 'no items | one item | {n} items'
+  no_items: No items found.
 trackList:
   Album: Album
   Title: Title

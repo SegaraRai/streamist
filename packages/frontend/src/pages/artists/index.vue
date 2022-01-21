@@ -53,7 +53,7 @@ export default defineComponent({
       const tracks = allTracks.value.value;
       const imageMap = allImageMap.value.value;
       if (!albums || !artists || !tracks || !imageMap) {
-        return [];
+        return;
       }
 
       const albumMultiMapByArtist: ReadonlyMap<string, ResourceAlbum[]> =
@@ -143,53 +143,62 @@ export default defineComponent({
       <div class="text-h5">
         {{ t('artists.Artists') }}
       </div>
-      <template v-if="items$$q.length">
+      <template v-if="items$$q?.length">
         <div class="s-subheading-sl">
           {{ t('artists.n_items', items$$q.length) }}
         </div>
       </template>
     </header>
-    <s-virtual-grid
-      :items="items$$q"
-      :item-width="displayObj$$q.width$$q"
-      :item-height="displayObj$$q.height$$q"
-      :item-margin-width="displayObj$$q.marginWidth$$q"
-      :item-margin-height="displayObj$$q.marginHeight$$q"
-    >
-      <template #default="{ data: item, width }">
-        <v-card
-          flat
-          tile
-          :width="`${width}px`"
-          class="bg-transparent flex flex-col"
-          @contextmenu.prevent="showMenu$$q($event, item)"
+    <template v-if="items$$q">
+      <template v-if="items$$q.length">
+        <s-virtual-grid
+          :items="items$$q"
+          :item-width="displayObj$$q.width$$q"
+          :item-height="displayObj$$q.height$$q"
+          :item-margin-width="displayObj$$q.marginWidth$$q"
+          :item-margin-height="displayObj$$q.marginHeight$$q"
         >
-          <router-link
-            v-ripple
-            :to="`/artists/${item.artist$$q.id}`"
-            class="block rounded-full"
-          >
-            <s-artist-image-x
-              :style="{
-                width: `${width}px`,
-                height: `${width}px`,
-              }"
-              :image="item.image$$q"
-              :size="width"
-              :alt="item.artist$$q.name"
-            />
-          </router-link>
-          <v-card-title class="p-0 my-1 flex flex-col">
-            <router-link
-              class="s-heading block text-base sm:text-lg font-bold line-clamp-2 break-words text-center"
-              :to="`/artists/${item.artist$$q.id}`"
+          <template #default="{ data: item, width }">
+            <v-card
+              flat
+              tile
+              :width="`${width}px`"
+              class="bg-transparent flex flex-col"
+              @contextmenu.prevent="showMenu$$q($event, item)"
             >
-              {{ item.artist$$q.name }}
-            </router-link>
-          </v-card-title>
-        </v-card>
+              <router-link
+                v-ripple
+                :to="`/artists/${item.artist$$q.id}`"
+                class="block rounded-full"
+              >
+                <s-artist-image-x
+                  :style="{
+                    width: `${width}px`,
+                    height: `${width}px`,
+                  }"
+                  :image="item.image$$q"
+                  :size="width"
+                  :alt="item.artist$$q.name"
+                />
+              </router-link>
+              <v-card-title class="p-0 my-1 flex flex-col">
+                <router-link
+                  class="s-heading block text-base sm:text-lg font-bold line-clamp-2 break-words text-center"
+                  :to="`/artists/${item.artist$$q.id}`"
+                >
+                  {{ item.artist$$q.name }}
+                </router-link>
+              </v-card-title>
+            </v-card>
+          </template>
+        </s-virtual-grid>
+        <s-dropdown-artist v-model="dropdown$$q" />
       </template>
-    </s-virtual-grid>
-    <s-dropdown-artist v-model="dropdown$$q" />
+      <template v-else>
+        <div class="text-base">
+          {{ t('artists.no_items') }}
+        </div>
+      </template>
+    </template>
   </v-container>
 </template>
