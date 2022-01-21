@@ -55,7 +55,7 @@ export function useLiveQuery<T>(
         }
       },
       error: (err): void => {
-        console.warn(err);
+        console.error(err);
         /*
         value.value = undefined;
         valueAsync.value = Promise.reject(err);

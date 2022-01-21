@@ -80,7 +80,7 @@ async function syncDB(
       },
     });
 
-    console.log(since, r);
+    // console.log(since, r);
 
     if (r.updated) {
       const oldUser: ResourceUser | null = dbUser$$q.value;

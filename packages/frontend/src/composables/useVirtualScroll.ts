@@ -95,7 +95,7 @@ export function useVirtualScrollList<T>(
     const contentElement = contentElementRef.value;
 
     if (!listElement || !containerElement || !contentElement) {
-      console.warn('some of elements are not defined', list.value);
+      console.error('some of elements are not defined', list.value);
       return;
     }
 

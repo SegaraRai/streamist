@@ -47,8 +47,6 @@ export function getBestTrackFileURL(
     }))
     .sort((a, b) => b.score$$q - a.score$$q);
 
-  console.log(trackFilesWithScore, preference);
-
   // 利用不可なものを除く
   trackFilesWithScore = trackFilesWithScore.filter(
     (object) => object.score$$q >= 0

@@ -33,7 +33,6 @@ export default defineComponent({
     const itemRegion$$q = ref<OSRegion>(ACCOUNT_PREFERENCE_DEFAULT_REGION);
 
     const reloadData = (newUser: ResourceUser): void => {
-      console.log('reloadData', newUser);
       requestInProgress$$q.value = false;
       itemDisplayName$$q.value = newUser.displayName;
       itemRegion$$q.value = newUser.region;

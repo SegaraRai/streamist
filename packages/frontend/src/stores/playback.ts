@@ -392,7 +392,6 @@ function _usePlaybackStore(): PlaybackState {
 
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata(metadataInit);
-          console.log('mediaSession updated A', navigator.mediaSession);
         }
       })();
     } else {
@@ -452,12 +451,9 @@ function _usePlaybackStore(): PlaybackState {
   //
 
   if ('mediaSession' in navigator) {
-    console.log('init mediaSession');
-
     watch(currentTrack, (newTrack): void => {
       if (!newTrack) {
         navigator.mediaSession.metadata = null;
-        console.log('mediaSession updated B');
       }
     });
 
@@ -499,7 +495,6 @@ function _usePlaybackStore(): PlaybackState {
           playbackRate: currentAudio.playbackRate,
           position: seekTime,
         });
-        console.log('mediaSession updated D');
       });
     } catch (error) {
       console.warn(
