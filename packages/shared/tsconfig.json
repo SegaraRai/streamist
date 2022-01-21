@@ -6,17 +6,7 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "baseUrl": ".",
-    "paths": {
-      "$shared/*": [
-        "../shared/src/*"
-      ],
-      "$prisma/*": [
-        "../server/node_modules/.prisma/*"
-      ],
-      ".prisma/*": [
-        "../server/node_modules/.prisma/*"
-      ]
-    },
+    "paths": {},
     "strict": true
   },
 }
