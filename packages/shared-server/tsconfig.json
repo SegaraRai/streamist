@@ -8,7 +8,7 @@
     "baseUrl": ".",
     "paths": {
       "$shared/*": [
-        "../shared/*"
+        "../shared/src/*"
       ]
     },
     "strict": true,

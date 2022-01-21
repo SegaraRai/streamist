@@ -13,10 +13,10 @@
     "baseUrl": ".",
     "paths": {
       "$shared/*": [
-        "../shared/*"
+        "../shared/src/*"
       ],
       "$shared-server/*": [
-        "../shared-server/*"
+        "../shared-server/src/*"
       ]
     },
     "rootDirs": [

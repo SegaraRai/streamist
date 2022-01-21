@@ -40,7 +40,7 @@
         "../server/node_modules/.prisma/*"
       ],
       "$shared/*": [
-        "../shared/*"
+        "../shared/src/*"
       ],
     }
   },

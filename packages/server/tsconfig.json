@@ -19,10 +19,10 @@
         "./node_modules/.prisma/*"
       ],
       "$shared/*": [
-        "../shared/*"
+        "../shared/src/*"
       ],
       "$shared-server/*": [
-        "../shared-server/*"
+        "../shared-server/src/*"
       ],
       "$transcoder/*": [
         "../transcoder/src/*"
