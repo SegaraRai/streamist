@@ -8,7 +8,7 @@ import { useEffectiveTheme } from './composables/useEffectiveTheme';
 
 export default defineComponent({
   setup() {
-    const { locale } = useI18n();
+    const { locale, t } = useI18n();
     const preferenceStore = storeToRefs(usePreferenceStore());
     const { themeName$$q } = useEffectiveTheme();
 
@@ -44,10 +44,8 @@ export default defineComponent({
     // you can use this to manipulate the document head in any components,
     // they will be rendered correctly in the html results with vite-ssg
     useHead({
-      title: 'Streamist',
-      meta: [
-        { name: 'description', content: 'A streaming service for yourself' },
-      ],
+      title: t('app.title'),
+      meta: [{ name: 'description', content: t('app.meta.description') }],
     });
 
     const naiveUITheme = eagerComputed(

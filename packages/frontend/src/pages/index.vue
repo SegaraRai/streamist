@@ -1,100 +1,57 @@
 <route lang="yaml">
 meta:
-  layout: app
+  layout: conditional
 </route>
 
 <script lang="ts">
-import { useDisplay } from 'vuetify';
-import { filterNullAndUndefined } from '$shared/filter';
-import { compareTrack } from '$/shared/sort';
-import { useAllTrackMap, useAllTracks, useRecentlyPlayed } from '~/composables';
-import { RECENTLY_UPLOADED_MAX_ENTRIES } from '~/config';
+import logoSVG from '~/assets/logo_colored.svg';
+import { loggedInRef } from '~/stores/auth';
 
 export default defineComponent({
   setup() {
     const { t } = useI18n();
-    const display = useDisplay();
-    const { tracks$$q: recentlyPlayedTrackItems } = useRecentlyPlayed();
-
-    const allTracks = useAllTracks();
-    const allTrackMap = useAllTrackMap();
 
     useHead({
       title: t('title.Home'),
     });
 
-    const recentlyUploadedTracks = computed(() => {
-      const tracks = allTracks.value.value;
-      return Array.from(tracks || [])
-        .sort((a, b) => b.createdAt - a.createdAt || compareTrack(a, b))
-        .slice(0, RECENTLY_UPLOADED_MAX_ENTRIES);
-    });
-
-    const recentlyPlayedTracks = computed(() => {
-      const trackMap = allTrackMap.value.value;
-      if (!trackMap) {
-        return [];
-      }
-      return filterNullAndUndefined(
-        recentlyPlayedTrackItems.value.map((item) => trackMap.get(item.id))
-      );
-    });
-
     return {
       t,
-      recentlyUploadedTracks$$q: recentlyUploadedTracks,
-      recentlyPlayedTracks$$q: recentlyPlayedTracks,
-      isMobile$$q: display.smAndDown,
+      logoSVG$$q: logoSVG,
+      loggedIn$$q: loggedInRef,
     };
   },
 });
 </script>
 
 <template>
-  <v-container fluid class="pt-0">
-    <s-tutorial-page>
-      <div class="flex flex-col gap-y-16">
-        <template v-if="recentlyPlayedTracks$$q?.length">
-          <div>
-            <header class="s-title">
-              <div class="text-h5">{{ t('home.RecentlyPlayed') }}</div>
-            </header>
-            <s-track-list
-              :show-disc-number="false"
-              :tracks="recentlyPlayedTracks$$q"
-              :loading="!recentlyPlayedTracks$$q"
-              :set-list="recentlyPlayedTracks$$q"
-              :set-list-name="t('setListName.RecentlyPlayed')"
-              index-content="albumArtwork"
-              :show-album="!isMobile$$q"
-              show-artist
-              :hide-duration="isMobile$$q"
-              visit-album
-              visit-artist
-            />
-          </div>
-        </template>
-        <template v-if="recentlyUploadedTracks$$q?.length">
-          <div>
-            <header class="s-title">
-              <div class="text-h5">{{ t('home.RecentlyUploaded') }}</div>
-            </header>
-            <s-track-list
-              :show-disc-number="false"
-              :tracks="recentlyUploadedTracks$$q"
-              :loading="!recentlyUploadedTracks$$q"
-              :set-list="recentlyUploadedTracks$$q"
-              :set-list-name="t('setListName.RecentlyUploaded')"
-              index-content="albumArtwork"
-              :show-album="!isMobile$$q"
-              show-artist
-              :hide-duration="isMobile$$q"
-              visit-album
-              visit-artist
-            />
-          </div>
-        </template>
+  <template v-if="loggedIn$$q">
+    <v-container fluid class="pt-0">
+      <s-home />
+    </v-container>
+  </template>
+  <template v-else>
+    <v-container>
+      <div class="flex flex-col text-center items-center pt-16">
+        <img
+          :src="logoSVG$$q"
+          width="128"
+          height="128"
+          class="block w-32 h-32 select-none pointer-events-none"
+          alt="Streamist Logo"
+        />
+        <div class="s-heading text-4xl mt-8">
+          {{ t('landing.title') }}
+        </div>
+        <div class="text-xl mt-8">
+          {{ t('landing.description') }}
+        </div>
+        <div class="mt-8">
+          <v-btn color="primary" href="/register">
+            {{ t('landing.button.Register') }}
+          </v-btn>
+        </div>
       </div>
-    </s-tutorial-page>
-  </v-container>
+    </v-container>
+  </template>
 </template>

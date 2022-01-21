@@ -1,3 +1,4 @@
+import { loggedInRef } from '~/stores/auth';
 import { extractSubFromJWT } from './jwt';
 import { tokens } from './tokens';
 import { unAuthAPI } from './unAuthAPI';
@@ -45,6 +46,8 @@ export async function authenticate(
       apiToken,
       cdnToken,
     };
+
+    loggedInRef.value = true;
 
     return true;
   } catch (error: unknown) {

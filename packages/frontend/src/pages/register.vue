@@ -198,7 +198,7 @@ export default defineComponent({
             :src="logoSVG$$q"
             width="128"
             height="128"
-            class="block w-7 h-7 pointer-events-none select-none"
+            class="block w-7 h-7 select-none pointer-events-none"
             alt="Streamist Logo"
           />
           <span>{{ t('register.title') }}</span>

@@ -6,15 +6,27 @@ import { usePreferenceStore } from '~/stores/preference';
 
 export default defineComponent({
   setup() {
+    const router = useRouter();
+    const { t } = useI18n();
     const preferenceStore = usePreferenceStore();
     const { switchTheme$$q, themeName$$q } = useEffectiveTheme();
 
+    const isLoginPage$$q = eagerComputed(
+      () => router.currentRoute.value.path === '/login'
+    );
+    const isRegisterPage$$q = eagerComputed(
+      () => router.currentRoute.value.path === '/register'
+    );
+
     return {
+      t,
       logoSVG$$q: logoSVG,
       preferenceStore$$q: preferenceStore,
       themeName$$q,
       switchTheme$$q,
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
+      isLoginPage$$q,
+      isRegisterPage$$q,
     };
   },
 });
@@ -34,7 +46,7 @@ export default defineComponent({
               :src="logoSVG$$q"
               width="128"
               height="128"
-              class="block w-7 h-7 pointer-events-none"
+              class="block w-7 h-7 select-none pointer-events-none"
               alt="Streamist Logo"
             />
             <span class="inline-block <sm:hidden" aria-hidden="true">
@@ -45,6 +57,16 @@ export default defineComponent({
         </div>
         <div class="flex-1"></div>
         <div class="flex items-center gap-x-2">
+          <div v-show="!isLoginPage$$q">
+            <v-btn class="whitespace-nowrap" to="/login">
+              {{ t('appBar.button.Login') }}
+            </v-btn>
+          </div>
+          <div v-show="!isRegisterPage$$q">
+            <v-btn class="whitespace-nowrap border" to="/register">
+              {{ t('appBar.button.Register') }}
+            </v-btn>
+          </div>
           <n-select
             v-model:value="preferenceStore$$q.language"
             :options="languageOptions$$q"

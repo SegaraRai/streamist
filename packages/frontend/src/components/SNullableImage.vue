@@ -57,7 +57,7 @@ export default defineComponent({
     <img
       :alt="alt"
       :src="noImageSrc$$q"
-      class="block object-cover overflow-hidden leading-none bg-true-gray-100 dark:bg-true-gray-300 text-st-text pointer-events-none"
+      class="block object-cover overflow-hidden leading-none bg-true-gray-100 dark:bg-true-gray-300 text-st-text select-none pointer-events-none"
     />
   </template>
   <template v-else>

@@ -2,6 +2,19 @@ notFound:
   message: Page not found.
   button:
     Back: Back
+app:
+  title: Streamist
+  meta:
+    description: Stream your favorite songs
+landing:
+  title: Streamist
+  description: Stream your favorite songs
+  button:
+    Register: Register
+appBar:
+  button:
+    Login: Login
+    Register: Register
 common:
   Logout: Logout
   ThisActionCannotBeUndone: This action cannot be undone.
