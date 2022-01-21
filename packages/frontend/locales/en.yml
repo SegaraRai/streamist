@@ -17,6 +17,8 @@ appBar:
     SignUp: Sign up
 common:
   SignOut: Sign out
+  Synchronize: Synchronize DB
+  Synchronized: Synchronized
   ThisActionCannotBeUndone: This action cannot be undone.
 regions:
   'ap-northeast-1': ap-northeast-1 (Tokyo, Japan)

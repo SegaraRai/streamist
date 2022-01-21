@@ -62,10 +62,6 @@ export default defineComponent({
       }
     });
 
-    const devSync$$q = (event: MouseEvent) => {
-      syncDB(event.shiftKey);
-    };
-
     const queueScroll$$q = ref(0);
     const onQueueScroll$$q = (e: Event): void => {
       queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
@@ -107,6 +103,8 @@ export default defineComponent({
       { passive: true }
     );
 
+    // FIXME: Move this to a better place
+    // We want to sync DB when the user opens the app (if logged in), or when the user logged in to the app
     syncDB();
 
     return {
@@ -116,7 +114,6 @@ export default defineComponent({
       scrollRef$$q,
       searchDialog$$q: ref(false),
       uploadDialog$$q: ref(false),
-      devSync$$q,
       hideShell$$q,
       queueScroll$$q,
       onQueueScroll$$q,
@@ -249,9 +246,6 @@ export default defineComponent({
               @click="searchDialog$$q = true"
             >
               <VIcon>mdi-magnify</VIcon>
-            </VBtn>
-            <VBtn icon size="small" @click="devSync$$q">
-              <VIcon>mdi-sync</VIcon>
             </VBtn>
             <VBtn icon size="small" @click="uploadDialog$$q = true">
               <NBadge

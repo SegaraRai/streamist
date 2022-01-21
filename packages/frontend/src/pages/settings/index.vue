@@ -10,6 +10,7 @@ import {
   PREFERENCE_AUDIO_QUALITIES,
   PREFERENCE_LANGUAGE_OPTIONS,
 } from '~/config';
+import { useSyncDB } from '~/db';
 import { logout } from '~/logic/logout';
 import { usePreferenceStore } from '~/stores/preference';
 import { PREFERENCE_THEMES, useThemeStore } from '~/stores/theme';
@@ -21,6 +22,7 @@ export default defineComponent({
     const dialog = useDialog();
     const preferenceStore = usePreferenceStore();
     const themeStore = useThemeStore();
+    const syncDB = useSyncDB();
 
     const themeOptions$$q = eagerComputed(() =>
       PREFERENCE_THEMES.map((code) => ({
@@ -36,6 +38,14 @@ export default defineComponent({
       }))
     );
 
+    const synchronized$$q = ref(false);
+    const synchronizeInProgress$$q = ref(false);
+
+    onMounted(() => {
+      synchronized$$q.value = false;
+      synchronizeInProgress$$q.value = false;
+    });
+
     return {
       t,
       audioQualityOptions$$q,
@@ -43,6 +53,8 @@ export default defineComponent({
       themeOptions$$q,
       preferenceStore$$q: preferenceStore,
       themeStore$$q: themeStore,
+      synchronized$$q,
+      synchronizeInProgress$$q,
       logout$$q: () => {
         dialog.warning({
           title: t('dialog.signOut.title'),
@@ -54,6 +66,17 @@ export default defineComponent({
             router.push('/login');
           },
         });
+      },
+      syncDB$$q: (force: boolean): void => {
+        synchronizeInProgress$$q.value = true;
+
+        syncDB(force)
+          .then(() => {
+            synchronized$$q.value = true;
+          })
+          .finally(() => {
+            synchronizeInProgress$$q.value = false;
+          });
       },
     };
   },
@@ -105,7 +128,29 @@ export default defineComponent({
             />
           </div>
         </div>
-        <div class="mt-4 flex flex-col gap-y-8">
+        <div class="mt-4 flex flex-col gap-y-12">
+          <div>
+            <VBtn
+              color="primary"
+              :disabled="synchronized$$q || synchronizeInProgress$$q"
+              @click="syncDB$$q(true)"
+            >
+              <span :class="synchronizeInProgress$$q && 'invisible'">
+                {{
+                  synchronized$$q
+                    ? t('common.Synchronized')
+                    : t('common.Synchronize')
+                }}
+              </span>
+              <template v-if="synchronizeInProgress$$q">
+                <VProgressCircular
+                  class="absolute left-0 top-0 right-0 bottom-0 m-auto"
+                  indeterminate
+                  size="20"
+                />
+              </template>
+            </VBtn>
+          </div>
           <div>
             <VBtn color="error" @click="logout$$q">
               {{ t('common.SignOut') }}
