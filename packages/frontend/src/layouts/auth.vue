@@ -3,19 +3,17 @@ import logoSVG from '~/assets/logo_colored.svg';
 import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
 import { PREFERENCE_LANGUAGE_OPTIONS } from '~/config';
 import { usePreferenceStore } from '~/stores/preference';
-import { useThemeStore } from '~/stores/theme';
 
 export default defineComponent({
   setup() {
     const preferenceStore = usePreferenceStore();
-    const { toggle } = useThemeStore();
-    const { themeName$$q } = useEffectiveTheme();
+    const { switchTheme$$q, themeName$$q } = useEffectiveTheme();
 
     return {
       logoSVG$$q: logoSVG,
       preferenceStore$$q: preferenceStore,
       themeName$$q,
-      toggleTheme$$q: toggle,
+      switchTheme$$q,
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
     };
   },
@@ -52,7 +50,7 @@ export default defineComponent({
             :options="languageOptions$$q"
             class="max-w-64"
           />
-          <v-btn icon size="small" @click="toggleTheme$$q()">
+          <v-btn icon size="small" @click="switchTheme$$q()">
             <v-icon>mdi-invert-colors</v-icon>
           </v-btn>
         </div>

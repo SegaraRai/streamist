@@ -33,7 +33,7 @@ export default defineComponent({
     close: () => true,
   },
   setup(props, { emit }) {
-    const { dark$$q } = useEffectiveTheme();
+    const { isDarkTheme$$q } = useEffectiveTheme();
 
     let widget: [HCaptcha, string] | undefined;
 
@@ -65,7 +65,7 @@ export default defineComponent({
         hCaptcha.render(hCaptchaElement$$q.value, {
           sitekey: props.siteKey,
           size: props.size,
-          theme: dark$$q.value ? 'dark' : 'light',
+          theme: isDarkTheme$$q.value ? 'dark' : 'light',
           callback: (response: string) => {
             emit('update', response);
           },
@@ -94,7 +94,11 @@ export default defineComponent({
     });
 
     watch(
-      [computed(() => props.siteKey), computed(() => props.size), dark$$q],
+      [
+        computed(() => props.siteKey),
+        computed(() => props.size),
+        isDarkTheme$$q,
+      ],
       (): void => {
         hCaptchaPromise.then(renderHCaptcha);
       }

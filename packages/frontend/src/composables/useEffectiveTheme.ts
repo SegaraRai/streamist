@@ -38,7 +38,10 @@ function _useEffectiveTheme() {
 
   return {
     themeName$$q: effectiveThemeName,
-    dark$$q: dark,
+    isDarkTheme$$q: dark,
+    switchTheme$$q: (): void => {
+      rawTheme.value = effectiveThemeName.value === 'light' ? 'dark' : 'light';
+    },
   };
 }
 
