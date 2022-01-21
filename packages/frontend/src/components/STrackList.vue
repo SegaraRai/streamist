@@ -496,7 +496,7 @@ export default defineComponent({
               "
               :removable="removable"
               @play="play$$q(element.track$$q, element.index$$q)"
-              @remove="remove$$q(item.track$$q, item.index$$q)"
+              @remove="remove$$q(element.track$$q, element.index$$q)"
               @menu="showMenu$$q($event.target as HTMLElement, element)"
               @ctx-menu="showMenu$$q($event, element)"
             />

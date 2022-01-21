@@ -16,6 +16,9 @@ export default defineComponent({
       default: undefined,
     },
   },
+  emits: {
+    'update:modelValue': (_modelValue: DropdownAlbumInput | undefined) => true,
+  },
   setup(props, { emit }) {
     const modelValue$$q = useVModel(props, 'modelValue', emit);
 
@@ -47,7 +50,8 @@ export default defineComponent({
       closeMenu$$q,
     });
 
-    watch(modelValue$$q, (value) => {
+    watch(modelValue$$q, () => {
+      const value = modelValue$$q.value as DropdownAlbumInput | undefined;
       if (!value) {
         return;
       }

@@ -231,7 +231,7 @@ export default defineComponent({
                       icon
                       size="small"
                       class="s-hover-visible text-st-success"
-                      @click="removeFile$$q(file.id)"
+                      @click="uploadStore$$q.removeFile(file.id)"
                     >
                       <VIcon>mdi-check</VIcon>
                     </VBtn>

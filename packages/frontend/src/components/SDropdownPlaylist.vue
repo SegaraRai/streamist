@@ -19,7 +19,8 @@ export default defineComponent({
     showCreateItem: Boolean,
   },
   emits: {
-    'update:modelValue': (_value: DropdownPlaylistInput | undefined) => true,
+    'update:modelValue': (_modelValue: DropdownPlaylistInput | undefined) =>
+      true,
     'update:showCreateDialog': (_value: Boolean) => true,
     'update:selectedPlaylist': (_value: ResourcePlaylist | undefined) => true,
   },
@@ -60,7 +61,8 @@ export default defineComponent({
       closeMenu$$q,
     });
 
-    watch(modelValue$$q, (value) => {
+    watch(modelValue$$q, () => {
+      const value = modelValue$$q.value as DropdownPlaylistInput | undefined;
       if (!value) {
         return;
       }
