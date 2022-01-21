@@ -19,6 +19,7 @@ jobs:
           node-version: '14'
           cache: pnpm
       - run: pnpm i --frozen-lockfile
+      - run: pnpm run generate
       - run: pnpm run lint
       - run: pnpm run typecheck
-      - run: pnpm test
+      - run: pnpm run test
