@@ -16,6 +16,8 @@
     "start": "nuxt serve",
     "test": "run-s test:*",
     "test:unit": "vitest",
+    "test_ci": "run-s test_ci:*",
+    "test_ci:unit": "vitest --run",
     "pretest": "pnpm run generate",
     "pretypecheck": "pnpm run generate",
     "typecheck": "vue-tsc --noEmit"
