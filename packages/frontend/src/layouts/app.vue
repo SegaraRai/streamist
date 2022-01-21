@@ -71,6 +71,14 @@ export default defineComponent({
       () => !!router.currentRoute.value.meta.hideShell
     );
 
+    watch(hideShell$$q, (newHideShell): void => {
+      if (!newHideShell) {
+        return;
+      }
+
+      _leftSidebar$$q.value = false;
+    });
+
     const scrollRef$$q = ref<ScrollbarInst | undefined>();
 
     onMounted(() => {
