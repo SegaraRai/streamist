@@ -144,7 +144,8 @@ export default defineComponent({
     <div
       class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-5"
     >
-      <div class="p-0 m-0 leading-none flex-none">
+      <!-- w-50 h-50 is needed to prevent layout shift -->
+      <div class="p-0 m-0 w-50 h-50 leading-none flex-none">
         <template v-if="linkExcludes.includes(playlistId$$q)">
           <s-image-manager
             attach-to-type="playlist"
