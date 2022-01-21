@@ -1,5 +1,6 @@
 <script lang="ts">
 import logoSVG from '~/assets/logo_colored.svg';
+import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
 import { PREFERENCE_LANGUAGE_OPTIONS } from '~/config';
 import { usePreferenceStore } from '~/stores/preference';
 import { useThemeStore } from '~/stores/theme';
@@ -7,12 +8,14 @@ import { useThemeStore } from '~/stores/theme';
 export default defineComponent({
   setup() {
     const preferenceStore = usePreferenceStore();
-    const theme = useThemeStore();
+    const { toggle } = useThemeStore();
+    const { themeName$$q } = useEffectiveTheme();
 
     return {
       logoSVG$$q: logoSVG,
       preferenceStore$$q: preferenceStore,
-      theme$$q: theme,
+      themeName$$q,
+      toggleTheme$$q: toggle,
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
     };
   },
@@ -20,14 +23,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <v-app :theme="theme$$q.theme">
-    <v-app-bar
-      flat
-      :border="1"
-      density="compact"
-      :theme="theme$$q.headerTheme"
-      class="s-offline-mod-mt"
-    >
+  <v-app :theme="themeName$$q">
+    <v-app-bar flat :border="1" density="compact" class="s-offline-mod-mt">
       <div class="w-full flex justify-between items-center">
         <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
           <router-link
@@ -55,7 +52,7 @@ export default defineComponent({
             :options="languageOptions$$q"
             class="max-w-64"
           />
-          <v-btn icon size="small" @click="theme$$q.toggle()">
+          <v-btn icon size="small" @click="toggleTheme$$q()">
             <v-icon>mdi-invert-colors</v-icon>
           </v-btn>
         </div>

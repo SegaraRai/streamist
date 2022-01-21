@@ -2,6 +2,7 @@
 import type { ScrollbarInst } from 'naive-ui';
 import { useDisplay } from 'vuetify';
 import logoSVG from '~/assets/logo_colored.svg';
+import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
 import { COOKIE_CHECK_INTERVAL, IDLE_TIMEOUT } from '~/config';
 import { useSyncDB } from '~/db';
 import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
@@ -12,7 +13,6 @@ import {
   currentScrollContentRef,
   currentScrollRef,
 } from '~/stores/scroll';
-import { useThemeStore } from '~/stores/theme';
 import { useUploadStore } from '~/stores/upload';
 
 export default defineComponent({
@@ -22,9 +22,9 @@ export default defineComponent({
     const isOnline = useOnline();
     const display = useDisplay();
     const syncDB = useSyncDB();
-    const theme = useThemeStore();
     const uploadStore$$q = useUploadStore();
     const playbackStore = usePlaybackStore();
+    const { themeName$$q } = useEffectiveTheme();
 
     const { idle } = useIdle(IDLE_TIMEOUT);
 
@@ -124,7 +124,7 @@ export default defineComponent({
       rightSidebar$$q,
       leftSidebar$$q,
       isOnline$$q: isOnline,
-      theme$$q: theme,
+      themeName$$q,
       alwaysShowLeftSidebar$$q,
       desktopPlaybackControl$$q,
     };
@@ -143,7 +143,7 @@ export default defineComponent({
       {{ t('header.NoInternetConnection') }}
     </div>
 
-    <v-app :theme="theme$$q.theme" class="flex-1 !h-auto">
+    <v-app :theme="themeName$$q" class="flex-1 !h-auto">
       <!-- we have to place this inside the app to apply theme -->
       <s-dialog-search v-model="searchDialog$$q" />
       <s-dialog-upload v-model="uploadDialog$$q" />
@@ -160,7 +160,6 @@ export default defineComponent({
         :model-value="rightSidebar$$q"
         temporary
         position="right"
-        :theme="theme$$q.rightSidebarTheme"
         :width="400"
         hide-overlay
         class="s-offline-mod-mt select-none"
@@ -188,13 +187,7 @@ export default defineComponent({
       </v-navigation-drawer>
 
       <!-- Header -->
-      <v-app-bar
-        flat
-        :border="1"
-        density="compact"
-        :theme="theme$$q.headerTheme"
-        class="s-offline-mod-mt"
-      >
+      <v-app-bar flat :border="1" density="compact" class="s-offline-mod-mt">
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">
             <div class="flex-none">
@@ -313,10 +306,7 @@ export default defineComponent({
       :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >
-      <v-sheet
-        :theme="theme$$q.theme"
-        class="m-0 p-0 w-full h-full flex flex-col"
-      >
+      <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
         <v-divider />
         <template v-if="desktopPlaybackControl$$q">
           <s-playback-control />

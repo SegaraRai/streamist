@@ -1,41 +1,44 @@
 <script lang="ts">
 import { storeToRefs } from 'pinia';
 import type { Ref } from 'vue';
-import { NAIVE_UI_THEMES } from '~/logic/theme';
-import { useThemeStore } from '~/stores/theme';
-import { LanguageCode } from './config';
-import { usePreferenceStore } from './stores/preference';
+import type { LanguageCode } from '~/config';
+import { NAIVE_UI_THEMES, THEMES } from '~/logic/theme';
+import { usePreferenceStore } from '~/stores/preference';
+import { useEffectiveTheme } from './composables/useEffectiveTheme';
 
 export default defineComponent({
   setup() {
-    const preferenceStore = storeToRefs(usePreferenceStore());
-    const themeStore = useThemeStore();
-
-    const naiveUITheme = eagerComputed(() => NAIVE_UI_THEMES[themeStore.theme]);
-
     const { locale } = useI18n();
-    biSyncRef(preferenceStore.language, locale as Ref<LanguageCode>);
-
-    const themeClass = eagerComputed(() => `s-theme--${themeStore.theme}`);
+    const preferenceStore = storeToRefs(usePreferenceStore());
+    const { themeName$$q } = useEffectiveTheme();
 
     const rootElement = document.documentElement;
 
+    // sync locale
+    biSyncRef(preferenceStore.language, locale as Ref<LanguageCode>);
     watch(
-      themeClass,
-      (currentThemeClass, previousThemeClass) => {
-        if (previousThemeClass) {
-          rootElement.classList.remove(previousThemeClass);
-        }
-        rootElement.classList.add(currentThemeClass);
+      locale,
+      (newLocale: string): void => {
+        rootElement.lang = newLocale;
       },
       {
         immediate: true,
       }
     );
 
-    onBeforeUnmount(() => {
-      rootElement.classList.remove(themeClass.value);
-    });
+    // sync theme
+    watch(
+      themeName$$q,
+      (newTheme): void => {
+        const isDark = THEMES[newTheme].dark;
+        rootElement.classList.toggle('dark', isDark);
+        rootElement.classList.toggle('light', !isDark);
+        rootElement.dataset.sTheme = newTheme;
+      },
+      {
+        immediate: true,
+      }
+    );
 
     // https://github.com/vueuse/head
     // you can use this to manipulate the document head in any components,
@@ -47,9 +50,12 @@ export default defineComponent({
       ],
     });
 
+    const naiveUITheme = eagerComputed(
+      () => NAIVE_UI_THEMES[themeName$$q.value]
+    );
+
     return {
       naiveUITheme$$q: naiveUITheme,
-      themeClass$$q: themeClass,
     };
   },
 });
@@ -63,9 +69,7 @@ export default defineComponent({
     <n-message-provider>
       <n-notification-provider>
         <n-dialog-provider>
-          <div :class="themeClass$$q">
-            <router-view />
-          </div>
+          <router-view />
         </n-dialog-provider>
       </n-notification-provider>
     </n-message-provider>

@@ -25,7 +25,6 @@ import {
   currentScrollContentRef,
   currentScrollRef,
 } from '~/stores/scroll';
-import { useThemeStore } from '~/stores/theme';
 import {
   ListItemDiscNumberHeader,
   discHeaderHeight,
@@ -112,7 +111,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
-    const themeStore = useThemeStore();
     const { isTrackAvailable$$q } = useTrackFilter();
 
     const propTracksRef = eagerComputed(() => props.tracks);
@@ -328,7 +326,6 @@ export default defineComponent({
 
     return {
       t,
-      themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       items$$q: items,
       trackOnlyItems$$q,

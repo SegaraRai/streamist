@@ -97,7 +97,7 @@ function themePlugin() {
   const content = Object.values(THEMES)
     .map(
       (theme) =>
-        `.s-theme--${theme.name} {\n` +
+        `*[s-theme='${theme.name}'] {\n` +
         COLOR_KEYS.map(
           (key) => `${COLOR_CSS_VAR_MAP[key]}: ${theme[key]};\n`
         ).join('') +

@@ -5,13 +5,13 @@ import { filterNullAndUndefined } from '$shared/filter';
 import type { SourceFileAttachToType } from '$shared/types';
 import type { ResourceImage } from '$/types';
 import { useLiveQuery } from '~/composables';
+import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
 import { db, useLocalStorageDB, useSyncDB } from '~/db';
 import { api } from '~/logic/api';
 import { FILE_ACCEPT_IMAGE } from '~/logic/fileAccept';
 import { getImageFileURL } from '~/logic/fileURL';
 import { NAIVE_UI_THEMES, createOverrideTheme } from '~/logic/theme';
 import { waitForChange } from '~/logic/waitForChange';
-import { useThemeStore } from '~/stores/theme';
 import { useUploadStore } from '~/stores/upload';
 
 export default defineComponent({
@@ -39,12 +39,12 @@ export default defineComponent({
     const message = useMessage();
     const syncDB = useSyncDB();
     const uploadStore = useUploadStore();
-    const themeStore$$q = useThemeStore();
     const { dbUserId$$q } = useLocalStorageDB();
+    const { themeName$$q } = useEffectiveTheme();
 
     const errorOverrideTheme$$q = eagerComputed(() =>
       createOverrideTheme(
-        NAIVE_UI_THEMES[themeStore$$q.theme].overrides,
+        NAIVE_UI_THEMES[themeName$$q.value].overrides,
         'error'
       )
     );

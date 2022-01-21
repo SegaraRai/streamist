@@ -8,9 +8,8 @@ import {
   ref,
   watch,
 } from 'vue';
+import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
 import { hCaptchaPromise } from '~/logic/hCaptchaPromise';
-import { THEMES } from '~/logic/theme';
-import { useThemeStore } from '~/stores/theme';
 import type { HCaptcha } from '~/types';
 
 export default defineComponent({
@@ -34,11 +33,7 @@ export default defineComponent({
     close: () => true,
   },
   setup(props, { emit }) {
-    const themeStore = useThemeStore();
-
-    const captchaTheme = eagerComputed(() =>
-      THEMES[themeStore.theme].dark ? 'dark' : 'light'
-    );
+    const { dark$$q } = useEffectiveTheme();
 
     let widget: [HCaptcha, string] | undefined;
 
@@ -70,7 +65,7 @@ export default defineComponent({
         hCaptcha.render(hCaptchaElement$$q.value, {
           sitekey: props.siteKey,
           size: props.size,
-          theme: captchaTheme.value,
+          theme: dark$$q.value ? 'dark' : 'light',
           callback: (response: string) => {
             emit('update', response);
           },
@@ -99,8 +94,8 @@ export default defineComponent({
     });
 
     watch(
-      [computed(() => props.siteKey), computed(() => props.size), captchaTheme],
-      () => {
+      [computed(() => props.siteKey), computed(() => props.size), dark$$q],
+      (): void => {
         hCaptchaPromise.then(renderHCaptcha);
       }
     );

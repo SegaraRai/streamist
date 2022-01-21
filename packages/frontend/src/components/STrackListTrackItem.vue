@@ -8,7 +8,6 @@ import type {
 } from '$/types';
 import { useTrackFilter } from '~/composables';
 import { usePlaybackStore } from '~/stores/playback';
-import { useThemeStore } from '~/stores/theme';
 
 /**
  * インデックスのところに表示する内容
@@ -60,7 +59,6 @@ export default defineComponent({
   setup(props, { emit }) {
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
-    const themeStore = useThemeStore();
     const { isTrackAvailable$$q } = useTrackFilter();
 
     const isAvailable$$q = eagerComputed(() =>
@@ -83,7 +81,6 @@ export default defineComponent({
           ? props.item.index$$q + 1
           : undefined
       ),
-      themeStore$$q: themeStore,
       playing$$q: playbackStore.playing$$q,
       isCurrentPlayingTrack$$q,
       play$$q: (): void => {
