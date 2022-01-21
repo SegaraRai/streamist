@@ -22,23 +22,8 @@ export const useThemeStore = defineStore('theme', () => {
     }
   );
 
-  const colorSchema = usePreferredColorScheme();
-
-  const theme = computed<ThemeName>({
-    get: (): ThemeName =>
-      rawTheme.value === 'system'
-        ? COLOR_SCHEMA_TO_THEME_NAME[colorSchema.value]
-        : rawTheme.value,
-    set: (theme: ThemeName): void => {
-      rawTheme.value = theme;
-    },
-  });
-
   return {
     rawTheme,
-    toggle: (): void => {
-      theme.value = theme.value === 'light' ? 'dark' : 'light';
-    },
   };
 });
 
