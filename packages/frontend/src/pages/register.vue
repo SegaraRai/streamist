@@ -280,7 +280,7 @@ export default defineComponent({
             :label="t('register.label.DisplayName')"
           />
           <!-- TODO: migrate to v-select -->
-          <div class="mb-8">
+          <div class="my-10">
             <n-select v-model:value="region$$q" :options="regionOptions$$q" />
           </div>
           <s-h-captcha site-key="x" @update="updateHCaptchaResponse$$q" />
