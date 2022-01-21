@@ -1,3 +1,8 @@
+node_modules
+
+dist
+public
+
 packages/frontend/src/auto-imports.d.ts
 packages/frontend/src/components.d.ts
 
