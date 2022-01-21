@@ -66,6 +66,9 @@ signUp:
     Region: Location to store your data
   button:
     SignUp: Sign up
+  tooltip:
+    UsernameAvailable: This username is available
+    UsernameAlreadyTaken: This username is already taken
 settings:
   account:
     title: Account Settings
