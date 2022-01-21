@@ -30,6 +30,7 @@ module.exports = defineConfig({
       'PascalCase',
       {
         registeredComponentsOnly: false,
+        ignores: ['i18n-t'],
       },
     ],
     'no-redeclare': 'off',
