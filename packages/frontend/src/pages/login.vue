@@ -5,8 +5,8 @@ meta:
 
 <script lang="ts">
 import logoSVG from '~/assets/logo_colored.svg';
+import { authenticate } from '~/logic/login';
 import { parseRedirectTo } from '~/logic/parseRedirectTo';
-import { authenticate } from '~/logic/tokens';
 
 export default defineComponent({
   setup() {

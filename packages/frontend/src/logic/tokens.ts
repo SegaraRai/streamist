@@ -1,8 +1,8 @@
 import { createAsyncCache } from '$shared/asyncCache';
 import { TOKEN_SHOULD_RENEW_TOLERANCE } from '~/config';
+import { isAxiosError } from '~/logic/axiosError';
 import { isJWTExpired } from '~/logic/jwt';
 import { unAuthAPI } from '~/logic/unAuthAPI';
-import { isAxiosError } from './axiosError';
 
 export interface Tokens {
   readonly apiToken: string;
@@ -50,36 +50,8 @@ export const tokens = createAsyncCache<Tokens>(
     isJWTExpired(tokens.cdnToken, TOKEN_SHOULD_RENEW_TOLERANCE)
 );
 
-export async function authenticate(
-  username: string,
-  password: string
-): Promise<boolean> {
-  try {
-    const {
-      access_token: apiToken,
-      cdn_access_token: cdnToken,
-      refresh_token: refreshToken,
-    } = await unAuthAPI.auth.token.$post({
-      body: {
-        grant_type: 'password',
-        username,
-        password,
-      },
-    });
-
-    if (refreshToken) {
-      localStorage.setItem('refreshToken', refreshToken);
-    }
-
-    tokens.value = {
-      apiToken,
-      cdnToken,
-    };
-
-    return true;
-  } catch (error: unknown) {
-    return false;
-  }
+export function getUserId(): string | null {
+  return localStorage.getItem('userId');
 }
 
 export async function isAuthenticated(): Promise<boolean> {

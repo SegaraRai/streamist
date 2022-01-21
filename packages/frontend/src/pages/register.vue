@@ -15,7 +15,7 @@ import {
 } from '$shared/config';
 import { OSRegion, getOSRegions } from '$shared/objectStorage';
 import logoSVG from '~/assets/logo_colored.svg';
-import { authenticate } from '~/logic/tokens';
+import { authenticate } from '~/logic/login';
 import { unAuthAPI } from '~/logic/unAuthAPI';
 
 function checkUsername(username: string): boolean {

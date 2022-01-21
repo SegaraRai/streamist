@@ -6,11 +6,12 @@ import type { SourceFileAttachToType } from '$shared/types';
 import type { ResourceImage } from '$/types';
 import { useLiveQuery } from '~/composables';
 import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
-import { db, useLocalStorageDB, useSyncDB } from '~/db';
+import { db, useSyncDB } from '~/db';
 import { api } from '~/logic/api';
 import { FILE_ACCEPT_IMAGE } from '~/logic/fileAccept';
 import { getImageFileURL } from '~/logic/fileURL';
 import { NAIVE_UI_THEMES, createOverrideTheme } from '~/logic/theme';
+import { getUserId } from '~/logic/tokens';
 import { waitForChange } from '~/logic/waitForChange';
 import { useUploadStore } from '~/stores/upload';
 
@@ -39,7 +40,6 @@ export default defineComponent({
     const message = useMessage();
     const syncDB = useSyncDB();
     const uploadStore = useUploadStore();
-    const { dbUserId$$q } = useLocalStorageDB();
     const { themeName$$q } = useEffectiveTheme();
 
     const errorOverrideTheme$$q = eagerComputed(() =>
@@ -154,7 +154,7 @@ export default defineComponent({
         if (!imageFile) {
           return;
         }
-        const userId = dbUserId$$q.value;
+        const userId = getUserId();
         if (!userId) {
           return;
         }

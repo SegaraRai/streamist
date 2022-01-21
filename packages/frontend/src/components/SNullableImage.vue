@@ -2,8 +2,8 @@
 import type { PropType } from 'vue';
 import type { ResourceImage } from '$/types';
 import noImage from '~/assets/no_image.svg';
-import { useLocalStorageDB } from '~/db';
 import { SrcObject, createSrc } from '~/logic/srcSet';
+import { getUserId } from '~/logic/tokens';
 
 export default defineComponent({
   props: {
@@ -23,15 +23,18 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { dbUserId$$q } = useLocalStorageDB();
+    const srcObject = computed<SrcObject | undefined>(() => {
+      if (props.image == null || typeof props.image !== 'object') {
+        return;
+      }
 
-    const srcObject = computed<SrcObject | undefined>(() =>
-      dbUserId$$q.value &&
-      props.image != null &&
-      typeof props.image === 'object'
-        ? createSrc(dbUserId$$q.value, props.image, Number(props.size))
-        : undefined
-    );
+      const userId = getUserId();
+      if (!userId) {
+        return;
+      }
+
+      return createSrc(userId, props.image, Number(props.size));
+    });
 
     const src = computed<string | undefined>(() =>
       typeof props.image === 'string' ? props.image : undefined

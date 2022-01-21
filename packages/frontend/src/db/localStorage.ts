@@ -12,7 +12,6 @@ function _useLocalStorageDB() {
   });
   return {
     dbUser$$q: dbUser,
-    dbUserId$$q: eagerComputed(() => dbUser.value?.id ?? null),
     dbMaxTrackId$$q: eagerComputed(() => dbUser.value?.maxTrackId ?? null),
     dbLastUpdate$$q: useLocalStorage<number>('db.lastUpdate', 0, {
       writeDefaults: false,

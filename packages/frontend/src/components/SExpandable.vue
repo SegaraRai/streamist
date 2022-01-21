@@ -2,8 +2,9 @@
 import type { PropType } from 'vue';
 import { filterNullAndUndefined } from '$shared/filter';
 import { useLiveQuery } from '~/composables';
-import { db, useLocalStorageDB } from '~/db';
+import { db } from '~/db';
 import { createSrc } from '~/logic/srcSet';
+import { getUserId } from '~/logic/tokens';
 
 export default defineComponent({
   props: {
@@ -22,7 +23,6 @@ export default defineComponent({
     'update:modelValue': (_modelValue: boolean) => true,
   },
   setup(props, { emit }) {
-    const { dbUserId$$q } = useLocalStorageDB();
     const modelValue$$q = useVModel(props, 'modelValue', emit);
 
     const imageIds$$q = computed(() => props.imageIds);
@@ -40,11 +40,11 @@ export default defineComponent({
 
     const resolvedImages = computed(() => {
       if (!images$$q.value) {
-        return [];
+        return;
       }
-      const userId = dbUserId$$q.value;
+      const userId = getUserId();
       if (!userId) {
-        return [];
+        return;
       }
       return filterNullAndUndefined(
         images$$q.value.map((image, index) => {
@@ -61,7 +61,7 @@ export default defineComponent({
     });
 
     const enabled = eagerComputed(
-      () => !props.disabled && resolvedImages.value.length > 0
+      () => !props.disabled && !!resolvedImages.value?.length
     );
     watch(enabled, (newEnabled) => {
       if (!newEnabled) {
@@ -105,29 +105,31 @@ export default defineComponent({
       <slot></slot>
     </div>
   </template>
-  <n-modal v-model:show="modelValue$$q" class="select-none w-full h-full">
-    <div class="relative w-full h-full">
-      <n-carousel draggable show-arrow keyboard>
-        <template v-for="image in resolvedImages$$q" :key="image.index$$q">
-          <img
-            class="w-screen h-screen object-contain"
-            :alt="`Image #${image.index$$q + 1} of ${altBase}`"
-            :src="image.src$$q.src$$q"
-            :srcset="image.src$$q.srcSet$$q"
-          />
-        </template>
-      </n-carousel>
-      <div class="absolute top-1 right-1">
-        <v-btn
-          class="text-st-error bg-true-gray-500/60 dark:bg-true-gray-900/80"
-          flat
-          icon
-          size="x-small"
-          @click="modelValue$$q = false"
-        >
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
+  <template v-if="resolvedImages$$q">
+    <n-modal v-model:show="modelValue$$q" class="select-none w-full h-full">
+      <div class="relative w-full h-full">
+        <n-carousel draggable show-arrow keyboard>
+          <template v-for="image in resolvedImages$$q" :key="image.index$$q">
+            <img
+              class="w-screen h-screen object-contain"
+              :alt="`Image #${image.index$$q + 1} of ${altBase}`"
+              :src="image.src$$q.src$$q"
+              :srcset="image.src$$q.srcSet$$q"
+            />
+          </template>
+        </n-carousel>
+        <div class="absolute top-1 right-1">
+          <v-btn
+            class="text-st-error bg-true-gray-500/60 dark:bg-true-gray-900/80"
+            flat
+            icon
+            size="x-small"
+            @click="modelValue$$q = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
       </div>
-    </div>
-  </n-modal>
+    </n-modal>
+  </template>
 </template>

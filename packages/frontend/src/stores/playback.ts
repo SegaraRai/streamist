@@ -3,10 +3,11 @@ import type { RepeatType } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
 import { useRecentlyPlayed, useTrackFilter } from '~/composables';
-import { db, useLocalStorageDB } from '~/db';
+import { db } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
+import { getUserId } from '~/logic/tokens';
 import { TrackProvider2 } from '~/logic/trackProvider2';
 import {
   realVolumeToVisualVolume,
@@ -129,7 +130,6 @@ function _usePlaybackStore(): PlaybackState {
   const volumeStore = useVolumeStore();
   const { isTrackAvailable$$q, serializedFilterKey$$q } = useTrackFilter();
   const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
-  const { dbUserId$$q } = useLocalStorageDB();
   const preferenceStore = usePreferenceStore();
 
   const repeat = useLocalStorage<RepeatType>('playback.repeat', 'off');
@@ -341,8 +341,6 @@ function _usePlaybackStore(): PlaybackState {
   });
 
   trackProvider.addEventListener('trackChange', (): void => {
-    const userId = dbUserId$$q.value;
-
     const track = trackProvider.currentTrack$$q;
     currentTrack.value = track;
 
@@ -358,7 +356,9 @@ function _usePlaybackStore(): PlaybackState {
 
     // load audio here because watching currentTrack does not trigger if the previous track is the same
     if (track) {
+      const userId = getUserId();
       if (!userId) {
+        console.error('playback: userId is not set');
         return;
       }
 
@@ -508,18 +508,22 @@ function _usePlaybackStore(): PlaybackState {
     }
   }
 
+  const cleanup = (): void => {
+    currentAudio?.pause();
+    currentAudio?.remove();
+    currentAudio = undefined;
+
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = 'none';
+    }
+  };
+
+  tryOnScopeDispose(() => {
+    cleanup();
+  });
+
   if (import.meta.hot) {
-    const cleanup = (): void => {
-      currentAudio?.pause();
-      currentAudio?.remove();
-      currentAudio = undefined;
-
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = null;
-        navigator.mediaSession.playbackState = 'none';
-      }
-    };
-
     import.meta.hot.accept((): void => {
       cleanup();
     });
@@ -599,12 +603,4 @@ function _usePlaybackStore(): PlaybackState {
   };
 }
 
-let gState: PlaybackState | undefined;
-
-export function usePlaybackStore(): PlaybackState {
-  if (!gState) {
-    console.log('create playback store');
-    gState = _usePlaybackStore();
-  }
-  return gState;
-}
+export const usePlaybackStore = createSharedComposable(_usePlaybackStore);
