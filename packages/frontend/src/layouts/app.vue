@@ -308,12 +308,14 @@ export default defineComponent({
     >
       <v-sheet class="m-0 p-0 w-full h-full flex flex-col">
         <v-divider />
-        <template v-if="desktopPlaybackControl$$q">
-          <s-playback-control />
-        </template>
-        <template v-else>
-          <s-mobile-playback-control />
-        </template>
+        <keep-alive>
+          <template v-if="desktopPlaybackControl$$q">
+            <s-playback-control />
+          </template>
+          <template v-else>
+            <s-mobile-playback-control />
+          </template>
+        </keep-alive>
       </v-sheet>
     </footer>
   </div>

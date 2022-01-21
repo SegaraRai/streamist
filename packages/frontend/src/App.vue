@@ -1,10 +1,11 @@
 <script lang="ts">
 import { storeToRefs } from 'pinia';
 import type { Ref } from 'vue';
+import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
 import type { LanguageCode } from '~/config';
 import { NAIVE_UI_THEMES, THEMES } from '~/logic/theme';
+import { loggedInRef } from '~/stores/auth';
 import { usePreferenceStore } from '~/stores/preference';
-import { useEffectiveTheme } from './composables/useEffectiveTheme';
 
 export default defineComponent({
   setup() {
@@ -53,6 +54,7 @@ export default defineComponent({
     );
 
     return {
+      isLoggedIn$$q: loggedInRef,
       naiveUITheme$$q: naiveUITheme,
     };
   },
@@ -72,5 +74,8 @@ export default defineComponent({
       </n-notification-provider>
     </n-message-provider>
     <n-global-style />
+    <template v-if="isLoggedIn$$q">
+      <s-playback-persistor />
+    </template>
   </n-config-provider>
 </template>
