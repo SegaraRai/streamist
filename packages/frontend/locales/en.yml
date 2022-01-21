@@ -10,13 +10,13 @@ landing:
   title: Streamist
   description: Stream your favorite songs
   button:
-    Register: Register
+    SignUp: Sign up
 appBar:
   button:
-    Login: Login
-    Register: Register
+    SignIn: Sign in
+    SignUp: Sign up
 common:
-  Logout: Logout
+  SignOut: Sign out
   ThisActionCannotBeUndone: This action cannot be undone.
 regions:
   'ap-northeast-1': ap-northeast-1 (Tokyo, Japan)
@@ -47,25 +47,25 @@ queue:
   NowPlaying: Now playing
   NextInQueue: Next in queue
   NextFrom: 'Next from: {0}'
-login:
-  title: Login
+signIn:
+  title: Sign in
   label:
     Username: Username
     Password: Password
   button:
-    Login: Login
-register:
-  title: Register
+    SignIn: Sign in
+signUp:
+  title: Sign up
   label:
     Username: Username
     Password: Password
     DisplayName: Display name
     Region: Region
   description:
-    Username: Login username
+    Username: Sign in username
     Region: Location to store your data
   button:
-    Register: Register
+    SignUp: Sign up
 settings:
   account:
     title: Account Settings
@@ -128,9 +128,8 @@ trackList:
   Title: Title
 title:
   Home: 'Streamist'
-  Register: "Register {'|'} Streamist"
-  Login: "Login {'|'} Streamist"
-  Logout: "Logout {'|'} Streamist"
+  SignIn: "Sign in {'|'} Streamist"
+  SignUp: "Sign up {'|'} Streamist"
   Albums: "Albums {'|'} Streamist"
   Album: "{0} by {1} {'|'} Streamist"
   AlbumInit: "Album by {1} {'|'} Streamist"
@@ -309,11 +308,11 @@ dialogComponent:
       hint: Release date will be treated as {0}
       invalid: Cannot parse release date
 dialog:
-  logout:
-    title: Logout
-    content: 'Are you sure you want to logout?'
+  signOut:
+    title: Sign out
+    content: 'Are you sure you want to sign out?'
     button:
-      Logout: Logout
+      SignOut: Sign out
       Cancel: Cancel
   removeFromPlaylist:
     title: Remove track from playlist

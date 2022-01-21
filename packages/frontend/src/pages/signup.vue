@@ -40,7 +40,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     useHead({
-      title: t('title.Register'),
+      title: t('title.SignUp'),
     });
 
     const regionOptions$$q = eagerComputed(() =>
@@ -201,7 +201,7 @@ export default defineComponent({
             class="block w-7 h-7 select-none pointer-events-none"
             alt="Streamist Logo"
           />
-          <span>{{ t('register.title') }}</span>
+          <span>{{ t('signUp.title') }}</span>
         </v-card-header-text>
       </v-card-header>
       <v-card-text>
@@ -213,8 +213,8 @@ export default defineComponent({
             autocomplete="off"
             required
             prepend-inner-icon="mdi-account"
-            :label="t('register.label.Username')"
-            :hint="t('register.description.Username')"
+            :label="t('signUp.label.Username')"
+            :hint="t('signUp.description.Username')"
             :minlength="ACCOUNT_USERNAME_MIN_LENGTH$$q"
             :maxlength="ACCOUNT_USERNAME_MAX_LENGTH$$q"
             :rules="usernameRules$$q"
@@ -238,7 +238,7 @@ export default defineComponent({
                         <i-mdi-check class="w-4 h-4 text-st-success" />
                       </template>
                       <div>
-                        {{ t('register.tooltip.UsernameAvailable') }}
+                        {{ t('signUp.tooltip.UsernameAvailable') }}
                       </div>
                     </n-popover>
                   </template>
@@ -248,7 +248,7 @@ export default defineComponent({
                         <i-mdi-close class="w-4 h-4 text-st-error" />
                       </template>
                       <div>
-                        {{ t('register.tooltip.UsernameAlreadyTaken') }}
+                        {{ t('signUp.tooltip.UsernameAlreadyTaken') }}
                       </div>
                     </n-popover>
                   </template>
@@ -263,7 +263,7 @@ export default defineComponent({
             autocomplete="off"
             required
             prepend-inner-icon="mdi-lock"
-            :label="t('register.label.Password')"
+            :label="t('signUp.label.Password')"
             :minlength="ACCOUNT_PASSWORD_MIN_LENGTH$$q"
             :maxlength="ACCOUNT_PASSWORD_MAX_LENGTH$$q"
             :rules="passwordRules$$q"
@@ -277,7 +277,7 @@ export default defineComponent({
             required
             prepend-inner-icon="mdi-account-box"
             hide-details
-            :label="t('register.label.DisplayName')"
+            :label="t('signUp.label.DisplayName')"
           />
           <!-- TODO: migrate to v-select -->
           <div class="my-10">
@@ -296,7 +296,7 @@ export default defineComponent({
           @click="register$$q"
         >
           <span :class="requestInProgress$$q && 'invisible'">
-            {{ t('register.button.Register') }}
+            {{ t('signUp.button.SignUp') }}
           </span>
           <template v-if="requestInProgress$$q">
             <v-progress-circular

@@ -11,11 +11,11 @@ export default defineComponent({
     const preferenceStore = usePreferenceStore();
     const { switchTheme$$q, themeName$$q } = useEffectiveTheme();
 
-    const isLoginPage$$q = eagerComputed(
+    const isSignInPage$$q = eagerComputed(
       () => router.currentRoute.value.path === '/login'
     );
-    const isRegisterPage$$q = eagerComputed(
-      () => router.currentRoute.value.path === '/register'
+    const isSignUpPage$$q = eagerComputed(
+      () => router.currentRoute.value.path === '/signup'
     );
 
     return {
@@ -25,8 +25,8 @@ export default defineComponent({
       themeName$$q,
       switchTheme$$q,
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
-      isLoginPage$$q,
-      isRegisterPage$$q,
+      isSignInPage$$q,
+      isSignUpPage$$q,
     };
   },
 });
@@ -57,14 +57,14 @@ export default defineComponent({
         </div>
         <div class="flex-1"></div>
         <div class="flex items-center gap-x-2">
-          <div v-show="!isLoginPage$$q">
+          <div v-show="!isSignInPage$$q">
             <v-btn class="whitespace-nowrap" to="/login">
-              {{ t('appBar.button.Login') }}
+              {{ t('appBar.button.SignIn') }}
             </v-btn>
           </div>
-          <div v-show="!isRegisterPage$$q">
-            <v-btn class="whitespace-nowrap border" to="/register">
-              {{ t('appBar.button.Register') }}
+          <div v-show="!isSignUpPage$$q">
+            <v-btn class="whitespace-nowrap border" to="/signup">
+              {{ t('appBar.button.SignUp') }}
             </v-btn>
           </div>
           <n-select

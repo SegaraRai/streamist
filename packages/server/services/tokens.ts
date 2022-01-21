@@ -192,7 +192,7 @@ export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
       if (tempUser.closedAt != null) {
         throw new HTTPError(
           409,
-          `User ${extractedUserId} is closed. Please login again to restore access.`
+          `User ${extractedUserId} is closed. Please sign in again to restore access.`
         );
       }
 

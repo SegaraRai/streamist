@@ -44,10 +44,10 @@ export default defineComponent({
       themeStore$$q: themeStore,
       logout$$q: () => {
         dialog.warning({
-          title: t('dialog.logout.title'),
-          content: t('dialog.logout.content'),
-          positiveText: t('dialog.logout.button.Logout'),
-          negativeText: t('dialog.logout.button.Cancel'),
+          title: t('dialog.signOut.title'),
+          content: t('dialog.signOut.content'),
+          positiveText: t('dialog.signOut.button.SignOut'),
+          negativeText: t('dialog.signOut.button.Cancel'),
           onPositiveClick: () => {
             logout();
             router.push('/login');
@@ -107,7 +107,7 @@ export default defineComponent({
         <div class="mt-4 flex flex-col gap-y-8">
           <div>
             <v-btn color="error" @click="logout$$q">
-              {{ t('common.Logout') }}
+              {{ t('common.SignOut') }}
             </v-btn>
           </div>
         </div>

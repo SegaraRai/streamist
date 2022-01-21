@@ -47,8 +47,8 @@ export default defineComponent({
           {{ t('landing.description') }}
         </div>
         <div class="mt-8">
-          <v-btn color="primary" href="/register">
-            {{ t('landing.button.Register') }}
+          <v-btn color="primary" href="/signup">
+            {{ t('landing.button.SignUp') }}
           </v-btn>
         </div>
       </div>

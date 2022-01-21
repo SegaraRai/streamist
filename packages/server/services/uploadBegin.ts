@@ -500,7 +500,7 @@ export async function createSource(
   if (user.closedAt != null) {
     throw new HTTPError(
       409,
-      `User ${userId} is closed. Please login again to restore access.`
+      `User ${userId} is closed. Please sign in again to restore access.`
     );
   }
 

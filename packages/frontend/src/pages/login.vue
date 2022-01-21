@@ -14,7 +14,7 @@ export default defineComponent({
     const { t } = useI18n();
 
     useHead({
-      title: t('title.Login'),
+      title: t('title.SignIn'),
     });
 
     const requestInProgress$$q = ref(false);
@@ -59,7 +59,7 @@ export default defineComponent({
             class="block w-7 h-7 select-none pointer-events-none"
             alt="Streamist Logo"
           />
-          <span>{{ t('login.title') }}</span>
+          <span>{{ t('signIn.title') }}</span>
         </v-card-header-text>
       </v-card-header>
       <v-card-text>
@@ -75,7 +75,7 @@ export default defineComponent({
             required
             prepend-inner-icon="mdi-account"
             hide-details
-            :label="t('login.label.Username')"
+            :label="t('signIn.label.Username')"
           />
           <v-text-field
             v-model="password$$q"
@@ -85,7 +85,7 @@ export default defineComponent({
             required
             prepend-inner-icon="mdi-lock"
             hide-details
-            :label="t('login.label.Password')"
+            :label="t('signIn.label.Password')"
           />
         </v-form>
       </v-card-text>
@@ -93,7 +93,7 @@ export default defineComponent({
         <v-spacer />
         <v-btn flat text color="transparent" @click="login$$q">
           <span :class="requestInProgress$$q && 'invisible'">
-            {{ t('login.button.Login') }}
+            {{ t('signIn.button.SignIn') }}
           </span>
           <template v-if="requestInProgress$$q">
             <v-progress-circular
