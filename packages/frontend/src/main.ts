@@ -38,8 +38,8 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
   if (ctx.isClient) {
     ctx.router.beforeEach(async (to, _from, next) => {
       const authenticated = await isAuthenticated();
-      const isAppPage = to.meta.layout === 'app';
-      const isAuthPage = to.meta.auth;
+      const isAppPage = to.meta.requiresAuth;
+      const isAuthPage = to.meta.authPage;
       if ((authenticated && isAuthPage) || (!authenticated && isAppPage)) {
         return next(
           authenticated

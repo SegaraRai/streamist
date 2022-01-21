@@ -1,6 +1,7 @@
 <route lang="yaml">
 meta:
-  layout: app
+  layout: conditional
+  requiresAuth: true
 </route>
 
 <script lang="ts">

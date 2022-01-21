@@ -1,6 +1,6 @@
 <route lang="yaml">
 meta:
-  auth: true
+  authPage: true
 </route>
 
 <script lang="ts">
