@@ -1,7 +1,10 @@
 import { configDevelopment, setOS } from '$shared/objectStorage';
 
-if (import.meta.env.DEV) {
-  setOS(configDevelopment);
-} else {
-  throw new Error('unknown NODE_ENV');
+switch (import.meta.env.MODE) {
+  case 'development':
+    setOS(configDevelopment);
+    break;
+
+  default:
+    throw new Error('unknown MODE');
 }
