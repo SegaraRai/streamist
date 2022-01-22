@@ -1,6 +1,5 @@
 import commonjs from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
-import replace from '@rollup/plugin-replace';
 import { defineConfig } from 'rollup';
 import esbuild from 'rollup-plugin-esbuild';
 import { terser } from 'rollup-plugin-terser';
@@ -18,16 +17,19 @@ export default defineConfig({
     format: 'es',
   },
   plugins: [
-    replace({
-      'BUILD_TIME_DEFINITION.NODE_ENV': `"${NODE_ENV}"`,
-      preventAssignment: true,
+    tsPaths({
+      tsConfigPath: ['tsconfig.json', '../shared/tsconfig.json'],
     }),
-    // NOTE: esbuild plugin does ont bundle or resolve dependencies
+    nodeResolve({
+      browser: true,
+      extensions: ['.ts', '.js', '.json'],
+    }),
     esbuild({
       minify: false,
+      define: {
+        'BUILD_TIME_DEFINITION.NODE_ENV': `"${NODE_ENV}"`,
+      },
     }),
-    tsPaths(),
-    nodeResolve({ extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'] }),
     commonjs(),
     terser(),
   ],

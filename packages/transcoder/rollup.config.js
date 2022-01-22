@@ -25,7 +25,6 @@ export default defineConfig({
         'tsconfig.json',
         '../shared/tsconfig.json',
         '../shared-server/tsconfig.json',
-        '../transcoder/tsconfig.json',
       ],
     }),
     nodeResolve({
