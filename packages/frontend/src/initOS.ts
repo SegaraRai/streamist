@@ -1,4 +1,7 @@
 import { configDevelopment, setOS } from '$shared/objectStorage';
 
-// TODO(prod): change definition
-setOS(configDevelopment);
+if (import.meta.env.DEV) {
+  setOS(configDevelopment);
+} else {
+  throw new Error('unknown NODE_ENV');
+}
