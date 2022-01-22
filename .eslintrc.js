@@ -28,10 +28,8 @@ module.exports = defineConfig({
     'import/no-mutable-exports': 'error',
     'import/no-unresolved': 'off',
     'generator-star-spacing': 'off',
-    // @ts-ignore
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
-    // @ts-ignore
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
+    'no-debugger': 'error',
+    'no-console': 'warn',
     'prefer-const': [
       'error',
       {
@@ -59,19 +57,6 @@ module.exports = defineConfig({
     'unicorn/prefer-text-content': 'error',
     'unicorn/prefer-type-error': 'error',
     'unicorn/throw-new-error': 'error',
-
-    'vue/no-parsing-error': [
-      'error',
-      {
-        'x-invalid-end-tag': false,
-      },
-    ],
-    'vue/max-attributes-per-line': [
-      'error',
-      {
-        singleline: 5,
-      },
-    ],
 
     // TypeScript rules
 
@@ -150,10 +135,7 @@ module.exports = defineConfig({
       },
     ],
 
-    'vue/no-v-model-argument': 'off',
     'vue/multi-word-component-names': 'off',
-    'vue/no-multiple-template-root': 'off',
-    'vue/no-v-for-template-key': 'off',
     'vue/html-self-closing': [
       'error',
       {
