@@ -18,7 +18,11 @@ export default defineConfig({
   },
   plugins: [
     tsPaths({
-      tsConfigPath: ['tsconfig.json', '../shared/tsconfig.json'],
+      tsConfigPath: [
+        'tsconfig.json',
+        '../shared/tsconfig.json',
+        '../shared-server/tsconfig.json',
+      ],
     }),
     nodeResolve({
       browser: true,

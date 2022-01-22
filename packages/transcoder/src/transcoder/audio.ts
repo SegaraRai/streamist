@@ -7,6 +7,10 @@ import {
   generateTranscodedAudioFileId,
 } from '$shared-server/generateId';
 import {
+  getSourceFileKey,
+  getSourceFileOS,
+  getTranscodedAudioFileKey,
+  getTranscodedAudioFileOS,
   osDeleteManaged,
   osGetData,
   osGetFile,
@@ -15,12 +19,6 @@ import {
 import { CueSheet, parseCueSheet } from '$shared/cueParser';
 import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText';
-import {
-  getSourceFileKey,
-  getSourceFileOS,
-  getTranscodedAudioFileKey,
-  getTranscodedAudioFileOS,
-} from '$shared/objectStorage';
 import { UploadJSONStorage, uploadJSON } from '../execAndLog';
 import { calcFileHash } from '../fileHash';
 import logger from '../logger';

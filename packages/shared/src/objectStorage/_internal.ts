@@ -1,26 +1,18 @@
-import { ObjectStorageDefinition, ObjectStorageRegion } from './types';
+import type { OSRegion } from './types';
 
-let gObjectStorageDefinition: ObjectStorageDefinition | undefined;
-let gRegions: readonly ObjectStorageRegion[] | undefined;
-let gRegionSet: ReadonlySet<string> | undefined;
+let gRegions: readonly OSRegion[] | undefined;
+let gRegionSet: ReadonlySet<OSRegion> | undefined;
 
-export function _internalSetOS(def: ObjectStorageDefinition): void {
-  if (gObjectStorageDefinition) {
-    throw new Error('internalSetOS: buckets already defined');
+export function _internalSetRegions(regions: readonly OSRegion[]): void {
+  if (gRegions) {
+    throw new Error('internalSetOS: regions already defined');
   }
 
-  gObjectStorageDefinition = { ...def };
-  gRegions = Object.values(gObjectStorageDefinition);
-  gRegionSet = new Set(Object.keys(gObjectStorageDefinition));
+  gRegions = [...regions];
+  gRegionSet = new Set(regions);
 }
 
-export function _internalGetOSDef(): ObjectStorageDefinition | undefined {
-  return gObjectStorageDefinition;
-}
-
-export function _internalGetRegions():
-  | readonly ObjectStorageRegion[]
-  | undefined {
+export function _internalGetRegions(): readonly OSRegion[] | undefined {
   return gRegions;
 }
 

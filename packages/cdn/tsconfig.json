@@ -10,12 +10,16 @@
     "baseUrl": ".",
     "paths": {
       "$shared/*": [
-        "../shared/src/*"
-      ]
+        "../shared/src/*",
+      ],
+      "$shared-server/*": [
+        "../shared-server/src/*",
+      ],
     },
     "rootDirs": [
       ".",
-      "../shared"
+      "../shared",
+      "../shared-server",
     ],
     "skipLibCheck": true,
     "strict": true,

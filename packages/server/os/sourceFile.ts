@@ -1,11 +1,11 @@
 import type { SourceFile } from '@prisma/client';
-import { osDeleteManaged } from '$shared-server/objectStorage';
-import { createMultiMap } from '$shared/multiMap';
 import {
   OSRegion,
   getSourceFileKey,
   getSourceFileOS,
-} from '$shared/objectStorage';
+  osDeleteManaged,
+} from '$shared-server/objectStorage';
+import { createMultiMap } from '$shared/multiMap';
 
 export async function osDeleteSourceFiles(
   sourceFiles: readonly Pick<

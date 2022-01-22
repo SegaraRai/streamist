@@ -5,6 +5,14 @@ import { Router } from 'worktop';
 import * as CORS from 'worktop/cors';
 import { reply } from 'worktop/module';
 import { send } from 'worktop/response';
+import {
+  getOSRawURL,
+  getTranscodedAudioFileKey,
+  getTranscodedAudioFileOS,
+  getTranscodedImageFileKey,
+  getTranscodedImageFileOS,
+  isValidOSRegion,
+} from '$shared-server/objectStorage';
 import { arrayBufferToHex } from '$shared/arrayBufferToHex';
 import {
   CACHE_CONTROL_IMMUTABLE_TTL,
@@ -14,14 +22,6 @@ import {
   JWT_CDN_TOKEN_AUD,
 } from '$shared/config';
 import { isId } from '$shared/id';
-import {
-  getOSRawURL,
-  getTranscodedAudioFileKey,
-  getTranscodedAudioFileOS,
-  getTranscodedImageFileKey,
-  getTranscodedImageFileOS,
-  isValidOSRegion,
-} from '$shared/objectStorage';
 import {
   CACHE_VERSION,
   COOKIE_EXPIRY_DELAY,

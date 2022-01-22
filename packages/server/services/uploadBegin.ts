@@ -5,6 +5,12 @@ import {
   generateSourceId,
 } from '$shared-server/generateId';
 import {
+  OSRegion,
+  getSourceFileKey,
+  getSourceFileOS,
+  toOSRegion,
+} from '$shared-server/objectStorage';
+import {
   MAX_SOURCE_AUDIO_FILE_SIZE_PER_PLAN,
   MAX_SOURCE_CUE_SHEET_FILE_SIZE_PER_PLAN,
   MAX_SOURCE_IMAGE_FILE_SIZE_PER_PLAN,
@@ -17,12 +23,6 @@ import {
   SOURCE_FILE_UPLOADABLE_AFTER_CREATE,
 } from '$shared/config';
 import { is } from '$shared/is';
-import {
-  OSRegion,
-  getSourceFileKey,
-  getSourceFileOS,
-  toOSRegion,
-} from '$shared/objectStorage';
 import { retryS3 } from '$shared/retry';
 import {
   SourceFileState,

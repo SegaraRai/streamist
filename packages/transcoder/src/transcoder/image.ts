@@ -4,16 +4,14 @@ import {
   generateTranscodedImageFileId,
 } from '$shared-server/generateId';
 import {
-  osDeleteManaged,
-  osGetFile,
-  osPutFile,
-} from '$shared-server/objectStorage';
-import {
   getSourceFileKey,
   getSourceFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-} from '$shared/objectStorage';
+  osDeleteManaged,
+  osGetFile,
+  osPutFile,
+} from '$shared-server/objectStorage';
 import { UploadJSONStorage, uploadJSON } from '../execAndLog';
 import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
 import { getTempFilepath } from '../tempFile';

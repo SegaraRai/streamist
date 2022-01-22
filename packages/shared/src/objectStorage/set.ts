@@ -1,6 +1,6 @@
-import { _internalSetOS } from './_internal';
-import type { ObjectStorageDefinition } from './types';
+import { _internalSetRegions } from './_internal';
+import type { OSRegion } from './types';
 
-export function setOS(def: ObjectStorageDefinition): void {
-  _internalSetOS(def);
+export function setOSRegions(regions: readonly OSRegion[]): void {
+  _internalSetRegions(regions);
 }

@@ -1,8 +1,8 @@
-import { configDevelopment, setOS } from '$shared/objectStorage';
+import { useRegionsDevelopment } from '$shared/objectStorage';
 
 switch (import.meta.env.MODE) {
   case 'development':
-    setOS(configDevelopment);
+    useRegionsDevelopment();
     break;
 
   default:

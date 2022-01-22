@@ -1,11 +1,11 @@
-import { USE_NFS_SIZE_THRESHOLD } from '$shared/config';
-import { filterNullAndUndefined } from '$shared/filter';
-import { is } from '$shared/is';
 import {
   OSRegion,
   getSourceFileKey,
   getSourceFileOS,
-} from '$shared/objectStorage';
+} from '$shared-server/objectStorage';
+import { USE_NFS_SIZE_THRESHOLD } from '$shared/config';
+import { filterNullAndUndefined } from '$shared/filter';
+import { is } from '$shared/is';
 import { retryS3, retryS3NoReject } from '$shared/retry';
 import type {
   SourceFileAttachToType,

@@ -1,5 +1,6 @@
+import type { OSRegion } from '$shared/objectStorage';
 import { _internalGetOSDef } from './_internal';
-import type { OSRegion, ObjectStorage, ObjectStorageRegion } from './types';
+import type { ObjectStorage, ObjectStorageRegion } from './types';
 
 export function getOSRegion(region: OSRegion): ObjectStorageRegion {
   const def = _internalGetOSDef();

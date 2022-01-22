@@ -3,27 +3,14 @@ import { createReadStream, createWriteStream } from 'fs';
 import { PassThrough, Readable } from 'stream';
 import { S3 } from '@aws-sdk/client-s3';
 import { retryS3, retryS3NoReject } from '$shared/retry';
-import { OS_BATCH_DELETE_MAX_ITEMS } from './config';
-import { decodeBuffer } from './contentEncoding';
-import { nodeReadableStreamToBuffer } from './stream';
-
-export interface ObjectStorageCredentials {
-  readonly WASABI_ACCESS_KEY_ID: string;
-  readonly WASABI_SECRET_ACCESS_KEY: string;
-}
-
-export interface ObjectStorage {
-  readonly provider: 'r2' | 'wasabi';
-  readonly region: string;
-  readonly bucket: string;
-}
-
-export interface ObjectStorageUploadOptions {
-  contentType: string;
-  cacheControl: string;
-  contentEncoding?: string;
-  contentDisposition?: string;
-}
+import { OS_BATCH_DELETE_MAX_ITEMS } from '../config';
+import { decodeBuffer } from '../contentEncoding';
+import { nodeReadableStreamToBuffer } from '../stream';
+import type {
+  ObjectStorage,
+  ObjectStorageCredentials,
+  ObjectStorageUploadOptions,
+} from './types';
 
 let gCredentials: ObjectStorageCredentials | undefined;
 
