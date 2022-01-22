@@ -1,8 +1,6 @@
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import nodeResolve from '@rollup/plugin-node-resolve';
-import replace from '@rollup/plugin-replace';
-import typescript from '@rollup/plugin-typescript';
 import { defineConfig } from 'rollup';
 import { terser } from 'rollup-plugin-terser';
 import tsPaths from 'rollup-plugin-tsconfig-paths';
@@ -20,19 +18,29 @@ export default defineConfig({
     inlineDynamicImports: true,
   },
   plugins: [
-    replace({
-      'process.env.NODE_ENV': `"${NODE_ENV}"`,
-      preventAssignment: true,
+    tsPaths({
+      // load other project's tsconfig.json
+      // this is required to resolve child project dependencies (such as `$shared`) imported from project dependencies (such as $shared-server)
+      tsConfigPath: [
+        'tsconfig.json',
+        '../shared/tsconfig.json',
+        '../shared-server/tsconfig.json',
+        '../transcoder/tsconfig.json',
+      ],
     }),
-    // rollup fails to resolve $shared/retry imported from $shared-server when using esbuild plugin instead
-    typescript({
-      rootDir: '..',
-    }),
-    json(),
-    tsPaths(),
     nodeResolve({
-      extensions: ['.tsx', '.ts', '.jsx', '.js', '.json'],
+      exportConditions: ['node'],
+      extensions: ['.js', '.mjs', '.ts', '.json', '.node'],
       preferBuiltins: true,
+    }),
+    json({
+      preferConst: true,
+    }),
+    esbuild({
+      define: {
+        'process.env.NODE_ENV': `"${NODE_ENV}"`,
+      },
+      minify: false,
     }),
     commonjs(),
     terser(),
