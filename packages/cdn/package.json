@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "miniflare -m -w ./dist/index_dev.js",
-    "build": "node ./build.js",
+    "dev": "miniflare -B \"pnpm run dev:build\" -m -w ./dist/index_dev.js",
+    "dev:build": "node ./build.dev.js",
+    "build": "node ./build.prod.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
