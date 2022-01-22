@@ -13,3 +13,10 @@ export function getOSRawURL(os: ObjectStorage, key: string): string {
 export function getOSCDNURL(os: ObjectStorage, key: string): string {
   return `https://${os.bucket}/${key}`;
 }
+
+export function convertOSRawURLToCDNURL(
+  os: ObjectStorage,
+  rawURL: string
+): string {
+  return getOSCDNURL(os, rawURL.split('/').slice(4).join('/'));
+}
