@@ -208,6 +208,12 @@ importers:
       '@aws-sdk/client-s3': ^3.47.1
       '@aws-sdk/s3-request-presigner': ^3.47.1
       '@prisma/client': ^3.8.1
+      '@rollup/plugin-alias': ^3.1.9
+      '@rollup/plugin-commonjs': ^21.0.1
+      '@rollup/plugin-json': ^4.1.0
+      '@rollup/plugin-node-resolve': ^13.1.3
+      '@rollup/plugin-replace': ^3.0.1
+      '@rollup/plugin-typescript': ^8.3.0
       '@segararai/frourio': ^0.25.1-fork.2
       '@types/busboy': ^1.3.0
       '@types/minimist': ^1.2.2
@@ -236,6 +242,10 @@ importers:
       pm2: ^5.1.2
       prisma: ^3.8.1
       reflect-metadata: ^0.1.13
+      rollup: ^2.65.0
+      rollup-plugin-esbuild: ^4.8.2
+      rollup-plugin-terser: ^7.0.2
+      rollup-plugin-tsconfig-paths: ^1.1.6
       tsd: ^0.19.1
       velona: ^0.7.0
       vite: ^2.7.13
@@ -266,6 +276,12 @@ importers:
       tsd: 0.19.1
       velona: 0.7.0
     devDependencies:
+      '@rollup/plugin-alias': 3.1.9_rollup@2.65.0
+      '@rollup/plugin-commonjs': 21.0.1_rollup@2.65.0
+      '@rollup/plugin-json': 4.1.0_rollup@2.65.0
+      '@rollup/plugin-node-resolve': 13.1.3_rollup@2.65.0
+      '@rollup/plugin-replace': 3.0.1_rollup@2.65.0
+      '@rollup/plugin-typescript': 8.3.0_rollup@2.65.0+typescript@4.5.5
       '@segararai/frourio': 0.25.1-fork.2
       '@types/busboy': 1.3.0
       '@types/minimist': 1.2.2
@@ -276,6 +292,10 @@ importers:
       esbuild-plugin-alias: 0.2.1
       node-dev: 7.1.0
       prisma: 3.8.1
+      rollup: 2.65.0
+      rollup-plugin-esbuild: 4.8.2_esbuild@0.14.12+rollup@2.65.0
+      rollup-plugin-terser: 7.0.2_rollup@2.65.0
+      rollup-plugin-tsconfig-paths: 1.1.6_rollup@2.65.0+typescript@4.5.5
       vite: 2.7.13
       vitest: 0.1.26
 
@@ -3243,6 +3263,16 @@ packages:
   /@prisma/engines/3.8.0-43.34df67547cf5598f5a6cd3eb45f14ee70c3fb86f:
     resolution: {integrity: sha512-bHYubuItSN/DGYo36aDu7xJiJmK52JOSHs4MK+KbceAtwS20BCWadRgtpQ3iZ2EXfN/B1T0iCXlNraaNwnpU2w==}
     requiresBuild: true
+
+  /@rollup/plugin-alias/3.1.9_rollup@2.65.0:
+    resolution: {integrity: sha512-QI5fsEvm9bDzt32k39wpOwZhVzRcL5ydcffUHMyLVaVaLeC70I8TJZ17F1z1eMoLu4E/UOcH9BWVkKpIKdrfiw==}
+    engines: {node: '>=8.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0
+    dependencies:
+      rollup: 2.65.0
+      slash: 3.0.0
+    dev: true
 
   /@rollup/plugin-babel/5.3.0_@babel+core@7.16.7+rollup@2.61.1:
     resolution: {integrity: sha512-9uIC8HZOnVLrLHxayq/PTzw+uS25E14KPUBh5ktF+18Mjo5yK0ToMMx6epY0uEgkjwJw0aBW4x2horYXh8juWw==}
@@ -9062,7 +9092,7 @@ packages:
     dependencies:
       debug: 4.3.3
       module-details-from-path: 1.0.3
-      resolve: 1.20.0
+      resolve: 1.21.1
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -9093,6 +9123,7 @@ packages:
     dependencies:
       is-core-module: 2.8.1
       path-parse: 1.0.7
+    dev: true
 
   /resolve/1.21.0:
     resolution: {integrity: sha512-3wCbTpk5WJlyE4mSOtDLhqQmGFi0/TD9VPwmiolnk8U0wRgMEktqCXd3vy5buTO3tljvalNvKrjHEfrd2WpEKA==}
@@ -10564,7 +10595,7 @@ packages:
       esbuild: 0.13.15
       postcss: 8.4.5
       resolve: 1.21.1
-      rollup: 2.61.1
+      rollup: 2.65.0
     optionalDependencies:
       fsevents: 2.3.2
     dev: true

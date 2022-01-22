@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "lib": [
+      "dom"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "$prisma/*": [
+        "./server/node_modules/.prisma/*"
+      ],
+      ".prisma/*": [
+        "./server/node_modules/.prisma/*"
+      ],
+      "$shared/*": [
+        "./shared/src/*"
+      ],
+      "$shared-server/*": [
+        "./shared-server/src/*"
+      ],
+      "$transcoder/*": [
+        "./transcoder/src/*"
+      ],
+      "$/*": [
+        "./server/*"
+      ],
+      "class-transformer": [
+        "./server/node_modules/class-transformer/esm2015"
+      ],
+    },
+    "rootDirs": [
+      ".",
+    ],
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ESNext"
+  }
+}
