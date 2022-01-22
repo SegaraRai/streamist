@@ -29,13 +29,13 @@ export default defineConfig({
         '../transcoder/tsconfig.json',
       ],
     }),
+    nodeResolve({
+      exportConditions: ['node'],
+      extensions: ['.js', '.mjs', '.ts', '.json', '.node'],
+      preferBuiltins: true,
+    }),
     json({
       preferConst: true,
-    }),
-    nodeResolve({
-      extensions: ['.js', '.mjs', '.ts', '.json', '.node'],
-      exportConditions: ['node'],
-      preferBuiltins: true,
     }),
     esbuild({
       define: {

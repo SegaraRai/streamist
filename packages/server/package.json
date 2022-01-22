@@ -47,12 +47,9 @@
     "velona": "^0.7.0"
   },
   "devDependencies": {
-    "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.1.3",
-    "@rollup/plugin-replace": "^3.0.1",
-    "@rollup/plugin-typescript": "^8.3.0",
     "@segararai/frourio": "^0.25.1-fork.2",
     "@types/busboy": "^1.3.0",
     "@types/minimist": "^1.2.2",
