@@ -11,7 +11,6 @@ export const configDevelopment: Record<
 > = {
   'ap-northeast-1': {
     region: 'ap-northeast-1',
-    name: 'Tokyo (Wasabi)',
     buckets: {
       transcodeLog: {
         provider: 'wasabi',

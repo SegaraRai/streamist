@@ -15,7 +15,6 @@ export interface ObjectStorageBuckets {
 
 export interface ObjectStorageRegion {
   readonly region: OSRegion;
-  readonly name: string;
   readonly buckets: ObjectStorageBuckets;
 }
 
