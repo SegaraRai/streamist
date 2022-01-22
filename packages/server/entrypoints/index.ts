@@ -24,10 +24,6 @@ function mainAPI(): void {
 
     app.listen(API_SERVER_PORT, '0.0.0.0').then((): void => {
       app.log.info('started');
-
-      // PM2 graceful start
-      // See also https://pm2.keymetrics.io/docs/usage/signals-clean-restart/
-      process.send?.('ready');
     });
   }
 }

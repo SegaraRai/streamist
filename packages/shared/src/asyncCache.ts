@@ -40,7 +40,7 @@ export function createAsyncCache<T>(
     get value(): T | undefined {
       if (cacheValue === undefined || !isValid(cacheValue)) {
         renewInternal();
-        return;
+        return undefined;
       }
 
       if (shouldRenew(cacheValue)) {

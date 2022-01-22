@@ -58,7 +58,9 @@ export async function extractUserIdFromRefreshToken(
   try {
     const payload = await verifier(String(token));
     return payload.id as string;
-  } catch (_error: unknown) {}
+  } catch (_error: unknown) {
+    // return undefined
+  }
 }
 
 export function issueAPIToken(
@@ -115,7 +117,9 @@ export async function extractPayloadFromCDNToken(
 
   try {
     return await verifier(String(token));
-  } catch (_error: unknown) {}
+  } catch (_error: unknown) {
+    // return undefined
+  }
 }
 
 export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
