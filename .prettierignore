@@ -7,10 +7,3 @@ packages/frontend/src/auto-imports.d.ts
 packages/frontend/src/components.d.ts
 
 packages/server/**/$*.ts
-packages/server/index.js
-packages/server/lambda.js
-packages/server/lambda_migration.js
-
-packages/transcoder/index.js
-
-packages/cdn/index.js

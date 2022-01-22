@@ -1,7 +1,7 @@
 {
   "name": "@streamist/shared-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^16.11.19",

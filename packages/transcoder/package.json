@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "run-p dev:*",
     "dev:build": "node ./build.dev.js",
-    "dev:start": "node-dev --respawn ./index.js",
+    "dev:start": "node-dev --respawn ./dist/index_dev.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

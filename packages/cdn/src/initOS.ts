@@ -1,4 +1,9 @@
 import { configDevelopment, setOS } from '$shared/objectStorage';
 
-// TODO(prod): change definition (build time)
-setOS(configDevelopment);
+declare const NODE_ENV: string;
+
+if (NODE_ENV === 'development') {
+  setOS(configDevelopment);
+} else {
+  throw new Error('unknown NODE_ENV');
+}

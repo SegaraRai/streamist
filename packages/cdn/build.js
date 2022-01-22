@@ -1,11 +1,5 @@
-require('dotenv').config({ path: '.env' });
-
-const { build } = require('esbuild');
-
-build({
-  entryPoints: ['./src/index.ts'],
-  outfile: 'index.js',
-  platform: 'neutral',
-  bundle: true,
-  logLevel: 'info',
-});
+if (process.env.MINIFLARE === '1') {
+  require('./build.dev');
+} else {
+  require('./build.prod');
+}
