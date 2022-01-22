@@ -6,9 +6,9 @@ import esbuild from 'rollup-plugin-esbuild';
 // import { terser } from 'rollup-plugin-terser';
 import tsPaths from 'rollup-plugin-tsconfig-paths';
 
-const { NODE_ENV = 'production' } = process.env;
-if (NODE_ENV !== 'production' && NODE_ENV !== 'development') {
-  throw new Error(`NODE_ENV must be 'production' or 'development'`);
+const { TARGET_NODE_ENV } = process.env;
+if (TARGET_NODE_ENV !== 'production' && TARGET_NODE_ENV !== 'staging') {
+  throw new Error(`TARGET_NODE_ENV must be 'production' or 'staging'`);
 }
 
 export default defineConfig({
@@ -39,7 +39,7 @@ export default defineConfig({
     }),
     esbuild({
       define: {
-        'process.env.NODE_ENV': `"${NODE_ENV}"`,
+        'process.env.NODE_ENV': `"${TARGET_NODE_ENV}"`,
       },
       minify: false,
     }),
