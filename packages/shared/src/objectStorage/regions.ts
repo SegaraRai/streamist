@@ -1,7 +1,7 @@
 import { _internalGetRegionSet, _internalGetRegions } from './_internal';
-import { OSRegion, ObjectStorageRegion } from './types';
+import type { OSRegion } from './types';
 
-export function getOSRegions(): readonly ObjectStorageRegion[] {
+export function getOSRegions(): readonly OSRegion[] {
   const regions = _internalGetRegions();
   if (!regions) {
     throw new Error('getOSRegions: buckets not defined');
@@ -24,5 +24,5 @@ export function toOSRegion(region: string): OSRegion {
   if (!isValidOSRegion(region)) {
     throw new Error(`toOSRegion: invalid region: ${region}`);
   }
-  return region as OSRegion;
+  return region;
 }

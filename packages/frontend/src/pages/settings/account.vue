@@ -22,8 +22,8 @@ export default defineComponent({
 
     const regionOptions$$q = eagerComputed(() =>
       getOSRegions().map((region) => ({
-        value: region.region,
-        label: t(`regions.${region.region}`),
+        value: region,
+        label: t(`regions.${region}`),
       }))
     );
 
