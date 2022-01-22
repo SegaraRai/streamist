@@ -3,7 +3,7 @@ import json from '@rollup/plugin-json';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import { defineConfig } from 'rollup';
 import esbuild from 'rollup-plugin-esbuild';
-// import { terser } from 'rollup-plugin-terser';
+import { terser } from 'rollup-plugin-terser';
 import tsPaths from 'rollup-plugin-tsconfig-paths';
 
 const { TARGET_NODE_ENV } = process.env;
@@ -15,7 +15,7 @@ export default defineConfig({
   input: 'entrypoints/index.ts',
   output: {
     file: 'dist/index.js',
-    format: 'es',
+    format: 'cjs',
     inlineDynamicImports: true,
   },
   plugins: [
@@ -44,6 +44,6 @@ export default defineConfig({
       minify: false,
     }),
     commonjs(),
-    // terser(),
+    terser(),
   ],
 });

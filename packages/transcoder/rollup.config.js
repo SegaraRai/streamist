@@ -14,7 +14,7 @@ export default defineConfig({
   input: 'src/indexLambda.ts',
   output: {
     file: 'dist/index.js',
-    format: 'es',
+    format: 'cjs',
     inlineDynamicImports: true,
   },
   plugins: [
