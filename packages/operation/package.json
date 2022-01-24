@@ -1,0 +1,22 @@
+{
+  "name": "@streamist/operation",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "pnpm run build && node ./dist/index.js",
+    "build": "esbuild src/index.ts --bundle --platform=node --outfile=dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^14.2.0",
+    "minimist": "^1.2.5"
+  },
+  "devDependencies": {
+    "@esbuild-plugins/node-resolve": "^0.1.4",
+    "@types/minimist": "^1.2.2",
+    "@types/node": "^16.11.19",
+    "esbuild": "^0.14.12",
+    "esbuild-node-externals": "^1.4.1",
+    "node-dev": "^7.1.0"
+  }
+}

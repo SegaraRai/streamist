@@ -202,6 +202,27 @@ importers:
       vue-tsc: 0.30.6_typescript@4.5.5
       windicss: 3.4.3
 
+  packages/operation:
+    specifiers:
+      '@esbuild-plugins/node-resolve': ^0.1.4
+      '@types/minimist': ^1.2.2
+      '@types/node': ^16.11.19
+      dotenv: ^14.2.0
+      esbuild: ^0.14.12
+      esbuild-node-externals: ^1.4.1
+      minimist: ^1.2.5
+      node-dev: ^7.1.0
+    dependencies:
+      dotenv: 14.2.0
+      minimist: 1.2.5
+    devDependencies:
+      '@esbuild-plugins/node-resolve': 0.1.4_esbuild@0.14.12
+      '@types/minimist': 1.2.2
+      '@types/node': 16.11.19
+      esbuild: 0.14.12
+      esbuild-node-externals: 1.4.1_esbuild@0.14.12
+      node-dev: 7.1.0
+
   packages/server:
     specifiers:
       '@aws-sdk/client-lambda': ^3.47.1

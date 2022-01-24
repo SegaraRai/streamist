@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "lib": [
+      "dom"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "$shared/*": [
+        "../shared/src/*"
+      ],
+      "$shared-server/*": [
+        "../shared-server/src/*"
+      ]
+    },
+    "rootDirs": [
+      ".",
+      "../shared",
+      "../shared-server"
+    ],
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "target": "ESNext"
+  }
+}
