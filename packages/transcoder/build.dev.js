@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '.env' });
+require('dotenv').config({ path: '../shared-server/env/.env' });
 
 const { build } = require('esbuild');
 const { nodeExternalsPlugin } = require('esbuild-node-externals');

@@ -13,7 +13,7 @@ import server from '$/$server';
 import {
   API_BASE_PATH,
   SECRET_API_JWT_SECRET,
-  SECRET_PROXY_AUTH_TOKEN,
+  SECRET_API_PROXY_AUTH_TOKEN,
 } from '$/services/env';
 import { fastPlainToInstance } from '$/services/fastClassTransformer';
 import { transcoderCallback } from '$/services/transcoderCallback';
@@ -24,7 +24,7 @@ const validateProxyRequestPlugin: FastifyPluginCallback = (
   _options: unknown,
   done: (err?: Error) => void
 ): void => {
-  const backendAuthorization = `Bearer ${SECRET_PROXY_AUTH_TOKEN}`;
+  const backendAuthorization = `Bearer ${SECRET_API_PROXY_AUTH_TOKEN}`;
   fastify.addHook('onRequest', (request, _reply, done) => {
     if (request.headers['x-backend-authorization'] !== backendAuthorization) {
       return done(new HTTPError(401, 'Incorrect backend token'));

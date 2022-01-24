@@ -94,7 +94,7 @@ TODO
       "Resource": ["arn:aws:s3:::*/tra/*", "arn:aws:s3:::*/tri/*"],
       "Condition": {
         "StringEquals": {
-          "aws:Referer": "<SECRET_STORAGE_ACCESS_REFERER>"
+          "aws:Referer": "<SECRET_CDN_STORAGE_ACCESS_REFERER>"
         }
       }
     }

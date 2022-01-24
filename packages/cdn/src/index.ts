@@ -192,7 +192,7 @@ API.add(
       noCache ? '&nc' : '',
     ].join('');
     const fullSecurityToken = await calculateHMAC(
-      context.bindings.SECRET_CACHE_SECURITY_KEY,
+      context.bindings.SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET,
       securityTokenBase
     );
     const securityTokenQuery = fullSecurityToken.slice(0, 64);
@@ -200,9 +200,9 @@ API.add(
 
     const originRequestHeaders: [string, string][] = [
       // Refererはアクセス制御（バケットポリシーでこのRefererでないとアクセスできなくしてある）
-      ['Referer', context.bindings.SECRET_STORAGE_ACCESS_REFERER],
+      ['Referer', context.bindings.SECRET_CDN_STORAGE_ACCESS_REFERER],
       // こっちはキャッシュ対策
-      ['X-CDN-Cache-Security-Header', securityTokenHeader],
+      ['Streamist-CDN-Cache-Security-Header', securityTokenHeader],
     ];
 
     // Rangeリクエストヘッダーが指定された場合、オリジンサーバーへのリクエストヘッダーにも同じものを付加する
@@ -215,7 +215,7 @@ API.add(
     const originRequest = new Request(
       `${storageURL}?_csq=${securityTokenQuery}&response-Cache-Control=${encodeURIComponent(
         CACHE_CONTROL_PUBLIC_IMMUTABLE
-      )}&response-Vary=Referer%2C%20User-Agent%2C%20X-CDN-Cache-Security-Header`,
+      )}&response-Vary=Referer%2C%20User-Agent%2C%20Streamist-CDN-Cache-Security-Header`,
       {
         method: req.method,
         cf: noCache
@@ -254,8 +254,8 @@ API.add(
     if (!responseOk) {
       const errorHeaders = {
         ...NO_CACHE_HEADERS,
-        'X-Origin-Status': responseStatus.toString(),
-        'X-Origin-Response-Time':
+        'Streamist-Origin-Status': responseStatus.toString(),
+        'Streamist-Origin-Response-Time':
           timestampAfterRequest - timestampBeforeRequest,
       };
 
@@ -294,7 +294,7 @@ API.add(
 
     // レスポンスタイムの測定用
     responseHeaders.set(
-      'X-Origin-Response-Time',
+      'Streamist-Origin-Response-Time',
       (timestampAfterRequest - timestampBeforeRequest).toString()
     );
 

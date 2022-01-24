@@ -1,8 +1,12 @@
 import { config } from 'dotenv';
 
-config();
-
 const IS_DEV = process.env.NODE_ENV === 'development';
+
+if (IS_DEV) {
+  config({
+    path: '../shared-server/env/development.env',
+  });
+}
 
 const API_SERVER_PORT = parseInt(process.env.API_SERVER_PORT || '8080', 10);
 const API_BASE_PATH = process.env.API_BASE_PATH ?? '';
@@ -13,7 +17,8 @@ const SECRET_REFRESH_TOKEN_JWT_SECRET =
   process.env.SECRET_REFRESH_TOKEN_JWT_SECRET ?? '';
 const SECRET_TRANSCODER_CALLBACK_SECRET =
   process.env.SECRET_TRANSCODER_CALLBACK_SECRET ?? '';
-const SECRET_PROXY_AUTH_TOKEN = process.env.SECRET_PROXY_AUTH_TOKEN ?? '';
+const SECRET_API_PROXY_AUTH_TOKEN =
+  process.env.SECRET_API_PROXY_AUTH_TOKEN ?? '';
 const SECRET_SERVER_WASABI_ACCESS_KEY_ID =
   process.env.SECRET_SERVER_WASABI_ACCESS_KEY_ID ?? '';
 const SECRET_SERVER_WASABI_SECRET_ACCESS_KEY =
@@ -77,8 +82,8 @@ if (!SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY) {
   throw new Error('SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY is not defined');
 }
 
-if (!SECRET_PROXY_AUTH_TOKEN) {
-  throw new Error('SECRET_PROXY_AUTH_TOKEN is not defined');
+if (!SECRET_API_PROXY_AUTH_TOKEN) {
+  throw new Error('SECRET_API_PROXY_AUTH_TOKEN is not defined');
 }
 
 if (!IS_DEV && !HCAPTCHA_SITE_KEY_REGISTRATION) {
@@ -97,7 +102,7 @@ export {
   SECRET_CDN_JWT_SECRET,
   SECRET_REFRESH_TOKEN_JWT_SECRET,
   SECRET_TRANSCODER_CALLBACK_SECRET,
-  SECRET_PROXY_AUTH_TOKEN,
+  SECRET_API_PROXY_AUTH_TOKEN,
   SECRET_SERVER_WASABI_ACCESS_KEY_ID,
   SECRET_SERVER_WASABI_SECRET_ACCESS_KEY,
   SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID,

@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '.env' });
+require('dotenv').config({ path: '../shared-server/env/development.env' });
 
 const { build } = require('esbuild');
 
