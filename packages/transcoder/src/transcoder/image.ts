@@ -8,10 +8,12 @@ import {
   getSourceFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
+} from '$shared-server/objectStorage';
+import {
   osDeleteManaged,
   osGetFile,
   osPutFile,
-} from '$shared-server/objectStorage';
+} from '$shared-server/osOperations';
 import { UploadJSONStorage, uploadJSON } from '../execAndLog';
 import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
 import { getTempFilepath } from '../tempFile';

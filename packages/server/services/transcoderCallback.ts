@@ -6,8 +6,8 @@ import {
   getTranscodedAudioFileOS,
   getTranscodedImageFileKey,
   getTranscodedImageFileOS,
-  osDeleteManaged,
 } from '$shared-server/objectStorage';
+import { osDeleteManaged } from '$shared-server/osOperations';
 import { is } from '$shared/is';
 import { parseDate } from '$shared/parseDate';
 import type {

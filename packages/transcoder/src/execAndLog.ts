@@ -2,8 +2,8 @@ import {
   OSRegion,
   getTranscodeLogFileKey,
   getTranscodeLogFileOS,
-  osPutData,
 } from '$shared-server/objectStorage';
+import { osPutData } from '$shared-server/osOperations';
 import { brotliCompressAsync } from '$shared-server/zlib';
 import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { ExecFileResult, execFileAsync } from './execFileAsync';

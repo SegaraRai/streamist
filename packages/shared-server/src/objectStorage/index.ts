@@ -1,7 +1,6 @@
 export * from '$shared/objectStorage';
 
 export * from './keys';
-export * from './operations';
 export * from './os';
 export * from './set';
 export * from './types';

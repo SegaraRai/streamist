@@ -3,8 +3,8 @@ import {
   OSRegion,
   getTranscodedAudioFileKey,
   getTranscodedAudioFileOS,
-  osDeleteManaged,
 } from '$shared-server/objectStorage';
+import { osDeleteManaged } from '$shared-server/osOperations';
 import { createMultiMap } from '$shared/multiMap';
 
 export async function osDeleteTrackFiles(

@@ -3,14 +3,14 @@ import { createReadStream, createWriteStream } from 'fs';
 import { PassThrough, Readable } from 'stream';
 import { S3 } from '@aws-sdk/client-s3';
 import { retryS3, retryS3NoReject } from '$shared/retry';
-import { OS_BATCH_DELETE_MAX_ITEMS } from '../config';
-import { decodeBuffer } from '../contentEncoding';
-import { nodeReadableStreamToBuffer } from '../stream';
+import { OS_BATCH_DELETE_MAX_ITEMS } from './config';
+import { decodeBuffer } from './contentEncoding';
 import type {
   ObjectStorage,
   ObjectStorageCredentials,
   ObjectStorageUploadOptions,
-} from './types';
+} from './objectStorage';
+import { nodeReadableStreamToBuffer } from './stream';
 
 let gCredentials: ObjectStorageCredentials | undefined;
 

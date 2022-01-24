@@ -11,11 +11,13 @@ import {
   getSourceFileOS,
   getTranscodedAudioFileKey,
   getTranscodedAudioFileOS,
+} from '$shared-server/objectStorage';
+import {
   osDeleteManaged,
   osGetData,
   osGetFile,
   osPutFile,
-} from '$shared-server/objectStorage';
+} from '$shared-server/osOperations';
 import { CueSheet, parseCueSheet } from '$shared/cueParser';
 import { validateCueSheet } from '$shared/cueSheetCheck';
 import { decodeText } from '$shared/decodeText';
