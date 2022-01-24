@@ -25,6 +25,7 @@ importers:
       stylelint-config-recommended-vue: ^1.1.0
       stylelint-config-standard: ^24.0.0
       typescript: ^4.5.5
+      vue-eslint-parser: ^8.2.0
     devDependencies:
       '@commitlint/cli': 16.1.0
       '@commitlint/config-conventional': 16.0.0
@@ -47,6 +48,7 @@ importers:
       stylelint-config-recommended-vue: 1.1.0_2d1bcf73d0f2e8e613ccd6d821b0344f
       stylelint-config-standard: 24.0.0_stylelint@14.2.0
       typescript: 4.5.5
+      vue-eslint-parser: 8.2.0_eslint@8.7.0
 
   packages/cdn:
     specifiers:
@@ -5507,7 +5509,7 @@ packages:
       eslint-utils: 3.0.0_eslint@8.7.0
       natural-compare: 1.4.0
       semver: 7.3.5
-      vue-eslint-parser: 8.1.0_eslint@8.7.0
+      vue-eslint-parser: 8.2.0_eslint@8.7.0
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -9825,8 +9827,8 @@ packages:
       vue: 3.2.28
     dev: false
 
-  /vue-eslint-parser/8.1.0_eslint@8.7.0:
-    resolution: {integrity: sha512-R8Pl6MSvuU81JKyUguexcABQxfM51Q2ZJVBX0TrKiLltPB+haVLp4hfuR5msiu9oqpsQkaV+TF18r4CBw9c9qg==}
+  /vue-eslint-parser/8.2.0_eslint@8.7.0:
+    resolution: {integrity: sha512-hvl8OVT8imlKk/lQyhkshqwQQChzHETcBd5abiO4ePw7ib7QUZLfW+2TUrJHKUvFOCFRJrDin5KJO9OHzB5bRQ==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     peerDependencies:
       eslint: '>=6.0.0'
