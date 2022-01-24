@@ -24,10 +24,12 @@ const validateProxyRequestPlugin: FastifyPluginCallback = (
   _options: unknown,
   done: (err?: Error) => void
 ): void => {
-  const backendAuthorization = `Bearer ${SECRET_API_PROXY_AUTH_TOKEN}`;
+  const proxyAuthorization = `Bearer ${SECRET_API_PROXY_AUTH_TOKEN}`;
   fastify.addHook('onRequest', (request, _reply, done) => {
-    if (request.headers['x-backend-authorization'] !== backendAuthorization) {
-      return done(new HTTPError(401, 'Incorrect backend token'));
+    if (
+      request.headers['streamist-proxy-authorization'] !== proxyAuthorization
+    ) {
+      return done(new HTTPError(401, 'Incorrect proxy token'));
     }
     done();
   });

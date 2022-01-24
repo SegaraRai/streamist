@@ -285,8 +285,8 @@ export default defineConfig(({ mode }) => {
           target: process.env.API_ORIGIN_FOR_API_PROXY,
           changeOrigin: true,
           headers: {
-            'X-Backend-Authorization': `Bearer ${process.env.SECRET_API_PROXY_AUTH_TOKEN}`,
-            'X-Backend-CF-Connecting-IP': '127.0.0.1',
+            'Streamist-Forwarded-CF-Connecting-IP': '127.0.0.1',
+            'Streamist-Proxy-Authorization': `Bearer ${process.env.SECRET_API_PROXY_AUTH_TOKEN}`,
           },
         },
       },
@@ -298,8 +298,8 @@ export default defineConfig(({ mode }) => {
           target: process.env.API_ORIGIN_FOR_API_PROXY,
           changeOrigin: true,
           headers: {
-            'X-Backend-Authorization': `Bearer ${process.env.SECRET_API_PROXY_AUTH_TOKEN}`,
-            'X-Backend-CF-Connecting-IP': '127.0.0.1',
+            'Streamist-Forwarded-CF-Connecting-IP': '127.0.0.1',
+            'Streamist-Proxy-Authorization': `Bearer ${process.env.SECRET_API_PROXY_AUTH_TOKEN}`,
           },
         },
       },

@@ -1,6 +1,10 @@
 const IS_MAINTENANCE = false;
 
 export default {
+  /**
+   * @param {Request} request
+   * @returns {Promise<Response>}
+   */
   fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname.startsWith('/api/')) {
@@ -16,13 +20,14 @@ export default {
           `${env.BACKEND_API_ORIGIN}${url.pathname}${url.search}`,
           request
         );
+        for (const [key, value] of request.headers.entries()) {
+          if (/^cf-/i.test(key)) {
+            newRequest.headers.set(`Streamist-Forwarded-${key}`, value);
+          }
+        }
         newRequest.headers.set(
-          'X-Backend-Authorization',
+          'Streamist-Proxy-Authorization',
           `Bearer ${env.BACKEND_API_TOKEN}`
-        );
-        newRequest.headers.set(
-          'X-Backend-CF-Connecting-IP',
-          request.headers.get('cf-connecting-ip')
         );
         return fetch(newRequest);
       }
