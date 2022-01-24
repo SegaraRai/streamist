@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "miniflare -B \"pnpm run dev:build\" -m -w ./dist/index_dev.js",
+    "dev": "miniflare -m -w -B \"pnpm run dev:build\" --env ../shared-server/env/development.env ./dist/index_dev.js",
     "dev:build": "node ./build.dev.js",
     "build": "rollup -c",
     "typecheck": "tsc --noEmit"
