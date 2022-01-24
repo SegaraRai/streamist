@@ -54,6 +54,31 @@ function createIAMPolicyServer(allBucketNames: readonly string[]) {
   };
 }
 
+function createIAMPolicyTranscoder(
+  sourceBucketNames: readonly string[],
+  transcodedFileAndLogBucketNames: readonly string[]
+) {
+  return {
+    Version: '2012-10-17',
+    Statement: [
+      {
+        Effect: 'Allow',
+        Action: ['s3:GetObject'],
+        Resource: sourceBucketNames.map(
+          (bucketName) => `arn:aws:s3:::${bucketName}/src/*`
+        ),
+      },
+      {
+        Effect: 'Allow',
+        Action: ['s3:DeleteObject', 's3:GetObject', 's3:PutObject'],
+        Resource: transcodedFileAndLogBucketNames.map(
+          (bucketName) => `arn:aws:s3:::${bucketName}/src/*`
+        ),
+      },
+    ],
+  };
+}
+
 function createIAMPolicyUserDownload(sourceBucketNames: readonly string[]) {
   return {
     Version: '2012-10-17',
@@ -88,7 +113,8 @@ export async function initS3(_env: Environment): Promise<void> {
   interface Bucket {
     bucket: ObjectStorage;
     isSource: boolean;
-    isTranscoder: boolean;
+    isTranscoded: boolean;
+    isTranscodeLog: boolean;
   }
 
   const buckets: Bucket[] = [];
@@ -101,13 +127,15 @@ export async function initS3(_env: Environment): Promise<void> {
       const bucketDef =
         _bucketDef as typeof def.buckets[keyof typeof def.buckets];
       const isSource = key === 'sourceFile';
-      const isTranscoder =
+      const isTranscoded =
         key === 'transcodedAudioFile' || key === 'transcodedImageFile';
+      const isTranscodeLog = key === 'transcodeLog';
+      const prev = bucketMap.get(bucketDef.bucket);
       bucketMap.set(bucketDef.bucket, {
         bucket: bucketDef,
-        isSource: bucketMap.get(bucketDef.bucket)?.isSource || isSource,
-        isTranscoder:
-          bucketMap.get(bucketDef.bucket)?.isTranscoder || isTranscoder,
+        isSource: prev?.isSource || isSource,
+        isTranscoded: prev?.isTranscoded || isTranscoded,
+        isTranscodeLog: prev?.isTranscodeLog || isTranscodeLog,
       });
     }
     for (const data of bucketMap.values()) {
@@ -116,27 +144,37 @@ export async function initS3(_env: Environment): Promise<void> {
   }
 
   // IAM policies
+  const allBucketNames = buckets.map((b) => b.bucket.bucket);
+  const sourceBucketNames = buckets
+    .filter((b) => b.isSource)
+    .map((b) => b.bucket.bucket);
+  const transcodedFileAndLogBucketNames = buckets
+    .filter((b) => b.isTranscoded || b.isTranscodeLog)
+    .map((b) => b.bucket.bucket);
   await writeResultFile(
     'iamPolicy.server.json',
-    createIAMPolicyServer(buckets.map((b) => b.bucket.bucket))
+    createIAMPolicyServer(allBucketNames)
+  );
+  await writeResultFile(
+    'iamPolicy.transcoder.json',
+    createIAMPolicyTranscoder(
+      sourceBucketNames,
+      transcodedFileAndLogBucketNames
+    )
   );
   await writeResultFile(
     'iamPolicy.userDownload.json',
-    createIAMPolicyUserDownload(
-      buckets.filter((b) => b.isSource).map((b) => b.bucket.bucket)
-    )
+    createIAMPolicyUserDownload(sourceBucketNames)
   );
   await writeResultFile(
     'iamPolicy.userUpload.json',
-    createIAMPolicyUserUpload(
-      buckets.filter((b) => b.isSource).map((b) => b.bucket.bucket)
-    )
+    createIAMPolicyUserUpload(sourceBucketNames)
   );
 
   // Bucket policies and commands
   let commands = '';
   for (const bucket of buckets) {
-    if (bucket.isTranscoder) {
+    if (bucket.isTranscoded) {
       await writeResultFile(
         `bucketPolicy.${bucket.bucket.bucket}.json`,
         createBucketPolicyTranscoded(bucket.bucket.bucket)
