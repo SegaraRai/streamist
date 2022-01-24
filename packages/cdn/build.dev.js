@@ -10,6 +10,6 @@ build({
   bundle: true,
   logLevel: 'info',
   define: {
-    NODE_ENV: '"development"',
+    'BUILD_TIME_DEFINITION.NODE_ENV': '"development"',
   },
 });
