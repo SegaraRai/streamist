@@ -10,7 +10,7 @@ if (IS_DEV) {
 
 const API_SERVER_PORT = parseInt(process.env.API_SERVER_PORT || '8080', 10);
 const API_BASE_PATH = process.env.API_BASE_PATH ?? '';
-const API_ORIGIN = process.env.API_ORIGIN ?? '';
+const API_ORIGIN_FOR_TRANSCODER = process.env.API_ORIGIN_FOR_TRANSCODER ?? '';
 const SECRET_API_JWT_SECRET = process.env.SECRET_API_JWT_SECRET ?? '';
 const SECRET_CDN_JWT_SECRET = process.env.SECRET_CDN_JWT_SECRET ?? '';
 const SECRET_REFRESH_TOKEN_JWT_SECRET =
@@ -35,9 +35,8 @@ const HCAPTCHA_SITE_KEY_FOR_REGISTRATION =
   process.env.HCAPTCHA_SITE_KEY_FOR_REGISTRATION ?? '';
 const SECRET_HCAPTCHA_SECRET = process.env.SECRET_HCAPTCHA_SECRET ?? '';
 
-if (!API_ORIGIN) {
-  // this is needed for the transcoder to call back to the API server
-  throw new Error('API_ORIGIN is not defined');
+if (!API_ORIGIN_FOR_TRANSCODER) {
+  throw new Error('API_ORIGIN_FOR_TRANSCODER is not defined');
 }
 
 if (!SECRET_API_JWT_SECRET) {
@@ -97,7 +96,7 @@ if (!IS_DEV && !SECRET_HCAPTCHA_SECRET) {
 export {
   API_SERVER_PORT,
   API_BASE_PATH,
-  API_ORIGIN,
+  API_ORIGIN_FOR_TRANSCODER,
   SECRET_API_JWT_SECRET,
   SECRET_CDN_JWT_SECRET,
   SECRET_REFRESH_TOKEN_JWT_SECRET,
