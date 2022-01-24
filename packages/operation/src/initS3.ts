@@ -49,7 +49,7 @@ function createIAMPolicyServer(allBucketNames: readonly string[]) {
         Effect: 'Allow',
         Action: ['s3:DeleteObject', 's3:GetObject', 's3:PutObject'],
         Resource: allBucketNames.map(
-          (bucketName) => `arn:aws:s3:::${bucketName}/src/*`
+          (bucketName) => `arn:aws:s3:::${bucketName}/*`
         ),
       },
     ],
@@ -73,9 +73,11 @@ function createIAMPolicyTranscoder(
       {
         Effect: 'Allow',
         Action: ['s3:DeleteObject', 's3:GetObject', 's3:PutObject'],
-        Resource: transcodedFileAndLogBucketNames.map(
-          (bucketName) => `arn:aws:s3:::${bucketName}/src/*`
-        ),
+        Resource: transcodedFileAndLogBucketNames.flatMap((bucketName) => [
+          `arn:aws:s3:::${bucketName}/tra/*`,
+          `arn:aws:s3:::${bucketName}/tri/*`,
+          `arn:aws:s3:::${bucketName}/trx/*`,
+        ]),
       },
     ],
   };
@@ -176,11 +178,14 @@ export async function initS3(_env: Environment): Promise<void> {
   // Bucket policies and commands
   let commands = '';
   for (const bucket of buckets) {
+    let bucketPolicyCreated = false;
+
     if (bucket.isTranscoded) {
       await writeResultFile(
         `bucketPolicy.${bucket.bucket.bucket}.json`,
         createBucketPolicyTranscoded(bucket.bucket.bucket)
       );
+      bucketPolicyCreated = true;
     }
 
     const profileSpec = `--profile ${bucket.bucket.provider}`;
@@ -190,7 +195,10 @@ export async function initS3(_env: Environment): Promise<void> {
     const allSpec = `${profileSpec} ${endpointSpec} ${regionSpec} ${bucketSpec}`;
 
     commands += `aws s3api create-bucket ${allSpec} --create-bucket-configuration LocationConstraint=${bucket.bucket.region}\n`;
-    commands += `aws s3api put-bucket-policy ${allSpec} --policy file://bucketPolicy.${bucket.bucket}.json\n`;
+
+    if (bucketPolicyCreated) {
+      commands += `aws s3api put-bucket-policy ${allSpec} --policy file://bucketPolicy.${bucket.bucket.bucket}.json\n`;
+    }
   }
 
   await writeResultFile('bucketCommands.sh', commands);
