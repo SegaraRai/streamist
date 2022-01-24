@@ -1,6 +1,6 @@
 import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { userCreate, userDoesExist } from '$/services/accountRegister';
-import { HCAPTCHA_SITE_KEY_REGISTRATION } from '$/services/env';
+import { HCAPTCHA_SITE_KEY_FOR_REGISTRATION } from '$/services/env';
 import { verifyHCaptcha } from '$/services/hCaptcha';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
@@ -20,7 +20,7 @@ export default defineController(() => ({
   },
   post: async ({ body, query }) => {
     const isCaptchaOk = await verifyHCaptcha(
-      HCAPTCHA_SITE_KEY_REGISTRATION,
+      HCAPTCHA_SITE_KEY_FOR_REGISTRATION,
       query?.captchaResponse
     );
     if (!isCaptchaOk) {

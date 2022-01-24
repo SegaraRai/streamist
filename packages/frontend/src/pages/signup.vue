@@ -15,6 +15,7 @@ import {
 } from '$shared/config';
 import { OSRegion, getOSRegions } from '$shared/objectStorage';
 import logoSVG from '~/assets/logo_colored.svg';
+import { HCAPTCHA_SITE_KEY_FOR_REGISTRATION } from '~/config';
 import { authenticate } from '~/logic/login';
 import { unAuthAPI } from '~/logic/unAuthAPI';
 
@@ -116,6 +117,7 @@ export default defineComponent({
     return {
       t,
       logoSVG$$q: logoSVG,
+      siteKey$$q: HCAPTCHA_SITE_KEY_FOR_REGISTRATION,
       requestInProgress$$q,
       username$$q,
       password$$q,
@@ -283,7 +285,10 @@ export default defineComponent({
           <div class="my-10">
             <NSelect v-model:value="region$$q" :options="regionOptions$$q" />
           </div>
-          <SHCaptcha site-key="x" @update="updateHCaptchaResponse$$q" />
+          <SHCaptcha
+            :site-key="siteKey$$q"
+            @update="updateHCaptchaResponse$$q"
+          />
         </VForm>
       </VCardText>
       <VCardActions>
