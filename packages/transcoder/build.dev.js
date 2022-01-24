@@ -18,6 +18,9 @@ build({
   watch: true,
   define: {
     'process.env.NODE_ENV': '"development"',
+    'process.env.SECRET_TRANSCODER_CALLBACK_SECRET': JSON.stringify(
+      process.env.SECRET_TRANSCODER_CALLBACK_SECRET
+    ),
     'process.env.SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID': JSON.stringify(
       process.env.SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID
     ),

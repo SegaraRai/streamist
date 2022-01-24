@@ -73,8 +73,6 @@ export type TranscoderRequestFileInternal =
 export interface TranscoderRequest {
   /** POST <callbackURL> */
   callbackURL: string;
-  /** value of Authorization header */
-  callbackToken: string;
   files: TranscoderRequestFile[];
 }
 

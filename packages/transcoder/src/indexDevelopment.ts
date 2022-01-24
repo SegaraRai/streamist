@@ -38,7 +38,7 @@ server.on('request', (req, res) => {
           return fetch(transcoderRequest.callbackURL, {
             method: 'POST',
             headers: {
-              Authorization: transcoderRequest.callbackToken,
+              Authorization: `Bearer ${process.env.SECRET_TRANSCODER_CALLBACK_SECRET}`,
               'Content-Type': 'application/json; charset=UTF-8',
             },
             body: JSON.stringify(transcoderResponse),

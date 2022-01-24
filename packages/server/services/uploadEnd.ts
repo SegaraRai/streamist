@@ -18,10 +18,7 @@ import {
   TranscoderRequestOptions,
 } from '$transcoder/types';
 import type { SourceFile } from '$prisma/client';
-import {
-  TRANSCODER_CALLBACK_API_ENDPOINT,
-  TRANSCODER_CALLBACK_API_TOKEN,
-} from '$/config';
+import { TRANSCODER_CALLBACK_API_ENDPOINT } from '$/config';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
@@ -183,7 +180,6 @@ async function invokeTranscoderBySource(
 
   const request: TranscoderRequest = {
     callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
-    callbackToken: TRANSCODER_CALLBACK_API_TOKEN,
     files: createTranscoderRequestFiles(source.files, {
       // TODO(prod): make this configurable
       defaultUnknownAlbumArtist: 'Unknown Artist',
