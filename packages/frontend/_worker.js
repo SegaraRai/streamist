@@ -6,8 +6,8 @@ export default {
    * @returns {Promise<Response>}
    */
   fetch(request, env) {
-    const url = new URL(request.url);
-    if (url.pathname.startsWith('/api/')) {
+    const { pathname, search } = new URL(request.url);
+    if (pathname.startsWith('/api/')) {
       if (IS_MAINTENANCE) {
         return new Response('down for maintenance', {
           status: 503,
@@ -16,8 +16,12 @@ export default {
           },
         });
       } else {
+        const rewrittenPathname = pathname.replace(
+          /^\/api\//,
+          `/${env.API_BASE_PATH}/`
+        );
         const newRequest = new Request(
-          `${env.BACKEND_API_ORIGIN}${url.pathname}${url.search}`,
+          `${env.API_ORIGIN_FOR_API_PROXY}${rewrittenPathname}${search}`,
           request
         );
         for (const [key, value] of request.headers.entries()) {
@@ -27,7 +31,7 @@ export default {
         }
         newRequest.headers.set(
           'Streamist-Proxy-Authorization',
-          `Bearer ${env.BACKEND_API_TOKEN}`
+          `Bearer ${env.SECRET_API_PROXY_AUTH_TOKEN}`
         );
         return fetch(newRequest);
       }

@@ -15,7 +15,7 @@ import {
   ComponentResolver,
 } from 'unplugin-vue-components/dist/types';
 import Components from 'unplugin-vue-components/vite';
-import { defineConfig } from 'vite';
+import { ProxyOptions, defineConfig } from 'vite';
 import Inspect from 'vite-plugin-inspect';
 import Markdown from 'vite-plugin-md';
 import Pages from 'vite-plugin-pages';
@@ -124,8 +124,24 @@ function themePlugin() {
 createVuetifyDTS();
 
 export default defineConfig(({ mode }) => {
+  let proxy: Record<string, ProxyOptions> = {};
+
   if (mode === 'development') {
     config({ path: '../shared-server/env/development.env' });
+
+    const { API_BASE_PATH } = process.env;
+
+    proxy = {
+      '/api': {
+        target: process.env.API_ORIGIN_FOR_API_PROXY,
+        changeOrigin: true,
+        headers: {
+          'Streamist-Forwarded-CF-Connecting-IP': '127.0.0.1',
+          'Streamist-Proxy-Authorization': `Bearer ${process.env.SECRET_API_PROXY_AUTH_TOKEN}`,
+        },
+        rewrite: (p: string) => p.replace(/^\/api\//, `${API_BASE_PATH}/`),
+      },
+    };
   }
 
   return {
@@ -275,35 +291,20 @@ export default defineConfig(({ mode }) => {
       themePlugin(),
     ],
 
-    server: {
-      host: '0.0.0.0',
-      fs: {
-        strict: true,
-      },
-      proxy: {
-        '/api': {
-          target: process.env.API_ORIGIN_FOR_API_PROXY,
-          changeOrigin: true,
-          headers: {
-            'Streamist-Forwarded-CF-Connecting-IP': '127.0.0.1',
-            'Streamist-Proxy-Authorization': `Bearer ${process.env.SECRET_API_PROXY_AUTH_TOKEN}`,
+    ...(mode === 'development'
+      ? {
+          server: {
+            host: '0.0.0.0',
+            fs: {
+              strict: true,
+            },
+            proxy,
           },
-        },
-      },
-    },
-
-    preview: {
-      proxy: {
-        '/api': {
-          target: process.env.API_ORIGIN_FOR_API_PROXY,
-          changeOrigin: true,
-          headers: {
-            'Streamist-Forwarded-CF-Connecting-IP': '127.0.0.1',
-            'Streamist-Proxy-Authorization': `Bearer ${process.env.SECRET_API_PROXY_AUTH_TOKEN}`,
+          preview: {
+            proxy,
           },
-        },
-      },
-    },
+        }
+      : {}),
 
     // https://github.com/antfu/vite-ssg
     ssgOptions: {
