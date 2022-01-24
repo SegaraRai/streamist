@@ -131,6 +131,10 @@ export default defineConfig(({ mode }) => {
 
     const { API_BASE_PATH } = process.env;
 
+    process.env.VITE_CDN_ORIGIN = process.env.CDN_ORIGIN;
+    process.env.VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION =
+      process.env.HCAPTCHA_SITE_KEY_FOR_REGISTRATION;
+
     proxy = {
       '/api': {
         target: process.env.API_ORIGIN_FOR_API_PROXY,
