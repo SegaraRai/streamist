@@ -1,9 +1,16 @@
-import { useRegionsDevelopment } from '$shared/objectStorage';
+import {
+  useRegionsDevelopment,
+  useRegionsStaging,
+} from '$shared/objectStorage';
 
 switch (import.meta.env.MODE) {
   case 'development':
   case 'test':
     useRegionsDevelopment();
+    break;
+
+  case 'staging':
+    useRegionsStaging();
     break;
 
   default:

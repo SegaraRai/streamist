@@ -15,6 +15,8 @@ export interface ObjectStorageBuckets {
 
 export interface ObjectStorageRegion {
   readonly region: OSRegion;
+  /** AWS region of transcoder */
+  readonly transcoderLambdaRegion: string;
   readonly buckets: ObjectStorageBuckets;
 }
 

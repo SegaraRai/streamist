@@ -1,12 +1,9 @@
-import {
-  regionsDevelopment,
-  useRegionsDevelopment,
-} from '$shared/objectStorage';
+import { regionsStaging, useRegionsStaging } from '$shared/objectStorage';
 import { setOS } from '../set';
 import type { ObjectStorageRegion } from '../types';
 
-export const configDevelopment: Record<
-  typeof regionsDevelopment[number],
+export const configStaging: Record<
+  typeof regionsStaging[number],
   ObjectStorageRegion
 > = {
   'ap-northeast-1': {
@@ -16,29 +13,29 @@ export const configDevelopment: Record<
       transcodeLog: {
         provider: 'wasabi',
         region: 'ap-northeast-1',
-        bucket: 'development-wasabi-ap-northeast-1.stst.page',
+        bucket: 'staging-wasabi-ap-northeast-1-transcoded.stst.page',
       },
       transcodedAudioFile: {
         provider: 'wasabi',
         region: 'ap-northeast-1',
-        bucket: 'development-wasabi-ap-northeast-1.stst.page',
+        bucket: 'staging-wasabi-ap-northeast-1-transcoded.stst.page',
       },
       transcodedImageFile: {
         provider: 'wasabi',
         region: 'ap-northeast-1',
-        bucket: 'development-wasabi-ap-northeast-1.stst.page',
+        bucket: 'staging-wasabi-ap-northeast-1-transcoded.stst.page',
       },
       sourceFile: {
         provider: 'wasabi',
         region: 'ap-northeast-1',
-        bucket: 'development-wasabi-ap-northeast-1.stst.page',
+        bucket: 'staging-wasabi-ap-northeast-1-source.stst.page',
       },
     },
   },
 };
 
-export function useConfigDevelopment(): void {
+export function useConfigStaging(): void {
   // this must be called before setOS
-  useRegionsDevelopment();
-  setOS(configDevelopment);
+  useRegionsStaging();
+  setOS(configStaging);
 }

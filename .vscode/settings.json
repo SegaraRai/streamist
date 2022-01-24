@@ -9,6 +9,7 @@
     "mkclean",
     "persistor",
     "streamist",
+    "stst",
     "vuedraggable",
     "vuetify"
   ],
