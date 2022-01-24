@@ -129,19 +129,25 @@ export default defineConfig(({ mode }) => {
   if (mode === 'development') {
     config({ path: '../shared-server/env/development.env' });
 
-    const { API_BASE_PATH } = process.env;
-
+    // apply VITE_ env vars
     process.env.VITE_CDN_ORIGIN = process.env.CDN_ORIGIN;
     process.env.VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION =
       process.env.HCAPTCHA_SITE_KEY_FOR_REGISTRATION;
 
+    // configure proxy
+    const {
+      API_BASE_PATH,
+      API_ORIGIN_FOR_API_PROXY,
+      SECRET_API_PROXY_AUTH_TOKEN,
+    } = process.env;
+
     proxy = {
       '/api': {
-        target: process.env.API_ORIGIN_FOR_API_PROXY,
+        target: API_ORIGIN_FOR_API_PROXY,
         changeOrigin: true,
         headers: {
           'Streamist-Forwarded-CF-Connecting-IP': '127.0.0.1',
-          'Streamist-Proxy-Authorization': `Bearer ${process.env.SECRET_API_PROXY_AUTH_TOKEN}`,
+          'Streamist-Proxy-Authorization': `Bearer ${SECRET_API_PROXY_AUTH_TOKEN}`,
         },
         rewrite: (p: string) => p.replace(/^\/api\//, `${API_BASE_PATH}/`),
       },
