@@ -3,12 +3,12 @@ import './initOS';
 import './initCredentials';
 
 import { createServer } from 'http';
-import fetch from 'node-fetch';
 import {
   DEV_TRANSCODER_API_PATH,
   DEV_TRANSCODER_PORT,
 } from '$shared-server/config/dev';
 import { nodeReadableStreamToBuffer } from '$shared-server/stream';
+import { sendCallback } from './callback';
 import logger from './logger';
 import { transcode } from './transcode';
 import type { TranscoderRequest } from './types';
@@ -28,21 +28,12 @@ server.on('request', (req, res) => {
       const transcoderRequest = JSON.parse(
         (await nodeReadableStreamToBuffer(req)).toString('utf-8')
       ) as TranscoderRequest;
-
       logger.info(transcoderRequest);
 
       transcode(transcoderRequest)
         .then((transcoderResponse) => {
           logger.info(transcoderResponse);
-
-          return fetch(transcoderRequest.callbackURL, {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${process.env.SECRET_TRANSCODER_CALLBACK_SECRET}`,
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: JSON.stringify(transcoderResponse),
-          });
+          return sendCallback(transcoderRequest, transcoderResponse);
         })
         .catch((error) => {
           logger.error(error);

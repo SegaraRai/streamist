@@ -31,7 +31,9 @@ const mkcleanFile =
     ? 'mkclean'
     : 'mkclean.exe';
 const sRGBProfileFilepath = isProductionOrStagingEnv
-  ? '/app/sRGB_ICC_v4_Appearance.icc'
+  ? process.env.PLATFORM_TYPE === 'lambda'
+    ? '/var/task/sRGB_ICC_v4_Appearance.icc'
+    : '/app/sRGB_ICC_v4_Appearance.icc'
   : 'sRGB_ICC_v4_Appearance.icc';
 
 // ffprobe 関数

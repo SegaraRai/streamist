@@ -15,5 +15,5 @@ export const NFS_TEMP_DIR =
   process.env.NODE_ENV === 'production' ||
   process.env.NODE_ENV === 'staging' ||
   process.platform !== 'win32'
-    ? '/mnt/tmp'
+    ? '/tmp'
     : './temp';
