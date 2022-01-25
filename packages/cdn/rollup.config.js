@@ -1,5 +1,7 @@
+// @ts-check
+
 import commonjs from '@rollup/plugin-commonjs';
-import nodeResolve from '@rollup/plugin-node-resolve';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { defineConfig } from 'rollup';
 import esbuild from 'rollup-plugin-esbuild';
 import { terser } from 'rollup-plugin-terser';
@@ -33,6 +35,7 @@ export default defineConfig({
       define: {
         'BUILD_TIME_DEFINITION.NODE_ENV': `"${TARGET_NODE_ENV}"`,
       },
+      target: 'es2021',
     }),
     commonjs(),
     terser(),

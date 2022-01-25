@@ -1,7 +1,10 @@
+// @ts-check
+
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
-import nodeResolve from '@rollup/plugin-node-resolve';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { defineConfig } from 'rollup';
+import esbuild from 'rollup-plugin-esbuild';
 import { terser } from 'rollup-plugin-terser';
 import tsPaths from 'rollup-plugin-tsconfig-paths';
 
@@ -40,6 +43,7 @@ export default defineConfig({
         'process.env.NODE_ENV': `"${TARGET_NODE_ENV}"`,
       },
       minify: false,
+      target: 'node14',
     }),
     commonjs(),
     terser(),
