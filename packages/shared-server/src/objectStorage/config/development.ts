@@ -11,7 +11,8 @@ export const configDevelopment: Record<
 > = {
   'ap-northeast-1': {
     region: 'ap-northeast-1',
-    transcoderLambdaRegion: 'ap-northeast-1',
+    transcoderLambdaRegion: '',
+    transcoderLambdaName: '',
     buckets: {
       transcodeLog: {
         provider: 'wasabi',

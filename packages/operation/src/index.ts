@@ -5,6 +5,7 @@ import {
   useConfigStaging,
 } from '$shared-server/objectStorage';
 import { initS3 } from './initS3';
+import { initTranscoder } from './initTranscoder';
 import { setResultEnvDir } from './write';
 
 async function main(): Promise<void> {
@@ -35,6 +36,10 @@ async function main(): Promise<void> {
   switch (argv._[0]) {
     case 'initS3':
       await initS3(TARGET_NODE_ENV);
+      break;
+
+    case 'initTranscoder':
+      await initTranscoder(TARGET_NODE_ENV);
       break;
 
     default:

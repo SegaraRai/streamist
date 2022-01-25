@@ -9,6 +9,7 @@ export const configStaging: Record<
   'ap-northeast-1': {
     region: 'ap-northeast-1',
     transcoderLambdaRegion: 'ap-northeast-1',
+    transcoderLambdaName: 'streamist-staging-transcoder-ap-northeast-1',
     buckets: {
       transcodeLog: {
         provider: 'wasabi',
