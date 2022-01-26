@@ -270,7 +270,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           name: 'Streamist',
           short_name: 'Streamist',
-          theme_color: '#ffffff',
+          theme_color: '#2a8dfe',
           icons: [
             {
               src: '/pwa-192x192.png',
@@ -283,10 +283,10 @@ export default defineConfig(({ mode }) => {
               type: 'image/png',
             },
             {
-              src: '/pwa-512x512.png',
-              sizes: '512x512',
+              src: '/pwa-maskable-1024x1024.png',
+              sizes: '1024x1024',
               type: 'image/png',
-              purpose: 'any maskable',
+              purpose: 'maskable',
             },
           ],
         },
