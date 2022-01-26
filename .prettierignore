@@ -3,6 +3,10 @@ node_modules
 dist
 public
 
+index.js
+index.cjs
+index.mjs
+
 packages/frontend/src/auto-imports.d.ts
 packages/frontend/src/components.d.ts
 
