@@ -6,6 +6,7 @@ on:
       - staging
     paths:
       - 'packages/transcoder/**'
+      - '.github/workflows/staging_deploy_transcoder.yml'
 
 jobs:
   deploy:

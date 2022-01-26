@@ -6,6 +6,7 @@ on:
       - staging
     paths:
       - 'packages/cdn/**'
+      - '.github/workflows/staging_deploy_cdn.yml'
 
 jobs:
   deploy:
