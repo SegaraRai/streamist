@@ -9,7 +9,6 @@
     "build": "run-s build:*",
     "build:gcr": "rollup -c rollup.config.gcr.js",
     "build:lambda": "rollup -c",
-    "pack": "./pack.gcr.sh && ./pack.lambda.sh",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -27,6 +26,7 @@
     "@types/node": "^16.11.19",
     "esbuild": "^0.14.12",
     "esbuild-node-externals": "^1.4.1",
+    "jszip": "^3.7.1",
     "node-dev": "^7.1.0",
     "rollup": "^2.65.0",
     "rollup-plugin-esbuild": "^4.8.2",

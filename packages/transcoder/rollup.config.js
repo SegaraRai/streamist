@@ -1,8 +1,10 @@
 // @ts-check
 
+import { readFile, rm, writeFile } from 'fs/promises';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import JSZip from 'jszip';
 import { defineConfig } from 'rollup';
 import esbuild from 'rollup-plugin-esbuild';
 import { terser } from 'rollup-plugin-terser';
@@ -21,6 +23,26 @@ export default defineConfig({
     inlineDynamicImports: true,
   },
   plugins: [
+    {
+      name: 'package',
+      buildStart: async () => {
+        await rm('dist', {
+          force: true,
+          recursive: true,
+        });
+      },
+      writeBundle: async () => {
+        const zip = new JSZip();
+        zip.file('index.js', await readFile('dist/index.js'));
+        const zipContent = await zip.generateAsync({
+          type: 'nodebuffer',
+          compressionOptions: {
+            level: 9,
+          },
+        });
+        await writeFile('dist.zip', zipContent);
+      },
+    },
     tsPaths({
       // load other project's tsconfig.json
       // this is required to resolve child project dependencies (such as `$shared`) imported from project dependencies (such as $shared-server)

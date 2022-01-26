@@ -1,5 +1,6 @@
 // @ts-check
 
+import { copyFile, mkdir, rm } from 'fs/promises';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
@@ -21,6 +22,31 @@ export default defineConfig({
     inlineDynamicImports: true,
   },
   plugins: [
+    {
+      name: 'package',
+      buildStart: async () => {
+        await rm('gcr/app', {
+          force: true,
+          recursive: true,
+        });
+      },
+      writeBundle: async () => {
+        await copyFile(
+          'sRGB_ICC_v4_Appearance.icc',
+          'gcr/app/sRGB_ICC_v4_Appearance.icc'
+        );
+        await mkdir('gcr/app/bin', {
+          recursive: true,
+        });
+        await copyFile('ffmpeg', 'gcr/app/bin/ffmpeg');
+        await copyFile('magick', 'gcr/app/bin/magick');
+        await copyFile('mkclean', 'gcr/app/bin/mkclean');
+        await mkdir('gcr/app/imconfig', {
+          recursive: true,
+        });
+        await copyFile('policy.xml', 'gcr/app/imconfig/policy.xml');
+      },
+    },
     tsPaths({
       // load other project's tsconfig.json
       // this is required to resolve child project dependencies (such as `$shared`) imported from project dependencies (such as $shared-server)
