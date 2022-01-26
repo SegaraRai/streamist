@@ -1,4 +1,4 @@
-name: Test and Deploy (staging)
+name: Build and Deploy (staging)
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   deploy:
-    name: Test and Deploy
+    name: Build and Deploy
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -24,10 +24,9 @@ jobs:
           cache: pnpm
       - run: pnpm i --frozen-lockfile
       - run: pnpm run generate
-      - run: pnpm run lint
-      - run: pnpm run typecheck
-      - run: pnpm run test
       - run: pnpm run build
+        env:
+          TARGET_NODE_ENV: staging
       - name: Deploy CDN
         uses: cloudflare/wrangler-action@1.3.0
         with:
