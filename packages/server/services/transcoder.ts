@@ -45,7 +45,7 @@ export async function invokeTranscoder(
             httpRequest: {
               httpMethod: 'POST',
               url: regionDef.transcoderGCRURL,
-              body: JSON.stringify(request),
+              body: Buffer.from(JSON.stringify(request)),
             },
           },
         });
