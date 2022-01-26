@@ -1,0 +1,46 @@
+name: Test and Deploy (staging)
+
+on:
+  push:
+    branches:
+      - staging
+    paths-ignore:
+      - '.husky/**'
+      - '.vscode/**'
+      - 'docs/**'
+
+jobs:
+  deploy:
+    name: Test and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: pnpm
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm run generate
+      - run: pnpm run lint
+      - run: pnpm run typecheck
+      - run: pnpm run test
+      - run: pnpm run build
+      - name: Deploy CDN
+        uses: cloudflare/wrangler-action@1.3.0
+        with:
+          apiToken: ${{ secrets.SECRET_GH_CF_API_TOKEN }}
+          environment: 'staging'
+          workingDirectory: 'packages/cdn'
+          secrets: |
+            APP_ORIGIN
+            SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET
+            SECRET_CDN_JWT_SECRET
+            SECRET_CDN_STORAGE_ACCESS_REFERER
+        env:
+          APP_ORIGIN: ${{ secrets.STAGING_APP_ORIGIN }}
+          SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET: ${{ secrets.STAGING_SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET }}
+          SECRET_CDN_JWT_SECRET: ${{ secrets.STAGING_SECRET_CDN_JWT_SECRET }}
+          SECRET_CDN_STORAGE_ACCESS_REFERER: ${{ secrets.STAGING_SECRET_CDN_STORAGE_ACCESS_REFERER }}

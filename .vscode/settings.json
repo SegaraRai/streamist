@@ -57,5 +57,8 @@
   "javascript.preferences.importModuleSpecifierEnding": "minimal",
   "typescript.preferences.importModuleSpecifierEnding": "minimal",
   "volar.completion.preferredAttrNameCase": "kebab",
-  "volar.completion.preferredTagNameCase": "pascal"
+  "volar.completion.preferredTagNameCase": "pascal",
+  "[dockerfile]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+  }
 }
