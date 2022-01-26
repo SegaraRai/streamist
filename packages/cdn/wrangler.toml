@@ -7,7 +7,7 @@ compatibility_date = "2021-11-10"
 
 [build.upload]
 format = "modules"
-main = "./dist/index.mjs"
+main = "./index.mjs"
 
 [env.staging]
 name = "streamist-cdn-staging"
