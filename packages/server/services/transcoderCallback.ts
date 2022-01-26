@@ -16,6 +16,7 @@ import type {
   SourceFileType,
   SourceState,
 } from '$shared/types';
+import { toUnique } from '$shared/unique';
 import type {
   FFprobeTags,
   TranscoderResponse,
@@ -675,6 +676,28 @@ async function handleTranscoderResponse(
   response: TranscoderResponse
 ): Promise<void> {
   const { artifacts } = response;
+
+  // 同時実行制御としては少し微妙（検証と更新のタイミングが異なるので同時に実行され得てしまう）
+  // 正しく行うなら新たにstateを定義してupdateManyを使用する必要がある
+  // が、callbackされるタイミングがかぶることはまずないと思うのでとりあえずこれでやる
+  {
+    const sourceIds = toUnique(
+      artifacts.map((artifact) => artifact.source.sourceId)
+    );
+    const sources = await client.source.findMany({
+      where: { id: { in: sourceIds } },
+      select: {
+        state: true,
+      },
+    });
+
+    if (
+      sources.some((source) => source.state !== is<SourceState>('transcoded'))
+    ) {
+      // already processed or being processed by another handler
+      return;
+    }
+  }
 
   const audioArtifacts = artifacts.filter(
     (artifact): artifact is TranscoderResponseArtifactAudio =>
