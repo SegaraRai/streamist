@@ -6,6 +6,8 @@ on:
       - staging
     paths:
       - 'packages/transcoder/**'
+      - 'packages/shared/**'
+      - 'packages/shared-server/**'
       - '.github/workflows/staging_deploy_transcoder.yml'
 
 jobs:

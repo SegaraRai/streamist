@@ -6,6 +6,8 @@ on:
       - staging
     paths:
       - 'packages/cdn/**'
+      - 'packages/shared/**'
+      - 'packages/shared-server/**'
       - '.github/workflows/staging_deploy_cdn.yml'
 
 jobs:
