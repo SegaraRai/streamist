@@ -32,6 +32,7 @@ jobs:
       - run: pnpm run build:transcoder
         env:
           TARGET_NODE_ENV: staging
+      - run: pnpm run pack:transcoder
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

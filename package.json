@@ -11,6 +11,7 @@
     "build:server": "pnpm run build --prefix packages/server",
     "build:transcoder": "pnpm run build --prefix packages/transcoder",
     "build:cdn": "pnpm run build --prefix packages/cdn",
+    "pack:transcoder": "pnpm run pack --prefix packages/transcoder",
     "generate": "run-p generate:*",
     "generate:client": "pnpm run generate --prefix packages/frontend",
     "generate:server": "pnpm run generate --prefix packages/server",
