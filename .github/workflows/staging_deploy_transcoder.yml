@@ -52,4 +52,6 @@ jobs:
       - name: Deploy transcoder to AWS Lambda and Google Cloud Run
         run: |
           cd packages/transcoder
-          ../operation/result/staging/deploy.sh
+          cp ../operation/result/staging/deploy.sh .
+          chmod +x deploy.sh
+          ./deploy.sh
