@@ -6,8 +6,10 @@
     "dev": "run-p dev:*",
     "dev:build": "node ./build.dev.js",
     "dev:start": "node-dev --respawn ./dist/index_dev.js",
-    "build": "rollup -c",
-    "build:gcr": "build.gcr.sh",
+    "build": "run-s build:*",
+    "build:gcr": "rollup -c rollup.config.gcr.js",
+    "build:lambda": "rollup -c",
+    "pack": "./pack.gcr.sh && ./pack.lambda.sh",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
