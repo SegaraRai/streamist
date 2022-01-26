@@ -2,6 +2,7 @@
   "name": "@streamist/cdn",
   "version": "0.1.0",
   "private": true,
+  "main": "dist/index.js",
   "scripts": {
     "dev": "miniflare -m -w -B \"pnpm run dev:build\" --env ../shared-server/env/development.env ./dist/index_dev.js",
     "dev:build": "node ./build.dev.js",
