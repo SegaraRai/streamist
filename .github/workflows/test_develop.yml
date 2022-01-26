@@ -1,4 +1,4 @@
-name: Test (develop)
+name: 'Develop: Test'
 
 on:
   push:
@@ -28,4 +28,5 @@ jobs:
       - run: pnpm run generate
       - run: pnpm run lint
       - run: pnpm run typecheck
+      - run: pnpm run build
       - run: pnpm run test

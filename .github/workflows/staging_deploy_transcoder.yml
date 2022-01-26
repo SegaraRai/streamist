@@ -1,13 +1,11 @@
-name: Build and Deploy (staging)
+name: 'Staging: Build and deploy Transcoder'
 
 on:
   push:
     branches:
       - staging
-    paths-ignore:
-      - '.husky/**'
-      - '.vscode/**'
-      - 'docs/**'
+    paths:
+      - 'packages/transcoder/**'
 
 jobs:
   deploy:
@@ -24,7 +22,7 @@ jobs:
           cache: pnpm
       - run: pnpm i --frozen-lockfile
       - run: pnpm run generate
-      - run: pnpm run build
+      - run: pnpm run build:cdn
         env:
           TARGET_NODE_ENV: staging
       - name: Deploy CDN
