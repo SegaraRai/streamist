@@ -4,7 +4,7 @@ declare namespace NodeJS {
   interface ProcessEnv {
     // build time
     readonly NODE_ENV: 'development' | 'staging' | 'production' | 'test';
-    readonly PLATFORM_TYPE: 'lambda' | 'ecs';
+    readonly PLATFORM_TYPE: 'lambda' | 'gcr';
 
     readonly SECRET_TRANSCODER_CALLBACK_SECRET: string;
     readonly SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID: string;

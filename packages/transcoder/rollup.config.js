@@ -41,6 +41,7 @@ export default defineConfig({
     esbuild({
       define: {
         'process.env.NODE_ENV': `"${TARGET_NODE_ENV}"`,
+        'process.env.PLATFORM_TYPE': '"lambda"',
       },
       minify: false,
       target: 'node14',

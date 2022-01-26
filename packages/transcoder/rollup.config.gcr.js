@@ -41,9 +41,10 @@ export default defineConfig({
     esbuild({
       define: {
         'process.env.NODE_ENV': `"${TARGET_NODE_ENV}"`,
+        'process.env.PLATFORM_TYPE': '"gcr"',
       },
       minify: false,
-      target: 'node14',
+      target: 'node16',
     }),
     commonjs(),
     terser(),
