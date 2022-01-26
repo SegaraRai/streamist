@@ -18,7 +18,7 @@ import {
   TranscoderRequestOptions,
 } from '$transcoder/types';
 import type { SourceFile } from '$prisma/client';
-import { TRANSCODER_CALLBACK_API_ENDPOINT } from '$/config';
+import { TRANSCODER_CALLBACK_API_PATH } from '$/config';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
@@ -194,7 +194,7 @@ async function invokeTranscoderBySource(
   const useGCR = maxSourceFileSize >= USE_GCR_SIZE_THRESHOLD;
 
   const request: TranscoderRequest = {
-    callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
+    callbackPath: TRANSCODER_CALLBACK_API_PATH,
     runner: useGCR ? 'gcr' : 'lambda',
     files: createTranscoderRequestFiles(source.files, {
       // TODO(prod): make this configurable

@@ -69,8 +69,8 @@ export type TranscoderRequestFileInternal =
   | TranscoderRequestFileImageExtracted;
 
 export interface TranscoderRequest {
-  /** POST <callbackURL> */
-  callbackURL: string;
+  /** POST <callbackPath> */
+  callbackPath: string;
   runner: 'gcr' | 'lambda';
   files: TranscoderRequestFile[];
 }

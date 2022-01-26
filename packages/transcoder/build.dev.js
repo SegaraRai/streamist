@@ -18,6 +18,10 @@ build({
   watch: true,
   define: {
     'process.env.NODE_ENV': '"development"',
+    'process.env.PLATFORM': '"development"',
+    'process.env.API_ORIGIN_FOR_TRANSCODER': JSON.stringify(
+      process.env.API_ORIGIN_FOR_TRANSCODER
+    ),
     'process.env.SECRET_TRANSCODER_CALLBACK_SECRET': JSON.stringify(
       process.env.SECRET_TRANSCODER_CALLBACK_SECRET
     ),
