@@ -10,8 +10,6 @@ import type { ImageMagickImage, ImageMagickResult } from './imageMagick';
 
 /** options specific to transcoding or user's preference */
 export interface TranscoderRequestOptions {
-  /** set this true if the audio file is too large to store in /tmp */
-  downloadAudioToNFS: boolean;
   extractImages: boolean;
   preferExternalCueSheet: boolean;
   useFilenameAsUnknownTrackTitle: boolean;
@@ -73,6 +71,7 @@ export type TranscoderRequestFileInternal =
 export interface TranscoderRequest {
   /** POST <callbackURL> */
   callbackURL: string;
+  runner: 'gcr' | 'lambda';
   files: TranscoderRequestFile[];
 }
 

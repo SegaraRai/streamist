@@ -24,6 +24,7 @@
     "@aws-sdk/client-lambda": "^3.47.1",
     "@aws-sdk/client-s3": "^3.47.1",
     "@aws-sdk/s3-request-presigner": "^3.47.1",
+    "@google-cloud/tasks": "^2.5.0",
     "@prisma/client": "^3.8.1",
     "aspida": "^1.7.1",
     "class-transformer": "^0.5.1",

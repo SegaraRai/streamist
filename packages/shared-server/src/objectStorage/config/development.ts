@@ -13,6 +13,10 @@ export const configDevelopment: Record<
     region: 'ap-northeast-1',
     transcoderLambdaRegion: '',
     transcoderLambdaName: '',
+    transcoderGCRProject: '',
+    transcoderGCRRegion: '',
+    transcoderGCRURL: '',
+    transcoderGCRTasksQueueName: '',
     buckets: {
       transcodeLog: {
         provider: 'wasabi',

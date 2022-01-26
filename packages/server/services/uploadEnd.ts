@@ -3,7 +3,7 @@ import {
   getSourceFileKey,
   getSourceFileOS,
 } from '$shared-server/objectStorage';
-import { USE_NFS_SIZE_THRESHOLD } from '$shared/config';
+import { USE_GCR_SIZE_THRESHOLD } from '$shared/config';
 import { filterNullAndUndefined } from '$shared/filter';
 import { is } from '$shared/is';
 import { retryS3, retryS3NoReject } from '$shared/retry';
@@ -129,6 +129,13 @@ async function invokeTranscoderBySource(
     throw new HTTPError(409, `state of source ${sourceId} is ${source.state}`);
   }
 
+  if (source.files.length === 0) {
+    throw new HTTPError(
+      500,
+      `source ${sourceId} has no files, this should not happen`
+    );
+  }
+
   const timestamp = Date.now();
 
   const updated = await client.source.updateMany({
@@ -169,17 +176,26 @@ async function invokeTranscoderBySource(
     },
     select: {
       fileSize: true,
+      region: true,
     },
   });
+
+  if (sourceFiles.length === 0) {
+    throw new HTTPError(
+      500,
+      `source ${sourceId} has no files, this should not happen`
+    );
+  }
 
   const maxSourceFileSize = Math.max(
     ...sourceFiles.map((sourceFile) => sourceFile.fileSize)
   );
 
-  const downloadAudioToNFS = maxSourceFileSize >= USE_NFS_SIZE_THRESHOLD;
+  const useGCR = maxSourceFileSize >= USE_GCR_SIZE_THRESHOLD;
 
   const request: TranscoderRequest = {
     callbackURL: TRANSCODER_CALLBACK_API_ENDPOINT,
+    runner: useGCR ? 'gcr' : 'lambda',
     files: createTranscoderRequestFiles(source.files, {
       // TODO(prod): make this configurable
       defaultUnknownAlbumArtist: 'Unknown Artist',
@@ -189,13 +205,12 @@ async function invokeTranscoderBySource(
       useFilenameAsUnknownTrackTitle: true,
       useTrackArtistAsUnknownAlbumArtist: true,
       useTrackTitleAsUnknownAlbumTitle: true,
-      downloadAudioToNFS,
       extractImages: true,
       preferExternalCueSheet: true,
     }),
   };
 
-  await invokeTranscoder(request);
+  await invokeTranscoder(request, sourceFiles[0].region as OSRegion);
 }
 
 function invokeTranscodeBySourceSync(userId: string, sourceId: string): void {

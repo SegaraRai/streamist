@@ -30,11 +30,7 @@ import {
   probeAudio,
   transcodeAudio,
 } from '../mediaTools';
-import {
-  generateTempFilename,
-  getNFSTempFilepath,
-  getTempFilepath,
-} from '../tempFile';
+import { generateTempFilename, getTempFilepath } from '../tempFile';
 import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig';
 import type {
   FFprobeStreamAudio,
@@ -243,9 +239,7 @@ export async function processAudioRequest(
   const os = getTranscodedAudioFileOS(region);
 
   try {
-    const sourceAudioFilepath = options.downloadAudioToNFS
-      ? getNFSTempFilepath(sourceFileId)
-      : getTempFilepath(sourceFileId);
+    const sourceAudioFilepath = getTempFilepath(sourceFileId);
 
     createdFiles.push(sourceAudioFilepath);
 

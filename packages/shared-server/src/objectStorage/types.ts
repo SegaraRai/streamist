@@ -19,6 +19,11 @@ export interface ObjectStorageRegion {
   readonly transcoderLambdaRegion: string;
   /** AWS Lambda function name of transcoder */
   readonly transcoderLambdaName: string;
+  readonly transcoderGCRProject: string;
+  /** GCP region of transcoder */
+  readonly transcoderGCRRegion: string;
+  readonly transcoderGCRURL: string;
+  readonly transcoderGCRTasksQueueName: string;
   readonly buckets: ObjectStorageBuckets;
 }
 

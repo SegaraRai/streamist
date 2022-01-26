@@ -20,7 +20,7 @@ export const SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD =
 
 export const MIN_SOURCE_FILE_SIZE = 1; // forbid uploading empty files (due to multipart upload)
 
-export const USE_NFS_SIZE_THRESHOLD = 400 * 1024 * 1024; // 400MiB
+export const USE_GCR_SIZE_THRESHOLD = 400 * 1024 * 1024; // 400MiB
 
 export const SOURCE_AUDIO_FILE_EXTENSIONS = [
   '.aac',
