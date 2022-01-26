@@ -54,4 +54,4 @@ server.on('request', (req, res) => {
   });
 });
 
-server.listen(process.env.PORT);
+server.listen(process.env.PORT || 8080);

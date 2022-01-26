@@ -5,7 +5,8 @@ FROM alpine:3 AS build
 WORKDIR /app
 
 COPY app .
-RUN chmod -R a=,u=rwX,go=rX
+RUN find . -type d -exec chmod 0755 {} +
+RUN find . -type f -exec chmod 0644 {} +
 RUN chmod 0755 ./bin/*
 RUN ln -s ./bin/ffmpeg ./bin/ffprobe
 
