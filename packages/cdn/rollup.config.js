@@ -15,7 +15,7 @@ if (TARGET_NODE_ENV !== 'production' && TARGET_NODE_ENV !== 'staging') {
 export default defineConfig({
   input: 'src/index.ts',
   output: {
-    file: 'dist/index.js',
+    file: 'dist/index.mjs',
     format: 'es',
   },
   plugins: [

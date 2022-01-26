@@ -6,7 +6,8 @@ zone_id = "741bbcd1f6bdaf9e0661e06ccbfb5648"
 compatibility_date = "2021-11-10"
 
 [build.upload]
-format = "service-worker"
+format = "modules"
+main = "./dist/index.mjs"
 
 [env.staging]
 name = "streamist-cdn-staging"
