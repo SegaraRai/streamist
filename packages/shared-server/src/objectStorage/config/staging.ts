@@ -12,6 +12,7 @@ export const configStaging: Record<
     transcoderLambdaName: 'streamist-staging-transcoder-ap-northeast-1',
     transcoderGCRProject: 'streamist-staging',
     transcoderGCRRegion: 'asia-northeast1',
+    transcoderGCRName: 'streamist-staging-transcoder-ap-northeast-1',
     transcoderGCRURL: '',
     transcoderGCRTasksQueueName: 'staging-transcoder-queue-ap-northeast-1',
     buckets: {

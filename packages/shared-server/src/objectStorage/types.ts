@@ -22,6 +22,7 @@ export interface ObjectStorageRegion {
   readonly transcoderGCRProject: string;
   /** GCP region of transcoder */
   readonly transcoderGCRRegion: string;
+  readonly transcoderGCRName: string;
   readonly transcoderGCRURL: string;
   readonly transcoderGCRTasksQueueName: string;
   readonly buckets: ObjectStorageBuckets;

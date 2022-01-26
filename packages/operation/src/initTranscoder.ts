@@ -11,6 +11,17 @@ function getLambdaResources(): readonly string[] {
     );
 }
 
+function getLambdaDeployCommand(): string {
+  return getOSRegions()
+    .map((region) => getOSRegion(region)!)
+    .map(
+      (item): string =>
+        `aws lambda update-function-code --function-name ${item.transcoderLambdaName} --zip-file fileb://dist.zip --region ${item.transcoderLambdaRegion}\n` +
+        `gcloud run deploy ${item.transcoderGCRName} --quiet --source gcr --region ${item.transcoderGCRRegion}\n`
+    )
+    .join('');
+}
+
 function createIAMPolicyDeployTranscoder() {
   return {
     Version: '2012-10-17',
@@ -52,4 +63,5 @@ export async function initTranscoder(_env: Environment): Promise<void> {
     'aws.iamPolicy.transcoderInvoke.json',
     createIAMPolicyInvokeTranscoder()
   );
+  await writeResultFile(`deploy.sh`, getLambdaDeployCommand());
 }
