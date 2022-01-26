@@ -42,6 +42,11 @@ async function main(): Promise<void> {
       await initTranscoder(TARGET_NODE_ENV);
       break;
 
+    case 'initAll':
+      await initS3(TARGET_NODE_ENV);
+      await initTranscoder(TARGET_NODE_ENV);
+      break;
+
     default:
       throw new Error(`Unknown command: ${argv._[0]}`);
   }

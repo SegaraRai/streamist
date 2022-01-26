@@ -2,6 +2,12 @@ import { getOSRegion, getOSRegions } from '$shared-server/objectStorage';
 import type { Environment } from './types';
 import { writeResultFile } from './write';
 
+const SECRETS = [
+  'SECRET_TRANSCODER_CALLBACK_SECRET',
+  'SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID',
+  'SECRET_TRANSCODER_WASABI_SECRET_ACCESS_KEY',
+];
+
 function getLambdaResources(): readonly string[] {
   return getOSRegions()
     .map((region) => getOSRegion(region)!)
@@ -12,12 +18,15 @@ function getLambdaResources(): readonly string[] {
 }
 
 function getLambdaDeployCommand(): string {
+  const GCR_SET_SECRETS =
+    '--set-secrets=' +
+    SECRETS.map((secret) => `${secret}=${secret}:latest`).join();
   return getOSRegions()
     .map((region) => getOSRegion(region)!)
     .map(
       (item): string =>
         `aws lambda update-function-code --function-name ${item.transcoderLambdaName} --zip-file fileb://dist.zip --region ${item.transcoderLambdaRegion}\n` +
-        `gcloud run deploy ${item.transcoderGCRName} --quiet --source gcr --region ${item.transcoderGCRRegion}\n`
+        `gcloud run deploy ${item.transcoderGCRName} --quiet --source gcr --no-allow-unauthenticated ${GCR_SET_SECRETS} --region ${item.transcoderGCRRegion}\n`
     )
     .join('');
 }
