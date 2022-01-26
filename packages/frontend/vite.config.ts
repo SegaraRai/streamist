@@ -16,6 +16,7 @@ import {
 } from 'unplugin-vue-components/dist/types';
 import Components from 'unplugin-vue-components/vite';
 import { ProxyOptions, defineConfig } from 'vite';
+import { minifyHtml } from 'vite-plugin-html';
 import Inspect from 'vite-plugin-inspect';
 import Markdown from 'vite-plugin-md';
 import Pages from 'vite-plugin-pages';
@@ -155,6 +156,15 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    build: {
+      rollupOptions: {
+        output: {
+          assetFileNames: 'assets/[hash][extname]',
+          entryFileNames: 'assets/[hash].js',
+          chunkFileNames: 'assets/[hash].js',
+        },
+      },
+    },
     resolve: {
       alias: {
         '~/': `${path.resolve(__dirname, 'src')}/`,
@@ -171,6 +181,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      minifyHtml(),
+
       Vue({
         include: [/\.vue$/, /\.md$/],
       }),
