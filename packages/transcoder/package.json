@@ -7,6 +7,7 @@
     "dev:build": "node ./build.dev.js",
     "dev:start": "node-dev --respawn ./dist/index_dev.js",
     "build": "rollup -c",
+    "build:gcr": "build.gcr.sh",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

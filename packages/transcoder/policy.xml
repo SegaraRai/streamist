@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policymap [
+  <!ELEMENT policymap (policy)+>
+  <!ATTLIST policymap xmlns CDATA #FIXED ''>
+  <!ELEMENT policy EMPTY>
+  <!ATTLIST policy xmlns CDATA #FIXED '' domain NMTOKEN #REQUIRED
+    name NMTOKEN #IMPLIED pattern CDATA #IMPLIED rights CDATA #IMPLIED
+    stealth NMTOKEN #IMPLIED value CDATA #IMPLIED>
+]>
+<!--
+  Configure ImageMagick policies.
+
+  Domains include system, delegate, coder, filter, path, or resource.
+
+  Rights include none, read, write, execute, and all.  Use | to combine them,
+  for example: "read | write" to permit read from, or write to, a path.
+
+  Use a glob expression as a pattern.
+
+  Suppose we do not want users to process MPEG video images:
+
+    <policy domain="delegate" rights="none" pattern="mpeg:decode" />
+
+  Here we do not want users reading images from HTTP:
+
+    <policy domain="coder" rights="none" pattern="HTTP" />
+
+  Lets prevent users from executing any image filters:
+
+    <policy domain="filter" rights="none" pattern="*" />
+
+  The /repository file system is restricted to read only.  We use a glob
+  expression to match all paths that start with /repository:
+
+    <policy domain="path" rights="read" pattern="/repository/*" />
+
+  Lets prevent users from executing any image filters:
+
+    <policy domain="filter" rights="none" pattern="*" />
+
+  Any large image is cached to disk rather than memory:
+
+    <policy domain="resource" name="area" value="1GB"/>
+
+  Define arguments for the memory, map, area, width, height and disk resources
+  with SI prefixes (.e.g 100MB).  In addition, resource policies are maximums
+  for each instance of ImageMagick (e.g. policy memory limit 1GB, -limit 2GB
+  exceeds policy maximum so memory limit is 1GB).
+
+  Rules are processed in order.  Here we want to restrict ImageMagick to only
+  read or write a small subset of proven web-safe image types:
+
+    <policy domain="delegate" rights="none" pattern="*" />
+    <policy domain="coder" rights="none" pattern="*" />
+    <policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP}" />
+-->
+<policymap>
+  <!-- GCRではファイルシステムがメモリ上にあるので、メモリ制限のようにディスク制限をする -->
+  <!-- GCRで使用できるメモリは2GiBなので -->
+  <policy domain="resource" name="temporary-path" value="/tmp" />
+  <policy domain="resource" name="width" value="5KP" />
+  <policy domain="resource" name="height" value="5KP" />
+  <!-- メモリ制限1GB -->
+  <!-- policy domain="resource" name="area" value="1GiB" / -->
+  <policy domain="resource" name="memory" value="1GiB" />
+  <policy domain="resource" name="map" value="0B" />
+  <policy domain="resource" name="disk" value="0B" />
+  <policy domain="resource" name="file" value="32" />
+  <!-- GCRではvCPUは1つだけなので、1スレッド -->
+  <!-- policy domain="resource" name="thread" value="1" /-->
+  <policy domain="resource" name="throttle" value="0" />
+  <policy domain="resource" name="time" value="30" />
+  <!-- precisionの意味は不明 -->
+  <!-- <policy domain="system" name="precision" value="6" /> -->
+  <!-- よくわからないけど適当に -->
+  <policy domain="cache" name="shared-secret" value="CZwbqPy6V30l2ae5G7yfcbSkzOmrzLF9" stealth="true" />
+
+  <!-- delegateは無効化 -->
+  <policy domain="delegate" rights="none" pattern="*" />
+
+  <!-- filterも無効化 -->
+  <policy domain="filter" rights="none" pattern="*" />
+
+  <!-- デフォルトは禁止、一部の形式だけ許可 -->
+  <!-- magick -list coder で確認できる -->
+  <policy domain="coder" rights="none" pattern="*" />
+  <!-- 必須（処理に使うもの） -->
+  <policy domain="coder" rights="read|write" pattern="{EXIF,ICC,ICM,XMP}" />
+  <policy domain="coder" rights="write" pattern="JSON" />
+  <policy domain="coder" rights="write" pattern="PNM" />
+  <!-- 書き込みもしそうなやつ -->
+  <policy domain="coder" rights="read|write" pattern="{JPEG,JPE,JPG,JPS,PJPEG}" />
+  <policy domain="coder" rights="read|write" pattern="{PNG,JNG,MNG,PNG8,PNG24,PNG32,PNG48,PNG64,PNG00}" />
+  <policy domain="coder" rights="read|write" pattern="WEBP" />
+  <!-- マイナーな形式は読み込みのみ -->
+  <policy domain="coder" rights="read" pattern="{BMP,BMP2,BMP3}" />
+  <policy domain="coder" rights="read" pattern="EXR" />
+  <policy domain="coder" rights="read" pattern="{GIF,GIF87}" />
+  <policy domain="coder" rights="read" pattern="HDR" />
+  <policy domain="coder" rights="read" pattern="HEIC" />
+  <policy domain="coder" rights="read" pattern="{JP2,JPC,J2K,J2C,JPM,JPT,JPC}" />
+  <policy domain="coder" rights="read" pattern="{PSD,PSB}" />
+  <policy domain="coder" rights="read" pattern="{RAW,R,C,G,M,B,Y,A,O,K}" />
+  <policy domain="coder" rights="read" pattern="TGA" />
+  <policy domain="coder" rights="read" pattern="{TIFF,TIFF64,GROUP4,PTIF,TIF}" />
+</policymap>
