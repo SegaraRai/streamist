@@ -18,7 +18,7 @@ function mainAPI(): void {
       cluster.fork();
     }
 
-    logger.info('primary: launched workers');
+    logger.info('primary: launched %d workers', numWorkers);
   } else {
     const app = init();
 
