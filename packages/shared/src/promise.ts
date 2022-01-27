@@ -9,5 +9,6 @@ export function createPromise<T>(): [
     _resolve = resolve;
     _reject = reject;
   });
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return [promise, _resolve!, _reject!];
 }

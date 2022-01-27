@@ -7,6 +7,7 @@ export const hCaptchaPromise = new Promise<HCaptcha>((resolve): void => {
   }
 
   window.hCaptchaCallback = (): void => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     resolve(window.hcaptcha!);
   };
 });

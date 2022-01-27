@@ -6,6 +6,7 @@ meta:
 
 <script lang="ts">
 import { useDisplay } from 'vuetify';
+import { filterNullAndUndefined } from '$shared/filter';
 import { compareTrack } from '$/shared/sort';
 import type {
   ResourceAlbum,
@@ -64,30 +65,36 @@ export default defineComponent({
         artists.map((artist) => [artist.id, artist])
       );
 
-      const gridItems = albums.map((album): Item => {
-        const artist = artistMap.get(album.artistId)!;
-        const image =
-          album.imageIds.length > 0
-            ? imageMap.get(album.imageIds[0])
-            : undefined;
-        const albumTracks = tracks
-          .filter((track) => track.albumId === album.id)
-          .sort(compareTrack);
+      const gridItems = filterNullAndUndefined(
+        albums.map((album): Item | undefined => {
+          const artist = artistMap.get(album.artistId);
+          if (!artist) {
+            return;
+          }
 
-        const releaseDate = albumTracks.find(
-          (track) => track.releaseDate
-        )?.releaseDate;
-        const releaseYear =
-          (releaseDate && releaseDate.replace(/-.+$/g, '')) || undefined;
+          const image =
+            album.imageIds.length > 0
+              ? imageMap.get(album.imageIds[0])
+              : undefined;
+          const albumTracks = tracks
+            .filter((track) => track.albumId === album.id)
+            .sort(compareTrack);
 
-        return {
-          album$$q: album,
-          artist$$q: artist,
-          image$$q: image,
-          tracks$$q: albumTracks,
-          releaseYear$$q: releaseYear,
-        };
-      });
+          const releaseDate = albumTracks.find(
+            (track) => track.releaseDate
+          )?.releaseDate;
+          const releaseYear =
+            (releaseDate && releaseDate.replace(/-.+$/g, '')) || undefined;
+
+          return {
+            album$$q: album,
+            artist$$q: artist,
+            image$$q: image,
+            tracks$$q: albumTracks,
+            releaseYear$$q: releaseYear,
+          };
+        })
+      );
 
       if (!unmounted) {
         playbackStore.setDefaultSetList$$q(

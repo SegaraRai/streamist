@@ -69,7 +69,9 @@ export const fastPlainToInstance: typeof plainToInstance = (
     undefined,
     plain,
     cls,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     undefined!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     undefined!,
     undefined
   );

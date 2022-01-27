@@ -35,7 +35,7 @@ export function installLazySizes(app: App) {
   document.addEventListener('lazybeforeunveil', (event) => {
     const el = event.target as HTMLImageElement;
 
-    if (!needsCDNCookie(el.dataset.src!)) {
+    if (!el.dataset.src || !needsCDNCookie(el.dataset.src)) {
       return;
     }
 

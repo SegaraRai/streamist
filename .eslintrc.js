@@ -135,6 +135,8 @@ module.exports = defineConfig({
       },
     ],
 
+    '@typescript-eslint/no-non-null-assertion': ['warn'],
+
     'vue/multi-word-component-names': 'off',
     'vue/html-self-closing': [
       'error',

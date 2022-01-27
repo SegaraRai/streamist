@@ -6,6 +6,7 @@ meta:
 
 <script lang="ts">
 import { useDisplay } from 'vuetify';
+import { filterNullAndUndefined } from '$shared/filter';
 import { compareTrack } from '$/shared/sort';
 import type { ResourceAlbum, ResourceArtist } from '$/types';
 import { useAllAlbums, useAllArtists, useAllTracks } from '~/composables';
@@ -46,11 +47,14 @@ export default defineComponent({
         artists.map((artist) => [artist.id, artist])
       );
 
-      const sortedTracks = tracks
-        .map((track) => {
-          const album = albumMap.get(track.albumId)!;
-          const artist = artistMap.get(track.artistId)!;
-          const albumArtist = artistMap.get(album.artistId)!;
+      const sortedTracks = filterNullAndUndefined(
+        tracks.map((track) => {
+          const album = albumMap.get(track.albumId);
+          const artist = artistMap.get(track.artistId);
+          const albumArtist = album && artistMap.get(album.artistId);
+          if (!album || !artist || !albumArtist) {
+            return;
+          }
           return {
             ...track,
             album: {
@@ -60,7 +64,7 @@ export default defineComponent({
             artist,
           };
         })
-        .sort(compareTrack);
+      ).sort(compareTrack);
 
       if (!unmounted) {
         playbackStore.setDefaultSetList$$q(

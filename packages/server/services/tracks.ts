@@ -179,6 +179,7 @@ export async function trackUpdate(
                   ? { role, artistId }
                   : {
                       role,
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       artistId: (await artistGetOrCreateTx(artistName!)).id,
                     }
               )

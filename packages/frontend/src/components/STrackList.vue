@@ -148,16 +148,23 @@ export default defineComponent({
       const imageMap = new Map<string, ResourceImage>(
         (await db.images.toArray()).map((image) => [image.id, image])
       );
-      return tracks.map((track) => {
-        const album = albumMap.get(track.albumId)!;
-        return {
-          track,
-          album,
-          artist: artistMap.get(track.artistId)!,
-          albumArtist: artistMap.get(album.artistId)!,
-          image: getDefaultAlbumImage(album, imageMap),
-        };
-      });
+      return filterNullAndUndefined(
+        tracks.map((track) => {
+          const album = albumMap.get(track.albumId);
+          const artist = artistMap.get(track.artistId);
+          const albumArtist = album && artistMap.get(album.artistId);
+          if (!album || !artist || !albumArtist) {
+            return;
+          }
+          return {
+            track,
+            album,
+            artist,
+            albumArtist,
+            image: getDefaultAlbumImage(album, imageMap),
+          };
+        })
+      );
     }, [propTracksRef]);
 
     const useDiscNumber = computed<boolean>(

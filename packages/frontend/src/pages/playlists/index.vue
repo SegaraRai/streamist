@@ -5,6 +5,7 @@ meta:
 </route>
 
 <script lang="ts">
+import { filterNullAndUndefined } from '$shared/filter';
 import type { ResourcePlaylist, ResourceTrack } from '$/types';
 import type { DropdownPlaylistInput } from '~/components/SDropdownPlaylist.vue';
 import { useAllPlaylists, useAllTrackMap } from '~/composables';
@@ -49,8 +50,8 @@ export default defineComponent({
       // NOTE: setDefaultSetList is intentionally not called because users will not want this behavior
 
       return playlists.map((playlist, index, arr): Item => {
-        const tracks = playlist.trackIds.map(
-          (trackId) => trackMap.get(trackId)!
+        const tracks = filterNullAndUndefined(
+          playlist.trackIds.map((trackId) => trackMap.get(trackId))
         );
         const duration = calcTracksTotalDuration(tracks);
         return {

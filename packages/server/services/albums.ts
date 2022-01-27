@@ -117,6 +117,7 @@ export async function albumUpdate(
                   ? { role, artistId }
                   : {
                       role,
+                      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                       artistId: (await artistGetOrCreateTx(artistName!)).id,
                     }
               )

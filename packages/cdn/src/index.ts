@@ -71,6 +71,7 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
   return send(204, null, {
     ...NO_CACHE_HEADERS,
     'Set-Cookie': serialize(COOKIE_JWT_KEY, strJWT, {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       expires: new Date((jwt.exp! + COOKIE_EXPIRY_DELAY) * 1000),
       httpOnly: true,
       sameSite: 'none',
