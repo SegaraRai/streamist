@@ -9,6 +9,7 @@ import Fastify, {
 } from 'fastify';
 import helmet from 'fastify-helmet';
 import { fastifyJwt } from 'fastify-jwt';
+import fp from 'fastify-plugin';
 import server from '$/$server';
 import {
   API_BASE_PATH,
@@ -19,23 +20,33 @@ import { fastPlainToInstance } from '$/services/fastClassTransformer';
 import { transcoderCallback } from '$/services/transcoderCallback';
 import { HTTPError } from '$/utils/httpError';
 
-const validateProxyRequestPlugin: FastifyPluginCallback = (
-  fastify: FastifyInstance,
-  _options: unknown,
-  done: (err?: Error) => void
-): void => {
-  const proxyAuthorization = `Bearer ${SECRET_API_PROXY_AUTH_TOKEN}`;
-  fastify.addHook('onRequest', (request, _reply, done) => {
-    if (
-      request.headers['streamist-proxy-authorization'] !== proxyAuthorization
-    ) {
-      return done(new HTTPError(401, 'Incorrect proxy token'));
-    }
+// NOTE: this must be wrapped in fastify-plugin to make validation work
+const validateProxyRequestPlugin: FastifyPluginCallback = fp(
+  (
+    fastify: FastifyInstance,
+    _options: unknown,
+    done: (err?: Error) => void
+  ): void => {
+    const proxyAuthorization = `Bearer ${SECRET_API_PROXY_AUTH_TOKEN}`;
+    fastify.addHook('onRequest', (request, _reply, done): void => {
+      // console.log('onRequest', request.headers);
+      if (
+        request.headers['streamist-proxy-authorization'] !== proxyAuthorization
+      ) {
+        fastify.log.warn(
+          'unauthenticated request from %s, %s',
+          request.ip,
+          request.headers['x-forwarded-for']
+        );
+        return done(new HTTPError(401, 'Incorrect proxy token'));
+      }
+      done();
+    });
     done();
-  });
-  done();
-};
+  }
+);
 
+// NOTE: do not wrap this in fastify-plugin or it will not work
 const appPlugin: FastifyPluginCallback = (
   fastify: FastifyInstance,
   _options: unknown,
@@ -46,6 +57,7 @@ const appPlugin: FastifyPluginCallback = (
   fastify.register(validateProxyRequestPlugin);
   fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
   server(fastify, {
+    basePath: '',
     plainToInstance: fastPlainToInstance,
   });
   done();
