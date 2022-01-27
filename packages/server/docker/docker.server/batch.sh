@@ -7,4 +7,5 @@ done
 
 sleep 5
 
-node /app/dist/index.js --type batch
+# exec is required to handle signals
+exec node /app/dist/index.js --type batch
