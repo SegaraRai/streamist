@@ -19,7 +19,7 @@ import {
   SOURCE_FILE_CACHE_CONTROL,
   SOURCE_FILE_CONTENT_ENCODING,
   SOURCE_FILE_CONTENT_TYPE,
-  SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
+  SOURCE_FILE_PRESIGNED_URL_MIN_EXPIRES_IN,
   SOURCE_FILE_UPLOADABLE_AFTER_CREATE,
 } from '$shared/config';
 import { is } from '$shared/is';
@@ -84,7 +84,8 @@ function createPresignedMultipartURLs(
   sourceFileId: string,
   region: OSRegion,
   fileSize: number,
-  uploadId: string
+  uploadId: string,
+  createdAt: number
 ): Promise<UploadURLPart[]> {
   const partSizes = splitIntoParts(fileSize);
 
@@ -106,7 +107,12 @@ function createPresignedMultipartURLs(
             ContentLength: partSize,
           }),
           {
-            expiresIn: SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
+            expiresIn: Math.floor(
+              Math.max(
+                createdAt + SOURCE_FILE_UPLOADABLE_AFTER_CREATE - Date.now(),
+                SOURCE_FILE_PRESIGNED_URL_MIN_EXPIRES_IN
+              ) / 1000
+            ),
           }
         ),
       })
@@ -114,21 +120,14 @@ function createPresignedMultipartURLs(
   );
 }
 
-/**
- * @param userId
- * @param sourceFileId
- * @param region
- * @param fileSize
- * @param uploadId uploadId (only needed for multipart upload)
- * @returns
- */
 async function createUploadURL(
   userId: string,
   sourceId: string,
   sourceFileId: string,
   region: OSRegion,
   fileSize: number,
-  uploadId: string
+  uploadId: string,
+  createdAt: number
 ): Promise<UploadURL> {
   return {
     size: fileSize,
@@ -138,7 +137,8 @@ async function createUploadURL(
       sourceFileId,
       region,
       fileSize,
-      uploadId
+      uploadId,
+      createdAt
     ),
   };
 }
@@ -272,7 +272,8 @@ export async function createAudioSource(
           audioFileId,
           region,
           request.audioFile.fileSize,
-          uploadId
+          uploadId,
+          timestamp
         ),
       },
       ...(request.cueSheetFile
@@ -286,7 +287,8 @@ export async function createAudioSource(
                 cueSheetFileId!,
                 region,
                 request.cueSheetFile.fileSize,
-                cueSheetUploadId!
+                cueSheetUploadId!,
+                timestamp
               ),
             },
           ]
@@ -418,7 +420,8 @@ export async function createImageSource(
           imageFileId,
           region,
           request.imageFile.fileSize,
-          uploadId
+          uploadId,
+          timestamp
         ),
       },
     ],
@@ -474,7 +477,8 @@ export async function getUploadURLForSourceFile(
     sourceFileId,
     sourceFile.region as OSRegion,
     sourceFile.fileSize,
-    sourceFile.uploadId
+    sourceFile.uploadId,
+    sourceFile.createdAt
   );
 }
 
