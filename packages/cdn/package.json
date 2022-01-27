@@ -4,7 +4,6 @@
   "private": true,
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
-  "type": "module",
   "scripts": {
     "dev": "miniflare -m -w -B \"pnpm run dev:build\" --env ../shared-server/env/development.env ./dist/index_dev.js",
     "dev:build": "node ./build.dev.js",
