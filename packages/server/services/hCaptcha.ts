@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { SECRET_HCAPTCHA_SECRET } from '$/services/env';
+import { SECRET_HCAPTCHA_SECRET_KEY } from '$/services/env';
 import { logger } from '$/services/logger';
 import { HTTPError } from '$/utils/httpError';
 
@@ -28,7 +28,7 @@ export async function verifyHCaptcha(
   }
 
   const params = new URLSearchParams();
-  params.append('secret', SECRET_HCAPTCHA_SECRET);
+  params.append('secret', SECRET_HCAPTCHA_SECRET_KEY);
   params.append('response', captchaResponse);
   params.append('sitekey', sitekey);
   const response = await fetch('https://hcaptcha.com/siteverify', {
