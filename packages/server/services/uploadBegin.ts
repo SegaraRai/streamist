@@ -6,7 +6,6 @@ import {
 } from '$shared-server/generateId';
 import {
   OSRegion,
-  convertOSRawURLToCDNURL,
   getSourceFileKey,
   getSourceFileOS,
   toOSRegion,
@@ -97,21 +96,18 @@ function createPresignedMultipartURLs(
     partSizes.map(
       async (partSize, index): Promise<UploadURLPart> => ({
         size: partSize,
-        url: convertOSRawURLToCDNURL(
-          os,
-          await getSignedUrl(
-            s3,
-            new UploadPartCommand({
-              Bucket: os.bucket,
-              Key: key,
-              UploadId: uploadId,
-              PartNumber: index + 1,
-              ContentLength: partSize,
-            }),
-            {
-              expiresIn: SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
-            }
-          )
+        url: await getSignedUrl(
+          s3,
+          new UploadPartCommand({
+            Bucket: os.bucket,
+            Key: key,
+            UploadId: uploadId,
+            PartNumber: index + 1,
+            ContentLength: partSize,
+          }),
+          {
+            expiresIn: SOURCE_FILE_PRESIGNED_URL_EXPIRES_IN_MULTIPART,
+          }
         ),
       })
     )

@@ -20,7 +20,8 @@ export function createUserDownloadS3Cached(objectStorage: ObjectStorage): S3 {
 
       case 'wasabi':
         s3 = new S3({
-          endpoint: `https://${objectStorage.region}.wasabisys.com`,
+          bucketEndpoint: true,
+          endpoint: `https://${objectStorage.bucket}`,
           region: objectStorage.region,
           credentials: {
             accessKeyId: SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID,
@@ -48,7 +49,8 @@ export function createUserUploadS3Cached(objectStorage: ObjectStorage): S3 {
 
       case 'wasabi':
         s3 = new S3({
-          endpoint: `https://${objectStorage.region}.wasabisys.com`,
+          bucketEndpoint: true,
+          endpoint: `https://${objectStorage.bucket}`,
           region: objectStorage.region,
           credentials: {
             accessKeyId: SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID,
