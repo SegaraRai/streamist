@@ -24,10 +24,6 @@ import type {
   TranscoderResponseArtifactError,
   TranscoderResponseArtifactImage,
 } from '$transcoder/types';
-import {
-  TRANSCODER_CALLBACK_API_PATH,
-  TRANSCODER_CALLBACK_API_TOKEN,
-} from '$/config';
 import { dbAlbumAddImageTx } from '$/db/album';
 import { dbArtistAddImageTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
@@ -37,6 +33,7 @@ import { dbPlaylistAddImageTx } from '$/db/playlist';
 import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 import { retryTransaction } from '$/services//transaction';
+import { SECRET_TRANSCODER_CALLBACK_SECRET } from '$/services/env';
 import { logger } from '$/services/logger';
 import { updateMaxTrackId } from '$/services/maxTrack';
 
@@ -692,9 +689,10 @@ async function handleTranscoderResponse(
     });
 
     if (
-      sources.some((source) => source.state !== is<SourceState>('transcoded'))
+      sources.some((source) => source.state === is<SourceState>('transcoded'))
     ) {
       // already processed or being processed by another handler
+      logger.info(sources, 'already processed');
       return;
     }
   }
@@ -774,13 +772,18 @@ function handleTranscoderResponseSync(response: TranscoderResponse): void {
   });
 }
 
-export const transcoderCallback: FastifyPluginCallback<{}> = (
+export const transcoderCallbackPlugin: FastifyPluginCallback<{}> = (
   fastify: FastifyInstance,
   _options: {},
   done: (err?: Error) => void
 ): void => {
-  fastify.post(TRANSCODER_CALLBACK_API_PATH, (request, reply): void => {
-    if (request.headers.authorization !== TRANSCODER_CALLBACK_API_TOKEN) {
+  const transcoderAuthorization = `Bearer ${SECRET_TRANSCODER_CALLBACK_SECRET}`;
+
+  fastify.post('/', (request, reply): void => {
+    if (
+      request.headers['streamist-transcoder-authorization'] !==
+      transcoderAuthorization
+    ) {
       reply.code(401).send();
       return;
     }

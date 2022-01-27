@@ -9,57 +9,49 @@ import Fastify, {
 } from 'fastify';
 import helmet from 'fastify-helmet';
 import { fastifyJwt } from 'fastify-jwt';
-import fp from 'fastify-plugin';
 import server from '$/$server';
+import { TRANSCODER_CALLBACK_API_PATH } from '$/config';
 import {
   API_BASE_PATH,
   SECRET_API_JWT_SECRET,
   SECRET_API_PROXY_AUTH_TOKEN,
 } from '$/services/env';
 import { fastPlainToInstance } from '$/services/fastClassTransformer';
-import { transcoderCallback } from '$/services/transcoderCallback';
+import { transcoderCallbackPlugin } from '$/services/transcoderCallback';
 import { HTTPError } from '$/utils/httpError';
 
-// NOTE: this must be wrapped in fastify-plugin to make validation work
-const validateProxyRequestPlugin: FastifyPluginCallback = fp(
-  (
-    fastify: FastifyInstance,
-    _options: unknown,
-    done: (err?: Error) => void
-  ): void => {
-    const proxyAuthorization = `Bearer ${SECRET_API_PROXY_AUTH_TOKEN}`;
-    fastify.addHook('onRequest', (request, _reply, done): void => {
-      // console.log('onRequest', request.headers);
-      if (
-        request.headers['streamist-proxy-authorization'] !== proxyAuthorization
-      ) {
-        fastify.log.warn(
-          'unauthenticated request from %s, %s',
-          request.ip,
-          request.headers['x-forwarded-for']
-        );
-        return done(new HTTPError(401, 'Incorrect proxy token'));
-      }
-      done();
-    });
-    done();
-  }
-);
-
-// NOTE: do not wrap this in fastify-plugin or it will not work
 const appPlugin: FastifyPluginCallback = (
   fastify: FastifyInstance,
   _options: unknown,
   done: (err?: Error) => void
 ): void => {
+  const proxyAuthorization = `Bearer ${SECRET_API_PROXY_AUTH_TOKEN}`;
+  fastify.addHook('onRequest', (request, _reply, done): void => {
+    // console.log('onRequest', request.headers);
+    if (
+      request.headers['streamist-proxy-authorization'] !== proxyAuthorization
+    ) {
+      fastify.log.warn(
+        'unauthenticated request from %s, %s',
+        request.ip,
+        request.headers['x-forwarded-for']
+      );
+      done(new HTTPError(401, 'Incorrect proxy token'));
+      return;
+    }
+    done();
+  });
+
+  fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
+
   // NOTE: not setting custom error handler as fastify's default one works fine
   // TODO(prod): should be set in production to collect errors and send them to sentry or something
-  fastify.register(validateProxyRequestPlugin);
-  fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
+
   server(fastify, {
     basePath: '',
     plainToInstance: fastPlainToInstance,
   });
+
   done();
 };
 
@@ -87,7 +79,9 @@ export const init = (serverFactory?: FastifyServerFactory) => {
     },
   });
 
-  app.register(transcoderCallback);
+  app.register(transcoderCallbackPlugin, {
+    prefix: TRANSCODER_CALLBACK_API_PATH,
+  });
 
   app.register(appPlugin, {
     prefix: API_BASE_PATH,
