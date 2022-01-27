@@ -1,5 +1,5 @@
 notFound:
-  message: ページが見つかりません
+  message: 'ページが見つかりません'
   button:
     Back: 戻る
 app:
@@ -91,8 +91,8 @@ settings:
     light: ライト
     system: システム設定を使用する
 tutorial:
-  title: Streamist へようこそ！
-  message: "トラックをアップロードしましょう\n右上の {0} ボタンを押すとアップロードを開始できます"
+  title: 'Streamist へようこそ！'
+  message: "トラックをアップロードしましょう\n右上の {0} ボタンを押してアップロードを開始できます"
 home:
   RecentlyPlayed: 最近再生した曲
   RecentlyUploaded: 最近アップロードした曲
@@ -132,7 +132,7 @@ title:
   SignIn: "ログイン {'|'} Streamist"
   SignUp: "登録 {'|'} Streamist"
   Albums: "アルバム {'|'} Streamist"
-  Album: "{0} by {1} {'|'} Streamist"
+  Album: "{1} の {0} {'|'} Streamist"
   AlbumInit: "{1} のアルバム {'|'} Streamist"
   Artists: "アーティスト {'|'} Streamist"
   Artist: "{0} {'|'} Streamist"
@@ -317,7 +317,7 @@ dialog:
       Cancel: キャンセル
   removeFromPlaylist:
     title: プレイリストからトラックを削除
-    content: "'{0}' から '{1]' を削除してもよろしいですか？"
+    content: "'{0}' から '{1}' を削除してもよろしいですか？"
     button:
       Remove: 削除
       Cancel: キャンセル
