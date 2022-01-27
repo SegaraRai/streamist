@@ -23,7 +23,7 @@ export const onRequest: PagesFunction<Env> = (context): Promise<Response> => {
   const { pathname, search } = new URL(request.url);
   const rewrittenPathname = pathname.replace(
     /^\/api\//,
-    `/${env.API_BASE_PATH}/`
+    `${env.API_BASE_PATH}/`
   );
   const newRequest = new Request(
     `${env.API_ORIGIN_FOR_API_PROXY}${rewrittenPathname}${search}`,
