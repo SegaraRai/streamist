@@ -57,9 +57,10 @@ export default defineComponent({
         type: 'link',
         icon: 'mdi-cog',
         path: '/settings',
-        text: 'Settings',
+        text: t('sidebar.Settings'),
       },
       // debug
+      /*
       {
         type: 'divider',
       },
@@ -69,6 +70,7 @@ export default defineComponent({
         path: '/playing',
         text: 'Playing',
       },
+      //*/
     ]);
 
     return {
