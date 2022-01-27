@@ -28,10 +28,6 @@ sidebar:
   Artists: Artists
   Tracks: Tracks
   Playlists: Playlists
-  Tags: Tags
-  Queue: Queue
-  Downloads: Downloads
-  Uploads: Uploads
   Settings: Settings
 header:
   NoInternetConnection: No Internet connection
@@ -241,7 +237,7 @@ dialogComponent:
     title: Details
     artist: Artist
   editAlbum:
-    title: Edit {0}
+    title: 'Edit {0}'
     button:
       OK: OK
       Cancel: Cancel
@@ -252,14 +248,14 @@ dialogComponent:
       Artist: Artist
       Description: Description
   mergeAlbum:
-    title: Merge {0}
+    title: 'Merge {0}'
     button:
       Merge: Merge
       Cancel: Cancel
     label:
       Album: Album
   editArtist:
-    title: Edit {0}
+    title: 'Edit {0}'
     button:
       OK: OK
       Cancel: Cancel
@@ -268,7 +264,7 @@ dialogComponent:
       NameSort: Name sort
       Description: Description
   mergeArtist:
-    title: Merge {0}
+    title: 'Merge {0}'
     button:
       Merge: Merge
       Cancel: Cancel
@@ -283,7 +279,7 @@ dialogComponent:
       Title: Title
       Description: Description
   editPlaylist:
-    title: Edit {0}
+    title: 'Edit {0}'
     button:
       OK: OK
       Cancel: Cancel
@@ -291,7 +287,7 @@ dialogComponent:
       Title: Title
       Description: Description
   editTrack:
-    title: Edit {0}
+    title: 'Edit {0}'
     button:
       OK: OK
       Cancel: Cancel
@@ -310,7 +306,7 @@ dialogComponent:
       Comment: Comment
       Lyrics: Lyrics
     releaseDate:
-      hint: Release date will be treated as {0}
+      hint: 'Release date will be treated as {0}'
       invalid: Cannot parse release date
 dialog:
   signOut:

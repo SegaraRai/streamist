@@ -1,26 +1,393 @@
-button:
-  about: これは？
-  back: 戻る
-  go: 進む
-  home: ホーム
-  toggle_dark: ダークモード切り替え
-  toggle_langs: 言語切り替え
-intro:
-  desc: 固執された Vite スターターテンプレート
-  dynamic-route: 動的ルートのデモ
-  hi: こんにちは、{name}!
-  whats-your-name: 君の名は。
-not-found: 見つかりませんでした
+notFound:
+  message: ページが見つかりません
+  button:
+    Back: 戻る
+app:
+  title: Streamist
+  meta:
+    description: お気に入りの曲をストリーミングしましょう
+landing:
+  title: Streamist
+  description: お気に入りの曲をストリーミングしましょう
+  button:
+    SignUp: 登録
+appBar:
+  button:
+    SignIn: ログイン
+    SignUp: 登録
+common:
+  SignOut: ログアウト
+  Synchronize: データベースを同期
+  Synchronized: 同期しました
+  ThisActionCannotBeUndone: この操作は取り消せません
+regions:
+  'ap-northeast-1': ap-northeast-1 (日本, 東京)
 sidebar:
   Home: ホーム
   Albums: アルバム
   Artists: アーティスト
   Tracks: トラック
   Playlists: プレイリスト
-  Tags: タグ
-  Queue: キュー
-  Downloads: ダウンロード
-  Uploads: アップロード
   Settings: 設定
 header:
+  NoInternetConnection: インターネット接続がありません
   Search: 検索
+  Upload: アップロード
+  Queue: 再生キュー
+setListName:
+  RecentlyPlayed: 最近再生した曲
+  RecentlyUploaded: 最近アップロードした曲
+  Albums: すべてのアルバム
+  Artists: すべてのアーティスト
+  Tracks: すべてのトラック
+queue:
+  title: 再生キュー
+  NowPlaying: 再生中
+  NextInQueue: 次に再生
+  NextFrom: '{0} から次に再生'
+signIn:
+  title: ログイン
+  label:
+    Username: ユーザー名
+    Password: パスワード
+  button:
+    SignIn: ログイン
+signUp:
+  title: 登録
+  label:
+    Username: ユーザー名
+    Password: パスワード
+    DisplayName: 表示名
+    Region: 地域
+  description:
+    Username: ログインに使用するユーザー名
+    Region: データを保存する場所
+  button:
+    SignUp: 登録
+  tooltip:
+    UsernameAvailable: このユーザー名は使用可能です
+    UsernameAlreadyTaken: このユーザー名は既に使用されています
+settings:
+  account:
+    title: アカウント設定
+    header:
+      DisplayName: 表示名
+      Region: 地域
+    button:
+      Save: 保存
+  device:
+    title: デバイス設定
+    header:
+      AudioQuality: 音質
+      Language: 言語
+      Theme: テーマ
+    link:
+      AccountSettings: アカウント設定
+  audioQuality:
+    medium: 標準音質
+    veryHigh: 最高音質
+  theme:
+    dark: ダーク
+    light: ライト
+    system: システム設定を使用する
+tutorial:
+  title: Streamist へようこそ！
+  message: "トラックをアップロードしましょう\n右上の {0} ボタンを押すとアップロードを開始できます"
+home:
+  RecentlyPlayed: 最近再生した曲
+  RecentlyUploaded: 最近アップロードした曲
+album:
+  Play: 再生
+  Shuffle: シャッフル
+  n_tracks: 'トラックがありません | 1 個のトラック | {n} 個のトラック'
+albums:
+  Albums: アルバム
+  n_items: '項目がありません | 1 個の項目 | {n} 個の項目'
+  no_items: 項目がありません
+artist:
+  Shuffle: シャッフル
+  MoreTracks: '他の {0} のトラック'
+artists:
+  Artists: アーティスト
+  n_items: '項目がありません | 1 個の項目 | {n} 個の項目'
+  no_items: 項目がありません
+playlist:
+  Play: 再生
+  Shuffle: シャッフル
+  n_tracks: 'トラックがありません | 1 個のトラック | {n} 個のトラック'
+playlists:
+  Playlists: プレイリスト
+  n_items: '項目がありません | 1 個の項目 | {n} 個の項目'
+  n_tracks: 'トラックがありません | 1 個のトラック | {n} 個のトラック'
+  no_items: 項目がありません
+tracks:
+  Tracks: トラック
+  n_items: '項目がありません | 1 個の項目 | {n} 個の項目'
+  no_items: 項目がありません
+trackList:
+  Album: アルバム
+  Title: タイトル
+title:
+  Home: 'Streamist'
+  SignIn: "ログイン {'|'} Streamist"
+  SignUp: "登録 {'|'} Streamist"
+  Albums: "アルバム {'|'} Streamist"
+  Album: "{0} by {1} {'|'} Streamist"
+  AlbumInit: "{1} のアルバム {'|'} Streamist"
+  Artists: "アーティスト {'|'} Streamist"
+  Artist: "{0} {'|'} Streamist"
+  ArtistInit: "アーティスト {'|'} Streamist"
+  Tracks: "トラック {'|'} Streamist"
+  Playlists: "プレイリスト {'|'} Streamist"
+  Playlist: "{0} {'|'} Streamist"
+  PlaylistInit: "プレイリスト {'|'} Streamist"
+  Playing:
+    track: "{0} by {1} {'|'} Streamist"
+    no_track: 'Streamist'
+coArtist:
+  role:
+    '#artist': アーティスト
+    '#vocal': ボーカル
+    '#arranger': 編曲
+    '#composer': 作曲
+    '#lyricist': 作詞
+    '#producer': プロデューサー
+  n_role:
+    '#artist': 'アーティスト | アーティスト | アーティスト'
+    '#vocal': 'ボーカル | ボーカル | ボーカル'
+    '#arranger': '編曲 | 編曲 | 編曲'
+    '#composer': '作曲 | 作曲 | 作曲'
+    '#lyricist': '作詞 | 作詞 | 作詞'
+    '#producer': 'プロデューサー | プロデューサー | プロデューサー'
+search:
+  NoResultsFound: No results found
+imageManager:
+  title:
+    album: '{0} のアルバムアート'
+    artist: '{0} のアーティスト画像'
+    playlist: '{0} のプレイリスト画像'
+uploader:
+  limitReached: "トラックのアップロード可能数の上限に達しました\n新たにトラックをアップロードするには、プランをアップグレードするか、既存のトラックを削除する必要があります"
+  tooltip:
+    file:
+      ErrorAborted: アップロードが中止されました
+      ErrorInvalid: 対応していないファイルです
+      ErrorTranscodeFailed: 変換に失敗しました
+      ErrorUploadFailed: アップロードに失敗しました
+      Pending: アップロードを待機しています
+      Queued: アップロードを待機しています
+      Skipped: 他のファイルの処理に失敗しました
+      Validated: アップロードを待機しています
+      Validating: アップロードを待機しています
+      Transcoded: 完了
+      Transcoding: 変換中
+      Uploaded: 変換を待機しています
+      Uploading: アップロード中
+      n_Uploading: 'アップロード中 ({0}% 完了)'
+    stagedFile:
+      AudioFileWithCueSheet: CUEシートつき音楽ファイル
+      AudioFile: 音楽ファイル
+      ImageFile: 画像ファイル
+      UnknownFile: 不明なファイル
+dropdown:
+  album:
+    Play: 再生
+    AddToPlayNextQueue: キューに追加
+    Edit: 編集
+    Merge: 統合
+  artist:
+    Edit: 編集
+    Merge: 統合
+  playlist:
+    Play: 再生
+    AddToPlayNextQueue: キューに追加
+    Edit: 編集
+    Delete: 削除
+    Create: プレイリストを作成
+  track:
+    Play: 再生
+    Pause: 一時停止
+    GoToAlbum: アルバムに移動
+    GoToArtist: アーティストに移動
+    ShowDetails: 詳細を表示
+    AddToPlayNextQueue: 次に再生
+    RemoveFromPlayNextQueue: 次に再生から削除
+    AddToQueue: 再生キューに追加
+    RemoveFromQueue: 再生キューから削除
+    AddToPlaylist: プレイリストに追加
+    AddToNewPlaylist: 新しいプレイリストに追加
+    RemoveFromPlaylist: プレイリストから削除
+    Edit: 編集
+    Delete: 削除
+combobox:
+  album:
+    CreateNewAlbum: アルバムが新たに作成されます
+  artist:
+    CreateNewArtist: アーティストが新たに作成されます
+dialogComponent:
+  search:
+    type:
+      album: アルバム
+      artist: アーティスト
+      playlist: プレイリスト
+      track: トラック
+  upload:
+    title: アップロード
+  trackDetails:
+    title: 詳細
+    artist: アーティスト
+  editAlbum:
+    title: '{0} を編集'
+    button:
+      OK: OK
+      Cancel: キャンセル
+    creators: クリエイター
+    label:
+      Title: タイトル
+      TitleSort: タイトル (読み)
+      Artist: アーティスト
+      Description: 説明
+  mergeAlbum:
+    title: '{0} を統合'
+    button:
+      Merge: 統合
+      Cancel: キャンセル
+    label:
+      Album: アルバム
+  editArtist:
+    title: '{0} を編集'
+    button:
+      OK: OK
+      Cancel: キャンセル
+    label:
+      Name: 名前
+      NameSort: 名前 (読み)
+      Description: 説明
+  mergeArtist:
+    title: '{0} を統合'
+    button:
+      Merge: 統合
+      Cancel: キャンセル
+    label:
+      Artist: アーティスト
+  createPlaylist:
+    title: プレイリストを作成
+    button:
+      Create: 作成
+      Cancel: キャンセル
+    label:
+      Title: タイトル
+      Description: 説明
+  editPlaylist:
+    title: '{0} を編集'
+    button:
+      OK: OK
+      Cancel: キャンセル
+    label:
+      Title: タイトル
+      Description: 説明
+  editTrack:
+    title: '{0} を編集'
+    button:
+      OK: OK
+      Cancel: キャンセル
+    creators: クリエイター
+    more: 詳細
+    label:
+      Title: タイトル
+      TitleSort: タイトル (読み)
+      Album: アルバム
+      Artist: アーティスト
+      TrackNumber: トラック番号
+      DiscNumber: ディスク番号
+      ReleaseDate: リリース日
+      Genre: ジャンル
+      BPM: BPM
+      Comment: コメント
+      Lyrics: 歌詞
+    releaseDate:
+      hint: 'リリース日は {0} として解釈されます'
+      invalid: リリース日が解析できません
+dialog:
+  signOut:
+    title: ログアウト
+    content: 'ログアウトしてもよろしいですか？'
+    button:
+      SignOut: ログアウト
+      Cancel: キャンセル
+  removeFromPlaylist:
+    title: プレイリストからトラックを削除
+    content: "'{0}' から '{1]' を削除してもよろしいですか？"
+    button:
+      Remove: 削除
+      Cancel: キャンセル
+  deletePlaylist:
+    title: プレイリストを削除
+    content: "'{0}' を削除してもよろしいですか？"
+    button:
+      Delete: 削除
+      Cancel: キャンセル
+  deleteTrack:
+    title: トラックを削除
+    content: "'{0}' を削除してもよろしいですか？"
+    button:
+      Delete: 削除
+      Cancel: キャンセル
+confirm:
+  abortUpload:
+    text: 'アップロードを中止してもよろしいですか？'
+    button:
+      Abort: 中止
+      Cancel: キャンセル
+  deleteImage:
+    text: "'{0}' の画像を削除してもよろしいですか？"
+    button:
+      Delete: 削除
+      Cancel: キャンセル
+message:
+  SyncedDatabase: 同期しました
+  FailedToSyncDatabase: "同期に失敗しました\n{0}"
+  ModifiedAlbum: "アルバム '{0}' を更新しました"
+  FailedToModifyAlbum: "アルバム '{0}' の更新に失敗しました\n{1}"
+  MergedAlbum: "アルバム '{0}' を '{1}' に統合しました"
+  FailedToMergeAlbum: "アルバム '{0}' の統合に失敗しました\n{2}"
+  ModifiedArtist: "アーティスト '{0}' を更新しました"
+  FailedToModifyArtist: "アーティスト '{0}' の更新に失敗しました\n{1}"
+  MergedArtist: "アーティスト '{0}' を '{1}' に統合しました"
+  FailedToMergeArtist: "アーティスト '{0}' の統合に失敗しました\n{2}"
+  CreatedPlaylist: "プレイリスト '{0}' を作成しました"
+  FailedToCreatePlaylist: "プレイリスト '{0}' の作成に失敗しました\n{1}"
+  ModifiedPlaylist: "プレイリスト '{0}' を更新しました"
+  FailedToModifyPlaylist: "プレイリスト '{0}' の更新に失敗しました\n{1}"
+  DeletedPlaylist: "プレイリスト '{0}' を削除しました"
+  FailedToDeletePlaylist: "プレイリスト '{0}' の削除に失敗しました\n{1}"
+  ReorderedTrack: 'トラックを並び替えました'
+  FailedToReorderTrack: "トラックの並び替えに失敗しました\n{0}"
+  ModifiedTrack: "トラック '{0}' を更新しました"
+  FailedToModifyTrack: "トラック '{0}' の更新に失敗しました\n{1}"
+  DeletedTrack: "トラック '{0}' を削除しました"
+  FailedToDeleteTrack: "トラック '{0}' の削除に失敗しました\n{1}"
+  AddedToPlayNextQueue: 再生キューに追加しました
+  n_AddedToPlayNextQueue: '再生キューに追加しました | 1 個のトラックを再生キューに追加しました | {n} 個のトラックを再生キューに追加しました'
+  AddedToPlaylist: "'{1}' を '{0}' に追加しました"
+  FailedToAddToPlaylist: "'{0}' への '{1}' の追加に失敗しました\n{2}"
+  RemovedFromPlaylist: "'{1}' を '{0}' から削除しました"
+  FailedToRemoveFromPlaylist: "'{0}' からの '{1}' の削除に失敗しました\n{2}"
+  ReorderedImage: '画像を並び替えました'
+  FailedToReorderImage: "画像の並び替えに失敗しました\n{1}"
+  DeletedImage: '画像を削除しました'
+  FailedToDeleteImage: "画像の削除に失敗しました\n{1}"
+timeAgo:
+  justNow: たった今
+  past: '{0}前'
+  future: '{0}後'
+  year: '0 年 | 1 年 | {n} 年'
+  month: '0 か月 | 1 か月 | {n} か月'
+  day: '0 日 | 1 日 | {n} 日'
+  week: '0 週間 | 1 週間 | {n} 週間'
+  hour: '0 時間 | 1 時間 | {n} 時間'
+  minute: '0 分 | 1 分 | {n} 分'
+  second: '0 秒 | 1 秒 | {n} 秒'
+vendor:
+  humanizeDuration:
+    language: ja
