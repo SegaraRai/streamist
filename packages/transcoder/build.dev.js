@@ -19,17 +19,5 @@ build({
   define: {
     'process.env.NODE_ENV': '"development"',
     'process.env.PLATFORM': '"development"',
-    'process.env.API_ORIGIN_FOR_TRANSCODER': JSON.stringify(
-      process.env.API_ORIGIN_FOR_TRANSCODER
-    ),
-    'process.env.SECRET_TRANSCODER_CALLBACK_SECRET': JSON.stringify(
-      process.env.SECRET_TRANSCODER_CALLBACK_SECRET
-    ),
-    'process.env.SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID': JSON.stringify(
-      process.env.SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID
-    ),
-    'process.env.SECRET_TRANSCODER_WASABI_SECRET_ACCESS_KEY': JSON.stringify(
-      process.env.SECRET_TRANSCODER_WASABI_SECRET_ACCESS_KEY
-    ),
   },
 });

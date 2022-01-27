@@ -1,4 +1,3 @@
-import './checkEnv';
 import './initOS';
 import './initCredentials';
 

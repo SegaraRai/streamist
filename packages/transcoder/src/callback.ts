@@ -1,4 +1,8 @@
 import fetch, { Response } from 'node-fetch';
+import {
+  API_ORIGIN_FOR_TRANSCODER,
+  SECRET_TRANSCODER_CALLBACK_SECRET,
+} from './env';
 import type { TranscoderRequest, TranscoderResponse } from './types';
 
 export function sendCallback(
@@ -6,11 +10,11 @@ export function sendCallback(
   transcoderResponse: TranscoderResponse
 ): Promise<Response> {
   return fetch(
-    `${process.env.API_ORIGIN_FOR_TRANSCODER}${transcoderRequest.callbackPath}`,
+    `${API_ORIGIN_FOR_TRANSCODER}${transcoderRequest.callbackPath}`,
     {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.SECRET_TRANSCODER_CALLBACK_SECRET}`,
+        Authorization: `Bearer ${SECRET_TRANSCODER_CALLBACK_SECRET}`,
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: JSON.stringify(transcoderResponse),

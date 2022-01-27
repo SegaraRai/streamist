@@ -4,7 +4,7 @@ declare namespace NodeJS {
   interface ProcessEnv {
     // build time
     readonly NODE_ENV: 'development' | 'staging' | 'production' | 'test';
-    readonly PLATFORM_TYPE: 'lambda' | 'gcr';
+    readonly PLATFORM_TYPE: 'development' | 'lambda' | 'gcr';
 
     readonly API_ORIGIN_FOR_TRANSCODER: string;
     readonly SECRET_TRANSCODER_CALLBACK_SECRET: string;
