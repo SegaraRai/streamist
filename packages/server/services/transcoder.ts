@@ -4,6 +4,10 @@ import fetch from 'node-fetch';
 import { DEV_TRANSCODER_API_ENDPOINT } from '$shared-server/config/dev';
 import { OSRegion, getOSRegion } from '$shared-server/objectStorage';
 import { TranscoderRequest } from '$transcoder/types';
+import {
+  SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID,
+  SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY,
+} from '$/services/env';
 import { logger } from '$/services/logger';
 
 async function invokeTranscoderDev(request: TranscoderRequest): Promise<void> {
@@ -56,6 +60,10 @@ export async function invokeTranscoder(
       case 'lambda': {
         const lambda = new Lambda({
           region: regionDef.transcoderLambdaRegion,
+          credentials: {
+            accessKeyId: SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID,
+            secretAccessKey: SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY,
+          },
         });
         await lambda.invoke({
           InvocationType: 'Event',
