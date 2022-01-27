@@ -25,14 +25,14 @@ export default defineComponent({
     const themeStore = useThemeStore();
     const syncDB = useSyncDB();
 
-    const themeOptions$$q = eagerComputed(() =>
+    const themeOptions$$q = computed(() =>
       PREFERENCE_THEMES.map((code) => ({
         value: code,
         label: t(`settings.theme.${code}`),
       }))
     );
 
-    const audioQualityOptions$$q = eagerComputed(() =>
+    const audioQualityOptions$$q = computed(() =>
       PREFERENCE_AUDIO_QUALITIES.map((code) => ({
         value: code,
         label: t(`settings.audioQuality.${code}`),
