@@ -1,0 +1,44 @@
+name: 'Staging: Build and deploy Frontend'
+
+on:
+  push:
+    branches:
+      - staging
+    paths:
+      - 'packages/frontend/**'
+      - 'packages/shared/**'
+      - '.github/workflows/staging_deploy_frontend.yml'
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: pnpm
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm run generate
+      - run: pnpm run build:client -- -- --mode $TARGET_NODE_ENV
+        env:
+          TARGET_NODE_ENV: staging
+          VITE_CDN_ORIGIN: ${{ secrets.STAGING_CDN_ORIGIN }}
+          VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION: ${{ secrets.STAGING_HCAPTCHA_SITE_KEY_FOR_REGISTRATION }}
+      - run: |
+          mkdir -p packages/frontend/build
+          mv packages/frontend/dist packages/frontend/build/
+          cp -r packages/frontend/functions packages/frontend/build/
+      - name: Deploy to build repository
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: git@github.com:${{ secrets.SECRET_GH_BUILD_REPOSITORY_NAME }}.git
+          BRANCH: staging
+          FOLDER: packages/frontend/build
+          SSH_PRIVATE_KEY: ${{ secrets.SECRET_GH_BUILD_REPOSITORY_DEPLOY_KEY }}
