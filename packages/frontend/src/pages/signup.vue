@@ -108,7 +108,7 @@ export default defineComponent({
         usernameAvailability$$q.value === true
     );
 
-    if (import.meta.env.DEV) {
+    if (import.meta.env.MODE === 'development') {
       useIntervalFn((): void => {
         hCaptchaResponse$$q.value = 'dummy';
       }, 500);
