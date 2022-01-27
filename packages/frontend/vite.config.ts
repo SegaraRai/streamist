@@ -16,7 +16,7 @@ import {
 } from 'unplugin-vue-components/dist/types';
 import Components from 'unplugin-vue-components/vite';
 import { ProxyOptions, defineConfig } from 'vite';
-import { minifyHtml } from 'vite-plugin-html';
+import { createHtmlPlugin } from 'vite-plugin-html';
 import Inspect from 'vite-plugin-inspect';
 import Markdown from 'vite-plugin-md';
 import Pages from 'vite-plugin-pages';
@@ -181,7 +181,19 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
-      minifyHtml(),
+      createHtmlPlugin({
+        minify: {
+          collapseWhitespace: true,
+          keepClosingSlash: true,
+          removeComments: true,
+          removeRedundantAttributes: true,
+          removeScriptTypeAttributes: true,
+          removeStyleLinkTypeAttributes: true,
+          useShortDoctype: true,
+          minifyCSS: true,
+          minifyJS: true,
+        },
+      }),
 
       Vue({
         include: [/\.vue$/, /\.md$/],
