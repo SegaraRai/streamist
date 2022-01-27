@@ -113,10 +113,10 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
   // 本当はitemTableもArrayMainTable型であることを確認したい
   const inserted = await txClient.$executeRawUnsafe(
     `
-    INSERT INTO \`${junctionTable}\` (\`${COL_USER_ID}\`, \`${COL_X}\`, \`${COL_Y}\`)
-    SELECT $1, $2, \`${COL_ID}\`
-      FROM \`${itemTable}\`
-      WHERE \`${COL_USER_ID}\` = $3 AND \`${COL_ID}\` IN (${dbCreatePlaceholders(
+    INSERT INTO "${junctionTable}" ("${COL_USER_ID}", "${COL_X}", "${COL_Y}")
+    SELECT $1, $2, "${COL_ID}"
+      FROM "${itemTable}"
+      WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" IN (${dbCreatePlaceholders(
       itemIds,
       4
     )})
@@ -137,13 +137,13 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
   // NOTE(security): ここでgroupIdのユーザーIDを確認している
   // NOTE: CONCAT is not supported by SQLite
   const expression = prepend
-    ? `($1 || \`${itemOrderColumn}\`)`
-    : `(\`${itemOrderColumn}\` || $1)`;
+    ? `($1 || "${itemOrderColumn}")`
+    : `("${itemOrderColumn}" || $1)`;
   const updated = await txClient.$executeRawUnsafe(
     `
-    UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = ${expression}, \`${COL_UPDATED_AT}\` = $2
-      WHERE \`${COL_USER_ID}\` = $3 AND \`${COL_ID}\` = $4
+    UPDATE "${mainTable}"
+      SET "${itemOrderColumn}" = ${expression}, "${COL_UPDATED_AT}" = $2
+      WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4
     `,
     dbArraySerializeItemIds(itemIds),
     Date.now(),
@@ -218,9 +218,9 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
   // NOTE(security): ここでgroupIdのユーザーIDを確認している
   const main = await txClient.$queryRawUnsafe<Record<string, string>[]>(
     `
-    SELECT \`${itemOrderColumn}\`
-      FROM \`${mainTable}\`
-      WHERE \`${COL_USER_ID}\` = ? AND \`${COL_ID}\` = ?
+    SELECT "${itemOrderColumn}"
+      FROM "${mainTable}"
+      WHERE "${COL_USER_ID}" = ? AND "${COL_ID}" = ?
     `,
     userId,
     groupId
@@ -254,8 +254,8 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
   const deleted = await txClient.$executeRawUnsafe(
     `
     DELETE
-      FROM \`${junctionTable}\`
-      WHERE \`${COL_X}\` = $1 AND \`${COL_Y}\` IN (${dbCreatePlaceholders(
+      FROM "${junctionTable}"
+      WHERE "${COL_X}" = $1 AND "${COL_Y}" IN (${dbCreatePlaceholders(
       removeItemIds,
       2
     )})
@@ -273,9 +273,9 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
   // update item order (optimistic lock pattern)
   const updated = await txClient.$executeRawUnsafe(
     `
-    UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = $1, \`${COL_UPDATED_AT}\` = $2
-      WHERE \`${COL_USER_ID}\` = $3 AND \`${COL_ID}\` = $4 AND \`${itemOrderColumn}\` = $5
+    UPDATE "${mainTable}"
+      SET "${itemOrderColumn}" = $1, "${COL_UPDATED_AT}" = $2
+      WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4 AND "${itemOrderColumn}" = $5
     `,
     newItemOrder,
     Date.now(),
@@ -478,9 +478,9 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
   // NOTE(security): ここでgroupIdのユーザーIDを確認している
   const main = await txClient.$queryRawUnsafe<Record<string, string>[]>(
     `
-    SELECT \`${itemOrderColumn}\`
-      FROM \`${mainTable}\`
-      WHERE \`${COL_USER_ID}\` = ? AND \`${COL_ID}\` = ?
+    SELECT "${itemOrderColumn}"
+      FROM "${mainTable}"
+      WHERE "${COL_USER_ID}" = ? AND "${COL_ID}" = ?
     `,
     userId,
     groupId
@@ -510,9 +510,9 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
   // update item order (optimistic lock pattern)
   const updated = await txClient.$executeRawUnsafe(
     `
-    UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = $1, \`${COL_UPDATED_AT}\` = $2
-      WHERE \`${COL_USER_ID}\` = $3 AND \`${COL_ID}\` = $4 AND \`${itemOrderColumn}\` = $5
+    UPDATE "${mainTable}"
+      SET "${itemOrderColumn}" = $1, "${COL_UPDATED_AT}" = $2
+      WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4 AND "${itemOrderColumn}" = $5
     `,
     newItemOrder,
     Date.now(),
@@ -678,9 +678,9 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
   const groupIds = (
     await txClient.$queryRawUnsafe<ArrayJunctionTable[]>(
       `
-      SELECT \`${COL_X}\`
-        FROM \`${junctionTable}\`
-        WHERE \`${COL_USER_ID}\` = $1 AND \`${COL_Y}\` = $2
+      SELECT "${COL_X}"
+        FROM "${junctionTable}"
+        WHERE "${COL_USER_ID}" = $1 AND "${COL_Y}" = $2
       `,
       userId,
       itemId
@@ -690,8 +690,8 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
   const deleted = await txClient.$executeRawUnsafe(
     `
     DELETE
-      FROM \`${junctionTable}\`
-      WHERE \`${COL_USER_ID}\` = $1 AND \`${COL_Y}\` = $2 AND \`${COL_X}\` IN (${dbCreatePlaceholders(
+      FROM "${junctionTable}"
+      WHERE "${COL_USER_ID}" = $1 AND "${COL_Y}" = $2 AND "${COL_X}" IN (${dbCreatePlaceholders(
       groupIds,
       3
     )})
@@ -708,9 +708,9 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
 
   const updated = await txClient.$executeRawUnsafe(
     `
-    UPDATE \`${mainTable}\`
-      SET \`${itemOrderColumn}\` = REPLACE(\`${itemOrderColumn}\`, $1, ''), \`${COL_UPDATED_AT}\` = $2
-      WHERE \`${COL_USER_ID}\` = $3 AND \`${itemOrderColumn}\` LIKE $4 AND \`${COL_ID}\` IN (${dbCreatePlaceholders(
+    UPDATE "${mainTable}"
+      SET "${itemOrderColumn}" = REPLACE("${itemOrderColumn}", $1, ''), "${COL_UPDATED_AT}" = $2
+      WHERE "${COL_USER_ID}" = $3 AND "${itemOrderColumn}" LIKE $4 AND "${COL_ID}" IN (${dbCreatePlaceholders(
       groupIds,
       5
     )})

@@ -36,12 +36,12 @@ export async function dbAlbumGetOrCreateByNameTx(
 
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
-    INSERT INTO Album (id, title, artistId, userId, createdAt, updatedAt)
+    INSERT INTO "Album" ("id", "title", "artistId", "userId", "createdAt", "updatedAt")
     SELECT ${newAlbumId}, ${albumTitle}, ${artistId}, ${userId}, ${timestamp}, ${timestamp}
       WHERE NOT EXISTS (
         SELECT 1
-          FROM Album
-          WHERE userId = ${userId} AND artistId = ${artistId} AND title = ${albumTitle}
+          FROM "Album"
+          WHERE "userId" = ${userId} AND "artistId" = ${artistId} AND "title" = ${albumTitle}
       )
       LIMIT 1
     `;

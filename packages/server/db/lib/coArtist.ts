@@ -27,19 +27,19 @@ export async function dbCoArtistMergeTx<T extends CoArtistTable>(
   // TODO: test this
   await txClient.$executeRawUnsafe(
     `
-    UPDATE \`${table}\`
+    UPDATE "${table}"
       SET
-        \`${entityColumn}\` = $1,
-        \`${COL_UPDATED_AT}\` = $2
+        "${entityColumn}" = $1,
+        "${COL_UPDATED_AT}" = $2
       WHERE
-        \`${COL_USER_ID}\` = $3 AND
-        \`${entityColumn}\` = $4 AND
+        "${COL_USER_ID}" = $3 AND
+        "${entityColumn}" = $4 AND
         NOT EXISTS (
           SELECT 1
-            FROM \`${table}\` A
+            FROM "${table}" "A"
             WHERE
-              A.\`${COL_USER_ID}\` = $5 AND A.\`${entityColumn}\` = $6 AND
-              A.\`${COL_ROLE}\` = \`${table}\`.\`${COL_ROLE}\` AND A.\`${COL_ARTIST_ID}\` = \`${table}\`.\`${COL_ARTIST_ID}\`
+              "A"."${COL_USER_ID}" = $5 AND "A"."${entityColumn}" = $6 AND
+              "A"."${COL_ROLE}" = "${table}"."${COL_ROLE}" AND "A"."${COL_ARTIST_ID}" = "${table}"."${COL_ARTIST_ID}"
         )
     `,
     toEntityId,
@@ -64,19 +64,19 @@ export async function dbCoArtistMergeArtistTx<T extends CoArtistTable>(
   // TODO: test this
   await txClient.$executeRawUnsafe(
     `
-    UPDATE \`${table}\`
+    UPDATE "${table}"
       SET
-        \`${COL_ARTIST_ID}\` = $1,
-        \`${COL_UPDATED_AT}\` = $2
+        "${COL_ARTIST_ID}" = $1,
+        "${COL_UPDATED_AT}" = $2
       WHERE
-        \`${COL_USER_ID}\` = $3 AND
-        \`${COL_ARTIST_ID}\` = $4 AND
+        "${COL_USER_ID}" = $3 AND
+        "${COL_ARTIST_ID}" = $4 AND
         NOT EXISTS (
           SELECT 1
-            FROM \`${table}\` A
+            FROM "${table}" "A"
             WHERE
-              A.\`${COL_USER_ID}\` = $5 AND A.\`${COL_ARTIST_ID}\` = $6 AND
-              A.\`${COL_ROLE}\` = \`${table}\`.\`${COL_ROLE}\` AND A.\`${entityColumn}\` = \`${table}\`.\`${entityColumn}\`
+              "A"."${COL_USER_ID}" = $5 AND "A"."${COL_ARTIST_ID}" = $6 AND
+              "A"."${COL_ROLE}" = "${table}"."${COL_ROLE}" AND "A"."${entityColumn}" = "${table}"."${entityColumn}"
         )
     `,
     toArtistId,
@@ -90,10 +90,10 @@ export async function dbCoArtistMergeArtistTx<T extends CoArtistTable>(
   await txClient.$executeRawUnsafe(
     `
     DELETE
-      FROM \`${table}\`
+      FROM "${table}"
       WHERE
-        \`${COL_USER_ID}\` = $1 AND
-        \`${COL_ARTIST_ID}\` = $2
+        "${COL_USER_ID}" = $1 AND
+        "${COL_ARTIST_ID}" = $2
     `,
     userId,
     artistId

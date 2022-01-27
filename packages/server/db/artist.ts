@@ -35,14 +35,14 @@ export async function dbArtistGetOrCreateByNameTx(
 
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
-    INSERT INTO Artist (id, name, nameSort, userId, createdAt, updatedAt)
+    INSERT INTO "Artist" ("id", "name", "nameSort", "userId", "createdAt", "updatedAt")
     SELECT ${newArtistId}, ${artistName}, ${
     artistNameSort || null
   }, ${userId}, ${timestamp}, ${timestamp}
       WHERE NOT EXISTS (
         SELECT 1
-          FROM Artist
-          WHERE userId = ${userId} AND name = ${artistName}
+          FROM "Artist"
+          WHERE "userId" = ${userId} AND "name" = ${artistName}
       )
       LIMIT 1
     `;
