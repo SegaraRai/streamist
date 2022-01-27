@@ -7,7 +7,7 @@
     "dev:build": "node ./build.dev.js",
     "dev:start": "node-dev --respawn ./dist/index_dev.js",
     "build": "run-s build:*",
-    "build:gcr": "rollup -c rollup.config.gcr.js",
+    "build:gcr": "rollup -c rollup.gcr.config.js",
     "build:lambda": "rollup -c",
     "typecheck": "tsc --noEmit"
   },
