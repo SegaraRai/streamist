@@ -51,12 +51,11 @@ services:
     image: haproxy:alpine
     container_name: haproxy
     restart: always
-    env_file: domain.env
     ports:
       - '80:80'
       - '443:443'
     volumes:
-      - ./data/lego:/etc/lego:ro
+      - ./data/lego/cert.pem:/certificates/cert.pem:ro
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
       - nodejs

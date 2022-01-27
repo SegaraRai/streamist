@@ -1,12 +1,10 @@
+#!/bin/sh
+
 FILE=database.env
 rm -f $FILE
 echo POSTGRES_USER=$SECRET_POSTGRES_USER >> $FILE
 echo POSTGRES_PASSWORD=$SECRET_POSTGRES_PASSWORD >> $FILE
 echo POSTGRES_DB=$SECRET_POSTGRES_DB >> $FILE
-
-FILE=domain.env
-rm -f $FILE
-echo API_DOMAIN=$API_DOMAIN >> $FILE
 
 FILE=server.env
 rm -f $FILE
