@@ -8,7 +8,7 @@ COPY app .
 RUN npm install
 RUN npx prisma generate
 
-COPY *.sh .
+COPY *.sh ./
 RUN chmod 0755 *.sh
 
 ### Release Stage
