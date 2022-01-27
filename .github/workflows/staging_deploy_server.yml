@@ -30,12 +30,13 @@ jobs:
       - run: pnpm run build:server
         env:
           TARGET_NODE_ENV: staging
-      - run: docker build -t streamist-server ./packages/server/docker/docker.server
+      - run: DOCKER_BUILDKIT=1 docker build -t streamist-server ./packages/server/docker/docker.server
       - run: docker save streamist-server | xz -0 > ./packages/server/docker/compose/streamist-server.tar.xz
-      - run: |
-          cd ./packages/server/compose
+      - name: Create env files
+        run: |
+          cd ./packages/server/docker/compose
           ./createEnv.sh
-          printenv SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON > gapp-credentials.json
+          printenv SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON > ./gapp-credentials.json
         env:
           SECRET_POSTGRES_USER: ${{ secrets.STAGING_SECRET_POSTGRES_USER }}
           SECRET_POSTGRES_PASSWORD: ${{ secrets.STAGING_SECRET_POSTGRES_PASSWORD }}
