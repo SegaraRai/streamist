@@ -34,6 +34,11 @@ export default defineConfig({
       writeBundle: async () => {
         const zip = new JSZip();
         zip.file('index.js', await readFile('dist/index.js'));
+        zip.file(
+          'sRGB_ICC_v4_Appearance.icc',
+          await readFile('sRGB_ICC_v4_Appearance.icc')
+        );
+        zip.file('imconfig/policy.xml', await readFile('policy.xml'));
         const zipContent = await zip.generateAsync({
           type: 'nodebuffer',
           compressionOptions: {
