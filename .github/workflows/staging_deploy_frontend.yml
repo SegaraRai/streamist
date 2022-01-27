@@ -6,6 +6,7 @@ on:
       - staging
     paths:
       - 'packages/frontend/**'
+      - '!packages/frontend/**/*.d.ts'
       - 'packages/shared/**'
       - '.github/workflows/staging_deploy_frontend.yml'
 
