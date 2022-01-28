@@ -198,7 +198,6 @@ export function useNDropdownTrack({
       key: 'addToPlaylist',
       label: t('dropdown.track.AddToPlaylist'),
       icon: nCreateDropdownIcon('mdi-playlist-plus'),
-      disabled: !playlists.length,
       children: [
         {
           key: 'addToPlaylist.createNew',
@@ -230,10 +229,14 @@ export function useNDropdownTrack({
             },
           },
         },
-        {
-          key: 'addToPlaylist.div',
-          type: 'divider',
-        },
+        ...(playlists.length
+          ? [
+              {
+                key: 'addToPlaylist.div',
+                type: 'divider',
+              },
+            ]
+          : []),
         ...playlists.map((playlist) => {
           const disabled = playlist.trackIds.includes(trackId);
           return {
