@@ -39,11 +39,11 @@ export default defineComponent({
       () => tentativeItems$$q.value || props.items
     );
 
-    const onChange$$q = (event: VueDraggableChangeEvent<any>) => {
+    const onChange$$q = (event: unknown) => {
       if (props.onMove) {
         const { items, onMove } = props;
 
-        const { moved } = event;
+        const { moved } = event as VueDraggableChangeEvent<any>;
         if (!moved) {
           return;
         }
