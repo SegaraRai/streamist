@@ -77,7 +77,7 @@ export interface FFprobeStreamBase {
   start_pts: number;
   start_time: string;
   duration_ts?: number;
-  duration: string;
+  duration?: string;
   nb_frames?: string;
   disposition: FFprobeDisposition;
   tags?: FFprobeTags;

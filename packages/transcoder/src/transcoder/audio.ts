@@ -33,6 +33,7 @@ import {
 import { generateTempFilename, getTempFilepath } from '../tempFile';
 import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig';
 import type {
+  FFprobeResult,
   FFprobeStreamAudio,
   FFprobeStreamVideo,
   FFprobeTags,
@@ -180,6 +181,7 @@ function createTracksFromCueSheet(
 }
 
 async function createTracks(
+  audioInfo: FFprobeResult,
   audioStream: FFprobeStreamAudio,
   tags: FFprobeTags,
   cueSheet?: CueSheet
@@ -190,7 +192,7 @@ async function createTracks(
       ? (parseInt(audioStream.duration_ts.toString(), 10) *
           parseInt(audioStream.time_base.split('/')[0], 10)) /
         parseInt(audioStream.time_base.split('/')[1], 10)
-      : parseFloat(audioStream.duration);
+      : parseFloat(audioStream.duration || audioInfo.format.duration);
 
   // トラック作成
   const tracks: TranscoderResponseArtifactAudioTrack[] = cueSheet
@@ -303,7 +305,7 @@ export async function processAudioRequest(
       ? parseCueSheet(strCueSheet)
       : undefined;
 
-    const tracks = await createTracks(audioStream, tags, cueSheet);
+    const tracks = await createTracks(audioInfo, audioStream, tags, cueSheet);
 
     // トランスコード
     // TODO(perf)?: 並列化
