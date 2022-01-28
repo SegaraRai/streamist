@@ -310,6 +310,14 @@ export async function processAudioRequest(
     // トランスコード
     // TODO(perf)?: 並列化
     for (const [trackIndex, track] of tracks.entries()) {
+      const {
+        id: trackId,
+        files,
+        duration,
+        clipStartTime,
+        clipDuration,
+      } = track;
+
       for (const audioFormat of getTranscodeAudioFormats(
         audioInfo,
         audioStream
@@ -323,18 +331,19 @@ export async function processAudioRequest(
         const preArgs = [];
         // 必要に応じて切り出しの開始時間を設定
         // 入力ファイルの方の引数で指定すると処理が早くなる
-        if (track.clipStartTime != null) {
-          preArgs.push('-ss', track.clipStartTime.toFixed(16));
+        if (clipStartTime != null) {
+          preArgs.push('-ss', clipStartTime.toFixed(16));
         }
         // 必要に応じて切り出す長さを設定
-        if (track.clipDuration != null) {
-          preArgs.push('-t', track.clipDuration.toFixed(16));
+        if (clipDuration != null) {
+          preArgs.push('-t', clipDuration.toFixed(16));
         }
 
         const comment: string = [
-          userId,
-          sourceId,
-          sourceFileId,
+          // userId,
+          // sourceId,
+          // sourceFileId,
+          // trackId,
           transcodedAudioFileId,
           audioFormat.name,
         ].join('\n');
@@ -375,7 +384,7 @@ export async function processAudioRequest(
 
         const key = getTranscodedAudioFileKey(
           userId,
-          track.id,
+          trackId,
           transcodedAudioFileId,
           audioFormat.extension
         );
@@ -393,14 +402,14 @@ export async function processAudioRequest(
 
         await unlink(transcodedAudioFilepath);
 
-        track.files.push({
+        files.push({
           fileId: transcodedAudioFileId,
           formatName: audioFormat.name,
           mimeType: audioFormat.mimeType,
           extension: audioFormat.extension,
           fileSize,
-          bitrate: (fileSize / track.duration) * 8,
-          duration: track.duration,
+          bitrate: (fileSize / duration) * 8,
+          duration,
           sha256,
         });
       }

@@ -112,9 +112,10 @@ export async function processImageRequest(
       const height = Math.round(sourceHeight * scale);
 
       const comment: string = [
-        userId,
-        sourceId,
-        sourceFileId,
+        // userId,
+        // sourceId,
+        // sourceFileId,
+        // imageId,
         transcodedImageFileId,
         imageFormat.name,
       ].join('\n');
