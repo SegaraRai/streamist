@@ -2,12 +2,25 @@ const IS_MAINTENANCE = false;
 
 interface Env {
   readonly API_BASE_PATH: string;
+  readonly APP_ORIGIN: string;
   readonly API_ORIGIN_FOR_API_PROXY: string;
   readonly SECRET_API_PROXY_AUTH_TOKEN: string;
 }
 
 export const onRequest: PagesFunction<Env> = (context): Promise<Response> => {
   const { env, request } = context;
+  const { origin, pathname, search } = new URL(request.url);
+
+  if (origin !== env.APP_ORIGIN) {
+    return Promise.resolve(
+      new Response('invalid origin', {
+        status: 403,
+        headers: {
+          'Cache-Control': 'no-store',
+        },
+      })
+    );
+  }
 
   if (IS_MAINTENANCE) {
     return Promise.resolve(
@@ -20,7 +33,6 @@ export const onRequest: PagesFunction<Env> = (context): Promise<Response> => {
     );
   }
 
-  const { pathname, search } = new URL(request.url);
   const rewrittenPathname = pathname.replace(
     /^\/api\//,
     `${env.API_BASE_PATH}/`
