@@ -231,13 +231,13 @@ export default defineComponent({
             </VCard>
           </template>
         </SVirtualGrid>
-        <SDropdownAlbum v-model="dropdown$$q" />
       </template>
       <template v-else>
         <div class="text-base">
           {{ t('albums.no_items') }}
         </div>
       </template>
+      <SDropdownAlbum v-model="dropdown$$q" />
     </template>
   </VContainer>
 </template>

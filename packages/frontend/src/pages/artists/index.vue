@@ -193,13 +193,13 @@ export default defineComponent({
             </VCard>
           </template>
         </SVirtualGrid>
-        <SDropdownArtist v-model="dropdown$$q" />
       </template>
       <template v-else>
         <div class="text-base">
           {{ t('artists.no_items') }}
         </div>
       </template>
+      <SDropdownArtist v-model="dropdown$$q" />
     </template>
   </VContainer>
 </template>
