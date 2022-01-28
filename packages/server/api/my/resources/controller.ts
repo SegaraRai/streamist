@@ -7,10 +7,10 @@ export default defineController(() => ({
     const data = await fetchResources(user.id, Number(query?.since || 0));
     return {
       status: 200,
-      body: data,
       headers: {
         'Cache-Control': CACHE_CONTROL_NO_STORE,
       },
+      body: data,
     };
   },
 }));

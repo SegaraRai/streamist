@@ -18,8 +18,8 @@ export default defineController(() => ({
     }
     return {
       status: 200,
-      body: convertPlaylist(playlist),
       headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
+      body: convertPlaylist(playlist),
     };
   },
   patch: async ({ body, params, user }) => {

@@ -11,7 +11,13 @@ export default defineController(() => ({
         userId: user.id,
       },
     });
-    return { status: 200, body: playlists.map(convertPlaylist) };
+    return {
+      status: 200,
+      headers: {
+        'Cache-Control': CACHE_CONTROL_NO_STORE,
+      },
+      body: playlists.map(convertPlaylist),
+    };
   },
   post: async ({ body, user }) => {
     const playlist = await playlistCreate(user.id, body);
