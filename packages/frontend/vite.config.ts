@@ -277,8 +277,13 @@ export default defineConfig(({ mode }) => {
 
       // https://github.com/antfu/vite-plugin-pwa
       VitePWA({
-        registerType: 'autoUpdate',
-        includeAssets: ['favicon.svg', 'robots.txt', 'safari-pinned-tab.svg'],
+        registerType: 'prompt',
+        includeAssets: [
+          'apple-touch-icon.png',
+          'favicon.svg',
+          'robots.txt',
+          'safari-pinned-tab.svg',
+        ],
         manifest: {
           name: 'Streamist',
           short_name: 'Streamist',
