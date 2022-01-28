@@ -1,6 +1,12 @@
 /assets/*
   Cache-Control: public, immutable, max-age=31536000
 
+/index.html
+  Cache-Control: public, max-age=0, stale-while-revalidate=604800, stale-if-error=604800
+
+/sw.js
+  Cache-Control: no-store
+
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
