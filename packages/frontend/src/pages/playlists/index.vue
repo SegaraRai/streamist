@@ -161,18 +161,18 @@ export default defineComponent({
             </template>
           </VList>
         </div>
-        <SDropdownPlaylist
-          v-model="dropdown$$q"
-          v-model:show-create-dialog="showCreateDialog$$q"
-          show-create-item
-          @update:selected-playlist="selectedPlaylist$$q = $event"
-        />
       </template>
       <template v-else>
         <div class="text-base">
           {{ t('playlists.no_items') }}
         </div>
       </template>
+      <SDropdownPlaylist
+        v-model="dropdown$$q"
+        v-model:show-create-dialog="showCreateDialog$$q"
+        show-create-item
+        @update:selected-playlist="selectedPlaylist$$q = $event"
+      />
     </template>
   </VContainer>
 </template>
