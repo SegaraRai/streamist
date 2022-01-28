@@ -307,6 +307,9 @@ export default defineConfig(({ mode }) => {
             },
           ],
         },
+        workbox: {
+          navigateFallbackDenylist: [/^\/api\//, /^\/cdn-cgi\//],
+        },
       }),
 
       // https://github.com/intlify/bundle-tools/tree/main/packages/vite-plugin-vue-i18n
