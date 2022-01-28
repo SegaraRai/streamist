@@ -7,6 +7,7 @@ import { Album, Artist, Prisma, Track } from '$prisma/client';
 import { dbAlbumGetOrCreateByNameTx } from './album';
 import { dbArtistCreateCachedGetOrCreateByNameTx } from './artist';
 import { client } from './lib/client';
+import { dbGetTimestamp } from './lib/timestamp';
 import type { TransactionalPrismaClient } from './lib/types';
 
 export type CreateTrackData = Omit<
@@ -118,7 +119,7 @@ export async function dbTrackCreateTx(
     ).values()
   );
 
-  const timestamp = Date.now();
+  const timestamp = dbGetTimestamp();
 
   const track = await txClient.track.create({
     data: {

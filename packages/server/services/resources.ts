@@ -18,6 +18,7 @@ import type {
 } from '$prisma/client';
 import { RESOURCE_TIMESTAMP_MARGIN } from '$/config';
 import { client } from '$/db/lib/client';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import type {
   ResourceAlbum,
   ResourceAlbumCoArtist,
@@ -35,9 +36,15 @@ import type {
 } from '$/types';
 import { HTTPError } from '$/utils/httpError';
 
+function toNumber<T = never>(value: T | bigint): T | number {
+  return typeof value === 'bigint' ? Number(value) : value;
+}
+
 function convertAlbum(album: Album): ResourceAlbum {
   return {
     ...album,
+    createdAt: toNumber(album.createdAt),
+    updatedAt: toNumber(album.updatedAt),
     imageIds: dbArrayDeserializeItemIds(album.imageOrder),
     imageOrder: undefined,
     userId: undefined,
@@ -49,6 +56,8 @@ function convertAlbumCoArtist(
 ): ResourceAlbumCoArtist {
   return {
     ...albumCoArtist,
+    createdAt: toNumber(albumCoArtist.createdAt),
+    updatedAt: toNumber(albumCoArtist.updatedAt),
     userId: undefined,
   } as ResourceAlbumCoArtist;
 }
@@ -56,6 +65,8 @@ function convertAlbumCoArtist(
 function convertArtist(artist: Artist): ResourceArtist {
   return {
     ...artist,
+    createdAt: toNumber(artist.createdAt),
+    updatedAt: toNumber(artist.updatedAt),
     imageIds: dbArrayDeserializeItemIds(artist.imageOrder),
     imageOrder: undefined,
     userId: undefined,
@@ -65,8 +76,12 @@ function convertArtist(artist: Artist): ResourceArtist {
 function convertImage(image: Image & { files: ImageFile[] }): ResourceImage {
   return {
     ...image,
+    createdAt: toNumber(image.createdAt),
+    updatedAt: toNumber(image.updatedAt),
     files: image.files.map((file) => ({
       ...file,
+      createdAt: toNumber(file.createdAt),
+      updatedAt: toNumber(file.updatedAt),
       imageId: undefined,
       userId: undefined,
     })),
@@ -77,6 +92,8 @@ function convertImage(image: Image & { files: ImageFile[] }): ResourceImage {
 function convertPlaylist(playlist: Playlist): ResourcePlaylist {
   return {
     ...playlist,
+    createdAt: toNumber(playlist.createdAt),
+    updatedAt: toNumber(playlist.updatedAt),
     imageIds: dbArrayDeserializeItemIds(playlist.imageOrder),
     trackIds: dbArrayDeserializeItemIds(playlist.trackOrder),
     imageOrder: undefined,
@@ -88,8 +105,12 @@ function convertPlaylist(playlist: Playlist): ResourcePlaylist {
 function convertTrack(track: Track & { files: TrackFile[] }): ResourceTrack {
   return {
     ...track,
+    createdAt: toNumber(track.createdAt),
+    updatedAt: toNumber(track.updatedAt),
     files: track.files.map((file) => ({
       ...file,
+      createdAt: toNumber(file.createdAt),
+      updatedAt: toNumber(file.updatedAt),
       trackId: undefined,
       userId: undefined,
     })),
@@ -100,6 +121,10 @@ function convertTrack(track: Track & { files: TrackFile[] }): ResourceTrack {
 function convertSource(source: Source): ResourceSource {
   return {
     ...source,
+    createdAt: toNumber(source.createdAt),
+    updatedAt: toNumber(source.updatedAt),
+    transcodeFinishedAt: toNumber(source.transcodeFinishedAt),
+    transcodeStartedAt: toNumber(source.transcodeStartedAt),
     userId: undefined,
   } as ResourceSource;
 }
@@ -107,6 +132,9 @@ function convertSource(source: Source): ResourceSource {
 function convertSourceFile(sourceFile: SourceFile): ResourceSourceFile {
   return {
     ...sourceFile,
+    createdAt: toNumber(sourceFile.createdAt),
+    updatedAt: toNumber(sourceFile.updatedAt),
+    uploadedAt: toNumber(sourceFile.uploadedAt),
     userId: undefined,
   } as ResourceSourceFile;
 }
@@ -116,6 +144,8 @@ function convertTrackCoArtist(
 ): ResourceTrackCoArtist {
   return {
     ...trackCoArtist,
+    createdAt: toNumber(trackCoArtist.createdAt),
+    updatedAt: toNumber(trackCoArtist.updatedAt),
     userId: undefined,
   } as ResourceTrackCoArtist;
 }
@@ -123,6 +153,7 @@ function convertTrackCoArtist(
 function convertDeletion(deletion: Deletion): ResourceDeletion {
   return {
     ...deletion,
+    deletedAt: toNumber(deletion.deletedAt),
     userId: undefined,
   } as ResourceDeletion;
 }
@@ -135,8 +166,8 @@ function convertUser(user: User): ResourceUser {
     region: user.region as OSRegion,
     plan: user.plan as Plan,
     maxTrackId: user.maxTrackId,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
+    createdAt: toNumber<never>(user.createdAt),
+    updatedAt: toNumber<never>(user.updatedAt),
   };
 }
 
@@ -166,7 +197,7 @@ export function fetchResources(
         throw new HTTPError(404, `User ${userId} not found`);
       }
 
-      const { updatedAt } = resourceUpdate;
+      const updatedAt = Number(resourceUpdate.updatedAt);
 
       // some clock skew may occur because of transaction
       const timestamp = Math.max(
@@ -198,7 +229,7 @@ export function fetchResources(
           updatedAt:
             nSince > 0
               ? {
-                  gte: nSince,
+                  gte: dbGetTimestamp(nSince),
                 }
               : undefined,
         },

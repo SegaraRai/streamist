@@ -1,11 +1,13 @@
 import { USER_TREAT_AS_DELETED_AFTER_CLOSE } from '$shared/config';
 import { client } from '$/db/lib/client';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { osDeleteImageFiles } from '$/os/imageFile';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 import { osDeleteTrackFiles } from '$/os/trackFile';
 
 export async function cleanupClosedAccounts(): Promise<void> {
-  const deleteClosedAt = Date.now() - USER_TREAT_AS_DELETED_AFTER_CLOSE;
+  const deleteClosedAt =
+    dbGetTimestamp() - BigInt(USER_TREAT_AS_DELETED_AFTER_CLOSE);
 
   const users = await client.user.findMany({
     where: {

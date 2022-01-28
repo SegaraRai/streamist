@@ -5,6 +5,7 @@ import { toUnique } from '$shared/unique';
 import { client } from '$/db/lib/client';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import {
   dbPlaylistAddTrack,
   dbPlaylistMoveImageBefore,
@@ -42,7 +43,7 @@ export async function playlistCreate(
     throw new HTTPError(400, 'some trackIds are not found');
   }
 
-  const timestamp = Date.now();
+  const timestamp = dbGetTimestamp();
 
   const playlist = await client.playlist.create({
     data: {
@@ -87,7 +88,7 @@ export async function playlistUpdate(
     data: {
       title,
       description,
-      updatedAt: Date.now(),
+      updatedAt: dbGetTimestamp(),
     },
   });
   if (playlist.count === 0) {

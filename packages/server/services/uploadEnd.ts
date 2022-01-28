@@ -21,6 +21,7 @@ import type { SourceFile } from '$prisma/client';
 import { TRANSCODER_CALLBACK_API_PATH } from '$/config';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { DBTimestamp, dbGetTimestamp } from '$/db/lib/timestamp';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 import { logger } from '$/services/logger';
 import { invokeTranscoder } from '$/services/transcoder';
@@ -136,7 +137,7 @@ async function invokeTranscoderBySource(
     );
   }
 
-  const timestamp = Date.now();
+  const timestamp = dbGetTimestamp();
 
   const updated = await client.source.updateMany({
     where: {
@@ -222,7 +223,7 @@ function invokeTranscodeBySourceSync(userId: string, sourceId: string): void {
 async function onSourceFileUpdated(
   userId: string,
   sourceId: string,
-  timestamp: number
+  timestamp: DBTimestamp
 ): Promise<void> {
   // NOTE: `uploaded`を更新した後に改めて取得しないと検出漏れする場合がある
   const sourceFiles = await client.sourceFile.findMany({
@@ -366,7 +367,7 @@ export async function onSourceFileFailed(
     throw new HTTPError(500, `state of the source ${sourceId} is inconsistent`);
   }
 
-  const timestamp = Date.now();
+  const timestamp = dbGetTimestamp();
 
   const updated = await client.sourceFile.updateMany({
     where: {
@@ -467,7 +468,7 @@ export async function onSourceFileUploaded(
     })
   );
 
-  const timestamp = Date.now();
+  const timestamp = dbGetTimestamp();
 
   const updated = await client.sourceFile.updateMany({
     where: {

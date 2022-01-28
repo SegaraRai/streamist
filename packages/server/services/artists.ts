@@ -4,6 +4,7 @@ import { client } from '$/db/lib/client';
 import { dbCoArtistMergeArtistTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { imageDeleteFilesAndSourceFiles } from '$/services/images';
 import { HTTPError } from '$/utils/httpError';
 import type { IArtistUpdateData } from '$/validators';
@@ -32,7 +33,7 @@ export async function artistUpdate(
       name,
       nameSort,
       description,
-      updatedAt: Date.now(),
+      updatedAt: dbGetTimestamp(),
     },
   });
   if (artist.count === 0) {
@@ -48,7 +49,7 @@ export async function artistMerge(
   toArtistId: string
 ): Promise<void> {
   await client.$transaction(async (txClient): Promise<void> => {
-    const timestamp = Date.now();
+    const timestamp = dbGetTimestamp();
 
     const artist = await txClient.artist.findFirst({
       where: {

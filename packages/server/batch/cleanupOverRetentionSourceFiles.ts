@@ -1,5 +1,6 @@
 import { MAX_SOURCE_FILE_RETENTION_PER_PLAN, PLANS } from '$shared/config';
 import { client } from '$/db/lib/client';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 
 export async function cleanupOverRetentionSourceFiles(): Promise<void> {
@@ -9,7 +10,7 @@ export async function cleanupOverRetentionSourceFiles(): Promise<void> {
       continue;
     }
 
-    const deleteUploadedAt = Date.now() - retention;
+    const deleteUploadedAt = dbGetTimestamp() - BigInt(retention);
 
     const sourceFiles = await client.sourceFile.findMany({
       where: {
@@ -42,7 +43,7 @@ export async function cleanupOverRetentionSourceFiles(): Promise<void> {
       },
       data: {
         entityExists: false,
-        updatedAt: Date.now(),
+        updatedAt: dbGetTimestamp(),
       },
     });
 

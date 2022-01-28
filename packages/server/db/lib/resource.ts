@@ -1,6 +1,7 @@
 import type { DeletionEntityType } from '$shared/types';
 import { logger } from '$/services/logger';
 import { client } from './client';
+import { dbGetTimestamp } from './timestamp';
 import type { TransactionalPrismaClient } from './types';
 
 /**
@@ -9,7 +10,7 @@ import type { TransactionalPrismaClient } from './types';
  */
 export async function dbResourceUpdateTimestamp(userId: string): Promise<void> {
   try {
-    const updatedAt = Date.now();
+    const updatedAt = dbGetTimestamp();
     await client.resourceUpdate.updateMany({
       where: {
         userId,
@@ -45,7 +46,7 @@ export async function dbDeletionAddTx(
       data: {
         entityType: type,
         entityId: id,
-        deletedAt: Date.now(),
+        deletedAt: dbGetTimestamp(),
         userId,
       },
     });

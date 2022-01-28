@@ -32,6 +32,7 @@ import {
 } from '$shared/types';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { splitIntoParts } from '$/services/uploadUtils';
 import { createUserUploadS3Cached } from '$/services/userOS';
 import type {
@@ -202,7 +203,8 @@ export async function createAudioSource(
     ? await createMultipartUploadId(userId, sourceId, cueSheetFileId, region)
     : null;
 
-  const timestamp = Date.now();
+  const nTimestamp = Date.now();
+  const timestamp = dbGetTimestamp(nTimestamp);
 
   await client.source.create({
     data: {
@@ -273,7 +275,7 @@ export async function createAudioSource(
           region,
           request.audioFile.fileSize,
           uploadId,
-          timestamp
+          nTimestamp
         ),
       },
       ...(request.cueSheetFile
@@ -288,7 +290,7 @@ export async function createAudioSource(
                 region,
                 request.cueSheetFile.fileSize,
                 cueSheetUploadId!,
-                timestamp
+                nTimestamp
               ),
             },
           ]
@@ -372,7 +374,8 @@ export async function createImageSource(
     region
   );
 
-  const timestamp = Date.now();
+  const nTimestamp = Date.now();
+  const timestamp = dbGetTimestamp(nTimestamp);
 
   await client.source.create({
     data: {
@@ -421,7 +424,7 @@ export async function createImageSource(
           region,
           request.imageFile.fileSize,
           uploadId,
-          timestamp
+          nTimestamp
         ),
       },
     ],
@@ -467,7 +470,9 @@ export async function getUploadURLForSourceFile(
     );
   }
 
-  if (sourceFile.createdAt + SOURCE_FILE_UPLOADABLE_AFTER_CREATE < Date.now()) {
+  const nCreatedAt = Number(sourceFile.createdAt);
+
+  if (nCreatedAt + SOURCE_FILE_UPLOADABLE_AFTER_CREATE < Date.now()) {
     throw new HTTPError(403, `source file ${sourceFileId} too old to upload`);
   }
 
@@ -478,7 +483,7 @@ export async function getUploadURLForSourceFile(
     sourceFile.region as OSRegion,
     sourceFile.fileSize,
     sourceFile.uploadId,
-    sourceFile.createdAt
+    nCreatedAt
   );
 }
 

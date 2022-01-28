@@ -7,6 +7,7 @@ import type { Prisma, PrismaClient } from '$prisma/client';
 import { HTTPError } from '$/utils/httpError';
 import { client } from './client';
 import { dbCreatePlaceholders } from './placeholder';
+import { dbGetTimestamp } from './timestamp';
 import type { TransactionalPrismaClient } from './types';
 
 /**
@@ -146,7 +147,7 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
       WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4
     `,
     dbArraySerializeItemIds(itemIds),
-    Date.now(),
+    dbGetTimestamp(),
     userId,
     groupId
   );
@@ -278,7 +279,7 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
       WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4 AND "${itemOrderColumn}" = $5
     `,
     newItemOrder,
-    Date.now(),
+    dbGetTimestamp(),
     userId,
     groupId,
     oldItemOrder
@@ -515,7 +516,7 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
       WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4 AND "${itemOrderColumn}" = $5
     `,
     newItemOrder,
-    Date.now(),
+    dbGetTimestamp(),
     userId,
     groupId,
     oldItemOrder
@@ -716,7 +717,7 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
     )})
     `,
     itemIdBlock,
-    Date.now(),
+    dbGetTimestamp(),
     userId,
     searchQuery,
     ...groupIds

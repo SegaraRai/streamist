@@ -18,9 +18,9 @@ model User {
   region          String
   plan            String
   maxTrackId      String?
-  closedAt        Float?
-  createdAt       Float
-  updatedAt       Float
+  closedAt        BigInt?          @db.BigInt
+  createdAt       BigInt           @db.BigInt
+  updatedAt       BigInt           @db.BigInt
   albums          Album[]
   artists         Artist[]
   image           Image[]
@@ -46,10 +46,10 @@ model User {
 model Source {
   id                  String       @id
   state               String // SourceState
-  transcodeStartedAt  Float?
-  transcodeFinishedAt Float?
-  createdAt           Float
-  updatedAt           Float
+  transcodeStartedAt  BigInt?      @db.BigInt
+  transcodeFinishedAt BigInt?      @db.BigInt
+  createdAt           BigInt       @db.BigInt
+  updatedAt           BigInt       @db.BigInt
   user                User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId              String
   files               SourceFile[]
@@ -80,9 +80,9 @@ model SourceFile {
   sourceFileId   String?
   entityExists   Boolean // whether the original file exists in S3. `false` for unuploaded files and extracted image files
   uploadId       String // S3 UploadId for multipart uploads
-  uploadedAt     Float?
-  createdAt      Float
-  updatedAt      Float
+  uploadedAt     BigInt?      @db.BigInt
+  createdAt      BigInt       @db.BigInt
+  updatedAt      BigInt       @db.BigInt
   source         Source       @relation(fields: [sourceId], references: [id], onDelete: Restrict)
   sourceId       String
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -102,8 +102,8 @@ model Artist {
   name           String
   nameSort       String?
   description    String          @default("")
-  createdAt      Float
-  updatedAt      Float
+  createdAt      BigInt          @db.BigInt
+  updatedAt      BigInt          @db.BigInt
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
   images         AArtistImage[]
@@ -124,8 +124,8 @@ model Album {
   description    String          @default("")
   replayGainGain Float?
   replayGainPeak Float?
-  createdAt      Float
-  updatedAt      Float
+  createdAt      BigInt          @db.BigInt
+  updatedAt      BigInt          @db.BigInt
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId         String
   artist         Artist          @relation(fields: [artistId], references: [id], onDelete: Restrict)
@@ -156,8 +156,8 @@ model Track {
   bpm                  Int?
   replayGainGain       Float?
   replayGainPeak       Float?
-  createdAt            Float
-  updatedAt            Float
+  createdAt            BigInt           @db.BigInt
+  updatedAt            BigInt           @db.BigInt
   user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId               String
   artist               Artist           @relation(fields: [artistId], references: [id], onDelete: Restrict)
@@ -185,8 +185,8 @@ model TrackFile {
   fileSize  Int
   sha256    String
   duration  Float
-  createdAt Float
-  updatedAt Float
+  createdAt BigInt @db.BigInt
+  updatedAt BigInt @db.BigInt
   track     Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
   trackId   String
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -203,8 +203,8 @@ model Image {
   sourceWidth  Int
   sourceHeight Int
   dHash        String
-  createdAt    Float
-  updatedAt    Float
+  createdAt    BigInt           @db.BigInt
+  updatedAt    BigInt           @db.BigInt
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
   sourceFile   SourceFile       @relation(fields: [sourceFileId], references: [id], onDelete: Restrict)
@@ -228,8 +228,8 @@ model ImageFile {
   sha256    String
   width     Int
   height    Int
-  createdAt Float
-  updatedAt Float
+  createdAt BigInt @db.BigInt
+  updatedAt BigInt @db.BigInt
   image     Image  @relation(fields: [imageId], references: [id], onDelete: Cascade)
   imageId   String
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -244,8 +244,8 @@ model ImageFile {
 model AlbumCoArtist {
   id        String @id
   role      String
-  createdAt Float
-  updatedAt Float
+  createdAt BigInt @db.BigInt
+  updatedAt BigInt @db.BigInt
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   artist    Artist @relation(fields: [artistId], references: [id], onDelete: Restrict)
@@ -263,8 +263,8 @@ model AlbumCoArtist {
 model TrackCoArtist {
   id        String @id
   role      String
-  createdAt Float
-  updatedAt Float
+  createdAt BigInt @db.BigInt
+  updatedAt BigInt @db.BigInt
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   artist    Artist @relation(fields: [artistId], references: [id], onDelete: Restrict)
@@ -283,8 +283,8 @@ model Playlist {
   id          String           @id
   title       String
   description String           @default("")
-  createdAt   Float
-  updatedAt   Float
+  createdAt   BigInt           @db.BigInt
+  updatedAt   BigInt           @db.BigInt
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
   images      APlaylistImage[]
@@ -300,7 +300,7 @@ model Deletion {
   // 'album', 'albumCoArtist', 'artist', 'image', 'imageFile', 'playlist', 'source', 'sourceFile', 'track', 'trackCoArtist', 'trackFile'
   entityType String
   entityId   String
-  deletedAt  Float
+  deletedAt  BigInt @db.BigInt
   user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
 
@@ -312,7 +312,7 @@ model Deletion {
 model ResourceUpdate {
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String @id
-  updatedAt Float
+  updatedAt BigInt @db.BigInt
 }
 
 // not visible to the user

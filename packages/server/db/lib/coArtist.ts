@@ -1,4 +1,5 @@
 import type { Prisma, PrismaClient } from '@prisma/client';
+import { DBTimestamp } from './timestamp';
 import type { TransactionalPrismaClient } from './types';
 
 const COL_ID = 'id' as const;
@@ -22,7 +23,7 @@ export async function dbCoArtistMergeTx<T extends CoArtistTable>(
   userId: string,
   entityId: string,
   toEntityId: string,
-  timestamp: number
+  timestamp: DBTimestamp
 ): Promise<void> {
   // TODO: test this
   await txClient.$executeRawUnsafe(
@@ -59,7 +60,7 @@ export async function dbCoArtistMergeArtistTx<T extends CoArtistTable>(
   userId: string,
   artistId: string,
   toArtistId: string,
-  timestamp: number
+  timestamp: DBTimestamp
 ): Promise<void> {
   // TODO: test this
   await txClient.$executeRawUnsafe(

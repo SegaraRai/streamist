@@ -1,6 +1,7 @@
 import { MAX_TRACKS_PER_PLAN, Plan } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { logger } from '$/services/logger';
 
 export async function updateMaxTrackId(
@@ -54,7 +55,7 @@ export async function updateMaxTrackId(
               },
             ],
       },
-      data: { maxTrackId: newMaxTrackId, updatedAt: Date.now() },
+      data: { maxTrackId: newMaxTrackId, updatedAt: dbGetTimestamp() },
     });
 
     if (updated.count && !skipUpdateTimestamp) {

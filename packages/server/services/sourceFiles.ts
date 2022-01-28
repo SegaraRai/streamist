@@ -1,5 +1,6 @@
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 import { HTTPError } from '$/utils/httpError';
 
@@ -70,7 +71,7 @@ export async function sourceFileDeleteFromOSIfUnreferenced(
     },
     data: {
       entityExists: false,
-      updatedAt: Date.now(),
+      updatedAt: dbGetTimestamp(),
     },
   });
 

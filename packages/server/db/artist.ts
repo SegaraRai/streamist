@@ -10,6 +10,7 @@ import {
   dbArrayReorder,
 } from './lib/array';
 import { client } from './lib/client';
+import { dbGetTimestamp } from './lib/timestamp';
 import type { TransactionalPrismaClient } from './lib/types';
 
 export type ImageSortableArtist = { imageOrder: string; images: Image[] };
@@ -31,7 +32,7 @@ export async function dbArtistGetOrCreateByNameTx(
 ): Promise<Artist> {
   const newArtistId = await generateArtistId();
 
-  const timestamp = Date.now();
+  const timestamp = dbGetTimestamp();
 
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`

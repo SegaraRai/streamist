@@ -12,6 +12,7 @@ import { dbArtistCreateCachedGetOrCreateByNameTx } from '$/db/artist';
 import { dbArrayRemoveFromAllTx } from '$/db/lib/array';
 import { client } from '$/db/lib/client';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { osDeleteTrackFiles } from '$/os/trackFile';
 import { albumDeleteIfUnreferenced } from '$/services/albums';
 import { artistDeleteIfUnreferenced } from '$/services/artists';
@@ -42,7 +43,7 @@ export async function trackUpdate(
     data.releaseDateText != null ? parseDate(data.releaseDateText) : undefined;
 
   const [oldTrack, newTrack] = await client.$transaction(async (txClient) => {
-    const timestamp = Date.now();
+    const timestamp = dbGetTimestamp();
 
     const artistGetOrCreateTx = dbArtistCreateCachedGetOrCreateByNameTx(
       txClient,

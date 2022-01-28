@@ -6,6 +6,7 @@ import {
 import { is } from '$shared/is';
 import type { SourceFileState, SourceState } from '$shared/types';
 import { client } from '$/db/lib/client';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { osDeleteSourceFiles } from '$/os/sourceFile';
 
 async function updateStaleSources(
@@ -36,7 +37,7 @@ async function updateStaleSources(
     },
     data: {
       state: postState,
-      updatedAt: Date.now(),
+      updatedAt: dbGetTimestamp(),
     },
   });
 
@@ -51,7 +52,7 @@ async function updateStaleSources(
     data: {
       state: postState,
       entityExists: false,
-      updatedAt: Date.now(),
+      updatedAt: dbGetTimestamp(),
     },
   });
 
@@ -60,7 +61,7 @@ async function updateStaleSources(
 
 export async function cleanupStaleUploads(): Promise<void> {
   const staleCreatedAt =
-    Date.now() - SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE;
+    dbGetTimestamp() - BigInt(SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE);
 
   await updateStaleSources(
     {
@@ -75,7 +76,7 @@ export async function cleanupStaleUploads(): Promise<void> {
 
 export async function cleanupStaleTranscodes(): Promise<void> {
   const staleUploadedAt =
-    Date.now() - SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD;
+    dbGetTimestamp() - BigInt(SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD);
 
   await updateStaleSources(
     {

@@ -24,43 +24,55 @@ import type {
   User,
 } from '$prisma/client';
 
+type BigIntToNumberValue<T, U = never> = T extends bigint | U
+  ? number | Exclude<U, bigint>
+  : T;
+
+type BigIntToNumber<T> = {
+  [P in keyof T]: BigIntToNumberValue<T[P]>;
+};
+
 export interface ResourceAlbum
-  extends Readonly<Omit<Album, 'imageOrder' | 'userId'>> {
+  extends Readonly<Omit<BigIntToNumber<Album>, 'imageOrder' | 'userId'>> {
   readonly imageIds: readonly string[];
 }
 
 export interface ResourceAlbumCoArtist
-  extends Readonly<Omit<AlbumCoArtist, 'userId'>> {
+  extends Readonly<Omit<BigIntToNumber<AlbumCoArtist>, 'userId'>> {
   readonly role: CoArtistRole;
 }
 
 export interface ResourceArtist
-  extends Readonly<Omit<Artist, 'imageOrder' | 'userId'>> {
+  extends Readonly<Omit<BigIntToNumber<Artist>, 'imageOrder' | 'userId'>> {
   readonly imageIds: readonly string[];
 }
 
 interface ResourceImageFile
-  extends Readonly<Omit<ImageFile, 'imageId' | 'userId'>> {
+  extends Readonly<Omit<BigIntToNumber<ImageFile>, 'imageId' | 'userId'>> {
   readonly region: OSRegion;
 }
 
-export interface ResourceImage extends Readonly<Omit<Image, 'userId'>> {
+export interface ResourceImage
+  extends Readonly<Omit<BigIntToNumber<Image>, 'userId'>> {
   readonly files: readonly ResourceImageFile[];
 }
 
 export interface ResourcePlaylist
-  extends Readonly<Omit<Playlist, 'imageOrder' | 'trackOrder' | 'userId'>> {
+  extends Readonly<
+    Omit<BigIntToNumber<Playlist>, 'imageOrder' | 'trackOrder' | 'userId'>
+  > {
   readonly imageIds: readonly string[];
   readonly trackIds: readonly string[];
 }
 
-export interface ResourceSource extends Readonly<Omit<Source, 'userId'>> {
+export interface ResourceSource
+  extends Readonly<Omit<BigIntToNumber<Source>, 'userId'>> {
   readonly state: SourceState;
 }
 
 // sourceFileId単体で索引できるようにするためにSourceの中に入れない
 export interface ResourceSourceFile
-  extends Readonly<Omit<SourceFile, 'userId'>> {
+  extends Readonly<Omit<BigIntToNumber<SourceFile>, 'userId'>> {
   readonly attachToType: SourceFileAttachToType | null;
   readonly region: OSRegion;
   readonly state: SourceFileState;
@@ -68,28 +80,29 @@ export interface ResourceSourceFile
 }
 
 interface ResourceTrackFile
-  extends Readonly<Omit<TrackFile, 'trackId' | 'userId'>> {
+  extends Readonly<Omit<BigIntToNumber<TrackFile>, 'trackId' | 'userId'>> {
   readonly region: OSRegion;
 }
 
-export interface ResourceTrack extends Readonly<Omit<Track, 'userId'>> {
+export interface ResourceTrack
+  extends Readonly<Omit<BigIntToNumber<Track>, 'userId'>> {
   readonly files: readonly ResourceTrackFile[];
 }
 
 export interface ResourceTrackCoArtist
-  extends Readonly<Omit<TrackCoArtist, 'userId'>> {
+  extends Readonly<Omit<BigIntToNumber<TrackCoArtist>, 'userId'>> {
   readonly role: CoArtistRole;
 }
 
 export interface ResourceDeletion
-  extends Readonly<Omit<Deletion, 'entityType' | 'userId'>> {
+  extends Readonly<Omit<BigIntToNumber<Deletion>, 'entityType' | 'userId'>> {
   readonly entityType: DeletionEntityType;
 }
 
 export interface ResourceUser
   extends Readonly<
     Pick<
-      User,
+      BigIntToNumber<User>,
       | 'id'
       | 'displayName'
       | 'region'

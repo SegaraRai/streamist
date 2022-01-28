@@ -1,6 +1,7 @@
 import type { User } from '@prisma/client';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { HTTPError } from '$/utils/httpError';
 import type { IAccountUpdateData } from '$/validators';
 import { calcPasswordHashAsync, verifyPasswordHashAsync } from './password';
@@ -48,7 +49,7 @@ export async function userUpdate(
       password: passwordHash,
       displayName,
       region,
-      updatedAt: Date.now(),
+      updatedAt: dbGetTimestamp(),
     },
   });
 

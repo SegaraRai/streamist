@@ -11,6 +11,7 @@ import { client } from '$/db/lib/client';
 import { dbCoArtistMergeTx } from '$/db/lib/coArtist';
 import { dbImageDeleteByImageOrderTx, dbImageDeleteTx } from '$/db/lib/image';
 import { dbDeletionAddTx, dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { artistDeleteIfUnreferenced } from '$/services/artists';
 import { imageDeleteFilesAndSourceFiles } from '$/services/images';
 import { HTTPError } from '$/utils/httpError';
@@ -27,7 +28,7 @@ export async function albumUpdate(
   { forceNewArtist = false }: UpdateAlbumOptions
 ): Promise<void> {
   const [oldAlbum, newAlbum] = await client.$transaction(async (txClient) => {
-    const timestamp = Date.now();
+    const timestamp = dbGetTimestamp();
 
     const artistGetOrCreateTx = dbArtistCreateCachedGetOrCreateByNameTx(
       txClient,
@@ -179,7 +180,7 @@ export async function albumMerge(
   toAlbumId: string
 ): Promise<void> {
   await client.$transaction(async (txClient): Promise<void> => {
-    const timestamp = Date.now();
+    const timestamp = dbGetTimestamp();
 
     const album = await txClient.album.findFirst({
       where: {

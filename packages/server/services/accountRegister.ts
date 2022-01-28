@@ -2,6 +2,7 @@ import type { User } from '@prisma/client';
 import { generateUserId } from '$shared-server/generateId';
 import { INITIAL_PLAN } from '$shared/config';
 import { client } from '$/db/lib/client';
+import { dbGetTimestamp } from '$/db/lib/timestamp';
 import { calcPasswordHashAsync } from '$/services/password';
 import type { IAccountCreateData } from '$/validators';
 
@@ -20,7 +21,7 @@ export async function userCreate(data: IAccountCreateData): Promise<User> {
 
   const passwordHash = await calcPasswordHashAsync(data.password);
 
-  const timestamp = Date.now();
+  const timestamp = dbGetTimestamp();
 
   const userId = await generateUserId();
 

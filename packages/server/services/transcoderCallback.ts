@@ -28,6 +28,7 @@ import { dbAlbumAddImageTx } from '$/db/album';
 import { dbArtistAddImageTx } from '$/db/artist';
 import { client } from '$/db/lib/client';
 import { dbResourceUpdateTimestamp } from '$/db/lib/resource';
+import { DBTimestamp, dbGetTimestamp } from '$/db/lib/timestamp';
 import type { TransactionalPrismaClient } from '$/db/lib/types';
 import { dbPlaylistAddImageTx } from '$/db/playlist';
 import { CreateTrackInputCoArtist, dbTrackCreateTx } from '$/db/track';
@@ -100,7 +101,7 @@ async function registerImage(
   attachToType: SourceFileAttachToType,
   attachToId: string,
   attachPrepend: boolean,
-  timestamp: number
+  timestamp: DBTimestamp
 ): Promise<void> {
   const { sourceFileId, region, userId } = artifact.source;
 
@@ -177,7 +178,7 @@ async function markSourceIdAsTranscodedTx(
   txClient: TransactionalPrismaClient | PrismaClient,
   userId: string,
   sourceId: string,
-  timestamp: number
+  timestamp: DBTimestamp
 ): Promise<void> {
   await txClient.source.updateMany({
     where: {
@@ -198,7 +199,7 @@ async function markSourceFileIdAsTx(
   sourceId: string,
   sourceFileId: string,
   newState: SourceFileState & ('transcoded' | 'failed'),
-  timestamp: number
+  timestamp: DBTimestamp
 ): Promise<void> {
   await txClient.sourceFile.updateMany({
     where: {
@@ -255,7 +256,7 @@ async function handleTranscoderResponseArtifactError(
   } = artifact;
 
   await retryTransaction(async (txClient): Promise<void> => {
-    const timestamp = Date.now();
+    const timestamp = dbGetTimestamp();
 
     await markSourceFileIdAsTx(
       txClient,
@@ -310,7 +311,7 @@ async function handleTranscoderResponseArtifactAudio(
 
   const albumId = await retryTransaction(
     async (txClient): Promise<string | undefined> => {
-      const timestamp = Date.now();
+      const timestamp = dbGetTimestamp();
 
       let albumId: string | undefined;
 
@@ -558,7 +559,7 @@ async function handleTranscoderResponseArtifactImage(
 
   const succeeded = await retryTransaction(
     async (txClient): Promise<boolean> => {
-      const timestamp = Date.now();
+      const timestamp = dbGetTimestamp();
 
       let attachToType: SourceFileAttachToType;
       let attachToId: string | undefined;
