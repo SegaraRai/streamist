@@ -1,3 +1,4 @@
+import logger from './logger';
 import { processAudioRequest } from './transcoder/audio';
 import { processImageRequest } from './transcoder/image';
 import type {
@@ -39,6 +40,7 @@ export async function transcode(
           throw new Error('unknown file type');
       }
     } catch (error) {
+      logger.error(error);
       artifact = {
         type: 'error',
         source: file,

@@ -73,10 +73,10 @@ export interface FFprobeStreamBase {
   codec_tag: string;
   r_frame_rate: string;
   avg_frame_rate: string;
-  time_base: string;
+  time_base?: string;
   start_pts: number;
   start_time: string;
-  duration_ts: number;
+  duration_ts?: number;
   duration: string;
   nb_frames?: string;
   disposition: FFprobeDisposition;

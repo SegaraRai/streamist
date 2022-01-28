@@ -186,9 +186,11 @@ async function createTracks(
 ): Promise<TranscoderResponseArtifactAudioTrack[]> {
   // 曲長（秒）
   const duration =
-    (parseInt(audioStream.duration_ts.toString(), 10) *
-      parseInt(audioStream.time_base.split('/')[0], 10)) /
-    parseInt(audioStream.time_base.split('/')[1], 10);
+    audioStream.duration_ts != null && audioStream.time_base
+      ? (parseInt(audioStream.duration_ts.toString(), 10) *
+          parseInt(audioStream.time_base.split('/')[0], 10)) /
+        parseInt(audioStream.time_base.split('/')[1], 10)
+      : parseFloat(audioStream.duration);
 
   // トラック作成
   const tracks: TranscoderResponseArtifactAudioTrack[] = cueSheet
