@@ -1,6 +1,14 @@
+import type { CoArtistRole } from '$shared/coArtist';
 import type { Plan } from '$shared/config';
 import { dbArrayDeserializeItemIds } from '$shared/dbArray';
 import type { OSRegion } from '$shared/objectStorage';
+import type {
+  DeletionEntityType,
+  SourceFileAttachToType,
+  SourceFileState,
+  SourceFileType,
+  SourceState,
+} from '$shared/types';
 import type {
   Album,
   AlbumCoArtist,
@@ -44,7 +52,7 @@ export function convertAlbum(album: Album): ResourceAlbum {
     imageIds: dbArrayDeserializeItemIds(album.imageOrder),
     imageOrder: undefined,
     userId: undefined,
-  } as ResourceAlbum;
+  };
 }
 
 export function convertAlbumCoArtist(
@@ -52,10 +60,11 @@ export function convertAlbumCoArtist(
 ): ResourceAlbumCoArtist {
   return {
     ...albumCoArtist,
+    role: albumCoArtist.role as CoArtistRole,
     createdAt: toNumber<never>(albumCoArtist.createdAt),
     updatedAt: toNumber<never>(albumCoArtist.updatedAt),
     userId: undefined,
-  } as ResourceAlbumCoArtist;
+  };
 }
 
 export function convertArtist(artist: Artist): ResourceArtist {
@@ -66,7 +75,7 @@ export function convertArtist(artist: Artist): ResourceArtist {
     imageIds: dbArrayDeserializeItemIds(artist.imageOrder),
     imageOrder: undefined,
     userId: undefined,
-  } as ResourceArtist;
+  };
 }
 
 export function convertImageSimple(image: Image): ResourceImageSimple {
@@ -75,7 +84,7 @@ export function convertImageSimple(image: Image): ResourceImageSimple {
     createdAt: toNumber<never>(image.createdAt),
     updatedAt: toNumber<never>(image.updatedAt),
     userId: undefined,
-  } as ResourceImageSimple;
+  };
 }
 
 export function convertImage(
@@ -85,12 +94,13 @@ export function convertImage(
     ...convertImageSimple(image),
     files: image.files.map((file) => ({
       ...file,
+      region: file.region as OSRegion,
       createdAt: toNumber<never>(file.createdAt),
       updatedAt: toNumber<never>(file.updatedAt),
       imageId: undefined,
       userId: undefined,
     })),
-  } as ResourceImage;
+  };
 }
 
 export function convertPlaylist(playlist: Playlist): ResourcePlaylist {
@@ -103,7 +113,7 @@ export function convertPlaylist(playlist: Playlist): ResourcePlaylist {
     imageOrder: undefined,
     trackOrder: undefined,
     userId: undefined,
-  } as ResourcePlaylist;
+  };
 }
 
 export function convertTrackSimple(track: Track): ResourceTrackSimple {
@@ -112,7 +122,7 @@ export function convertTrackSimple(track: Track): ResourceTrackSimple {
     createdAt: toNumber<never>(track.createdAt),
     updatedAt: toNumber<never>(track.updatedAt),
     userId: undefined,
-  } as ResourceTrackSimple;
+  };
 }
 
 export function convertTrack(
@@ -122,33 +132,39 @@ export function convertTrack(
     ...convertTrackSimple(track),
     files: track.files.map((file) => ({
       ...file,
+      region: file.region as OSRegion,
       createdAt: toNumber<never>(file.createdAt),
       updatedAt: toNumber<never>(file.updatedAt),
       trackId: undefined,
       userId: undefined,
     })),
-  } as ResourceTrack;
+  };
 }
 
 export function convertSource(source: Source): ResourceSource {
   return {
     ...source,
+    state: source.state as SourceState,
     createdAt: toNumber<never>(source.createdAt),
     updatedAt: toNumber<never>(source.updatedAt),
     transcodeFinishedAt: toNumber<null>(source.transcodeFinishedAt),
     transcodeStartedAt: toNumber<null>(source.transcodeStartedAt),
     userId: undefined,
-  } as ResourceSource;
+  };
 }
 
 export function convertSourceFile(sourceFile: SourceFile): ResourceSourceFile {
   return {
     ...sourceFile,
+    attachToType: sourceFile.attachToType as SourceFileAttachToType | null,
+    region: sourceFile.region as OSRegion,
+    state: sourceFile.state as SourceFileState,
+    type: sourceFile.type as SourceFileType,
     createdAt: toNumber<never>(sourceFile.createdAt),
     updatedAt: toNumber<never>(sourceFile.updatedAt),
     uploadedAt: toNumber<null>(sourceFile.uploadedAt),
     userId: undefined,
-  } as ResourceSourceFile;
+  };
 }
 
 export function convertTrackCoArtist(
@@ -156,18 +172,20 @@ export function convertTrackCoArtist(
 ): ResourceTrackCoArtist {
   return {
     ...trackCoArtist,
+    role: trackCoArtist.role as CoArtistRole,
     createdAt: toNumber<never>(trackCoArtist.createdAt),
     updatedAt: toNumber<never>(trackCoArtist.updatedAt),
     userId: undefined,
-  } as ResourceTrackCoArtist;
+  };
 }
 
 export function convertDeletion(deletion: Deletion): ResourceDeletion {
   return {
     ...deletion,
+    entityType: deletion.entityType as DeletionEntityType,
     deletedAt: toNumber<never>(deletion.deletedAt),
     userId: undefined,
-  } as ResourceDeletion;
+  };
 }
 
 export function convertUser(user: User): ResourceUser {

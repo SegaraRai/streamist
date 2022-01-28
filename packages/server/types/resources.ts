@@ -32,28 +32,35 @@ type BigIntToNumber<T> = {
   [P in keyof T]: BigIntToNumberValue<T[P]>;
 };
 
+type UndefinableOmit<T, K extends string | number | symbol> = Omit<T, K> & {
+  [P in K]?: undefined;
+};
+
+type TransformAndOmit<T, K extends string> = Readonly<
+  UndefinableOmit<BigIntToNumber<T>, K>
+>;
+
 export interface ResourceAlbum
-  extends Readonly<Omit<BigIntToNumber<Album>, 'imageOrder' | 'userId'>> {
+  extends TransformAndOmit<Album, 'imageOrder' | 'userId'> {
   readonly imageIds: readonly string[];
 }
 
 export interface ResourceAlbumCoArtist
-  extends Readonly<Omit<BigIntToNumber<AlbumCoArtist>, 'userId'>> {
+  extends TransformAndOmit<AlbumCoArtist, 'userId'> {
   readonly role: CoArtistRole;
 }
 
 export interface ResourceArtist
-  extends Readonly<Omit<BigIntToNumber<Artist>, 'imageOrder' | 'userId'>> {
+  extends TransformAndOmit<Artist, 'imageOrder' | 'userId'> {
   readonly imageIds: readonly string[];
 }
 
 interface ResourceImageFile
-  extends Readonly<Omit<BigIntToNumber<ImageFile>, 'imageId' | 'userId'>> {
+  extends TransformAndOmit<ImageFile, 'imageId' | 'userId'> {
   readonly region: OSRegion;
 }
 
-export interface ResourceImage
-  extends Readonly<Omit<BigIntToNumber<Image>, 'userId'>> {
+export interface ResourceImage extends TransformAndOmit<Image, 'userId'> {
   readonly files: readonly ResourceImageFile[];
 }
 
@@ -61,20 +68,19 @@ export type ResourceImageSimple = Omit<ResourceImage, 'files'>;
 
 export interface ResourcePlaylist
   extends Readonly<
-    Omit<BigIntToNumber<Playlist>, 'imageOrder' | 'trackOrder' | 'userId'>
+    TransformAndOmit<Playlist, 'imageOrder' | 'trackOrder' | 'userId'>
   > {
   readonly imageIds: readonly string[];
   readonly trackIds: readonly string[];
 }
 
-export interface ResourceSource
-  extends Readonly<Omit<BigIntToNumber<Source>, 'userId'>> {
+export interface ResourceSource extends TransformAndOmit<Source, 'userId'> {
   readonly state: SourceState;
 }
 
 // sourceFileId単体で索引できるようにするためにSourceの中に入れない
 export interface ResourceSourceFile
-  extends Readonly<Omit<BigIntToNumber<SourceFile>, 'userId'>> {
+  extends TransformAndOmit<SourceFile, 'userId'> {
   readonly attachToType: SourceFileAttachToType | null;
   readonly region: OSRegion;
   readonly state: SourceFileState;
@@ -82,27 +88,26 @@ export interface ResourceSourceFile
 }
 
 interface ResourceTrackFile
-  extends Readonly<Omit<BigIntToNumber<TrackFile>, 'trackId' | 'userId'>> {
+  extends TransformAndOmit<TrackFile, 'trackId' | 'userId'> {
   readonly region: OSRegion;
 }
 
-export interface ResourceTrack
-  extends Readonly<Omit<BigIntToNumber<Track>, 'userId'>> {
+export interface ResourceTrack extends TransformAndOmit<Track, 'userId'> {
   readonly files: readonly ResourceTrackFile[];
 }
 
 export type ResourceTrackSimple = Omit<ResourceTrack, 'files'>;
 
 export interface ResourceTrackCoArtist
-  extends Readonly<Omit<BigIntToNumber<TrackCoArtist>, 'userId'>> {
+  extends TransformAndOmit<TrackCoArtist, 'userId'> {
   readonly role: CoArtistRole;
 }
 
-export interface ResourceDeletion
-  extends Readonly<Omit<BigIntToNumber<Deletion>, 'entityType' | 'userId'>> {
+export interface ResourceDeletion extends TransformAndOmit<Deletion, 'userId'> {
   readonly entityType: DeletionEntityType;
 }
 
+// NOTE: this uses Pick, not Omit
 export interface ResourceUser
   extends Readonly<
     Pick<
