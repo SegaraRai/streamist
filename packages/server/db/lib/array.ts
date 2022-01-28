@@ -688,6 +688,10 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
     )
   ).map((junctionRow): string => junctionRow[COL_X]);
 
+  if (groupIds.length === 0) {
+    return;
+  }
+
   const deleted = await txClient.$executeRawUnsafe(
     `
     DELETE
