@@ -10,7 +10,7 @@ import {
   dbArrayReorder,
 } from './lib/array';
 import { client } from './lib/client';
-import { dbGetTimestamp } from './lib/timestamp';
+import { dbConvertTimestampForRaw, dbGetTimestamp } from './lib/timestamp';
 import type { TransactionalPrismaClient } from './lib/types';
 
 export type ImageSortableArtist = { imageOrder: string; images: Image[] };
@@ -30,16 +30,17 @@ export async function dbArtistGetOrCreateByNameTx(
   artistName: string,
   artistNameSort?: string
 ): Promise<Artist> {
+  const artistNameSortN = artistNameSort || null;
+
   const newArtistId = await generateArtistId();
 
   const timestamp = dbGetTimestamp();
+  const rTimestamp = dbConvertTimestampForRaw(timestamp);
 
   // NOTE: DO NOT check inserted row count. it's ok if it's 0.
   await txClient.$executeRaw`
     INSERT INTO "Artist" ("id", "name", "nameSort", "userId", "createdAt", "updatedAt")
-    SELECT ${newArtistId}, ${artistName}, ${
-    artistNameSort || null
-  }, ${userId}, ${timestamp}, ${timestamp}
+    SELECT ${newArtistId}, ${artistName}, ${artistNameSortN}, ${userId}, ${rTimestamp}, ${rTimestamp}
       WHERE NOT EXISTS (
         SELECT 1
           FROM "Artist"

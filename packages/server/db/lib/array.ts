@@ -7,7 +7,7 @@ import type { Prisma, PrismaClient } from '$prisma/client';
 import { HTTPError } from '$/utils/httpError';
 import { client } from './client';
 import { dbCreatePlaceholders } from './placeholder';
-import { dbGetTimestamp } from './timestamp';
+import { dbConvertTimestampForRaw, dbGetTimestamp } from './timestamp';
 import type { TransactionalPrismaClient } from './types';
 
 /**
@@ -147,7 +147,7 @@ export async function dbArrayAddTx<T extends ArrayMainTable>(
       WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4
     `,
     dbArraySerializeItemIds(itemIds),
-    dbGetTimestamp(),
+    dbConvertTimestampForRaw(dbGetTimestamp()),
     userId,
     groupId
   );
@@ -221,7 +221,7 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
     `
     SELECT "${itemOrderColumn}"
       FROM "${mainTable}"
-      WHERE "${COL_USER_ID}" = ? AND "${COL_ID}" = ?
+      WHERE "${COL_USER_ID}" = $1 AND "${COL_ID}" = $2
     `,
     userId,
     groupId
@@ -279,7 +279,7 @@ async function dbArrayRemoveByCallbackTx<T extends ArrayMainTable>(
       WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4 AND "${itemOrderColumn}" = $5
     `,
     newItemOrder,
-    dbGetTimestamp(),
+    dbConvertTimestampForRaw(dbGetTimestamp()),
     userId,
     groupId,
     oldItemOrder
@@ -481,7 +481,7 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
     `
     SELECT "${itemOrderColumn}"
       FROM "${mainTable}"
-      WHERE "${COL_USER_ID}" = ? AND "${COL_ID}" = ?
+      WHERE "${COL_USER_ID}" = $1 AND "${COL_ID}" = $2
     `,
     userId,
     groupId
@@ -516,7 +516,7 @@ export async function dbArrayReorderTx<T extends ArrayMainTable>(
       WHERE "${COL_USER_ID}" = $3 AND "${COL_ID}" = $4 AND "${itemOrderColumn}" = $5
     `,
     newItemOrder,
-    dbGetTimestamp(),
+    dbConvertTimestampForRaw(dbGetTimestamp()),
     userId,
     groupId,
     oldItemOrder
@@ -717,7 +717,7 @@ export async function dbArrayRemoveFromAllTx<T extends ArrayMainTable>(
     )})
     `,
     itemIdBlock,
-    dbGetTimestamp(),
+    dbConvertTimestampForRaw(dbGetTimestamp()),
     userId,
     searchQuery,
     ...groupIds
