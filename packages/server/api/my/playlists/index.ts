@@ -1,12 +1,12 @@
-import type { Playlist } from '$prisma/client';
+import type { ResourcePlaylist } from '$/types';
 import type { VPlaylistCreateBody } from '$/validators';
 
 export type Methods = {
   get: {
-    resBody: Playlist[];
+    resBody: ResourcePlaylist[];
   };
   post: {
     reqBody: VPlaylistCreateBody;
-    resBody: Playlist;
+    resBody: ResourcePlaylist;
   };
 };

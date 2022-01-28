@@ -1,9 +1,9 @@
-import type { Track } from '$prisma/client';
+import type { ResourceTrackSimple } from '$/types';
 import type { VPlaylistAddTrackBody } from '$/validators';
 
 export type Methods = {
   get: {
-    resBody: Track[];
+    resBody: ResourceTrackSimple[];
   };
   post: {
     reqBody: VPlaylistAddTrackBody;

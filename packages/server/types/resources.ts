@@ -57,6 +57,8 @@ export interface ResourceImage
   readonly files: readonly ResourceImageFile[];
 }
 
+export type ResourceImageSimple = Omit<ResourceImage, 'files'>;
+
 export interface ResourcePlaylist
   extends Readonly<
     Omit<BigIntToNumber<Playlist>, 'imageOrder' | 'trackOrder' | 'userId'>
@@ -88,6 +90,8 @@ export interface ResourceTrack
   extends Readonly<Omit<BigIntToNumber<Track>, 'userId'>> {
   readonly files: readonly ResourceTrackFile[];
 }
+
+export type ResourceTrackSimple = Omit<ResourceTrack, 'files'>;
 
 export interface ResourceTrackCoArtist
   extends Readonly<Omit<BigIntToNumber<TrackCoArtist>, 'userId'>> {

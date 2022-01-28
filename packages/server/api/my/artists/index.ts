@@ -1,8 +1,8 @@
-import type { Artist } from '$prisma/client';
+import type { ResourceArtist } from '$/types';
 
 export type Methods = {
   get: {
-    resBody: Artist[];
+    resBody: ResourceArtist[];
   };
   // アルバムやトラックのPATCHから作成できるのでとりあえずここにはPOSTは設けない
 };

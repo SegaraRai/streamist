@@ -1,7 +1,7 @@
-import type { SourceFile } from '$prisma/client';
+import type { ResourceSourceFile } from '$/types';
 
 export type Methods = {
   get: {
-    resBody: SourceFile[];
+    resBody: ResourceSourceFile[];
   };
 };

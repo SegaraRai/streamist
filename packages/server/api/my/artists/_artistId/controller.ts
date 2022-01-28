@@ -1,6 +1,7 @@
 import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { artistMerge, artistUpdate } from '$/services/artists';
+import { convertArtist } from '$/services/resourceTransformer';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -20,7 +21,7 @@ export default defineController(() => ({
       headers: {
         'Cache-Control': CACHE_CONTROL_NO_STORE,
       },
-      body: artist,
+      body: convertArtist(artist),
     };
   },
   patch: async ({ body, params, user }) => {

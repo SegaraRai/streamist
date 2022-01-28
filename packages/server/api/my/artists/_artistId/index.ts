@@ -1,9 +1,9 @@
-import type { Artist } from '$prisma/client';
+import type { ResourceArtist } from '$/types';
 import type { VArtistMergeBody, VArtistUpdateBody } from '$/validators';
 
 export type Methods = {
   get: {
-    resBody: Artist;
+    resBody: ResourceArtist;
   };
   patch: {
     reqBody: VArtistUpdateBody;

@@ -2,6 +2,7 @@ import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { dbPlaylistGetTracks } from '$/db/playlist';
 import { playlistTrackAdd } from '$/services/playlists';
+import { convertTrackSimple } from '$/services/resourceTransformer';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -20,7 +21,7 @@ export default defineController(() => ({
     return {
       status: 200,
       headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
-      body: tracks,
+      body: tracks.map(convertTrackSimple),
     };
   },
   post: async ({ body, params, user }) => {

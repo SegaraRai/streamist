@@ -1,9 +1,9 @@
-import type { Album } from '$prisma/client';
+import type { ResourceAlbum } from '$/types';
 import type { VAlbumMergeBody, VAlbumUpdateBody } from '$/validators';
 
 export type Methods = {
   get: {
-    resBody: Album;
+    resBody: ResourceAlbum;
   };
   patch: {
     reqBody: VAlbumUpdateBody;

@@ -1,9 +1,9 @@
-import type { Track } from '$prisma/client';
+import type { ResourceTrack, ResourceTrackSimple } from '$/types';
 import type { VTrackUpdateBody } from '$/validators';
 
 export type Methods = {
   get: {
-    resBody: Track;
+    resBody: ResourceTrack;
   };
   patch: {
     query?: {
@@ -13,7 +13,7 @@ export type Methods = {
       preferAlbumArtist?: boolean | number;
     };
     reqBody: VTrackUpdateBody;
-    resBody: Track;
+    resBody: ResourceTrackSimple;
   };
   delete: {
     status: 204;

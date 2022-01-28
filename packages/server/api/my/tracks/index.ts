@@ -1,7 +1,7 @@
-import type { Track } from '$prisma/client';
+import type { ResourceTrackSimple } from '$/types';
 
 export type Methods = {
   get: {
-    resBody: Track[];
+    resBody: ResourceTrackSimple[];
   };
 };

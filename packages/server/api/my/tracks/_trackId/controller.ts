@@ -1,5 +1,9 @@
 import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
+import {
+  convertTrack,
+  convertTrackSimple,
+} from '$/services/resourceTransformer';
 import { trackDelete, trackUpdate } from '$/services/tracks';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
@@ -11,6 +15,9 @@ export default defineController(() => ({
         id: params.trackId,
         userId: user.id,
       },
+      include: {
+        files: true,
+      },
     });
     if (!track) {
       throw new HTTPError(404, `track ${params.trackId} not found`);
@@ -20,7 +27,7 @@ export default defineController(() => ({
       headers: {
         'Cache-Control': CACHE_CONTROL_NO_STORE,
       },
-      body: track,
+      body: convertTrack(track),
     };
   },
   patch: async ({ body, params, query, user }) => {
@@ -35,7 +42,7 @@ export default defineController(() => ({
       headers: {
         'Cache-Control': CACHE_CONTROL_NO_STORE,
       },
-      body: newTrack,
+      body: convertTrackSimple(newTrack),
     };
   },
   delete: async ({ params, user }) => {

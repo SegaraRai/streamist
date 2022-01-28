@@ -1,6 +1,7 @@
 import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
 import { playlistDelete, playlistUpdate } from '$/services/playlists';
+import { convertPlaylist } from '$/services/resourceTransformer';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -17,7 +18,7 @@ export default defineController(() => ({
     }
     return {
       status: 200,
-      body: playlist,
+      body: convertPlaylist(playlist),
       headers: { 'Cache-Control': CACHE_CONTROL_NO_STORE },
     };
   },

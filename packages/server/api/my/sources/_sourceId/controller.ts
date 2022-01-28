@@ -1,5 +1,9 @@
 import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
+import {
+  convertSource,
+  convertSourceFile,
+} from '$/services/resourceTransformer';
 import { HTTPError } from '$/utils/httpError';
 import { defineController } from './$relay';
 
@@ -22,7 +26,10 @@ export default defineController(() => ({
       headers: {
         'Cache-Control': CACHE_CONTROL_NO_STORE,
       },
-      body: source,
+      body: {
+        ...convertSource(source),
+        files: source.files.map(convertSourceFile),
+      },
     };
   },
 }));

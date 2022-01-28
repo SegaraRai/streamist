@@ -1,7 +1,7 @@
-import type { Album } from '$prisma/client';
+import type { ResourceAlbum } from '$/types';
 
 export type Methods = {
   get: {
-    resBody: Album[];
+    resBody: ResourceAlbum[];
   };
 };

@@ -1,5 +1,6 @@
 import { CACHE_CONTROL_NO_STORE } from '$shared/config';
 import { client } from '$/db/lib/client';
+import { convertTrackSimple } from '$/services/resourceTransformer';
 import { defineController } from './$relay';
 
 export default defineController(() => ({
@@ -14,7 +15,7 @@ export default defineController(() => ({
       headers: {
         'Cache-Control': CACHE_CONTROL_NO_STORE,
       },
-      body: tracks,
+      body: tracks.map(convertTrackSimple),
     };
   },
 }));
