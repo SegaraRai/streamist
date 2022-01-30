@@ -24,6 +24,8 @@ jobs:
           echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
           echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
       - uses: actions/checkout@v2
+        with:
+          lfs: true
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: 6
