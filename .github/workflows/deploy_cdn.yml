@@ -8,7 +8,7 @@ on:
       - 'packages/cdn/**'
       - 'packages/shared/**'
       - 'packages/shared-server/**'
-      - '.github/workflows/staging_deploy_cdn.yml'
+      - '.github/workflows/deploy_cdn.yml'
 
 jobs:
   deploy:
