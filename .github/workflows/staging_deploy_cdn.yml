@@ -1,4 +1,4 @@
-name: 'Staging: Build and deploy CDN'
+name: 'Deploy CDN'
 
 on:
   push:
@@ -12,11 +12,16 @@ on:
 
 jobs:
   deploy:
-    name: Build and Deploy
+    name: Build and deploy
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
     steps:
+      - name: Set env (Staging)
+        if: ${{ github.ref == 'refs/heads/staging' }}
+        run: |
+          echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
+          echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.0.1
         with:
@@ -28,13 +33,11 @@ jobs:
       - run: pnpm i --frozen-lockfile
       - run: pnpm run generate
       - run: pnpm run build:cdn
-        env:
-          TARGET_NODE_ENV: staging
       - name: Deploy CDN to Workers
         uses: cloudflare/wrangler-action@1.3.0
         with:
           apiToken: ${{ secrets.SECRET_GH_CF_API_TOKEN }}
-          environment: 'staging'
+          environment: ${{ env.TARGET_NODE_ENV }}
           workingDirectory: 'packages/cdn'
           secrets: |
             APP_ORIGIN
@@ -42,7 +45,7 @@ jobs:
             SECRET_CDN_JWT_SECRET
             SECRET_CDN_STORAGE_ACCESS_REFERER
         env:
-          APP_ORIGIN: ${{ secrets.STAGING_APP_ORIGIN }}
-          SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET: ${{ secrets.STAGING_SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET }}
-          SECRET_CDN_JWT_SECRET: ${{ secrets.STAGING_SECRET_CDN_JWT_SECRET }}
-          SECRET_CDN_STORAGE_ACCESS_REFERER: ${{ secrets.STAGING_SECRET_CDN_STORAGE_ACCESS_REFERER }}
+          APP_ORIGIN: ${{ secrets[format('{0}_APP_ORIGIN', env.DEPLOY_ENV)] }}
+          SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET: ${{ secrets[format('{0}_SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET', env.DEPLOY_ENV)] }}
+          SECRET_CDN_JWT_SECRET: ${{ secrets[format('{0}_SECRET_CDN_JWT_SECRET', env.DEPLOY_ENV)] }}
+          SECRET_CDN_STORAGE_ACCESS_REFERER: ${{ secrets[format('{0}_SECRET_CDN_STORAGE_ACCESS_REFERER', env.DEPLOY_ENV)] }}

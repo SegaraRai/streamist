@@ -1,4 +1,4 @@
-name: 'Staging: Build and deploy Transcoder'
+name: 'Deploy Transcoder'
 
 on:
   push:
@@ -12,12 +12,17 @@ on:
 
 jobs:
   deploy:
-    name: Build and Deploy
+    name: Build and deploy
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
       id-token: 'write'
     steps:
+      - name: Set env (Staging)
+        if: ${{ github.ref == 'refs/heads/staging' }}
+        run: |
+          echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
+          echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.0.1
         with:
@@ -30,21 +35,19 @@ jobs:
       - run: pnpm run generate
       - run: |
           cd packages/operation
-          pnpm run start -- initAll staging
+          pnpm run start -- initAll $TARGET_NODE_ENV
       - run: pnpm run build:transcoder
-        env:
-          TARGET_NODE_ENV: staging
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.SECRET_GH_STAGING_DEPLOY_TRANSCODER_LAMBDA_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.SECRET_GH_STAGING_DEPLOY_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets[format('SECRET_GH_{0}_DEPLOY_TRANSCODER_LAMBDA_ACCESS_KEY_ID', env.DEPLOY_ENV)] }}
+          aws-secret-access-key: ${{ secrets[format('SECRET_GH_{0}_DEPLOY_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY', env.DEPLOY_ENV)] }}
           aws-region: us-east-2
       - id: 'auth'
         uses: 'google-github-actions/auth@v0'
         with:
-          workload_identity_provider: projects/532903232967/locations/global/workloadIdentityPools/transcoder-deploy-github-actions/providers/github
-          service_account: transcoder-deploy@streamist-staging.iam.gserviceaccount.com
+          workload_identity_provider: ${{ secrets[format('SECRET_GH_{0}_DEPLOY_TRANSCODER_GCP_WIF_IDP', env.DEPLOY_ENV)] }}
+          service_account: ${{ secrets[format('SECRET_GH_{0}_DEPLOY_TRANSCODER_GCP_WIF_SA', env.DEPLOY_ENV)] }}
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
         with:
@@ -53,6 +56,6 @@ jobs:
       - name: Deploy transcoder to AWS Lambda and Google Cloud Run
         run: |
           cd packages/transcoder
-          cp ../operation/result/staging/deploy.sh .
+          cp ../operation/result/$TARGET_NODE_ENV/deploy.sh .
           chmod +x deploy.sh
           ./deploy.sh

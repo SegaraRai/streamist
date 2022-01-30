@@ -87,6 +87,30 @@ Cloud SDK コマンドライン ツール（gcloud）をインストールして
 - `deploy.transcoder.sh`の `gcloud` の行を実行する
   API を有効化するか等訊かれた場合は yes と答える
 
+#### データベースバックアップ用 S3 バケットのセットアップ
+
+バケット`staging-database-backup.stst.page`を`ap-northeast-1`に作成する（バケットポリシーはなし）
+
+IAM ポリシー`StreamistStagingDBBackup`を以下の内容で作成する
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetObject", "s3:PutObject"],
+      "Resource": [
+        "arn:aws:s3:::staging-database-backup.stst.page",
+        "arn:aws:s3:::staging-database-backup.stst.page/*"
+      ]
+    }
+  ]
+}
+```
+
+IAM ユーザー`StreamistStagingDBBackup`を作成し、IAM ロール`StreamistStagingDBBackup`を添付する
+
 #### VPS のセットアップ
 
 ##### ローカル環境での準備（SSH 鍵の生成）
@@ -338,7 +362,53 @@ xxx.xxx.xxx.xxx ecdsa-sha2-nistp256 AAAA...
 
 `SECRET_GH_STAGING_SSH_PORT`に`43642`を登録する
 
-`SECRET_GH_STAGING_SSH_IP_ADDRESS`に接続先の IP アドレスを登録する
+`SECRET_GH_STAGING_SSH_REMOTE`に接続先の IP アドレスを登録する
+
+#### GitHub のシークレットの設定
+
+以下のシークレットを設定する（サーバーのセットアップで設定したシークレットを含む）
+
+- SECRET_GH_BUILD_REPOSITORY_DEPLOY_KEY
+- SECRET_GH_BUILD_REPOSITORY_NAME (`<username>/<repository>`)
+- SECRET_GH_CF_API_TOKEN
+- SECRET_GH_STAGING_DEPLOY_TRANSCODER_GCP_WIF_IDP (`projects/<123456789>/locations/global/workloadIdentityPools/<example-identity-pool>/providers/github`)
+- SECRET_GH_STAGING_DEPLOY_TRANSCODER_GCP_WIF_SA (`<example-deploy-account>@<example>.iam.gserviceaccount.com`)
+- SECRET_GH_STAGING_DEPLOY_TRANSCODER_LAMBDA_ACCESS_KEY_ID
+- SECRET_GH_STAGING_DEPLOY_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY
+- SECRET_GH_STAGING_SSH_REMOTE (`<xxx.xxx.xxx.xxx>`)
+- SECRET_GH_STAGING_SSH_KEY (`-----BEGIN OPENSSH PRIVATE KEY-----\n...`)
+- SECRET_GH_STAGING_SSH_KNOWN_HOSTS (`xxx.xxx.xxx.xxx ecdsa-sha2-nistp256 AAAA...`)
+- SECRET_GH_STAGING_SSH_PORT (`43642`)
+- STAGING_APP_ORIGIN (`staging.streamist.app`)
+- STAGING_CDN_ORIGIN (`staging-cdn.stst.page`)
+- STAGING_HCAPTCHA_SITE_KEY_FOR_REGISTRATION
+- STAGING_SECRET_API_JWT_SECRET
+- STAGING_SECRET_API_PROXY_AUTH_TOKEN
+- STAGING_SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET
+- STAGING_SECRET_CDN_JWT_SECRET
+- STAGING_SECRET_CDN_STORAGE_ACCESS_REFERER
+- STAGING_SECRET_DATABASE_BACKUP_PASSPHRASE
+- STAGING_SECRET_DATABASE_BACKUP_S3_ACCESS_KEY_ID
+- STAGING_SECRET_DATABASE_BACKUP_S3_BUCKET
+- STAGING_SECRET_DATABASE_BACKUP_S3_SECRET_ACCESS_KEY
+- STAGING_SECRET_DATABASE_URL (`postgresql://<username>:<password>@postgresql:5432/<database>`)
+- STAGING_SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON
+- STAGING_SECRET_HCAPTCHA_SECRET_KEY
+- STAGING_SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID
+- STAGING_SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY
+- STAGING_SECRET_POSTGRES_DB
+- STAGING_SECRET_POSTGRES_PASSWORD
+- STAGING_SECRET_POSTGRES_USER
+- STAGING_SECRET_REFRESH_TOKEN_JWT_SECRET
+- STAGING_SECRET_SERVER_WASABI_ACCESS_KEY_ID
+- STAGING_SECRET_SERVER_WASABI_SECRET_ACCESS_KEY
+- STAGING_SECRET_TRANSCODER_CALLBACK_SECRET
+- STAGING_SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID
+- STAGING_SECRET_TRANSCODER_WASABI_SECRET_ACCESS_KEY
+- STAGING_SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID
+- STAGING_SECRET_USER_DOWNLOAD_WASABI_SECRET_ACCESS_KEY
+- STAGING_SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID
+- STAGING_SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY
 
 #### Cloudflare Pages の設定
 

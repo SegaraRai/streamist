@@ -1,4 +1,4 @@
-name: 'Staging: Build and deploy Frontend'
+name: 'Deploy Frontend'
 
 on:
   push:
@@ -12,11 +12,16 @@ on:
 
 jobs:
   deploy:
-    name: Build and Deploy
+    name: Build and deploy
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
     steps:
+      - name: Set env (Staging)
+        if: ${{ github.ref == 'refs/heads/staging' }}
+        run: |
+          echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
+          echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.0.1
         with:
@@ -29,9 +34,8 @@ jobs:
       - run: pnpm run generate
       - run: pnpm run build:client -- -- --mode $TARGET_NODE_ENV
         env:
-          TARGET_NODE_ENV: staging
-          VITE_CDN_ORIGIN: ${{ secrets.STAGING_CDN_ORIGIN }}
-          VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION: ${{ secrets.STAGING_HCAPTCHA_SITE_KEY_FOR_REGISTRATION }}
+          VITE_CDN_ORIGIN: ${{ secrets[format('{0}_CDN_ORIGIN', env.DEPLOY_ENV)] }}
+          VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION: ${{ secrets[format('{0}_HCAPTCHA_SITE_KEY_FOR_REGISTRATION', env.DEPLOY_ENV)] }}
       - run: |
           mkdir -p packages/frontend/build
           mv packages/frontend/dist packages/frontend/build/

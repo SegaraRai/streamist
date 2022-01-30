@@ -1,4 +1,4 @@
-name: 'Staging: Build and deploy Server'
+name: 'Deploy Server'
 
 on:
   push:
@@ -12,11 +12,16 @@ on:
 
 jobs:
   deploy:
-    name: Build and Deploy
+    name: Build and deploy
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
     steps:
+      - name: Set env (Staging)
+        if: ${{ github.ref == 'refs/heads/staging' }}
+        run: |
+          echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
+          echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.0.1
         with:
@@ -28,8 +33,6 @@ jobs:
       - run: pnpm i --frozen-lockfile
       - run: pnpm run generate
       - run: pnpm run build:server
-        env:
-          TARGET_NODE_ENV: staging
       - run: DOCKER_BUILDKIT=1 docker build -t streamist-server ./packages/server/docker/docker.server
       - run: docker save streamist-server | xz -0 > ./packages/server/docker/compose/streamist-server.tar.xz
       - name: Create env files
@@ -38,36 +41,36 @@ jobs:
           ./createEnv.sh
           printenv SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON > ./gapp-credentials.json
         env:
-          SECRET_POSTGRES_USER: ${{ secrets.STAGING_SECRET_POSTGRES_USER }}
-          SECRET_POSTGRES_PASSWORD: ${{ secrets.STAGING_SECRET_POSTGRES_PASSWORD }}
-          SECRET_POSTGRES_DB: ${{ secrets.STAGING_SECRET_POSTGRES_DB }}
-          SECRET_DATABASE_URL: ${{ secrets.STAGING_SECRET_DATABASE_URL }}
-          SECRET_API_JWT_SECRET: ${{ secrets.STAGING_SECRET_API_JWT_SECRET }}
-          SECRET_CDN_JWT_SECRET: ${{ secrets.STAGING_SECRET_CDN_JWT_SECRET }}
-          SECRET_REFRESH_TOKEN_JWT_SECRET: ${{ secrets.STAGING_SECRET_REFRESH_TOKEN_JWT_SECRET }}
-          SECRET_TRANSCODER_CALLBACK_SECRET: ${{ secrets.STAGING_SECRET_TRANSCODER_CALLBACK_SECRET }}
-          SECRET_API_PROXY_AUTH_TOKEN: ${{ secrets.STAGING_SECRET_API_PROXY_AUTH_TOKEN }}
-          SECRET_SERVER_WASABI_ACCESS_KEY_ID: ${{ secrets.STAGING_SECRET_SERVER_WASABI_ACCESS_KEY_ID }}
-          SECRET_SERVER_WASABI_SECRET_ACCESS_KEY: ${{ secrets.STAGING_SECRET_SERVER_WASABI_SECRET_ACCESS_KEY }}
-          SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID: ${{ secrets.STAGING_SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID }}
-          SECRET_USER_DOWNLOAD_WASABI_SECRET_ACCESS_KEY: ${{ secrets.STAGING_SECRET_USER_DOWNLOAD_WASABI_SECRET_ACCESS_KEY }}
-          SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID: ${{ secrets.STAGING_SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID }}
-          SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY: ${{ secrets.STAGING_SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY }}
-          SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID: ${{ secrets.STAGING_SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID }}
-          SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY: ${{ secrets.STAGING_SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY }}
-          HCAPTCHA_SITE_KEY_FOR_REGISTRATION: ${{ secrets.STAGING_HCAPTCHA_SITE_KEY_FOR_REGISTRATION }}
-          SECRET_HCAPTCHA_SECRET_KEY: ${{ secrets.STAGING_SECRET_HCAPTCHA_SECRET_KEY }}
-          SECRET_DATABASE_BACKUP_S3_BUCKET: ${{ secrets.STAGING_SECRET_DATABASE_BACKUP_S3_BUCKET }}
-          SECRET_DATABASE_BACKUP_S3_ACCESS_KEY_ID: ${{ secrets.STAGING_SECRET_DATABASE_BACKUP_S3_ACCESS_KEY_ID }}
-          SECRET_DATABASE_BACKUP_S3_SECRET_ACCESS_KEY: ${{ secrets.STAGING_SECRET_DATABASE_BACKUP_S3_SECRET_ACCESS_KEY }}
-          SECRET_DATABASE_BACKUP_PASSPHRASE: ${{ secrets.STAGING_SECRET_DATABASE_BACKUP_PASSPHRASE }}
-          SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.STAGING_SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+          SECRET_POSTGRES_USER: ${{ secrets[format('{0}_SECRET_POSTGRES_USER', env.DEPLOY_ENV)] }}
+          SECRET_POSTGRES_PASSWORD: ${{ secrets[format('{0}_SECRET_POSTGRES_PASSWORD', env.DEPLOY_ENV)] }}
+          SECRET_POSTGRES_DB: ${{ secrets[format('{0}_SECRET_POSTGRES_DB', env.DEPLOY_ENV)] }}
+          SECRET_DATABASE_URL: ${{ secrets[format('{0}_SECRET_DATABASE_URL', env.DEPLOY_ENV)] }}
+          SECRET_API_JWT_SECRET: ${{ secrets[format('{0}_SECRET_API_JWT_SECRET', env.DEPLOY_ENV)] }}
+          SECRET_CDN_JWT_SECRET: ${{ secrets[format('{0}_SECRET_CDN_JWT_SECRET', env.DEPLOY_ENV)] }}
+          SECRET_REFRESH_TOKEN_JWT_SECRET: ${{ secrets[format('{0}_SECRET_REFRESH_TOKEN_JWT_SECRET', env.DEPLOY_ENV)] }}
+          SECRET_TRANSCODER_CALLBACK_SECRET: ${{ secrets[format('{0}_SECRET_TRANSCODER_CALLBACK_SECRET', env.DEPLOY_ENV)] }}
+          SECRET_API_PROXY_AUTH_TOKEN: ${{ secrets[format('{0}_SECRET_API_PROXY_AUTH_TOKEN', env.DEPLOY_ENV)] }}
+          SECRET_SERVER_WASABI_ACCESS_KEY_ID: ${{ secrets[format('{0}_SECRET_SERVER_WASABI_ACCESS_KEY_ID', env.DEPLOY_ENV)] }}
+          SECRET_SERVER_WASABI_SECRET_ACCESS_KEY: ${{ secrets[format('{0}_SECRET_SERVER_WASABI_SECRET_ACCESS_KEY', env.DEPLOY_ENV)] }}
+          SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID: ${{ secrets[format('{0}_SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID', env.DEPLOY_ENV)] }}
+          SECRET_USER_DOWNLOAD_WASABI_SECRET_ACCESS_KEY: ${{ secrets[format('{0}_SECRET_USER_DOWNLOAD_WASABI_SECRET_ACCESS_KEY', env.DEPLOY_ENV)] }}
+          SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID: ${{ secrets[format('{0}_SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID', env.DEPLOY_ENV)] }}
+          SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY: ${{ secrets[format('{0}_SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY', env.DEPLOY_ENV)] }}
+          SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID: ${{ secrets[format('{0}_SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID', env.DEPLOY_ENV)] }}
+          SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY: ${{ secrets[format('{0}_SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY', env.DEPLOY_ENV)] }}
+          HCAPTCHA_SITE_KEY_FOR_REGISTRATION: ${{ secrets[format('{0}_HCAPTCHA_SITE_KEY_FOR_REGISTRATION', env.DEPLOY_ENV)] }}
+          SECRET_HCAPTCHA_SECRET_KEY: ${{ secrets[format('{0}_SECRET_HCAPTCHA_SECRET_KEY', env.DEPLOY_ENV)] }}
+          SECRET_DATABASE_BACKUP_S3_BUCKET: ${{ secrets[format('{0}_SECRET_DATABASE_BACKUP_S3_BUCKET', env.DEPLOY_ENV)] }}
+          SECRET_DATABASE_BACKUP_S3_ACCESS_KEY_ID: ${{ secrets[format('{0}_SECRET_DATABASE_BACKUP_S3_ACCESS_KEY_ID', env.DEPLOY_ENV)] }}
+          SECRET_DATABASE_BACKUP_S3_SECRET_ACCESS_KEY: ${{ secrets[format('{0}_SECRET_DATABASE_BACKUP_S3_SECRET_ACCESS_KEY', env.DEPLOY_ENV)] }}
+          SECRET_DATABASE_BACKUP_PASSPHRASE: ${{ secrets[format('{0}_SECRET_DATABASE_BACKUP_PASSPHRASE', env.DEPLOY_ENV)] }}
+          SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets[format('{0}_SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON', env.DEPLOY_ENV)] }}
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.SECRET_GH_STAGING_SSH_KEY }}
+          key: ${{ secrets[format('SECRET_GH_{0}_SSH_KEY', env.DEPLOY_ENV)] }}
           name: id_ed25519
-          known_hosts: ${{ secrets.SECRET_GH_STAGING_SSH_KNOWN_HOSTS }}
+          known_hosts: ${{ secrets[format('SECRET_GH_{0}_SSH_KNOWN_HOSTS', env.DEPLOY_ENV)] }}
           if_key_exists: fail
       - name: Deploy to server
         run: |
@@ -77,5 +80,5 @@ jobs:
           rsync -av --no-owner --no-group --checksum --delete --exclude data -e "ssh -p $SSH_PORT" ./ deploy@$SSH_REMOTE:/app/
           ssh -p $SSH_PORT deploy@$SSH_REMOTE '/app/deploy.sh'
         env:
-          SSH_REMOTE: ${{ secrets.SECRET_GH_STAGING_SSH_IP_ADDRESS }}
-          SSH_PORT: ${{ secrets.SECRET_GH_STAGING_SSH_PORT }}
+          SSH_REMOTE: ${{ secrets[format('SECRET_GH_{0}_SSH_REMOTE', env.DEPLOY_ENV)] }}
+          SSH_PORT: ${{ secrets[format('SECRET_GH_{0}_SSH_PORT', env.DEPLOY_ENV)] }}
