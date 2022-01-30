@@ -17,7 +17,7 @@ server.on('request', (req, res): void => {
       if (!/^application\/json;?/.test(req.headers['content-type'] || '')) {
         res.statusCode = 400;
         res.setHeader('Content-Type', 'text/plain');
-        res.end('content-type must be application/json');
+        res.end('Content-Type must be application/json');
         return;
       }
 

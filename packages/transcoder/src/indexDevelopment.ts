@@ -14,13 +14,13 @@ import type { TranscoderRequest } from './types';
 
 const server = createServer();
 
-server.on('request', (req, res) => {
-  (async () => {
+server.on('request', (req, res): void => {
+  (async (): Promise<void> => {
     if (req.method === 'POST' && req.url === DEV_TRANSCODER_API_PATH) {
       if (!/^application\/json;?/.test(req.headers['content-type'] || '')) {
         res.statusCode = 400;
         res.setHeader('Content-Type', 'text/plain');
-        res.end('content-type must be application/json');
+        res.end('Content-Type must be application/json');
         return;
       }
 
@@ -29,14 +29,10 @@ server.on('request', (req, res) => {
       ) as TranscoderRequest;
       logger.info(transcoderRequest);
 
-      transcode(transcoderRequest)
-        .then((transcoderResponse) => {
-          logger.info(transcoderResponse);
-          return sendCallback(transcoderRequest, transcoderResponse);
-        })
-        .catch((error) => {
-          logger.error(error);
-        });
+      const transcoderResponse = await transcode(transcoderRequest);
+      logger.info(transcoderResponse);
+
+      await sendCallback(transcoderRequest, transcoderResponse);
 
       res.statusCode = 204;
       res.end();

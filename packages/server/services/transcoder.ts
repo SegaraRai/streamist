@@ -19,7 +19,7 @@ async function invokeTranscoderDev(request: TranscoderRequest): Promise<void> {
     const response = await fetch(DEV_TRANSCODER_API_ENDPOINT, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=UTF-8',
       },
       body: JSON.stringify(request),
     });
@@ -56,6 +56,9 @@ export async function invokeTranscoder(
               oidcToken: {
                 serviceAccountEmail:
                   SECRET_INVOKE_TRANSCODER_GCR_SERVICE_ACCOUNT,
+              },
+              headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
               },
               body: Buffer.from(JSON.stringify(request)),
             },
