@@ -69,7 +69,7 @@ services:
       - postgres
     networks:
       - db-network
-    env_file: databse_backup.env
+    env_file: database_backup.env
     environment:
       - SCHEDULE=@daily
       - S3_PREFIX=backup
