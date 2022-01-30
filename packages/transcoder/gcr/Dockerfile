@@ -21,7 +21,7 @@ COPY --from=build /app /app
 ENV MAGICK_CONFIGURE_PATH /app/imconfig
 ENV PATH /app/bin:$PATH
 
-CMD [ "node", "/app/index.js" ]
+CMD ["node", "/app/index.js"]
 
 # docker build -t gcr-transcode .
 # docker run --name gcr -e "PORT=8080" -p 21090:8080 --rm gcr-transcode
