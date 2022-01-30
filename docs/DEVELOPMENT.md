@@ -123,17 +123,17 @@ timedatectl set-timezone UTC
 
 ###### 管理用アカウントの作成
 
-パスワードは適当に生成しておく
-ここでは対話的な作業が必要
+パスワードが訊かれるので入力する
+`usermod`をちゃんと実行すること
 
 ```sh
-adduser vps
+adduser --gecos "" vps
 usermod -aG sudo vps
 ```
 
 ###### SSH のポート変更、FW の設定
 
-/etc/ssh/sshd_config を変更する
+`/etc/ssh/sshd_config` を変更する
 パスワードログインは本当は無効化したほうが良いがとりあえず有効なままにしておく
 
 ```diff
@@ -148,6 +148,7 @@ usermod -aG sudo vps
 ```
 
 以下を実行する
+`ufw enable`でプロンプトされるので`y`を入力する
 
 ```sh
 ufw allow 80
@@ -160,17 +161,23 @@ ufw reload
 ufw enable
 ```
 
+一度 SSH 接続を切断し、`vps`ユーザーで改めてログインする
+`sudo su -`を実行し、`sudo`が使用できることを確認した上で後続の手順を実行する
+
 ###### Docker のインストール
 
 ```sh
 apt install -y apt-transport-https ca-certificates curl software-properties-common
+
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 apt update
 apt-cache policy docker-ce
 
 apt install -y docker-ce
+
 systemctl status docker
+
 systemctl start docker
 systemctl enable docker
 
@@ -200,7 +207,13 @@ chown -R deploy:deploy /app
 
 ###### lego のセットアップ
 
-以下のスクリプトを /etc/lego/update.sh に配置する
+以下を実行する
+
+```sh
+mkdir -p /etc/lego
+```
+
+以下のスクリプトを`/etc/lego/update.sh`に配置する
 `DOMAIN`と`CLOUDFLARE_DNS_API_TOKEN`は適宜変更する
 
 ```sh
@@ -219,26 +232,29 @@ EMAIL=ssl-admin@streamist.app
 DOMAIN=XXXXXXXXXX.streamist.app
 CLOUDFLARE_DNS_API_TOKEN=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-CLOUDFLARE_DNS_API_TOKEN=$CLOUDFLARE_DNS_API_TOKEN lego --accept-tos --path $LEGO_DIR --key-type $KEY_TYPE --run-hook="/etc/lego/hook.sh $DOMAIN" --dns cloudflare --email $EMAIL --domains $DOMAIN $COMMAND
+CLOUDFLARE_DNS_API_TOKEN=$CLOUDFLARE_DNS_API_TOKEN lego --accept-tos --path $LEGO_DIR --key-type $KEY_TYPE --dns cloudflare --email $EMAIL --domains $DOMAIN $COMMAND --$COMMAND-hook "/etc/lego/hook.sh $DOMAIN $COMMAND"
 ```
 
-以下のスクリプトを /etc/lego/hook.sh に配置する
+以下のスクリプトを`/etc/lego/hook.sh`に配置する
 
 ```sh
 #!/bin/bash
 
 DOMAIN="$1"
+COMMAND="$2"
 
 if [ "$DOMAIN" = "" ]; then
-  echo "Usage: $0 [domain]"
+  echo "Usage: $0 [domain] [command]"
   exit 1
 fi
 
 cat /etc/lego/data/certificates/$DOMAIN.crt /etc/lego/data/certificates/$DOMAIN.key > /app/data/lego/cert.pem
 chmod 644 /app/data/lego/cert.pem
 
-cd /app
-docker-compose restart haproxy
+if [ "$COMMAND" == "renew" ]; then
+  cd /app
+  docker-compose restart haproxy
+fi
 ```
 
 以下を実行する
@@ -287,6 +303,7 @@ systemctl restart cron.service
 - `deploy`ユーザーは
   - 存在するか
   - `docker`コマンドが使えるか
+  - `/home/deploy/.ssh/authorized_keys`に`streamist_id_ed25519.pub`が設定されているか
 - `lego`ユーザーは
   - 存在するか
   - `docker`コマンドが使えるか
@@ -303,7 +320,8 @@ systemctl restart cron.service
 
 `streamist-build`リポジトリを作成する
 
-秘密鍵を `SECRET_GH_STAGING_SSH_KEY` として登録する（以下のような形式）
+`SECRET_GH_STAGING_SSH_KEY`に秘密鍵を登録する（以下のような形式）
+念の為最後に改行を入れておく
 
 ```plaintext
 -----BEGIN OPENSSH PRIVATE KEY-----
@@ -311,15 +329,16 @@ systemctl restart cron.service
 -----END OPENSSH PRIVATE KEY-----
 ```
 
-known_hosts を `SECRET_GH_STAGING_SSH_KNOWN_HOSTS` として登録する（以下のような形式）
+`SECRET_GH_STAGING_SSH_KNOWN_HOSTS`に`known_hosts`の内容を登録する（以下のような形式）
+ポート番号は指定しなくて良い、念の為最後に改行を入れておく
 
 ```plaintext
 xxx.xxx.xxx.xxx ecdsa-sha2-nistp256 AAAA...
 ```
 
-`SECRET_GH_STAGING_SSH_PORT` に 43642 を登録する
+`SECRET_GH_STAGING_SSH_PORT`に`43642`を登録する
 
-`SECRET_GH_STAGING_SSH_IP_ADDRESS` に接続先の IP アドレスを登録する
+`SECRET_GH_STAGING_SSH_IP_ADDRESS`に接続先の IP アドレスを登録する
 
 #### Cloudflare Pages の設定
 
