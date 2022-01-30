@@ -62,6 +62,21 @@ services:
     networks:
       - app-network
 
+  postgres_backup:
+    image: eeshugerman/postgres-backup-s3:14
+    container_name: postgres_backup
+    depends_on:
+      - postgres
+    networks:
+      - db-network
+    env_file: databse_backup.env
+    environment:
+      - SCHEDULE=@daily
+      - S3_PREFIX=backup
+      - POSTGRES_HOST=postgres
+      - S3_REGION=ap-northeast-1
+      - S3_ENDPOINT=s3.ap-northeast-1.wasabisys.com
+
 networks:
   app-network:
     driver: bridge
