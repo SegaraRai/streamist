@@ -192,9 +192,7 @@ async function invokeTranscoderBySource(
     ...sourceFiles.map((sourceFile) => sourceFile.fileSize)
   );
 
-  const useGCR =
-    maxSourceFileSize >= USE_GCR_SIZE_THRESHOLD ||
-    maxSourceFileSize >= 10_000_000;
+  const useGCR = maxSourceFileSize >= USE_GCR_SIZE_THRESHOLD;
 
   const request: TranscoderRequest = {
     callbackPath: TRANSCODER_CALLBACK_API_PATH,
