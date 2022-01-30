@@ -6,7 +6,7 @@ import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { defineConfig } from 'rollup';
 import esbuild from 'rollup-plugin-esbuild';
-// import { terser } from 'rollup-plugin-terser';
+import { terser } from 'rollup-plugin-terser';
 import tsPaths from 'rollup-plugin-tsconfig-paths';
 
 const { TARGET_NODE_ENV } = process.env;
@@ -75,6 +75,6 @@ export default defineConfig({
       target: 'node16',
     }),
     commonjs(),
-    // terser(),
+    terser(),
   ],
 });

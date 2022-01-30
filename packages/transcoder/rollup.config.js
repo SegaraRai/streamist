@@ -1,6 +1,6 @@
 // @ts-check
 
-import { readFile, rm, writeFile } from 'fs/promises';
+import { readFile, readdir, rm, writeFile } from 'fs/promises';
 import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
@@ -18,9 +18,11 @@ if (TARGET_NODE_ENV !== 'production' && TARGET_NODE_ENV !== 'staging') {
 export default defineConfig({
   input: 'src/indexLambda.ts',
   output: {
-    file: 'dist/index.js',
+    dir: 'dist',
     format: 'cjs',
-    inlineDynamicImports: true,
+    entryFileNames: 'index.js',
+    manualChunks: (chunk) =>
+      /node_modules/.test(chunk) ? 'vendor' : undefined,
   },
   plugins: [
     {
@@ -33,7 +35,13 @@ export default defineConfig({
       },
       writeBundle: async () => {
         const zip = new JSZip();
-        zip.file('index.js', await readFile('dist/index.js'));
+        const files = await readdir('dist');
+        for (const file of files) {
+          if (!file.endsWith('.js')) {
+            continue;
+          }
+          zip.file(file, await readFile(`dist/${file}`));
+        }
         zip.file(
           'sRGB_ICC_v4_Appearance.icc',
           await readFile('sRGB_ICC_v4_Appearance.icc')
