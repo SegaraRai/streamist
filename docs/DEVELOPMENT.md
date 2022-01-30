@@ -103,6 +103,8 @@ staging と production でゾーンが同じ場合は使い回せる（現状は
 
 ##### サーバー環境での準備
 
+以下はすべて root ユーザーで実行する
+
 予め `streamist_id_ed25519.pub` をサーバーに転送しておく
 以下のように SSH で繋いでコピペして書き込めば良い
 
@@ -264,7 +266,14 @@ DNS を設定する
 runuser -l lego -c "/etc/lego/update.sh run"
 ```
 
-TODO: cron の設定
+cron を設定する
+production 環境では DNS の競合を避けるため一応`0 1`にすること
+
+```sh
+echo "0 0 * * * lego /etc/lego/update.sh renew" > /etc/cron.d/lego
+chmod 644 /etc/cron.d/lego
+systemctl restart cron.service
+```
 
 ###### 最終確認
 
