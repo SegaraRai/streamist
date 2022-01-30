@@ -16,7 +16,7 @@ export const configDevelopment: Record<
     transcoderGCRProject: '',
     transcoderGCRRegion: '',
     transcoderGCRName: '',
-    transcoderGCRURL: '',
+    transcoderGCROrigin: '',
     transcoderGCRTasksQueueName: '',
     buckets: {
       transcodeLog: {

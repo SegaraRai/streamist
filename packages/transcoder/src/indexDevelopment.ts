@@ -5,7 +5,7 @@ import { createServer } from 'http';
 import {
   DEV_TRANSCODER_API_PATH,
   DEV_TRANSCODER_PORT,
-} from '$shared-server/config/dev';
+} from '$shared-server/config';
 import { nodeReadableStreamToBuffer } from '$shared-server/stream';
 import { sendCallback } from './callback';
 import logger from './logger';

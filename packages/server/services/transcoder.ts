@@ -1,7 +1,10 @@
 import { Lambda } from '@aws-sdk/client-lambda';
 import { CloudTasksClient } from '@google-cloud/tasks';
 import fetch from 'node-fetch';
-import { DEV_TRANSCODER_API_ENDPOINT } from '$shared-server/config/dev';
+import {
+  DEV_TRANSCODER_API_ENDPOINT,
+  TRANSCODER_GCR_API_PATH,
+} from '$shared-server/config';
 import { OSRegion, getOSRegion } from '$shared-server/objectStorage';
 import { TranscoderRequest } from '$transcoder/types';
 import {
@@ -49,7 +52,7 @@ export async function invokeTranscoder(
           task: {
             httpRequest: {
               httpMethod: 'POST',
-              url: regionDef.transcoderGCRURL,
+              url: `${regionDef.transcoderGCROrigin}${TRANSCODER_GCR_API_PATH}`,
               oidcToken: {
                 serviceAccountEmail:
                   SECRET_INVOKE_TRANSCODER_GCR_SERVICE_ACCOUNT,

@@ -2,6 +2,7 @@ import './initOS';
 import './initCredentials';
 
 import { createServer } from 'http';
+import { TRANSCODER_GCR_API_PATH } from '$shared-server/config';
 import { nodeReadableStreamToBuffer } from '$shared-server/stream';
 import { sendCallback } from './callback';
 import logger from './logger';
@@ -12,7 +13,7 @@ const server = createServer();
 
 server.on('request', (req, res): void => {
   (async (): Promise<void> => {
-    if (req.method === 'POST' && req.url === '/api/transcode') {
+    if (req.method === 'POST' && req.url === TRANSCODER_GCR_API_PATH) {
       if (!/^application\/json;?/.test(req.headers['content-type'] || '')) {
         res.statusCode = 400;
         res.setHeader('Content-Type', 'text/plain');
