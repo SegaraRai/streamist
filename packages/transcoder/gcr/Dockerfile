@@ -8,7 +8,7 @@ COPY app .
 RUN find . -type d -exec chmod 0755 {} +
 RUN find . -type f -exec chmod 0644 {} +
 RUN chmod 0755 ./bin/*
-RUN ln -s ./bin/ffmpeg ./bin/ffprobe
+RUN ln -s ./ffmpeg ./bin/ffprobe
 
 ### Release Stage
 
