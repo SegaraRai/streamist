@@ -201,7 +201,7 @@ API.add(
 
     const originRequestHeaders: [string, string][] = [
       // Refererはアクセス制御（バケットポリシーでこのRefererでないとアクセスできなくしてある）
-      ['Referer', context.bindings.SECRET_CDN_STORAGE_ACCESS_REFERER],
+      ['Referer', context.bindings.SECRET_CDN_STORAGE_ACCESS_REFERRER],
       // こっちはキャッシュ対策
       ['Streamist-CDN-Cache-Security-Header', securityTokenHeader],
     ];

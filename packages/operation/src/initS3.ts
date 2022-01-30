@@ -32,8 +32,8 @@ function createBucketPolicyTranscoded(bucketName: string) {
         Condition: {
           StringEquals: {
             'aws:Referer':
-              process.env.SECRET_CDN_STORAGE_ACCESS_REFERER ||
-              '<SECRET_CDN_STORAGE_ACCESS_REFERER>',
+              process.env.SECRET_CDN_STORAGE_ACCESS_REFERRER ||
+              '<SECRET_CDN_STORAGE_ACCESS_REFERRER>',
           },
         },
       },
