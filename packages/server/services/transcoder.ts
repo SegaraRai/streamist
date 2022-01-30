@@ -5,6 +5,7 @@ import { DEV_TRANSCODER_API_ENDPOINT } from '$shared-server/config/dev';
 import { OSRegion, getOSRegion } from '$shared-server/objectStorage';
 import { TranscoderRequest } from '$transcoder/types';
 import {
+  SECRET_INVOKE_TRANSCODER_GCR_SERVICE_ACCOUNT,
   SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID,
   SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY,
 } from '$/services/env';
@@ -49,6 +50,10 @@ export async function invokeTranscoder(
             httpRequest: {
               httpMethod: 'POST',
               url: regionDef.transcoderGCRURL,
+              oidcToken: {
+                serviceAccountEmail:
+                  SECRET_INVOKE_TRANSCODER_GCR_SERVICE_ACCOUNT,
+              },
               body: Buffer.from(JSON.stringify(request)),
             },
           },
