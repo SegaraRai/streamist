@@ -8,10 +8,6 @@ COPY app .
 RUN find . -type d -exec chmod 0755 {} +
 RUN find . -type f -exec chmod 0644 {} +
 RUN chmod 0755 ./bin/*
-RUN chmod 0644 ./imconfig/*
-RUN chmod 0644 ./*.icc
-RUN chmod 0644 ./*.js
-RUN chmod 0644 ./*.mjs
 RUN ln -s ./bin/ffmpeg ./bin/ffprobe
 
 ### Release Stage
