@@ -188,6 +188,67 @@ function _usePlaybackStore(): PlaybackState {
     },
   });
 
+  const setMediaSessionActionHandlers = (): void => {
+    navigator.mediaSession.setActionHandler('play', (): void => {
+      playing.value = true;
+    });
+
+    navigator.mediaSession.setActionHandler('pause', (): void => {
+      playing.value = false;
+    });
+
+    navigator.mediaSession.setActionHandler('stop', (): void => {
+      playing.value = false;
+      position.value = 0;
+    });
+
+    navigator.mediaSession.setActionHandler('previoustrack', (): void => {
+      trackProvider.skipPrevious$$q();
+    });
+
+    navigator.mediaSession.setActionHandler('nexttrack', (): void => {
+      trackProvider.skipNext$$q();
+    });
+
+    try {
+      navigator.mediaSession.setActionHandler('seekto', (event): void => {
+        const { seekTime } = event;
+        if (!currentAudio || seekTime == null) {
+          return;
+        }
+        if (event.fastSeek && 'fastSeek' in currentAudio) {
+          currentAudio.fastSeek(seekTime);
+          return;
+        }
+        internalSeekingPosition.value = seekTime;
+        currentAudio.currentTime = seekTime;
+        navigator.mediaSession.setPositionState({
+          duration: currentAudio.duration,
+          playbackRate: currentAudio.playbackRate,
+          position: seekTime,
+        });
+      });
+    } catch (error) {
+      console.warn(
+        'Warning! The "seekto" media session action is not supported.'
+      );
+    }
+  };
+
+  const clearMediaSession = (): void => {
+    // we don't have to set playbackState as we follow media's playback state
+    navigator.mediaSession.metadata = null;
+    // I think we don't need to clear the action handlers too
+    /*
+    navigator.mediaSession.setActionHandler('play', null);
+    navigator.mediaSession.setActionHandler('pause', null);
+    navigator.mediaSession.setActionHandler('stop', null);
+    navigator.mediaSession.setActionHandler('previoustrack', null);
+    navigator.mediaSession.setActionHandler('nexttrack', null);
+    navigator.mediaSession.setActionHandler('seekto', null);
+    //*/
+  };
+
   const createAudio = (): HTMLAudioElement => {
     const audio = new Audio();
     audio.classList.add('currentTrack');
@@ -392,6 +453,7 @@ function _usePlaybackStore(): PlaybackState {
 
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata(metadataInit);
+          setMediaSessionActionHandlers();
         }
       })();
     } else {
@@ -453,54 +515,9 @@ function _usePlaybackStore(): PlaybackState {
   if ('mediaSession' in navigator) {
     watch(currentTrack, (newTrack): void => {
       if (!newTrack) {
-        navigator.mediaSession.metadata = null;
+        clearMediaSession();
       }
     });
-
-    navigator.mediaSession.setActionHandler('play', (): void => {
-      playing.value = true;
-    });
-
-    navigator.mediaSession.setActionHandler('pause', (): void => {
-      playing.value = false;
-    });
-
-    navigator.mediaSession.setActionHandler('stop', (): void => {
-      playing.value = false;
-      position.value = 0;
-    });
-
-    navigator.mediaSession.setActionHandler('previoustrack', (): void => {
-      trackProvider.skipPrevious$$q();
-    });
-
-    navigator.mediaSession.setActionHandler('nexttrack', (): void => {
-      trackProvider.skipNext$$q();
-    });
-
-    try {
-      navigator.mediaSession.setActionHandler('seekto', (event): void => {
-        const { seekTime } = event;
-        if (!currentAudio || seekTime == null) {
-          return;
-        }
-        if (event.fastSeek && 'fastSeek' in currentAudio) {
-          currentAudio.fastSeek(seekTime);
-          return;
-        }
-        internalSeekingPosition.value = seekTime;
-        currentAudio.currentTime = seekTime;
-        navigator.mediaSession.setPositionState({
-          duration: currentAudio.duration,
-          playbackRate: currentAudio.playbackRate,
-          position: seekTime,
-        });
-      });
-    } catch (error) {
-      console.warn(
-        'Warning! The "seekto" media session action is not supported.'
-      );
-    }
   }
 
   const cleanup = (): void => {
@@ -509,8 +526,7 @@ function _usePlaybackStore(): PlaybackState {
     currentAudio = undefined;
 
     if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = null;
-      navigator.mediaSession.playbackState = 'none';
+      clearMediaSession();
     }
   };
 
