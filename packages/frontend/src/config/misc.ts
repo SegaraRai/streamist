@@ -1,6 +1,8 @@
 export const IDLE_TIMEOUT = 1 * 60 * 1000;
 export const COOKIE_CHECK_INTERVAL = 30 * 1000;
 
+export const SW_UPDATE_CHECK_INTERVAL = 60 * 60 * 1000;
+
 export const SYNC_DB_THROTTLE = 5 * 1000;
 
 // this is required to prevent dancing with multiple tab opened (see issue #117)
