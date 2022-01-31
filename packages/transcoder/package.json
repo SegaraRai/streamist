@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.48.0",
+    "@aws-sdk/client-s3": "^3.49.0",
     "dotenv": "^14.3.2",
     "log4js": "^6.4.1",
     "node-fetch": "^3.2.0"
