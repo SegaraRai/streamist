@@ -70,13 +70,15 @@ export default defineComponent({
       <NNotificationProvider>
         <NDialogProvider>
           <RouterView />
+          <template v-if="isLoggedIn$$q">
+            <SReloadPrompt />
+          </template>
         </NDialogProvider>
       </NNotificationProvider>
     </NMessageProvider>
     <NGlobalStyle />
     <template v-if="isLoggedIn$$q">
       <SPlaybackPersistor />
-      <SReloadPrompt />
     </template>
   </NConfigProvider>
 </template>
