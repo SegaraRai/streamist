@@ -76,6 +76,7 @@ export default defineComponent({
     <NGlobalStyle />
     <template v-if="isLoggedIn$$q">
       <SPlaybackPersistor />
+      <SReloadPrompt />
     </template>
   </NConfigProvider>
 </template>

@@ -22,6 +22,13 @@ common:
   ThisActionCannotBeUndone: この操作は取り消せません
 regions:
   'ap-northeast-1': ap-northeast-1 (日本, 東京)
+reloadPrompt:
+  message:
+    offlineReady: オフラインで利用可能になりました
+    needsRefresh: アプリの更新があります。再読み込みを押して更新してください。
+  button:
+    Reload: 再読み込み
+    Close: 閉じる
 sidebar:
   Home: ホーム
   Albums: アルバム
