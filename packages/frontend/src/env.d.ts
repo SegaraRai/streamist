@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  readonly VITE_BUILD_REV: string;
   readonly VITE_CDN_ORIGIN: string;
   readonly VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION: string;
 }

@@ -49,6 +49,7 @@ export default defineComponent({
 
     return {
       t,
+      buildRev$$q: import.meta.env.VITE_BUILD_REV,
       audioQualityOptions$$q,
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
       themeOptions$$q,
@@ -167,6 +168,7 @@ export default defineComponent({
           {{ t('settings.device.link.AccountSettings') }}
         </RouterLink>
       </div>
+      <div class="mt-8 text-sm opacity-80">Version {{ buildRev$$q }}</div>
     </div>
   </VContainer>
 </template>

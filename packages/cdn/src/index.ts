@@ -36,6 +36,7 @@ import type { Bindings } from './types';
 
 const NO_CACHE_HEADERS = {
   'Cache-Control': CACHE_CONTROL_NO_STORE,
+  'Streamist-Revision-CDN': BUILD_TIME_DEFINITION.BUILD_REV,
 };
 
 const API = new Router<Bindings>();
@@ -297,6 +298,11 @@ API.add(
     responseHeaders.set(
       'Streamist-Origin-Response-Time',
       (timestampAfterRequest - timestampBeforeRequest).toString()
+    );
+
+    responseHeaders.set(
+      'Streamist-Revision-CDN',
+      BUILD_TIME_DEFINITION.BUILD_REV
     );
 
     return originResponse;

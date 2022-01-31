@@ -18,6 +18,7 @@ jobs:
       contents: 'read'
       id-token: 'write'
     steps:
+      - run: echo "TARGET_BUILD_REV=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - name: Set env (Staging)
         if: ${{ github.ref == 'refs/heads/staging' }}
         run: |

@@ -17,6 +17,7 @@ build({
   ],
   watch: true,
   define: {
+    'process.env.BUILD_REV': '"development"',
     'process.env.NODE_ENV': '"development"',
   },
 });

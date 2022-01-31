@@ -75,6 +75,9 @@ export default defineConfig({
     }),
     esbuild({
       define: {
+        'process.env.BUILD_REV': `"${
+          process.env.TARGET_BUILD_REV || 'unknown'
+        }"`,
         'process.env.NODE_ENV': `"${TARGET_NODE_ENV}"`,
         'process.env.PLATFORM_TYPE': '"lambda"',
       },

@@ -33,6 +33,9 @@ export default defineConfig({
     esbuild({
       minify: false,
       define: {
+        'BUILD_TIME_DEFINITION.BUILD_REV': `"${
+          process.env.TARGET_BUILD_REV || 'unknown'
+        }"`,
         'BUILD_TIME_DEFINITION.NODE_ENV': `"${TARGET_NODE_ENV}"`,
       },
       target: 'es2021',

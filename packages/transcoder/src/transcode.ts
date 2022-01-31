@@ -55,6 +55,7 @@ export async function transcode(
   }
 
   return {
+    transcoderRevision: process.env.BUILD_REV || 'unknown',
     request,
     artifacts,
   };

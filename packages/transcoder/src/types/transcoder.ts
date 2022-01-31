@@ -69,6 +69,7 @@ export type TranscoderRequestFileInternal =
   | TranscoderRequestFileImageExtracted;
 
 export interface TranscoderRequest {
+  serverRevision: string;
   /** POST <callbackPath> */
   callbackPath: string;
   runner: 'gcr' | 'lambda';
@@ -172,6 +173,7 @@ export type TranscoderResponseArtifact =
   | TranscoderResponseArtifactError;
 
 export interface TranscoderResponse {
+  transcoderRevision: string;
   request: TranscoderRequest;
   artifacts: TranscoderResponseArtifact[];
 }

@@ -131,6 +131,7 @@ export default defineConfig(({ mode }) => {
     config({ path: '../shared-server/env/development.env' });
 
     // apply VITE_ env vars
+    process.env.VITE_BUILD_REV = 'development';
     process.env.VITE_CDN_ORIGIN = process.env.CDN_ORIGIN;
     process.env.VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION =
       process.env.HCAPTCHA_SITE_KEY_FOR_REGISTRATION;
@@ -153,6 +154,8 @@ export default defineConfig(({ mode }) => {
         rewrite: (p: string) => p.replace(/^\/api\//, `${API_BASE_PATH}/`),
       },
     };
+  } else {
+    process.env.VITE_BUILD_REV = process.env.TARGET_BUILD_REV || 'unknown';
   }
 
   return {
@@ -182,10 +185,15 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       createHtmlPlugin({
+        inject: {
+          data: {
+            BUILD_REV: process.env.VITE_BUILD_REV,
+          },
+        },
         minify: {
           collapseWhitespace: true,
           keepClosingSlash: true,
-          removeComments: true,
+          removeComments: false,
           removeRedundantAttributes: true,
           removeScriptTypeAttributes: true,
           removeStyleLinkTypeAttributes: true,

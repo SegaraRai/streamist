@@ -42,6 +42,14 @@ const appPlugin: FastifyPluginCallback = (
     done();
   });
 
+  fastify.addHook('onSend', (_request, reply, _payload, done): void => {
+    reply.header(
+      'Streamist-Revision-Server',
+      process.env.BUILD_REV || 'unknown'
+    );
+    done();
+  });
+
   fastify.register(fastifyJwt, { secret: SECRET_API_JWT_SECRET });
 
   // NOTE: not setting custom error handler as fastify's default one works fine

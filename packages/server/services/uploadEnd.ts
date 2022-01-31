@@ -195,6 +195,7 @@ async function invokeTranscoderBySource(
   const useGCR = maxSourceFileSize >= USE_GCR_SIZE_THRESHOLD;
 
   const request: TranscoderRequest = {
+    serverRevision: process.env.BUILD_REV || 'unknown',
     callbackPath: TRANSCODER_CALLBACK_API_PATH,
     runner: useGCR ? 'gcr' : 'lambda',
     files: createTranscoderRequestFiles(source.files, {
