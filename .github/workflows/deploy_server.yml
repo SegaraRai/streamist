@@ -79,6 +79,9 @@ jobs:
           cd ./packages/server/docker/compose
           rm .gitignore
           rm createEnv.sh
+          chmod 0700 deploy.sh
+          chmod 0600 *.env
+          chmod 0600 *.env.example
           rsync -av --no-owner --no-group --checksum --delete --exclude data -e "ssh -p $SSH_PORT" ./ deploy@$SSH_REMOTE:/app/
           ssh -p $SSH_PORT deploy@$SSH_REMOTE '/app/deploy.sh'
         env:
