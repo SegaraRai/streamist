@@ -23,11 +23,6 @@ export default defineComponent({
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
 
-    const headTitleRef = ref(t('title.AlbumInit'));
-    useHead({
-      title: headTitleRef,
-    });
-
     onBeforeUnmount(() => {
       playbackStore.clearDefaultSetList$$q();
     });
@@ -48,14 +43,25 @@ export default defineComponent({
         if (albumId !== propAlbumIdRef.value) {
           throw new Error('operation aborted');
         }
-        headTitleRef.value = t('title.Album', [album$$q.title, artist$$q.name]);
         return {
           album$$q,
+          artist$$q,
         };
       },
       [propAlbumIdRef],
       true
     );
+
+    useHead({
+      title: computed(() =>
+        value.value
+          ? t('title.Album', [
+              value.value.album$$q.title,
+              value.value.artist$$q.name,
+            ])
+          : t('title.AlbumInit')
+      ),
+    });
 
     const setList$$q = ref<readonly ResourceTrack[]>([]);
 

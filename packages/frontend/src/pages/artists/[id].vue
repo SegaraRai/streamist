@@ -23,11 +23,6 @@ export default defineComponent({
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
 
-    const headTitleRef = ref(t('title.ArtistInit'));
-    useHead({
-      title: headTitleRef,
-    });
-
     onBeforeUnmount(() => {
       playbackStore.clearDefaultSetList$$q();
     });
@@ -41,7 +36,6 @@ export default defineComponent({
           tryRedirect(router);
           throw new Error(`Artist ${artistId} not found`);
         }
-        headTitleRef.value = t('title.Artist', [artist$$q.name]);
         return {
           artist$$q,
         };
@@ -49,6 +43,14 @@ export default defineComponent({
       [propArtistIdRef],
       true
     );
+
+    useHead({
+      title: computed(() =>
+        value.value
+          ? t('title.Artist', [value.value.artist$$q.name])
+          : t('title.ArtistInit')
+      ),
+    });
 
     const setList$$q = ref<readonly ResourceTrack[]>([]);
 
