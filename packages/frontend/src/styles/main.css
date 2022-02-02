@@ -40,16 +40,15 @@
 
 .s-title {
   @apply sticky;
-  @apply top-0;
+  @apply -top-1 -mt-1;
   @apply z-1;
   @apply flex;
   @apply items-baseline;
   @apply gap-x-4;
   @apply bg-st-background;
-  @apply pt-3;
+  @apply pt-4;
   @apply pb-1;
-  @apply -mx-2px;
-  @apply px-2px;
+  @apply -mx-2px px-2px;
 }
 
 .s-dialog-title {
