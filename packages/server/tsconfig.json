@@ -30,6 +30,9 @@
       "$/*": [
         "./*"
       ],
+      "class-transformer/esm2015": [
+        "./node_modules/class-transformer/esm2015"
+      ],
       "class-transformer": [
         "./node_modules/class-transformer/esm2015"
       ],
