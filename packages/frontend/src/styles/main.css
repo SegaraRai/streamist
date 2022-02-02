@@ -71,7 +71,6 @@
 
 .s-subheading,
 .s-subheading-sl {
-  @apply light:font-medium;
   @apply opacity-60 !important;
 }
 
