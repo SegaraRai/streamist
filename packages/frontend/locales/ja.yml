@@ -199,7 +199,7 @@ uploader:
 dropdown:
   album:
     Play: 再生
-    AddToPlayNextQueue: キューに追加
+    AddToPlayNextQueue: 次に再生
     Edit: 編集
     Merge: 統合
   artist:
@@ -207,7 +207,7 @@ dropdown:
     Merge: 統合
   playlist:
     Play: 再生
-    AddToPlayNextQueue: キューに追加
+    AddToPlayNextQueue: 次に再生
     Edit: 編集
     Delete: 削除
     Create: プレイリストを作成
@@ -374,8 +374,8 @@ message:
   FailedToModifyTrack: "トラック '{0}' の更新に失敗しました\n{1}"
   DeletedTrack: "トラック '{0}' を削除しました"
   FailedToDeleteTrack: "トラック '{0}' の削除に失敗しました\n{1}"
-  AddedToPlayNextQueue: 再生キューに追加しました
-  n_AddedToPlayNextQueue: '再生キューに追加しました | 1 個のトラックを再生キューに追加しました | {n} 個のトラックを再生キューに追加しました'
+  AddedToPlayNextQueue: 次に再生に追加しました
+  n_AddedToPlayNextQueue: '次に再生に追加しました | 1 個のトラックを次に再生に追加しました | {n} 個のトラックを次に再生に追加しました'
   AddedToPlaylist: "'{1}' を '{0}' に追加しました"
   FailedToAddToPlaylist: "'{0}' への '{1}' の追加に失敗しました\n{2}"
   RemovedFromPlaylist: "'{1}' を '{0}' から削除しました"
