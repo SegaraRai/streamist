@@ -3,6 +3,7 @@ name: 'Deploy Frontend'
 on:
   push:
     branches:
+      - main
       - staging
     paths:
       - 'packages/frontend/**'
@@ -18,12 +19,21 @@ jobs:
       contents: 'read'
     steps:
       - run: echo "TARGET_BUILD_REV=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Set env (Production)
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          echo "DEPLOY_ENV=PRODUCTION" >> $GITHUB_ENV
+          echo "TARGET_NODE_ENV=production" >> $GITHUB_ENV
+          echo "VITE_CDN_ORIGIN=https://cdn.stst.page" >> $GITHUB_ENV
+
       - name: Set env (Staging)
         if: ${{ github.ref == 'refs/heads/staging' }}
         run: |
           echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
           echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
           echo "VITE_CDN_ORIGIN=https://staging-cdn.stst.page" >> $GITHUB_ENV
+
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.0.1
         with:

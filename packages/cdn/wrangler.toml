@@ -9,10 +9,10 @@ compatibility_date = "2021-11-10"
 format = "modules"
 main = "./index.mjs"
 
-[env.staging]
-name = "streamist-cdn-staging"
-route = "staging-cdn.stst.page/*"
-
 [env.production]
 name = "streamist-cdn-production"
 route = "cdn.stst.page/*"
+
+[env.staging]
+name = "streamist-cdn-staging"
+route = "staging-cdn.stst.page/*"

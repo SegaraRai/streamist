@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 import minimist from 'minimist';
 import {
   useConfigDevelopment,
+  useConfigProduction,
   useConfigStaging,
 } from '$shared-server/objectStorage';
 import { initS3 } from './initS3';
@@ -15,6 +16,10 @@ async function main(): Promise<void> {
   switch (TARGET_NODE_ENV) {
     case 'development':
       useConfigDevelopment();
+      break;
+
+    case 'production':
+      useConfigProduction();
       break;
 
     case 'staging':

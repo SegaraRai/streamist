@@ -1,5 +1,6 @@
 import {
   useConfigDevelopment,
+  useConfigProduction,
   useConfigStaging,
 } from '$shared-server/objectStorage';
 
@@ -7,6 +8,10 @@ switch (process.env.NODE_ENV) {
   case 'development':
   case 'test':
     useConfigDevelopment();
+    break;
+
+  case 'production':
+    useConfigProduction();
     break;
 
   case 'staging':

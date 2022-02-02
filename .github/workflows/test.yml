@@ -32,8 +32,8 @@ jobs:
       - run: pnpm run typecheck
       - run: pnpm run build
         env:
+          TARGET_NODE_ENV: production
+      - run: pnpm run build
+        env:
           TARGET_NODE_ENV: staging
-      # run: pnpm run build
-      # env:
-      #   TARGET_NODE_ENV: production
       - run: pnpm run test

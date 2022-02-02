@@ -20,11 +20,11 @@
   - `streamist-dev/transcoder-dev` (Server ポリシー)
   - `streamist-dev/user-dev` (User ポリシー)
 - バケットの作成
-  - `bucketCommands.sh` を実行するとバケットの作成とポリシーの設定が自動で行われます
+  - `bucketCommands.sh`を実行するとバケットの作成とポリシーの設定が自動で行われます
 
 #### 設定の反映
 
-- `packages/shared-server/env/.env.example` を元に `packages/shared-server/env/development.env` に設定を書き込む
+- `packages/shared-server/env/.env.example`を元に`packages/shared-server/env/development.env`に設定を書き込む
 
 ## ステージング/プロダクション環境での開発
 
@@ -79,6 +79,28 @@ AWS CLI をインストールし、aws プロファイルを作成してくだ�
 Cloud SDK コマンドライン ツール（gcloud）をインストールしてください
 
 - プロジェクトを作成する
+- サービス アカウントを作成する
+  - Transcoder Deploy
+    - Cloud Build サービス アカウント
+    - Cloud Run デベロッパー
+    - サービス アカウント ユーザー
+  - Transcoder Tasks
+    - Cloud Run 起動元
+    - クラウドタスクへのデータ追加
+    - サービス アカウント ユーザー
+- Workload Identity 連携を設定する
+  - ID プールを作成する
+    - OpenID Connect (OIDC)
+    - GitHub
+    - `https://token.actions.githubusercontent.com`
+    - Default audience
+    - 属性のマッピング
+      - `google.subject`: `assertion.sub`
+      - `attribute.aud`: `assertion.aud`
+      - `attribute.actor`: `assertion.actor`
+      - `attribute.repository`: `assertion.repository`
+  - アクセスを許可から Transcoder Deploy を追加する
+    - フィルタに一致する ID のみにし、`repository`を GitHub のリポジトリ名にする（`<ユーザー名>/<リポジトリ名>`の形式）
 - Secret Manager に以下のシークレットを登録する
   それぞれのシークレットの権限にて Default compute service account プリンシパルにシークレット アクセサーのロールを付与する
   - API_ORIGIN_FOR_TRANSCODER
@@ -241,6 +263,7 @@ mkdir -p /etc/lego
 
 以下のスクリプトを`/etc/lego/update.sh`に配置する
 `DOMAIN`と`CLOUDFLARE_DNS_API_TOKEN`は適宜変更する
+注: `DOMAIN`にはプロキシの背後の API サーバのドメインを指定する
 
 ```sh
 #!/bin/bash
@@ -302,7 +325,7 @@ chmod 0700 /etc/lego/*.sh
 chown lego:lego /app/data/lego
 ```
 
-DNS を設定する
+証明書を発行する
 
 ```sh
 runuser -l lego -c "/etc/lego/update.sh run"
@@ -323,6 +346,7 @@ systemctl restart cron.service
 既にスワップファイルが作成されている場合は`/etc/fstab`の設定は不要
 
 ```sh
+free -h
 swapoff -a
 dd if=/dev/zero of=/swapfile bs=1G count=4
 mkswap /swapfile
@@ -381,6 +405,12 @@ volumes:
   netdatacache:
 ```
 
+起動する
+
+```sh
+docker-compose up -d
+```
+
 ###### 最終確認
 
 - `docker`コマンドは存在するか
@@ -415,6 +445,7 @@ volumes:
 - SECRET_GH_BUILD_REPOSITORY_DEPLOY_KEY
 - SECRET_GH_BUILD_REPOSITORY_NAME (`<username>/<repository>`)
 - SECRET_GH_CF_API_TOKEN
+
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_GCP_WIF_IDP (`projects/<123456789>/locations/global/workloadIdentityPools/<example-identity-pool>/providers/github`)
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_GCP_WIF_SA (`<example-deploy-account>@<example>.iam.gserviceaccount.com`)
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_LAMBDA_ACCESS_KEY_ID
@@ -496,7 +527,7 @@ SECRET_HCAPTCHA_SECRET_KEY=
 
 ##### `STAGING_SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON`
 
-GCR を invoke できる権限を持ったサービスアカウントの資格情報を登録する
+`Transcoder Tasks`サービスアカウントの資格情報を登録する
 
 #### Cloudflare Pages の設定
 
