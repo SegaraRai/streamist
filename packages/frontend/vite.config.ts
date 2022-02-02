@@ -1,10 +1,12 @@
-import { writeFileSync } from 'fs';
+import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
 import VueI18n from '@intlify/vite-plugin-vue-i18n';
+import replace from '@rollup/plugin-replace';
 import Vue from '@vitejs/plugin-vue';
 import VueJSX from '@vitejs/plugin-vue-jsx';
 import Vuetify from '@vuetify/vite-plugin';
 import { config } from 'dotenv';
+import fg from 'fast-glob';
 import LinkAttributes from 'markdown-it-link-attributes';
 import Prism from 'markdown-it-prism';
 import AutoImport from 'unplugin-auto-import/vite';
@@ -34,7 +36,7 @@ function toUpperCamelCase(str: string): string {
 
 const markdownWrapperClasses = 'prose prose-sm m-auto text-left';
 
-function createVuetifyDTS(): void {
+async function createVuetifyDTS(): Promise<void> {
   const importMapJSON = require('vuetify/dist/json/importMap.json') as {
     readonly components: Record<string, unknown>;
   };
@@ -56,7 +58,8 @@ declare module 'vue' {
 
 export {};
 `;
-  writeFileSync('src/vuetify.d.ts', content);
+
+  await writeFile('src/vuetify.d.ts', content);
 }
 
 function getNaiveUIComponents(): readonly string[] {
@@ -122,12 +125,78 @@ function themePlugin() {
   };
 }
 
-createVuetifyDTS();
+async function createMangleReplacements(): Promise<[string, string][]> {
+  const indexToIdentifier = (index: number): string => {
+    const ALPHABET = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const ALNUM =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-export default defineConfig(({ mode }) => {
+    let id = '';
+    while (index >= ALPHABET.length) {
+      id = ALNUM[index % ALNUM.length] + id;
+      index = Math.floor(index / ALNUM.length);
+    }
+    id = ALPHABET[index] + id;
+
+    return id;
+  };
+
+  const GLOB_DIR = '..';
+  const GLOB_PATTERN = [
+    '**/*.{json,js,jsx,ts,tsx,vue}',
+    '!**/build/**',
+    '!**/dist/**',
+    '!**/node_modules/**',
+  ];
+
+  const IDENTIFIER_RE = /[a-zA-Z_$][\w$]*/g;
+  const MANGLE_RE = /\$\$q$/;
+
+  const files = await fg(GLOB_PATTERN, {
+    cwd: GLOB_DIR,
+    absolute: true,
+  });
+
+  const identifierMap = new Map<string, number>();
+  for (const file of files) {
+    const content = await readFile(file, 'utf-8');
+    const identifiers = content.match(IDENTIFIER_RE) || [];
+    for (const identifier of identifiers) {
+      identifierMap.set(identifier, (identifierMap.get(identifier) || 0) + 1);
+    }
+
+    // console.log('reading', file, ', identifierMap.size:', identifierMap.size);
+  }
+
+  const mangleNames = Array.from(identifierMap.entries())
+    .filter(([identifier]) => MANGLE_RE.test(identifier))
+    .sort(([, countA], [, countB]) => countB - countA)
+    .map(([identifier]) => identifier);
+
+  let index = 0;
+  const replacements = new Map<string, string>();
+  for (const mangleName of mangleNames) {
+    if (replacements.has(mangleName)) {
+      continue;
+    }
+
+    let mangledId;
+    do {
+      mangledId = indexToIdentifier(index++);
+    } while (identifierMap.has(mangledId));
+
+    replacements.set(mangleName, mangledId);
+  }
+
+  return [...replacements].sort(([a], [b]) => b.length - a.length);
+}
+
+export default defineConfig(async ({ mode }) => {
+  const IS_DEV = mode === 'development';
+
   let proxy: Record<string, ProxyOptions> = {};
 
-  if (mode === 'development') {
+  if (IS_DEV) {
     config({ path: '../shared-server/env/development.env' });
 
     // apply VITE_ env vars
@@ -158,6 +227,26 @@ export default defineConfig(({ mode }) => {
     process.env.VITE_BUILD_REV = process.env.TARGET_BUILD_REV || 'unknown';
   }
 
+  const mangleReplacements = IS_DEV ? [] : await createMangleReplacements();
+
+  // console.log(mangleReplacements);
+
+  if (!IS_DEV) {
+    const maxIdLength = mangleReplacements.reduce(
+      (acc, cur) => Math.max(acc, cur[0].length),
+      0
+    );
+    const content = [...mangleReplacements]
+      .sort(([, a], [, b]) => (a < b ? -1 : 1))
+      .map(([from, to]) => `${from.padEnd(maxIdLength)}  ${to}\n`)
+      .join('');
+    await writeFile('mangleReplacements.txt', content);
+
+    console.log(content);
+  }
+
+  await createVuetifyDTS();
+
   return {
     build: {
       rollupOptions: {
@@ -184,6 +273,12 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      replace({
+        preventAssignment: false,
+        delimiters: ['', ''],
+        values: Object.fromEntries(mangleReplacements),
+      }),
+
       createHtmlPlugin({
         inject: {
           data: {
