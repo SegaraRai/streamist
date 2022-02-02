@@ -53,9 +53,6 @@ jobs:
           service_account: ${{ secrets[format('SECRET_GH_{0}_DEPLOY_TRANSCODER_GCP_WIF_SA', env.DEPLOY_ENV)] }}
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
-        with:
-          project_id: ${{ env.PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
       - name: Deploy transcoder to AWS Lambda and Google Cloud Run
         run: |
           cd packages/transcoder
