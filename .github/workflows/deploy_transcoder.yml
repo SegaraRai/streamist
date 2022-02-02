@@ -9,6 +9,7 @@ on:
       - 'packages/transcoder/**'
       - 'packages/shared/**'
       - 'packages/shared-server/**'
+      - 'packages/operation/**'
       - '.github/workflows/deploy_transcoder.yml'
 
 jobs:

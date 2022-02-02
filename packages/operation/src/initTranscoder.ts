@@ -28,7 +28,7 @@ function getLambdaDeployCommand(): string {
     .map(
       (item): string =>
         `aws lambda update-function-code --function-name ${item.transcoderLambdaName} --zip-file fileb://dist.zip --region ${item.transcoderLambdaRegion}\n` +
-        `gcloud run deploy ${item.transcoderGCRName} --quiet --source gcr --no-allow-unauthenticated ${GCR_SET_SECRETS} --region ${item.transcoderGCRRegion}\n`
+        `gcloud run deploy ${item.transcoderGCRName} --quiet --source gcr --no-allow-unauthenticated ${GCR_SET_SECRETS} --memory 1.5Gi --region ${item.transcoderGCRRegion}\n`
     )
     .join('');
 }
