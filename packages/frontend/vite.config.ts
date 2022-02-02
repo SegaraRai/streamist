@@ -293,8 +293,12 @@ export default defineConfig(({ mode }) => {
           'safari-pinned-tab.svg',
         ],
         manifest: {
+          id: '/',
           name: 'Streamist',
           short_name: 'Streamist',
+          start_url: '/',
+          display: 'standalone',
+          background_color: '#2a8dfe',
           theme_color: '#2a8dfe',
           icons: [
             {
