@@ -23,7 +23,7 @@ jobs:
         run: |
           echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
           echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
-          echo "VITE_CDN_ORIGIN=staging-cdn.stst.page" >> $GITHUB_ENV
+          echo "VITE_CDN_ORIGIN=https://staging-cdn.stst.page" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.0.1
         with:
