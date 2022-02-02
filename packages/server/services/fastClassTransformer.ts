@@ -1,9 +1,9 @@
 import {
   TransformationType,
   TypeMetadata,
-  plainToInstance as esm2015PlainToInstance,
   plainToInstance,
 } from 'class-transformer';
+import { plainToInstance as esm2015PlainToInstance } from 'class-transformer/esm2015';
 import { TransformOperationExecutor as esm2015TransformOperationExecutor } from 'class-transformer/esm2015/TransformOperationExecutor';
 import { defaultOptions } from 'class-transformer/esm2015/constants/default-options.constant';
 
