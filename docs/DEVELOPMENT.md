@@ -108,6 +108,10 @@ Cloud SDK コマンドライン ツール（gcloud）をインストールして
   - SECRET_TRANSCODER_CALLBACK_SECRET
   - SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID
   - SECRET_TRANSCODER_WASABI_SECRET_ACCESS_KEY
+- Cloud Tasks で Push キューを作成する
+  - 名前は config/production.ts または config/staging.ts を参照
+  - 最大試行回数 4 回
+  - 最小バックオフ 4 秒
 - `deploy.transcoder.sh`の`gcloud`の行を実行する
   API を有効化するか等訊かれた場合は yes と答える
 
