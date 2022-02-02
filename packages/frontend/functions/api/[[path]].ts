@@ -4,6 +4,7 @@ interface Env {
   readonly API_BASE_PATH: string;
   readonly APP_ORIGIN: string;
   readonly API_ORIGIN_FOR_API_PROXY: string;
+  readonly SECRET_API_CLIENT_REFERRER: string;
   readonly SECRET_API_PROXY_AUTH_TOKEN: string;
 }
 
@@ -42,10 +43,11 @@ export const onRequest: PagesFunction<Env> = (context): Promise<Response> => {
     request
   );
   for (const [key, value] of request.headers.entries()) {
-    if (/^cf-/i.test(key)) {
+    if (/^CF-|^Referer$|^User-Agent$/i.test(key)) {
       newRequest.headers.set(`Streamist-Forwarded-${key}`, value);
     }
   }
+  newRequest.headers.set('Referer', env.SECRET_API_CLIENT_REFERRER);
   newRequest.headers.set(
     'Streamist-Proxy-Authorization',
     `Bearer ${env.SECRET_API_PROXY_AUTH_TOKEN}`

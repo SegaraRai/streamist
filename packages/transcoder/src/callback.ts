@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import {
   API_ORIGIN_FOR_TRANSCODER,
+  SECRET_API_CLIENT_REFERRER,
   SECRET_TRANSCODER_CALLBACK_SECRET,
 } from './env';
 import logger from './logger';
@@ -16,6 +17,7 @@ export async function sendCallback(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json; charset=UTF-8',
+        Referer: SECRET_API_CLIENT_REFERRER,
         'Streamist-Transcoder-Authorization': `Bearer ${SECRET_TRANSCODER_CALLBACK_SECRET}`,
       },
       body: JSON.stringify(transcoderResponse),
