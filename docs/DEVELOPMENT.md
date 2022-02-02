@@ -47,7 +47,7 @@
 トランスコーダの準備のため最初に以下を実行します
 
 - operation パッケージで initTranscoder を実行する
-- TARGET_NODE_ENV を適切に設定（staging または production）し`pnpm run build:transcoder`を実行してビルドする
+- `TARGET_NODE_ENV`を適切に設定（`staging`または`production`）し`pnpm run build:transcoder`を実行してビルドする
 
 ##### AWS Lambda のセットアップ
 
@@ -68,23 +68,25 @@ AWS CLI をインストールし、aws プロファイルを作成してくだ�
     - 以下の環境変数を設定する（暗号化はしない）
       TODO: 本当は Secret Manager か暗号化して管理したほうが良いが未対応
       - API_ORIGIN_FOR_TRANSCODER
+      - SECRET_API_CLIENT_REFERRER
       - SECRET_TRANSCODER_CALLBACK_SECRET
       - SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID
       - SECRET_TRANSCODER_WASABI_SECRET_ACCESS_KEY
-- `deploy.transcoder.sh`の `aws` の行を実行する
+- `deploy.transcoder.sh`の`aws`の行を実行する
 
 ##### Google Cloud Run のセットアップ
 
 Cloud SDK コマンドライン ツール（gcloud）をインストールしてください
 
 - プロジェクトを作成する
-- Secret Manager にシークレットを登録する
+- Secret Manager に以下のシークレットを登録する
   それぞれのシークレットの権限にて Default compute service account プリンシパルにシークレット アクセサーのロールを付与する
   - API_ORIGIN_FOR_TRANSCODER
+  - SECRET_API_CLIENT_REFERRER
   - SECRET_TRANSCODER_CALLBACK_SECRET
   - SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID
   - SECRET_TRANSCODER_WASABI_SECRET_ACCESS_KEY
-- `deploy.transcoder.sh`の `gcloud` の行を実行する
+- `deploy.transcoder.sh`の`gcloud`の行を実行する
   API を有効化するか等訊かれた場合は yes と答える
 
 #### データベースバックアップ用 S3 バケットのセットアップ
@@ -315,6 +317,70 @@ chmod 644 /etc/cron.d/lego
 systemctl restart cron.service
 ```
 
+###### swap の設定
+
+4GB の swap メモリを設定する
+既にスワップファイルが作成されている場合は`/etc/fstab`の設定は不要
+
+```sh
+swapoff -a
+dd if=/dev/zero of=/swapfile bs=1G count=4
+mkswap /swapfile
+swapon /swapfile
+# echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
+```
+
+###### Netdata のセットアップ
+
+Docker Compose を用いる
+
+```sh
+mkdir -p /netdata
+cd /netdata
+```
+
+以下を`/netdata/docker-compose.yml`として作成する
+`hostname`と`environment`は適宜修正すること
+
+```yml
+version: '3'
+services:
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    hostname: <...>
+    restart: always
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+    environment:
+      - NETDATA_CLAIM_TOKEN=<...>
+      - NETDATA_CLAIM_URL=https://app.netdata.cloud
+      - NETDATA_CLAIM_ROOMS=<...>
+  proxy:
+    image: tecnativa/docker-socket-proxy
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CONTAINERS=1
+
+volumes:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
+```
+
 ###### 最終確認
 
 - `docker`コマンドは存在するか
@@ -340,33 +406,11 @@ systemctl restart cron.service
   - オーナーとグループは`lego:lego`になっているか
   - パーミッションは`0644`になっているか
 
-##### GitHub での設定
+#### GitHub の設定
 
 `streamist-build`リポジトリを作成する
 
-`SECRET_GH_STAGING_SSH_KEY`に秘密鍵を登録する（以下のような形式）
-念の為最後に改行を入れておく
-
-```plaintext
------BEGIN OPENSSH PRIVATE KEY-----
-...
------END OPENSSH PRIVATE KEY-----
-```
-
-`SECRET_GH_STAGING_SSH_KNOWN_HOSTS`に`known_hosts`の内容を登録する（以下のような形式）
-ポート番号は指定しなくて良い、念の為最後に改行を入れておく
-
-```plaintext
-xxx.xxx.xxx.xxx ecdsa-sha2-nistp256 AAAA...
-```
-
-`SECRET_GH_STAGING_SSH_PORT`に`43642`を登録する
-
-`SECRET_GH_STAGING_SSH_REMOTE`に接続先の IP アドレスを登録する
-
-#### GitHub のシークレットの設定
-
-以下のシークレットを設定する（サーバーのセットアップで設定したシークレットを含む）
+以下のシークレットを登録する
 
 - SECRET_GH_BUILD_REPOSITORY_DEPLOY_KEY
 - SECRET_GH_BUILD_REPOSITORY_NAME (`<username>/<repository>`)
@@ -375,41 +419,84 @@ xxx.xxx.xxx.xxx ecdsa-sha2-nistp256 AAAA...
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_GCP_WIF_SA (`<example-deploy-account>@<example>.iam.gserviceaccount.com`)
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_LAMBDA_ACCESS_KEY_ID
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY
-- SECRET_GH_STAGING_SSH_REMOTE (`<xxx.xxx.xxx.xxx>`)
 - SECRET_GH_STAGING_SSH_KEY (`-----BEGIN OPENSSH PRIVATE KEY-----\n...`)
 - SECRET_GH_STAGING_SSH_KNOWN_HOSTS (`xxx.xxx.xxx.xxx ecdsa-sha2-nistp256 AAAA...`)
-- SECRET_GH_STAGING_SSH_PORT (`43642`)
-- STAGING_APP_ORIGIN (`staging.streamist.app`)
-- STAGING_CDN_ORIGIN (`staging-cdn.stst.page`)
+- SECRET_GH_STAGING_SSH_REMOTE (`<xxx.xxx.xxx.xxx>`)
 - STAGING_HCAPTCHA_SITE_KEY_FOR_REGISTRATION
-- STAGING_SECRET_API_JWT_SECRET
-- STAGING_SECRET_API_PROXY_AUTH_TOKEN
 - STAGING_SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET
 - STAGING_SECRET_CDN_JWT_SECRET
 - STAGING_SECRET_CDN_STORAGE_ACCESS_REFERRER
-- STAGING_SECRET_DATABASE_BACKUP_PASSPHRASE
-- STAGING_SECRET_DATABASE_BACKUP_S3_ACCESS_KEY_ID
-- STAGING_SECRET_DATABASE_BACKUP_S3_BUCKET
-- STAGING_SECRET_DATABASE_BACKUP_S3_SECRET_ACCESS_KEY
-- STAGING_SECRET_DATABASE_URL (`postgresql://<username>:<password>@postgresql:5432/<database>`)
+- STAGING_SECRET_ENV_DATABASE
+- STAGING_SECRET_ENV_DATABASE_BACKUP
+- STAGING_SECRET_ENV_SERVER
 - STAGING_SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON
-- STAGING_SECRET_HCAPTCHA_SECRET_KEY
-- STAGING_SECRET_INVOKE_TRANSCODER_GCR_SERVICE_ACCOUNT
-- STAGING_SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID
-- STAGING_SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY
-- STAGING_SECRET_POSTGRES_DB
-- STAGING_SECRET_POSTGRES_PASSWORD
-- STAGING_SECRET_POSTGRES_USER
-- STAGING_SECRET_REFRESH_TOKEN_JWT_SECRET
-- STAGING_SECRET_SERVER_WASABI_ACCESS_KEY_ID
-- STAGING_SECRET_SERVER_WASABI_SECRET_ACCESS_KEY
-- STAGING_SECRET_TRANSCODER_CALLBACK_SECRET
-- STAGING_SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID
-- STAGING_SECRET_TRANSCODER_WASABI_SECRET_ACCESS_KEY
-- STAGING_SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID
-- STAGING_SECRET_USER_DOWNLOAD_WASABI_SECRET_ACCESS_KEY
-- STAGING_SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID
-- STAGING_SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY
+
+##### `SECRET_GH_STAGING_SSH_KEY`
+
+以下のような形式で`deploy`ユーザの秘密鍵を登録する
+念の為最後に改行を入れておく
+
+```plaintext
+-----BEGIN OPENSSH PRIVATE KEY-----
+...
+-----END OPENSSH PRIVATE KEY-----
+```
+
+##### `SECRET_GH_STAGING_SSH_KNOWN_HOSTS`
+
+以下のような形式で`known_hosts`の内容を登録する
+念の為最後に改行を入れておく
+ポート番号は指定しなくて良い
+
+```plaintext
+xxx.xxx.xxx.xxx ecdsa-sha2-nistp256 AAAA...
+```
+
+##### `STAGING_SECRET_ENV_DATABASE`
+
+```env
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
+```
+
+##### `STAGING_SECRET_ENV_DATABASE_BACKUP`
+
+```env
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DATABASE=
+S3_BUCKET=
+S3_ACCESS_KEY_ID=
+S3_SECRET_ACCESS_KEY=
+PASSPHRASE=
+```
+
+##### `STAGING_SECRET_ENV_SERVER`
+
+```env
+SECRET_DATABASE_URL=postgresql://<username>:<password>@postgres:5432/<database>?connection_limit=1
+SECRET_API_JWT_SECRET=
+SECRET_CDN_JWT_SECRET=
+SECRET_REFRESH_TOKEN_JWT_SECRET=
+SECRET_TRANSCODER_CALLBACK_SECRET=
+SECRET_API_PROXY_AUTH_TOKEN=
+SECRET_SERVER_WASABI_ACCESS_KEY_ID=
+SECRET_SERVER_WASABI_SECRET_ACCESS_KEY=
+SECRET_USER_DOWNLOAD_WASABI_ACCESS_KEY_ID=
+SECRET_USER_DOWNLOAD_WASABI_SECRET_ACCESS_KEY=
+SECRET_USER_UPLOAD_WASABI_ACCESS_KEY_ID=
+SECRET_USER_UPLOAD_WASABI_SECRET_ACCESS_KEY=
+SECRET_INVOKE_TRANSCODER_GCR_SERVICE_ACCOUNT=
+SECRET_INVOKE_TRANSCODER_LAMBDA_ACCESS_KEY_ID=
+SECRET_INVOKE_TRANSCODER_LAMBDA_SECRET_ACCESS_KEY=
+HCAPTCHA_SITE_KEY_FOR_REGISTRATION=
+SECRET_HCAPTCHA_SECRET_KEY=
+```
+
+##### `STAGING_SECRET_GOOGLE_APPLICATION_CREDENTIALS_JSON`
+
+GCR を invoke できる権限を持ったサービスアカウントの資格情報を登録する
 
 #### Cloudflare Pages の設定
 
