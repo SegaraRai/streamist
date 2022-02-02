@@ -155,9 +155,11 @@ export default defineComponent({
           </div>
         </VCardTitle>
         <VCardText class="opacity-100">
-          <div class="flex gap-x-4">
+          <div class="flex <sm:flex-col gap-x-4 gap-y-2">
             <!-- left pane (image) -->
-            <div class="<sm:w-full text-center leading-none">
+            <div
+              class="<sm:w-full flex justify-center text-center leading-none"
+            >
               <SAlbumImage
                 class="w-40 h-40"
                 size="160"
@@ -168,9 +170,9 @@ export default defineComponent({
             <div
               class="flex-1 flex flex-col gap-y-4 select-none overflow-hidden"
             >
-              <div class="flex flex-col select-text">
+              <div class="<sm:text-center flex flex-col select-text">
                 <div
-                  class="s-heading-sl text-2xl"
+                  class="s-heading-sl text-2xl mb-1"
                   :title="value$$q.track$$q.titleSort || undefined"
                 >
                   {{ value$$q.track$$q.title }}
