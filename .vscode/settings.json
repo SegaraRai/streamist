@@ -6,6 +6,7 @@
     "fastify",
     "ffprobe",
     "hcaptcha",
+    "HMAC",
     "intlify",
     "magick",
     "miniflare",
