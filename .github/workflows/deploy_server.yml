@@ -83,4 +83,4 @@ jobs:
           ssh -p $SSH_PORT deploy@$SSH_REMOTE '/app/deploy.sh'
         env:
           SSH_REMOTE: ${{ secrets[format('SECRET_GH_{0}_SSH_REMOTE', env.DEPLOY_ENV)] }}
-          SSH_PORT: ${{ secrets[format('SECRET_GH_{0}_SSH_PORT', env.DEPLOY_ENV)] }}
+          SSH_PORT: '43642'

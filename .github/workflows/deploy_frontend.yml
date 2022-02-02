@@ -23,6 +23,7 @@ jobs:
         run: |
           echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
           echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
+          echo "VITE_CDN_ORIGIN=staging-cdn.stst.page" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.0.1
         with:
@@ -35,7 +36,6 @@ jobs:
       - run: pnpm run generate
       - run: pnpm run build:client -- -- --mode $TARGET_NODE_ENV
         env:
-          VITE_CDN_ORIGIN: ${{ secrets[format('{0}_CDN_ORIGIN', env.DEPLOY_ENV)] }}
           VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION: ${{ secrets[format('{0}_HCAPTCHA_SITE_KEY_FOR_REGISTRATION', env.DEPLOY_ENV)] }}
       - run: |
           mkdir -p packages/frontend/build

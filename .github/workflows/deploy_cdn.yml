@@ -23,6 +23,7 @@ jobs:
         run: |
           echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
           echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
+          echo "APP_ORIGIN=staging.streamist.app" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - uses: pnpm/action-setup@v2.0.1
         with:
@@ -46,7 +47,6 @@ jobs:
             SECRET_CDN_JWT_SECRET
             SECRET_CDN_STORAGE_ACCESS_REFERRER
         env:
-          APP_ORIGIN: ${{ secrets[format('{0}_APP_ORIGIN', env.DEPLOY_ENV)] }}
           SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET: ${{ secrets[format('{0}_SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET', env.DEPLOY_ENV)] }}
           SECRET_CDN_JWT_SECRET: ${{ secrets[format('{0}_SECRET_CDN_JWT_SECRET', env.DEPLOY_ENV)] }}
           SECRET_CDN_STORAGE_ACCESS_REFERRER: ${{ secrets[format('{0}_SECRET_CDN_STORAGE_ACCESS_REFERRER', env.DEPLOY_ENV)] }}
