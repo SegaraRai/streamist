@@ -8,14 +8,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "dotenv": "^14.3.2",
+    "dotenv": "^15.0.0",
     "minimist": "^1.2.5"
   },
   "devDependencies": {
     "@esbuild-plugins/node-resolve": "^0.1.4",
     "@types/minimist": "^1.2.2",
     "@types/node": "^16.11.19",
-    "esbuild": "^0.14.14",
+    "esbuild": "^0.14.17",
     "esbuild-node-externals": "^1.4.1",
     "node-dev": "^7.1.0"
   }
