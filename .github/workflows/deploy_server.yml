@@ -58,8 +58,7 @@ jobs:
       - name: Deploy to server
         run: |
           cd ./packages/server/docker/compose
-          rm .gitignore
-          rm createEnv.sh
+          rm -f .gitignore
           chmod 0700 deploy.sh
           chmod 0600 *.env
           chmod 0600 *.env.example
