@@ -140,7 +140,7 @@ title:
   SignUp: "Sign up {'|'} Streamist"
   Albums: "Albums {'|'} Streamist"
   Album: "{0} by {1} {'|'} Streamist"
-  AlbumInit: "Album by {1} {'|'} Streamist"
+  AlbumInit: "Album {'|'} Streamist"
   Artists: "Artists {'|'} Streamist"
   Artist: "{0} {'|'} Streamist"
   ArtistInit: "Artist {'|'} Streamist"
