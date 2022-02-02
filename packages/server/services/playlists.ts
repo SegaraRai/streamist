@@ -31,14 +31,16 @@ export async function playlistCreate(
   // トラックが存在するか確認
   // NOTE(security): ここでトラックの所有者を確認している
   // 存在しないトラックについてはconnectの段階でエラーになるので実は確認しなくても良いが、他のユーザーのトラックが指定できると問題なので
-  const trackCount = await client.track.count({
-    where: {
-      id: {
-        in: trackIds,
-      },
-      userId,
-    },
-  });
+  const trackCount = trackIds.length
+    ? await client.track.count({
+        where: {
+          id: {
+            in: trackIds,
+          },
+          userId,
+        },
+      })
+    : 0;
   if (trackCount !== trackIds.length) {
     throw new HTTPError(400, 'some trackIds are not found');
   }
