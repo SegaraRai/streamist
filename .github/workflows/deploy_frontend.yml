@@ -54,7 +54,7 @@ jobs:
       - name: Deploy to build repository
         uses: s0/git-publish-subdir-action@develop
         env:
-          REPO: git@github.com:${{ secrets.SECRET_GH_BUILD_REPOSITORY_NAME }}.git
-          BRANCH: staging
+          REPO: git@github.com:${{ secrets[format('SECRET_GH_{0}_BUILD_REPOSITORY_NAME', env.DEPLOY_ENV)] }}
+          BRANCH: main
           FOLDER: packages/frontend/build
-          SSH_PRIVATE_KEY: ${{ secrets.SECRET_GH_BUILD_REPOSITORY_DEPLOY_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets[format('SECRET_GH_{0}_BUILD_REPOSITORY_DEPLOY_KEY', env.DEPLOY_ENV)] }}

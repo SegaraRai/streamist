@@ -442,10 +442,10 @@ docker-compose up -d
 
 以下のシークレットを登録する
 
-- SECRET_GH_BUILD_REPOSITORY_DEPLOY_KEY
-- SECRET_GH_BUILD_REPOSITORY_NAME (`<username>/<repository>`)
 - SECRET_GH_CF_API_TOKEN
 
+- SECRET_GH_STAGING_BUILD_REPOSITORY_DEPLOY_KEY (`-----BEGIN OPENSSH PRIVATE KEY-----\n...`)
+- SECRET_GH_STAGING_BUILD_REPOSITORY_NAME (`<username>/<repository>`)
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_GCP_WIF_IDP (`projects/<123456789>/locations/global/workloadIdentityPools/<example-identity-pool>/providers/github`)
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_GCP_WIF_SA (`<example-deploy-account>@<example>.iam.gserviceaccount.com`)
 - SECRET_GH_STAGING_DEPLOY_TRANSCODER_LAMBDA_ACCESS_KEY_ID
