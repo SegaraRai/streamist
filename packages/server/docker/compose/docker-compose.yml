@@ -56,6 +56,7 @@ services:
       - '443:443'
     volumes:
       - ./data/lego/cert.pem:/certificates/cert.pem:ro
+      - ./cfip.txt:/usr/local/etc/haproxy/cfip.txt:ro
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     depends_on:
       - nodejs
