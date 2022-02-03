@@ -202,7 +202,6 @@ model Image {
   id           String           @id
   sourceWidth  Int
   sourceHeight Int
-  dHash        String
   createdAt    BigInt           @db.BigInt
   updatedAt    BigInt           @db.BigInt
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)

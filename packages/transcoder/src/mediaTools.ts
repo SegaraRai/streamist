@@ -1,6 +1,5 @@
 import { existsSync } from 'node:fs';
 import { normalizeTextForSingleLine } from '$shared/normalize';
-import { calcDHash } from './dHash';
 import { UploadJSONStorage, execAndLog } from './execAndLog';
 import type { FFprobeResult, FFprobeTags, ImageMagickResult } from './types';
 
@@ -248,53 +247,6 @@ export async function probeImage(
   );
 
   return JSON.parse(execResult.stdout$$q) as ImageMagickResult;
-}
-
-export async function calcImageDHash(
-  srcPath: string,
-  logStorage: UploadJSONStorage
-): Promise<string> {
-  const execResult = await execAndLog(
-    imageMagickFile,
-    [
-      'convert',
-      // 効果あるかわからないがとりあえずつけとく
-      '-define',
-      'jpeg:size=9x8',
-      // EXIFの回転情報を元に回転する
-      '-auto-orient',
-      // -auto-orientでずれたジオメトリ（位置情報）を修正する（実はリサイズ時に修正されるっぽいので不要っぽい）
-      '+repage',
-      // -stripでカラープロファイルが失われるため予め変換する
-      '-profile',
-      sRGBProfileFilepath,
-      // グレースケールで処理（PGMで出力）
-      '-colorspace',
-      'LinearGray',
-      // 9x8にリサイズ
-      // （末尾の!でアスペクト比を無視）
-      '-thumbnail',
-      '9x8!',
-      // 8ビットに変換
-      '-depth',
-      '8',
-      // 一応メタデータを削除しておく（-thumbnailで削除されるためどのみち不要）
-      '-strip',
-      // PNM（PGM）の出力形式をASCIIに
-      // これをしないとバイナリ形式になる
-      '-compress',
-      'none',
-      // 入力ファイル
-      srcPath,
-      // 出力先：標準出力
-      'pnm:-',
-    ],
-    imagemagickTranscodeImageTimeout,
-    'image_dhash',
-    logStorage
-  );
-
-  return calcDHash(execResult.stdout$$q.replace(/\r/g, '').trim());
 }
 
 export async function transcodeImage(
