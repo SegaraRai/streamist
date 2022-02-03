@@ -3,6 +3,7 @@ import type { RepeatType } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
 import { useRecentlyPlayed, useTrackFilter } from '~/composables';
+import { SEEK_BACKWARD_TIME, SEEK_FORWARD_TIME } from '~/config';
 import { db } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
@@ -188,6 +189,18 @@ function _usePlaybackStore(): PlaybackState {
     },
   });
 
+  const seekBy = (diff: number): void => {
+    if (!currentAudio) {
+      return;
+    }
+
+    const newTime = Math.min(
+      Math.max(currentAudio.currentTime + diff, 0),
+      currentAudio.duration
+    );
+    currentAudio.currentTime = newTime;
+  };
+
   const setMediaSessionActionHandlers = (): void => {
     navigator.mediaSession.setActionHandler('play', (): void => {
       playing.value = true;
@@ -197,17 +210,20 @@ function _usePlaybackStore(): PlaybackState {
       playing.value = false;
     });
 
-    navigator.mediaSession.setActionHandler('stop', (): void => {
-      playing.value = false;
-      position.value = 0;
-    });
-
     navigator.mediaSession.setActionHandler('previoustrack', (): void => {
       trackProvider.skipPrevious$$q();
     });
 
     navigator.mediaSession.setActionHandler('nexttrack', (): void => {
       trackProvider.skipNext$$q();
+    });
+
+    navigator.mediaSession.setActionHandler('seekforward', (): void => {
+      seekBy(SEEK_FORWARD_TIME);
+    });
+
+    navigator.mediaSession.setActionHandler('seekbackward', (): void => {
+      seekBy(SEEK_BACKWARD_TIME);
     });
 
     try {

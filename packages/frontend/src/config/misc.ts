@@ -8,6 +8,10 @@ export const SYNC_DB_THROTTLE = 5 * 1000;
 // this is required to prevent dancing with multiple tab opened (see issue #117)
 export const VOLUME_SYNC_THROTTLE = 100;
 
+/** in seconds */
+export const SEEK_FORWARD_TIME = 10;
+export const SEEK_BACKWARD_TIME = -SEEK_FORWARD_TIME;
+
 export const RESTORE_SCROLL_CHECK_TIMEOUT = 5 * 1000;
 export const RESTORE_SCROLL_CHECK_INTERVAL = 100;
 export const STORE_SCROLL_THROTTLE = 100;
