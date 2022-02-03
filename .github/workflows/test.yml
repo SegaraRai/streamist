@@ -10,6 +10,8 @@ on:
       - 'docs/**'
       - 'frontend/locales/**'
       - 'frontend/public/**'
+  pull_request:
+    types: [opened, reopened]
 
 jobs:
   test:
