@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { PropType } from 'vue';
+import { DRAG_DELAY_FOR_TOUCH } from '~/config';
 import type { VueDraggableChangeEvent } from '~/logic/draggable/types';
 
 function wrapPromise<T>(func: () => T | PromiseLike<T>): Promise<T> {
@@ -68,6 +69,7 @@ export default defineComponent({
     };
 
     return {
+      delay$$q: DRAG_DELAY_FOR_TOUCH,
       items$$q,
       tentative$$q,
       onChange$$q,
@@ -81,6 +83,8 @@ export default defineComponent({
     :model-value="items$$q"
     :item-key="itemKey"
     :disabled="disabled || tentative$$q"
+    :delay="delay$$q"
+    :delay-on-touch-only="true"
     @change="onChange$$q"
   >
     <!-- https://github.com/SortableJS/vue.draggable.next/issues/111 -->
