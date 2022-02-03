@@ -43,8 +43,8 @@ export default defineConfig({
           zip.file(file, await readFile(`dist/${file}`));
         }
         zip.file(
-          'sRGB_ICC_v4_Appearance.icc',
-          await readFile('sRGB_ICC_v4_Appearance.icc')
+          'sRGB_v4_ICC_preference.icc',
+          await readFile('sRGB_v4_ICC_preference.icc')
         );
         zip.file('imconfig/policy.xml', await readFile('policy.xml'));
         const zipContent = await zip.generateAsync({

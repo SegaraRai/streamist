@@ -34,8 +34,8 @@ export default defineConfig({
       },
       writeBundle: async () => {
         await copyFile(
-          'sRGB_ICC_v4_Appearance.icc',
-          'gcr/app/sRGB_ICC_v4_Appearance.icc'
+          'sRGB_v4_ICC_preference.icc',
+          'gcr/app/sRGB_v4_ICC_preference.icc'
         );
         await mkdir('gcr/app/bin', {
           recursive: true,
