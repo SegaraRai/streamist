@@ -55,21 +55,20 @@
     <policy domain="coder" rights="read|write" pattern="{GIF,JPEG,PNG,WEBP}" />
 -->
 <policymap>
-  <!-- GCRではファイルシステムがメモリ上にあるので、メモリ制限のようにディスク制限をする -->
-  <!-- GCRで使用できるメモリは2GiBなので -->
+  <!-- ImageMagickは現状すべてLambda上で使用される -->
   <policy domain="resource" name="temporary-path" value="/tmp" />
   <policy domain="resource" name="width" value="5KP" />
   <policy domain="resource" name="height" value="5KP" />
-  <!-- メモリ制限1GB -->
-  <!-- policy domain="resource" name="area" value="1GiB" / -->
-  <policy domain="resource" name="memory" value="1GiB" />
+  <!-- メモリ制限800MiB -->
+  <!-- policy domain="resource" name="area" value="800MiB" / -->
+  <policy domain="resource" name="memory" value="800MiB" />
   <policy domain="resource" name="map" value="0B" />
   <policy domain="resource" name="disk" value="0B" />
-  <policy domain="resource" name="file" value="32" />
+  <policy domain="resource" name="file" value="0" />
   <!-- GCRではvCPUは1つだけなので、1スレッド -->
-  <!-- policy domain="resource" name="thread" value="1" /-->
+  <policy domain="resource" name="thread" value="1" />
   <policy domain="resource" name="throttle" value="0" />
-  <policy domain="resource" name="time" value="30" />
+  <policy domain="resource" name="time" value="60" />
   <!-- precisionの意味は不明 -->
   <!-- <policy domain="system" name="precision" value="6" /> -->
   <!-- よくわからないけど適当に -->
