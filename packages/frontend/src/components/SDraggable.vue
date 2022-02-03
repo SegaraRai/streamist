@@ -79,7 +79,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <GDraggable
+  <VueDraggable
     :model-value="items$$q"
     :item-key="itemKey"
     :disabled="disabled || tentative$$q"
@@ -99,5 +99,5 @@ export default defineComponent({
     <template #footer>
       <slot name="footer"></slot>
     </template>
-  </GDraggable>
+  </VueDraggable>
 </template>

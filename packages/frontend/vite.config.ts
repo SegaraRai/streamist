@@ -343,7 +343,7 @@ export default defineConfig(async ({ mode }) => {
           }),
           NativeUIResolver(),
           CustomResolver('component', {
-            GDraggable: {
+            VueDraggable: {
               path: 'vuedraggable',
             },
           }),

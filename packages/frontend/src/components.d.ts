@@ -4,7 +4,6 @@
 
 declare module 'vue' {
   export interface GlobalComponents {
-    GDraggable: typeof import('vuedraggable')['default']
     IMdiAccountPlus: typeof import('~icons/mdi/account-plus')['default']
     IMdiCalendarOutline: typeof import('~icons/mdi/calendar-outline')['default']
     IMdiCheck: typeof import('~icons/mdi/check')['default']
@@ -91,6 +90,7 @@ declare module 'vue' {
     SUploadingImage: typeof import('./components/SUploadingImage.vue')['default']
     SVirtualGrid: typeof import('./components/SVirtualGrid.vue')['default']
     SVolumeControl: typeof import('./components/SVolumeControl.vue')['default']
+    VueDraggable: typeof import('vuedraggable')['default']
   }
 }
 
