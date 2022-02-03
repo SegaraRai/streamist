@@ -144,6 +144,8 @@ async function createMangleReplacements(): Promise<[string, string][]> {
   const GLOB_DIR = '..';
   const GLOB_PATTERN = [
     '**/*.{json,js,jsx,ts,tsx,vue}',
+    '!**/.vite-ssg-dist/**',
+    '!**/.vite-ssg-temp/**',
     '!**/build/**',
     '!**/dist/**',
     '!**/node_modules/**',
