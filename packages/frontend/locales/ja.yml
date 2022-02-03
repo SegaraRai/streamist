@@ -86,6 +86,7 @@ settings:
     title: デバイス設定
     header:
       AudioQuality: 音質
+      ConfirmOnLeave: 終了時の確認
       Language: 言語
       Theme: テーマ
     link:
@@ -93,6 +94,10 @@ settings:
   audioQuality:
     medium: 標準音質
     veryHigh: 最高音質
+  confirmOnLeave:
+    always: 常に確認する
+    whenPlaying: 再生中のみ確認する
+    never: 確認しない
   theme:
     dark: ダーク
     light: ライト

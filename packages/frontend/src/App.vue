@@ -79,6 +79,7 @@ export default defineComponent({
     <NGlobalStyle />
     <template v-if="isLoggedIn$$q">
       <SPlaybackPersistor />
+      <SConfirmOnLeaveHandler />
     </template>
   </NConfigProvider>
 </template>

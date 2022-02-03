@@ -8,6 +8,7 @@ meta:
 import { useDialog } from 'naive-ui';
 import {
   PREFERENCE_AUDIO_QUALITIES,
+  PREFERENCE_CONFIRM_ON_LEAVES,
   PREFERENCE_LANGUAGE_OPTIONS,
   PREFERENCE_THEMES,
 } from '~/config';
@@ -39,6 +40,13 @@ export default defineComponent({
       }))
     );
 
+    const confirmOnLeaveOptions$$q = computed(() =>
+      PREFERENCE_CONFIRM_ON_LEAVES.map((code) => ({
+        value: code,
+        label: t(`settings.confirmOnLeave.${code}`),
+      }))
+    );
+
     const synchronized$$q = ref(false);
     const synchronizeInProgress$$q = ref(false);
 
@@ -53,6 +61,7 @@ export default defineComponent({
       audioQualityOptions$$q,
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
       themeOptions$$q,
+      confirmOnLeaveOptions$$q,
       preferenceStore$$q: preferenceStore,
       themeStore$$q: themeStore,
       synchronized$$q,
@@ -127,6 +136,18 @@ export default defineComponent({
             <NSelect
               v-model:value="preferenceStore$$q.audioQuality"
               :options="audioQualityOptions$$q"
+            />
+          </div>
+        </div>
+        <div class="flex flex-col gap-y-4">
+          <h2 class="text-xl">
+            {{ t('settings.device.header.ConfirmOnLeave') }}
+          </h2>
+          <div class="w-64">
+            <!-- TODO: migrate to v-select -->
+            <NSelect
+              v-model:value="preferenceStore$$q.confirmOnLeave"
+              :options="confirmOnLeaveOptions$$q"
             />
           </div>
         </div>

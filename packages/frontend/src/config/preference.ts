@@ -63,3 +63,9 @@ export const AUDIO_SCORE_BY_FORMAT_PER_PREFERENCE: Record<
     'v1-opus-256k': 2000,
   },
 };
+
+//
+
+export const PREFERENCE_CONFIRM_ON_LEAVES = ['always', 'whenPlaying', 'never'];
+export type ConfirmOnLeave = typeof PREFERENCE_CONFIRM_ON_LEAVES[number];
+export const PREFERENCE_CONFIRM_ON_LEAVE_DEFAULT: ConfirmOnLeave = 'never';

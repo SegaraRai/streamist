@@ -1,9 +1,12 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import {
   AudioQuality,
+  ConfirmOnLeave,
   LanguageCode,
   PREFERENCE_AUDIO_QUALITIES,
   PREFERENCE_AUDIO_QUALITY_DEFAULT,
+  PREFERENCE_CONFIRM_ON_LEAVES,
+  PREFERENCE_CONFIRM_ON_LEAVE_DEFAULT,
   PREFERENCE_LANGUAGE_CODES,
 } from '~/config';
 import { getLanguageFromNavigator } from '~/logic/language';
@@ -32,9 +35,21 @@ export const usePreferenceStore = defineStore('preference', () => {
     }
   );
 
+  const confirmOnLeave = useLocalStorage<ConfirmOnLeave>(
+    'preference.confirmOnLeave',
+    PREFERENCE_CONFIRM_ON_LEAVE_DEFAULT,
+    {
+      serializer: createInSerializer(
+        PREFERENCE_CONFIRM_ON_LEAVES,
+        PREFERENCE_CONFIRM_ON_LEAVE_DEFAULT
+      ),
+    }
+  );
+
   return {
     audioQuality,
     language,
+    confirmOnLeave,
   };
 });
 

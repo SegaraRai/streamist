@@ -86,6 +86,7 @@ settings:
     title: Device Settings
     header:
       AudioQuality: Audio Quality
+      ConfirmOnLeave: Confirm on Close
       Language: Language
       Theme: Theme
     link:
@@ -93,6 +94,10 @@ settings:
   audioQuality:
     medium: Medium
     veryHigh: Very High
+  confirmOnLeave:
+    always: Always
+    whenPlaying: When playing
+    never: Never
   theme:
     dark: Dark
     light: Light
