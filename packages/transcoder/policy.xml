@@ -57,8 +57,8 @@
 <policymap>
   <!-- ImageMagickは現状すべてLambda上で使用される -->
   <policy domain="resource" name="temporary-path" value="/tmp" />
-  <policy domain="resource" name="width" value="5KP" />
-  <policy domain="resource" name="height" value="5KP" />
+  <policy domain="resource" name="width" value="1MP" />
+  <policy domain="resource" name="height" value="1MP" />
   <!-- メモリ制限800MiB -->
   <!-- policy domain="resource" name="area" value="800MiB" / -->
   <policy domain="resource" name="memory" value="800MiB" />
