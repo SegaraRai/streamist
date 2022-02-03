@@ -68,6 +68,7 @@ AWS CLI をインストールし、aws プロファイルを作成してくだ�
     - 以下の環境変数を設定する（暗号化はしない）
       TODO: 本当は Secret Manager か暗号化して管理したほうが良いが未対応
       - API_ORIGIN_FOR_TRANSCODER
+      - MAGICK_CONFIGURE_PATH `/var/task/imconfig`
       - SECRET_API_CLIENT_REFERRER
       - SECRET_TRANSCODER_CALLBACK_SECRET
       - SECRET_TRANSCODER_WASABI_ACCESS_KEY_ID
