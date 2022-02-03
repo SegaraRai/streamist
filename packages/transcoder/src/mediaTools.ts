@@ -289,7 +289,7 @@ export async function calcImageDHash(
       // 出力先：標準出力
       'pnm:-',
     ],
-    imagemagickProbeImageTimeout,
+    imagemagickTranscodeImageTimeout,
     'image_dhash',
     logStorage
   );
