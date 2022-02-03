@@ -7,12 +7,12 @@ import type { FFprobeResult, FFprobeTags, ImageMagickResult } from './types';
 const isProductionOrStagingEnv =
   process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
 
-const ffprobeProbeAudioTimeout = 5000;
-const ffprobeExtractImageTimeout = 10000;
-const ffprobeTranscodeAudioTimeout = 100000;
-const imagemagickProbeImageTimeout = 5000;
-const imagemagickTranscodeImageTimeout = 10000;
-const mkcleanCleanAudioTimeout = 10000;
+const ffprobeProbeAudioTimeout = 10_000;
+const ffprobeExtractImageTimeout = 30_000;
+const ffprobeTranscodeAudioTimeout = 120_000;
+const imagemagickProbeImageTimeout = 10_000;
+const imagemagickTranscodeImageTimeout = 60_000;
+const mkcleanCleanAudioTimeout = 30_000;
 
 const ffmpegFile =
   isProductionOrStagingEnv || process.platform !== 'win32'
