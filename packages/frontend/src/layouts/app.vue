@@ -278,15 +278,14 @@ export default defineComponent({
         :permanent="alwaysShowLeftSidebar$$q"
         position="left"
         rail-width="56"
-        class="s-offline-mod-mt select-none"
+        class="select-none"
         @update:model-value="leftSidebar$$q = $event"
       >
         <NScrollbar
-          class="h-full s-n-scrollbar-min-h-full s-n-scrollbar-flex-col"
+          class="s-offline-mod-pt s-n-scrollbar-min-h-full s-n-scrollbar-flex-col h-full"
         >
           <div class="flex-1 flex flex-col h-full">
             <SNavigation />
-            <div class="s-offline-mod-h"></div>
             <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
           </div>
         </NScrollbar>
@@ -327,6 +326,10 @@ export default defineComponent({
 <style>
 .s-offline--offline .s-offline-mod-mt {
   @apply mt-6 !important;
+}
+
+.s-offline--offline .s-offline-mod-pt {
+  @apply pt-6 !important;
 }
 
 .s-offline--offline .s-offline-mod-h,
