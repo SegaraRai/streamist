@@ -269,7 +269,7 @@ export async function calcImageDHash(
       sRGBProfileFilepath,
       // グレースケールで処理（PGMで出力）
       '-colorspace',
-      'gray',
+      'LinearGray',
       // 9x8にリサイズ
       // （末尾の!でアスペクト比を無視）
       '-thumbnail',
@@ -330,6 +330,10 @@ export async function transcodeImage(
       // （末尾の!でアスペクト比を無視）
       '-thumbnail',
       `${width}x${height}!`,
+      // 色空間をリニアRGBとして扱う（なんかいつのバージョンからか必要になった）
+      '-set',
+      'colorspace',
+      'RGB',
       // 色空間をリニアRGBからsRGBに戻す（実はJPEGなら不要っぽい）
       '-colorspace',
       'sRGB',
