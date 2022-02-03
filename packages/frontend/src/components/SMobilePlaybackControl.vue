@@ -31,7 +31,7 @@ export default defineComponent({
         switch (event.button) {
           // browser back
           case 3:
-            playbackStore.skipPrevious$$q();
+            playbackStore.goPrevious$$q();
             break;
 
           // browser forward

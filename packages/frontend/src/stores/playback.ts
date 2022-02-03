@@ -3,7 +3,11 @@ import type { RepeatType } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
 import { useRecentlyPlayed, useTrackFilter } from '~/composables';
-import { SEEK_BACKWARD_TIME, SEEK_FORWARD_TIME } from '~/config';
+import {
+  SEEK_BACKWARD_TIME,
+  SEEK_FORWARD_TIME,
+  SEEK_TO_BEGINNING_THRESHOLD,
+} from '~/config';
 import { db } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
@@ -79,6 +83,8 @@ export interface PlaybackState {
   readonly skipNext$$q: (n?: number) => void;
   /** 前のトラックに戻る */
   readonly skipPrevious$$q: (n?: number) => void;
+  /** 前のトラックに戻るか曲頭に戻る */
+  readonly goPrevious$$q: () => void;
   /** 次のトラックに進む */
   readonly next$$q: () => void;
 }
@@ -201,6 +207,18 @@ function _usePlaybackStore(): PlaybackState {
     currentAudio.currentTime = newTime;
   };
 
+  const goPrevious = (): void => {
+    if (
+      currentAudio &&
+      currentAudio.currentTime >= SEEK_TO_BEGINNING_THRESHOLD
+    ) {
+      currentAudio.currentTime = 0;
+      return;
+    }
+
+    trackProvider.skipPrevious$$q();
+  };
+
   const setMediaSessionActionHandlers = (): void => {
     navigator.mediaSession.setActionHandler('play', (): void => {
       playing.value = true;
@@ -211,7 +229,7 @@ function _usePlaybackStore(): PlaybackState {
     });
 
     navigator.mediaSession.setActionHandler('previoustrack', (): void => {
-      trackProvider.skipPrevious$$q();
+      goPrevious();
     });
 
     navigator.mediaSession.setActionHandler('nexttrack', (): void => {
@@ -623,6 +641,9 @@ function _usePlaybackStore(): PlaybackState {
     },
     skipPrevious$$q: (n = 1): void => {
       trackProvider.skipPrevious$$q(n);
+    },
+    goPrevious$$q: (): void => {
+      goPrevious();
     },
     next$$q: (): void => {
       trackProvider.next$$q();

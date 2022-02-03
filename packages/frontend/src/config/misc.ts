@@ -12,6 +12,9 @@ export const VOLUME_SYNC_THROTTLE = 100;
 export const SEEK_FORWARD_TIME = 10;
 export const SEEK_BACKWARD_TIME = -SEEK_FORWARD_TIME;
 
+/** in seconds */
+export const SEEK_TO_BEGINNING_THRESHOLD = 3;
+
 export const DRAG_DELAY_FOR_TOUCH = 500;
 
 export const RESTORE_SCROLL_CHECK_TIMEOUT = 5 * 1000;

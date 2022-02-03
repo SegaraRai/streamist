@@ -73,8 +73,8 @@ export default defineComponent({
       skipNext$$q: (): void => {
         playbackStore.skipNext$$q();
       },
-      skipPrevious$$q: (): void => {
-        playbackStore.skipPrevious$$q();
+      goPrevious$$q: (): void => {
+        playbackStore.goPrevious$$q();
       },
       preventXButton$$q: (event: MouseEvent): void => {
         if (event.button === 3 || event.button === 4) {
@@ -86,7 +86,7 @@ export default defineComponent({
         switch (event.button) {
           // browser back
           case 3:
-            playbackStore.skipPrevious$$q();
+            playbackStore.goPrevious$$q();
             break;
 
           // browser forward
@@ -132,7 +132,7 @@ export default defineComponent({
           class="mx-5"
           flat
           icon
-          @click="skipPrevious$$q"
+          @click="goPrevious$$q"
           @mouseup="blurButton$$q"
         >
           <VIcon>mdi-skip-previous</VIcon>
