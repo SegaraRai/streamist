@@ -7,12 +7,13 @@ import type { FFprobeResult, FFprobeTags, ImageMagickResult } from './types';
 const isProductionOrStagingEnv =
   process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
 
-const ffprobeProbeAudioTimeout = 5000;
-const ffprobeExtractImageTimeout = 10000;
-const ffprobeTranscodeAudioTimeout = 100000;
-const imagemagickProbeImageTimeout = 5000;
-const imagemagickTranscodeImageTimeout = 10000;
-const mkcleanCleanAudioTimeout = 10000;
+// NOTE: timeout for ImageMagick is also specified in the policy.xml
+const ffprobeProbeAudioTimeout = 10_000;
+const ffprobeExtractImageTimeout = 30_000;
+const ffprobeTranscodeAudioTimeout = 120_000;
+const imagemagickProbeImageTimeout = 10_000;
+const imagemagickTranscodeImageTimeout = 70_000;
+const mkcleanCleanAudioTimeout = 30_000;
 
 const ffmpegFile =
   isProductionOrStagingEnv || process.platform !== 'win32'
