@@ -69,3 +69,7 @@ export const AUDIO_SCORE_BY_FORMAT_PER_PREFERENCE: Record<
 export const PREFERENCE_CONFIRM_ON_LEAVES = ['always', 'whenPlaying', 'never'];
 export type ConfirmOnLeave = typeof PREFERENCE_CONFIRM_ON_LEAVES[number];
 export const PREFERENCE_CONFIRM_ON_LEAVE_DEFAULT: ConfirmOnLeave = 'never';
+
+//
+
+export const PREFERENCE_PWA_PREVENT_CLOSE_DEFAULT = true;

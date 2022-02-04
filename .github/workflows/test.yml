@@ -32,10 +32,7 @@ jobs:
       - run: pnpm run generate
       - run: pnpm run lint
       - run: pnpm run typecheck
+      - run: pnpm run test
       - run: pnpm run build
         env:
           TARGET_NODE_ENV: production
-      - run: pnpm run build
-        env:
-          TARGET_NODE_ENV: staging
-      - run: pnpm run test

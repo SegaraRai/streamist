@@ -15,7 +15,7 @@ import {
   osPutFile,
 } from '$shared-server/osOperations';
 import { UploadJSONStorage, uploadJSON } from '../execAndLog';
-import { calcImageDHash, probeImage, transcodeImage } from '../mediaTools';
+import { probeImage, transcodeImage } from '../mediaTools';
 import { getTempFilepath } from '../tempFile';
 import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig';
 import type {
@@ -164,10 +164,6 @@ export async function processImageRequest(
       });
     }
 
-    // dHash計算
-    // アップロード待機前に行うことで効率化を図る
-    const dHash = await calcImageDHash(sourceImageFilepath, logStorage);
-
     await unlink(sourceImageFilepath);
 
     const artifact: TranscoderResponseArtifactImage = {
@@ -175,7 +171,6 @@ export async function processImageRequest(
       source: file,
       id: imageId,
       files: transcodedFiles,
-      dHash,
       sha256: sourceFileSHA256,
       probe: {
         allMetadata: imageInfoList,

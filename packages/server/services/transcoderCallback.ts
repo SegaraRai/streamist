@@ -112,7 +112,6 @@ async function registerImage(
       id: imageId,
       sourceWidth: artifact.probe.width,
       sourceHeight: artifact.probe.height,
-      dHash: artifact.dHash,
       user: { connect: { id: userId } },
       createdAt: timestamp,
       updatedAt: timestamp,
@@ -597,7 +596,6 @@ async function handleTranscoderResponseArtifactImage(
           },
         });
 
-        // NOTE: we can use dHash here
         if (
           !album ||
           album.images
