@@ -158,7 +158,6 @@ export interface TranscoderResponseArtifactImage {
   files: TranscoderResponseArtifactImageFile[];
   probe: TranscoderResponseArtifactImageProbe;
   sha256: string;
-  dHash: string;
 }
 
 export interface TranscoderResponseArtifactError {

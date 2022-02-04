@@ -511,6 +511,10 @@ export class UploadManager extends EventTarget {
 
     let changed = false;
     for (const file of this._files) {
+      if (file.status === 'removed') {
+        continue;
+      }
+
       const sourceFileId = file.uploadInfo?.sourceFileId;
       if (!sourceFileId) {
         continue;

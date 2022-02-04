@@ -51,7 +51,7 @@ queue:
   title: 再生キュー
   NowPlaying: 再生中
   NextInQueue: 次に再生
-  NextFrom: '{0} から次に再生'
+  NextFrom: '{0} から再生'
 signIn:
   title: ログイン
   label:
@@ -91,6 +91,8 @@ settings:
       Theme: テーマ
     link:
       AccountSettings: アカウント設定
+    DoNotExitWithBackButton: 戻るボタンで終了しない
+    RequiresRestartToTakeEffect: 変更の適用には再起動が必要です
   audioQuality:
     medium: 標準音質
     veryHigh: 最高音質
