@@ -51,7 +51,7 @@ queue:
   title: 再生キュー
   NowPlaying: 再生中
   NextInQueue: 次に再生
-  NextFrom: '{0} から次に再生'
+  NextFrom: '{0} から再生'
 signIn:
   title: ログイン
   label:
