@@ -24,6 +24,8 @@ import { useVolumeStore } from './volume';
 // TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる
 
 export interface PlaybackState {
+  /** シークバーの右側に残り時間を表示するか */
+  readonly showRemainingTime$$q: Ref<boolean>;
   /** 再生中か */
   readonly playing$$q: Ref<boolean>;
   /** 再生位置（秒） */
@@ -141,6 +143,10 @@ function _usePlaybackStore(): PlaybackState {
 
   const repeat = useLocalStorage<RepeatType>('playback.repeat', 'off');
   const shuffle = useLocalStorage<boolean>('playback.shuffle', false);
+  const showRemainingTime = useLocalStorage<boolean>(
+    'playback.showRemainingTime',
+    false
+  );
 
   let currentAudio: HTMLAudioElement | undefined;
 
@@ -579,6 +585,7 @@ function _usePlaybackStore(): PlaybackState {
   }
 
   return {
+    showRemainingTime$$q: showRemainingTime,
     playing$$q: playing,
     position$$q: position,
     duration$$q: computed((): number | undefined => {

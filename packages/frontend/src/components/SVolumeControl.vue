@@ -61,10 +61,10 @@ export default defineComponent({
     </button>
     <div class="ml-2 flex-1">
       <SSlider
-        :value="volume$$q"
+        :model-value="volume$$q"
         :max="maxVolume$$q"
         @dragging="onDragging$$q"
-        @update="onUpdate$$q"
+        @update:model-value="onUpdate$$q"
       />
     </div>
   </div>

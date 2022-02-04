@@ -55,6 +55,7 @@ export default defineComponent({
     return {
       currentTrackInfo$$q: currentTrackInfo,
       volumeStore$$q: volumeStore,
+      showRemainingTime$$q: playbackStore.showRemainingTime$$q,
       playing$$q: playbackStore.playing$$q,
       repeatEnabled$$q: repeatEnabled,
       shuffleEnabled$$q: shuffleEnabled,
@@ -64,9 +65,6 @@ export default defineComponent({
       blurButton$$q: blurButton,
       switchRepeat$$q: switchRepeat,
       switchShuffle$$q: switchShuffle,
-      seekTo$$q: (position: number): void => {
-        playbackStore.position$$q.value = position;
-      },
       play$$q: (): void => {
         playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
       },
@@ -163,10 +161,10 @@ export default defineComponent({
         </button>
       </div>
       <SSeekBar
+        v-model="position$$q"
+        v-model:show-remaining-time="showRemainingTime$$q"
         class="pt-2"
-        :current-time="position$$q"
         :duration="duration$$q"
-        @update="seekTo$$q"
       />
     </div>
     <div

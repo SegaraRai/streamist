@@ -3,7 +3,8 @@ import { formatTime } from '~/logic/formatTime';
 
 export default defineComponent({
   props: {
-    currentTime: {
+    showRemainingTime: Boolean,
+    modelValue: {
       type: Number,
       default: undefined,
     },
@@ -13,17 +14,17 @@ export default defineComponent({
     },
   },
   emits: {
-    update: (_newTime: number) => true,
+    'update:modelValue': (_newTime: number) => true,
+    'update:showRemainingTime': (_newValue: boolean) => true,
   },
   setup(props, { emit }) {
-    const showRemaining = ref(false);
     const draggingTime = ref<number | undefined>();
 
     const positionDisplay = computed<string | undefined>(() =>
-      props.currentTime != null && props.duration != null
+      props.modelValue != null && props.duration != null
         ? formatTime(
             Math.floor(
-              Math.min(draggingTime.value ?? props.currentTime, props.duration)
+              Math.min(draggingTime.value ?? props.modelValue, props.duration)
             ),
             props.duration
           )
@@ -31,12 +32,12 @@ export default defineComponent({
     );
 
     const durationDisplay = computed<string | undefined>(() =>
-      props.currentTime != null && props.duration != null
-        ? showRemaining.value
+      props.modelValue != null && props.duration != null
+        ? props.showRemainingTime
           ? `-${formatTime(
               Math.max(
                 Math.floor(props.duration) -
-                  Math.floor(draggingTime.value ?? props.currentTime),
+                  Math.floor(draggingTime.value ?? props.modelValue),
                 0
               ),
               props.duration
@@ -53,10 +54,10 @@ export default defineComponent({
       },
       onUpdate$$q(value: number) {
         draggingTime.value = undefined;
-        emit('update', value);
+        emit('update:modelValue', value);
       },
       toggleRemaining$$q() {
-        showRemaining.value = !showRemaining.value;
+        emit('update:showRemainingTime', !props.showRemainingTime);
       },
     };
   },
@@ -70,10 +71,10 @@ export default defineComponent({
     </div>
     <div class="seek-bar flex-1 flex flex-col justify-center">
       <SSlider
-        :value="currentTime"
+        :model-value="modelValue"
         :max="duration"
         @dragging="onDragging$$q"
-        @update="onUpdate$$q"
+        @update:model-value="onUpdate$$q"
       />
     </div>
     <div :class="$style.time" @click="toggleRemaining$$q">

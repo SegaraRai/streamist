@@ -5,14 +5,14 @@ export default defineComponent({
       type: Number,
       default: undefined,
     },
-    value: {
+    modelValue: {
       type: Number,
       default: undefined,
     },
     disabled: Boolean,
   },
   emits: {
-    update: (_value: number) => true,
+    'update:modelValue': (_value: number) => true,
     dragging: (_value: number | undefined) => true,
   },
   setup(props, { emit }) {
@@ -20,14 +20,14 @@ export default defineComponent({
       () =>
         !props.disabled &&
         props.max != null &&
-        props.value != null &&
-        props.value >= 0 &&
-        props.value <= props.max
+        props.modelValue != null &&
+        props.modelValue >= 0 &&
+        props.modelValue <= props.max
     );
 
     const rate = computed(() =>
-      props.max != null && props.value != null && props.max > 0
-        ? props.value / props.max
+      props.max != null && props.modelValue != null && props.max > 0
+        ? props.modelValue / props.max
         : 0
     );
 
@@ -64,7 +64,7 @@ export default defineComponent({
       dragging.value = false;
 
       if (valid.value && props.max != null) {
-        emit('update', mousePosition.value * props.max);
+        emit('update:modelValue', mousePosition.value * props.max);
       }
     });
 
