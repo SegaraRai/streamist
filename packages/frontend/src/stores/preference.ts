@@ -8,6 +8,7 @@ import {
   PREFERENCE_CONFIRM_ON_LEAVES,
   PREFERENCE_CONFIRM_ON_LEAVE_DEFAULT,
   PREFERENCE_LANGUAGE_CODES,
+  PREFERENCE_PWA_PREVENT_CLOSE_DEFAULT,
 } from '~/config';
 import { getLanguageFromNavigator } from '~/logic/language';
 import { createInSerializer } from './utils';
@@ -46,10 +47,16 @@ export const usePreferenceStore = defineStore('preference', () => {
     }
   );
 
+  const pwaPreventClose = useLocalStorage<boolean>(
+    'preference.pwaPreventClose',
+    PREFERENCE_PWA_PREVENT_CLOSE_DEFAULT
+  );
+
   return {
     audioQuality,
     language,
     confirmOnLeave,
+    pwaPreventClose,
   };
 });
 

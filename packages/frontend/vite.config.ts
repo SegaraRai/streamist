@@ -393,7 +393,7 @@ export default defineConfig(async ({ mode }) => {
           id: '/',
           name: 'Streamist',
           short_name: 'Streamist',
-          start_url: '/',
+          start_url: '/pwa',
           display: 'standalone',
           background_color: '#2a8dfe',
           theme_color: '#2a8dfe',

@@ -91,6 +91,8 @@ settings:
       Theme: テーマ
     link:
       AccountSettings: アカウント設定
+    DoNotExitWithBackButton: 戻るボタンで終了しない
+    RequiresRestartToTakeEffect: 変更の適用には再起動が必要です
   audioQuality:
     medium: 標準音質
     veryHigh: 最高音質

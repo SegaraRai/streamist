@@ -15,6 +15,7 @@ import {
 import { useSyncDB } from '~/db';
 import { logout } from '~/logic/logout';
 import { usePreferenceStore } from '~/stores/preference';
+import { isPWAStarted } from '~/stores/pwa';
 import { useThemeStore } from '~/stores/theme';
 
 export default defineComponent({
@@ -62,6 +63,7 @@ export default defineComponent({
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
       themeOptions$$q,
       confirmOnLeaveOptions$$q,
+      pwaStarted$$q: isPWAStarted(),
       preferenceStore$$q: preferenceStore,
       themeStore$$q: themeStore,
       synchronized$$q,
@@ -149,6 +151,20 @@ export default defineComponent({
               v-model:value="preferenceStore$$q.confirmOnLeave"
               :options="confirmOnLeaveOptions$$q"
             />
+            <template v-if="pwaStarted$$q">
+              <div>
+                <VSwitch
+                  v-model="preferenceStore$$q.pwaPreventClose"
+                  :label="t('settings.device.DoNotExitWithBackButton')"
+                  color="primary"
+                  hide-details
+                  class="s-v-input-hide-details"
+                />
+                <div class="text-xs font-medium leading-tight opacity-60 -mt-3">
+                  {{ t('settings.device.RequiresRestartToTakeEffect') }}
+                </div>
+              </div>
+            </template>
           </div>
         </div>
         <div class="mt-4 flex flex-col gap-y-12">
