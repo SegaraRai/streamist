@@ -49,6 +49,7 @@ declare module 'vue' {
     SComboboxAlbum: typeof import('./components/SComboboxAlbum.vue')['default']
     SComboboxArtist: typeof import('./components/SComboboxArtist.vue')['default']
     SConditionalLink: typeof import('./components/SConditionalLink.vue')['default']
+    SConfirmOnLeaveHandler: typeof import('./components/SConfirmOnLeaveHandler.vue')['default']
     SDialogAlbumEdit: typeof import('./components/SDialogAlbumEdit.vue')['default']
     SDialogAlbumMerge: typeof import('./components/SDialogAlbumMerge.vue')['default']
     SDialogArtistEdit: typeof import('./components/SDialogArtistEdit.vue')['default']
