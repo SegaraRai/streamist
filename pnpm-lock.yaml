@@ -101,8 +101,6 @@ importers:
       '@types/nprogress': ^0.2.0
       '@vitejs/plugin-vue': ^2.1.0
       '@vitejs/plugin-vue-jsx': ^1.3.3
-      '@vue/compiler-sfc': ^3.2.29
-      '@vue/server-renderer': ^3.2.29
       '@vuetify/vite-plugin': ^1.0.0-alpha.10
       '@vueuse/core': ^7.5.5
       '@vueuse/head': ^0.7.5
@@ -189,8 +187,6 @@ importers:
       '@types/nprogress': 0.2.0
       '@vitejs/plugin-vue': 2.1.0_vite@2.7.13+vue@3.2.29
       '@vitejs/plugin-vue-jsx': 1.3.3
-      '@vue/compiler-sfc': 3.2.29
-      '@vue/server-renderer': 3.2.29_vue@3.2.29
       '@vuetify/vite-plugin': 1.0.0-alpha.10_902994a9e07790b2cb4be6cd47c8a820
       aspida: 1.7.1
       critters: 0.0.16
@@ -199,13 +195,13 @@ importers:
       markdown-it-link-attributes: 4.0.0
       markdown-it-prism: 2.2.2
       unplugin-auto-import: 0.5.11_@vueuse+core@7.5.5+vite@2.7.13
-      unplugin-icons: 0.13.0_156ab524000ac0f29e01f162b9943b71
+      unplugin-icons: 0.13.0_vite@2.7.13
       unplugin-vue-components: 0.17.16_vite@2.7.13+vue@3.2.29
       vite: 2.7.13
       vite-plugin-html: 3.0.3_vite@2.7.13
       vite-plugin-inspect: 0.3.13_vite@2.7.13
       vite-plugin-md: 0.11.7_vite@2.7.13
-      vite-plugin-pages: 0.20.1_156ab524000ac0f29e01f162b9943b71
+      vite-plugin-pages: 0.20.1_vite@2.7.13
       vite-plugin-pwa: 0.11.13_vite@2.7.13
       vite-plugin-vue-layouts: 0.6.0_5be28afadb16af157591decefdfd37a0
       vite-plugin-windicss: 1.6.3_vite@2.7.13
@@ -3801,6 +3797,7 @@ packages:
       '@vue/compiler-ssr': 3.2.29
       '@vue/shared': 3.2.29
       vue: 3.2.29
+    dev: false
 
   /@vue/shared/3.2.29:
     resolution: {integrity: sha512-BjNpU8OK6Z0LVzGUppEk0CMYm/hKDnZfYdjSmPOs0N+TR1cLKJAkDwW8ASZUvaaSLEi6d3hVM7jnWnX+6yWnHw==}
@@ -9807,7 +9804,7 @@ packages:
       - webpack
     dev: true
 
-  /unplugin-icons/0.13.0_156ab524000ac0f29e01f162b9943b71:
+  /unplugin-icons/0.13.0_vite@2.7.13:
     resolution: {integrity: sha512-CyAl0HV3bZUGT7ut9agpPRhEYXCvufr80Fh72yrkD57BVCTZ7ze10Rt63ZrvPXiJQpd+aI/Bizm2aqOf3WPSfg==}
     peerDependencies:
       '@svgr/core': ^5.5.0
@@ -9827,7 +9824,6 @@ packages:
       '@antfu/install-pkg': 0.1.0
       '@antfu/utils': 0.4.0
       '@iconify/utils': 1.0.20
-      '@vue/compiler-sfc': 3.2.29
       debug: 4.3.3
       kolorist: 1.5.1
       local-pkg: 0.4.0
@@ -10017,7 +10013,7 @@ packages:
       vite: 2.7.13
     dev: true
 
-  /vite-plugin-pages/0.20.1_156ab524000ac0f29e01f162b9943b71:
+  /vite-plugin-pages/0.20.1_vite@2.7.13:
     resolution: {integrity: sha512-VHKE1/39HW4vqUcGLO6blq8MKqzP73kxYW9bykH1ihRfhgp7HLMCgTvmag6zDa66iKafzM3orzjVeIg4dUA+4A==}
     peerDependencies:
       '@vue/compiler-sfc': '>=3'
@@ -10026,7 +10022,6 @@ packages:
       '@vue/compiler-sfc':
         optional: true
     dependencies:
-      '@vue/compiler-sfc': 3.2.29
       debug: 4.3.3
       deep-equal: 2.0.5
       fast-glob: 3.2.11
