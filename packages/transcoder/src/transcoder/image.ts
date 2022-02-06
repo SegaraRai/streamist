@@ -16,7 +16,7 @@ import {
 } from '$shared-server/osOperations';
 import { UploadJSONStorage, uploadJSON } from '../execAndLog';
 import { probeImage, transcodeImage } from '../mediaTools';
-import { getTempFilepath } from '../tempFile';
+import { generateTempFilename, getTempFilepath } from '../tempFile';
 import { TRANSCODED_FILE_CACHE_CONTROL } from '../transcodedFileConfig';
 import type {
   TranscoderRequestFileImage,
@@ -56,7 +56,7 @@ export async function processImageRequest(
 
     const sourceImageFilepath = extracted
       ? file.filePath
-      : getTempFilepath(sourceFileId);
+      : getTempFilepath(`${sourceFileId}-${generateTempFilename()}`);
 
     createdFiles.push(sourceImageFilepath);
 
@@ -106,7 +106,9 @@ export async function processImageRequest(
     )) {
       const transcodedImageFileId = await generateTranscodedImageFileId();
       const transcodedImageFilepath = getTempFilepath(
-        transcodedImageFileId + imageFormat.extension
+        `${transcodedImageFileId}-${generateTempFilename()}${
+          imageFormat.extension
+        }`
       );
 
       const scale = Math.min(
