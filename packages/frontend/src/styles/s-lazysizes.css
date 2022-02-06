@@ -10,8 +10,6 @@
 .s-lazyload-image.s-lazyloaded + .s-lazyload-background,
 .s-lazyload-image.lazyloaded:not(.s-lazyloading) + .s-lazyload-background {
   animation: none;
-  visibility: hidden;
-  transition: visibility 0.3s;
 }
 
 .s-lazyload-image.lazyload,
