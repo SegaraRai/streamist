@@ -244,7 +244,9 @@ export async function processAudioRequest(
   const os = getTranscodedAudioFileOS(region);
 
   try {
-    const sourceAudioFilepath = getTempFilepath(sourceFileId);
+    const sourceAudioFilepath = getTempFilepath(
+      `${sourceFileId}-${generateTempFilename()}`
+    );
 
     createdFiles.push(sourceAudioFilepath);
 
@@ -330,7 +332,9 @@ export async function processAudioRequest(
       )) {
         const transcodedAudioFileId = await generateTranscodedAudioFileId();
         const transcodedAudioFilepath = getTempFilepath(
-          `${transcodedAudioFileId}${audioFormat.extension}`
+          `${transcodedAudioFileId}-${generateTempFilename()}${
+            audioFormat.extension
+          }`
         );
 
         /** 入力ファイル用の引数 */
