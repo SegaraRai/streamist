@@ -1,13 +1,13 @@
-import lazySizes from 'lazysizes';
 import type { App } from 'vue';
-
 import {
   isCDNCookieSet,
   needsCDNCookie,
   setCDNCookie,
-} from './logic/cdnCookie';
+} from '~/logic/cdnCookie';
 
 export function installLazySizes(app: App) {
+  const lazySizesPromise = import('lazysizes');
+
   app.directive('lazysizes', {
     beforeMount(el) {
       if (el.tagName !== 'IMG') {
@@ -28,7 +28,9 @@ export function installLazySizes(app: App) {
       }
 
       el.classList.remove('lazyloaded');
-      lazySizes.loader?.unveil(el);
+      lazySizesPromise.then((lazySizes): void => {
+        lazySizes.loader?.unveil(el);
+      });
     },
   });
 
@@ -49,7 +51,9 @@ export function installLazySizes(app: App) {
 
     setCDNCookie().then((): void => {
       el.classList.remove('s-lazyloading');
-      lazySizes.loader?.unveil(el);
+      lazySizesPromise.then((lazySizes): void => {
+        lazySizes.loader?.unveil(el);
+      });
     });
   });
 }

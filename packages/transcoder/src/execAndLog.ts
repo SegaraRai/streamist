@@ -51,7 +51,7 @@ export async function execAndLog(
   const beginTimestamp = Date.now();
   const result = await execFileAsync(file, args, timeout);
   const endTimestamp = Date.now();
-  await uploadJSON(type, storage, {
+  await uploadJSON(result.error$$q ? `${type}_error` : type, storage, {
     userId: storage.userId,
     file,
     args,
@@ -63,5 +63,8 @@ export async function execAndLog(
     stdout: result.stdout$$q,
     ...additionalLogRecord,
   });
+  if (result.error$$q) {
+    throw result.error$$q;
+  }
   return result;
 }

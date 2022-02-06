@@ -39,6 +39,19 @@ export class TrackProvider2<T extends TrackBase> extends TrackProvider<T> {
     this.emitPlayNextQueueChangeEvent$$q();
   }
 
+  override setSetList$$q(setList: readonly T[], currentTrack?: T | null): void {
+    if (currentTrack !== undefined && this._currentTrackOverride$$q) {
+      this._playNextHistory$$q.push(this._currentTrackOverride$$q);
+      this._playNextHistory$$q.splice(
+        0,
+        this._playNextHistory$$q.length - MAX_HISTORY_SIZE
+      );
+      this._currentTrackOverride$$q = undefined;
+    }
+
+    super.setSetList$$q(setList, currentTrack);
+  }
+
   override skipNext$$q(n = 1): void {
     // nを正規化し、値を検証する
     n = Math.round(n);

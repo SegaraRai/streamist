@@ -64,9 +64,9 @@ export {};
 
 function getNaiveUIComponents(): readonly string[] {
   const webTypesJSON = require('naive-ui/web-types.json') as {
-    contributions: { html: { tags: { name: string }[] } };
+    contributions: { html: { elements: { name: string }[] } };
   };
-  return webTypesJSON.contributions.html.tags
+  return webTypesJSON.contributions.html.elements
     .map((tag) => toUpperCamelCase(tag.name))
     .filter((x) => x.startsWith('N'));
 }

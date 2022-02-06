@@ -217,7 +217,6 @@ export default defineComponent({
     <div class="flex-none flex flex-row items-center gap-x-8 my-8">
       <VBtn
         color="primary"
-        flat
         icon
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(false)"

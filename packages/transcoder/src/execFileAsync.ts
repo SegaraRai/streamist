@@ -1,7 +1,8 @@
-import { execFile } from 'node:child_process';
+import { ExecFileException, execFile } from 'node:child_process';
 import logger from './logger';
 
 export interface ExecFileResult {
+  error$$q: ExecFileException | null;
   stdout$$q: string;
   stderr$$q: string;
 }
@@ -21,7 +22,7 @@ export function execFileAsync(
   args: string[],
   timeout: number
 ): Promise<ExecFileResult> {
-  return new Promise<ExecFileResult>((resolve, reject) => {
+  return new Promise<ExecFileResult>((resolve): void => {
     logger.info(`exec     ${file} ${args.map(escapeShell).join(' ')}`);
     execFile(
       file,
@@ -32,11 +33,10 @@ export function execFileAsync(
       },
       (error, stdout, stderr) => {
         logger.info(`exec-end ${file} ${error}`);
-        if (error) {
-          reject(error);
-          return;
-        }
+        logger.info(`exec-end-stdout ${stdout}`);
+        logger.info(`exec-end-stderr ${stderr}`);
         resolve({
+          error$$q: error,
           stdout$$q: stdout,
           stderr$$q: stderr,
         });
