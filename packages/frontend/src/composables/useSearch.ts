@@ -20,7 +20,7 @@ function _useAlbumSearch(limit?: number) {
   const options = createOptions(limit);
   const fuse = useFuse(items.value, { keys: ['title'] });
   return (term: Readonly<Ref<string>>) =>
-    computed(() => fuse.value.search(term.value, options));
+    computed(() => fuse.value?.search(term.value, options) || []);
 }
 
 function _useArtistSearch(limit?: number) {
@@ -28,7 +28,7 @@ function _useArtistSearch(limit?: number) {
   const options = createOptions(limit);
   const fuse = useFuse(items.value, { keys: ['name'] });
   return (term: Readonly<Ref<string>>) =>
-    computed(() => fuse.value.search(term.value, options));
+    computed(() => fuse.value?.search(term.value, options) || []);
 }
 
 function _useTrackSearch(limit?: number) {
@@ -36,7 +36,7 @@ function _useTrackSearch(limit?: number) {
   const options = createOptions(limit);
   const fuse = useFuse(items.value, { keys: ['title'] });
   return (term: Readonly<Ref<string>>) =>
-    computed(() => fuse.value.search(term.value, options));
+    computed(() => fuse.value?.search(term.value, options) || []);
 }
 
 function _usePlaylistSearch(limit?: number) {
@@ -44,7 +44,7 @@ function _usePlaylistSearch(limit?: number) {
   const options = createOptions(limit);
   const fuse = useFuse(items.value, { keys: ['title'] });
   return (term: Readonly<Ref<string>>) =>
-    computed(() => fuse.value.search(term.value, options));
+    computed(() => fuse.value?.search(term.value, options) || []);
 }
 
 function _useAllSearch(limit?: number) {
@@ -52,7 +52,7 @@ function _useAllSearch(limit?: number) {
   const options = createOptions(limit);
   const fuse = useFuse(items, { keys: ['l'] });
   return (term: Readonly<Ref<string>>) =>
-    computed(() => fuse.value.search(term.value, options));
+    computed(() => fuse.value?.search(term.value, options) || []);
 }
 
 export const useAlbumSearch = createSharedComposable(_useAlbumSearch);

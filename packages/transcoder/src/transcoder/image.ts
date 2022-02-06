@@ -61,18 +61,24 @@ export async function processImageRequest(
     createdFiles.push(sourceImageFilepath);
 
     // ユーザーがアップロードした画像ファイルをローカルにダウンロード
+    let downloadedFileSize: number;
     let sourceFileSHA256: string;
     if (extracted) {
+      downloadedFileSize = file.fileSize;
       sourceFileSHA256 = file.sha256;
     } else {
-      sourceFileSHA256 = (
-        await osGetFile(
-          getSourceFileOS(region),
-          getSourceFileKey(userId, sourceId, sourceFileId),
-          sourceImageFilepath,
-          'sha256'
-        )
-      )[1];
+      [downloadedFileSize, sourceFileSHA256] = await osGetFile(
+        getSourceFileOS(region),
+        getSourceFileKey(userId, sourceId, sourceFileId),
+        sourceImageFilepath,
+        'sha256'
+      );
+    }
+
+    if (downloadedFileSize !== file.fileSize) {
+      throw new Error(
+        `downloaded file size is not equal to the source file size: ${downloadedFileSize} !== ${file.fileSize}`
+      );
     }
 
     const imageInfoList = await probeImage(sourceImageFilepath, logStorage);

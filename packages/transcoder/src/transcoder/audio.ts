@@ -223,6 +223,7 @@ export async function processAudioRequest(
     cueSheetSourceFileId,
     options,
     region,
+    fileSize,
     sourceFileId,
     sourceId,
     userId,
@@ -248,12 +249,17 @@ export async function processAudioRequest(
     createdFiles.push(sourceAudioFilepath);
 
     // ユーザーがアップロードした音楽ファイルをローカルにダウンロード
-    const [, sourceFileSHA256] = await osGetFile(
+    const [downloadedFileSize, sourceFileSHA256] = await osGetFile(
       getSourceFileOS(region),
       getSourceFileKey(userId, sourceId, sourceFileId),
       sourceAudioFilepath,
       'sha256'
     );
+    if (downloadedFileSize !== fileSize) {
+      throw new Error(
+        `downloaded file size is not equal to the source file size: ${downloadedFileSize} !== ${fileSize}`
+      );
+    }
 
     // 音楽ファイルの情報を解析
     const audioInfo = await probeAudio(sourceAudioFilepath, logStorage);

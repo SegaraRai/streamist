@@ -616,6 +616,9 @@ function _usePlaybackStore(): PlaybackState {
       if (shuffleValue != null) {
         shuffle.value = shuffleValue;
       }
+      if (repeat.value === 'one') {
+        repeat.value = 'all';
+      }
       setSetListAndPlay(name, tracks, track);
     },
     setSetListAndPlayAuto$$q: (
@@ -625,6 +628,9 @@ function _usePlaybackStore(): PlaybackState {
     ): void => {
       if (shuffleValue != null) {
         shuffle.value = shuffleValue;
+      }
+      if (repeat.value === 'one') {
+        repeat.value = 'all';
       }
       setSetListAndPlayAuto(name, tracks);
     },

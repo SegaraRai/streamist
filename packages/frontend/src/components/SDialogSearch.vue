@@ -197,10 +197,11 @@ export default defineComponent({
     const rsFuse = useFuse(queries$$q, { keys: ['query'] });
     const filteredRSQueries$$q = computed(() =>
       (debouncedSearchQuery$$q.value
-        ? rsFuse.value
-            .search(debouncedSearchQuery$$q.value, {
+        ? (
+            rsFuse.value?.search(debouncedSearchQuery$$q.value, {
               limit: RECENTLY_SEARCHED_MAX_ENTRIES_DISPLAY + 1,
-            })
+            }) || []
+          )
             .map(({ item }) => item)
             .filter(({ query }) => query !== debouncedSearchQuery$$q.value)
         : queries$$q.value

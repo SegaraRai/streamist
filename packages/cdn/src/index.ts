@@ -163,9 +163,7 @@ API.add(
       return send(storageURL === false ? 403 : 404, null, NO_CACHE_HEADERS);
     }
 
-    // キャッシュしない設定か確認
-    // 将来のための拡張用
-    const noCache = context.url.searchParams.get('nc') === '1';
+    const cacheAll = type === 'images';
 
     // ETag計算
     const eTagBase = arrayBufferToHex(
@@ -190,8 +188,7 @@ API.add(
 
     // キャッシュ対策の値を計算
     const securityTokenBase = [
-      `${storageURL}?v=${CACHE_VERSION}`,
-      noCache ? '&nc' : '',
+      `${storageURL}?v=${CACHE_VERSION}&c=${cacheAll ? 1 : 0}`,
     ].join('');
     const fullSecurityToken = await calculateHMAC(
       context.bindings.SECRET_CDN_CACHE_SECURITY_KEY_HMAC_SECRET,
@@ -220,11 +217,8 @@ API.add(
       )}&response-Vary=Referer%2C%20User-Agent%2C%20Streamist-CDN-Cache-Security-Header`,
       {
         method: req.method,
-        cf: noCache
+        cf: cacheAll
           ? {
-              cacheEverything: false,
-            }
-          : {
               // NOTE: キャッシュについて
               // Cloudflare側でキャッシュを有効にした場合、クライアントからRangeリクエストが行われようとすべてのデータをダウンロードする模様
               // そのため、特に巨大なファイルで後ろの方のRangeリクエストが行われた場合、クライアントはレスポンスの到着を待たされることになる
@@ -233,6 +227,9 @@ API.add(
               // ここでは、それぞれのファイルが小さいことから、キャッシュを有効化することとしている
               cacheEverything: true,
               cacheTtl: CACHE_CONTROL_IMMUTABLE_TTL,
+            }
+          : {
+              cacheEverything: false,
             },
         headers: originRequestHeaders,
       }
