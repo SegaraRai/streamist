@@ -7,8 +7,6 @@ import VueJSX from '@vitejs/plugin-vue-jsx';
 import Vuetify from '@vuetify/vite-plugin';
 import { config } from 'dotenv';
 import fg from 'fast-glob';
-import LinkAttributes from 'markdown-it-link-attributes';
-import Prism from 'markdown-it-prism';
 import AutoImport from 'unplugin-auto-import/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
@@ -20,7 +18,6 @@ import Components from 'unplugin-vue-components/vite';
 import { ProxyOptions, defineConfig } from 'vite';
 import { createHtmlPlugin } from 'vite-plugin-html';
 import Inspect from 'vite-plugin-inspect';
-import Markdown from 'vite-plugin-md';
 import Pages from 'vite-plugin-pages';
 import { VitePWA } from 'vite-plugin-pwa';
 import Layouts from 'vite-plugin-vue-layouts';
@@ -33,8 +30,6 @@ function toUpperCamelCase(str: string): string {
     .replace(/-[a-z]/g, (match) => match[1].toUpperCase())
     .replace(/-/g, '');
 }
-
-const markdownWrapperClasses = 'prose prose-sm m-auto text-left';
 
 async function createVuetifyDTS(): Promise<void> {
   const importMapJSON = require('vuetify/dist/json/importMap.json') as {
@@ -328,11 +323,9 @@ export default defineConfig(async ({ mode }) => {
 
       // https://github.com/antfu/unplugin-vue-components
       Components({
-        // allow auto load markdown components under `./src/components/`
-        extensions: ['vue', 'md'],
+        extensions: ['vue'],
 
-        // allow auto import and register components used in markdown
-        include: [/\.vue$/, /\.vue\?vue/, /\.md$/],
+        include: [/\.vue$/, /\.vue\?vue/],
 
         // custom resolvers
         resolvers: [
@@ -358,27 +351,7 @@ export default defineConfig(async ({ mode }) => {
       }),
 
       // https://github.com/antfu/vite-plugin-windicss
-      WindiCSS({
-        safelist: markdownWrapperClasses,
-      }),
-
-      // https://github.com/antfu/vite-plugin-md
-      // Don't need this? Try vitesse-lite: https://github.com/antfu/vitesse-lite
-      Markdown({
-        wrapperClasses: markdownWrapperClasses,
-        headEnabled: true,
-        markdownItSetup(md) {
-          // https://prismjs.com/
-          md.use(Prism);
-          md.use(LinkAttributes, {
-            pattern: /^https?:\/\//,
-            attrs: {
-              target: '_blank',
-              rel: 'noopener',
-            },
-          });
-        },
-      }),
+      WindiCSS(),
 
       // https://github.com/antfu/vite-plugin-pwa
       VitePWA({
