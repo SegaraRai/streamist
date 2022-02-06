@@ -2,6 +2,9 @@ import { getOSRegion, getOSRegions } from '$shared-server/objectStorage';
 import type { Environment } from './types';
 import { writeResultFile } from './write';
 
+const GCR_CONFIG =
+  '--no-allow-unauthenticated --concurrency 1 --memory 1.1Gi --timeout 20m';
+
 const SECRETS = [
   'API_ORIGIN_FOR_TRANSCODER',
   'SECRET_API_CLIENT_REFERRER',
@@ -28,7 +31,7 @@ function getLambdaDeployCommand(): string {
     .map(
       (item): string =>
         `aws lambda update-function-code --function-name ${item.transcoderLambdaName} --zip-file fileb://dist.zip --region ${item.transcoderLambdaRegion}\n` +
-        `gcloud run deploy ${item.transcoderGCRName} --quiet --source gcr --no-allow-unauthenticated ${GCR_SET_SECRETS} --memory 1.1Gi --concurrency 1 --region ${item.transcoderGCRRegion}\n`
+        `gcloud run deploy ${item.transcoderGCRName} --quiet --source gcr ${GCR_SET_SECRETS} ${GCR_CONFIG} --region ${item.transcoderGCRRegion}\n`
     )
     .join('');
 }

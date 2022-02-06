@@ -11,7 +11,7 @@ export const SOURCE_FILE_UPLOADABLE_AFTER_CREATE = 4 * 60 * 60 * 1000;
 /** in msec. 30min. later */
 export const SOURCE_FILE_TREAT_AS_NOT_UPLOADED_AFTER_CREATE =
   SOURCE_FILE_UPLOADABLE_AFTER_CREATE + 30 * 60 * 1000;
-/** in msec. 30min. (current max. Lambda execution time is 15 min. and max. GCR execution time is 60 min.) */
+/** in msec. 30min. (current max. Lambda execution time is 15 min. and max. GCR execution time is 20 min.) */
 export const SOURCE_FILE_TREAT_AS_NOT_TRANSCODED_AFTER_UPLOAD = 30 * 60 * 1000;
 
 export const MIN_SOURCE_FILE_SIZE = 1; // forbid uploading empty files (due to multipart upload)
