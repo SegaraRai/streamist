@@ -258,7 +258,8 @@ export default defineComponent({
       playbackStore.setSetListAndPlay$$q(
         props.setListName,
         props.setList,
-        track
+        track,
+        false
       );
     };
 
