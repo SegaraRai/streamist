@@ -24,7 +24,7 @@ services:
     env_file: server.env
     environment:
       - API_SERVER_PORT=8080
-      - API_BASE_PATH=/brp-api
+      - API_BASE_PATH=/api
       - GOOGLE_APPLICATION_CREDENTIALS=/credentials/gapp-credentials.json
     volumes:
       - ./gapp-credentials.json:/credentials/gapp-credentials.json:ro
