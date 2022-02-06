@@ -12,6 +12,8 @@ on:
       - 'frontend/public/**'
   pull_request:
     types: [opened, reopened]
+    branches:
+      - develop
 
 jobs:
   test:
