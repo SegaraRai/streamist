@@ -41,11 +41,7 @@ export class TrackProvider2<T extends TrackBase> extends TrackProvider<T> {
 
   override setSetList$$q(setList: readonly T[], currentTrack?: T | null): void {
     if (currentTrack !== undefined && this._currentTrackOverride$$q) {
-      this._playNextHistory$$q.push(this._currentTrackOverride$$q);
-      this._playNextHistory$$q.splice(
-        0,
-        this._playNextHistory$$q.length - MAX_HISTORY_SIZE
-      );
+      this._playNextHistory$$q = [];
       this._currentTrackOverride$$q = undefined;
     }
 
