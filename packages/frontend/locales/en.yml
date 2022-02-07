@@ -5,10 +5,10 @@ notFound:
 app:
   title: Streamist
   meta:
-    description: Stream your favorite songs
+    description: Stream your favorite songs.
 landing:
   title: Streamist
-  description: Stream your favorite songs
+  description: Stream your favorite songs.
   button:
     SignUp: Sign up
 appBar:
