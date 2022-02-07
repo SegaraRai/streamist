@@ -42,7 +42,6 @@ export class VAccountUpdateData implements IAccountUpdateData {
   @MinLength(ACCOUNT_PASSWORD_MIN_LENGTH)
   @MaxLength(ACCOUNT_PASSWORD_MAX_LENGTH)
   @Matches(ACCOUNT_PASSWORD_REGEX)
-  @Transform(({ value }) => tStringNormalizeSingleLine(value))
   password?: string;
 
   @IsUndefinable()
@@ -62,6 +61,5 @@ export class VAccountUpdateData implements IAccountUpdateData {
   @MinLength(ACCOUNT_PASSWORD_MIN_LENGTH)
   @MaxLength(ACCOUNT_PASSWORD_MAX_LENGTH)
   @Matches(ACCOUNT_PASSWORD_REGEX)
-  @Transform(({ value }) => tStringNormalizeSingleLine(value))
   currentPassword?: string;
 }
