@@ -1,13 +1,11 @@
-import { Transform, Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
   Equals,
   IsNotEmpty,
-  IsObject,
   IsString,
   Matches,
   MaxLength,
   MinLength,
-  ValidateNested,
 } from 'class-validator';
 import {
   ACCOUNT_PASSWORD_MAX_LENGTH,
@@ -25,7 +23,7 @@ export interface IAuthBodyPassword {
   password: string;
 }
 
-class VAuthBodyPassword implements IAuthBodyPassword {
+export class VAuthBodyPassword implements IAuthBodyPassword {
   @Equals('password')
   grant_type!: 'password';
 
@@ -51,33 +49,13 @@ export interface IAuthBodyRefreshToken {
   refresh_token: string;
 }
 
-class VAuthBodyRefreshToken implements IAuthBodyRefreshToken {
+export class VAuthBodyRefreshToken implements IAuthBodyRefreshToken {
   @Equals('refresh_token')
   grant_type!: 'refresh_token';
 
   @IsString()
   @IsNotEmpty()
   refresh_token!: string;
-}
-
-export type IAuthRequest = IAuthBodyPassword | IAuthBodyRefreshToken;
-
-export class VAuthBodyWrapper {
-  @IsObject({
-    message: 'grant_type must be either "password" or "refresh_token"',
-  })
-  @ValidateNested()
-  @Type(() => Boolean, {
-    keepDiscriminatorProperty: true,
-    discriminator: {
-      property: 'grant_type',
-      subTypes: [
-        { value: VAuthBodyPassword, name: 'password' },
-        { value: VAuthBodyRefreshToken, name: 'refresh_token' },
-      ],
-    },
-  })
-  '!payload'!: VAuthBodyPassword | VAuthBodyRefreshToken;
 }
 
 export interface IAuthResponse {

@@ -23,7 +23,7 @@ export async function authenticate(
       access_token: apiToken,
       cdn_access_token: cdnToken,
       refresh_token: refreshToken,
-    } = await unAuthAPI.auth.token.$post({
+    } = await unAuthAPI.auth.login.$post({
       body: {
         grant_type: 'password',
         username,
