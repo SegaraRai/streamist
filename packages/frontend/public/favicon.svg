@@ -1,13 +1,3 @@
 <svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" width="256" height="256" viewBox="0 0 256 256">
-  <style>
-    path {
-      fill: #2a8dfe;
-    }
-    @media (prefers-color-scheme: dark) {
-      path {
-        fill: #2a8dfe;
-      }
-    }
-  </style>
-  <path d="M198 6.7564L142 103.7513L204.3538 139.7513L58 249.2436L114 152.2487L51.6462 116.2487Z" />
+  <path fill="#2a8dfe" stroke="none" d="M198 6.7564L142 103.7513L204.3538 139.7513L58 249.2436L114 152.2487L51.6462 116.2487Z" />
 </svg>
