@@ -77,6 +77,7 @@ declare module 'vue' {
     SSearchHistoryItem: typeof import('./components/SSearchHistoryItem.vue')['default']
     SSeekBar: typeof import('./components/SSeekBar.vue')['default']
     SSlider: typeof import('./components/SSlider.vue')['default']
+    SSliderIndicator: typeof import('./components/SSliderIndicator.vue')['default']
     STrackList: typeof import('./components/STrackList.vue')['default']
     STrackListDiscHeaderItem: typeof import('./components/STrackListDiscHeaderItem.vue')['default']
     STrackListTrackItem: typeof import('./components/STrackListTrackItem.vue')['default']

@@ -20,7 +20,7 @@ import {
   SECRET_REFRESH_TOKEN_JWT_SECRET,
 } from '$/services/env';
 import { HTTPError } from '$/utils/httpError';
-import type { IAuthRequest, IAuthResponse } from '$/validators';
+import type { IAuthResponse } from '$/validators';
 import { verifyPasswordHashAsync } from './password';
 
 type UserSubset = Pick<User, 'id' | 'maxTrackId' | 'plan'>;
@@ -122,104 +122,107 @@ export async function extractPayloadFromCDNToken(
   }
 }
 
-export async function issueTokens(body: IAuthRequest): Promise<IAuthResponse> {
-  let user: UserSubset;
+async function issueTokens(
+  user: UserSubset,
+  addRefreshToken: false
+): Promise<IAuthResponse & { refresh_token: undefined }>;
 
-  switch (body.grant_type) {
-    case 'password': {
-      const tempUser = await client.user.findUnique({
-        where: {
-          username: String(body.username),
-        },
-        select: {
-          id: true,
-          password: true,
-          closedAt: true,
-          plan: true,
-          maxTrackId: true,
-        },
-      });
-      if (!tempUser) {
-        throw new HTTPError(404, `User ${body.username} not found`);
-      }
+async function issueTokens(
+  user: UserSubset,
+  addRefreshToken: true
+): Promise<IAuthResponse & { refresh_token: string }>;
 
-      const isOk = await verifyPasswordHashAsync(
-        String(body.password),
-        tempUser.password
-      );
-      if (!isOk) {
-        throw new HTTPError(401, 'Invalid password');
-      }
-
-      if (tempUser.closedAt != null) {
-        await client.user.update({
-          where: {
-            id: tempUser.id,
-          },
-          data: {
-            closedAt: null,
-          },
-        });
-      }
-
-      user = tempUser;
-
-      break;
-    }
-
-    case 'refresh_token': {
-      const extractedUserId = await extractUserIdFromRefreshToken(
-        String(body.refresh_token)
-      );
-      if (!extractedUserId) {
-        throw new HTTPError(401, 'Invalid refresh token');
-      }
-
-      // TODO(auth): check if refresh token is not revoked
-
-      const tempUser = await client.user.findUnique({
-        where: {
-          id: extractedUserId,
-        },
-        select: {
-          id: true,
-          closedAt: true,
-          plan: true,
-          maxTrackId: true,
-        },
-      });
-
-      if (!tempUser) {
-        throw new HTTPError(404, `User ${extractedUserId} not found`);
-      }
-
-      if (tempUser.closedAt != null) {
-        throw new HTTPError(
-          409,
-          `User ${extractedUserId} is closed. Please sign in again to restore access.`
-        );
-      }
-
-      user = tempUser;
-
-      break;
-    }
-
-    default:
-      throw new HTTPError(400, 'Invalid grant type');
-  }
-
+async function issueTokens(
+  user: UserSubset,
+  addRefreshToken: boolean
+): Promise<IAuthResponse> {
   const timestamp = Date.now();
   const apiToken = await issueAPIToken(user, timestamp);
   const cdnToken = await issueCDNToken(user, timestamp);
-  const refreshToken =
-    body.grant_type === 'password'
-      ? await issueRefreshToken(user, timestamp)
-      : undefined;
+  const refreshToken = addRefreshToken
+    ? await issueRefreshToken(user, timestamp)
+    : undefined;
 
   return {
     access_token: apiToken,
     cdn_access_token: cdnToken,
     refresh_token: refreshToken,
   };
+}
+
+export async function issueTokensFromUsernamePassword(
+  username: string,
+  password: string
+): Promise<Required<IAuthResponse>> {
+  const user = await client.user.findUnique({
+    where: {
+      username: String(username),
+    },
+    select: {
+      id: true,
+      password: true,
+      closedAt: true,
+      plan: true,
+      maxTrackId: true,
+    },
+  });
+  if (!user) {
+    throw new HTTPError(401, 'Invalid username or password');
+  }
+
+  const isOk = await verifyPasswordHashAsync(String(password), user.password);
+  if (!isOk) {
+    throw new HTTPError(401, 'Invalid username or password');
+  }
+
+  if (user.closedAt != null) {
+    await client.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        closedAt: null,
+      },
+    });
+  }
+
+  return issueTokens(user, true);
+}
+
+export async function issueTokensFromRefreshToken(
+  refreshToken: string
+): Promise<IAuthResponse> {
+  const extractedUserId = await extractUserIdFromRefreshToken(
+    String(refreshToken)
+  );
+  if (!extractedUserId) {
+    throw new HTTPError(401, 'Invalid refresh token');
+  }
+
+  // TODO(auth): check if refresh token is not revoked
+
+  const user = await client.user.findUnique({
+    where: {
+      id: extractedUserId,
+    },
+    select: {
+      id: true,
+      closedAt: true,
+      plan: true,
+      maxTrackId: true,
+    },
+  });
+
+  if (!user) {
+    throw new HTTPError(404, `User ${extractedUserId} not found`);
+  }
+
+  if (user.closedAt != null) {
+    throw new HTTPError(
+      409,
+      `User ${extractedUserId} is closed. Please sign in again to restore access.`
+    );
+  }
+
+  return issueTokens(user, false);
 }

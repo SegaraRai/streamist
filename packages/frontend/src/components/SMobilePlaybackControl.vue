@@ -38,13 +38,8 @@ export default defineComponent({
       container$$q,
       currentTrackInfo$$q: currentTrackInfo,
       playing$$q: playbackStore.playing$$q,
-      progress$$q: computed(() =>
-        playbackStore.position$$q.value && playbackStore.duration$$q.value
-          ? (playbackStore.position$$q.value /
-              playbackStore.duration$$q.value) *
-            100
-          : 0
-      ),
+      position$$q: playbackStore.position$$q,
+      duration$$q: playbackStore.duration$$q,
       play$$q: (): void => {
         playbackStore.playing$$q.value = !playbackStore.playing$$q.value;
       },
@@ -104,12 +99,10 @@ export default defineComponent({
         </VBtn>
       </div>
     </div>
-    <VProgressLinear
-      class="flex-none w-full"
-      :model-value="progress$$q"
-      color="primary"
-      rounded
-      rounded-bar
+    <SSliderIndicator
+      class="flex-none w-full h-1"
+      :model-value="position$$q"
+      :max="duration$$q"
     />
   </VSheet>
 </template>
