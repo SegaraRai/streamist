@@ -1,5 +1,10 @@
 <script lang="ts">
-import { HALF_VOLUME, MAX_VOLUME, MIN_VOLUME } from '$shared/config';
+import {
+  HALF_VOLUME,
+  MAX_VOLUME,
+  MIN_VOLUME,
+  VOLUME_WHEEL_DELTA,
+} from '$shared/config';
 
 export default defineComponent({
   props: {
@@ -24,6 +29,7 @@ export default defineComponent({
     );
     return {
       maxVolume$$q: MAX_VOLUME,
+      wheelDelta$$q: VOLUME_WHEEL_DELTA,
       volume$$q,
       icon$$q: computed(() => {
         const volume = draggingVolume$$q.value ?? volume$$q.value;
@@ -63,6 +69,7 @@ export default defineComponent({
       <SSlider
         :model-value="volume$$q"
         :max="maxVolume$$q"
+        :wheel-delta="wheelDelta$$q"
         @dragging="onDragging$$q"
         @update:model-value="onUpdate$$q"
       />
