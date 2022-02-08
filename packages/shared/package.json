@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "vite": "^2.7.13",
-    "vitest": "^0.2.7"
+    "vitest": "^0.2.8"
   },
   "scripts": {
     "test": "vitest"
