@@ -16,7 +16,6 @@
     "@types/minimist": "^1.2.2",
     "@types/node": "^16.11.22",
     "esbuild": "^0.14.20",
-    "esbuild-node-externals": "^1.4.1",
-    "node-dev": "^7.1.0"
+    "esbuild-node-externals": "^1.4.1"
   }
 }

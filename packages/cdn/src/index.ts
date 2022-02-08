@@ -2,8 +2,8 @@ import './initOS';
 
 import { parse, serialize } from 'cookie';
 import { Router } from 'worktop';
+import { start } from 'worktop/cfw';
 import * as CORS from 'worktop/cors';
-import { reply } from 'worktop/module';
 import { send } from 'worktop/response';
 import {
   getOSRawURL,
@@ -306,4 +306,4 @@ API.add(
   }
 );
 
-export default reply(API.run);
+export default start(API.run);

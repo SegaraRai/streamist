@@ -62,17 +62,16 @@ importers:
       dotenv: ^16.0.0
       esbuild: ^0.14.20
       miniflare: ^2.3.0
-      node-dev: ^7.1.0
       rollup: ^2.67.1
       rollup-plugin-esbuild: ^4.8.2
       rollup-plugin-terser: ^7.0.2
       rollup-plugin-tsconfig-paths: ^1.1.6
-      worktop: ^0.8.0-next.9
+      worktop: ^0.8.0-next.10
     dependencies:
       '@aws-sdk/client-s3': 3.49.0
       cookie: 0.4.2
       dotenv: 16.0.0
-      worktop: 0.8.0-next.9
+      worktop: 0.8.0-next.10
     devDependencies:
       '@cloudflare/workers-types': 3.3.1
       '@rollup/plugin-commonjs': 21.0.1_rollup@2.67.1
@@ -81,7 +80,6 @@ importers:
       '@types/node': 16.11.22
       esbuild: 0.14.20
       miniflare: 2.3.0
-      node-dev: 7.1.0
       rollup: 2.67.1
       rollup-plugin-esbuild: 4.8.2_esbuild@0.14.20+rollup@2.67.1
       rollup-plugin-terser: 7.0.2_rollup@2.67.1
@@ -209,7 +207,6 @@ importers:
       esbuild: ^0.14.20
       esbuild-node-externals: ^1.4.1
       minimist: ^1.2.5
-      node-dev: ^7.1.0
     dependencies:
       dotenv: 16.0.0
       minimist: 1.2.5
@@ -219,7 +216,6 @@ importers:
       '@types/node': 16.11.22
       esbuild: 0.14.20
       esbuild-node-externals: 1.4.1_esbuild@0.14.20
-      node-dev: 7.1.0
 
   packages/server:
     specifiers:
@@ -10603,8 +10599,8 @@ packages:
       '@types/trusted-types': 2.0.2
       workbox-core: 6.4.2
 
-  /worktop/0.8.0-next.9:
-    resolution: {integrity: sha512-GyivR1g+3IHkKGV4lF4Wft9gdKiVlwmYGRJLjT7P88cUvecJYhnyn4vF9k3XCHTYXImtYdugxYx0g18S4QYPuw==}
+  /worktop/0.8.0-next.10:
+    resolution: {integrity: sha512-IUq+fTF7bO3DhwubXlkIIqWPIrXgLfHg1XHqDJVaRhVN39KcUqR3sH4PqB8Ogjb23fPEskeTeVfTtItgmJSxOA==}
     engines: {node: '>=12'}
     dependencies:
       mrmime: 1.0.0
