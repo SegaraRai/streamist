@@ -4,7 +4,7 @@ import { parse, serialize } from 'cookie';
 import { Router } from 'worktop';
 import { start } from 'worktop/cfw';
 import * as CORS from 'worktop/cors';
-import { send } from 'worktop/response';
+import { reply } from 'worktop/response';
 import {
   getOSRawURL,
   getTranscodedAudioFileKey,
@@ -53,12 +53,12 @@ API.prepare = (req, context) => {
 
 API.add('POST', '/api/cookies/token', async (req, context) => {
   if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
-    return send(403, 'Invalid origin', NO_CACHE_HEADERS);
+    return reply(403, 'Invalid origin', NO_CACHE_HEADERS);
   }
 
   const auth = req.headers.get('Authorization');
   if (!auth || !auth.startsWith('Bearer ')) {
-    return send(401, 'Malformed token', NO_CACHE_HEADERS);
+    return reply(401, 'Malformed token', NO_CACHE_HEADERS);
   }
 
   const strJWT = auth.slice(7).trim();
@@ -66,10 +66,10 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
   const jwt = await verifyJWT(strJWT, context);
 
   if (!jwt || jwt.aud !== JWT_CDN_TOKEN_AUD) {
-    return send(401, 'Invalid token', NO_CACHE_HEADERS);
+    return reply(401, 'Invalid token', NO_CACHE_HEADERS);
   }
 
-  return send(204, null, {
+  return reply(204, null, {
     ...NO_CACHE_HEADERS,
     'Set-Cookie': serialize(COOKIE_JWT_KEY, strJWT, {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -84,10 +84,10 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
 
 API.add('DELETE', '/api/cookies/token', (req, context) => {
   if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
-    return send(403, null, NO_CACHE_HEADERS);
+    return reply(403, null, NO_CACHE_HEADERS);
   }
 
-  return send(204, null, {
+  return reply(204, null, {
     ...NO_CACHE_HEADERS,
     Cookie: serialize(COOKIE_JWT_KEY, '', {
       expires: new Date(0), // 1970-01-01T00:00:00.000Z
@@ -105,36 +105,36 @@ API.add(
   async (req, context) => {
     const strJWT = parse(req.headers.get('Cookie') || '')[COOKIE_JWT_KEY];
     if (!strJWT) {
-      return send(401, 'Cookie not set', NO_CACHE_HEADERS);
+      return reply(401, 'Cookie not set', NO_CACHE_HEADERS);
     }
 
     const jwt = await verifyJWT(strJWT, context);
     if (!jwt || jwt.aud !== JWT_CDN_TOKEN_AUD) {
-      return send(401, 'Invalid cookie', NO_CACHE_HEADERS);
+      return reply(401, 'Invalid cookie', NO_CACHE_HEADERS);
     }
 
     const { entityId, filename, region, type, userId } = context.params;
 
     if (jwt.sub !== userId) {
-      return send(401, 'Token subject mismatch', NO_CACHE_HEADERS);
+      return reply(401, 'Token subject mismatch', NO_CACHE_HEADERS);
     }
 
     if (!isValidOSRegion(region)) {
-      return send(404, 'Unknown region', NO_CACHE_HEADERS);
+      return reply(404, 'Unknown region', NO_CACHE_HEADERS);
     }
 
     if (!isId(entityId)) {
-      return send(404, 'Malformed id', NO_CACHE_HEADERS);
+      return reply(404, 'Malformed id', NO_CACHE_HEADERS);
     }
 
     const match = filename.match(/^([^.]+)(\.[\da-z]+)$/);
     if (!match) {
-      return send(404, 'Malformed filename', NO_CACHE_HEADERS);
+      return reply(404, 'Malformed filename', NO_CACHE_HEADERS);
     }
 
     const [, fileId, extension] = match;
     if (!isId(fileId)) {
-      return send(404, 'Malformed file id', NO_CACHE_HEADERS);
+      return reply(404, 'Malformed file id', NO_CACHE_HEADERS);
     }
 
     let storageURL: string | false | undefined;
@@ -160,7 +160,7 @@ API.add(
     }
 
     if (!storageURL) {
-      return send(storageURL === false ? 403 : 404, null, NO_CACHE_HEADERS);
+      return reply(storageURL === false ? 403 : 404, null, NO_CACHE_HEADERS);
     }
 
     const cacheAll = type === 'images';
@@ -182,7 +182,7 @@ API.add(
       // 厳密にはETagに,が含まれている場合を考慮すると正しくないが、仮にそのようなものが送られてきたとしても基本誤判定は発生しないためこれで良いものとする
       const requestETags = ifNoneMatchHeader.split(/,\s*/);
       if (requestETags.includes(eTag) || requestETags.includes('*')) {
-        return send(304);
+        return reply(304);
       }
     }
 
@@ -260,16 +260,16 @@ API.add(
 
       // 404 -> 404
       if (responseStatus === 404) {
-        return send(404, null, errorHeaders);
+        return reply(404, null, errorHeaders);
       }
 
       // 503 -> 503
       if (responseStatus === 503) {
-        return send(503, null, errorHeaders);
+        return reply(503, null, errorHeaders);
       }
 
       // other (4xx and 5xx) -> 500
-      return send(500, null, errorHeaders);
+      return reply(500, null, errorHeaders);
     }
 
     // レスポンスヘッダーを修正
