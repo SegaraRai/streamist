@@ -29,7 +29,7 @@ export default defineComponent({
         tag="div"
         class="text-base leading-normal whitespace-pre-line"
       >
-        <IMdiCloudUpload />
+        <i-mdi-cloud-upload />
       </i18n-t>
     </div>
   </template>

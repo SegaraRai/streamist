@@ -270,7 +270,7 @@ export default defineComponent({
             >
               <template #icon>
                 <NIcon>
-                  <IMdiMagnify />
+                  <i-mdi-magnify />
                 </NIcon>
               </template>
               <VKbd>Ctrl+K</VKbd>

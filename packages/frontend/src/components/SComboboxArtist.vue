@@ -91,7 +91,7 @@ export default defineComponent({
             <template v-else-if="create && modelValue$$q">
               <NPopover placement="top" trigger="hover">
                 <template #trigger>
-                  <IMdiAccountPlus
+                  <i-mdi-account-plus
                     class="flex-none mr-2 w-6 h-6 text-st-info"
                   />
                 </template>

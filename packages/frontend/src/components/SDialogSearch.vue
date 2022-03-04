@@ -336,7 +336,7 @@ export default defineComponent({
                         <div
                           class="s-hover-visible w-full h-full flex items-center justify-center text-[2rem] light:opacity-80"
                         >
-                          <IMdiPlayCircle />
+                          <i-mdi-play-circle />
                         </div>
                       </template>
                       <template v-else-if="item.t === 'track'">
@@ -396,7 +396,7 @@ export default defineComponent({
         <template v-else-if="debouncedSearchQuery$$q">
           <div class="flex flex-col items-center gap-4 justify-center py-4">
             <div class="text-4xl">
-              <IMdiInbox />
+              <i-mdi-inbox />
             </div>
             <div class="opacity-60">{{ t('search.NoResultsFound') }}</div>
           </div>

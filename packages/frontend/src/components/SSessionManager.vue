@@ -38,7 +38,7 @@ export default defineComponent({
         class="flex items-center justify-center transition-colors select-none"
         :class="sessions$$q.length > 1 ? 'text-st-primary' : ''"
       >
-        <IMdiTabletCellphone />
+        <i-mdi-tablet-cellphone />
       </button>
     </template>
     <div class="-m-4">
