@@ -31,7 +31,7 @@ export default defineComponent({
 
     const rate = computed(() =>
       props.max != null && props.modelValue != null && props.max > 0
-        ? props.modelValue / props.max
+        ? Math.max(Math.min(props.modelValue / props.max, 1), 0)
         : 0
     );
 
