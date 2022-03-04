@@ -529,15 +529,28 @@ export class TrackProvider extends EventTarget {
   }
 
   removeTracks$$q(filter: (trackId: TrackId) => boolean): void {
-    this._setList$$q = this._setList$$q.filter(filter);
-    this._queue$$q = this._queue$$q.filter(filter);
-    this._repeatQueue$$q = this._repeatQueue$$q.filter(filter);
-    this._history$$q = this._history$$q.filter(filter);
-    this.fillRepeatQueue$$q();
-    if (this._currentTrack$$q && !filter(this._currentTrack$$q)) {
-      this._skipNext$$q();
-    } else {
-      this.emitQueueChangeEvent$$q();
+    let modified = false;
+    const filterAndCheck = (array: TrackId[]): TrackId[] => {
+      const result = array.filter(filter);
+      if (result.length !== array.length) {
+        modified = true;
+        return result;
+      }
+      return array;
+    };
+
+    this._setList$$q = filterAndCheck(this._setList$$q);
+    this._queue$$q = filterAndCheck(this._queue$$q);
+    this._repeatQueue$$q = filterAndCheck(this._repeatQueue$$q);
+    this._history$$q = filterAndCheck(this._history$$q);
+
+    if (modified) {
+      this.fillRepeatQueue$$q();
+      if (this._currentTrack$$q && !filter(this._currentTrack$$q)) {
+        this._skipNext$$q();
+      } else {
+        this.emitQueueChangeEvent$$q();
+      }
     }
   }
 

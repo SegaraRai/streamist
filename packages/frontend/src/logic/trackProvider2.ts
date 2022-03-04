@@ -161,15 +161,28 @@ export class TrackProvider2 extends TrackProvider {
   override removeTracks$$q(filter: (trackId: string) => boolean): void {
     super.removeTracks$$q(filter);
 
-    this._playNextQueue$$q = this._playNextQueue$$q.filter(filter);
-    this._playNextHistory$$q = this._playNextHistory$$q.filter(filter);
-    if (
-      this._currentTrackOverride$$q &&
-      !filter(this._currentTrackOverride$$q)
-    ) {
-      this.skipNext$$q();
-    } else {
-      this.emitPlayNextQueueChangeEvent$$q();
+    let modified = false;
+    const filterAndCheck = (array: TrackId[]): TrackId[] => {
+      const result = array.filter(filter);
+      if (result.length !== array.length) {
+        modified = true;
+        return result;
+      }
+      return array;
+    };
+
+    this._playNextQueue$$q = filterAndCheck(this._playNextQueue$$q);
+    this._playNextHistory$$q = filterAndCheck(this._playNextHistory$$q);
+
+    if (modified) {
+      if (
+        this._currentTrackOverride$$q &&
+        !filter(this._currentTrackOverride$$q)
+      ) {
+        this.skipNext$$q();
+      } else {
+        this.emitPlayNextQueueChangeEvent$$q();
+      }
     }
   }
 
