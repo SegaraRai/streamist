@@ -458,6 +458,7 @@ export default defineConfig(async ({ mode }) => {
         'humanize-duration',
         'naive-ui',
         'p-queue',
+        'ua-parser-js',
         'vue',
         'vuedraggable',
         'vue-router',
