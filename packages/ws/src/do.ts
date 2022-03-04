@@ -31,8 +31,8 @@ function send(ws: WebSocket, data: readonly WSResponse[]): void {
  * per-user durable object
  */
 export class DO extends Actor {
-  readonly state: Durable.State;
-  readonly bindings: WSBindings;
+  readonly state!: Durable.State;
+  readonly bindings!: WSBindings;
 
   readonly sessions: WSSessionWithWS[] = [];
   hostWS: WebSocket | null = null;

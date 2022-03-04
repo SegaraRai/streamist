@@ -1,40 +1,46 @@
 {
   "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
     "isolatedModules": true,
-    "downlevelIteration": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "target": "ES2021",
+    "module": "ES2020",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
-    "lib": [
-      "dom"
-    ],
-    "module": "ESNext",
-    "moduleResolution": "node",
     "baseUrl": ".",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+    ],
     "paths": {
       "$prisma/*": [
-        "./node_modules/.prisma/*"
+        "./node_modules/.prisma/*",
       ],
       ".prisma/*": [
-        "./node_modules/.prisma/*"
+        "./node_modules/.prisma/*",
       ],
       "$shared/*": [
-        "../shared/src/*"
+        "../shared/src/*",
       ],
       "$shared-server/*": [
-        "../shared-server/src/*"
+        "../shared-server/src/*",
       ],
       "$transcoder/*": [
-        "../transcoder/src/*"
+        "../transcoder/src/*",
       ],
       "$/*": [
-        "./*"
+        "./*",
       ],
       "class-transformer/esm2015": [
-        "./node_modules/class-transformer/esm2015"
+        "./node_modules/class-transformer/esm2015",
       ],
       "class-transformer": [
-        "./node_modules/class-transformer/esm2015"
+        "./node_modules/class-transformer/esm2015",
       ],
     },
     "rootDirs": [
@@ -43,8 +49,5 @@
       "../shared-server",
       "../transcoder",
     ],
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ESNext"
   }
 }

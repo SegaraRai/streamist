@@ -1,13 +1,19 @@
 {
   "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
     "isolatedModules": true,
-    "downlevelIteration": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "target": "ES2021",
     "module": "ES2020",
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
     "baseUrl": ".",
+    "types": [
+      "@cloudflare/workers-types",
+    ],
     "paths": {
       "$shared/*": [
         "../shared/src/*",
@@ -17,12 +23,5 @@
       ".",
       "../shared",
     ],
-    "skipLibCheck": true,
-    "strict": true,
-    "strictPropertyInitialization": false,
-    "target": "ES2020",
-    "types": [
-      "@cloudflare/workers-types"
-    ]
   }
 }
