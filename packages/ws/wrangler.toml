@@ -21,7 +21,7 @@ routes = [
 
 [env.staging]
 name = "streamist-ws-staging"
-route = [
+routes = [
   "staging.streamist.app/ws/*",
   "staging-workers-ws.streamist.app/*",
 ]
