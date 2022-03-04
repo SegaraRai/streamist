@@ -109,7 +109,12 @@ export default defineComponent({
 
       tracks$$q.sort(compareTrack);
 
-      playbackStore.setSetListAndPlay$$q(track.title, tracks$$q, track, false);
+      playbackStore.setSetListAndPlay$$q(
+        track.title,
+        tracks$$q.map((track) => track.id),
+        track.id,
+        false
+      );
     };
 
     const selectedItem = ref<AllItem | undefined>();
@@ -260,7 +265,7 @@ export default defineComponent({
       <div>
         <VTextField
           v-model="searchQuery$$q"
-          class="s-v-input-hide-details w-full"
+          class="w-full"
           density="compact"
           prepend-inner-icon="mdi-magnify"
           hide-details
@@ -331,7 +336,7 @@ export default defineComponent({
                         <div
                           class="s-hover-visible w-full h-full flex items-center justify-center text-[2rem] light:opacity-80"
                         >
-                          <IMdiPlayCircle />
+                          <i-mdi-play-circle />
                         </div>
                       </template>
                       <template v-else-if="item.t === 'track'">
@@ -365,14 +370,12 @@ export default defineComponent({
                     </div>
                   </VListItemAvatar>
                   <VListItemHeader>
-                    <div class="flex-1 flex flex-col">
-                      <div class="s-heading-sl text-sm">
-                        {{ item.l }}
-                      </div>
-                      <div class="s-subheading-sl text-xs">
-                        {{ t(`dialogComponent.search.type.${item.t}`) }}
-                      </div>
-                    </div>
+                    <VListItemTitle class="s-heading-sl text-sm">
+                      {{ item.l }}
+                    </VListItemTitle>
+                    <VListItemSubtitle class="s-subheading-sl text-xs">
+                      {{ t(`dialogComponent.search.type.${item.t}`) }}
+                    </VListItemSubtitle>
                   </VListItemHeader>
                   <VBtn
                     v-show="item.t !== 'artist'"
@@ -393,7 +396,7 @@ export default defineComponent({
         <template v-else-if="debouncedSearchQuery$$q">
           <div class="flex flex-col items-center gap-4 justify-center py-4">
             <div class="text-4xl">
-              <IMdiInbox />
+              <i-mdi-inbox />
             </div>
             <div class="opacity-60">{{ t('search.NoResultsFound') }}</div>
           </div>

@@ -22,6 +22,7 @@ export async function authenticate(
     const {
       access_token: apiToken,
       cdn_access_token: cdnToken,
+      ws_access_token: wsToken,
       refresh_token: refreshToken,
     } = await unAuthAPI.auth.login.$post({
       body: {
@@ -45,6 +46,7 @@ export async function authenticate(
     tokens.value = {
       apiToken,
       cdnToken,
+      wsToken,
     };
 
     loggedInRef.value = true;

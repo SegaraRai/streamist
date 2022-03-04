@@ -9,6 +9,10 @@ export default defineComponent({
       type: Number,
       default: undefined,
     },
+    wheelDelta: {
+      type: Number,
+      default: undefined,
+    },
     disabled: Boolean,
   },
   emits: {
@@ -27,7 +31,7 @@ export default defineComponent({
 
     const rate = computed(() =>
       props.max != null && props.modelValue != null && props.max > 0
-        ? props.modelValue / props.max
+        ? Math.max(Math.min(props.modelValue / props.max, 1), 0)
         : 0
     );
 
@@ -84,6 +88,28 @@ export default defineComponent({
 
         dragging.value = true;
       },
+      onWheel$$q(event: WheelEvent) {
+        if (
+          !props.wheelDelta ||
+          !valid.value ||
+          !e.value ||
+          props.modelValue == null ||
+          props.max == null
+        ) {
+          return;
+        }
+
+        const rawDelta = -event.deltaY || event.deltaX;
+        if (!rawDelta) {
+          return;
+        }
+
+        const delta = (rawDelta > 0 ? 1 : -1) * props.wheelDelta;
+        emit(
+          'update:modelValue',
+          Math.min(Math.max(props.modelValue + delta, 0), props.max)
+        );
+      },
     };
   },
 });
@@ -92,6 +118,7 @@ export default defineComponent({
 <template>
   <div
     class="py-2 cursor-pointer s-hover-container"
+    @wheel.stop.prevent="onWheel$$q"
     @mousedown.prevent="onMouseDown$$q"
     @touchstart.prevent="onMouseDown$$q()"
   >

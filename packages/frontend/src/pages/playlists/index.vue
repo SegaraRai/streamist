@@ -137,11 +137,13 @@ export default defineComponent({
                   :playlist="item.playlist$$q"
                 />
                 <VListItemHeader class="flex-1">
-                  <VListItemTitle>{{ item.title$$q }}</VListItemTitle>
-                  <VListItemSubtitle>
-                    <span>{{
-                      t('playlists.n_tracks', item.trackCount$$q)
-                    }}</span>
+                  <VListItemTitle class="s-heading-sl">
+                    {{ item.title$$q }}
+                  </VListItemTitle>
+                  <VListItemSubtitle class="s-subheading-sl text-xs">
+                    <span>
+                      {{ t('playlists.n_tracks', item.trackCount$$q) }}
+                    </span>
                     <template v-if="item.trackCount$$q">
                       <span>, {{ item.formattedDuration$$q }}</span>
                     </template>

@@ -127,16 +127,12 @@ exports[`VSourceCreateBodyWrapper > should reject malformed payloads 4`] = `
     ],
     "property": "!payload",
     "value": VSourceCreateBodyImage {
-      "attachPrepend": undefined,
-      "attachToId": undefined,
-      "attachToType": undefined,
       "audioFile": {
         "fileSize": 1000,
         "filename": "test.mp3",
         "type": "audio",
       },
       "cueSheetFile": null,
-      "imageFile": undefined,
       "region": "ap-northeast-1",
       "type": "image",
     },

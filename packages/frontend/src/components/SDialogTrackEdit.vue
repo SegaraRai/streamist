@@ -326,14 +326,14 @@ export default defineComponent({
               <VTextField
                 v-model="itemTitle$$q"
                 hide-details
-                class="flex-1 s-v-input-hide-details"
+                class="flex-1"
                 :label="t('dialogComponent.editTrack.label.Title')"
                 required
               />
               <VTextField
                 v-model="itemTitleSort$$q"
                 hide-details
-                class="flex-1 s-v-input-hide-details"
+                class="flex-1"
                 :label="t('dialogComponent.editTrack.label.TitleSort')"
               />
             </div>
@@ -368,7 +368,7 @@ export default defineComponent({
                         hide-details
                         type="number"
                         min="1"
-                        class="s-v-input-hide-details !flex-1"
+                        class="!flex-1"
                         :label="
                           t('dialogComponent.editTrack.label.TrackNumber')
                         "
@@ -378,14 +378,14 @@ export default defineComponent({
                         hide-details
                         type="number"
                         min="1"
-                        class="s-v-input-hide-details !flex-1"
+                        class="!flex-1"
                         :label="t('dialogComponent.editTrack.label.DiscNumber')"
                       />
                     </div>
                     <VTextField
                       v-model="itemReleaseDateText$$q"
                       hide-details
-                      class="s-v-input-hide-details !flex-1"
+                      class="!flex-1"
                       :label="t('dialogComponent.editTrack.label.ReleaseDate')"
                       :hint="releaseDateHint$$q"
                       :title="releaseDateHint$$q"
@@ -398,7 +398,7 @@ export default defineComponent({
                     <VTextField
                       v-model="itemGenre$$q"
                       hide-details
-                      class="s-v-input-hide-details !flex-1"
+                      class="!flex-1"
                       :label="t('dialogComponent.editTrack.label.Genre')"
                     />
                     <VTextField
@@ -406,20 +406,18 @@ export default defineComponent({
                       hide-details
                       type="number"
                       min="1"
-                      class="s-v-input-hide-details !flex-1"
+                      class="!flex-1"
                       :label="t('dialogComponent.editTrack.label.BPM')"
                     />
                   </div>
                   <VTextField
                     v-model="itemComment$$q"
                     hide-details
-                    class="s-v-input-hide-details"
                     :label="t('dialogComponent.editTrack.label.Comment')"
                   />
                   <VTextarea
                     v-model="itemLyrics$$q"
                     hide-details
-                    class="s-v-input-hide-details"
                     :label="t('dialogComponent.editTrack.label.Lyrics')"
                   />
                   <footer class="flex m-0 gap-x-4 justify-end">

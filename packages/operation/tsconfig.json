@@ -1,33 +1,35 @@
 {
   "compilerOptions": {
-    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
     "isolatedModules": true,
-    "downlevelIteration": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "target": "ES2021",
+    "module": "ES2020",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
-    "lib": [
-      "dom"
-    ],
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "resolveJsonModule": true,
     "baseUrl": ".",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+    ],
     "paths": {
       "$shared/*": [
         "../shared/src/*"
       ],
       "$shared-server/*": [
-        "../shared-server/src/*"
-      ]
+        "../shared-server/src/*",
+      ],
     },
     "rootDirs": [
       ".",
       "../shared",
-      "../shared-server"
+      "../shared-server",
     ],
-    "skipLibCheck": true,
-    "strict": true,
-    "strictPropertyInitialization": false,
-    "target": "ESNext"
   }
 }

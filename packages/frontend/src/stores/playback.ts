@@ -1,8 +1,9 @@
-import type { Ref } from 'vue';
-import type { RepeatType } from '$shared/types';
+import type { RepeatType, WSPlaybackState } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
-import { useRecentlyPlayed, useTrackFilter } from '~/composables';
+import { useLiveQuery, useRecentlyPlayed, useTrackFilter } from '~/composables';
+import { useAccurateTime } from '~/composables/useAccurateTime';
+import { useWS, useWSListener } from '~/composables/useWS';
 import {
   SEEK_BACKWARD_TIME,
   SEEK_FORWARD_TIME,
@@ -20,76 +21,6 @@ import {
 } from '~/logic/volume';
 import { usePreferenceStore } from './preference';
 import { useVolumeStore } from './volume';
-
-// TODO: このへんはユーザーの全クライアントで状態を共有できるようにする場合に定義とかを移すことになる
-
-export interface PlaybackState {
-  /** シークバーの右側に残り時間を表示するか */
-  readonly showRemainingTime$$q: Ref<boolean>;
-  /** 再生中か */
-  readonly playing$$q: Ref<boolean>;
-  /** 再生位置（秒） */
-  readonly position$$q: Ref<number | undefined>;
-  /** 再生時間（getterのみ） */
-  readonly duration$$q: Readonly<Ref<number | undefined>>;
-  /** 再生位置（0～1、getterのみ） */
-  readonly positionRate$$q: Readonly<Ref<number | undefined>>;
-  readonly defaultSetListAvailable$$q: Readonly<Ref<boolean>>;
-  /**
-   * 規定のトラックリストを設定する
-   */
-  readonly setDefaultSetList$$q: (
-    name: string,
-    tracks: readonly ResourceTrack[]
-  ) => void;
-  readonly clearDefaultSetList$$q: () => void;
-  /**
-   * トラックリストを設定して再生する \
-   * 同一のトラックが重複してはならない
-   */
-  readonly setSetListAndPlay$$q: (
-    name: string,
-    tracks: readonly ResourceTrack[],
-    track: ResourceTrack,
-    shuffle?: boolean
-  ) => void;
-  /**
-   * トラックリストを設定して再生する \
-   * 再生するトラックは現在のシャッフルの設定によって自動で設定される \
-   * （シャッフルが有効なら`tracks`の中からランダムで選択され、無効なら`tracks`の先頭の要素が選択される）
-   */
-  readonly setSetListAndPlayAuto$$q: (
-    name: string,
-    tracks: readonly ResourceTrack[],
-    shuffle?: boolean
-  ) => void;
-  /** リピート再生 */
-  readonly repeat$$q: Ref<RepeatType>;
-  /** シャッフル再生 */
-  readonly shuffle$$q: Ref<boolean>;
-  /** 現在のトラック */
-  readonly currentTrack$$q: Readonly<Ref<ResourceTrack | undefined>>;
-  /** 現在のセットリスト名 */
-  readonly currentSetListName$$q: Readonly<Ref<string>>;
-  /** 現在のセットリスト */
-  readonly currentSetList$$q: Readonly<
-    Ref<readonly ResourceTrack[] | undefined>
-  >;
-  /** 再生キュー */
-  readonly queue$$q: Readonly<Ref<ResourceTrack[]>>;
-  /** 次に再生のキュー */
-  readonly playNextQueue$$q: Readonly<Ref<ResourceTrack[]>>;
-  appendTracksToPlayNextQueue$$q: (tracks: readonly ResourceTrack[]) => void;
-  removeTracksFromPlayNextQueue$$q: (index: number, count?: number) => void;
-  /** 次のトラックにスキップする */
-  readonly skipNext$$q: (n?: number) => void;
-  /** 前のトラックに戻る */
-  readonly skipPrevious$$q: (n?: number) => void;
-  /** 前のトラックに戻るか曲頭に戻る */
-  readonly goPrevious$$q: () => void;
-  /** 次のトラックに進む */
-  readonly next$$q: () => void;
-}
 
 const audioContainer = document.body;
 
@@ -135,11 +66,69 @@ async function createMetadataInit(
   };
 }
 
-function _usePlaybackStore(): PlaybackState {
+function _usePlaybackStore() {
   const volumeStore = useVolumeStore();
   const { isTrackAvailable$$q, serializedFilterKey$$q } = useTrackFilter();
   const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
   const preferenceStore = usePreferenceStore();
+  const { sessionType$$q, sendWS$$q } = useWS();
+  const { getAccurateTime, accurateTimeDiff } = useAccurateTime();
+
+  const remotePlaybackState = ref<WSPlaybackState | undefined>();
+
+  // WS
+
+  let processingConnectedEvent = false;
+  let processingUpdatedEvent = false;
+
+  useWSListener('connected', (data): void => {
+    processingConnectedEvent = true;
+    try {
+      remotePlaybackState.value = data.pbState ?? undefined;
+      internalRemoteSeekingPosition.value = undefined;
+      if (data.pbTracks) {
+        trackProvider.import$$q(data.pbTracks);
+        currentSetListName.value = data.pbTracks.setListName;
+      }
+    } finally {
+      processingConnectedEvent = false;
+    }
+  });
+
+  useWSListener('updated', (data): void => {
+    processingUpdatedEvent = true;
+    try {
+      const { byYou } = data;
+
+      const isHost = sessionType$$q.value === 'host';
+
+      // update trackProvider
+      if (!byYou) {
+        if (data.pbTracks !== undefined) {
+          if (data.pbTracks) {
+            trackProvider.import$$q(data.pbTracks, data.pbTrackChange ?? false);
+            currentSetListName.value = data.pbTracks.setListName;
+          }
+        }
+      }
+
+      // update state
+      if (data.pbState !== undefined) {
+        remotePlaybackState.value = data.pbState ?? undefined;
+        internalRemoteSeekingPosition.value = undefined;
+      }
+
+      if (data.pbState && isHost && !byYou) {
+        // TODO: defer this after current track is updated
+        playing.value = data.pbState.playing;
+        position.value = calcPositionFromState(data.pbState, getAccurateTime());
+      }
+    } finally {
+      processingUpdatedEvent = false;
+    }
+  });
+
+  //
 
   const repeat = useLocalStorage<RepeatType>('playback.repeat', 'off');
   const shuffle = useLocalStorage<boolean>('playback.shuffle', false);
@@ -150,75 +139,211 @@ function _usePlaybackStore(): PlaybackState {
 
   let currentAudio: HTMLAudioElement | undefined;
 
-  const trackProvider = new TrackProvider2<ResourceTrack>();
+  const trackProvider = new TrackProvider2();
 
   const internalSeekingPosition = ref<number | undefined>();
+  const internalRemoteSeekingPosition = ref<number | undefined>();
   const internalPosition = ref<number | undefined>();
+  const timestampRef = useTimestamp();
+  const accurateTimeRef = computed(
+    () => timestampRef.value + accurateTimeDiff.value
+  );
+  const calcPositionFromState = (
+    state: WSPlaybackState,
+    accurateTime: number
+  ): number =>
+    Math.min(
+      Math.max(
+        state.startPosition +
+          (state.playing ? (accurateTime - state.startedAt) / 1000 : 0),
+        0
+      ),
+      state.duration
+    );
   const position = computed<number | undefined>({
     get: (): number | undefined => {
+      // note that position may exist even if sessionType is 'none'
+      if (sessionType$$q.value !== 'host') {
+        const remoteState = remotePlaybackState.value;
+        if (!remoteState) {
+          return undefined;
+        }
+        return (
+          internalRemoteSeekingPosition.value ??
+          calcPositionFromState(remoteState, accurateTimeRef.value)
+        );
+      }
       return internalSeekingPosition.value ?? internalPosition.value;
     },
     set: (value: number | undefined): void => {
-      if (value == null || !currentAudio) {
+      if (value == null) {
         return;
       }
-      internalSeekingPosition.value = value;
-      currentAudio.currentTime = value;
+
+      const byRemote = processingConnectedEvent || processingUpdatedEvent;
+
+      const duration =
+        sessionType$$q.value === 'host'
+          ? currentAudio?.duration
+          : remotePlaybackState.value?.duration;
+
+      if (duration == null || !isFinite(duration)) {
+        console.error('duration is null or not finite');
+        return;
+      }
+
+      value = Math.max(0, Math.min(value, duration));
+
+      if (sessionType$$q.value === 'host') {
+        if (!currentAudio) {
+          return;
+        }
+
+        internalSeekingPosition.value = value;
+        currentAudio.currentTime = value;
+      }
+
+      if (!byRemote) {
+        internalRemoteSeekingPosition.value = value;
+
+        // skip sending if host because it will be sent by 'seeked' event handler
+        if (sessionType$$q.value !== 'host') {
+          sendWS$$q(
+            [
+              {
+                type: playing.value ? 'play' : 'pause',
+                duration,
+                position: value,
+                timestamp: getAccurateTime(),
+              },
+            ],
+            true
+          );
+        }
+      }
     },
   });
 
-  const currentTrack = ref<ResourceTrack | undefined>();
-  const queue = ref<ResourceTrack[]>([]);
-  const playNextQueue = ref<ResourceTrack[]>([]);
+  const currentTrackId = ref<string | undefined>();
+  const currentTrack = useLiveQuery(
+    async () =>
+      currentTrackId.value
+        ? await db.tracks.get(currentTrackId.value)
+        : undefined,
+    [currentTrackId]
+  );
+  const queue = ref<string[]>([]);
+  const playNextQueue = ref<string[]>([]);
 
   const currentSetListName = ref<string>('');
-  const currentSetList = ref<readonly ResourceTrack[] | undefined>();
+  const currentSetList = ref<readonly string[] | undefined>();
   const defaultSetListName = ref<string>('');
-  const defaultSetList = ref<readonly ResourceTrack[] | undefined>();
+  const defaultSetList = ref<readonly string[] | undefined>();
 
   const internalPlaying = ref<boolean>(false);
   const playing = computed<boolean>({
     get: (): boolean => {
+      if (sessionType$$q.value === 'none') {
+        return false;
+      }
+      if (
+        sessionType$$q.value !== 'host' &&
+        remotePlaybackState.value != null
+      ) {
+        return remotePlaybackState.value.playing;
+      }
       return internalPlaying.value;
     },
     set: (value: boolean): void => {
-      if (value === internalPlaying.value) {
+      const byRemote = processingConnectedEvent || processingUpdatedEvent;
+
+      const currentValue = playing.value;
+      if (value === currentValue) {
         return;
       }
 
-      if (value && !currentTrack.value) {
+      if (value && !currentTrackId.value) {
         playNext();
         return;
       }
 
-      internalPlaying.value = value;
+      const duration =
+        sessionType$$q.value === 'host'
+          ? currentAudio?.duration
+          : remotePlaybackState.value?.duration;
+      const position =
+        sessionType$$q.value === 'host'
+          ? currentAudio?.currentTime
+          : remotePlaybackState.value &&
+            calcPositionFromState(remotePlaybackState.value, getAccurateTime());
 
-      if (value) {
-        currentAudio?.play();
+      if (
+        duration == null ||
+        !isFinite(duration) ||
+        position == null ||
+        !isFinite(position)
+      ) {
+        console.error('duration or position is null or not finite');
+        return;
+      }
+
+      if (sessionType$$q.value === 'host') {
+        if (!currentAudio) {
+          return;
+        }
+
+        internalPlaying.value = value;
+
+        if (value) {
+          currentAudio.play();
+        } else {
+          currentAudio.pause();
+        }
+
+        // skip sending play/pause because it will be sent by 'play' and 'pause' event handler
+        return;
+      }
+
+      // do nothing if not host and triggered by remote
+      if (byRemote) {
+        return;
+      }
+
+      // if there is no host, play tracks in this session
+      if (sessionType$$q.value === 'none' && !byRemote && value) {
+        setTimeout((): void => playTrack(value, position), 0);
       } else {
-        currentAudio?.pause();
+        // otherwise, send play/pause (to host and other sessions)
+        sendWS$$q(
+          [
+            {
+              type: value ? 'play' : 'pause',
+              duration,
+              position,
+              timestamp: getAccurateTime(),
+            },
+          ],
+          true
+        );
       }
     },
   });
 
   const seekBy = (diff: number): void => {
-    if (!currentAudio) {
+    if (position.value == null) {
       return;
     }
 
-    const newTime = Math.min(
-      Math.max(currentAudio.currentTime + diff, 0),
-      currentAudio.duration
-    );
-    currentAudio.currentTime = newTime;
+    position.value = position.value + diff;
   };
 
   const goPrevious = (): void => {
     if (
       currentAudio &&
-      currentAudio.currentTime >= SEEK_TO_BEGINNING_THRESHOLD
+      position.value != null &&
+      position.value >= SEEK_TO_BEGINNING_THRESHOLD
     ) {
-      currentAudio.currentTime = 0;
+      position.value = 0;
       return;
     }
 
@@ -242,12 +367,12 @@ function _usePlaybackStore(): PlaybackState {
       trackProvider.skipNext$$q();
     });
 
-    navigator.mediaSession.setActionHandler('seekforward', (): void => {
-      seekBy(SEEK_FORWARD_TIME);
+    navigator.mediaSession.setActionHandler('seekforward', (event): void => {
+      seekBy(event.seekOffset || SEEK_FORWARD_TIME);
     });
 
-    navigator.mediaSession.setActionHandler('seekbackward', (): void => {
-      seekBy(SEEK_BACKWARD_TIME);
+    navigator.mediaSession.setActionHandler('seekbackward', (event): void => {
+      seekBy(-(event.seekOffset || SEEK_BACKWARD_TIME));
     });
 
     try {
@@ -276,51 +401,87 @@ function _usePlaybackStore(): PlaybackState {
   };
 
   const clearMediaSession = (): void => {
-    // we don't have to set playbackState as we follow media's playback state
     navigator.mediaSession.metadata = null;
-    // I think we don't need to clear the action handlers too
-    /*
+    navigator.mediaSession.playbackState = 'none';
     navigator.mediaSession.setActionHandler('play', null);
     navigator.mediaSession.setActionHandler('pause', null);
     navigator.mediaSession.setActionHandler('stop', null);
     navigator.mediaSession.setActionHandler('previoustrack', null);
     navigator.mediaSession.setActionHandler('nexttrack', null);
     navigator.mediaSession.setActionHandler('seekto', null);
-    //*/
   };
 
   const createAudio = (): HTMLAudioElement => {
     const audio = new Audio();
     audio.classList.add('currentTrack');
+    audio.classList.add('preparing');
     audio.volume = visualVolumeToRealVolume(volumeStore.volume);
+
+    // console.info('create', audio);
+
+    const sendState = (playing = !audio.paused): void => {
+      if (
+        !audio.src ||
+        !isFinite(audio.duration) ||
+        !isFinite(audio.currentTime)
+      ) {
+        console.warn(
+          'audio.src is null or audio.duration or audio.currentTime is not finite'
+        );
+        return;
+      }
+
+      sendWS$$q(
+        [
+          {
+            type: playing ? 'play' : 'pause',
+            duration: audio.duration,
+            position: audio.currentTime,
+            timestamp: getAccurateTime(),
+          },
+        ],
+        true
+      );
+    };
 
     audio.onplay = (): void => {
       if (currentAudio !== audio) {
+        console.info('ignoring play', currentAudio, audio);
         return;
       }
 
       internalPlaying.value = true;
+
+      // skip sending 'play' event as it is already sent by 'trackChange' event handler
+      if (!audio.classList.contains('preparing')) {
+        sendState(true);
+      }
     };
 
     audio.onpause = (): void => {
       if (currentAudio !== audio) {
+        console.info('ignoring pause', currentAudio, audio);
         return;
       }
 
       internalPlaying.value = false;
+      sendState(false);
     };
 
     audio.onseeked = (): void => {
       if (currentAudio !== audio) {
+        console.info('ignoring seeked', currentAudio, audio);
         return;
       }
 
       internalSeekingPosition.value = undefined;
       internalPosition.value = audio.currentTime;
+      sendState();
     };
 
     audio.ontimeupdate = (): void => {
       if (currentAudio !== audio || audio.seeking) {
+        console.info('ignoring timeupdate', currentAudio, audio, audio.seeking);
         return;
       }
 
@@ -329,6 +490,7 @@ function _usePlaybackStore(): PlaybackState {
 
     audio.onended = (): void => {
       if (currentAudio !== audio) {
+        console.info('ignoring ended', currentAudio, audio);
         return;
       }
 
@@ -337,6 +499,7 @@ function _usePlaybackStore(): PlaybackState {
 
     audio.onvolumechange = (): void => {
       if (currentAudio !== audio) {
+        console.info('ignoring volumechange', currentAudio, audio);
         return;
       }
 
@@ -353,6 +516,8 @@ function _usePlaybackStore(): PlaybackState {
   };
 
   const cleanupAudio = (audio: HTMLAudioElement): void => {
+    // console.info('cleanup', audio, currentAudio);
+
     audio.onplay = null;
     audio.onpause = null;
     audio.onseeked = null;
@@ -363,40 +528,35 @@ function _usePlaybackStore(): PlaybackState {
 
   const setSetListAndPlay = (
     name: string,
-    tracks: readonly ResourceTrack[],
-    track?: ResourceTrack | null
+    trackIds: readonly string[],
+    trackId?: string | null
   ): void => {
-    if (track && !isTrackAvailable$$q(track.id)) {
+    if (trackId && !isTrackAvailable$$q(trackId)) {
       return;
     }
-    tracks = tracks.filter((track) => isTrackAvailable$$q(track.id));
-    if (track) {
-      addRecentlyPlayedTrack$$q(track.id);
+    trackIds = trackIds.filter((trackId) => isTrackAvailable$$q(trackId));
+    if (trackId) {
+      addRecentlyPlayedTrack$$q(trackId);
     }
-    playing.value = false;
     currentSetListName.value = name;
-    currentSetList.value = tracks;
+    currentSetList.value = trackIds;
+    internalPosition.value = trackIds.length ? 0 : undefined;
     // NOTE: `setSetList$$q`に渡す`currentTrack`（第2引数）は`null`と`undefined`で挙動が異なる
-    trackProvider.setSetList$$q(tracks, tracks.length ? track : null);
-    if (tracks.length) {
-      internalPosition.value = 0;
-      playing.value = true;
-    } else {
-      internalPosition.value = undefined;
-    }
+    trackProvider.setSetList$$q(trackIds, trackIds.length ? trackId : null);
+    // we don't have to manipulate playing and position here, because `trackChange` event handler will do it
   };
 
   const setSetListAndPlayAuto = (
     name: string,
-    tracks: readonly ResourceTrack[]
+    trackIds: readonly string[]
   ): void => {
-    tracks = tracks.filter((track) => isTrackAvailable$$q(track.id));
+    trackIds = trackIds.filter((track) => isTrackAvailable$$q(track));
     const trackIndex = shuffle.value
-      ? Math.floor(Math.random() * tracks.length)
+      ? Math.floor(Math.random() * trackIds.length)
       : 0;
-    // NOTE: `setSetListAndPlay`に渡す`track`（第2引数）は`null`と`undefined`で挙動が異なる
-    const track = tracks[trackIndex] || null;
-    setSetListAndPlay(name, tracks, track);
+    // NOTE: `setSetListAndPlay`に渡す`trackId`（第3引数）は`null`と`undefined`で挙動が異なる
+    const track = trackIds[trackIndex] || null;
+    setSetListAndPlay(name, trackIds, track);
   };
 
   /**
@@ -404,7 +564,7 @@ function _usePlaybackStore(): PlaybackState {
    * キューにトラックがある場合はそちらを、ない場合は（現在のビューの）デフォルトのセットリストを再生する
    */
   const playNext = (): void => {
-    if (currentTrack.value) {
+    if (currentTrackId.value) {
       return;
     }
 
@@ -421,9 +581,7 @@ function _usePlaybackStore(): PlaybackState {
 
   const removeTracks = (filter: (trackId: string) => boolean): void => {
     if (defaultSetList.value) {
-      defaultSetList.value = defaultSetList.value.filter((track) =>
-        filter(track.id)
-      );
+      defaultSetList.value = defaultSetList.value.filter(filter);
     }
 
     trackProvider.removeTracks$$q(filter);
@@ -441,9 +599,68 @@ function _usePlaybackStore(): PlaybackState {
     removeTracks(isTrackAvailable$$q);
   });
 
-  trackProvider.addEventListener('trackChange', (): void => {
-    const track = trackProvider.currentTrack$$q;
-    currentTrack.value = track;
+  {
+    let trackChange = false;
+    let sending = false;
+    const sendTracks = (event: Event): void => {
+      if (processingConnectedEvent || processingUpdatedEvent) {
+        return;
+      }
+
+      if (event.type === 'trackChange') {
+        trackChange = true;
+      }
+
+      if (sending) {
+        return;
+      }
+
+      sending = true;
+      Promise.resolve()
+        .then((): void => {
+          if (trackChange) {
+            internalRemoteSeekingPosition.value = 0;
+          }
+
+          // skip sending 'setTracks' event because it is already sent by 'trackChange' event handler
+          if (
+            sessionType$$q.value !== 'host' ||
+            !trackChange ||
+            !trackProvider.currentTrack$$q
+          ) {
+            sendWS$$q(
+              [
+                {
+                  type: 'setTracks',
+                  tracks: {
+                    ...trackProvider.export$$q(),
+                    setListName: currentSetListName.value,
+                  },
+                  trackChange,
+                },
+              ],
+              true
+            );
+          }
+        })
+        .finally((): void => {
+          sending = false;
+          trackChange = false;
+        });
+    };
+
+    trackProvider.addEventListener('playNextQueueChange', sendTracks);
+    trackProvider.addEventListener('queueChange', sendTracks);
+    trackProvider.addEventListener('repeatChange', sendTracks);
+    trackProvider.addEventListener('shuffleChange', sendTracks);
+    trackProvider.addEventListener('trackChange', sendTracks);
+  }
+
+  const playTrack = (playing = true, position = 0): void => {
+    const byRemote = processingConnectedEvent || processingUpdatedEvent;
+
+    const trackId = trackProvider.currentTrack$$q;
+    currentTrackId.value = trackId;
 
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = null;
@@ -456,7 +673,7 @@ function _usePlaybackStore(): PlaybackState {
     }
 
     // load audio here because watching currentTrack does not trigger if the previous track is the same
-    if (track) {
+    if (trackId) {
       const userId = getUserId();
       if (!userId) {
         console.error('playback: userId is not set');
@@ -471,6 +688,13 @@ function _usePlaybackStore(): PlaybackState {
       internalPosition.value = 0;
 
       (async (): Promise<void> => {
+        const track = await db.tracks.get(trackId);
+        if (!track) {
+          return;
+        }
+
+        const clampedPosition = Math.max(Math.min(position, track.duration), 0);
+
         const url = getBestTrackFileURL(
           userId,
           track,
@@ -487,9 +711,57 @@ function _usePlaybackStore(): PlaybackState {
           return;
         }
 
-        newAudio.src = url;
-        newAudio.currentTime = 0;
-        await newAudio.play();
+        if (
+          sessionType$$q.value === 'host' ||
+          (sessionType$$q.value === 'none' && !byRemote)
+        ) {
+          newAudio.preload = 'auto';
+          newAudio.src = url;
+          if (clampedPosition) {
+            const canPlayPromise = new Promise((resolve, reject): void => {
+              newAudio.addEventListener('canplay', resolve, {
+                once: true,
+              });
+              newAudio.addEventListener('abort', reject, {
+                once: true,
+              });
+              newAudio.addEventListener('error', reject, {
+                once: true,
+              });
+            });
+            await canPlayPromise;
+            // TODO: clear event listeners
+            newAudio.currentTime = clampedPosition;
+          }
+          if (playing) {
+            await newAudio.play();
+          }
+
+          newAudio.classList.remove('preparing');
+
+          sendWS$$q(
+            [
+              {
+                type: 'setHost',
+              },
+              {
+                type: 'setTracks',
+                tracks: {
+                  ...trackProvider.export$$q(),
+                  setListName: currentSetListName.value,
+                },
+                trackChange: true,
+              },
+              {
+                type: playing ? 'play' : 'pause',
+                duration: track.duration,
+                position: clampedPosition,
+                timestamp: getAccurateTime(),
+              },
+            ],
+            true
+          );
+        }
 
         if ('mediaSession' in navigator) {
           navigator.mediaSession.metadata = new MediaMetadata(metadataInit);
@@ -500,6 +772,27 @@ function _usePlaybackStore(): PlaybackState {
       internalPlaying.value = false;
       internalPosition.value = undefined;
     }
+  };
+
+  // when host changed
+  watch(sessionType$$q, (newSessionType): void => {
+    if (newSessionType === 'host') {
+      if (remotePlaybackState.value) {
+        playTrack(
+          remotePlaybackState.value.playing,
+          calcPositionFromState(remotePlaybackState.value, getAccurateTime())
+        );
+      }
+    } else if (currentAudio) {
+      // we do not have to clear media session
+      cleanupAudio(currentAudio);
+      currentAudio.remove();
+      currentAudio = undefined;
+    }
+  });
+
+  trackProvider.addEventListener('trackChange', (): void => {
+    playTrack();
   });
 
   trackProvider.addEventListener('playNextQueueChange', (): void => {
@@ -553,7 +846,7 @@ function _usePlaybackStore(): PlaybackState {
   //
 
   if ('mediaSession' in navigator) {
-    watch(currentTrack, (newTrack): void => {
+    watch(currentTrackId, (newTrack): void => {
       if (!newTrack) {
         clearMediaSession();
       }
@@ -584,33 +877,47 @@ function _usePlaybackStore(): PlaybackState {
     });
   }
 
-  return {
+  const store = {
+    /** シークバーの右側に残り時間を表示するか */
     showRemainingTime$$q: showRemainingTime,
+    /** 再生中か */
     playing$$q: playing,
+    /** 再生位置（秒） */
     position$$q: position,
-    duration$$q: computed((): number | undefined => {
-      return currentTrack.value?.duration;
-    }),
-    positionRate$$q: computed((): number | undefined => {
-      return currentTrack.value && internalPosition.value != null
-        ? internalPosition.value / currentTrack.value.duration
-        : undefined;
-    }),
-    defaultSetListAvailable$$q: computed((): boolean => {
-      return defaultSetList.value != null && defaultSetList.value.length > 0;
-    }),
-    setDefaultSetList$$q(name: string, tracks: readonly ResourceTrack[]): void {
+    /** 再生時間（getterのみ） */
+    duration$$q: computed(
+      (): number | undefined => currentTrack.value.value?.duration
+    ),
+    /** 再生位置（0～1、getterのみ） */
+    positionRate$$q: computed((): number | undefined =>
+      currentTrack.value.value && internalPosition.value != null
+        ? internalPosition.value / currentTrack.value.value.duration
+        : undefined
+    ),
+    /** 規定のトラックリストが設定されているか */
+    defaultSetListAvailable$$q: computed(
+      (): boolean =>
+        defaultSetList.value != null && defaultSetList.value.length > 0
+    ),
+    /**
+     * 規定のトラックリストを設定する
+     */
+    setDefaultSetList$$q(name: string, trackIds: readonly string[]): void {
       defaultSetListName.value = name;
-      defaultSetList.value = tracks && [...tracks];
+      defaultSetList.value = trackIds && [...trackIds];
     },
     clearDefaultSetList$$q(): void {
       defaultSetListName.value = '';
       defaultSetList.value = undefined;
     },
+    /**
+     * トラックリストを設定して再生する \
+     * 同一のトラックが重複してはならない
+     */
     setSetListAndPlay$$q: (
       name: string,
-      tracks: readonly ResourceTrack[],
-      track: ResourceTrack,
+      trackIds: readonly string[],
+      trackId: string,
       shuffleValue?: boolean
     ): void => {
       if (shuffleValue != null) {
@@ -619,11 +926,16 @@ function _usePlaybackStore(): PlaybackState {
       if (repeat.value === 'one') {
         repeat.value = 'all';
       }
-      setSetListAndPlay(name, tracks, track);
+      setSetListAndPlay(name, trackIds, trackId);
     },
+    /**
+     * トラックリストを設定して再生する \
+     * 再生するトラックは現在のシャッフルの設定によって自動で設定される \
+     * （シャッフルが有効なら`tracks`の中からランダムで選択され、無効なら`tracks`の先頭の要素が選択される）
+     */
     setSetListAndPlayAuto$$q: (
       name: string,
-      tracks: readonly ResourceTrack[],
+      trackIds: readonly string[],
       shuffleValue?: boolean
     ): void => {
       if (shuffleValue != null) {
@@ -632,36 +944,53 @@ function _usePlaybackStore(): PlaybackState {
       if (repeat.value === 'one') {
         repeat.value = 'all';
       }
-      setSetListAndPlayAuto(name, tracks);
+      setSetListAndPlayAuto(name, trackIds);
     },
+    /** リピート再生 */
     repeat$$q: repeat,
+    /** シャッフル再生 */
     shuffle$$q: shuffle,
-    currentTrack$$q: currentTrack,
+    /** 現在のトラック */
+    currentTrack$$q: currentTrackId,
+    /** 現在のセットリスト名 */
     currentSetListName$$q: currentSetListName,
+    /** 現在のセットリスト */
     currentSetList$$q: currentSetList,
+    /** 再生キュー */
     queue$$q: queue,
+    /** 次に再生のキュー */
     playNextQueue$$q: playNextQueue,
-    appendTracksToPlayNextQueue$$q: (
-      tracks: readonly ResourceTrack[]
-    ): void => {
+    appendTracksToPlayNextQueue$$q: (tracks: readonly string[]): void => {
       trackProvider.appendTracksToPlayNextQueue$$q(tracks);
     },
     removeTracksFromPlayNextQueue$$q: (index: number, count = 1): void => {
       trackProvider.removeTracksFromPlayNextQueue$$q(index, count);
     },
+    /**
+     * 次のトラックにスキップする \
+     * リピートが one の場合は all に変更した上で次のトラックに進む
+     */
     skipNext$$q: (n = 1): void => {
       trackProvider.skipNext$$q(n);
     },
+    /** 前のトラックに戻る */
     skipPrevious$$q: (n = 1): void => {
       trackProvider.skipPrevious$$q(n);
     },
+    /** 前のトラックに戻るか曲頭に戻る */
     goPrevious$$q: (): void => {
       goPrevious();
     },
+    /**
+     * 次のトラックに進む \
+     * リピートが one のときは同じトラックを先頭から再生する
+     */
     next$$q: (): void => {
       trackProvider.next$$q();
     },
   };
+
+  return store as Readonly<typeof store>;
 }
 
 export const usePlaybackStore = createSharedComposable(_usePlaybackStore);

@@ -1,16 +1,20 @@
 {
   "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
     "isolatedModules": true,
-    "esModuleInterop": true,
-    "target": "ESNext",
-    "module": "ESNext",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
+    "target": "ES2021",
+    "module": "ES2020",
     "moduleResolution": "Node",
+    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
       "$shared/*": [
-        "../shared/src/*"
-      ]
+        "../shared/src/*",
+      ],
     },
-    "strict": true,
   },
 }

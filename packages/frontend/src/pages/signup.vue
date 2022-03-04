@@ -237,7 +237,7 @@ export default defineComponent({
                   <template v-else-if="usernameAvailability$$q">
                     <NPopover placement="top" trigger="hover">
                       <template #trigger>
-                        <IMdiCheck class="w-4 h-4 text-st-success" />
+                        <i-mdi-check class="w-4 h-4 text-st-success" />
                       </template>
                       <div>
                         {{ t('signUp.tooltip.UsernameAvailable') }}
@@ -247,7 +247,7 @@ export default defineComponent({
                   <template v-else>
                     <NPopover placement="top" trigger="hover">
                       <template #trigger>
-                        <IMdiClose class="w-4 h-4 text-st-error" />
+                        <i-mdi-close class="w-4 h-4 text-st-error" />
                       </template>
                       <div>
                         {{ t('signUp.tooltip.UsernameAlreadyTaken') }}
@@ -273,7 +273,6 @@ export default defineComponent({
           />
           <VTextField
             v-model="displayName$$q"
-            class="s-v-input-hide-details"
             type="text"
             autocomplete="off"
             required

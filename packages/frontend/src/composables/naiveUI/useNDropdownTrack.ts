@@ -65,7 +65,7 @@ export function useNDropdownTrack({
 
     const isAvailable = isTrackAvailable$$q(trackId);
 
-    const currentPlayingTrackId = playbackStore.currentTrack$$q.value?.id;
+    const currentPlayingTrackId = playbackStore.currentTrack$$q.value;
     const isPlayingThisTrack =
       isSameSetList$$q.value &&
       playbackStore.playing$$q.value &&
@@ -90,7 +90,7 @@ export function useNDropdownTrack({
           // NOTE: we have to access to ref directly in the render function to make icon reactive
           isSameSetList$$q.value &&
           playbackStore.playing$$q.value &&
-          trackId === playbackStore.currentTrack$$q.value?.id
+          trackId === playbackStore.currentTrack$$q.value
             ? 'mdi-pause'
             : 'mdi-play'
         ),
@@ -119,7 +119,7 @@ export function useNDropdownTrack({
             }
 
             delayedCloseMenu();
-            playbackStore.appendTracksToPlayNextQueue$$q([track]);
+            playbackStore.appendTracksToPlayNextQueue$$q([track.id]);
             message.success(t('message.AddedToPlayNextQueue', [track.title]));
           },
         },

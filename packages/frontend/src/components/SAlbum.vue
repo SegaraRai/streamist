@@ -116,7 +116,7 @@ export default defineComponent({
         }
         playbackStore.setSetListAndPlayAuto$$q(
           value.value.album$$q.title,
-          value.value.tracks$$q
+          value.value.tracks$$q.map((track) => track.id)
         );
       },
       dropdown$$q,

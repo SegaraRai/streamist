@@ -7,6 +7,7 @@ import { unAuthAPI } from '~/logic/unAuthAPI';
 export interface Tokens {
   readonly apiToken: string;
   readonly cdnToken: string;
+  readonly wsToken: string;
 }
 
 export const tokens = createAsyncCache<Tokens>(
@@ -31,6 +32,7 @@ export const tokens = createAsyncCache<Tokens>(
       return {
         apiToken: tokens.access_token,
         cdnToken: tokens.cdn_access_token,
+        wsToken: tokens.ws_access_token,
       };
     } catch (error: unknown) {
       if (isAxiosError(error)) {

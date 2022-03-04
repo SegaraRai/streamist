@@ -78,6 +78,7 @@ export default defineComponent({
           artists
             .flatMap((artist) => albumMultiMapByArtist.get(artist.id) || [])
             .flatMap((album) => trackMultiMapByAlbum.get(album.id) || [])
+            .map((track) => track.id)
         );
       }
 
