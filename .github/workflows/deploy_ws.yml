@@ -1,0 +1,63 @@
+name: 'Deploy WS'
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+    paths:
+      - 'packages/ws/**'
+      - 'packages/shared/**'
+      - 'packages/shared-server/**'
+      - '.github/workflows/deploy_ws.yml'
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+    steps:
+      - run: echo "TARGET_BUILD_REV=${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Set env (Production)
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          echo "DEPLOY_ENV=PRODUCTION" >> $GITHUB_ENV
+          echo "TARGET_NODE_ENV=production" >> $GITHUB_ENV
+          echo "APP_ORIGIN=https://streamist.app" >> $GITHUB_ENV
+          echo "WS_ORIGIN_FOR_SERVER=https://production-workers-ws.streamist.app" >> $GITHUB_ENV
+
+      - name: Set env (Staging)
+        if: ${{ github.ref == 'refs/heads/staging' }}
+        run: |
+          echo "DEPLOY_ENV=STAGING" >> $GITHUB_ENV
+          echo "TARGET_NODE_ENV=staging" >> $GITHUB_ENV
+          echo "APP_ORIGIN=https://staging.streamist.app" >> $GITHUB_ENV
+          echo "WS_ORIGIN_FOR_SERVER=https://staging-workers-ws.streamist.app" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v2
+      - uses: pnpm/action-setup@v2.0.1
+        with:
+          version: 6
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+          cache: pnpm
+      - run: pnpm i --frozen-lockfile
+      - run: pnpm run generate
+      - run: pnpm run build:ws
+      - name: Deploy WS to Workers
+        uses: cloudflare/wrangler-action@1.3.0
+        with:
+          apiToken: ${{ secrets.SECRET_GH_CF_API_TOKEN }}
+          environment: ${{ env.TARGET_NODE_ENV }}
+          workingDirectory: 'packages/ws'
+          secrets: |
+            APP_ORIGIN
+            WS_ORIGIN_FOR_SERVER
+            SECRET_WS_JWT_SECRET
+            SECRET_WS_AUTH_TOKEN
+        env:
+          SECRET_WS_JWT_SECRET: ${{ secrets[format('{0}_SECRET_WS_JWT_SECRET', env.DEPLOY_ENV)] }}
+          SECRET_WS_AUTH_TOKEN: ${{ secrets[format('{0}_SECRET_WS_AUTH_TOKEN', env.DEPLOY_ENV)] }}

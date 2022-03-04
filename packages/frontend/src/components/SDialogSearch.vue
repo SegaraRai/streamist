@@ -109,7 +109,12 @@ export default defineComponent({
 
       tracks$$q.sort(compareTrack);
 
-      playbackStore.setSetListAndPlay$$q(track.title, tracks$$q, track, false);
+      playbackStore.setSetListAndPlay$$q(
+        track.title,
+        tracks$$q.map((track) => track.id),
+        track.id,
+        false
+      );
     };
 
     const selectedItem = ref<AllItem | undefined>();

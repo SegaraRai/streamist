@@ -99,7 +99,7 @@ export default defineComponent({
       if (!unmounted) {
         playbackStore.setDefaultSetList$$q(
           t('setListName.Albums'),
-          gridItems.flatMap((item) => item.tracks$$q)
+          gridItems.flatMap((item) => item.tracks$$q.map((track) => track.id))
         );
       }
 

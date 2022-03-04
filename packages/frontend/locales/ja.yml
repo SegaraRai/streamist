@@ -20,6 +20,10 @@ common:
   Synchronize: データベースを同期
   Synchronized: 同期しました
   ThisActionCannotBeUndone: この操作は取り消せません
+session:
+  ListeningOn: '{0} で再生中'
+  Normal: '{0}'
+  ThisDevice: このデバイス
 regions:
   'ap-northeast-1': ap-northeast-1 (日本, 東京)
 reloadPrompt:

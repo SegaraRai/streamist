@@ -68,7 +68,7 @@ export default defineComponent({
     const isCurrentPlayingTrack$$q = eagerComputed(
       () =>
         !props.disableCurrentPlaying &&
-        playbackStore.currentTrack$$q.value?.id === props.item.track$$q.id
+        playbackStore.currentTrack$$q.value === props.item.track$$q.id
     );
 
     return {

@@ -6,7 +6,7 @@ export function useCurrentTrackInfo() {
   const playbackStore = usePlaybackStore();
 
   return useLiveQuery(async () => {
-    const trackId = playbackStore.currentTrack$$q.value?.id;
+    const trackId = playbackStore.currentTrack$$q.value;
     if (!trackId) {
       return;
     }

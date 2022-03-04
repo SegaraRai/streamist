@@ -54,7 +54,10 @@ export default defineComponent({
         (track) => !existingTrackIdSet.has(track.id)
       );
       setList.push(...additionalTracks$$q.value);
-      playbackStore.setDefaultSetList$$q(artist.name, setList);
+      playbackStore.setDefaultSetList$$q(
+        artist.name,
+        setList.map((track) => track.id)
+      );
       setList$$q.value = setList;
       filteredSetList$$q.value = setList.filter((track) =>
         isTrackAvailable$$q(track.id)
@@ -174,7 +177,10 @@ export default defineComponent({
         if (shuffle !== undefined) {
           playbackStore.shuffle$$q.value = shuffle;
         }
-        playbackStore.setSetListAndPlayAuto$$q(artist.name, setList$$q.value);
+        playbackStore.setSetListAndPlayAuto$$q(
+          artist.name,
+          setList$$q.value.map((track) => track.id)
+        );
       },
       playAdditional$$q: (): void => {
         const artist = value.value?.artist$$q;
@@ -187,8 +193,8 @@ export default defineComponent({
         }
         playbackStore.setSetListAndPlay$$q(
           artist.name,
-          setList$$q.value,
-          additionalTracks$$q.value[0],
+          setList$$q.value.map((track) => track.id),
+          additionalTracks$$q.value[0].id,
           false
         );
       },

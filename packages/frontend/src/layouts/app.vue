@@ -132,6 +132,25 @@ export default defineComponent({
       themeName$$q,
       alwaysShowLeftSidebar$$q,
       desktopPlaybackControl$$q,
+      hostSessionName$$q: computed(() =>
+        playbackStore.hostSession$$q.value?.you === false
+          ? playbackStore.hostSession$$q.value.info.name ||
+            playbackStore.hostSession$$q.value.info.platform
+          : undefined
+      ),
+      sessionTypeClass$$q: computed(() => {
+        switch (playbackStore.sessionType$$q.value) {
+          case 'host':
+            return 'host';
+
+          case 'hostSibling':
+          case 'guest':
+            return 'remote';
+
+          default:
+            return 'none';
+        }
+      }),
     };
   },
 });
@@ -139,7 +158,11 @@ export default defineComponent({
 
 <template>
   <div
-    :class="isOnline$$q ? 's-offline--online' : 's-offline--offline'"
+    :class="[
+      isOnline$$q ? 's-offline--online' : 's-offline--offline',
+      `s-session--${sessionTypeClass$$q}`,
+      desktopPlaybackControl$$q ? 's-playback--desktop' : 's-playback--mobile',
+    ]"
     class="min-h-screen flex flex-col"
   >
     <div
@@ -186,7 +209,10 @@ export default defineComponent({
           >
             <SQueue :scroll-top="queueScroll$$q" />
           </NScrollbar>
-          <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
+          <div
+            class="s-footer-height flex-none"
+            :class="hideShell$$q && '!hidden'"
+          ></div>
           <div class="s-offline-mod-h"></div>
         </div>
       </VNavigationDrawer>
@@ -286,7 +312,10 @@ export default defineComponent({
         >
           <div class="flex-1 flex flex-col h-full">
             <SNavigation />
-            <div class="h-24" :class="hideShell$$q && '!hidden'"></div>
+            <div
+              class="s-footer-height flex-none"
+              :class="hideShell$$q && '!hidden'"
+            ></div>
           </div>
         </NScrollbar>
       </VNavigationDrawer>
@@ -298,26 +327,42 @@ export default defineComponent({
         >
           <RouterView class="px-4" />
         </NScrollbar>
-        <div class="flex-none h-24" :class="hideShell$$q && '!hidden'"></div>
+        <div
+          class="s-footer-height flex-none"
+          :class="hideShell$$q && '!hidden'"
+        ></div>
       </VMain>
     </VApp>
 
     <footer
-      class="select-none fixed bottom-0 z-100 w-full m-0 p-0 h-24"
+      class="s-footer-height flex-none select-none fixed bottom-0 z-100 w-full m-0 p-0"
       :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >
-      <!-- we have to explicitly provide theme as this is outside of VApp -->
+      <!-- we must provide theme explicitly as this is outside of VApp -->
       <VSheet class="m-0 p-0 w-full h-full flex flex-col" :theme="themeName$$q">
         <VDivider />
-        <KeepAlive>
-          <template v-if="desktopPlaybackControl$$q">
-            <SPlaybackControl />
+        <template v-if="desktopPlaybackControl$$q">
+          <SPlaybackControl />
+          <template v-if="sessionTypeClass$$q === 'remote'">
+            <div
+              class="h-6 bg-st-primary text-st-on-primary px-2 flex justify-end"
+            >
+              <i18n-t
+                keypath="session.ListeningOn"
+                tag="div"
+                class="flex items-center min-w-60"
+              >
+                <span class="font-bold mx-1">
+                  {{ hostSessionName$$q }}
+                </span>
+              </i18n-t>
+            </div>
           </template>
-          <template v-else>
-            <SMobilePlaybackControl />
-          </template>
-        </KeepAlive>
+        </template>
+        <template v-else>
+          <SMobilePlaybackControl :session-name="hostSessionName$$q" />
+        </template>
       </VSheet>
     </footer>
   </div>
@@ -335,6 +380,14 @@ export default defineComponent({
 .s-offline--offline .s-offline-mod-h,
 .s-offline--offline .s-offline-bar {
   @apply h-6 !important;
+}
+
+.s-footer-height {
+  @apply h-24;
+}
+
+.s-playback--desktop.s-session--remote .s-footer-height {
+  @apply h-30;
 }
 
 .s-v-main.v-main > .v-main__wrap {

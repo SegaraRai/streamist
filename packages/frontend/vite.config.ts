@@ -219,6 +219,11 @@ export default defineConfig(async ({ mode }) => {
         },
         rewrite: (p: string) => p.replace(/^\/api\//, `${API_BASE_PATH}/`),
       },
+      '/ws': {
+        target: 'http://localhost:8788',
+        changeOrigin: false,
+        ws: true,
+      },
     };
   } else {
     process.env.VITE_BUILD_REV = process.env.TARGET_BUILD_REV || 'unknown';

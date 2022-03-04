@@ -1,20 +1,21 @@
 import { MAX_HISTORY_SIZE } from '$shared/config';
-import { TrackBase, TrackProvider } from './trackProvider';
+import type { TrackId, TrackProvider2State } from '$shared/types';
+import { TrackProvider } from './trackProvider';
 
 /**
  * `TrackProvider`に次に再生キューを追加したもの \
  * `TrackProvider`自体が複雑で完成度が高いため
  */
-export class TrackProvider2<T extends TrackBase> extends TrackProvider<T> {
-  private _playNextQueue$$q: T[] = [];
-  private _playNextHistory$$q: T[] = [];
-  private _currentTrackOverride$$q: T | undefined;
+export class TrackProvider2 extends TrackProvider {
+  private _playNextQueue$$q: TrackId[] = [];
+  private _playNextHistory$$q: TrackId[] = [];
+  private _currentTrackOverride$$q: TrackId | undefined;
 
-  get currentTrack$$q(): T | undefined {
+  get currentTrack$$q(): TrackId | undefined {
     return this._currentTrackOverride$$q || super.currentTrack$$q;
   }
 
-  get playNextQueue$$q(): readonly T[] {
+  get playNextQueue$$q(): readonly TrackId[] {
     return this._playNextQueue$$q;
   }
 
@@ -26,7 +27,7 @@ export class TrackProvider2<T extends TrackBase> extends TrackProvider<T> {
     this.dispatchEvent(new Event('playNextQueueChange'));
   }
 
-  appendTracksToPlayNextQueue$$q(tracks: readonly T[]): void {
+  appendTracksToPlayNextQueue$$q(tracks: readonly TrackId[]): void {
     this._playNextQueue$$q.push(...tracks);
     this.emitPlayNextQueueChangeEvent$$q();
   }
@@ -39,7 +40,10 @@ export class TrackProvider2<T extends TrackBase> extends TrackProvider<T> {
     this.emitPlayNextQueueChangeEvent$$q();
   }
 
-  override setSetList$$q(setList: readonly T[], currentTrack?: T | null): void {
+  override setSetList$$q(
+    setList: readonly TrackId[],
+    currentTrack?: TrackId | null
+  ): void {
     if (currentTrack !== undefined && this._currentTrackOverride$$q) {
       this._playNextHistory$$q = [];
       this._currentTrackOverride$$q = undefined;
@@ -157,24 +161,40 @@ export class TrackProvider2<T extends TrackBase> extends TrackProvider<T> {
   override removeTracks$$q(filter: (trackId: string) => boolean): void {
     super.removeTracks$$q(filter);
 
-    const filterFunc = (track: T): boolean => filter(track.id);
-    this._playNextQueue$$q = this._playNextQueue$$q.filter(filterFunc);
-    this._playNextHistory$$q = this._playNextHistory$$q.filter(filterFunc);
+    this._playNextQueue$$q = this._playNextQueue$$q.filter(filter);
+    this._playNextHistory$$q = this._playNextHistory$$q.filter(filter);
     if (
       this._currentTrackOverride$$q &&
-      !filterFunc(this._currentTrackOverride$$q)
+      !filter(this._currentTrackOverride$$q)
     ) {
       this.skipNext$$q();
     } else {
       this.emitPlayNextQueueChangeEvent$$q();
     }
   }
+
+  export$$q(): TrackProvider2State {
+    return {
+      ...super.export$$q(),
+      currentTrackOverride: this._currentTrackOverride$$q ?? null,
+      playNextQueue: this._playNextQueue$$q,
+      playNextHistory: this._playNextHistory$$q,
+    };
+  }
+
+  import$$q(state: TrackProvider2State, emitTrackChange = true): void {
+    this._currentTrackOverride$$q = state.currentTrackOverride ?? undefined;
+    this._playNextQueue$$q = [...state.playNextQueue];
+    this._playNextHistory$$q = [...state.playNextHistory];
+    super.import$$q(state, emitTrackChange);
+    this.emitPlayNextQueueChangeEvent$$q();
+  }
 }
 
 // `TrackProvider2`の`addEventListener`メソッドのオーバーロードの定義
 // class内には実装を記述しない限り記述できない
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface TrackProvider2<T extends TrackBase> {
+export interface TrackProvider2 {
   addEventListener(
     type: 'trackChange' | 'queueChange' | 'repeatChange' | 'shuffleChange',
     listener: EventListenerOrEventListenerObject | null,

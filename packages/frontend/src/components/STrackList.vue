@@ -188,7 +188,6 @@ export default defineComponent({
       () =>
         playbackStore.currentSetList$$q.value &&
         playbackStore.currentSetList$$q.value
-          .map(({ id }) => id)
           .filter((id) => isTrackAvailable$$q(id))
           .join('\n')
     );
@@ -243,7 +242,7 @@ export default defineComponent({
     );
 
     const currentPlayingTrackId = eagerComputed(
-      () => playbackStore.currentTrack$$q.value?.id
+      () => playbackStore.currentTrack$$q.value
     );
 
     const play$$q = (track: ResourceTrack, index: number): void => {
@@ -257,8 +256,8 @@ export default defineComponent({
       }
       playbackStore.setSetListAndPlay$$q(
         props.setListName,
-        props.setList,
-        track,
+        props.setList.map((track) => track.id),
+        track.id,
         false
       );
     };

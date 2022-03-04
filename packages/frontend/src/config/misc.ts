@@ -10,7 +10,7 @@ export const VOLUME_SYNC_THROTTLE = 100;
 
 /** in seconds */
 export const SEEK_FORWARD_TIME = 10;
-export const SEEK_BACKWARD_TIME = -SEEK_FORWARD_TIME;
+export const SEEK_BACKWARD_TIME = SEEK_FORWARD_TIME;
 
 /** in seconds */
 export const SEEK_TO_BEGINNING_THRESHOLD = 3;

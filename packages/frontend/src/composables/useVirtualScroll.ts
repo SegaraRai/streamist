@@ -26,7 +26,7 @@ export function useVirtualScrollList<T>(
     itemHeightFunc,
     additionalHeight,
     overscan = 5,
-    blockSize = 5,
+    blockSize = 10,
     containerElementRef,
     contentElementRef,
   }: UseVirtualScrollListOptions
