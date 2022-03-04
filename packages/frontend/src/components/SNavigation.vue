@@ -89,7 +89,7 @@ export default defineComponent({
             <VIcon>{{ item.icon }}</VIcon>
           </VListItemAvatar>
           <VListItemHeader class="pl-2">
-            <VListItemTitle>
+            <VListItemTitle class="s-heading-sl text-sm">
               {{ item.text }}
             </VListItemTitle>
           </VListItemHeader>
