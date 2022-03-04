@@ -158,20 +158,22 @@ export class DO extends Actor {
       );
     }
 
-    for (const session of this.sessions) {
-      send(session.ws, [
-        {
-          type: 'updated',
-          byHost: ws === this.hostWS,
-          byYou: session.ws === ws,
-          pbState: modifiedState ? this.pbState : undefined,
-          pbTracks: modifiedTracks ? this.pbTracks : undefined,
-          pbTrackChange: modifiedTracks ? trackChange : undefined,
-          sessions: modifiedSessions
-            ? this.listSessions(session.ws)
-            : undefined,
-        },
-      ]);
+    if (modifiedState || modifiedTracks || modifiedSessions) {
+      for (const session of this.sessions) {
+        send(session.ws, [
+          {
+            type: 'updated',
+            byHost: ws === this.hostWS,
+            byYou: session.ws === ws,
+            pbState: modifiedState ? this.pbState : undefined,
+            pbTracks: modifiedTracks ? this.pbTracks : undefined,
+            pbTrackChange: modifiedTracks ? trackChange : undefined,
+            sessions: modifiedSessions
+              ? this.listSessions(session.ws)
+              : undefined,
+          },
+        ]);
+      }
     }
   }
 
