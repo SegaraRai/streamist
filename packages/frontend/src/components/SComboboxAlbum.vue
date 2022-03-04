@@ -80,7 +80,6 @@ export default defineComponent({
     >
       <template #default="{ handleInput }">
         <VTextField
-          class="s-v-input-hide-details"
           :label="label"
           hide-details
           :model-value="modelValue$$q"

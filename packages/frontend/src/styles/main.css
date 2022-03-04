@@ -7,7 +7,6 @@
 @import './s-lazysizes.css';
 @import './s-naive-ui.css';
 @import './s-nprogress.css';
-@import './s-vuetify.css';
 
 .dark {
   color-scheme: dark;

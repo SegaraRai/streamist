@@ -158,7 +158,6 @@ export default defineComponent({
                   :label="t('settings.device.DoNotExitWithBackButton')"
                   color="primary"
                   hide-details
-                  class="s-v-input-hide-details"
                 />
                 <div class="text-xs font-medium leading-tight opacity-60 -mt-3">
                   {{ t('settings.device.RequiresRestartToTakeEffect') }}

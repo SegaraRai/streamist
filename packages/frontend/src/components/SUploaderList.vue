@@ -95,7 +95,7 @@ export default defineComponent({
         :file-type="file.type"
         class="s-hover-container text-st-primary"
       >
-        <div>
+        <div class="w-8">
           <NPopover placement="right" trigger="hover">
             <template #trigger>
               <div>
@@ -137,7 +137,7 @@ export default defineComponent({
           :file-type="file.fileType"
           class="s-hover-container"
         >
-          <div>
+          <div class="w-8">
             <NPopover placement="right" trigger="hover">
               <template #trigger>
                 <div>

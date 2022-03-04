@@ -273,7 +273,6 @@ export default defineComponent({
           />
           <VTextField
             v-model="displayName$$q"
-            class="s-v-input-hide-details"
             type="text"
             autocomplete="off"
             required

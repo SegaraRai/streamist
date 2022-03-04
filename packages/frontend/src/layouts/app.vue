@@ -167,7 +167,7 @@ export default defineComponent({
     class="min-h-screen flex flex-col"
   >
     <div
-      class="s-offline-bar bg-yellow-500 h-0 text-white font-medium text-md flex items-center px-4 leading-none z-1000 overflow-hidden"
+      class="s-offline-bar bg-yellow-500 h-0 text-white font-medium text-md flex items-center px-4 leading-none z-1200 overflow-hidden"
     >
       {{ t('header.NoInternetConnection') }}
     </div>
@@ -185,18 +185,19 @@ export default defineComponent({
       ></div -->
 
       <!-- Right Sidebar: Queue -->
+      <!-- remove disable-resize-watcher when https://github.com/vuetifyjs/vuetify/commit/3dc57e2ff5c67d6547ed3e0a278d340672db84f8 is released -->
       <VNavigationDrawer
-        :model-value="rightSidebar$$q"
+        v-model="rightSidebar$$q"
         temporary
         position="right"
         :width="400"
-        hide-overlay
+        disable-resize-watcher
         class="s-offline-mod-mt select-none"
       >
         <div class="flex flex-col h-full">
           <VSheet tile>
             <div class="title flex items-center py-1 -mb-1px">
-              <VIcon class="mx-4">mdi-playlist-play</VIcon>
+              <VIcon class="ml-4 mr-2">mdi-playlist-play</VIcon>
               <span class="flex-1">{{ t('queue.title') }}</span>
               <VBtn flat icon size="small" @click="rightSidebar$$q = false">
                 <VIcon>mdi-close</VIcon>
@@ -336,7 +337,7 @@ export default defineComponent({
     </VApp>
 
     <footer
-      class="s-footer-height flex-none select-none fixed bottom-0 z-100 w-full m-0 p-0"
+      class="s-footer-height flex-none select-none fixed bottom-0 z-1100 w-full m-0 p-0"
       :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >

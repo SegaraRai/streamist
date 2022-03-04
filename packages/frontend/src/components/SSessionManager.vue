@@ -52,32 +52,30 @@ export default defineComponent({
               popover?.setShow(false);
             "
           >
-            <VListItemAvatar icon class="flex items-center justify-center">
+            <VListItemAvatar icon class="flex items-center justify-center px-2">
               <VIcon>{{ getDeviceIcon$$q(session.info.type) }}</VIcon>
             </VListItemAvatar>
-            <VListItemHeader>
-              <div class="flex-1 flex flex-col pl-2">
-                <div class="s-heading-sl text-base">
-                  <i18n-t
-                    :keypath="
-                      session.host ? 'session.ListeningOn' : 'session.Normal'
-                    "
-                    tag="div"
-                    class="leading-relaxed"
-                  >
-                    <span class="font-bold">
-                      {{
-                        session.you
-                          ? t('session.ThisDevice')
-                          : session.info.name || session.info.platform
-                      }}
-                    </span>
-                  </i18n-t>
-                </div>
-                <div class="s-subheading-sl text-xs">
-                  {{ session.info.client }}
-                </div>
-              </div>
+            <VListItemHeader class="pl-2">
+              <VListItemTitle class="s-heading-sl text-base">
+                <i18n-t
+                  :keypath="
+                    session.host ? 'session.ListeningOn' : 'session.Normal'
+                  "
+                  tag="div"
+                  class="leading-relaxed"
+                >
+                  <span class="font-bold">
+                    {{
+                      session.you
+                        ? t('session.ThisDevice')
+                        : session.info.name || session.info.platform
+                    }}
+                  </span>
+                </i18n-t>
+              </VListItemTitle>
+              <VListItemSubtitle class="s-subheading-sl text-xs">
+                {{ session.info.client }}
+              </VListItemSubtitle>
             </VListItemHeader>
           </VListItem>
         </template>

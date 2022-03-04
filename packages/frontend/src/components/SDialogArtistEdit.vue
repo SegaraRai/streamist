@@ -168,21 +168,20 @@ export default defineComponent({
               <VTextField
                 v-model="itemName$$q"
                 hide-details
-                class="flex-1 s-v-input-hide-details"
+                class="flex-1"
                 :label="t('dialogComponent.editArtist.label.Name')"
                 required
               />
               <VTextField
                 v-model="itemNameSort$$q"
                 hide-details
-                class="flex-1 s-v-input-hide-details"
+                class="flex-1"
                 :label="t('dialogComponent.editArtist.label.NameSort')"
               />
             </div>
             <VTextarea
               v-model="itemDescription$$q"
               hide-details
-              class="s-v-input-hide-details"
               :label="t('dialogComponent.editArtist.label.Description')"
             />
             <footer class="flex m-0 gap-x-4 justify-end">

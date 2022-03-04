@@ -265,7 +265,7 @@ export default defineComponent({
       <div>
         <VTextField
           v-model="searchQuery$$q"
-          class="s-v-input-hide-details w-full"
+          class="w-full"
           density="compact"
           prepend-inner-icon="mdi-magnify"
           hide-details
@@ -370,14 +370,12 @@ export default defineComponent({
                     </div>
                   </VListItemAvatar>
                   <VListItemHeader>
-                    <div class="flex-1 flex flex-col">
-                      <div class="s-heading-sl text-sm">
-                        {{ item.l }}
-                      </div>
-                      <div class="s-subheading-sl text-xs">
-                        {{ t(`dialogComponent.search.type.${item.t}`) }}
-                      </div>
-                    </div>
+                    <VListItemTitle class="s-heading-sl text-sm">
+                      {{ item.l }}
+                    </VListItemTitle>
+                    <VListItemSubtitle class="s-subheading-sl text-xs">
+                      {{ t(`dialogComponent.search.type.${item.t}`) }}
+                    </VListItemSubtitle>
                   </VListItemHeader>
                   <VBtn
                     v-show="item.t !== 'artist'"

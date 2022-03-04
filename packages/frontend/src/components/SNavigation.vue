@@ -88,8 +88,10 @@ export default defineComponent({
           <VListItemAvatar icon class="flex items-center justify-center">
             <VIcon>{{ item.icon }}</VIcon>
           </VListItemAvatar>
-          <VListItemHeader>
-            {{ item.text }}
+          <VListItemHeader class="pl-2">
+            <VListItemTitle>
+              {{ item.text }}
+            </VListItemTitle>
           </VListItemHeader>
         </VListItem>
       </template>
