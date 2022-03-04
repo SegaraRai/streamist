@@ -10,10 +10,15 @@ format = "modules"
 main = "./index.mjs"
 
 [durable_objects]
-bindings = [{name = "DO", class_name = "DO"}]
+bindings = [
+  {name = "DO", class_name = "DO"},
+]
 
 [env.production]
 name = "streamist-ws-production"
+durable_objects.bindings = [
+  {name = "DO", class_name = "DO"},
+]
 routes = [
   "streamist.app/ws/*",
   "production-workers-ws.streamist.app/*",
@@ -21,6 +26,9 @@ routes = [
 
 [env.staging]
 name = "streamist-ws-staging"
+durable_objects.bindings = [
+  {name = "DO", class_name = "DO"},
+]
 routes = [
   "staging.streamist.app/ws/*",
   "staging-workers-ws.streamist.app/*",
