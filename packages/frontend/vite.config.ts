@@ -375,7 +375,12 @@ export default defineConfig(async ({ mode }) => {
           ],
         },
         workbox: {
-          navigateFallbackDenylist: [/^\/api\//, /^\/cdn-cgi\//],
+          navigateFallbackDenylist: [
+            /^\/cdn-cgi\//,
+            /^\/api\//,
+            /^\/ws\//,
+            /^\/auth$/,
+          ],
         },
       }),
 
