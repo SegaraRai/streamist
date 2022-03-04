@@ -3,6 +3,7 @@ import type { ScrollbarInst } from 'naive-ui';
 import { useDisplay } from 'vuetify';
 import logoSVG from '~/assets/logo_colored.svg';
 import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
+import { useWS } from '~/composables/useWS';
 import { COOKIE_CHECK_INTERVAL, IDLE_TIMEOUT } from '~/config';
 import { useSyncDB } from '~/db';
 import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
@@ -25,6 +26,7 @@ export default defineComponent({
     const uploadStore$$q = useUploadStore();
     const playbackStore = usePlaybackStore();
     const { themeName$$q } = useEffectiveTheme();
+    const { hostSession$$q, sessionType$$q } = useWS();
 
     const { idle } = useIdle(IDLE_TIMEOUT);
 
@@ -133,13 +135,12 @@ export default defineComponent({
       alwaysShowLeftSidebar$$q,
       desktopPlaybackControl$$q,
       hostSessionName$$q: computed(() =>
-        playbackStore.hostSession$$q.value?.you === false
-          ? playbackStore.hostSession$$q.value.info.name ||
-            playbackStore.hostSession$$q.value.info.platform
+        hostSession$$q.value?.you === false
+          ? hostSession$$q.value.info.name || hostSession$$q.value.info.platform
           : undefined
       ),
       sessionTypeClass$$q: computed(() => {
-        switch (playbackStore.sessionType$$q.value) {
+        switch (sessionType$$q.value) {
           case 'host':
             return 'host';
 

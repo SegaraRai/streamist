@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { DeviceType } from '$shared/types';
-import { usePlaybackStore } from '~/stores/playback';
+import { useWS } from '~/composables/useWS';
 
 function getDeviceIcon(deviceType: DeviceType): string {
   switch (deviceType) {
@@ -16,7 +16,7 @@ function getDeviceIcon(deviceType: DeviceType): string {
 export default defineComponent({
   setup() {
     const { t } = useI18n();
-    const { sessions$$q, setHost$$q } = usePlaybackStore();
+    const { sessions$$q, setHost$$q } = useWS();
 
     return {
       t,

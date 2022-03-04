@@ -10,7 +10,7 @@ import { defer } from '~/logic/defer';
 import { useWS, useWSListener } from './useWS';
 
 function _useAccurateTime() {
-  const { sendWS } = useWS();
+  const { sendWS$$q } = useWS();
 
   const diff = ref(0);
 
@@ -23,7 +23,7 @@ function _useAccurateTime() {
     sending = true;
     defer((): void => {
       sending = false;
-      sendWS([
+      sendWS$$q([
         {
           type: 'ping',
           timestamp: Date.now(),

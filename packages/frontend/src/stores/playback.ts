@@ -1,8 +1,4 @@
-import type {
-  RepeatType,
-  WSPlaybackState,
-  WSSessionForResponse,
-} from '$shared/types';
+import type { RepeatType, WSPlaybackState } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
 import { useLiveQuery, useRecentlyPlayed, useTrackFilter } from '~/composables';
@@ -75,25 +71,8 @@ function _usePlaybackStore() {
   const { isTrackAvailable$$q, serializedFilterKey$$q } = useTrackFilter();
   const { addRecentlyPlayedTrack$$q } = useRecentlyPlayed();
   const preferenceStore = usePreferenceStore();
-  const { deviceId, sendWS } = useWS();
+  const { sessionType$$q, sendWS$$q } = useWS();
   const { getAccurateTime, accurateTimeDiff } = useAccurateTime();
-
-  const sessions = ref<readonly WSSessionForResponse[]>([]);
-  const hostSession = eagerComputed(() =>
-    sessions.value.find((session) => session.host)
-  );
-  const currentSession = eagerComputed(() =>
-    sessions.value.find((session) => session.you)
-  );
-  const sessionType = eagerComputed(() => {
-    return hostSession.value?.you
-      ? 'host'
-      : hostSession.value?.deviceId === deviceId.value
-      ? 'hostSibling'
-      : hostSession.value
-      ? 'guest'
-      : 'none';
-  });
 
   const remotePlaybackState = ref<WSPlaybackState | undefined>();
 
@@ -105,7 +84,6 @@ function _usePlaybackStore() {
   useWSListener('connected', (data): void => {
     processingConnectedEvent = true;
     try {
-      sessions.value = data.sessions;
       remotePlaybackState.value = data.pbState ?? undefined;
       internalRemoteSeekingPosition.value = undefined;
       if (data.pbTracks) {
@@ -122,12 +100,7 @@ function _usePlaybackStore() {
     try {
       const { byYou } = data;
 
-      if (data.sessions) {
-        sessions.value = data.sessions;
-      }
-
-      // this check must be done after sessions is updated
-      const isHost = sessionType.value === 'host';
+      const isHost = sessionType$$q.value === 'host';
 
       // update trackProvider
       if (!byYou) {
@@ -190,7 +163,7 @@ function _usePlaybackStore() {
   const position = computed<number | undefined>({
     get: (): number | undefined => {
       // note that position may exist even if sessionType is 'none'
-      if (sessionType.value !== 'host') {
+      if (sessionType$$q.value !== 'host') {
         const remoteState = remotePlaybackState.value;
         if (!remoteState) {
           return undefined;
@@ -208,8 +181,9 @@ function _usePlaybackStore() {
       }
 
       const byRemote = processingConnectedEvent || processingUpdatedEvent;
+
       const duration =
-        sessionType.value === 'host'
+        sessionType$$q.value === 'host'
           ? currentAudio?.duration
           : remotePlaybackState.value?.duration;
 
@@ -220,7 +194,7 @@ function _usePlaybackStore() {
 
       value = Math.max(0, Math.min(value, duration));
 
-      if (sessionType.value === 'host') {
+      if (sessionType$$q.value === 'host') {
         if (!currentAudio) {
           return;
         }
@@ -233,8 +207,8 @@ function _usePlaybackStore() {
         internalRemoteSeekingPosition.value = value;
 
         // skip sending if host because it will be sent by 'seeked' event handler
-        if (sessionType.value !== 'host') {
-          sendWS(
+        if (sessionType$$q.value !== 'host') {
+          sendWS$$q(
             [
               {
                 type: playing.value ? 'play' : 'pause',
@@ -269,22 +243,36 @@ function _usePlaybackStore() {
   const internalPlaying = ref<boolean>(false);
   const playing = computed<boolean>({
     get: (): boolean => {
-      if (sessionType.value === 'none') {
+      if (sessionType$$q.value === 'none') {
         return false;
       }
-      if (sessionType.value !== 'host' && remotePlaybackState.value != null) {
+      if (
+        sessionType$$q.value !== 'host' &&
+        remotePlaybackState.value != null
+      ) {
         return remotePlaybackState.value.playing;
       }
       return internalPlaying.value;
     },
     set: (value: boolean): void => {
       const byRemote = processingConnectedEvent || processingUpdatedEvent;
+
+      const currentValue = playing.value;
+      if (value === currentValue) {
+        return;
+      }
+
+      if (value && !currentTrackId.value) {
+        playNext();
+        return;
+      }
+
       const duration =
-        sessionType.value === 'host'
+        sessionType$$q.value === 'host'
           ? currentAudio?.duration
           : remotePlaybackState.value?.duration;
       const position =
-        sessionType.value === 'host'
+        sessionType$$q.value === 'host'
           ? currentAudio?.currentTime
           : remotePlaybackState.value &&
             calcPositionFromState(remotePlaybackState.value, getAccurateTime());
@@ -299,17 +287,8 @@ function _usePlaybackStore() {
         return;
       }
 
-      if (sessionType.value === 'host') {
+      if (sessionType$$q.value === 'host') {
         if (!currentAudio) {
-          return;
-        }
-
-        if (value === internalPlaying.value) {
-          return;
-        }
-
-        if (value && !currentTrackId.value) {
-          playNext();
           return;
         }
 
@@ -320,25 +299,32 @@ function _usePlaybackStore() {
         } else {
           currentAudio.pause();
         }
+
+        // skip sending play/pause because it will be sent by 'play' and 'pause' event handler
+        return;
       }
 
-      if (!byRemote) {
-        if (sessionType.value === 'none' && !byRemote && value) {
-          setTimeout((): void => playTrack(value, position), 0);
-        } else if (sessionType.value !== 'host') {
-          // skip sending if host because it will be sent by 'play' and 'pause' event handler
-          sendWS(
-            [
-              {
-                type: value ? 'play' : 'pause',
-                duration,
-                position,
-                timestamp: getAccurateTime(),
-              },
-            ],
-            true
-          );
-        }
+      // do nothing if not host and triggered by remote
+      if (byRemote) {
+        return;
+      }
+
+      // if there is no host, play tracks in this session
+      if (sessionType$$q.value === 'none' && !byRemote && value) {
+        setTimeout((): void => playTrack(value, position), 0);
+      } else {
+        // otherwise, send play/pause (to host and other sessions)
+        sendWS$$q(
+          [
+            {
+              type: value ? 'play' : 'pause',
+              duration,
+              position,
+              timestamp: getAccurateTime(),
+            },
+          ],
+          true
+        );
       }
     },
   });
@@ -445,7 +431,7 @@ function _usePlaybackStore() {
         return;
       }
 
-      sendWS(
+      sendWS$$q(
         [
           {
             type: playing ? 'play' : 'pause',
@@ -630,35 +616,37 @@ function _usePlaybackStore() {
       }
 
       sending = true;
-      setTimeout((): void => {
-        if (trackChange) {
-          internalRemoteSeekingPosition.value = 0;
-        }
+      Promise.resolve()
+        .then((): void => {
+          if (trackChange) {
+            internalRemoteSeekingPosition.value = 0;
+          }
 
-        // skip sending 'setTracks' event because it is already sent by 'trackChange' event handler
-        if (
-          sessionType.value !== 'host' ||
-          !trackChange ||
-          !trackProvider.currentTrack$$q
-        ) {
-          sendWS(
-            [
-              {
-                type: 'setTracks',
-                tracks: {
-                  ...trackProvider.export$$q(),
-                  setListName: currentSetListName.value,
+          // skip sending 'setTracks' event because it is already sent by 'trackChange' event handler
+          if (
+            sessionType$$q.value !== 'host' ||
+            !trackChange ||
+            !trackProvider.currentTrack$$q
+          ) {
+            sendWS$$q(
+              [
+                {
+                  type: 'setTracks',
+                  tracks: {
+                    ...trackProvider.export$$q(),
+                    setListName: currentSetListName.value,
+                  },
+                  trackChange,
                 },
-                trackChange,
-              },
-            ],
-            true
-          );
-        }
-
-        sending = false;
-        trackChange = false;
-      }, 0);
+              ],
+              true
+            );
+          }
+        })
+        .finally((): void => {
+          sending = false;
+          trackChange = false;
+        });
     };
 
     trackProvider.addEventListener('playNextQueueChange', sendTracks);
@@ -724,8 +712,8 @@ function _usePlaybackStore() {
         }
 
         if (
-          sessionType.value === 'host' ||
-          (sessionType.value === 'none' && !byRemote)
+          sessionType$$q.value === 'host' ||
+          (sessionType$$q.value === 'none' && !byRemote)
         ) {
           newAudio.preload = 'auto';
           newAudio.src = url;
@@ -751,7 +739,7 @@ function _usePlaybackStore() {
 
           newAudio.classList.remove('preparing');
 
-          sendWS(
+          sendWS$$q(
             [
               {
                 type: 'setHost',
@@ -787,7 +775,7 @@ function _usePlaybackStore() {
   };
 
   // when host changed
-  watch(sessionType, (newSessionType): void => {
+  watch(sessionType$$q, (newSessionType): void => {
     if (newSessionType === 'host') {
       if (remotePlaybackState.value) {
         playTrack(
@@ -890,21 +878,6 @@ function _usePlaybackStore() {
   }
 
   const store = {
-    sessions$$q: sessions as Readonly<typeof sessions>,
-    hostSession$$q: hostSession,
-    currentSession$$q: currentSession,
-    sessionType$$q: sessionType,
-    setHost$$q: (id?: string): void => {
-      sendWS(
-        [
-          {
-            type: 'setHost',
-            id,
-          },
-        ],
-        true
-      );
-    },
     /** シークバーの右側に残り時間を表示するか */
     showRemainingTime$$q: showRemainingTime,
     /** 再生中か */

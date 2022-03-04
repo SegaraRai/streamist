@@ -1,4 +1,10 @@
-import { WSRequest, WSResponse } from '$shared/types';
+import type {
+  WSRequest,
+  WSResponse,
+  WSResponseConnected,
+  WSResponseUpdated,
+  WSSessionForResponse,
+} from '$shared/types';
 import { generateDeviceId } from '~/logic/deviceId';
 import { getUserId, tokens } from '~/logic/tokens';
 import { useSessionInfo } from '~/stores/sessionInfo';
@@ -9,10 +15,12 @@ function _useWS() {
   let closing = false;
   let ws: WebSocket | undefined;
 
-  const sendQueue: WSRequest[] = [];
-  const callbacks: (readonly [type: string, callback: Callback<any>])[] = [];
+  const pendingRequests: WSRequest[] = [];
+  const callbacks: (readonly [
+    type: WSResponse['type'],
+    callback: Callback<any>
+  ])[] = [];
 
-  const host = ref(false);
   const deviceId = useLocalStorage('deviceId', generateDeviceId());
   const { sessionInfo } = useSessionInfo();
 
@@ -32,7 +40,7 @@ function _useWS() {
     }
 
     const searchParams = new URLSearchParams([
-      ['host', host ? '1' : '0'],
+      ['host', sessionType.value === 'host' ? '1' : '0'],
       ['d_id', deviceId.value],
       ['d_type', sessionInfo.value.type],
       ['d_platform', sessionInfo.value.platform],
@@ -59,7 +67,7 @@ function _useWS() {
     };
 
     ws.onopen = (): void => {
-      sendQueueMessages();
+      sendQueuedRequests();
     };
 
     ws.onmessage = (event): void => {
@@ -91,14 +99,14 @@ function _useWS() {
       console.error(e, data);
     }
     if (!sent && resend) {
-      sendQueue.push(...data);
+      pendingRequests.push(...data);
     }
   };
 
-  const sendQueueMessages = (): void => {
-    if (ws?.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(sendQueue));
-      sendQueue.splice(0, sendQueue.length);
+  const sendQueuedRequests = (): void => {
+    if (pendingRequests.length > 0 && ws?.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(pendingRequests));
+      pendingRequests.splice(0, pendingRequests.length);
     }
   };
 
@@ -136,14 +144,65 @@ function _useWS() {
 
   //
 
+  const sessions = ref<readonly WSSessionForResponse[]>([]);
+  const currentSession = eagerComputed(() =>
+    sessions.value.find((session) => session.you)
+  );
+  const hostSession = eagerComputed(() =>
+    sessions.value.find((session) => session.host)
+  );
+  const sessionType = eagerComputed(() => {
+    return hostSession.value?.you
+      ? 'host'
+      : hostSession.value?.deviceId === deviceId.value
+      ? 'hostSibling'
+      : hostSession.value
+      ? 'guest'
+      : 'none';
+  });
+
+  callbacks.push(
+    [
+      'connected',
+      (data: WSResponseConnected): void => {
+        sessions.value = data.sessions;
+      },
+    ],
+    [
+      'updated',
+      (data: WSResponseUpdated): void => {
+        if (data.sessions) {
+          sessions.value = data.sessions;
+        }
+      },
+    ]
+  );
+
+  //
+
   tokens.renew().then((): void => {
     setupWebSocket();
   });
 
   return {
-    deviceId,
-    sendWS,
-    addWSListener: <T extends WSResponse['type']>(
+    deviceId$$q: deviceId,
+    sessions$$q: sessions as Readonly<typeof sessions>,
+    currentSession$$q: currentSession,
+    hostSession$$q: hostSession,
+    sessionType$$q: sessionType,
+    sendWS$$q: sendWS,
+    setHost$$q: (id?: string): void => {
+      sendWS(
+        [
+          {
+            type: 'setHost',
+            id,
+          },
+        ],
+        true
+      );
+    },
+    addWSListener$$q: <T extends WSResponse['type']>(
       type: T,
       callback: Callback<WSResponse & { type: T }>
     ): void => {
@@ -152,7 +211,7 @@ function _useWS() {
         callbacks.push([type, callback]);
       }
     },
-    removeWSListener: <T extends WSResponse['type']>(
+    removeWSListener$$q: <T extends WSResponse['type']>(
       type: T,
       callback: Callback<WSResponse & { type: T }>
     ): void => {
@@ -170,11 +229,11 @@ export function useWSListener<T extends WSResponse['type']>(
   type: T,
   callback: Callback<WSResponse & { readonly type: T }>
 ): void {
-  const { addWSListener, removeWSListener } = useWS();
+  const { addWSListener$$q, removeWSListener$$q } = useWS();
 
-  addWSListener(type, callback as Callback<any>);
+  addWSListener$$q(type, callback as Callback<any>);
 
   tryOnScopeDispose((): void => {
-    removeWSListener(type, callback as Callback<any>);
+    removeWSListener$$q(type, callback as Callback<any>);
   });
 }
