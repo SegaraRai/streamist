@@ -69,7 +69,7 @@ export default defineComponent({
       if (!unmounted) {
         playbackStore.setDefaultSetList$$q(
           t('setListName.Tracks'),
-          sortedTracks
+          sortedTracks.map((track) => track.id)
         );
       }
 

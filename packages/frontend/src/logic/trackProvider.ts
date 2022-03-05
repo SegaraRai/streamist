@@ -1,6 +1,7 @@
 import { MAX_HISTORY_SIZE, MIN_QUEUE_SIZE } from '$shared/config';
 import { shuffleArray } from '$shared/shuffle';
-import type { RepeatType } from '$shared/types';
+import type { RepeatType, TrackId, TrackProviderState } from '$shared/types';
+import { toUnique } from '$shared/unique';
 
 /*
 ## 用語定義
@@ -60,14 +61,12 @@ import type { RepeatType } from '$shared/types';
     リピート用のキューからセットリストの要素数分をキューに移動し、リピート用のキューを補充する
 */
 
-export type TrackBase = { readonly id: string };
-
 /**
  * トラックリストの管理を行うクラス \
  * 与えられたセットリストと、リピートやシャッフルの設定から、再生すべきトラックを提供する \
  * スキップや前の曲に戻るといった操作も提供する
  */
-export class TrackProvider<T extends TrackBase> extends EventTarget {
+export class TrackProvider extends EventTarget {
   /**
    * 現在のリピートの設定 \
    * 内部用 \
@@ -94,7 +93,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * オブジェクトは必ず`_setList$$q`の要素の1つ（同一の参照）である \
    * 内部用、外部からは`currentTrack$$q`のgetterを用いる
    */
-  private _currentTrack$$q: T | undefined;
+  private _currentTrack$$q: TrackId | undefined;
 
   /**
    * 再生キュー \
@@ -105,7 +104,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * リピートを勘案しない、セットリストの残りトラックのみで構成される
    * （シャッフル有効時はセットリストから現在のトラックのみを除いてシャッフルしたもので、シャッフル無効時はセットリストから現在のトラック以前を除いたもの） \
    */
-  private _queue$$q: T[] = [];
+  private _queue$$q: TrackId[] = [];
 
   /**
    * リピート用の再生キュー \
@@ -115,14 +114,14 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * 各要素は必ず`_setList$$q`の要素の1つ（同一の参照）である \
    * 内部用
    */
-  private _repeatQueue$$q: T[] = [];
+  private _repeatQueue$$q: TrackId[] = [];
 
   /**
    * リピートやシャッフルを構成するトラックのリスト（セットリストと呼ぶ） \
    * 設定時は（IDが）同一のトラックが重複しないようにすること \
    * 内部用
    */
-  private _setList$$q: T[] = [];
+  private _setList$$q: TrackId[] = [];
 
   /**
    * 「前のトラックに戻る」機能用の再生履歴スタック \
@@ -130,7 +129,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * 各要素は必ず`_setList$$q`の要素の1つ（同一の参照）である \
    * 内部用
    */
-  private _history$$q: T[] = [];
+  private _history$$q: TrackId[] = [];
 
   /**
    * 対外的に見せるためのキュー配列 \
@@ -140,7 +139,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * こちらはリピートの設定に応じてトラックが補充されているものになる（すなわち、`[..._queue$$q, ..._repeatQueue$$q]`） \
    * リピートが無効な場合は`_queue$$q`と同じ内容
    */
-  private _queueCache$$q: T[] = [];
+  private _queueCache$$q: TrackId[] = [];
 
   /**
    * `'queueChange'`イベントを発火する \
@@ -174,6 +173,13 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
   }
 
   /**
+   * `'shuffleChange'`イベントを発火する
+   */
+  protected emitShuffleChangeEvent$$q(): void {
+    this.dispatchEvent(new Event('shuffleChange'));
+  }
+
+  /**
    * リピート用のキューを埋める
    */
   private fillRepeatQueue$$q(): void {
@@ -190,8 +196,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
         if (
           array.length > 1 &&
           this._repeatQueue$$q.length > 0 &&
-          array[0].id ===
-            this._repeatQueue$$q[this._repeatQueue$$q.length - 1].id
+          array[0] === this._repeatQueue$$q[this._repeatQueue$$q.length - 1]
         ) {
           const swapIndex = Math.floor(Math.random() * (array.length - 1)) + 1;
           [array[0], array[swapIndex]] = [array[swapIndex], array[0]];
@@ -210,12 +215,16 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
   private regenerate$$q(shuffleChanged = true): void {
     // セットリストが空の場合はキューを空にして終了
     if (this._setList$$q.length === 0) {
+      if (this._repeatQueue$$q.length === 0) {
+        return;
+      }
+
       this._repeatQueue$$q = [];
       this.emitQueueChangeEvent$$q();
       return;
     }
 
-    const currentTrackId = this._currentTrack$$q?.id;
+    const currentTrackId = this._currentTrack$$q;
     const repeatEnabled = this._repeat$$q !== 'off';
 
     // リピートが変更されただけのときはリピート用のキューを操作して終了
@@ -252,7 +261,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
       // 現在のトラックが存在しない場合は全てのセットリストの要素を用いる
       let array = [...this._setList$$q];
       if (currentTrackId) {
-        array = array.filter((track) => track.id !== currentTrackId);
+        array = array.filter((trackId) => trackId !== currentTrackId);
       }
       this._queue$$q = shuffleArray(array);
     } else {
@@ -260,7 +269,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
       // 現在のトラックが存在しない場合はセットリスト全体をキューとする
       // 現在のトラックがセットリストの最後にある場合は、キューを空にする（リピートが有効な場合はリピート用のキューでカバーできる）
       const currentTrackIndex = currentTrackId
-        ? this._setList$$q.findIndex((track) => track.id === currentTrackId)
+        ? this._setList$$q.findIndex((trackId) => trackId === currentTrackId)
         : -1;
       this._queue$$q =
         currentTrackIndex >= 0
@@ -288,18 +297,16 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * また、現在のトラックを変更しない場合に、変更されたセットリストに元の現在のトラックが含まれない場合は、現在のトラックには新しく`undefined`が設定される
    * この関数を呼び出すと現在のトラックが切り替わったかどうかによらず常に'trackChange'イベントが発火する
    */
-  setSetList$$q(setList: readonly T[], currentTrack?: T | null): void {
+  setSetList$$q(
+    setList: readonly TrackId[],
+    currentTrack?: TrackId | null
+  ): void {
     // 重複を除去
-    const trackMap = new Map(setList.map((track) => [track.id, track]));
-    const uniqueSetList = Array.from(trackMap.values());
+    const uniqueSetList = toUnique(setList);
     currentTrack =
       currentTrack === undefined
         ? this._currentTrack$$q
         : currentTrack || undefined;
-    // currentTrackをsetList内にあるTrackに変換する
-    // （そうなっていないと後々バグる、が、ここに指定する時点でそうなっているべきでもある）
-    // `undefined`が指定されて元のcurrentTrackを維持する場合には割と不整合が起こりそう？（起こらないようにしたいが）
-    currentTrack = currentTrack && trackMap.get(currentTrack.id);
     this._currentTrack$$q = currentTrack;
     this._setList$$q = uniqueSetList;
     this._queue$$q = [];
@@ -313,7 +320,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * キューの先頭にトラックを追加する
    * @param tracks 追加するトラックの配列
    */
-  prependTracks$$q(tracks: T[]): void {
+  prependTracks$$q(tracks: readonly TrackId[]): void {
     if (this._repeat$$q === 'one') {
       throw new Error('prependTracks is not available with repeat one');
     }
@@ -325,7 +332,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * キューの末尾にトラックを追加する
    * @param tracks 追加するトラックの配列
    */
-  appendTracks$$q(tracks: T[]): void {
+  appendTracks$$q(tracks: readonly TrackId[]): void {
     if (this._repeat$$q !== 'off') {
       throw new Error('appendTracks is not available with repeat enabled');
     }
@@ -384,8 +391,8 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
       this._currentTrack$$q = track;
     }
 
-    this.emitTrackChangeEvent$$q();
     this.emitQueueChangeEvent$$q();
+    this.emitTrackChangeEvent$$q();
   }
 
   /**
@@ -434,7 +441,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
       // 生成する履歴が空になってはならない
       if (this._history$$q.length === 0 && this._setList$$q.length > 0) {
         const repeatEnabled = this._repeat$$q !== 'off';
-        const currentTrackId = this._currentTrack$$q?.id;
+        const currentTrackId = this._currentTrack$$q;
         if (this._shuffle$$q) {
           // シャッフルが有効な場合
           if (repeatEnabled) {
@@ -455,7 +462,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
             if (
               array.length > 1 &&
               currentTrackId &&
-              array[lengthMinus1].id === currentTrackId
+              array[lengthMinus1] === currentTrackId
             ) {
               const swapIndex = Math.floor(Math.random() * lengthMinus1);
               [array[lengthMinus1], array[swapIndex]] = [
@@ -469,7 +476,9 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
         } else {
           // シャッフルが無効な場合
           const currentTrackIndex = currentTrackId
-            ? this._setList$$q.findIndex((track) => track.id === currentTrackId)
+            ? this._setList$$q.findIndex(
+                (trackId) => trackId === currentTrackId
+              )
             : -1;
           if (repeatEnabled || currentTrackIndex > 0) {
             // セットリストのうち先頭から現在のトラックの1つ前までの部分を履歴とする
@@ -492,8 +501,8 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
       this._currentTrack$$q = track;
     }
 
-    this.emitTrackChangeEvent$$q();
     this.emitQueueChangeEvent$$q();
+    this.emitTrackChangeEvent$$q();
   }
 
   /**
@@ -514,8 +523,8 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
   next$$q(): void {
     // リピートが「1曲のみ」のときは何も変更しない
     if (this._repeat$$q === 'one') {
-      this.emitTrackChangeEvent$$q();
       this.emitQueueChangeEvent$$q();
+      this.emitTrackChangeEvent$$q();
       return;
     }
 
@@ -523,17 +532,29 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
     this.skipNext$$q();
   }
 
-  removeTracks$$q(filter: (trackId: string) => boolean): void {
-    const filterFunc = (track: T) => filter(track.id);
-    this._setList$$q = this._setList$$q.filter(filterFunc);
-    this._queue$$q = this._queue$$q.filter(filterFunc);
-    this._repeatQueue$$q = this._repeatQueue$$q.filter(filterFunc);
-    this._history$$q = this._history$$q.filter(filterFunc);
-    this.fillRepeatQueue$$q();
-    if (this._currentTrack$$q && !filterFunc(this._currentTrack$$q)) {
-      this._skipNext$$q();
-    } else {
-      this.emitQueueChangeEvent$$q();
+  removeTracks$$q(filter: (trackId: TrackId) => boolean): void {
+    let modified = false;
+    const filterAndCheck = (array: TrackId[]): TrackId[] => {
+      const result = array.filter(filter);
+      if (result.length !== array.length) {
+        modified = true;
+        return result;
+      }
+      return array;
+    };
+
+    this._setList$$q = filterAndCheck(this._setList$$q);
+    this._queue$$q = filterAndCheck(this._queue$$q);
+    this._repeatQueue$$q = filterAndCheck(this._repeatQueue$$q);
+    this._history$$q = filterAndCheck(this._history$$q);
+
+    if (modified) {
+      this.fillRepeatQueue$$q();
+      if (this._currentTrack$$q && !filter(this._currentTrack$$q)) {
+        this._skipNext$$q();
+      } else {
+        this.emitQueueChangeEvent$$q();
+      }
     }
   }
 
@@ -541,7 +562,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * 現在のトラック \
    * getterのみ
    */
-  get currentTrack$$q(): T | undefined {
+  get currentTrack$$q(): TrackId | undefined {
     return this._currentTrack$$q;
   }
 
@@ -549,7 +570,7 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
    * 現在のキュー \
    * getterのみ
    */
-  get queue$$q(): readonly T[] {
+  get queue$$q(): readonly TrackId[] {
     return this._queueCache$$q;
   }
 
@@ -586,12 +607,40 @@ export class TrackProvider<T extends TrackBase> extends EventTarget {
     this._repeat$$q = repeat;
     this.regenerate$$q(false);
   }
+
+  export$$q(): TrackProviderState {
+    return {
+      repeat: this._repeat$$q,
+      shuffle: this._shuffle$$q,
+      currentTrack: this._currentTrack$$q ?? null,
+      setList: this._setList$$q,
+      queue: this._queue$$q,
+      history: this._history$$q,
+      repeatQueue: this._repeatQueue$$q,
+    };
+  }
+
+  import$$q(state: TrackProviderState, emitTrackChange = true): void {
+    this._repeat$$q = state.repeat;
+    this._shuffle$$q = state.shuffle;
+    this._currentTrack$$q = state.currentTrack ?? undefined;
+    this._setList$$q = [...state.setList];
+    this._queue$$q = [...state.queue];
+    this._history$$q = [...state.history];
+    this._repeatQueue$$q = [...state.repeatQueue];
+    this.emitQueueChangeEvent$$q();
+    if (emitTrackChange) {
+      this.emitTrackChangeEvent$$q();
+    }
+    this.emitRepeatChangeEvent$$q();
+    this.emitShuffleChangeEvent$$q();
+  }
 }
 
 // `TrackProvider`の`addEventListener`メソッドのオーバーロードの定義
 // class内には実装を記述しない限り記述できない
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export interface TrackProvider<T extends TrackBase> {
+export interface TrackProvider {
   /**
    * `currentTrack$$q`が変更された際のイベント
    */

@@ -188,7 +188,6 @@ export default defineComponent({
       () =>
         playbackStore.currentSetList$$q.value &&
         playbackStore.currentSetList$$q.value
-          .map(({ id }) => id)
           .filter((id) => isTrackAvailable$$q(id))
           .join('\n')
     );
@@ -243,7 +242,7 @@ export default defineComponent({
     );
 
     const currentPlayingTrackId = eagerComputed(
-      () => playbackStore.currentTrack$$q.value?.id
+      () => playbackStore.currentTrack$$q.value
     );
 
     const play$$q = (track: ResourceTrack, index: number): void => {
@@ -257,8 +256,8 @@ export default defineComponent({
       }
       playbackStore.setSetListAndPlay$$q(
         props.setListName,
-        props.setList,
-        track,
+        props.setList.map((track) => track.id),
+        track.id,
         false
       );
     };
@@ -398,7 +397,7 @@ export default defineComponent({
         <VListItem
           class="w-full py-0 h-8 !min-h-0 flex items-center !<sm:px-2 select-none font-bold text-sm"
         >
-          <div class="s-track-list-column-icon mr-4 py-2">
+          <div class="s-track-list-column-icon text-sm mr-4 py-2">
             {{
               indexContent === 'index' || indexContent === 'trackNumber'
                 ? '#'
@@ -408,7 +407,7 @@ export default defineComponent({
           <VListItemHeader
             class="s-track-list-column-title flex items-center py-2"
           >
-            <VListItemTitle>
+            <VListItemTitle class="s-heading-sl text-sm">
               {{ t('trackList.Title') }}
             </VListItemTitle>
           </VListItemHeader>
@@ -416,7 +415,7 @@ export default defineComponent({
             <VListItemHeader
               class="s-track-list-column-album flex items-center ml-6 py-2 !<md:hidden"
             >
-              <VListItemTitle>
+              <VListItemTitle class="s-heading-sl text-sm">
                 {{ t('trackList.Album') }}
               </VListItemTitle>
             </VListItemHeader>

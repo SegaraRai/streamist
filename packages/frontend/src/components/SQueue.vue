@@ -14,11 +14,9 @@ export default defineComponent({
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
 
-    const playNextQueue$$q = eagerComputed(() =>
-      playbackStore.playNextQueue$$q.value.map(({ id }) => id)
-    );
-    const queue$$q = eagerComputed(() =>
-      playbackStore.queue$$q.value.slice(0, MIN_QUEUE_SIZE).map(({ id }) => id)
+    const playNextQueue$$q = playbackStore.playNextQueue$$q;
+    const queue$$q = computed(() =>
+      playbackStore.queue$$q.value.slice(0, MIN_QUEUE_SIZE)
     );
 
     const play$$q = (index: number): void => {

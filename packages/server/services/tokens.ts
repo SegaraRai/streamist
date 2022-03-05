@@ -12,12 +12,16 @@ import {
   JWT_REFRESH_TOKEN_AUD,
   JWT_REFRESH_TOKEN_EXPIRES_IN,
   JWT_REFRESH_TOKEN_ISS,
+  JWT_WS_TOKEN_AUD,
+  JWT_WS_TOKEN_EXPIRES_IN,
+  JWT_WS_TOKEN_ISS,
 } from '$shared/config';
 import { client } from '$/db/lib/client';
 import {
   SECRET_API_JWT_SECRET,
   SECRET_CDN_JWT_SECRET,
   SECRET_REFRESH_TOKEN_JWT_SECRET,
+  SECRET_WS_JWT_SECRET,
 } from '$/services/env';
 import { HTTPError } from '$/utils/httpError';
 import type { IAuthResponse } from '$/validators';
@@ -105,6 +109,27 @@ export function issueCDNToken(
   );
 }
 
+export function issueWSToken(
+  user: UserSubset,
+  timestamp: number
+): Promise<string> {
+  const signer = createSigner({
+    algorithm: JWT_ALGORITHM,
+    key: SECRET_WS_JWT_SECRET,
+    aud: JWT_WS_TOKEN_AUD,
+    iss: JWT_WS_TOKEN_ISS,
+    clockTimestamp: timestamp,
+    expiresIn: JWT_WS_TOKEN_EXPIRES_IN,
+  });
+  return Promise.resolve(
+    signer({
+      id: user.id,
+      sub: user.id,
+      plan: user.plan,
+    })
+  );
+}
+
 // for dev
 export async function extractPayloadFromCDNToken(
   token: string
@@ -139,6 +164,7 @@ async function issueTokens(
   const timestamp = Date.now();
   const apiToken = await issueAPIToken(user, timestamp);
   const cdnToken = await issueCDNToken(user, timestamp);
+  const wsToken = await issueWSToken(user, timestamp);
   const refreshToken = addRefreshToken
     ? await issueRefreshToken(user, timestamp)
     : undefined;
@@ -146,6 +172,7 @@ async function issueTokens(
   return {
     access_token: apiToken,
     cdn_access_token: cdnToken,
+    ws_access_token: wsToken,
     refresh_token: refreshToken,
   };
 }

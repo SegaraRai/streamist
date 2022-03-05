@@ -260,7 +260,7 @@ export default defineComponent({
           class="s-hover-visible absolute top-0 left-0 w-full h-full flex items-center justify-center text-white text-4xl bg-black/50"
           :class="roundClass$$q"
         >
-          <IMdiImagePlus class="w-16 h-16" />
+          <i-mdi-image-plus class="w-16 h-16" />
         </div>
       </template>
     </template>

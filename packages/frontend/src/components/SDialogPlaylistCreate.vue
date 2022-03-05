@@ -108,14 +108,12 @@ export default defineComponent({
             <VTextField
               v-model="itemTitle$$q"
               hide-details
-              class="s-v-input-hide-details"
               :label="t('dialogComponent.createPlaylist.label.Title')"
               required
             />
             <VTextarea
               v-model="itemNotes$$q"
               hide-details
-              class="s-v-input-hide-details"
               :label="t('dialogComponent.createPlaylist.label.Description')"
             />
           </div>

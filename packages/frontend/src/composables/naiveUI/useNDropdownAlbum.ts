@@ -61,7 +61,7 @@ export function useNDropdownAlbum({
           }
           playbackStore.setSetListAndPlayAuto$$q(
             album.title,
-            albumTracks,
+            albumTracks.map((track) => track.id),
             false
           );
         },
@@ -80,7 +80,9 @@ export function useNDropdownAlbum({
           if (!albumTracks?.length || !availableAlbumTracks?.length) {
             return;
           }
-          playbackStore.appendTracksToPlayNextQueue$$q(albumTracks);
+          playbackStore.appendTracksToPlayNextQueue$$q(
+            albumTracks.map((track) => track.id)
+          );
           message.success(
             t('message.n_AddedToPlayNextQueue', albumTracks.length)
           );

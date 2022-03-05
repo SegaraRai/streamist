@@ -45,7 +45,7 @@ export default defineComponent({
       <VIcon>{{ typeToFileIcon$$q[fileType || 'unknown'] }}</VIcon>
     </VListItemAvatar>
     <VListItemHeader class="px-2">
-      <div class="flex-1 flex items-center">
+      <VListItemTitle class="flex-1 flex items-center">
         <div
           class="flex-1 text-sm whitespace-nowrap overflow-hidden overflow-ellipsis"
         >
@@ -54,7 +54,7 @@ export default defineComponent({
         <div class="flex-none text-sm w-24 text-right opacity-60">
           {{ humanizeSize$$q(filesize ?? 0) }}
         </div>
-      </div>
+      </VListItemTitle>
     </VListItemHeader>
     <VListItemAvatar icon class="flex-none flex items-center justify-center">
       <slot></slot>

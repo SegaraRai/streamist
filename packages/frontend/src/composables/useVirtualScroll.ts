@@ -8,6 +8,7 @@ export interface UseVirtualScrollListOptions {
   itemHeightFunc?: (index: number) => number;
   additionalHeight?: Readonly<Ref<number>>;
   overscan?: number;
+  blockSize?: number;
   containerElementRef: Readonly<Ref<HTMLElement | undefined>>;
   contentElementRef: Readonly<Ref<HTMLElement | undefined>>;
 }
@@ -25,6 +26,7 @@ export function useVirtualScrollList<T>(
     itemHeightFunc,
     additionalHeight,
     overscan = 5,
+    blockSize = 10,
     containerElementRef,
     contentElementRef,
   }: UseVirtualScrollListOptions
@@ -105,11 +107,10 @@ export function useVirtualScrollList<T>(
     const listScrollTop = containerElement.scrollTop - listOffsetTop;
     const viewHeight = containerElement.clientHeight;
 
-    const offset = getOffset(listScrollTop);
-    const viewCapacity = getViewCapacity(
-      viewHeight + Math.min(listScrollTop, 0),
-      offset
-    );
+    const offset = Math.floor(getOffset(listScrollTop) / blockSize) * blockSize;
+    const viewCapacity =
+      getViewCapacity(viewHeight + Math.min(listScrollTop, 0), offset) +
+      blockSize;
 
     // console.log(listOffsetTop, listScrollTop, viewHeight, offset, viewCapacity);
 

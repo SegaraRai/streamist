@@ -5,6 +5,12 @@ import { SWIPE_DISTANCE_THRESHOLD } from '~/config';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({
+  props: {
+    sessionName: {
+      type: String,
+      default: undefined,
+    },
+  },
   setup() {
     const playbackStore = usePlaybackStore();
     const { value: currentTrackInfo } = useCurrentTrackInfo();
@@ -86,11 +92,13 @@ export default defineComponent({
           <SPlaybackTrackView
             :track="currentTrackInfo$$q.track$$q"
             :artist-name="currentTrackInfo$$q.trackArtist$$q.name"
+            :session-name="sessionName"
             navigate-playing
           />
         </template>
       </RouterLink>
-      <div class="flex-none items-center">
+      <div class="flex-none flex pl-4 gap-4 items-center">
+        <SSessionManager />
         <!-- TODO: implement vertical volume control -->
         <VBtn flat icon @click="play$$q">
           <VIcon>

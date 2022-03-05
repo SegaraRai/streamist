@@ -70,7 +70,7 @@ export function useNDropdownPlaylist({
           }
           playbackStore.setSetListAndPlayAuto$$q(
             playlist.title,
-            playlistTracks,
+            playlistTracks.map((track) => track.id),
             false
           );
         },
@@ -89,7 +89,9 @@ export function useNDropdownPlaylist({
           if (!availablePlaylistTracks?.length || !playlistTracks?.length) {
             return;
           }
-          playbackStore.appendTracksToPlayNextQueue$$q(playlistTracks);
+          playbackStore.appendTracksToPlayNextQueue$$q(
+            playlistTracks.map((track) => track.id)
+          );
           message.success(
             t('message.n_AddedToPlayNextQueue', playlistTracks.length)
           );

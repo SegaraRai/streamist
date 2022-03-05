@@ -98,7 +98,7 @@ export default defineComponent({
         }
         playbackStore.setSetListAndPlayAuto$$q(
           value.value.playlist$$q.title,
-          value.value.tracks$$q
+          value.value.tracks$$q.map((track) => track.id)
         );
       },
       onMove$$q: async (

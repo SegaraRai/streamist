@@ -170,12 +170,17 @@ export default defineComponent({
     <div
       class="w-20vw xl:w-25vw min-w-50 flex-none flex items-center justify-end"
     >
-      <div class="flex-1 max-w-40">
-        <SVolumeControl
-          v-model="volumeStore$$q.volume"
-          @mute="volumeStore$$q.muted = !volumeStore$$q.muted"
-          @dragging="volumeStore$$q.setDraggingVolume($event)"
-        />
+      <div class="flex-1 flex flex-row gap-8 items-center justify-end">
+        <div class="flex-none">
+          <SSessionManager />
+        </div>
+        <div class="flex-1 max-w-40">
+          <SVolumeControl
+            v-model="volumeStore$$q.volume"
+            @mute="volumeStore$$q.muted = !volumeStore$$q.muted"
+            @dragging="volumeStore$$q.setDraggingVolume($event)"
+          />
+        </div>
       </div>
     </div>
   </VSheet>

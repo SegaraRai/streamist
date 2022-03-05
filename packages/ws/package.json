@@ -1,0 +1,29 @@
+{
+  "name": "@streamist/ws",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "scripts": {
+    "dev": "miniflare -m -w -p 8788 --debug --build-watch-path src -B \"pnpm run dev:build\" --env ../shared-server/env/development.env ./dist/index_dev.js",
+    "dev:build": "node ./build.dev.js",
+    "build": "rollup -c",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0",
+    "worktop": "^0.8.0-next.12"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^3.4.0",
+    "@rollup/plugin-commonjs": "^21.0.2",
+    "@rollup/plugin-node-resolve": "^13.1.3",
+    "@types/node": "^16.11.22",
+    "esbuild": "^0.14.25",
+    "miniflare": "^2.3.0",
+    "rollup": "^2.69.1",
+    "rollup-plugin-esbuild": "^4.8.2",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-tsconfig-paths": "^1.1.6"
+  }
+}

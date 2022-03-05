@@ -37,15 +37,13 @@ export default defineComponent({
     >
       <VIcon>mdi-history</VIcon>
     </VListItemAvatar>
-    <VListItemHeader>
-      <div class="flex-1 flex flex-col pl-2">
-        <div class="s-heading-sl text-sm">
-          {{ query }}
-        </div>
-        <div class="s-subheading-sl text-xs">
-          {{ strAt$$q }}
-        </div>
-      </div>
+    <VListItemHeader class="pl-2">
+      <VListItemTitle class="s-heading-sl text-sm">
+        {{ query }}
+      </VListItemTitle>
+      <VListItemSubtitle class="s-subheading-sl text-xs">
+        {{ strAt$$q }}
+      </VListItemSubtitle>
     </VListItemHeader>
     <VBtn
       icon

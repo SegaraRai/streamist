@@ -59,7 +59,10 @@ export default defineComponent({
       setList$$q,
       onTrackLoad$$q: (tracks: readonly ResourceTrack[]) => {
         valueAsync.value.then((v) => {
-          playbackStore.setDefaultSetList$$q(v.artist$$q.name, tracks);
+          playbackStore.setDefaultSetList$$q(
+            v.artist$$q.name,
+            tracks.map((track) => track.id)
+          );
         });
         setList$$q.value = tracks;
       },

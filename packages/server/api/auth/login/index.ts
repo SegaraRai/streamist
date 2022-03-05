@@ -6,6 +6,7 @@ export type Methods = {
     resBody: {
       access_token: string;
       cdn_access_token: string;
+      ws_access_token: string;
       refresh_token: string;
     };
   };

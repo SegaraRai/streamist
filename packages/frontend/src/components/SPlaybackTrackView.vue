@@ -13,9 +13,14 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    sessionName: {
+      type: String,
+      default: undefined,
+    },
     navigatePlaying: Boolean,
   },
   setup(props) {
+    const { t } = useI18n();
     const dialogEdit$$q = ref(false);
     const dialogDetails$$q = ref(false);
     const lastSelectedTrack$$q = ref<ResourceTrack | undefined>();
@@ -51,6 +56,7 @@ export default defineComponent({
       closeMenu$$q,
     });
     return {
+      t,
       lastSelectedTrack$$q,
       dialogEdit$$q,
       dialogDetails$$q,
@@ -87,6 +93,17 @@ export default defineComponent({
       >
         {{ artistName || '\u200b' /* to prevent layout shift */ }}
       </RouterLink>
+      <template v-if="sessionName">
+        <i18n-t
+          keypath="session.ListeningOn"
+          tag="div"
+          class="text-xs text-st-primary leading-tight pt-2px"
+        >
+          <span class="font-bold">
+            {{ sessionName }}
+          </span>
+        </i18n-t>
+      </template>
     </div>
   </div>
   <NDropdown
