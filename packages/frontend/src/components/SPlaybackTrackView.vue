@@ -97,7 +97,7 @@ export default defineComponent({
         <i18n-t
           keypath="session.ListeningOn"
           tag="div"
-          class="text-xs text-st-primary leading-tight"
+          class="text-xs text-st-primary leading-tight pt-2px"
         >
           <span class="font-bold">
             {{ sessionName }}
