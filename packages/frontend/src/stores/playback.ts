@@ -102,6 +102,12 @@ function _usePlaybackStore() {
 
       const isHost = sessionType$$q.value === 'host';
 
+      // update state
+      if (data.pbState !== undefined) {
+        remotePlaybackState.value = data.pbState ?? undefined;
+        internalRemoteSeekingPosition.value = undefined;
+      }
+
       // update trackProvider
       if (!byYou) {
         if (data.pbTracks !== undefined) {
@@ -112,14 +118,8 @@ function _usePlaybackStore() {
         }
       }
 
-      // update state
-      if (data.pbState !== undefined) {
-        remotePlaybackState.value = data.pbState ?? undefined;
-        internalRemoteSeekingPosition.value = undefined;
-      }
-
-      if (data.pbState && isHost && !byYou) {
-        // TODO: defer this after current track is updated
+      // apply state
+      if (data.pbState && !data.pbTrackChange && isHost && !byYou) {
         playing.value = data.pbState.playing;
         position.value = calcPositionFromState(data.pbState, getAccurateTime());
       }
