@@ -126,7 +126,13 @@ API.add(
       ).fetch(`https://do/user`, mutableReq)
     );
 
-    res.headers.set('Sec-WebSocket-Protocol', WS_PROTOCOL);
+    // https://github.com/cloudflare/miniflare/issues/179
+    if (
+      BUILD_TIME_DEFINITION.NODE_ENV !== 'development' ||
+      !(globalThis as any).MINIFLARE
+    ) {
+      res.headers.set('Sec-WebSocket-Protocol', WS_PROTOCOL);
+    }
 
     return res;
   }
