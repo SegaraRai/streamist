@@ -124,6 +124,7 @@ export default defineConfig({
     nodeResolve({
       exportConditions: ['node'],
       extensions: ['.js', '.mjs', '.ts', '.json', '.node'],
+      preferBuiltins: true,
     }),
     json({
       preferConst: true,
