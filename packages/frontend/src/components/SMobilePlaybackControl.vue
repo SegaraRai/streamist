@@ -97,7 +97,7 @@ export default defineComponent({
           />
         </template>
       </RouterLink>
-      <div class="flex-none flex gap-4 items-center">
+      <div class="flex-none flex pl-4 gap-4 items-center">
         <SSessionManager />
         <!-- TODO: implement vertical volume control -->
         <VBtn flat icon @click="play$$q">
