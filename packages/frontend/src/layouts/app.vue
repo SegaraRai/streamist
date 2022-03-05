@@ -304,6 +304,7 @@ export default defineComponent({
       <VNavigationDrawer
         :model-value="leftSidebar$$q && !hideShell$$q"
         :permanent="alwaysShowLeftSidebar$$q"
+        :touchless="alwaysShowLeftSidebar$$q"
         position="left"
         rail-width="56"
         class="select-none"
