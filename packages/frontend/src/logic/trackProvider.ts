@@ -215,6 +215,10 @@ export class TrackProvider extends EventTarget {
   private regenerate$$q(shuffleChanged = true): void {
     // セットリストが空の場合はキューを空にして終了
     if (this._setList$$q.length === 0) {
+      if (this._repeatQueue$$q.length === 0) {
+        return;
+      }
+
       this._repeatQueue$$q = [];
       this.emitQueueChangeEvent$$q();
       return;
