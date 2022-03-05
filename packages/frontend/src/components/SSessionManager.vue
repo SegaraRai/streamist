@@ -32,7 +32,12 @@ export default defineComponent({
 </script>
 
 <template>
-  <NPopover ref="popover" placement="top" trigger="click">
+  <NPopover
+    ref="popover"
+    placement="top"
+    trigger="click"
+    :disabled="sessions$$q.length === 0"
+  >
     <template #trigger>
       <button
         class="flex items-center justify-center transition-colors select-none"
@@ -42,7 +47,7 @@ export default defineComponent({
       </button>
     </template>
     <div class="-m-4">
-      <VList class="min-w-60 select-none">
+      <VList class="min-w-60 select-none !bg-transparent">
         <template v-for="session in sessions$$q" :key="session.id">
           <VListItem
             :class="session.host ? 'text-st-primary' : ''"

@@ -102,6 +102,12 @@ function _usePlaybackStore() {
 
       const isHost = sessionType$$q.value === 'host';
 
+      // update state
+      if (data.pbState !== undefined) {
+        remotePlaybackState.value = data.pbState ?? undefined;
+        internalRemoteSeekingPosition.value = undefined;
+      }
+
       // update trackProvider
       if (!byYou) {
         if (data.pbTracks !== undefined) {
@@ -112,14 +118,8 @@ function _usePlaybackStore() {
         }
       }
 
-      // update state
-      if (data.pbState !== undefined) {
-        remotePlaybackState.value = data.pbState ?? undefined;
-        internalRemoteSeekingPosition.value = undefined;
-      }
-
-      if (data.pbState && isHost && !byYou) {
-        // TODO: defer this after current track is updated
+      // apply state
+      if (data.pbState && !data.pbTrackChange && isHost && !byYou) {
         playing.value = data.pbState.playing;
         position.value = calcPositionFromState(data.pbState, getAccurateTime());
       }
@@ -255,6 +255,7 @@ function _usePlaybackStore() {
       return internalPlaying.value;
     },
     set: (value: boolean): void => {
+      const audio = currentAudio;
       const byRemote = processingConnectedEvent || processingUpdatedEvent;
 
       const currentValue = playing.value;
@@ -269,11 +270,11 @@ function _usePlaybackStore() {
 
       const duration =
         sessionType$$q.value === 'host'
-          ? currentAudio?.duration
+          ? audio?.duration
           : remotePlaybackState.value?.duration;
       const position =
         sessionType$$q.value === 'host'
-          ? currentAudio?.currentTime
+          ? audio?.currentTime
           : remotePlaybackState.value &&
             calcPositionFromState(remotePlaybackState.value, getAccurateTime());
 
@@ -288,16 +289,23 @@ function _usePlaybackStore() {
       }
 
       if (sessionType$$q.value === 'host') {
-        if (!currentAudio) {
+        if (!audio) {
           return;
         }
 
         internalPlaying.value = value;
 
         if (value) {
-          currentAudio.play();
+          (async (): Promise<void> => {
+            if (needsCDNCookie(audio.src)) {
+              await setCDNCookie();
+            }
+            if (currentAudio === audio) {
+              await audio.play();
+            }
+          })();
         } else {
-          currentAudio.pause();
+          audio.pause();
         }
 
         // skip sending play/pause because it will be sent by 'play' and 'pause' event handler

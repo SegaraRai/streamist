@@ -10,6 +10,7 @@ import {
 import { osDeleteManaged } from '$shared-server/osOperations';
 import { is } from '$shared/is';
 import { parseDate } from '$shared/parseDate';
+import { getStem } from '$shared/path';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -19,6 +20,7 @@ import type {
 import { toUnique } from '$shared/unique';
 import type {
   FFprobeTags,
+  TranscoderRequestOptions,
   TranscoderResponse,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactError,
@@ -92,6 +94,62 @@ function parseDiscAndTrackNumber(
     discNumber || 1, // ディスク番号が0またはundefinedのときは1にする
     trackNumber || 1, // トラック番号が0またはundefinedのときは1にする
   ];
+}
+
+function parseDiscAndTrackNumberEx(
+  tags: FFprobeTags,
+  filename: string,
+  hasCueSheet: boolean,
+  options: TranscoderRequestOptions
+): [discNumber: number, trackNumber: number] {
+  let [discNumber, trackNumber] = parseDiscAndTrackNumber(tags);
+
+  const isValidDiscNumber = (
+    value: number | null | undefined
+  ): value is number =>
+    value != null && isFinite(value) && value >= 1 && value <= 99;
+
+  const isValidTrackNumber = isValidDiscNumber;
+
+  const basename = getStem(filename);
+
+  if (hasCueSheet) {
+    // eg. 'Disc2', 'ABCD-1234-2', 'ABCD-1234' (not valid)
+    const match = basename.match(/(\d+)\s*$/);
+    if (match) {
+      const newDiscNumber = parseInt(match[1]);
+      if (
+        options.guessDiscNumberUsingFilenameForCue &&
+        discNumber === 1 &&
+        isValidDiscNumber(newDiscNumber)
+      ) {
+        discNumber = newDiscNumber;
+      }
+    }
+  } else {
+    // eg. '2.03 Track Title', '03. Track Title', '03 Track Title'
+    const match = basename.match(/^\s*(?:(\d+)[\s.-]+)?(\d+)$/);
+    if (match) {
+      const newDiscNumber = match[1] ? parseInt(match[1]) : undefined;
+      const newTrackNumber = parseInt(match[2]);
+      if (
+        options.guessDiscNumberUsingFilename &&
+        discNumber === 1 &&
+        isValidDiscNumber(newDiscNumber)
+      ) {
+        discNumber = newDiscNumber;
+      }
+      if (
+        options.guessTrackNumberUsingFilename &&
+        trackNumber === 1 &&
+        isValidTrackNumber(newTrackNumber)
+      ) {
+        trackNumber = newTrackNumber;
+      }
+    }
+  }
+
+  return [discNumber, trackNumber];
 }
 
 async function registerImage(
@@ -318,7 +376,12 @@ async function handleTranscoderResponseArtifactAudio(
         const { duration, files, id, tags } = artifactTrack;
 
         const date = tags.date ? parseDate(tags.date) : undefined;
-        const [discNumber, trackNumber] = parseDiscAndTrackNumber(tags);
+        const [discNumber, trackNumber] = parseDiscAndTrackNumberEx(
+          tags,
+          filename,
+          !!cueSheetSourceFileId,
+          options
+        );
 
         const defaultUnknownTrackTitle = options.useFilenameAsUnknownTrackTitle
           ? filename
