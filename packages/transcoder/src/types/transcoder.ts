@@ -15,6 +15,9 @@ export interface TranscoderRequestOptions {
   useFilenameAsUnknownTrackTitle: boolean;
   useTrackArtistAsUnknownAlbumArtist: boolean;
   useTrackTitleAsUnknownAlbumTitle: boolean;
+  guessDiscNumberUsingFilenameForCue: boolean;
+  guessDiscNumberUsingFilename: boolean;
+  guessTrackNumberUsingFilename: boolean;
   defaultUnknownTrackArtist: string;
   defaultUnknownTrackTitle: string;
   defaultUnknownAlbumArtist: string;
