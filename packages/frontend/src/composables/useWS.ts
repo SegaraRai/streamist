@@ -1,3 +1,13 @@
+import {
+  WS_PROTOCOL,
+  WS_QUERY_PARAM_DEVICE_CLIENT,
+  WS_QUERY_PARAM_DEVICE_ID,
+  WS_QUERY_PARAM_DEVICE_NAME,
+  WS_QUERY_PARAM_DEVICE_PLATFORM,
+  WS_QUERY_PARAM_DEVICE_TYPE,
+  WS_QUERY_PARAM_HOST,
+  WS_TOKEN_PROTOCOL_PREFIX,
+} from '$shared/config';
 import type {
   WSRequest,
   WSResponse,
@@ -40,19 +50,19 @@ function _useWS() {
     }
 
     const searchParams = new URLSearchParams([
-      ['host', sessionType.value === 'host' ? '1' : '0'],
-      ['d_id', deviceId.value],
-      ['d_type', sessionInfo.value.type],
-      ['d_platform', sessionInfo.value.platform],
-      ['d_client', sessionInfo.value.client],
-      ['d_name', sessionInfo.value.name],
+      [WS_QUERY_PARAM_HOST, sessionType.value === 'host' ? '1' : '0'],
+      [WS_QUERY_PARAM_DEVICE_ID, deviceId.value],
+      [WS_QUERY_PARAM_DEVICE_TYPE, sessionInfo.value.type],
+      [WS_QUERY_PARAM_DEVICE_PLATFORM, sessionInfo.value.platform],
+      [WS_QUERY_PARAM_DEVICE_CLIENT, sessionInfo.value.client],
+      [WS_QUERY_PARAM_DEVICE_NAME, sessionInfo.value.name],
     ]);
 
     ws = new WebSocket(
       `${import.meta.env.MODE === 'development' ? 'ws' : 'wss'}://${
         location.host
       }/ws/channels/${userId}?${searchParams}`,
-      `token~${wsToken}`
+      [WS_PROTOCOL, `${WS_TOKEN_PROTOCOL_PREFIX}${wsToken}`]
     );
 
     ws.onerror = (): void => {
