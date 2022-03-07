@@ -15,6 +15,7 @@ import type {
   WSResponseUpdated,
   WSSessionForResponse,
 } from '$shared/types';
+import { SEND_ACTIVATE_EVENT_THROTTLE } from '~/config';
 import { generateDeviceId } from '~/logic/deviceId';
 import { getUserId, tokens } from '~/logic/tokens';
 import { useSessionInfo } from '~/stores/sessionInfo';
@@ -123,6 +124,18 @@ function _useWS() {
   const findCallbackIndex = (type: string, callback: Callback<any>): number =>
     callbacks.findIndex(([t, c]) => t === type && c === callback);
 
+  const sendActivatedThrottled = useThrottleFn(
+    (): void => {
+      sendWS([
+        {
+          type: 'activate',
+        },
+      ]);
+    },
+    SEND_ACTIVATE_EVENT_THROTTLE,
+    false
+  );
+
   //
 
   tryOnScopeDispose((): void => {
@@ -144,12 +157,11 @@ function _useWS() {
     );
   });
 
-  useEventListener('focus', (): void => {
-    sendWS([
-      {
-        type: 'activate',
-      },
-    ]);
+  useEventListener('focus', sendActivatedThrottled);
+  useEventListener(document, 'visibilitychange', (): void => {
+    if (document.visibilityState === 'visible') {
+      sendActivatedThrottled();
+    }
   });
 
   //
