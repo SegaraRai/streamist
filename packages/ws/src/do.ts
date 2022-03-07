@@ -63,7 +63,10 @@ export class DO extends Actor {
       (session) => session.ws === this.hostWS
     );
 
+    const isHost = hostSession?.ws === ws;
+
     const pings: number[] = [];
+    let activated = false;
     let modifiedSessions = false;
     let modifiedState = false;
     let modifiedTracks = false;
@@ -73,6 +76,7 @@ export class DO extends Actor {
       switch (data.type) {
         case 'activate':
           senderSession.lastActivatedAt = Date.now();
+          activated = true;
           modifiedSessions = true;
           break;
 
@@ -158,8 +162,27 @@ export class DO extends Actor {
       );
     }
 
+    if (activated && !isHost) {
+      // send current state
+      send(ws, [
+        {
+          type: 'updated',
+          byHost: false,
+          byYou: true,
+          pbState: this.pbState,
+          pbTracks: this.pbTracks,
+          pbTrackChange: true,
+          sessions: modifiedSessions ? this.listSessions(ws) : undefined,
+        },
+      ]);
+    }
+
     if (modifiedState || modifiedTracks || modifiedSessions) {
       for (const session of this.sessions) {
+        if (session.ws === ws && activated && !isHost) {
+          continue;
+        }
+
         send(session.ws, [
           {
             type: 'updated',
@@ -260,9 +283,13 @@ export class DO extends Actor {
 
     try {
       ws.addEventListener('message', (event): void => {
-        // TODO: use zod
-        const data: readonly WSRequest[] = JSON.parse(event.data);
-        this.onMessage(ws, data);
+        try {
+          // TODO: use zod
+          const data: readonly WSRequest[] = JSON.parse(event.data);
+          this.onMessage(ws, data);
+        } catch (e) {
+          console.error(e);
+        }
       });
 
       ws.addEventListener('close', (): void => {
