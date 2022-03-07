@@ -282,12 +282,12 @@ export class DO extends Actor {
       if (session.ws === ws) {
         continue;
       }
-      send(ws, [
+      send(session.ws, [
         {
           type: 'updated',
           byHost: false,
           byYou: false,
-          sessions: this.listSessions(ws),
+          sessions: this.listSessions(session.ws),
         },
       ]);
     }
