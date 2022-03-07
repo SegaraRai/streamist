@@ -11,3 +11,4 @@ export * from './useSearch';
 export * from './useTimeAgo';
 export * from './useTrackFilter';
 export * from './useVirtualScroll';
+export * from './useWS';

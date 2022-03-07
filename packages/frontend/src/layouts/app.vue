@@ -351,11 +351,7 @@ export default defineComponent({
             <div
               class="h-6 bg-st-primary text-st-on-primary px-2 flex justify-end"
             >
-              <i18n-t
-                keypath="session.ListeningOn"
-                tag="div"
-                class="flex items-center min-w-60"
-              >
+              <i18n-t keypath="session.ListeningOn" tag="div" class="min-w-60">
                 <span class="font-bold mx-1">
                   {{ hostSessionName$$q }}
                 </span>
