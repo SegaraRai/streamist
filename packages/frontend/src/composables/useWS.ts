@@ -162,13 +162,14 @@ function _useWS() {
     sessions.value.find((session) => session.host)
   );
   const sessionType = eagerComputed(() => {
-    return hostSession.value?.you
+    const host = hostSession.value;
+    return !host
+      ? 'none'
+      : host.you
       ? 'host'
-      : hostSession.value?.deviceId === deviceId.value
+      : host.deviceId === deviceId.value
       ? 'hostSibling'
-      : hostSession.value
-      ? 'guest'
-      : 'none';
+      : 'guest';
   });
 
   callbacks.push(
