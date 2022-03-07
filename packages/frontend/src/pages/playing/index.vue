@@ -6,14 +6,17 @@ meta:
 </route>
 
 <script lang="ts">
+import { SwipeDirection } from '@vueuse/core';
 import type { RepeatType } from '$shared/types';
 import { useCurrentTrackInfo } from '~/composables';
+import { SWIPE_DISTANCE_THRESHOLD_BACK } from '~/config';
 import { findAncestor } from '~/logic/findAncestor';
 import { usePlaybackStore } from '~/stores/playback';
 import { useVolumeStore } from '~/stores/volume';
 
 export default defineComponent({
   setup() {
+    const router = useRouter();
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const volumeStore = useVolumeStore();
@@ -80,7 +83,28 @@ export default defineComponent({
       playbackStore.shuffle$$q.value = !playbackStore.shuffle$$q.value;
     };
 
+    const container$$q = ref<HTMLElement | null | undefined>();
+    const containerWidth = computed(() => container$$q.value?.offsetWidth);
+    const { lengthY } = useSwipe(container$$q, {
+      passive: true,
+      onSwipeEnd(_e: TouchEvent, direction: SwipeDirection) {
+        const yTrigger =
+          containerWidth.value &&
+          Math.abs(lengthY.value) / containerWidth.value >=
+            SWIPE_DISTANCE_THRESHOLD_BACK;
+
+        switch (direction) {
+          case SwipeDirection.DOWN:
+            if (yTrigger) {
+              router.back();
+            }
+            break;
+        }
+      },
+    });
+
     return {
+      container$$q,
       currentTrackInfo$$q: currentTrackInfo,
       volumeStore$$q: volumeStore,
       showRemainingTime$$q: playbackStore.showRemainingTime$$q,
@@ -129,7 +153,10 @@ export default defineComponent({
 <template>
   <div class="absolute w-full h-full select-none !px-0">
     <div class="flex flex-col h-full px-6 pt-8 max-w-xl mx-auto">
-      <div class="flex-1 flex flex-col items-center justify-start gap-y-4">
+      <div
+        ref="container$$q"
+        class="flex-1 flex flex-col items-center justify-start gap-y-4"
+      >
         <template v-if="currentTrackInfo$$q">
           <div class="w-full px-4">
             <RouterLink
