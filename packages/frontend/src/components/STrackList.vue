@@ -175,28 +175,27 @@ export default defineComponent({
         )
     );
 
-    const propsStrAvailableSetList = computed(
-      () =>
-        props.setList &&
-        props.setList
-          .map(({ id }) => id)
-          .filter((id) => isTrackAvailable$$q(id))
-          .join('\n')
-    );
+    // true if props.setList is a superset of playback setList
+    const isSameSetList$$q = computed<boolean>((): boolean => {
+      if (props.skipSetListCheck) {
+        return true;
+      }
 
-    const playbacksStrAvailableSetList = computed(
-      () =>
-        playbackStore.currentSetList$$q.value &&
-        playbackStore.currentSetList$$q.value
-          .filter((id) => isTrackAvailable$$q(id))
-          .join('\n')
-    );
+      const pbSetList =
+        playbackStore.currentSetList$$q.value?.filter(isTrackAvailable$$q) ||
+        [];
+      const propSetList =
+        props.setList?.map(({ id }) => id).filter(isTrackAvailable$$q) || [];
 
-    const isSameSetList$$q = eagerComputed(
-      () =>
-        props.skipSetListCheck ||
-        propsStrAvailableSetList.value === playbacksStrAvailableSetList.value
-    );
+      const propSetListSet = new Set(propSetList);
+      for (const trackId of pbSetList) {
+        if (!propSetListSet.has(trackId)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     const items = computed(() => {
       if (!trackItems.value) {
