@@ -27,6 +27,7 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    skipSetListCheck: Boolean,
     visitAlbum: Boolean,
     visitArtist: Boolean,
   },
@@ -251,6 +252,7 @@ export default defineComponent({
       index-content="trackNumber"
       :set-list="setList"
       :set-list-name="setListName || value$$q?.album$$q.title"
+      :skip-set-list-check="skipSetListCheck"
       :visit-album="visitAlbum"
       :visit-artist="visitArtist"
       show-delete
