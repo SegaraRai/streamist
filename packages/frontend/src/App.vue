@@ -1,7 +1,7 @@
 <script lang="ts">
 import { storeToRefs } from 'pinia';
 import type { Ref } from 'vue';
-import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
+import { useEffectiveTheme } from '~/composables';
 import { LanguageCode, THEMES } from '~/config';
 import { NAIVE_UI_THEMES } from '~/logic/theme';
 import { loggedInRef } from '~/stores/auth';

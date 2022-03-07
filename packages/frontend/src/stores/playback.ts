@@ -1,9 +1,14 @@
 import type { RepeatType, WSPlaybackState } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
-import { useLiveQuery, useRecentlyPlayed, useTrackFilter } from '~/composables';
-import { useAccurateTime } from '~/composables/useAccurateTime';
-import { useWS, useWSListener } from '~/composables/useWS';
+import {
+  useAccurateTime,
+  useLiveQuery,
+  useRecentlyPlayed,
+  useTrackFilter,
+  useWS,
+  useWSListener,
+} from '~/composables';
 import {
   SEEK_BACKWARD_TIME,
   SEEK_FORWARD_TIME,
