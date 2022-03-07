@@ -429,16 +429,6 @@ export default defineComponent({
             <div class="s-track-list-column-menu py-1"></div>
           </template>
         </VListItem>
-        <VDivider
-          class="mx-1"
-          :class="
-            renderMode !== 'draggable' &&
-            items$$q[0]?.type$$q === 'discNumberHeader'
-              ? 'invisible'
-              : ''
-          "
-          @contextmenu.prevent
-        />
       </template>
       <template v-if="items$$q.length === 0"></template>
       <template v-if="renderMode === 'plain'">
