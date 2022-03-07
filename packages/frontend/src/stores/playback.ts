@@ -211,9 +211,10 @@ function _usePlaybackStore() {
           sendWS$$q(
             [
               {
-                type: playing.value ? 'play' : 'pause',
+                type: 'setState',
                 duration,
                 position: value,
+                playing: playing.value,
                 timestamp: getAccurateTime(),
               },
             ],
@@ -325,9 +326,10 @@ function _usePlaybackStore() {
         sendWS$$q(
           [
             {
-              type: value ? 'play' : 'pause',
+              type: 'setState',
               duration,
               position,
+              playing: value,
               timestamp: getAccurateTime(),
             },
           ],
@@ -442,9 +444,10 @@ function _usePlaybackStore() {
       sendWS$$q(
         [
           {
-            type: playing ? 'play' : 'pause',
+            type: 'setState',
             duration: audio.duration,
             position: audio.currentTime,
+            playing,
             timestamp: getAccurateTime(),
           },
         ],
@@ -761,9 +764,10 @@ function _usePlaybackStore() {
                 trackChange: true,
               },
               {
-                type: playing ? 'play' : 'pause',
+                type: 'setState',
                 duration: track.duration,
                 position: clampedPosition,
+                playing,
                 timestamp: getAccurateTime(),
               },
             ],

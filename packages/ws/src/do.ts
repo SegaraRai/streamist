@@ -9,6 +9,7 @@ import type {
   WSSessionForResponse,
 } from '$shared/types';
 import { decodeUTF8Base64URL } from '$shared/unicodeBase64';
+import { zWSRequests } from '$shared/validations';
 import type { DORequestData, WSBindings } from './types';
 
 type Mutable<T> = {
@@ -80,13 +81,11 @@ export class DO extends Actor {
           modifiedSessions = true;
           break;
 
-        case 'pause':
-        case 'play': {
-          const isPlay = data.type === 'play';
+        case 'setState': {
           senderSession.lastActivatedAt = Date.now();
           this.pbState = {
             duration: data.duration,
-            playing: isPlay && !!this.hostWS,
+            playing: data.playing && !!this.hostWS,
             startPosition: data.position,
             startedAt: data.timestamp,
           };
@@ -284,8 +283,7 @@ export class DO extends Actor {
     try {
       ws.addEventListener('message', (event): void => {
         try {
-          // TODO: use zod
-          const data: readonly WSRequest[] = JSON.parse(event.data);
+          const data = zWSRequests.parse(JSON.parse(event.data));
           this.onMessage(ws, data);
         } catch (e) {
           console.error(e);

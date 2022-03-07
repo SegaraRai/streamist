@@ -316,9 +316,11 @@ importers:
       iconv-lite: ^0.6.3
       vite: ^2.8.6
       vitest: ^0.5.9
+      zod: ^3.13.4
     dependencies:
       chardet: 1.4.0
       iconv-lite: 0.6.3
+      zod: 3.13.4
     devDependencies:
       vite: 2.8.6
       vitest: 0.5.9
@@ -404,7 +406,7 @@ importers:
       rollup: 2.70.0
       rollup-plugin-esbuild: 4.8.2_esbuild@0.14.25+rollup@2.70.0
       rollup-plugin-terser: 7.0.2_rollup@2.70.0
-      rollup-plugin-tsconfig-paths: 1.1.6_rollup@2.70.0+typescript@4.6.2
+      rollup-plugin-tsconfig-paths: 1.1.6_rollup@2.70.0
 
 packages:
 
@@ -6317,18 +6319,6 @@ packages:
       type-fest: 0.20.2
     dev: true
 
-  /globby/11.0.4:
-    resolution: {integrity: sha512-9O4MVG9ioZJ08ffbcyVYyLOJLk5JQ688pJ4eMGLpdWLHq/Wr1D9BlriLQyL0E+jbkuePVZXYFj47QM/v093wHg==}
-    engines: {node: '>=10'}
-    dependencies:
-      array-union: 2.1.0
-      dir-glob: 3.0.1
-      fast-glob: 3.2.11
-      ignore: 5.2.0
-      merge2: 1.4.1
-      slash: 3.0.0
-    dev: false
-
   /globby/11.1.0:
     resolution: {integrity: sha512-jhIXaOzy1sb8IyocaruWSn1TjmnBVs8Ayhcy83rmxNJ8q2uWKCAj3CnJY+KpGSXCueAPc0i05kVvVKtP1t9S3g==}
     engines: {node: '>=10'}
@@ -6339,7 +6329,6 @@ packages:
       ignore: 5.2.0
       merge2: 1.4.1
       slash: 3.0.0
-    dev: true
 
   /globjoin/0.1.4:
     resolution: {integrity: sha1-L0SUrIkZ43Z8XLtpHp9GMyQoXUM=}
@@ -8699,6 +8688,17 @@ packages:
       - acorn
     dev: true
 
+  /rollup-plugin-tsconfig-paths/1.1.6_rollup@2.70.0:
+    resolution: {integrity: sha512-g+SOMt2jfjgUekeCqLDuw9HQhxogzp9pU8Hccb8bR7o+ebNLKkuIeGHnbdva2XN4a7JnMKpKqKwtlZzPTM5rDQ==}
+    peerDependencies:
+      rollup: ^2
+    dependencies:
+      rollup: 2.70.0
+      typescript-paths: 1.3.1
+    transitivePeerDependencies:
+      - typescript
+    dev: true
+
   /rollup-plugin-tsconfig-paths/1.1.6_rollup@2.70.0+typescript@4.6.2:
     resolution: {integrity: sha512-g+SOMt2jfjgUekeCqLDuw9HQhxogzp9pU8Hccb8bR7o+ebNLKkuIeGHnbdva2XN4a7JnMKpKqKwtlZzPTM5rDQ==}
     peerDependencies:
@@ -9506,7 +9506,7 @@ packages:
     dependencies:
       '@tsd/typescript': 4.5.4
       eslint-formatter-pretty: 4.1.0
-      globby: 11.0.4
+      globby: 11.1.0
       meow: 9.0.0
       path-exists: 4.0.0
       read-pkg-up: 7.0.1
@@ -9572,6 +9572,12 @@ packages:
   /type-fest/0.8.1:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
+
+  /typescript-paths/1.3.1:
+    resolution: {integrity: sha512-K/idYNIohZAaQTd5hIlVNJnRc2g65mgAno4kfz5VXHTFHh34Ai6Q4Jf2u8B+QkRSJWzNSprOGXnmb6yaYKzOyg==}
+    peerDependencies:
+      typescript: ^4.1.2
+    dev: true
 
   /typescript-paths/1.3.1_typescript@4.6.2:
     resolution: {integrity: sha512-K/idYNIohZAaQTd5hIlVNJnRc2g65mgAno4kfz5VXHTFHh34Ai6Q4Jf2u8B+QkRSJWzNSprOGXnmb6yaYKzOyg==}
@@ -10715,3 +10721,7 @@ packages:
       mustache: 4.2.0
       stack-trace: 0.0.10
     dev: true
+
+  /zod/3.13.4:
+    resolution: {integrity: sha512-LZRucWt4j/ru5azOkJxCfpR87IyFDn8h2UODdqvXzZLb3K7bb9chUrUIGTy3BPsr8XnbQYfQ5Md5Hu2OYIo1mg==}
+    dev: false
