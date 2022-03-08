@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import { fetch } from 'undici';
 import { SECRET_HCAPTCHA_SECRET_KEY } from '$/services/env';
 import { logger } from '$/services/logger';
 import { HTTPError } from '$/utils/httpError';

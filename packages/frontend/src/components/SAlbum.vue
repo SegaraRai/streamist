@@ -140,7 +140,7 @@ export default defineComponent({
 <template>
   <template v-if="value$$q">
     <div
-      class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-5"
+      class="mb-6 <md:mt-4 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-5"
     >
       <div class="p-0 m-0 leading-none flex-none">
         <template v-if="linkExcludes.includes(albumId$$q)">

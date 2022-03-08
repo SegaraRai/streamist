@@ -46,7 +46,9 @@ export default defineComponent({
 
           case SwipeDirection.UP:
             if (yTrigger) {
-              router.push('/playing');
+              if (currentTrackInfo.value) {
+                router.push('/playing');
+              }
             }
             break;
         }
@@ -97,19 +99,22 @@ export default defineComponent({
       ref="container$$q"
       class="w-full flex-1 flex flex-row px-4 items-center"
     >
-      <RouterLink
-        class="flex-1 flex items-center overflow-hidden"
-        to="/playing"
-      >
-        <template v-if="currentTrackInfo$$q">
+      <template v-if="currentTrackInfo$$q">
+        <RouterLink
+          class="flex-1 flex items-center overflow-hidden"
+          to="/playing"
+        >
           <SPlaybackTrackView
             :track="currentTrackInfo$$q.track$$q"
             :artist-name="currentTrackInfo$$q.trackArtist$$q.name"
             :session-name="sessionName"
             navigate-playing
           />
-        </template>
-      </RouterLink>
+        </RouterLink>
+      </template>
+      <template v-else>
+        <div class="flex-1 flex"></div>
+      </template>
       <div class="flex-none flex pl-4 gap-4 items-center">
         <SSessionManager />
         <!-- TODO: implement vertical volume control -->
