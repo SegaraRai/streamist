@@ -18,9 +18,6 @@ appBar:
     SignIn: ログイン
     SignUp: 登録
 common:
-  SignOut: ログアウト
-  Synchronize: データベースを同期
-  Synchronized: 同期しました
   ThisActionCannotBeUndone: この操作は取り消せません
 session:
   ListeningOn: '{0} で再生中'
@@ -95,13 +92,20 @@ settings:
   device:
     title: デバイス設定
     header:
+      Account: アカウント
       AudioQuality: 音質
       ConfirmOnLeave: 終了時の確認
       Language: 言語
       RemoteMediaSession: リモートメディアセッション
+      Repair: 修復
       Theme: テーマ
-    link:
+    account:
       AccountSettings: アカウント設定
+      SignOut: ログアウト
+    repair:
+      description: アプリが正常に動作しない場合にお試しください
+      DBSynchronize: データベースを同期
+      DBSynchronized: 同期しました
     DoNotExitWithBackButton: 戻るボタンで終了しない
     RequiresRestartToTakeEffect: 変更の適用には再起動が必要です
     ShowRemoteMediaSession: リモートメディアセッションを表示する (実験的)
