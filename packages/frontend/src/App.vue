@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import type { Ref } from 'vue';
 import { useEffectiveTheme } from '~/composables';
 import { LanguageCode, THEMES } from '~/config';
+import { checkAPIStatus } from '~/logic/apiCheck';
 import { NAIVE_UI_THEMES } from '~/logic/theme';
 import { loggedInRef } from '~/stores/auth';
 import { usePreferenceStore } from '~/stores/preference';
@@ -53,6 +54,16 @@ export default defineComponent({
       () => NAIVE_UI_THEMES[themeName$$q.value]
     );
 
+    onBeforeMount(() => {
+      checkAPIStatus().then((status) => {
+        switch (status) {
+          case 'ng_needs_auth':
+            location.href = '/auth?to=' + encodeURIComponent(location.pathname);
+            break;
+        }
+      });
+    });
+
     return {
       isLoggedIn$$q: loggedInRef,
       naiveUITheme$$q: naiveUITheme,
@@ -63,6 +74,7 @@ export default defineComponent({
 
 <template>
   <NConfigProvider
+    class="h-full"
     :theme="naiveUITheme$$q.base"
     :theme-overrides="naiveUITheme$$q.overrides"
   >

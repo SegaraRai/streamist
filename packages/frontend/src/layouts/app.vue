@@ -387,19 +387,4 @@ export default defineComponent({
 .s-playback--desktop.s-session--remote .s-footer-height {
   @apply h-30;
 }
-
-.s-v-main.v-main > .v-main__wrap {
-  @apply flex;
-  @apply flex-col;
-  @apply h-full;
-}
-
-html.s-static-layout {
-  overflow: hidden;
-}
-
-html.s-static-layout .s-v-main.v-main {
-  @apply !absolute;
-  @apply h-full;
-}
 </style>
