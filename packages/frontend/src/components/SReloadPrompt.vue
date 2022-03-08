@@ -32,7 +32,7 @@ export default defineComponent({
 <template>
   <template v-if="needRefresh$$q">
     <div
-      class="z-10 bg-st-tooltip text-st-on-tooltip fixed right-0 bottom-25 m-4 p-4 text-left shadow-md rounded text-base"
+      class="z-1100 bg-st-tooltip text-st-on-tooltip fixed right-0 bottom-25 m-4 p-4 text-left shadow-md rounded text-base"
       role="alert"
     >
       <div class="flex flex-col gap-y-4 md:min-w-80">

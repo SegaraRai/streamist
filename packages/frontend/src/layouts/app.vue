@@ -337,7 +337,7 @@ export default defineComponent({
     </VApp>
 
     <footer
-      class="s-footer-height flex-none select-none fixed bottom-0 z-1100 w-full m-0 p-0"
+      class="s-footer-height flex-none select-none fixed bottom-0 z-1200 w-full m-0 p-0"
       :class="hideShell$$q && '!hidden'"
       @contextmenu.prevent
     >
