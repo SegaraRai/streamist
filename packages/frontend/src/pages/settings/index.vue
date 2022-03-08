@@ -141,6 +141,20 @@ export default defineComponent({
             />
           </div>
         </div>
+        <div class="flex flex-col gap-y-2">
+          <h2 class="text-xl">
+            {{ t('settings.device.header.RemoteMediaSession') }}
+          </h2>
+          <div class="w-64">
+            <VSwitch
+              v-model="preferenceStore$$q.enableRemoteMediaSession"
+              :label="t('settings.device.ShowRemoteMediaSession')"
+              color="primary"
+              density="compact"
+              hide-details
+            />
+          </div>
+        </div>
         <div class="flex flex-col gap-y-4">
           <h2 class="text-xl">
             {{ t('settings.device.header.ConfirmOnLeave') }}

@@ -7,6 +7,7 @@ import {
   PREFERENCE_AUDIO_QUALITY_DEFAULT,
   PREFERENCE_CONFIRM_ON_LEAVES,
   PREFERENCE_CONFIRM_ON_LEAVE_DEFAULT,
+  PREFERENCE_ENABLE_REMOTE_MEDIA_SESSION_DEFAULT,
   PREFERENCE_LANGUAGE_CODES,
   PREFERENCE_PWA_PREVENT_CLOSE_DEFAULT,
 } from '~/config';
@@ -52,11 +53,17 @@ export const usePreferenceStore = defineStore('preference', () => {
     PREFERENCE_PWA_PREVENT_CLOSE_DEFAULT
   );
 
+  const enableRemoteMediaSession = useLocalStorage<boolean>(
+    'preference.enableRemoteMediaSession',
+    PREFERENCE_ENABLE_REMOTE_MEDIA_SESSION_DEFAULT
+  );
+
   return {
     audioQuality,
     language,
     confirmOnLeave,
     pwaPreventClose,
+    enableRemoteMediaSession,
   };
 });
 

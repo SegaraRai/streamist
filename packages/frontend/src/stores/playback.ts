@@ -18,6 +18,7 @@ import { db } from '~/db';
 import { getBestTrackFileURL } from '~/logic/audio';
 import { needsCDNCookie, setCDNCookie } from '~/logic/cdnCookie';
 import { getImageFileURL } from '~/logic/fileURL';
+import { createSilentMP3DataURI } from '~/logic/silentMP3';
 import { getUserId } from '~/logic/tokens';
 import { TrackProvider2 } from '~/logic/trackProvider2';
 import {
@@ -71,6 +72,31 @@ async function createMetadataInit(
   };
 }
 
+async function seek(audio: HTMLAudioElement, position: number): Promise<void> {
+  if (audio.readyState === HTMLMediaElement.HAVE_NOTHING) {
+    let cleanup: () => void;
+    const canPlayPromise = new Promise((resolve, reject): void => {
+      audio.addEventListener('canplay', resolve, {
+        once: true,
+      });
+      audio.addEventListener('abort', reject, {
+        once: true,
+      });
+      audio.addEventListener('error', reject, {
+        once: true,
+      });
+      cleanup = (): void => {
+        audio.removeEventListener('canplay', resolve);
+        audio.removeEventListener('abort', reject);
+        audio.removeEventListener('error', reject);
+      };
+    });
+    await canPlayPromise;
+    cleanup!();
+  }
+  audio.currentTime = position;
+}
+
 function _usePlaybackStore() {
   const volumeStore = useVolumeStore();
   const { isTrackAvailable$$q, serializedFilterKey$$q } = useTrackFilter();
@@ -82,6 +108,12 @@ function _usePlaybackStore() {
   const remotePlaybackState = ref<WSPlaybackState | undefined>();
 
   // WS
+
+  /**
+   * indicates whether the operation was caused internally or by the user agent (via media session)
+   */
+  let skipSendStatePlayPause = false;
+  let skipSendStateSeek = false;
 
   let processingConnectedEvent = false;
   let processingUpdatedEvent = false;
@@ -113,25 +145,103 @@ function _usePlaybackStore() {
         internalRemoteSeekingPosition.value = undefined;
       }
 
-      // update trackProvider
       if (!byYou) {
+        // update trackProvider
         if (data.pbTracks !== undefined) {
           if (data.pbTracks) {
             trackProvider.import$$q(data.pbTracks, data.pbTrackChange ?? false);
             currentSetListName.value = data.pbTracks.setListName;
           }
         }
-      }
 
-      // apply state
-      if (data.pbState && !data.pbTrackChange && isHost && !byYou) {
-        playing.value = data.pbState.playing;
-        position.value = calcPositionFromState(data.pbState, getAccurateTime());
+        // apply state
+        if (data.pbState && !data.pbTrackChange) {
+          const newPosition = calcPositionFromState(
+            data.pbState,
+            getAccurateTime()
+          );
+          if (isHost) {
+            // FIXME: this causes two setState requests (by seeked and play/pause event handlers)
+            if (data.pbState.playing) {
+              position.value = newPosition;
+              playing.value = true;
+            } else {
+              playing.value = false;
+              position.value = newPosition;
+            }
+          } else if (dummyAudio) {
+            skipSendStatePlayPause = true;
+            skipSendStateSeek = true;
+            if (data.pbState.playing) {
+              dummyAudio.currentTime = newPosition;
+              dummyAudio.play();
+            } else {
+              dummyAudio.pause();
+              dummyAudio.currentTime = newPosition;
+            }
+          }
+        }
       }
     } finally {
       processingUpdatedEvent = false;
     }
   });
+
+  // utils
+
+  const sendState = (
+    audio: HTMLAudioElement,
+    playing = !audio.paused
+  ): void => {
+    if (
+      !audio.src ||
+      !isFinite(audio.duration) ||
+      !isFinite(audio.currentTime)
+    ) {
+      console.warn(
+        'audio.src is null or audio.duration or audio.currentTime is not finite'
+      );
+      return;
+    }
+
+    sendWS$$q(
+      [
+        {
+          type: 'setState',
+          duration: audio.duration,
+          position: audio.currentTime,
+          playing,
+          timestamp: getAccurateTime(),
+        },
+      ],
+      true
+    );
+  };
+
+  const sendStateUsingRemoteState = (
+    playing: boolean,
+    position?: number
+  ): void => {
+    const state = remotePlaybackState.value;
+    if (!state) {
+      return;
+    }
+
+    const timestamp = getAccurateTime();
+
+    sendWS$$q(
+      [
+        {
+          type: 'setState',
+          duration: state.duration,
+          position: position ?? calcPositionFromState(state, timestamp),
+          playing,
+          timestamp,
+        },
+      ],
+      true
+    );
+  };
 
   //
 
@@ -142,7 +252,22 @@ function _usePlaybackStore() {
     false
   );
 
+  let dummyAudio: HTMLAudioElement | undefined;
   let currentAudio: HTMLAudioElement | undefined;
+
+  const getAudio = (): HTMLAudioElement | null | undefined => {
+    switch (sessionType$$q.value) {
+      case 'host':
+        return currentAudio || null;
+
+      case 'hostSibling':
+      case 'guest':
+        // not checking enableRemoteMediaSession intentionally
+        return dummyAudio || null;
+    }
+
+    return;
+  };
 
   const trackProvider = new TrackProvider2();
 
@@ -167,24 +292,25 @@ function _usePlaybackStore() {
     );
   const position = computed<number | undefined>({
     get: (): number | undefined => {
-      // note that position may exist even if sessionType is 'none'
-      if (sessionType$$q.value !== 'host') {
-        const remoteState = remotePlaybackState.value;
-        if (!remoteState) {
-          return undefined;
-        }
-        return (
-          internalRemoteSeekingPosition.value ??
-          calcPositionFromState(remoteState, accurateTimeRef.value)
-        );
+      if (sessionType$$q.value === 'host') {
+        return internalSeekingPosition.value ?? internalPosition.value;
       }
-      return internalSeekingPosition.value ?? internalPosition.value;
+      // note that position may exist even if sessionType is 'none'
+      const remoteState = remotePlaybackState.value;
+      if (!remoteState) {
+        return undefined;
+      }
+      return (
+        internalRemoteSeekingPosition.value ??
+        calcPositionFromState(remoteState, accurateTimeRef.value)
+      );
     },
     set: (value: number | undefined): void => {
       if (value == null) {
         return;
       }
 
+      const audio = getAudio();
       const byRemote = processingConnectedEvent || processingUpdatedEvent;
 
       const duration =
@@ -200,32 +326,31 @@ function _usePlaybackStore() {
       value = Math.max(0, Math.min(value, duration));
 
       if (sessionType$$q.value === 'host') {
-        if (!currentAudio) {
-          return;
-        }
-
         internalSeekingPosition.value = value;
-        currentAudio.currentTime = value;
       }
 
-      if (!byRemote) {
+      if (audio) {
+        skipSendStateSeek = true;
+        audio.currentTime = value;
+      }
+
+      // send event
+      // skip sending if host because it will be sent by 'seeked' event handler
+      if (!byRemote && sessionType$$q.value !== 'host') {
         internalRemoteSeekingPosition.value = value;
 
-        // skip sending if host because it will be sent by 'seeked' event handler
-        if (sessionType$$q.value !== 'host') {
-          sendWS$$q(
-            [
-              {
-                type: 'setState',
-                duration,
-                position: value,
-                playing: playing.value,
-                timestamp: getAccurateTime(),
-              },
-            ],
-            true
-          );
-        }
+        sendWS$$q(
+          [
+            {
+              type: 'setState',
+              duration,
+              position: value,
+              playing: playing.value,
+              timestamp: getAccurateTime(),
+            },
+          ],
+          true
+        );
       }
     },
   });
@@ -252,24 +377,25 @@ function _usePlaybackStore() {
       if (sessionType$$q.value === 'none') {
         return false;
       }
-      if (
-        sessionType$$q.value !== 'host' &&
-        remotePlaybackState.value != null
-      ) {
-        return remotePlaybackState.value.playing;
+      if (sessionType$$q.value !== 'host') {
+        return remotePlaybackState.value?.playing || false;
       }
       return internalPlaying.value;
     },
     set: (value: boolean): void => {
-      const audio = currentAudio;
+      const audio = getAudio();
       const byRemote = processingConnectedEvent || processingUpdatedEvent;
+
+      console.log('playing set', value, byRemote, audio);
 
       const currentValue = playing.value;
       if (value === currentValue) {
+        console.log('nothing changed');
         return;
       }
 
       if (value && !currentTrackId.value) {
+        console.log('do playNext');
         playNext();
         return;
       }
@@ -294,52 +420,61 @@ function _usePlaybackStore() {
         return;
       }
 
-      if (sessionType$$q.value === 'host') {
-        if (!audio) {
-          return;
-        }
+      if (audio) {
+        (async (): Promise<void> => {
+          if (value !== audio.paused) {
+            return;
+          }
 
-        internalPlaying.value = value;
-
-        if (value) {
-          (async (): Promise<void> => {
+          if (value) {
             if (needsCDNCookie(audio.src)) {
               await setCDNCookie();
             }
             if (currentAudio === audio) {
+              skipSendStatePlayPause = true;
               await audio.play();
             }
-          })();
+          } else {
+            skipSendStatePlayPause = true;
+            audio.pause();
+          }
+        })();
+      }
+
+      if (!byRemote && sessionType$$q.value !== 'host') {
+        // if there is no host, play tracks in this session
+        if (sessionType$$q.value === 'none' && value) {
+          // TODO: make this work on offline
+          sendWS$$q(
+            [
+              {
+                type: 'setHost',
+              },
+              {
+                type: 'setState',
+                duration,
+                position,
+                playing: value,
+                timestamp: getAccurateTime(),
+              },
+            ],
+            true
+          );
         } else {
-          audio.pause();
+          // otherwise, send play/pause (to host and other sessions)
+          sendWS$$q(
+            [
+              {
+                type: 'setState',
+                duration,
+                position,
+                playing: value,
+                timestamp: getAccurateTime(),
+              },
+            ],
+            true
+          );
         }
-
-        // skip sending play/pause because it will be sent by 'play' and 'pause' event handler
-        return;
-      }
-
-      // do nothing if not host and triggered by remote
-      if (byRemote) {
-        return;
-      }
-
-      // if there is no host, play tracks in this session
-      if (sessionType$$q.value === 'none' && !byRemote && value) {
-        setTimeout((): void => playTrack(value, position), 0);
-      } else {
-        // otherwise, send play/pause (to host and other sessions)
-        sendWS$$q(
-          [
-            {
-              type: 'setState',
-              duration,
-              position,
-              playing: value,
-              timestamp: getAccurateTime(),
-            },
-          ],
-          true
-        );
       }
     },
   });
@@ -349,16 +484,25 @@ function _usePlaybackStore() {
       return;
     }
 
-    position.value = position.value + diff;
+    const audio = getAudio();
+    if (audio) {
+      audio.currentTime += diff;
+    } else if (audio !== null) {
+      position.value += diff;
+    }
   };
 
   const goPrevious = (): void => {
     if (
-      currentAudio &&
       position.value != null &&
       position.value >= SEEK_TO_BEGINNING_THRESHOLD
     ) {
-      position.value = 0;
+      const audio = getAudio();
+      if (audio) {
+        audio.currentTime = 0;
+      } else if (audio !== null) {
+        position.value = 0;
+      }
       return;
     }
 
@@ -367,11 +511,29 @@ function _usePlaybackStore() {
 
   const setMediaSessionActionHandlers = (): void => {
     navigator.mediaSession.setActionHandler('play', (): void => {
-      playing.value = true;
+      if (!currentTrack.value.value) {
+        return;
+      }
+
+      const audio = getAudio();
+      if (audio) {
+        audio.play();
+      } else if (audio !== null) {
+        playing.value = true;
+      }
     });
 
     navigator.mediaSession.setActionHandler('pause', (): void => {
-      playing.value = false;
+      if (!currentTrack.value.value) {
+        return;
+      }
+
+      const audio = getAudio();
+      if (audio) {
+        audio.pause();
+      } else if (audio !== null) {
+        playing.value = false;
+      }
     });
 
     navigator.mediaSession.setActionHandler('previoustrack', (): void => {
@@ -393,20 +555,24 @@ function _usePlaybackStore() {
     try {
       navigator.mediaSession.setActionHandler('seekto', (event): void => {
         const { seekTime } = event;
-        if (!currentAudio || seekTime == null) {
+        if (seekTime == null) {
           return;
         }
-        if (event.fastSeek && 'fastSeek' in currentAudio) {
-          currentAudio.fastSeek(seekTime);
-          return;
+        const audio = getAudio();
+        if (audio) {
+          internalSeekingPosition.value = seekTime;
+          if (
+            sessionType$$q.value === 'host' &&
+            event.fastSeek &&
+            'fastSeek' in audio
+          ) {
+            audio.fastSeek(seekTime);
+            return;
+          }
+          audio.currentTime = seekTime;
+        } else if (audio === null) {
+          position.value = seekTime;
         }
-        internalSeekingPosition.value = seekTime;
-        currentAudio.currentTime = seekTime;
-        navigator.mediaSession.setPositionState({
-          duration: currentAudio.duration,
-          playbackRate: currentAudio.playbackRate,
-          position: seekTime,
-        });
       });
     } catch (error) {
       console.warn(
@@ -428,38 +594,15 @@ function _usePlaybackStore() {
 
   const createAudio = (): HTMLAudioElement => {
     const audio = new Audio();
+    audio.autoplay = false;
+    audio.volume = visualVolumeToRealVolume(volumeStore.volume);
     audio.classList.add('currentTrack');
     audio.classList.add('preparing');
-    audio.volume = visualVolumeToRealVolume(volumeStore.volume);
-
     // console.info('create', audio);
+    return audio;
+  };
 
-    const sendState = (playing = !audio.paused): void => {
-      if (
-        !audio.src ||
-        !isFinite(audio.duration) ||
-        !isFinite(audio.currentTime)
-      ) {
-        console.warn(
-          'audio.src is null or audio.duration or audio.currentTime is not finite'
-        );
-        return;
-      }
-
-      sendWS$$q(
-        [
-          {
-            type: 'setState',
-            duration: audio.duration,
-            position: audio.currentTime,
-            playing,
-            timestamp: getAccurateTime(),
-          },
-        ],
-        true
-      );
-    };
-
+  const setupAudioEventListeners = (audio: HTMLAudioElement): void => {
     audio.onplay = (): void => {
       if (currentAudio !== audio) {
         console.info('ignoring play', currentAudio, audio);
@@ -467,11 +610,7 @@ function _usePlaybackStore() {
       }
 
       internalPlaying.value = true;
-
-      // skip sending 'play' event as it is already sent by 'trackChange' event handler
-      if (!audio.classList.contains('preparing')) {
-        sendState(true);
-      }
+      sendState(audio, true);
     };
 
     audio.onpause = (): void => {
@@ -481,7 +620,7 @@ function _usePlaybackStore() {
       }
 
       internalPlaying.value = false;
-      sendState(false);
+      sendState(audio, false);
     };
 
     audio.onseeked = (): void => {
@@ -492,7 +631,7 @@ function _usePlaybackStore() {
 
       internalSeekingPosition.value = undefined;
       internalPosition.value = audio.currentTime;
-      sendState();
+      sendState(audio);
     };
 
     audio.ontimeupdate = (): void => {
@@ -527,8 +666,67 @@ function _usePlaybackStore() {
       }
       volumeStore.volume = vol;
     };
+  };
 
+  const createDummyAudio = (): HTMLAudioElement => {
+    const audio = new Audio();
+    audio.autoplay = false;
+    audio.volume = 0;
+    audio.classList.add('dummyTrack');
     return audio;
+  };
+
+  const setupDummyAudioEventListeners = (audio: HTMLAudioElement): void => {
+    audio.onplay = (): void => {
+      if (skipSendStatePlayPause || dummyAudio !== audio) {
+        console.info(
+          'ignoring play (dummy)',
+          audio.paused,
+          audio.seeking,
+          audio.currentTime,
+          skipSendStatePlayPause,
+          skipSendStateSeek
+        );
+        skipSendStatePlayPause = false;
+        return;
+      }
+
+      sendStateUsingRemoteState(true);
+    };
+
+    audio.onpause = (): void => {
+      if (skipSendStatePlayPause || dummyAudio !== audio) {
+        console.info(
+          'ignoring pause (dummy)',
+          audio.paused,
+          audio.seeking,
+          audio.currentTime,
+          skipSendStatePlayPause,
+          skipSendStateSeek
+        );
+        skipSendStatePlayPause = false;
+        return;
+      }
+
+      sendStateUsingRemoteState(false);
+    };
+
+    audio.onseeked = (): void => {
+      if (skipSendStateSeek || dummyAudio !== audio) {
+        console.info(
+          'ignoring seeked (dummy)',
+          audio.paused,
+          audio.seeking,
+          audio.currentTime,
+          skipSendStatePlayPause,
+          skipSendStateSeek
+        );
+        skipSendStateSeek = false;
+        return;
+      }
+
+      sendStateUsingRemoteState(!audio.paused, audio.currentTime);
+    };
   };
 
   const cleanupAudio = (audio: HTMLAudioElement): void => {
@@ -540,6 +738,9 @@ function _usePlaybackStore() {
     audio.ontimeupdate = null;
     audio.onended = null;
     audio.onvolumechange = null;
+
+    audio.pause();
+    audio.src = '';
   };
 
   const setSetListAndPlay = (
@@ -678,14 +879,16 @@ function _usePlaybackStore() {
     const trackId = trackProvider.currentTrack$$q;
     currentTrackId.value = trackId;
 
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = null;
-    }
-
     if (currentAudio) {
       cleanupAudio(currentAudio);
       currentAudio.remove();
       currentAudio = undefined;
+    }
+
+    if (dummyAudio) {
+      cleanupAudio(dummyAudio);
+      dummyAudio.remove();
+      dummyAudio = undefined;
     }
 
     // load audio here because watching currentTrack does not trigger if the previous track is the same
@@ -696,11 +899,7 @@ function _usePlaybackStore() {
         return;
       }
 
-      const newAudio = createAudio();
-      currentAudio = newAudio;
-
-      audioContainer.appendChild(newAudio);
-      internalSeekingPosition.value = undefined;
+      internalSeekingPosition.value = position || undefined;
       internalPosition.value = 0;
 
       (async (): Promise<void> => {
@@ -723,37 +922,42 @@ function _usePlaybackStore() {
 
         const metadataInit = await createMetadataInit(userId, track);
 
-        if (currentAudio !== newAudio) {
+        if (currentAudio || dummyAudio) {
+          console.warn('another audio is already playing');
           return;
         }
+
+        console.log(sessionType$$q.value, byRemote);
 
         if (
           sessionType$$q.value === 'host' ||
           (sessionType$$q.value === 'none' && !byRemote)
         ) {
+          const newAudio = createAudio();
+          currentAudio = newAudio;
+
+          audioContainer.appendChild(newAudio);
+
           newAudio.preload = 'auto';
           newAudio.src = url;
           if (clampedPosition) {
-            const canPlayPromise = new Promise((resolve, reject): void => {
-              newAudio.addEventListener('canplay', resolve, {
-                once: true,
-              });
-              newAudio.addEventListener('abort', reject, {
-                once: true,
-              });
-              newAudio.addEventListener('error', reject, {
-                once: true,
-              });
-            });
-            await canPlayPromise;
-            // TODO: clear event listeners
-            newAudio.currentTime = clampedPosition;
+            internalSeekingPosition.value = clampedPosition;
+            await seek(newAudio, clampedPosition);
+          } else {
+            internalSeekingPosition.value = undefined;
           }
           if (playing) {
             await newAudio.play();
+          } else {
+            newAudio.pause();
           }
 
           newAudio.classList.remove('preparing');
+
+          internalPlaying.value = playing;
+          internalPosition.value = clampedPosition;
+
+          setupAudioEventListeners(newAudio);
 
           sendWS$$q(
             [
@@ -778,33 +982,86 @@ function _usePlaybackStore() {
             ],
             true
           );
+        } else if (preferenceStore.enableRemoteMediaSession) {
+          const newAudio = createDummyAudio();
+          dummyAudio = newAudio;
+          skipSendStatePlayPause = false;
+          skipSendStateSeek = false;
+
+          audioContainer.appendChild(newAudio);
+
+          newAudio.preload = 'auto';
+          newAudio.src = createSilentMP3DataURI(track.duration);
+
+          if (clampedPosition) {
+            await seek(newAudio, clampedPosition);
+          }
+          if (playing) {
+            await newAudio.play();
+          } else {
+            newAudio.pause();
+          }
+
+          newAudio.classList.remove('preparing');
+
+          setupDummyAudioEventListeners(newAudio);
+
+          audioContainer.appendChild(newAudio);
         }
 
         if ('mediaSession' in navigator) {
-          navigator.mediaSession.metadata = new MediaMetadata(metadataInit);
-          setMediaSessionActionHandlers();
+          if (currentAudio || dummyAudio) {
+            if (playing) {
+              navigator.mediaSession.metadata = new MediaMetadata(metadataInit);
+              navigator.mediaSession.playbackState = playing
+                ? 'playing'
+                : 'paused';
+              navigator.mediaSession.setPositionState({
+                duration: track.duration,
+                position: clampedPosition,
+                playbackRate: 1,
+              });
+              setMediaSessionActionHandlers();
+            }
+          }
         }
       })();
     } else {
       internalPlaying.value = false;
       internalPosition.value = undefined;
+
+      if (navigator.mediaSession.metadata) {
+        clearMediaSession();
+      }
     }
   };
 
   // when host changed
   watch(sessionType$$q, (newSessionType): void => {
-    if (newSessionType === 'host') {
-      if (remotePlaybackState.value) {
-        playTrack(
-          remotePlaybackState.value.playing,
-          calcPositionFromState(remotePlaybackState.value, getAccurateTime())
-        );
+    // we do not have to clear media session here
+
+    if (newSessionType !== 'hostSibling' && newSessionType !== 'guest') {
+      if (dummyAudio) {
+        cleanupAudio(dummyAudio);
+        dummyAudio.remove();
+        dummyAudio = undefined;
       }
-    } else if (currentAudio) {
-      // we do not have to clear media session
-      cleanupAudio(currentAudio);
-      currentAudio.remove();
-      currentAudio = undefined;
+    }
+
+    if (newSessionType !== 'host') {
+      if (currentAudio) {
+        cleanupAudio(currentAudio);
+        currentAudio.remove();
+        currentAudio = undefined;
+      }
+    }
+
+    // this device is selected as host
+    if (newSessionType === 'host' && remotePlaybackState.value) {
+      playTrack(
+        remotePlaybackState.value.playing,
+        calcPositionFromState(remotePlaybackState.value, getAccurateTime())
+      );
     }
   });
 
@@ -863,17 +1120,42 @@ function _usePlaybackStore() {
   //
 
   if ('mediaSession' in navigator) {
-    watch(currentTrackId, (newTrack): void => {
-      if (!newTrack) {
-        clearMediaSession();
+    watch(
+      [playing, position, currentTrack.value],
+      ([newPlaying, newPosition, newCurrentTrack]): void => {
+        const audio = currentAudio || dummyAudio;
+        if (
+          newCurrentTrack &&
+          newPosition != null &&
+          audio &&
+          !audio.classList.contains('preparing')
+        ) {
+          const { duration } = newCurrentTrack;
+          navigator.mediaSession.playbackState = newPlaying
+            ? 'playing'
+            : 'paused';
+          navigator.mediaSession.setPositionState({
+            duration,
+            position: Math.min(newPosition, duration),
+            playbackRate: 1,
+          });
+        }
       }
-    });
+    );
   }
 
   const cleanup = (): void => {
-    currentAudio?.pause();
-    currentAudio?.remove();
-    currentAudio = undefined;
+    if (dummyAudio) {
+      cleanupAudio(dummyAudio);
+      dummyAudio.remove();
+      dummyAudio = undefined;
+    }
+
+    if (currentAudio) {
+      cleanupAudio(currentAudio);
+      currentAudio.remove();
+      currentAudio = undefined;
+    }
 
     if ('mediaSession' in navigator) {
       clearMediaSession();

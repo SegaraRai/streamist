@@ -92,11 +92,13 @@ settings:
       AudioQuality: Audio Quality
       ConfirmOnLeave: Confirm on Close
       Language: Language
+      RemoteMediaSession: Remote Media Session
       Theme: Theme
     link:
       AccountSettings: Account Settings
     DoNotExitWithBackButton: Don't exit with back button
     RequiresRestartToTakeEffect: Requires restart to take effect
+    ShowRemoteMediaSession: Show Remote Media Session (experimental)
   audioQuality:
     medium: Medium
     veryHigh: Very High

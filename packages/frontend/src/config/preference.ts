@@ -73,3 +73,7 @@ export const PREFERENCE_CONFIRM_ON_LEAVE_DEFAULT: ConfirmOnLeave = 'never';
 //
 
 export const PREFERENCE_PWA_PREVENT_CLOSE_DEFAULT = true;
+
+//
+
+export const PREFERENCE_ENABLE_REMOTE_MEDIA_SESSION_DEFAULT = false;
