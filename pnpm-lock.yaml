@@ -251,7 +251,6 @@ importers:
       fastify-jwt: ^4.1.3
       minimist: ^1.2.5
       node-dev: ^7.2.0
-      node-fetch: ^3.2.2
       p-queue: ^7.2.0
       pino: ^7.8.0
       pino-pretty: ^7.5.3
@@ -262,6 +261,7 @@ importers:
       rollup-plugin-terser: ^7.0.2
       rollup-plugin-tsconfig-paths: ^1.1.6
       tsd: ^0.19.1
+      undici: ^4.15.1
       velona: ^0.7.0
       vite: ^2.8.6
       vitest: ^0.6.0
@@ -283,12 +283,12 @@ importers:
       fastify-helmet: 7.0.1
       fastify-jwt: 4.1.3
       minimist: 1.2.5
-      node-fetch: 3.2.2
       p-queue: 7.2.0
       pino: 7.8.0
       pino-pretty: 7.5.3
       reflect-metadata: 0.1.13
       tsd: 0.19.1
+      undici: 4.15.1
       velona: 0.7.0
     devDependencies:
       '@rollup/plugin-commonjs': 21.0.2_rollup@2.70.0
@@ -353,16 +353,16 @@ importers:
       jszip: ^3.7.1
       log4js: ^6.4.2
       node-dev: ^7.2.0
-      node-fetch: ^3.2.2
       rollup: ^2.70.0
       rollup-plugin-esbuild: ^4.8.2
       rollup-plugin-terser: ^7.0.2
       rollup-plugin-tsconfig-paths: ^1.1.6
+      undici: ^4.15.1
     dependencies:
       '@aws-sdk/client-s3': 3.53.1
       dotenv: 16.0.0
       log4js: 6.4.2
-      node-fetch: 3.2.2
+      undici: 4.15.1
     devDependencies:
       '@esbuild-plugins/node-resolve': 0.1.4_esbuild@0.14.25
       '@rollup/plugin-commonjs': 21.0.2_rollup@2.70.0
@@ -4930,11 +4930,6 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /data-uri-to-buffer/4.0.0:
-    resolution: {integrity: sha512-Vr3mLBA8qWmcuschSLAOogKgQ/Jwxulv3RNE4FXnYWRGujzrRWQI4m12fQqRkwX06C0KanhLr4hK+GydchZsaA==}
-    engines: {node: '>= 12'}
-    dev: false
-
   /data-urls/3.0.1:
     resolution: {integrity: sha512-Ds554NeT5Gennfoo9KN50Vh6tpgtvYEwraYjejXnyTpu1C7oXKxdFk75REooENHE8ndTVOJuv+BEs4/J/xcozw==}
     engines: {node: '>=12'}
@@ -6007,14 +6002,6 @@ packages:
       xtend: 4.0.2
     dev: false
 
-  /fetch-blob/3.1.4:
-    resolution: {integrity: sha512-Eq5Xv5+VlSrYWEqKrusxY1C3Hm/hjeAsCGVG3ft7pZahlUAChpGZT/Ms1WmSLnEAisEXszjzu/s+ce6HZB2VHA==}
-    engines: {node: ^12.20 || >= 14.13}
-    dependencies:
-      node-domexception: 1.0.0
-      web-streams-polyfill: 3.2.0
-    dev: false
-
   /file-entry-cache/6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
     engines: {node: ^10.12.0 || >=12.0.0}
@@ -6117,13 +6104,6 @@ packages:
       asynckit: 0.4.0
       combined-stream: 1.0.8
       mime-types: 2.1.34
-
-  /formdata-polyfill/4.0.10:
-    resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
-    engines: {node: '>=12.20.0'}
-    dependencies:
-      fetch-blob: 3.1.4
-    dev: false
 
   /forwarded/0.2.0:
     resolution: {integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==}
@@ -7636,11 +7616,6 @@ packages:
       semver: 7.3.5
     dev: true
 
-  /node-domexception/1.0.0:
-    resolution: {integrity: sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==}
-    engines: {node: '>=10.5.0'}
-    dev: false
-
   /node-fetch/2.6.7:
     resolution: {integrity: sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==}
     engines: {node: 4.x || >=6.0.0}
@@ -7651,15 +7626,6 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
-    dev: false
-
-  /node-fetch/3.2.2:
-    resolution: {integrity: sha512-Cwhq1JFIoon15wcIkFzubVNFE5GvXGV82pKf4knXXjvGmn7RJKcypeuqcVNZMGDZsAFWyIRya/anwAJr7TWJ7w==}
-    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-    dependencies:
-      data-uri-to-buffer: 4.0.0
-      fetch-blob: 3.1.4
-      formdata-polyfill: 4.0.10
     dev: false
 
   /node-forge/1.2.1:
@@ -9604,6 +9570,11 @@ packages:
     engines: {node: '>=12.18'}
     dev: true
 
+  /undici/4.15.1:
+    resolution: {integrity: sha512-h8LJybhMKD09IyQZoQadNtIR/GmugVhTOVREunJrpV6RStriKBFdSVoFzEzTihwXi/27DIBO+Z0OGF+Mzfi0lA==}
+    engines: {node: '>=12.18'}
+    dev: false
+
   /unicode-canonical-property-names-ecmascript/2.0.0:
     resolution: {integrity: sha512-yY5PpDlfVIU5+y/BSCxAJRBIS1Zc2dDG3Ujq+sR0U+JjUevW2JhocOF+soROYDSaAezOzOKuyyixhD6mBknSmQ==}
     engines: {node: '>=4'}
@@ -10282,11 +10253,6 @@ packages:
     dependencies:
       xml-name-validator: 4.0.0
     dev: true
-
-  /web-streams-polyfill/3.2.0:
-    resolution: {integrity: sha512-EqPmREeOzttaLRm5HS7io98goBgZ7IVz79aDvqjD0kYXLtFZTc0T/U6wHTPKyIjb+MdN7DFIIX6hgdBEpWmfPA==}
-    engines: {node: '>= 8'}
-    dev: false
 
   /webidl-conversions/3.0.1:
     resolution: {integrity: sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=}

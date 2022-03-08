@@ -1,6 +1,6 @@
 import { Lambda } from '@aws-sdk/client-lambda';
 import { CloudTasksClient } from '@google-cloud/tasks';
-import fetch from 'node-fetch';
+import { fetch } from 'undici';
 import {
   DEV_TRANSCODER_API_ENDPOINT,
   TRANSCODER_GCR_API_PATH,

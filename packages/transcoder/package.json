@@ -15,7 +15,7 @@
     "@aws-sdk/client-s3": "^3.53.1",
     "dotenv": "^16.0.0",
     "log4js": "^6.4.2",
-    "node-fetch": "^3.2.2"
+    "undici": "^4.15.1"
   },
   "devDependencies": {
     "@esbuild-plugins/node-resolve": "^0.1.4",

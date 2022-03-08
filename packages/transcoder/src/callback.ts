@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+import { fetch } from 'undici';
 import {
   API_ORIGIN_FOR_TRANSCODER,
   SECRET_API_CLIENT_REFERRER,
