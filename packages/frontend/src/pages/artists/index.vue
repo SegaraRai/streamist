@@ -163,7 +163,7 @@ export default defineComponent({
           <template #default="{ data: item, width }">
             <VCard
               flat
-              tile
+              rounded="none"
               :width="`${width}px`"
               class="bg-transparent flex flex-col"
               @contextmenu.prevent="showMenu$$q($event, item)"

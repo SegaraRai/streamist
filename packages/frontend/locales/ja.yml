@@ -1,7 +1,9 @@
 notFound:
-  message: 'ページが見つかりません'
+  message: ページが見つかりません
   button:
     Back: 戻る
+auth:
+  message: リダイレクトされるまでお待ちください…
 app:
   title: Streamist
   meta:
@@ -63,6 +65,10 @@ signIn:
     Password: パスワード
   button:
     SignIn: ログイン
+  error:
+    IncorrectUsernameOrPassword: ユーザー名またはパスワードが間違っています
+    RateLimitExceeded: ログイン試行回数制限を超過しました。時間をあけて再度お試しください。
+    AnUnknownErrorOccurred: 不明なエラーが発生しました
 signUp:
   title: 登録
   label:
@@ -92,11 +98,13 @@ settings:
       AudioQuality: 音質
       ConfirmOnLeave: 終了時の確認
       Language: 言語
+      RemoteMediaSession: リモートメディアセッション
       Theme: テーマ
     link:
       AccountSettings: アカウント設定
     DoNotExitWithBackButton: 戻るボタンで終了しない
     RequiresRestartToTakeEffect: 変更の適用には再起動が必要です
+    ShowRemoteMediaSession: リモートメディアセッションを表示する (実験的)
   audioQuality:
     medium: 標準音質
     veryHigh: 最高音質

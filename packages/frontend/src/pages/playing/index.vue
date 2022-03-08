@@ -6,19 +6,22 @@ meta:
 </route>
 
 <script lang="ts">
+import { SwipeDirection } from '@vueuse/core';
 import type { RepeatType } from '$shared/types';
-import { useCurrentTrackInfo } from '~/composables';
+import { useCurrentTrackInfo, useWS } from '~/composables';
+import { SWIPE_DISTANCE_THRESHOLD_BACK } from '~/config';
 import { findAncestor } from '~/logic/findAncestor';
 import { usePlaybackStore } from '~/stores/playback';
 import { useVolumeStore } from '~/stores/volume';
 
 export default defineComponent({
   setup() {
+    const router = useRouter();
     const { t } = useI18n();
     const playbackStore = usePlaybackStore();
     const volumeStore = useVolumeStore();
-
     const { value: currentTrackInfo } = useCurrentTrackInfo();
+    const { hostSession$$q } = useWS();
 
     useHead({
       title: t('title.Playing.no_track'),
@@ -80,7 +83,28 @@ export default defineComponent({
       playbackStore.shuffle$$q.value = !playbackStore.shuffle$$q.value;
     };
 
+    const container$$q = ref<HTMLElement | null | undefined>();
+    const containerWidth = computed(() => container$$q.value?.offsetWidth);
+    const { lengthY } = useSwipe(container$$q, {
+      passive: true,
+      onSwipeEnd(_e: TouchEvent, direction: SwipeDirection) {
+        const yTrigger =
+          containerWidth.value &&
+          Math.abs(lengthY.value) / containerWidth.value >=
+            SWIPE_DISTANCE_THRESHOLD_BACK;
+
+        switch (direction) {
+          case SwipeDirection.DOWN:
+            if (yTrigger) {
+              router.back();
+            }
+            break;
+        }
+      },
+    });
+
     return {
+      container$$q,
       currentTrackInfo$$q: currentTrackInfo,
       volumeStore$$q: volumeStore,
       showRemainingTime$$q: playbackStore.showRemainingTime$$q,
@@ -90,6 +114,11 @@ export default defineComponent({
       repeatIcon$$q: repeatIcon,
       position$$q: playbackStore.position$$q,
       duration$$q: playbackStore.duration$$q,
+      hostSessionName$$q: computed(() =>
+        hostSession$$q.value?.you === false
+          ? hostSession$$q.value.info.name || hostSession$$q.value.info.platform
+          : undefined
+      ),
       blurButton$$q: blurButton,
       switchRepeat$$q: switchRepeat,
       switchShuffle$$q: switchShuffle,
@@ -129,7 +158,10 @@ export default defineComponent({
 <template>
   <div class="absolute w-full h-full select-none !px-0">
     <div class="flex flex-col h-full px-6 pt-8 max-w-xl mx-auto">
-      <div class="flex-1 flex flex-col items-center justify-start gap-y-4">
+      <div
+        ref="container$$q"
+        class="flex-1 flex flex-col items-center justify-start gap-y-4"
+      >
         <template v-if="currentTrackInfo$$q">
           <div class="w-full px-4">
             <RouterLink
@@ -165,7 +197,7 @@ export default defineComponent({
       </div>
       <!-- we are using position: fixed here due to browser's navigation bar -->
       <div
-        class="flex flex-col justify-center gap-y-8 fixed left-0 right-0 bottom-0 w-full max-w-md mx-auto pb-8"
+        class="flex flex-col justify-center gap-y-4 fixed left-0 right-0 bottom-0 w-full max-w-md mx-auto pb-8"
       >
         <SSeekBar
           v-model="position$$q"
@@ -231,6 +263,22 @@ export default defineComponent({
               {{ repeatIcon$$q }}
             </VIcon>
           </VBtn>
+        </div>
+        <div class="flex gap-4 items-center px-6 h-6">
+          <SSessionManager class="flex-none" />
+          <div class="flex-1 overflow-hidden">
+            <template v-if="hostSessionName$$q">
+              <i18n-t
+                keypath="session.ListeningOn"
+                tag="div"
+                class="text-st-primary overflow-hidden overflow-ellipsis"
+              >
+                <span class="font-bold mx-1">
+                  {{ hostSessionName$$q }}
+                </span>
+              </i18n-t>
+            </template>
+          </div>
         </div>
       </div>
     </div>

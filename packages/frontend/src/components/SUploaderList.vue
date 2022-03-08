@@ -95,7 +95,7 @@ export default defineComponent({
         :file-type="file.type"
         class="s-hover-container text-st-primary"
       >
-        <div class="w-8">
+        <div class="w-10 flex items-center justify-center">
           <NPopover placement="right" trigger="hover">
             <template #trigger>
               <div>
@@ -121,11 +121,13 @@ export default defineComponent({
       </SUploaderListItem>
       <template v-if="file.type === 'audioWithCueSheet'">
         <SUploaderListItem
-          class="ml-6 text-st-info"
+          class="ml-6 text-st-primary"
           :filename="file.cueSheetFile.name"
           :filesize="file.cueSheetFile.size"
           file-type="cueSheet"
-        />
+        >
+          <div class="w-10"></div>
+        </SUploaderListItem>
       </template>
     </template>
     <template v-for="(file, _index) in uploadStore$$q.files" :key="_index">
@@ -137,7 +139,7 @@ export default defineComponent({
           :file-type="file.fileType"
           class="s-hover-container"
         >
-          <div class="w-8">
+          <div class="w-10 flex items-center justify-center">
             <NPopover placement="right" trigger="hover">
               <template #trigger>
                 <div>

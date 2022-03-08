@@ -8,7 +8,7 @@ import {
   ref,
   watch,
 } from 'vue';
-import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
+import { useEffectiveTheme } from '~/composables';
 import { hCaptchaPromise } from '~/logic/hCaptchaPromise';
 import type { HCaptcha } from '~/types';
 

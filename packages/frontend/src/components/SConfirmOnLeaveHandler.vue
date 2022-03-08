@@ -1,4 +1,5 @@
 <script lang="ts">
+import { useWS } from '~/composables';
 import { usePlaybackStore } from '~/stores/playback';
 import { usePreferenceStore } from '~/stores/preference';
 
@@ -6,6 +7,7 @@ export default defineComponent({
   setup() {
     const preferenceStore = usePreferenceStore();
     const playbackStore = usePlaybackStore();
+    const { sessionType$$q } = useWS();
 
     useEventListener('beforeunload', (event) => {
       let preventLeave = false;
@@ -15,7 +17,8 @@ export default defineComponent({
           break;
 
         case 'whenPlaying':
-          preventLeave = playbackStore.playing$$q.value;
+          preventLeave =
+            sessionType$$q.value === 'host' && playbackStore.playing$$q.value;
           break;
       }
 

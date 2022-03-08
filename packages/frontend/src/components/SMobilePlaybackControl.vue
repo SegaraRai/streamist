@@ -12,29 +12,42 @@ export default defineComponent({
     },
   },
   setup() {
+    const router = useRouter();
     const playbackStore = usePlaybackStore();
     const { value: currentTrackInfo } = useCurrentTrackInfo();
 
     const container$$q = ref<HTMLElement | null | undefined>();
     const containerWidth = computed(() => container$$q.value?.offsetWidth);
-    const { lengthX } = useSwipe(container$$q, {
+    const containerHeight = computed(() => container$$q.value?.offsetHeight);
+    const { lengthX, lengthY } = useSwipe(container$$q, {
       passive: true,
       onSwipeEnd(_e: TouchEvent, direction: SwipeDirection) {
-        const trigger =
+        const xTrigger =
           containerWidth.value &&
           Math.abs(lengthX.value) / containerWidth.value >=
             SWIPE_DISTANCE_THRESHOLD;
-        if (!trigger) {
-          return;
-        }
+        const yTrigger =
+          containerHeight.value &&
+          Math.abs(lengthY.value) / containerHeight.value >=
+            SWIPE_DISTANCE_THRESHOLD;
 
         switch (direction) {
           case SwipeDirection.LEFT:
-            playbackStore.skipNext$$q();
+            if (xTrigger) {
+              playbackStore.skipNext$$q();
+            }
             break;
 
           case SwipeDirection.RIGHT:
-            playbackStore.goPrevious$$q();
+            if (xTrigger) {
+              playbackStore.goPrevious$$q();
+            }
+            break;
+
+          case SwipeDirection.UP:
+            if (yTrigger) {
+              router.push('/playing');
+            }
             break;
         }
       },
