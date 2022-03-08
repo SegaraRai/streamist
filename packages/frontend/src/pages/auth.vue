@@ -4,8 +4,10 @@ export default defineComponent({
     const router = useRouter();
     const { t } = useI18n();
 
-    const query = new URLSearchParams(location.search);
-    router.replace(query.get('to') || '/');
+    onBeforeMount((): void => {
+      const query = new URLSearchParams(location.search);
+      router.replace(query.get('to') || '/');
+    });
 
     return {
       t,
