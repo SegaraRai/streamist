@@ -12,7 +12,7 @@ build({
   logLevel: 'info',
   plugins: [
     nodeExternalsPlugin({
-      allowList: ['class-transformer', 'node-fetch', 'p-queue'],
+      allowList: ['class-transformer', 'p-queue'],
     }),
   ],
   watch: true,

@@ -180,45 +180,60 @@ export default defineComponent({
             </template>
           </div>
         </div>
-        <div class="mt-4 flex flex-col gap-y-12">
-          <div>
-            <VBtn
-              color="primary"
-              :disabled="synchronized$$q || synchronizeInProgress$$q"
-              @click="syncDB$$q(true)"
-            >
-              <span :class="synchronizeInProgress$$q && 'invisible'">
-                {{
-                  synchronized$$q
-                    ? t('common.Synchronized')
-                    : t('common.Synchronize')
-                }}
-              </span>
-              <template v-if="synchronizeInProgress$$q">
-                <VProgressCircular
-                  class="absolute left-0 top-0 right-0 bottom-0 m-auto"
-                  indeterminate
-                  size="20"
-                />
-              </template>
-            </VBtn>
+        <div class="flex flex-col gap-y-4">
+          <h2 class="text-xl">
+            {{ t('settings.device.header.Account') }}
+          </h2>
+          <div class="flex flex-col gap-y-5">
+            <div>
+              <RouterLink
+                class="inline text-st-primary text-lg"
+                to="/settings/account"
+              >
+                {{ t('settings.device.account.AccountSettings') }}
+              </RouterLink>
+            </div>
+            <div>
+              <VBtn color="error" variant="outlined" @click="logout$$q">
+                {{ t('settings.device.account.SignOut') }}
+              </VBtn>
+            </div>
           </div>
-          <div>
-            <VBtn color="error" @click="logout$$q">
-              {{ t('common.SignOut') }}
-            </VBtn>
+        </div>
+        <div class="flex flex-col gap-y-4">
+          <h2 class="text-xl">
+            {{ t('settings.device.header.Repair') }}
+          </h2>
+          <div class="flex flex-col gap-y-4">
+            <div class="opacity-80">
+              {{ t('settings.device.repair.description') }}
+            </div>
+            <div>
+              <VBtn
+                color="primary"
+                :disabled="synchronized$$q || synchronizeInProgress$$q"
+                @click="syncDB$$q(true)"
+              >
+                <span :class="synchronizeInProgress$$q && 'invisible'">
+                  {{
+                    synchronized$$q
+                      ? t('settings.device.repair.DBSynchronized')
+                      : t('settings.device.repair.DBSynchronize')
+                  }}
+                </span>
+                <template v-if="synchronizeInProgress$$q">
+                  <VProgressCircular
+                    class="absolute left-0 top-0 right-0 bottom-0 m-auto"
+                    indeterminate
+                    size="20"
+                  />
+                </template>
+              </VBtn>
+            </div>
           </div>
         </div>
       </div>
-      <div class="mt-8">
-        <RouterLink
-          class="inline-flex items-center gap-x-1 text-st-primary text-lg"
-          to="/settings/account"
-        >
-          {{ t('settings.device.link.AccountSettings') }}
-        </RouterLink>
-      </div>
-      <div class="mt-8 text-sm opacity-80">Version {{ buildRev$$q }}</div>
+      <div class="mt-6 text-sm opacity-80">Version {{ buildRev$$q }}</div>
     </div>
   </VContainer>
 </template>

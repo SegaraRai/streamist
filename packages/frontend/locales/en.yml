@@ -18,9 +18,6 @@ appBar:
     SignIn: Sign in
     SignUp: Sign up
 common:
-  SignOut: Sign out
-  Synchronize: Synchronize DB
-  Synchronized: Synchronized
   ThisActionCannotBeUndone: This action cannot be undone.
 session:
   ListeningOn: Listening on {0}
@@ -95,13 +92,20 @@ settings:
   device:
     title: Device Settings
     header:
+      Account: Account
       AudioQuality: Audio Quality
       ConfirmOnLeave: Confirm on Close
       Language: Language
       RemoteMediaSession: Remote Media Session
+      Repair: Repair
       Theme: Theme
-    link:
+    account:
       AccountSettings: Account Settings
+      SignOut: Sign out
+    repair:
+      description: Try it if the app does not work properly.
+      DBSynchronize: Synchronize DB
+      DBSynchronized: Synchronized
     DoNotExitWithBackButton: Don't exit with back button
     RequiresRestartToTakeEffect: Requires restart to take effect
     ShowRemoteMediaSession: Show Remote Media Session (experimental)

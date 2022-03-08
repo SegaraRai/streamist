@@ -142,7 +142,7 @@ export default defineComponent({
 <template>
   <template v-if="value$$q">
     <div
-      class="mb-6 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-5"
+      class="mb-6 <md:mt-4 flex flex-col items-center md:flex-row md:items-stretch gap-x-8 gap-y-5"
     >
       <!-- w-50 h-50 is needed to prevent layout shift -->
       <div class="p-0 m-0 w-50 h-50 leading-none flex-none">

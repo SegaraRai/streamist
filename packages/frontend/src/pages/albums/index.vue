@@ -185,9 +185,9 @@ export default defineComponent({
           <template #default="{ data: item, width }">
             <VCard
               flat
-              rounded="none"
+              :rounded="false"
               :width="`${width}px`"
-              class="bg-transparent flex flex-col"
+              class="bg-transparent flex flex-col !rounded-none"
               @contextmenu.prevent="showMenu$$q($event, item)"
             >
               <RouterLink
