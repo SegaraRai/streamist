@@ -75,3 +75,18 @@
 .s-subheading-sl {
   @apply whitespace-nowrap !important;
 }
+
+.s-v-main.v-main > .v-main__wrap {
+  @apply flex;
+  @apply flex-col;
+  @apply h-full;
+}
+
+html.s-static-layout {
+  overflow: hidden;
+}
+
+html.s-static-layout .s-v-main.v-main {
+  @apply !absolute;
+  @apply h-full;
+}
