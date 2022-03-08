@@ -55,10 +55,16 @@ export default defineComponent({
     );
 
     onBeforeMount(() => {
+      if (location.pathname === '/auth') {
+        return;
+      }
+
       checkAPIStatus().then((status) => {
         switch (status) {
           case 'ng_needs_auth':
-            location.href = '/auth?to=' + encodeURIComponent(location.pathname);
+            location.replace(
+              '/auth?to=' + encodeURIComponent(location.pathname)
+            );
             break;
         }
       });

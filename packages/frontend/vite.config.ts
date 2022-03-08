@@ -379,7 +379,7 @@ export default defineConfig(async ({ mode }) => {
             /^\/cdn-cgi\//,
             /^\/api\//,
             /^\/ws\//,
-            /^\/auth$/,
+            /^\/auth([/#?]|$)/,
           ],
         },
       }),
