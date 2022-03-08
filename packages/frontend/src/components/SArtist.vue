@@ -285,9 +285,9 @@ export default defineComponent({
     </div>
     <template v-if="value$$q">
       <template v-if="value$$q.albums$$q.length">
-        <div class="mt-4 mb-6">
+        <div class="mt-4">
           <template v-for="album in value$$q.albums$$q" :key="album.id">
-            <div class="my-12">
+            <div class="mt-12">
               <SAlbum
                 :album="album.id"
                 :link-excludes="[artistId$$q]"
@@ -302,7 +302,7 @@ export default defineComponent({
       </template>
       <template v-if="additionalTracks$$q.length">
         <template v-if="value$$q.albums$$q.length">
-          <div class="flex-none flex flex-row items-center gap-x-8 mb-4">
+          <div class="flex-none flex flex-row items-center gap-x-8 mb-4 mt-12">
             <div class="flex-none text-3xl whitespace-nowrap">
               {{ t('artist.MoreTracks', [value$$q.artist$$q.name]) }}
             </div>

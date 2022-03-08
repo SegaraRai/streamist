@@ -32,6 +32,16 @@ export async function checkAPIStatus(): Promise<APIStatus> {
       return 'ok';
     }
 
+    // Browser integrity check and CAPTCHA
+    // status: 403 or 503
+    if (
+      pingResText.includes('cloudflare') &&
+      (pingResText.includes('cf-browser-verification') ||
+        pingResText.includes('cf-captcha-container'))
+    ) {
+      return 'ng_needs_auth';
+    }
+
     // Origin down?
     if (
       pingRes.status === 502 ||
@@ -39,14 +49,6 @@ export async function checkAPIStatus(): Promise<APIStatus> {
       pingRes.status >= 520
     ) {
       return 'ng_origin_down';
-    }
-
-    // Browser integrity check and CAPTCHA
-    if (
-      pingResText.includes('cloudflare') &&
-      (pingResText.includes('challenge') || pingResText.includes('captcha'))
-    ) {
-      return 'ng_needs_auth';
     }
 
     // unknown error

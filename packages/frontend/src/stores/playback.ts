@@ -325,11 +325,11 @@ function _usePlaybackStore() {
 
       value = Math.max(0, Math.min(value, duration));
 
-      if (sessionType$$q.value === 'host') {
-        internalSeekingPosition.value = value;
-      }
-
       if (audio) {
+        if (sessionType$$q.value === 'host') {
+          internalSeekingPosition.value = value;
+        }
+
         skipSendStateSeek = true;
         audio.currentTime = value;
       }
@@ -896,7 +896,7 @@ function _usePlaybackStore() {
       }
 
       internalSeekingPosition.value = position || undefined;
-      internalPosition.value = 0;
+      internalPosition.value = position;
 
       (async (): Promise<void> => {
         const track = await db.tracks.get(trackId);
@@ -929,6 +929,9 @@ function _usePlaybackStore() {
           sessionType$$q.value === 'host' ||
           (sessionType$$q.value === 'none' && !byRemote)
         ) {
+          internalSeekingPosition.value = clampedPosition;
+          internalPosition.value = clampedPosition;
+
           const newAudio = createAudio();
           currentAudio = newAudio;
 
@@ -937,10 +940,7 @@ function _usePlaybackStore() {
           newAudio.preload = 'auto';
           newAudio.src = url;
           if (clampedPosition) {
-            internalSeekingPosition.value = clampedPosition;
             await seek(newAudio, clampedPosition);
-          } else {
-            internalSeekingPosition.value = undefined;
           }
           if (playing) {
             await newAudio.play();
@@ -950,6 +950,7 @@ function _usePlaybackStore() {
 
           newAudio.classList.remove('preparing');
 
+          internalSeekingPosition.value = undefined;
           internalPlaying.value = playing;
           internalPosition.value = clampedPosition;
 
