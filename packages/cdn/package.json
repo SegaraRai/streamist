@@ -21,7 +21,7 @@
     "@rollup/plugin-commonjs": "^21.0.2",
     "@rollup/plugin-node-resolve": "^13.1.3",
     "@types/cookie": "^0.4.1",
-    "@types/node": "^16.11.22",
+    "@types/node": "^16.11.26",
     "esbuild": "^0.14.25",
     "miniflare": "^2.3.0",
     "rollup": "^2.70.0",
