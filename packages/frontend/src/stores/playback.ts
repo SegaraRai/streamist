@@ -205,15 +205,15 @@ function _usePlaybackStore() {
     }
 
     sendWS$$q(
-      [
-        {
-          type: 'setState',
-          duration: audio.duration,
-          position: audio.currentTime,
+      {
+        type: 'setState',
+        state: {
           playing,
-          timestamp: getAccurateTime(),
+          duration: audio.duration,
+          startPosition: audio.currentTime,
+          startedAt: getAccurateTime(),
         },
-      ],
+      },
       true
     );
   };
@@ -230,15 +230,15 @@ function _usePlaybackStore() {
     const timestamp = getAccurateTime();
 
     sendWS$$q(
-      [
-        {
-          type: 'setState',
-          duration: state.duration,
-          position: position ?? calcPositionFromState(state, timestamp),
+      {
+        type: 'setState',
+        state: {
           playing,
-          timestamp,
+          duration: state.duration,
+          startPosition: position ?? calcPositionFromState(state, timestamp),
+          startedAt: timestamp,
         },
-      ],
+      },
       true
     );
   };
@@ -340,15 +340,15 @@ function _usePlaybackStore() {
         internalRemoteSeekingPosition.value = value;
 
         sendWS$$q(
-          [
-            {
-              type: 'setState',
-              duration,
-              position: value,
+          {
+            type: 'setState',
+            state: {
               playing: playing.value,
-              timestamp: getAccurateTime(),
+              duration,
+              startPosition: value,
+              startedAt: getAccurateTime(),
             },
-          ],
+          },
           true
         );
       }
@@ -446,32 +446,30 @@ function _usePlaybackStore() {
         if (sessionType$$q.value === 'none' && value) {
           // TODO: make this work on offline
           sendWS$$q(
-            [
-              {
-                type: 'setHost',
-              },
-              {
-                type: 'setState',
-                duration,
-                position,
+            {
+              type: 'setState',
+              host: true,
+              state: {
                 playing: value,
-                timestamp: getAccurateTime(),
+                duration,
+                startPosition: position,
+                startedAt: getAccurateTime(),
               },
-            ],
+            },
             true
           );
         } else {
           // otherwise, send play/pause (to host and other sessions)
           sendWS$$q(
-            [
-              {
-                type: 'setState',
-                duration,
-                position,
+            {
+              type: 'setState',
+              state: {
                 playing: value,
-                timestamp: getAccurateTime(),
+                duration,
+                startPosition: position,
+                startedAt: getAccurateTime(),
               },
-            ],
+            },
             true
           );
         }
@@ -846,16 +844,14 @@ function _usePlaybackStore() {
             !trackProvider.currentTrack$$q
           ) {
             sendWS$$q(
-              [
-                {
-                  type: 'setTracks',
-                  tracks: {
-                    ...trackProvider.export$$q(),
-                    setListName: currentSetListName.value,
-                  },
-                  trackChange,
+              {
+                type: 'setState',
+                tracks: {
+                  ...trackProvider.export$$q(),
+                  setListName: currentSetListName.value,
                 },
-              ],
+                trackChange,
+              },
               true
             );
           }
@@ -960,26 +956,21 @@ function _usePlaybackStore() {
           setupAudioEventListeners(newAudio);
 
           sendWS$$q(
-            [
-              {
-                type: 'setHost',
+            {
+              type: 'setState',
+              host: true,
+              tracks: {
+                ...trackProvider.export$$q(),
+                setListName: currentSetListName.value,
               },
-              {
-                type: 'setTracks',
-                tracks: {
-                  ...trackProvider.export$$q(),
-                  setListName: currentSetListName.value,
-                },
-                trackChange: true,
-              },
-              {
-                type: 'setState',
-                duration: track.duration,
-                position: clampedPosition,
+              trackChange: true,
+              state: {
                 playing,
-                timestamp: getAccurateTime(),
+                duration: track.duration,
+                startPosition: clampedPosition,
+                startedAt: getAccurateTime(),
               },
-            ],
+            },
             true
           );
         } else if (preferenceStore.enableRemoteMediaSession) {

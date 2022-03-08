@@ -10,6 +10,8 @@ import {
 } from '$shared/config';
 import type {
   WSRequest,
+  WSRequestSetSession,
+  WSRequestSetState,
   WSResponse,
   WSResponseConnected,
   WSResponseUpdated,
@@ -20,13 +22,21 @@ import { generateDeviceId } from '~/logic/deviceId';
 import { getUserId, tokens } from '~/logic/tokens';
 import { useSessionInfo } from '~/stores/sessionInfo';
 
+export interface WSPong {
+  readonly timestamp$$q: number;
+  readonly serverTimestamp$$q: number;
+}
+
 type Callback<T> = (data: T) => void;
 
 function _useWS() {
   let closing = false;
   let ws: WebSocket | undefined;
 
-  const pendingRequests: WSRequest[] = [];
+  let pendingRequestSetSession: WSRequestSetSession | undefined;
+  let pendingRequestSetState: WSRequestSetState | undefined;
+
+  const pongCallbacks: Callback<WSPong>[] = [];
   const callbacks: (readonly [
     type: WSResponse['type'],
     callback: Callback<any>
@@ -78,7 +88,7 @@ function _useWS() {
     };
 
     ws.onopen = (): void => {
-      sendQueuedRequests();
+      sendPendingRequests();
     };
 
     ws.onmessage = (event): void => {
@@ -86,19 +96,29 @@ function _useWS() {
         return;
       }
 
-      const dataList = JSON.parse(event.data) as readonly WSResponse[];
-      for (const data of dataList) {
-        const { type } = data;
-        for (const [t, cb] of callbacks) {
-          if (t === type) {
-            cb(data);
-          }
+      if (event.data.startsWith('pong:')) {
+        const [, strTimestamp, strServerTimestamp] = event.data.split(':');
+        const pong: WSPong = {
+          timestamp$$q: parseInt(strTimestamp, 10),
+          serverTimestamp$$q: parseInt(strServerTimestamp, 10),
+        };
+        for (const cb of pongCallbacks) {
+          cb(pong);
+        }
+        return;
+      }
+
+      const data = JSON.parse(event.data) as WSResponse;
+      const { type } = data;
+      for (const [t, cb] of callbacks) {
+        if (t === type) {
+          cb(data);
         }
       }
     };
   };
 
-  const sendWS = (data: readonly WSRequest[], resend = false): void => {
+  const sendWS = (data: WSRequest, resend = false): void => {
     // TODO: queue data and send when connection is ready
     let sent = false;
     try {
@@ -110,14 +130,35 @@ function _useWS() {
       console.error(e, data);
     }
     if (!sent && resend) {
-      pendingRequests.push(...data);
+      // we do not resend ping request
+      switch (data.type) {
+        case 'setSession':
+          pendingRequestSetSession = {
+            ...pendingRequestSetSession,
+            ...data,
+          };
+          break;
+
+        case 'setState':
+          pendingRequestSetState = {
+            ...pendingRequestSetState,
+            ...data,
+          };
+          break;
+      }
     }
   };
 
-  const sendQueuedRequests = (): void => {
-    if (pendingRequests.length > 0 && ws?.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(pendingRequests));
-      pendingRequests.splice(0, pendingRequests.length);
+  const sendPendingRequests = (): void => {
+    if (ws?.readyState === WebSocket.OPEN) {
+      if (pendingRequestSetSession) {
+        ws.send(JSON.stringify(pendingRequestSetSession));
+        pendingRequestSetSession = undefined;
+      }
+      if (pendingRequestSetState) {
+        ws.send(JSON.stringify(pendingRequestSetState));
+        pendingRequestSetState = undefined;
+      }
     }
   };
 
@@ -126,11 +167,10 @@ function _useWS() {
 
   const sendActivatedThrottled = useThrottleFn(
     (): void => {
-      sendWS([
-        {
-          type: 'activate',
-        },
-      ]);
+      sendWS({
+        type: 'setSession',
+        activate: true,
+      });
     },
     SEND_ACTIVATE_EVENT_THROTTLE,
     false
@@ -146,13 +186,11 @@ function _useWS() {
 
   watch([deviceId, sessionInfo], ([newDeviceId, newSessionInfo]): void => {
     sendWS(
-      [
-        {
-          type: 'updateSession',
-          deviceId: newDeviceId,
-          info: newSessionInfo,
-        },
-      ],
+      {
+        type: 'setSession',
+        deviceId: newDeviceId,
+        info: newSessionInfo,
+      },
       true
     );
   });
@@ -214,14 +252,17 @@ function _useWS() {
     hostSession$$q: hostSession,
     sessionType$$q: sessionType,
     sendWS$$q: sendWS,
+    sendPing$$q: (timestamp = Date.now()) => {
+      if (ws?.readyState === WebSocket.OPEN) {
+        ws.send(`ping:${timestamp}`);
+      }
+    },
     setHost$$q: (id?: string): void => {
       sendWS(
-        [
-          {
-            type: 'setHost',
-            id,
-          },
-        ],
+        {
+          type: 'setState',
+          host: id || true,
+        },
         true
       );
     },
@@ -243,6 +284,18 @@ function _useWS() {
         callbacks.splice(callbackIndex, 1);
       }
     },
+    addWSPongListener$$q: (callback: Callback<WSPong>): void => {
+      const callbackIndex = pongCallbacks.indexOf(callback);
+      if (callbackIndex === -1) {
+        pongCallbacks.push(callback);
+      }
+    },
+    removeWSPongListener$$q: (callback: Callback<WSPong>): void => {
+      const callbackIndex = pongCallbacks.indexOf(callback);
+      if (callbackIndex !== -1) {
+        callbacks.splice(callbackIndex, 1);
+      }
+    },
   };
 }
 
@@ -258,5 +311,15 @@ export function useWSListener<T extends WSResponse['type']>(
 
   tryOnScopeDispose((): void => {
     removeWSListener$$q(type, callback as Callback<any>);
+  });
+}
+
+export function useWSPongListener(callback: Callback<WSPong>): void {
+  const { addWSPongListener$$q, removeWSPongListener$$q } = useWS();
+
+  addWSPongListener$$q(callback);
+
+  tryOnScopeDispose((): void => {
+    removeWSPongListener$$q(callback);
   });
 }

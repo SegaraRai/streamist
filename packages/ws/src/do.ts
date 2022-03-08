@@ -9,7 +9,7 @@ import type {
   WSSessionForResponse,
 } from '$shared/types';
 import { decodeUTF8Base64URL } from '$shared/unicodeBase64';
-import { zWSRequests } from '$shared/validations';
+import { zWSRequest } from '$shared/validations';
 import type { DORequestData, WSBindings } from './types';
 
 type Mutable<T> = {
@@ -20,7 +20,7 @@ interface WSSessionWithWS extends Mutable<WSSession> {
   readonly ws: WebSocket;
 }
 
-function send(ws: WebSocket, data: readonly WSResponse[]): void {
+function send(ws: WebSocket, data: WSResponse): void {
   try {
     ws.send(JSON.stringify(data));
   } catch (e) {
@@ -53,7 +53,15 @@ export class DO extends Actor {
     }));
   }
 
-  private onMessage(ws: WebSocket, dataList: readonly WSRequest[]): void {
+  private onPingMessage(ws: WebSocket, data: string) {
+    try {
+      ws.send(`pong:${data.slice(5)}:${Date.now()}`);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  private onMessage(ws: WebSocket, data: WSRequest): void {
     const senderSession = this.sessions.find((session) => session.ws === ws);
     if (!senderSession) {
       console.error('session not found');
@@ -66,52 +74,52 @@ export class DO extends Actor {
 
     const isHost = hostSession?.ws === ws;
 
-    const pings: number[] = [];
     let activated = false;
     let modifiedSessions = false;
     let modifiedState = false;
     let modifiedTracks = false;
     let trackChange = false;
 
-    for (const data of dataList) {
-      switch (data.type) {
-        case 'activate':
-          senderSession.lastActivatedAt = Date.now();
+    switch (data.type) {
+      case 'setSession':
+        senderSession.lastActivatedAt = Date.now();
+        if (data.activate) {
           activated = true;
-          modifiedSessions = true;
-          break;
-
-        case 'setState': {
-          senderSession.lastActivatedAt = Date.now();
-          this.pbState = {
-            duration: data.duration,
-            playing: data.playing && !!this.hostWS,
-            startPosition: data.position,
-            startedAt: data.timestamp,
-          };
-          modifiedSessions = true;
-          modifiedState = true;
-          break;
         }
+        if (data.info) {
+          senderSession.info = data.info;
+        }
+        if (data.deviceId) {
+          senderSession.deviceId = data.deviceId;
+        }
+        if (data.volume != null) {
+          senderSession.volume = data.volume;
+        }
+        modifiedSessions = true;
+        break;
 
-        case 'setHost': {
-          const newHostWS = data.id
-            ? this.sessions.find((s) => s.id === data.id)?.ws
-            : ws;
+      case 'setState': {
+        senderSession.lastActivatedAt = Date.now();
+        if (data.host) {
+          const newHostWS =
+            data.host === true
+              ? ws
+              : this.sessions.find((s) => s.id === data.host)?.ws;
           if (newHostWS) {
             this.hostWS = newHostWS;
           }
-          senderSession.lastActivatedAt = Date.now();
-          modifiedSessions = true;
-          break;
         }
-
-        case 'setTracks':
+        if (data.state) {
+          this.pbState = data.state;
+          if (!this.hostWS) {
+            (this.pbState as Mutable<WSPlaybackState>).playing = false;
+          }
+          modifiedState = true;
+        }
+        if (data.tracks) {
           this.pbTracks = data.tracks;
-          senderSession.lastActivatedAt = Date.now();
-          modifiedSessions = true;
+          trackChange = data.trackChange || false;
           modifiedTracks = true;
-          trackChange ||= data.trackChange;
           if (
             !data.tracks.currentTrack &&
             !data.tracks.currentTrackOverride &&
@@ -120,60 +128,28 @@ export class DO extends Actor {
             this.pbState = null;
             modifiedState = true;
           }
-          break;
-
-        case 'setVolume':
-          senderSession.lastActivatedAt = Date.now();
+        }
+        if (data.volume != null) {
           if (hostSession) {
             hostSession.volume = data.volume;
           }
-          modifiedSessions = true;
-          break;
-
-        case 'updateSession':
-          if (data.info) {
-            senderSession.info = data.info;
-          }
-          if (data.deviceId) {
-            senderSession.deviceId = data.deviceId;
-          }
-          if (data.volume != null) {
-            senderSession.volume = data.volume;
-          }
-          senderSession.lastActivatedAt = Date.now();
-          modifiedSessions = true;
-          break;
-
-        case 'ping':
-          pings.push(data.timestamp);
-          break;
+        }
+        modifiedSessions = true;
+        break;
       }
-    }
-
-    if (pings.length > 0) {
-      send(
-        ws,
-        pings.map((ping) => ({
-          type: 'pong',
-          timestamp: ping,
-          serverTimestamp: Date.now(),
-        }))
-      );
     }
 
     if (activated && !isHost) {
       // send current state
-      send(ws, [
-        {
-          type: 'updated',
-          byHost: false,
-          byYou: true,
-          pbState: this.pbState,
-          pbTracks: this.pbTracks,
-          pbTrackChange: true,
-          sessions: modifiedSessions ? this.listSessions(ws) : undefined,
-        },
-      ]);
+      send(ws, {
+        type: 'updated',
+        byHost: false,
+        byYou: true,
+        pbState: this.pbState,
+        pbTracks: this.pbTracks,
+        pbTrackChange: true,
+        sessions: modifiedSessions ? this.listSessions(ws) : undefined,
+      });
     }
 
     if (modifiedState || modifiedTracks || modifiedSessions) {
@@ -182,19 +158,17 @@ export class DO extends Actor {
           continue;
         }
 
-        send(session.ws, [
-          {
-            type: 'updated',
-            byHost: ws === this.hostWS,
-            byYou: session.ws === ws,
-            pbState: modifiedState ? this.pbState : undefined,
-            pbTracks: modifiedTracks ? this.pbTracks : undefined,
-            pbTrackChange: modifiedTracks ? trackChange : undefined,
-            sessions: modifiedSessions
-              ? this.listSessions(session.ws)
-              : undefined,
-          },
-        ]);
+        send(session.ws, {
+          type: 'updated',
+          byHost: ws === this.hostWS,
+          byYou: session.ws === ws,
+          pbState: modifiedState ? this.pbState : undefined,
+          pbTracks: modifiedTracks ? this.pbTracks : undefined,
+          pbTrackChange: modifiedTracks ? trackChange : undefined,
+          sessions: modifiedSessions
+            ? this.listSessions(session.ws)
+            : undefined,
+        });
       }
     }
   }
@@ -235,15 +209,13 @@ export class DO extends Actor {
     }
 
     for (const session of this.sessions) {
-      send(session.ws, [
-        {
-          type: 'updated',
-          byHost: false,
-          byYou: false,
-          sessions: this.listSessions(session.ws),
-          pbState: stateUpdated ? this.pbState : undefined,
-        },
-      ]);
+      send(session.ws, {
+        type: 'updated',
+        byHost: false,
+        byYou: false,
+        sessions: this.listSessions(session.ws),
+        pbState: stateUpdated ? this.pbState : undefined,
+      });
     }
   }
 
@@ -282,9 +254,17 @@ export class DO extends Actor {
 
     try {
       ws.addEventListener('message', (event): void => {
+        if (typeof event.data !== 'string') {
+          return;
+        }
+
         try {
-          const data = zWSRequests.parse(JSON.parse(event.data));
-          this.onMessage(ws, data);
+          if (event.data.startsWith('ping:')) {
+            this.onPingMessage(ws, event.data);
+          } else {
+            const data = zWSRequest.parse(JSON.parse(event.data));
+            this.onMessage(ws, data);
+          }
         } catch (e) {
           console.error(e);
         }
@@ -307,24 +287,20 @@ export class DO extends Actor {
       if (session.ws === ws) {
         continue;
       }
-      send(session.ws, [
-        {
-          type: 'updated',
-          byHost: false,
-          byYou: false,
-          sessions: this.listSessions(session.ws),
-        },
-      ]);
+      send(session.ws, {
+        type: 'updated',
+        byHost: false,
+        byYou: false,
+        sessions: this.listSessions(session.ws),
+      });
     }
 
-    send(ws, [
-      {
-        type: 'connected',
-        sessions: this.listSessions(ws),
-        pbState: this.pbState,
-        pbTracks: this.pbTracks,
-      },
-    ]);
+    send(ws, {
+      type: 'connected',
+      sessions: this.listSessions(ws),
+      pbState: this.pbState,
+      pbTracks: this.pbTracks,
+    });
   }
 
   async receive(req: Request): Promise<Response> {

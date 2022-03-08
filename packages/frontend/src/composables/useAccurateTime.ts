@@ -7,10 +7,10 @@ import {
   ACCURATE_TIME_PING_INTERVAL,
 } from '~/config';
 import { defer } from '~/logic/defer';
-import { useWS, useWSListener } from './useWS';
+import { useWS, useWSListener, useWSPongListener } from './useWS';
 
 function _useAccurateTime() {
-  const { sendWS$$q } = useWS();
+  const { sendPing$$q } = useWS();
 
   const diff = ref(0);
 
@@ -23,24 +23,19 @@ function _useAccurateTime() {
     sending = true;
     defer((): void => {
       sending = false;
-      sendWS$$q([
-        {
-          type: 'ping',
-          timestamp: Date.now(),
-        },
-      ]);
+      sendPing$$q();
     });
   };
 
-  useWSListener('pong', ({ serverTimestamp, timestamp }): void => {
+  useWSPongListener(({ serverTimestamp$$q, timestamp$$q }): void => {
     const now = Date.now();
-    const ping = now - timestamp;
+    const ping = now - timestamp$$q;
 
     if (ping < 0 || ping >= ACCURATE_TIME_IGNORE_PING_THRESHOLD) {
       console.warn(
         'accurateTime pong error',
-        timestamp,
-        serverTimestamp,
+        timestamp$$q,
+        serverTimestamp$$q,
         now,
         ping
       );
@@ -48,12 +43,12 @@ function _useAccurateTime() {
     }
 
     const latency = Math.round(ping / 2);
-    const newDiff = serverTimestamp + latency - now;
+    const newDiff = serverTimestamp$$q + latency - now;
 
     console.info(
       'accurateTime pong',
-      timestamp,
-      serverTimestamp,
+      timestamp$$q,
+      serverTimestamp$$q,
       now,
       ping,
       latency,

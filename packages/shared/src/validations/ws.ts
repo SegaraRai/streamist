@@ -52,94 +52,39 @@ export interface WSSessionForResponse extends WSSession {
 
 // requests
 
-export const zWSRequestPing = z.object({
-  type: z.literal('ping'),
-  timestamp: z.number(),
-});
-
-export type WSRequestPing = DeepReadonly<z.infer<typeof zWSRequestPing>>;
-
-export const zWSRequestActivate = z.object({
-  type: z.literal('activate'),
-});
-
-export type WSRequestActivate = DeepReadonly<
-  z.infer<typeof zWSRequestActivate>
->;
-
-export const zWSRequestUpdateSession = z.object({
-  type: z.literal('updateSession'),
+export const zWSRequestSetSession = z.object({
+  type: z.literal('setSession'),
+  activate: z.optional(z.boolean()),
   info: z.optional(zSessionInfo),
   deviceId: z.optional(z.string()),
   volume: z.optional(z.number()),
   volumeUnmuted: z.optional(z.number()),
 });
 
-export type WSRequestUpdateSession = DeepReadonly<
-  z.infer<typeof zWSRequestUpdateSession>
->;
-
-export const zWSRequestSetHost = z.object({
-  type: z.literal('setHost'),
-  id: z.optional(z.string()),
-});
-
-export type WSRequestSetHost = z.infer<typeof zWSRequestSetHost>;
-
-export const zWSRequestSetTracks = z.object({
-  type: z.literal('setTracks'),
-  tracks: zWSPlaybackTracks,
-  trackChange: z.boolean(),
-});
-
-export type WSRequestSetTracks = DeepReadonly<
-  z.infer<typeof zWSRequestSetTracks>
->;
-
-export const zWSRequestSetVolume = z.object({
-  type: z.literal('setVolume'),
-  volume: z.number().gte(MIN_VOLUME).lte(MAX_VOLUME),
-  volumeUnmuted: z.number().gt(MIN_VOLUME).lte(MAX_VOLUME),
-});
-
-export type WSRequestSetVolume = DeepReadonly<
-  z.infer<typeof zWSRequestSetVolume>
+export type WSRequestSetSession = DeepReadonly<
+  z.infer<typeof zWSRequestSetSession>
 >;
 
 export const zWSRequestSetState = z.object({
   type: z.literal('setState'),
-  timestamp: z.number().gte(1),
-  position: z.number().gte(0),
-  duration: z.number().gte(0),
-  playing: z.boolean(),
+  host: z.optional(z.union([z.string(), z.literal(true)])),
+  tracks: z.optional(zWSPlaybackTracks),
+  trackChange: z.optional(z.boolean()),
+  state: z.optional(zWSPlaybackState),
+  volume: z.optional(z.number().gte(MIN_VOLUME).lte(MAX_VOLUME)),
+  volumeUnmuted: z.optional(z.number().gt(MIN_VOLUME).lte(MAX_VOLUME)),
 });
 
 export type WSRequestSetState = DeepReadonly<
   z.infer<typeof zWSRequestSetState>
 >;
 
-export const zWSRequest = z.union([
-  zWSRequestPing,
-  zWSRequestActivate,
-  zWSRequestUpdateSession,
-  zWSRequestSetHost,
-  zWSRequestSetTracks,
-  zWSRequestSetVolume,
-  zWSRequestSetState,
-]);
+export const zWSRequest = z.union([zWSRequestSetSession, zWSRequestSetState]);
 
 export type WSRequest = DeepReadonly<z.infer<typeof zWSRequest>>;
 
-export const zWSRequests = z.array(zWSRequest);
-
 // responses
 // no need to create schema for these types
-
-export interface WSResponsePong {
-  readonly type: 'pong';
-  readonly timestamp: number;
-  readonly serverTimestamp: number;
-}
 
 export interface WSResponseConnected {
   readonly type: 'connected';
@@ -158,7 +103,4 @@ export interface WSResponseUpdated {
   readonly pbState?: WSPlaybackState | null;
 }
 
-export type WSResponse =
-  | WSResponsePong
-  | WSResponseConnected
-  | WSResponseUpdated;
+export type WSResponse = WSResponseConnected | WSResponseUpdated;
