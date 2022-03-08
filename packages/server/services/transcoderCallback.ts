@@ -67,7 +67,9 @@ function floatOr<T>(str: string | null | undefined, fallback: T): number | T {
 }
 
 function parseDiscAndTrackNumber(
-  tags: FFprobeTags
+  tags: FFprobeTags,
+  defaultDiscNumber = 1,
+  defaultTrackNumber = 1
 ): [discNumber: number, trackNumber: number] {
   // possible formats of tags.track:
   // 2, 02, 2/4, 02/04, 1.2, 1.02, 01.2, 01.02
@@ -91,8 +93,8 @@ function parseDiscAndTrackNumber(
   }
 
   return [
-    discNumber || 1, // ディスク番号が0またはundefinedのときは1にする
-    trackNumber || 1, // トラック番号が0またはundefinedのときは1にする
+    discNumber || defaultDiscNumber, // ディスク番号が0またはundefinedのときはdefaultDiscNumberにする
+    trackNumber || defaultTrackNumber, // トラック番号が0またはundefinedのときはdefaultTrackNumberにする
   ];
 }
 
@@ -102,14 +104,34 @@ function parseDiscAndTrackNumberEx(
   hasCueSheet: boolean,
   options: TranscoderRequestOptions
 ): [discNumber: number, trackNumber: number] {
-  let [discNumber, trackNumber] = parseDiscAndTrackNumber(tags);
+  let [discNumber, trackNumber] = parseDiscAndTrackNumber(tags, 0, 0);
 
-  const isValidDiscNumber = (
-    value: number | null | undefined
-  ): value is number =>
-    value != null && isFinite(value) && value >= 1 && value <= 99;
+  const parseDiscNumber = (
+    strValue: string | null | undefined
+  ): number | null => {
+    if (!strValue || strValue.length > 2) {
+      // ignore something like '0002'
+      return null;
+    }
+    const value = parseInt(strValue, 10);
+    if (!isFinite(value) || value < 1 || value > 99) {
+      return null;
+    }
+    return value;
+  };
 
-  const isValidTrackNumber = isValidDiscNumber;
+  const parseTrackNumber = (
+    strValue: string | null | undefined
+  ): number | null => {
+    if (!strValue || strValue.length > 2) {
+      return null;
+    }
+    const value = parseInt(strValue, 10);
+    if (!isFinite(value) || value < 1 || value > 99) {
+      return null;
+    }
+    return value;
+  };
 
   const basename = getStem(filename);
 
@@ -117,11 +139,11 @@ function parseDiscAndTrackNumberEx(
     // eg. 'Disc2', 'ABCD-1234-2', 'ABCD-1234' (not valid)
     const match = basename.match(/(\d+)\s*$/);
     if (match) {
-      const newDiscNumber = parseInt(match[1]);
+      const newDiscNumber = parseDiscNumber(match[1]);
       if (
         options.guessDiscNumberUsingFilenameForCue &&
-        discNumber === 1 &&
-        isValidDiscNumber(newDiscNumber)
+        discNumber === 0 &&
+        newDiscNumber != null
       ) {
         discNumber = newDiscNumber;
       }
@@ -130,26 +152,29 @@ function parseDiscAndTrackNumberEx(
     // eg. '2.03 Track Title', '03. Track Title', '03 Track Title'
     const match = basename.match(/^\s*(?:(\d+)[\s.-]+)?(\d+)$/);
     if (match) {
-      const newDiscNumber = match[1] ? parseInt(match[1]) : undefined;
-      const newTrackNumber = parseInt(match[2]);
+      const newDiscNumber = match[1] ? parseDiscNumber(match[1]) : undefined;
+      const newTrackNumber = parseTrackNumber(match[2]);
       if (
         options.guessDiscNumberUsingFilename &&
-        discNumber === 1 &&
-        isValidDiscNumber(newDiscNumber)
+        discNumber === 0 &&
+        newDiscNumber != null
       ) {
         discNumber = newDiscNumber;
       }
       if (
         options.guessTrackNumberUsingFilename &&
-        trackNumber === 1 &&
-        isValidTrackNumber(newTrackNumber)
+        trackNumber === 0 &&
+        newTrackNumber != null
       ) {
         trackNumber = newTrackNumber;
       }
     }
   }
 
-  return [discNumber, trackNumber];
+  return [
+    discNumber || 1, // discNumberが0のときは1にする
+    trackNumber || 1, // trackNumberが0のときは1にする
+  ];
 }
 
 async function registerImage(

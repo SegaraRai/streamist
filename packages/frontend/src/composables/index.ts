@@ -1,7 +1,9 @@
 export * from './naiveUI';
+export * from './useAccurateTime';
 export * from './useAllItem';
 export * from './useCurrentTrackInfo';
 export * from './useDB';
+export * from './useEffectiveTheme';
 export * from './useFuse';
 export * from './useLiveQuery';
 export * from './useMenu';
@@ -11,3 +13,4 @@ export * from './useSearch';
 export * from './useTimeAgo';
 export * from './useTrackFilter';
 export * from './useVirtualScroll';
+export * from './useWS';

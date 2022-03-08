@@ -5,7 +5,8 @@
   "license": "MIT",
   "dependencies": {
     "chardet": "^1.4.0",
-    "iconv-lite": "^0.6.3"
+    "iconv-lite": "^0.6.3",
+    "zod": "^3.13.4"
   },
   "devDependencies": {
     "vite": "^2.8.6",

@@ -2,8 +2,7 @@
 import type { ScrollbarInst } from 'naive-ui';
 import { useDisplay } from 'vuetify';
 import logoSVG from '~/assets/logo_colored.svg';
-import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
-import { useWS } from '~/composables/useWS';
+import { useEffectiveTheme, useWS } from '~/composables';
 import { COOKIE_CHECK_INTERVAL, IDLE_TIMEOUT } from '~/config';
 import { useSyncDB } from '~/db';
 import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
@@ -351,11 +350,7 @@ export default defineComponent({
             <div
               class="h-6 bg-st-primary text-st-on-primary px-2 flex justify-end"
             >
-              <i18n-t
-                keypath="session.ListeningOn"
-                tag="div"
-                class="flex items-center min-w-60"
-              >
+              <i18n-t keypath="session.ListeningOn" tag="div" class="min-w-60">
                 <span class="font-bold mx-1">
                   {{ hostSessionName$$q }}
                 </span>
@@ -391,20 +386,5 @@ export default defineComponent({
 
 .s-playback--desktop.s-session--remote .s-footer-height {
   @apply h-30;
-}
-
-.s-v-main.v-main > .v-main__wrap {
-  @apply flex;
-  @apply flex-col;
-  @apply h-full;
-}
-
-html.s-static-layout {
-  overflow: hidden;
-}
-
-html.s-static-layout .s-v-main.v-main {
-  @apply !absolute;
-  @apply h-full;
 }
 </style>

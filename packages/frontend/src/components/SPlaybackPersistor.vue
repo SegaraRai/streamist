@@ -1,6 +1,5 @@
 <script lang="ts">
-import { useAccurateTime } from '~/composables/useAccurateTime';
-import { useWS } from '~/composables/useWS';
+import { useAccurateTime, useWS } from '~/composables';
 import { usePlaybackStore } from '~/stores/playback';
 
 export default defineComponent({

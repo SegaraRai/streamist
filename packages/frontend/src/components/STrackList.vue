@@ -175,28 +175,27 @@ export default defineComponent({
         )
     );
 
-    const propsStrAvailableSetList = computed(
-      () =>
-        props.setList &&
-        props.setList
-          .map(({ id }) => id)
-          .filter((id) => isTrackAvailable$$q(id))
-          .join('\n')
-    );
+    // true if props.setList is a superset of playback setList
+    const isSameSetList$$q = computed<boolean>((): boolean => {
+      if (props.skipSetListCheck) {
+        return true;
+      }
 
-    const playbacksStrAvailableSetList = computed(
-      () =>
-        playbackStore.currentSetList$$q.value &&
-        playbackStore.currentSetList$$q.value
-          .filter((id) => isTrackAvailable$$q(id))
-          .join('\n')
-    );
+      const pbSetList =
+        playbackStore.currentSetList$$q.value?.filter(isTrackAvailable$$q) ||
+        [];
+      const propSetList =
+        props.setList?.map(({ id }) => id).filter(isTrackAvailable$$q) || [];
 
-    const isSameSetList$$q = eagerComputed(
-      () =>
-        props.skipSetListCheck ||
-        propsStrAvailableSetList.value === playbacksStrAvailableSetList.value
-    );
+      const propSetListSet = new Set(propSetList);
+      for (const trackId of pbSetList) {
+        if (!propSetListSet.has(trackId)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     const items = computed(() => {
       if (!trackItems.value) {
@@ -342,6 +341,7 @@ export default defineComponent({
       currentPlayingTrackId$$q: currentPlayingTrackId,
       useDiscNumber$$q: useDiscNumber,
       isSameSetList$$q,
+      disableCtxMenu$$q: ref(false),
       play$$q,
       showMenu$$q: (
         eventOrElement: MouseEvent | HTMLElement,
@@ -430,16 +430,6 @@ export default defineComponent({
             <div class="s-track-list-column-menu py-1"></div>
           </template>
         </VListItem>
-        <VDivider
-          class="mx-1"
-          :class="
-            renderMode !== 'draggable' &&
-            items$$q[0]?.type$$q === 'discNumberHeader'
-              ? 'invisible'
-              : ''
-          "
-          @contextmenu.prevent
-        />
       </template>
       <template v-if="items$$q.length === 0"></template>
       <template v-if="renderMode === 'plain'">
@@ -508,7 +498,10 @@ export default defineComponent({
               @play="play$$q(element.track$$q, element.index$$q)"
               @remove="remove$$q(element.track$$q, element.index$$q)"
               @menu="showMenu$$q($event.target as HTMLElement, element)"
-              @ctx-menu="showMenu$$q($event, element)"
+              @ctx-menu="disableCtxMenu$$q || showMenu$$q($event, element)"
+              @touchstart="disableCtxMenu$$q = true"
+              @touchcancel="disableCtxMenu$$q = false"
+              @touchend="disableCtxMenu$$q = false"
             />
           </template>
         </SDraggable>

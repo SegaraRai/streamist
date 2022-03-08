@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { DeviceType } from '$shared/types';
-import { useWS } from '~/composables/useWS';
+import { useWS } from '~/composables';
 
 function getDeviceIcon(deviceType: DeviceType): string {
   switch (deviceType) {

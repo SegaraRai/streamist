@@ -21,7 +21,7 @@
     "@types/node": "^16.11.22",
     "esbuild": "^0.14.25",
     "miniflare": "^2.3.0",
-    "rollup": "^2.69.1",
+    "rollup": "^2.70.0",
     "rollup-plugin-esbuild": "^4.8.2",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-tsconfig-paths": "^1.1.6"

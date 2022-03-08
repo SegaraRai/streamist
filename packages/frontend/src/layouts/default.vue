@@ -1,6 +1,6 @@
 <script lang="ts">
 import logoSVG from '~/assets/logo_colored.svg';
-import { useEffectiveTheme } from '~/composables/useEffectiveTheme';
+import { useEffectiveTheme } from '~/composables';
 import { PREFERENCE_LANGUAGE_OPTIONS } from '~/config';
 import { usePreferenceStore } from '~/stores/preference';
 
