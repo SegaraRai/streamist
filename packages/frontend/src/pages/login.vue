@@ -5,7 +5,7 @@ meta:
 
 <script lang="ts">
 import logoSVG from '~/assets/logo_colored.svg';
-import { authenticate } from '~/logic/login';
+import { AuthenticateResult, authenticate } from '~/logic/login';
 import { parseRedirectTo } from '~/logic/parseRedirectTo';
 
 export default defineComponent({
@@ -18,6 +18,20 @@ export default defineComponent({
     });
 
     const requestInProgress$$q = ref(false);
+    const erred$$q = ref<AuthenticateResult | undefined>();
+    const errorMessage$$q = computed(() => {
+      switch (erred$$q.value) {
+        case 'ng_invalid_credentials':
+          return t('signIn.error.IncorrectUsernameOrPassword');
+
+        case 'ng_rate_limit':
+          return t('signIn.error.RateLimitExceeded');
+
+        case 'ng_unknown_error':
+          return t('signIn.error.AnUnknownErrorOccurred');
+      }
+      return;
+    });
 
     const username$$q = ref('');
     const password$$q = ref('');
@@ -26,6 +40,7 @@ export default defineComponent({
       t,
       logoSVG$$q: logoSVG,
       requestInProgress$$q,
+      errorMessage$$q,
       username$$q,
       password$$q,
       login$$q() {
@@ -35,8 +50,13 @@ export default defineComponent({
 
         requestInProgress$$q.value = true;
         authenticate(username$$q.value, password$$q.value)
-          .then(() => {
-            router.push(parseRedirectTo(router.currentRoute.value.query.to));
+          .then((result) => {
+            if (result === 'ok') {
+              erred$$q.value = undefined;
+              router.push(parseRedirectTo(router.currentRoute.value.query.to));
+            } else {
+              erred$$q.value = result;
+            }
           })
           .finally(() => {
             requestInProgress$$q.value = false;
@@ -85,6 +105,11 @@ export default defineComponent({
             hide-details
             :label="t('signIn.label.Password')"
           />
+          <template v-if="errorMessage$$q">
+            <VAlert variant="text" type="error" icon="mdi-alert-circle-outline">
+              {{ errorMessage$$q }}
+            </VAlert>
+          </template>
         </VForm>
       </VCardText>
       <VCardActions>

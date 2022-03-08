@@ -1,7 +1,9 @@
 notFound:
-  message: 'ページが見つかりません'
+  message: ページが見つかりません
   button:
     Back: 戻る
+auth:
+  message: リダイレクトされるまでお待ちください…
 app:
   title: Streamist
   meta:
@@ -63,6 +65,10 @@ signIn:
     Password: パスワード
   button:
     SignIn: ログイン
+  error:
+    IncorrectUsernameOrPassword: ユーザー名またはパスワードが間違っています
+    RateLimitExceeded: ログイン試行回数制限を超過しました。時間をあけて再度お試しください。
+    AnUnknownErrorOccurred: 不明なエラーが発生しました
 signUp:
   title: 登録
   label:

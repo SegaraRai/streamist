@@ -2,6 +2,8 @@ notFound:
   message: Page not found.
   button:
     Back: Back
+auth:
+  message: Please wait while you are redirected...
 app:
   title: Streamist
   meta:
@@ -63,6 +65,10 @@ signIn:
     Password: Password
   button:
     SignIn: Sign in
+  error:
+    IncorrectUsernameOrPassword: Incorrect username or password
+    RateLimitExceeded: Rate limit exceeded, please try again later
+    AnUnknownErrorOccurred: An unknown error occurred
 signUp:
   title: Sign up
   label:

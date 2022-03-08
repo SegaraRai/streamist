@@ -1,7 +1,14 @@
 import { loggedInRef } from '~/stores/auth';
+import { isAxiosError } from './axiosError';
 import { extractSubFromJWT } from './jwt';
 import { tokens } from './tokens';
 import { unAuthAPI } from './unAuthAPI';
+
+export type AuthenticateResult =
+  | 'ok'
+  | 'ng_rate_limit'
+  | 'ng_invalid_credentials'
+  | 'ng_unknown_error';
 
 function clearUserData(): void {
   localStorage.removeItem('recentlyPlayed');
@@ -15,7 +22,7 @@ function clearUserData(): void {
 export async function authenticate(
   username: string,
   password: string
-): Promise<boolean> {
+): Promise<AuthenticateResult> {
   try {
     const oldUserId = localStorage.getItem('userId');
 
@@ -51,8 +58,17 @@ export async function authenticate(
 
     loggedInRef.value = true;
 
-    return true;
+    return 'ok';
   } catch (error: unknown) {
-    return false;
+    if (isAxiosError(error)) {
+      switch (error.response?.status) {
+        case 401:
+          return 'ng_invalid_credentials';
+
+        case 429:
+          return 'ng_rate_limit';
+      }
+    }
+    return 'ng_unknown_error';
   }
 }
