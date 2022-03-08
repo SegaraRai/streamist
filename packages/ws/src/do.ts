@@ -68,11 +68,10 @@ export class DO extends Actor {
       return;
     }
 
-    const hostSession = this.sessions.find(
+    let hostSession = this.sessions.find(
       (session) => session.ws === this.hostWS
     );
-
-    const isHost = hostSession?.ws === ws;
+    let isHost = hostSession?.ws === ws;
 
     let activated = false;
     let modifiedSessions = false;
@@ -101,18 +100,26 @@ export class DO extends Actor {
       case 'setState': {
         senderSession.lastActivatedAt = Date.now();
         if (data.host) {
-          const newHostWS =
+          const newHostSession =
             data.host === true
-              ? ws
-              : this.sessions.find((s) => s.id === data.host)?.ws;
-          if (newHostWS) {
-            this.hostWS = newHostWS;
+              ? senderSession
+              : this.sessions.find((s) => s.id === data.host);
+          if (newHostSession) {
+            this.hostWS = newHostSession.ws;
+            hostSession = newHostSession;
+            isHost = newHostSession.ws === senderSession.ws;
           }
         }
         if (data.state) {
           this.pbState = data.state;
-          if (!this.hostWS) {
-            (this.pbState as Mutable<WSPlaybackState>).playing = false;
+          if (this.pbState) {
+            if (!this.hostWS) {
+              (this.pbState as Mutable<WSPlaybackState>).playing = false;
+            }
+            (this.pbState as Mutable<WSPlaybackState>).startPosition = Math.max(
+              Math.min(this.pbState.startPosition, this.pbState.duration),
+              0
+            );
           }
           modifiedState = true;
         }
@@ -121,8 +128,8 @@ export class DO extends Actor {
           trackChange = data.trackChange || false;
           modifiedTracks = true;
           if (
-            !data.tracks.currentTrack &&
-            !data.tracks.currentTrackOverride &&
+            !this.pbTracks.currentTrack &&
+            !this.pbTracks.currentTrackOverride &&
             this.pbState
           ) {
             this.pbState = null;
