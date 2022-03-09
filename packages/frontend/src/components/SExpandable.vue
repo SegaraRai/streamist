@@ -7,6 +7,7 @@ import { createSrc } from '~/logic/srcSet';
 import { getUserId } from '~/logic/tokens';
 
 export default defineComponent({
+  inheritAttrs: false,
   props: {
     modelValue: Boolean,
     disabled: Boolean,

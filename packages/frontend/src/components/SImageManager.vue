@@ -15,6 +15,7 @@ import { waitForChange } from '~/logic/waitForChange';
 import { useUploadStore } from '~/stores/upload';
 
 export default defineComponent({
+  inheritAttrs: false,
   props: {
     attachToType: {
       type: String as PropType<SourceFileAttachToType>,

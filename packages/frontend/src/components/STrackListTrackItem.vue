@@ -30,6 +30,7 @@ export interface ListItemTrack {
 export const trackItemHeight = 56;
 
 export default defineComponent({
+  inheritAttrs: false,
   props: {
     item: {
       type: Object as PropType<ListItemTrack>,
