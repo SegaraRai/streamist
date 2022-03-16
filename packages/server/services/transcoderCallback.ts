@@ -560,25 +560,22 @@ async function handleTranscoderResponseArtifactAudio(
         }
 
         // register track files
-        // TODO(prod): use createMany
-        for (const file of files) {
-          await txClient.trackFile.create({
-            data: {
-              id: file.fileId,
-              region,
-              format: file.formatName,
-              mimeType: file.mimeType,
-              extension: file.extension,
-              fileSize: file.fileSize,
-              sha256: file.sha256,
-              duration: file.duration,
-              trackId: track.id,
-              userId,
-              createdAt: timestamp,
-              updatedAt: timestamp,
-            },
-          });
-        }
+        await txClient.trackFile.createMany({
+          data: files.map((file) => ({
+            id: file.fileId,
+            region,
+            format: file.formatName,
+            mimeType: file.mimeType,
+            extension: file.extension,
+            fileSize: file.fileSize,
+            sha256: file.sha256,
+            duration: file.duration,
+            trackId: track.id,
+            userId,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+          })),
+        });
       }
 
       await markSourceFileIdAsTx(

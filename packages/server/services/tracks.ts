@@ -197,12 +197,9 @@ export async function trackUpdate(
             updatedAt: timestamp,
           }))
         );
-        // TODO(db): use createMany for PostgreSQL
-        for (const coArtist of newCoArtists) {
-          await txClient.trackCoArtist.create({
-            data: coArtist,
-          });
-        }
+        await txClient.trackCoArtist.createMany({
+          data: newCoArtists,
+        });
       }
     }
 
