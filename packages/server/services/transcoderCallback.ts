@@ -480,6 +480,7 @@ async function handleTranscoderResponseArtifactAudio(
               releaseDateText: date?.text$$q ?? null,
               genre: tags.genre || null,
               bpm: numberOr(tags.bpm, null, 1),
+              sensitive: false,
               replayGainGain: floatOr(tags.replaygain_track_gain, null),
               replayGainPeak: floatOr(tags.replaygain_track_peak, null),
               sourceFile: { connect: { id: artifact.source.sourceFileId } },

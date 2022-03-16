@@ -220,6 +220,7 @@ export async function trackUpdate(
         releaseDateText: parsedDate?.text$$q ?? null,
         genre: emptyToNull(data.genre),
         bpm: data.bpm,
+        sensitive: data.sensitive,
         albumId,
         artistId,
         updatedAt: timestamp,

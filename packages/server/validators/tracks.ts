@@ -1,6 +1,7 @@
 import type { Track } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
 import {
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsString,
@@ -28,6 +29,7 @@ export type ITrackUpdateData = Partial<
     | 'releaseDateText'
     | 'genre'
     | 'bpm'
+    | 'sensitive'
     | 'albumId'
     | 'artistId'
   >
@@ -90,6 +92,10 @@ export class VTrackUpdateBody implements ITrackUpdateData {
   @IsInt()
   @Min(1)
   bpm?: number | null;
+
+  @IsUndefinable()
+  @IsBoolean()
+  sensitive?: boolean;
 
   @IsUndefinable()
   @IsId()
