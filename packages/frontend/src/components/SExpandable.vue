@@ -61,7 +61,7 @@ export default defineComponent({
       );
     });
 
-    const enabled = eagerComputed(
+    const enabled = computedEager(
       () => !props.disabled && !!resolvedImages.value?.length
     );
     watch(enabled, (newEnabled) => {

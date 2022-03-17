@@ -26,7 +26,7 @@ export default defineComponent({
     return {
       t,
       currentSetListName$$q: playbackStore.currentSetListName$$q,
-      repeatOne$$q: eagerComputed(
+      repeatOne$$q: computedEager(
         () => playbackStore.repeat$$q.value === 'one'
       ),
       playNextQueue$$q,

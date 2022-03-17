@@ -32,18 +32,18 @@ export default defineComponent({
     const _listElementRef = ref<HTMLElement | null | undefined>();
     const containerWidth = useElementBounding(_listElementRef).width;
 
-    const numColsRef = eagerComputed(() =>
+    const numColsRef = computedEager(() =>
       Math.floor(
         ((containerWidth.value || 0) + props.itemMarginWidth) /
           (props.itemWidth + props.itemMarginWidth)
       )
     );
-    const itemHeightRef = eagerComputed(
+    const itemHeightRef = computedEager(
       () => props.itemHeight + props.itemMarginHeight
     );
 
-    const rowStyle$$q = eagerComputed(() => `height:${itemHeightRef.value}px;`);
-    const cellStyle$$q = eagerComputed(
+    const rowStyle$$q = computedEager(() => `height:${itemHeightRef.value}px;`);
+    const cellStyle$$q = computedEager(
       () =>
         `width:${props.itemWidth}px;height:${itemHeightRef.value}px;padding-bottom:${props.itemMarginHeight}px;`
     );
@@ -72,7 +72,7 @@ export default defineComponent({
       rowsRef,
       {
         itemHeightRef,
-        additionalHeight: eagerComputed(() => -props.itemMarginHeight),
+        additionalHeight: computedEager(() => -props.itemMarginHeight),
         containerElementRef: currentScrollContainerRef,
         contentElementRef: currentScrollContentRef,
       }

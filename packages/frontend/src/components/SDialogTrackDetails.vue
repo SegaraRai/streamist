@@ -30,7 +30,7 @@ export default defineComponent({
 
     const dialog$$q = useVModel(props, 'modelValue', emit);
 
-    const propTrackRef = eagerComputed(() => props.track);
+    const propTrackRef = computedEager(() => props.track);
     const { value } = useLiveQuery(
       async () => {
         const propTrack = propTrackRef.value;

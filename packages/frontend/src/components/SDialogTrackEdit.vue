@@ -97,7 +97,7 @@ export default defineComponent({
     };
 
     watch(
-      eagerComputed(() => props.track),
+      computedEager(() => props.track),
       reloadData,
       {
         immediate: true,
@@ -110,23 +110,23 @@ export default defineComponent({
       }
     });
 
-    const isAlbumEmpty$$q = eagerComputed(
+    const isAlbumEmpty$$q = computedEager(
       () => !albumId$$q.value && !albumTitle$$q.value
     );
 
-    const isArtistEmpty$$q = eagerComputed(
+    const isArtistEmpty$$q = computedEager(
       () => !artistId$$q.value && !artistName$$q.value
     );
 
-    const parsedReleaseDate$$q = eagerComputed(() =>
+    const parsedReleaseDate$$q = computedEager(() =>
       itemReleaseDateText$$q.value
         ? parseDate(itemReleaseDateText$$q.value)
         : undefined
     );
-    const releaseDateWarning$$q = eagerComputed(
+    const releaseDateWarning$$q = computedEager(
       () => !!itemReleaseDateText$$q.value && !parsedReleaseDate$$q.value
     );
-    const releaseDateHint$$q = eagerComputed(() => {
+    const releaseDateHint$$q = computedEager(() => {
       if (releaseDateWarning$$q.value) {
         return t('dialogComponent.editTrack.releaseDate.invalid');
       }
@@ -154,7 +154,7 @@ export default defineComponent({
       }
     });
 
-    const modified$$q = eagerComputed(
+    const modified$$q = computedEager(
       () =>
         (itemTitle$$q.value && itemTitle$$q.value !== props.track.title) ||
         (itemTitleSort$$q.value || null) !== props.track.titleSort ||
@@ -203,10 +203,10 @@ export default defineComponent({
       itemCoArtists$$q,
       modified$$q,
       strCreatedAt$$q: useTranslatedTimeAgo(
-        eagerComputed(() => props.track.createdAt)
+        computedEager(() => props.track.createdAt)
       ),
       strUpdatedAt$$q: useTranslatedTimeAgo(
-        eagerComputed(() => props.track.updatedAt)
+        computedEager(() => props.track.updatedAt)
       ),
       apply$$q: () => {
         if (requestInProgress$$q.value) {

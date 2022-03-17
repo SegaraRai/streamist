@@ -20,7 +20,7 @@ export default defineComponent({
     const syncDB = useSyncDB();
     const { dbUser$$q } = useLocalStorageDB();
 
-    const regionOptions$$q = eagerComputed(() =>
+    const regionOptions$$q = computedEager(() =>
       getOSRegions().map((region) => ({
         value: region,
         label: t(`regions.${region}`),
@@ -44,7 +44,7 @@ export default defineComponent({
       }
     });
 
-    const modified$$q = eagerComputed(
+    const modified$$q = computedEager(
       () =>
         dbUser$$q.value &&
         ((itemDisplayName$$q.value &&

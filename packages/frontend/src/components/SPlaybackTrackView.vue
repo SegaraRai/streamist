@@ -35,7 +35,7 @@ export default defineComponent({
       scrollRef$$q: ref(0),
     });
     const menuOptions$$q = useNDropdownTrack({
-      selectedTrack$$q: eagerComputed(() => props.track),
+      selectedTrack$$q: computedEager(() => props.track),
       isSameSetList$$q: ref(true),
       playlistId$$q: ref(),
       showVisitAlbum$$q: ref(true),

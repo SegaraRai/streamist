@@ -113,7 +113,7 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const { isTrackAvailable$$q } = useTrackFilter();
 
-    const propTracksRef = eagerComputed(() => props.tracks);
+    const propTracksRef = computedEager(() => props.tracks);
     const { value: trackItems } = useLiveQuery(async () => {
       const propTracks = propTracksRef.value;
       if (!propTracks) {
@@ -240,7 +240,7 @@ export default defineComponent({
       )
     );
 
-    const currentPlayingTrackId = eagerComputed(
+    const currentPlayingTrackId = computedEager(
       () => playbackStore.currentTrack$$q.value
     );
 
@@ -274,7 +274,7 @@ export default defineComponent({
       open$$q: openMenu$$q,
     } = useMenu({
       closeOnScroll$$q: true,
-      scrollRef$$q: eagerComputed(
+      scrollRef$$q: computedEager(
         () => props.scrollTop ?? currentScrollRef.value
       ),
       onClose$$q: () => {
@@ -285,11 +285,11 @@ export default defineComponent({
     const menuOptions$$q = useNDropdownTrack({
       selectedTrack$$q,
       isSameSetList$$q,
-      playlistId$$q: eagerComputed(() => props.playlistId),
-      showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
-      showVisitArtist$$q: eagerComputed(() => props.visitArtist),
+      playlistId$$q: computedEager(() => props.playlistId),
+      showVisitAlbum$$q: computedEager(() => props.visitAlbum),
+      showVisitArtist$$q: computedEager(() => props.visitArtist),
       showPlayback$$q: ref(true),
-      showDelete$$q: eagerComputed(() => props.showDelete),
+      showDelete$$q: computedEager(() => props.showDelete),
       play$$q: (track: ResourceTrack) => {
         if (
           !selectedTrack$$q.value ||
@@ -319,11 +319,11 @@ export default defineComponent({
     const { containerStyle, list, listElementRef } = useVirtualScrollList(
       items,
       {
-        disabled: eagerComputed(() => props.renderMode !== 'virtual'),
-        containerElementRef: eagerComputed(
+        disabled: computedEager(() => props.renderMode !== 'virtual'),
+        containerElementRef: computedEager(
           () => props.scrollContainer || currentScrollContainerRef.value
         ),
-        contentElementRef: eagerComputed(
+        contentElementRef: computedEager(
           () => props.scrollContent || currentScrollContentRef.value
         ),
         itemHeightFunc: (index: number) => items.value[index].height$$q,

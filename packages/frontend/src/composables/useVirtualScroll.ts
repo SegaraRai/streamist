@@ -37,7 +37,7 @@ export function useVirtualScrollList<T>(
 
   const currentList: Ref<UseVirtualScrollListItem<T>[]> = ref([]);
   const shallowList = shallowRef(list);
-  const source = eagerComputed(() =>
+  const source = computedEager(() =>
     disabled?.value ? [] : shallowList.value
   );
 

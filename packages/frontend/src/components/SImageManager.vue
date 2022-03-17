@@ -42,14 +42,14 @@ export default defineComponent({
     const uploadStore = useUploadStore();
     const { themeName$$q } = useEffectiveTheme();
 
-    const errorOverrideTheme$$q = eagerComputed(() =>
+    const errorOverrideTheme$$q = computedEager(() =>
       createOverrideTheme(
         NAIVE_UI_THEMES[themeName$$q.value].overrides,
         'error'
       )
     );
 
-    const roundClass$$q = eagerComputed(() => {
+    const roundClass$$q = computedEager(() => {
       switch (props.attachToType) {
         case 'album':
           return '';
@@ -107,9 +107,9 @@ export default defineComponent({
 
     const inputFileElement$$q = ref<HTMLInputElement | null>(null);
     const dialog$$q = ref(false);
-    const loaded$$q = eagerComputed(() => !!props.imageIds);
-    const hasImage$$q = eagerComputed(() => props.imageIds?.length !== 0);
-    const imageIds$$q = eagerComputed(() => props.imageIds);
+    const loaded$$q = computedEager(() => !!props.imageIds);
+    const hasImage$$q = computedEager(() => props.imageIds?.length !== 0);
+    const imageIds$$q = computedEager(() => props.imageIds);
     const { value: images$$q } = useLiveQuery(async () => {
       if (!imageIds$$q.value) {
         return;

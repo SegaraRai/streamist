@@ -34,7 +34,7 @@ export default defineComponent({
       }
     });
 
-    const valid$$q = eagerComputed(() => !!itemTitle$$q.value.trim());
+    const valid$$q = computedEager(() => !!itemTitle$$q.value.trim());
 
     return {
       t,

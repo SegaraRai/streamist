@@ -41,7 +41,7 @@ export default defineComponent({
     };
 
     watch(
-      eagerComputed(() => props.artist),
+      computedEager(() => props.artist),
       reloadData,
       {
         immediate: true,
@@ -54,7 +54,7 @@ export default defineComponent({
       }
     });
 
-    const modified$$q = eagerComputed(
+    const modified$$q = computedEager(
       () =>
         (itemName$$q.value && itemName$$q.value !== props.artist.name) ||
         (itemNameSort$$q.value || null) !== props.artist.nameSort ||
@@ -72,10 +72,10 @@ export default defineComponent({
       itemDescription$$q,
       modified$$q,
       strCreatedAt$$q: useTranslatedTimeAgo(
-        eagerComputed(() => props.artist.createdAt)
+        computedEager(() => props.artist.createdAt)
       ),
       strUpdatedAt$$q: useTranslatedTimeAgo(
-        eagerComputed(() => props.artist.updatedAt)
+        computedEager(() => props.artist.updatedAt)
       ),
       apply$$q: () => {
         if (requestInProgress$$q.value) {

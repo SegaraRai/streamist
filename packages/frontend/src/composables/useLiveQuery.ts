@@ -95,7 +95,7 @@ export function transformObservableComputed<T, U>(
   transform: (item: T) => U,
   eager = false
 ): ObservableComputed<U> {
-  const comp = eager ? eagerComputed : computed;
+  const comp = eager ? computedEager : computed;
 
   let transformCache: [T, U] | undefined;
   const memoizedTransform = (item: T): U => {

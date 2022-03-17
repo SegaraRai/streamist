@@ -7,7 +7,7 @@ export function useTranslatedTimeAgo(
 ): Readonly<Ref<string>> {
   const { t, locale } = useI18n();
 
-  const timeAgoRefRef = controlledComputed(locale, () => {
+  const timeAgoRefRef = computedWithControl(locale, () => {
     return useTimeAgo(timestamp, {
       ...options,
       messages: {
@@ -25,5 +25,5 @@ export function useTranslatedTimeAgo(
     });
   });
 
-  return eagerComputed((): string => timeAgoRefRef.value.value);
+  return computedEager((): string => timeAgoRefRef.value.value);
 }
