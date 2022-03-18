@@ -20,6 +20,16 @@ import { verifyJWT } from './jwt';
 import { convertToMutableResponse } from './response';
 import type { DORequestData, WSContext } from './types';
 
+function getAppOrigin(
+  req: Request,
+  context: Pick<WSContext, 'bindings' | 'url'>
+): string {
+  return BUILD_TIME_DEFINITION.NODE_ENV === 'development' &&
+    context.bindings.DEV_WS_SKIP_ORIGIN_CHECK === '1'
+    ? req.headers.get('Origin') || context.url.origin
+    : context.bindings.APP_ORIGIN;
+}
+
 const API = new Router<WSContext>();
 
 API.prepare = (_req, context) => {
@@ -34,12 +44,14 @@ API.add(
   '/ws/channels/:userId',
   async (req, context): Promise<Response> => {
     // request protocol is 'https://' (not 'wss://') here so we can compare origin safely
-    if (context.url.origin !== context.bindings.APP_ORIGIN) {
+    if (context.url.origin !== /* #__PURE__ */ getAppOrigin(req, context)) {
       return reply(404, null);
     }
 
     // Origin header is always present in WebSocket requests
-    if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
+    if (
+      req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
+    ) {
       return reply(403, null);
     }
 
