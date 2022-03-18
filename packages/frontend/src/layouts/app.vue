@@ -40,7 +40,7 @@ export default defineComponent({
       () => display.mdAndUp.value
     );
     const alwaysShowLeftSidebar$$q = desktopPlaybackControl$$q;
-    const canShowPlaying$$q = desktopPlaybackControl$$q;
+    const canShowPlaying$$q = logicNot(desktopPlaybackControl$$q);
     const leftSidebar$$q = computed<boolean>({
       get: (): boolean => {
         return alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value;
@@ -60,7 +60,7 @@ export default defineComponent({
 
     const showPlaying$$q = eagerComputed(
       () =>
-        !canShowPlaying$$q.value &&
+        canShowPlaying$$q.value &&
         isShowPlayingEnabled(router.currentRoute.value)
     );
 
@@ -73,7 +73,7 @@ export default defineComponent({
     });
 
     onBeforeRouteUpdate((to, from) => {
-      if (!canShowPlaying$$q.value && !isShowPlayingEnabled(to)) {
+      if (canShowPlaying$$q.value || !isShowPlayingEnabled(to)) {
         return;
       }
 
@@ -83,16 +83,18 @@ export default defineComponent({
     watch(
       computed(
         () =>
-          canShowPlaying$$q.value &&
+          !canShowPlaying$$q.value &&
           isShowPlayingEnabled(router.currentRoute.value)
       ),
       (shouldRemoveHash) => {
-        if (shouldRemoveHash) {
-          router.replace({
-            ...router.currentRoute.value,
-            hash: '',
-          });
+        if (!shouldRemoveHash) {
+          return;
         }
+
+        router.replace({
+          ...router.currentRoute.value,
+          hash: '',
+        });
       }
     );
 
