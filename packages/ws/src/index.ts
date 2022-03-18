@@ -14,8 +14,8 @@ import {
   WS_QUERY_PARAM_HOST,
   WS_TOKEN_PROTOCOL_PREFIX,
 } from '$shared/config';
+import { encodeRFC8187ValueChars } from '$shared/encodeURI';
 import type { ClientName, DeviceType } from '$shared/types';
-import { encodeUTF8Base64URL } from '$shared/unicodeBase64';
 import { verifyJWT } from './jwt';
 import { convertToMutableResponse } from './response';
 import type { DORequestData, WSContext } from './types';
@@ -117,7 +117,7 @@ API.add(
     mutableReq.headers.delete('Sec-WebSocket-Protocol');
     mutableReq.headers.set(
       'Streamist-DO-Request-Data',
-      encodeUTF8Base64URL(JSON.stringify(requestData))
+      encodeRFC8187ValueChars(JSON.stringify(requestData))
     );
 
     const res = convertToMutableResponse(
