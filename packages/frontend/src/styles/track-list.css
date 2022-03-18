@@ -1,5 +1,5 @@
 .s-track-list-column-icon {
-  @apply w-10;
+  @apply w-12;
   @apply text-center;
   @apply leading-none;
 }

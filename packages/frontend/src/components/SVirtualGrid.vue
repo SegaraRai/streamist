@@ -70,6 +70,7 @@ export default defineComponent({
 
     const { containerStyle, list, listElementRef, wrapperStyle } =
       useVirtualScrollList(rowsRef, {
+        itemHeightReferenceRef: itemHeightRef,
         itemHeightRef,
         additionalHeight: computedEager(() => -props.itemMarginHeight),
         containerElementRef: currentScrollContainerRef,
