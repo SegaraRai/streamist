@@ -4,7 +4,7 @@ import type { Ref } from 'vue';
 
 export interface UseVirtualScrollListOptions {
   disabled?: Readonly<Ref<boolean>>;
-  itemHeightRef?: Readonly<Ref<number>>;
+  itemHeightRef?: Readonly<Ref<number | undefined>>;
   itemHeightFunc?: (index: number) => number;
   additionalHeight?: Readonly<Ref<number>>;
   overscan?: number;
@@ -44,7 +44,7 @@ export function useVirtualScrollList<T>(
   const state = ref({ start: 0, end: 10 });
 
   const getViewCapacity = (containerHeight: number, start: number) => {
-    if (itemHeightRef) {
+    if (itemHeightRef?.value) {
       return Math.ceil(containerHeight / itemHeightRef.value);
     }
 
@@ -67,7 +67,7 @@ export function useVirtualScrollList<T>(
   };
 
   const getOffset = (scrollTop: number) => {
-    if (itemHeightRef) {
+    if (itemHeightRef?.value) {
       return Math.floor(scrollTop / itemHeightRef.value);
     }
 
@@ -156,7 +156,7 @@ export function useVirtualScrollList<T>(
     if (disabled?.value) {
       return 0;
     }
-    if (itemHeightRef) {
+    if (itemHeightRef?.value) {
       return source.value.length * itemHeightRef.value;
     }
     return source.value.reduce(
@@ -169,7 +169,7 @@ export function useVirtualScrollList<T>(
     if (disabled?.value) {
       return 0;
     }
-    if (itemHeightRef) {
+    if (itemHeightRef?.value) {
       return index * itemHeightRef.value;
     }
     return source.value

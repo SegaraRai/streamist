@@ -235,6 +235,9 @@ export default defineComponent({
       }
       return array;
     });
+    const itemHeight = computed(() =>
+      useDiscNumber.value ? undefined : trackItemHeight
+    );
     const trackOnlyItems$$q = computed(() =>
       items.value.filter(
         (item): item is ListItemTrack => item.type$$q === 'track'
@@ -326,6 +329,7 @@ export default defineComponent({
         contentElementRef: computedEager(
           () => props.scrollContent || currentScrollContentRef.value
         ),
+        itemHeightRef: itemHeight,
         itemHeightFunc: (index: number) => items.value[index].height$$q,
       });
 
