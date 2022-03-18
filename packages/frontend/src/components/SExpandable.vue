@@ -7,6 +7,7 @@ import { createSrc } from '~/logic/srcSet';
 import { getUserId } from '~/logic/tokens';
 
 export default defineComponent({
+  inheritAttrs: false,
   props: {
     modelValue: Boolean,
     disabled: Boolean,
@@ -60,7 +61,7 @@ export default defineComponent({
       );
     });
 
-    const enabled = eagerComputed(
+    const enabled = computedEager(
       () => !props.disabled && !!resolvedImages.value?.length
     );
     watch(enabled, (newEnabled) => {

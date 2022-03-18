@@ -75,6 +75,7 @@ declare module 'vue' {
     SPlaybackControl: typeof import('./components/SPlaybackControl.vue')['default']
     SPlaybackPersistor: typeof import('./components/SPlaybackPersistor.vue')['default']
     SPlaybackTrackView: typeof import('./components/SPlaybackTrackView.vue')['default']
+    SPlaying: typeof import('./components/SPlaying.vue')['default']
     SPlaylist: typeof import('./components/SPlaylist.vue')['default']
     SPlaylistImage: typeof import('./components/SPlaylistImage.vue')['default']
     SQueue: typeof import('./components/SQueue.vue')['default']

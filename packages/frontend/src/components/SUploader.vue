@@ -22,7 +22,7 @@ export default defineComponent({
 
     const inputFileElement = ref<HTMLInputElement | undefined>();
 
-    const canUpload$$q = eagerComputed(() => !dbMaxTrackId$$q.value);
+    const canUpload$$q = computedEager(() => !dbMaxTrackId$$q.value);
 
     return {
       t,

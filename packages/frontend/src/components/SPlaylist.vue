@@ -36,11 +36,11 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const { isTrackAvailable$$q } = useTrackFilter();
 
-    const playlistId$$q = eagerComputed(() =>
+    const playlistId$$q = computedEager(() =>
       typeof props.playlist === 'string' ? props.playlist : props.playlist.id
     );
 
-    const propPlaylistRef = eagerComputed(() => props.playlist);
+    const propPlaylistRef = computedEager(() => props.playlist);
     const { value } = useLiveQuery(
       async () => {
         const propPlaylist = propPlaylistRef.value;
@@ -71,7 +71,7 @@ export default defineComponent({
       value.value?.tracks$$q.filter((track) => isTrackAvailable$$q(track.id))
     );
 
-    const duration = eagerComputed(
+    const duration = computedEager(
       () =>
         value.value &&
         formatTracksTotalDuration(

@@ -50,6 +50,8 @@ function createSchema(schema: DBResourcesSchemaInput): DBResourcesSchema {
   ) as DBResourcesSchema;
 }
 
+export const DB_VERSION = 2;
+
 export class ResourcesDexie extends Dexie {
   readonly albumCoArtists!: Table<DBResources['albumCoArtists'][number]>;
   readonly albums!: Table<DBResources['albums'][number]>;
@@ -64,7 +66,7 @@ export class ResourcesDexie extends Dexie {
   constructor() {
     super('resources');
 
-    this.version(1).stores(
+    this.version(DB_VERSION).stores(
       createSchema({
         albumCoArtists: ['&[role+albumId+artistId]', 'albumId', 'artistId'],
         albums: ['&id', 'artistId', '*imageIds'],

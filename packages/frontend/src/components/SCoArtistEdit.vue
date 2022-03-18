@@ -18,7 +18,7 @@ export default defineComponent({
     const { t } = useI18n();
     const modelValue$$q = useVModel(props, 'modelValue', emit);
 
-    const roleOptions$$q = eagerComputed(() =>
+    const roleOptions$$q = computedEager(() =>
       builtinCoArtistRoles.map((role) => ({
         label: t(`coArtist.role.${role}`),
         value: role,

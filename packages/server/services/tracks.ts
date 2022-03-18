@@ -197,12 +197,9 @@ export async function trackUpdate(
             updatedAt: timestamp,
           }))
         );
-        // TODO(db): use createMany for PostgreSQL
-        for (const coArtist of newCoArtists) {
-          await txClient.trackCoArtist.create({
-            data: coArtist,
-          });
-        }
+        await txClient.trackCoArtist.createMany({
+          data: newCoArtists,
+        });
       }
     }
 
@@ -223,6 +220,7 @@ export async function trackUpdate(
         releaseDateText: parsedDate?.text$$q ?? null,
         genre: emptyToNull(data.genre),
         bpm: data.bpm,
+        sensitive: data.sensitive,
         albumId,
         artistId,
         updatedAt: timestamp,

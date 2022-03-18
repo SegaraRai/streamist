@@ -38,7 +38,7 @@ export default defineComponent({
     };
 
     watch(
-      eagerComputed(() => props.playlist),
+      computedEager(() => props.playlist),
       reloadData,
       {
         immediate: true,
@@ -51,7 +51,7 @@ export default defineComponent({
       }
     });
 
-    const modified$$q = eagerComputed(
+    const modified$$q = computedEager(
       () =>
         (itemTitle$$q.value && itemTitle$$q.value !== props.playlist.title) ||
         itemDescription$$q.value !== props.playlist.description

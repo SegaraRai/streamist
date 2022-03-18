@@ -7,7 +7,7 @@ import { SYNC_DB_THROTTLE } from '~/config';
 import { api } from '~/logic/api';
 import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
 import { getUserId } from '~/logic/tokens';
-import { db } from './db';
+import { DB_VERSION, db } from './db';
 import { useLocalStorageDB } from './localStorage';
 
 async function clearAndAdd<T>(
@@ -54,6 +54,7 @@ async function syncDB(
     dbNextSince$$q,
     dbUpdating$$q,
     dbUser$$q,
+    dbVersion$$q,
   }: ReturnType<typeof useLocalStorageDB>,
   reconstruct = false
 ): Promise<void> {
@@ -67,7 +68,10 @@ async function syncDB(
 
   try {
     const currentUserId = getUserId();
-    if (dbUser$$q.value?.id !== currentUserId) {
+    if (
+      dbUser$$q.value?.id !== currentUserId ||
+      dbVersion$$q.value !== DB_VERSION
+    ) {
       since = undefined;
       reconstruct = true;
     }
@@ -143,6 +147,7 @@ async function syncDB(
       );
 
       dbUser$$q.value = r.user;
+      dbVersion$$q.value = DB_VERSION;
 
       if (
         r.user.plan !== oldUser?.plan ||

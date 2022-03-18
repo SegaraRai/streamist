@@ -30,6 +30,7 @@ export interface ListItemTrack {
 export const trackItemHeight = 56;
 
 export default defineComponent({
+  inheritAttrs: false,
   props: {
     item: {
       type: Object as PropType<ListItemTrack>,
@@ -61,11 +62,11 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const { isTrackAvailable$$q } = useTrackFilter();
 
-    const isAvailable$$q = eagerComputed(() =>
+    const isAvailable$$q = computedEager(() =>
       isTrackAvailable$$q(props.item.track$$q.id)
     );
 
-    const isCurrentPlayingTrack$$q = eagerComputed(
+    const isCurrentPlayingTrack$$q = computedEager(
       () =>
         !props.disableCurrentPlaying &&
         playbackStore.currentTrack$$q.value === props.item.track$$q.id
@@ -74,7 +75,7 @@ export default defineComponent({
     return {
       t,
       isAvailable$$q,
-      indexContentNumber$$q: eagerComputed(() =>
+      indexContentNumber$$q: computedEager(() =>
         props.indexContent === 'trackNumber'
           ? props.item.track$$q.trackNumber
           : props.indexContent === 'index'

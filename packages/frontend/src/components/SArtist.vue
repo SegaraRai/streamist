@@ -25,7 +25,7 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const { isTrackAvailable$$q } = useTrackFilter();
 
-    const artistId$$q = eagerComputed(() =>
+    const artistId$$q = computedEager(() =>
       typeof props.artist === 'string' ? props.artist : props.artist.id
     );
 

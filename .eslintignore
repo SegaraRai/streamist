@@ -6,5 +6,10 @@ public
 index.js
 index.cjs
 index.mjs
+index_dev.js
+index_dev.cjs
+index_dev.mjs
+
+packages/transcoder/gcr/app/**/*
 
 packages/server/migration

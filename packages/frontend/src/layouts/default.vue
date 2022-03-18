@@ -11,10 +11,10 @@ export default defineComponent({
     const preferenceStore = usePreferenceStore();
     const { switchTheme$$q, themeName$$q } = useEffectiveTheme();
 
-    const isSignInPage$$q = eagerComputed(
+    const isSignInPage$$q = computedEager(
       () => router.currentRoute.value.path === '/login'
     );
-    const isSignUpPage$$q = eagerComputed(
+    const isSignUpPage$$q = computedEager(
       () => router.currentRoute.value.path === '/signup'
     );
 

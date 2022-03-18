@@ -23,7 +23,18 @@ describe('VAuthBodyWrapper', () => {
         username: 'test_id',
         password: 'test_password',
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [],
+          "constraints": {
+            "equals": "grant_type must be equal to password",
+          },
+          "property": "grant_type",
+          "value": "foo",
+        },
+      ]
+    `);
 
     // missing grant_type
     await expect(
@@ -31,7 +42,18 @@ describe('VAuthBodyWrapper', () => {
         username: 'test_id',
         password: 'test_password',
       } as any)
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [],
+          "constraints": {
+            "equals": "grant_type must be equal to password",
+          },
+          "property": "grant_type",
+          "value": undefined,
+        },
+      ]
+    `);
 
     // invalid username
     await expect(

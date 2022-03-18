@@ -44,7 +44,7 @@ export default defineComponent({
       title: t('title.SignUp'),
     });
 
-    const regionOptions$$q = eagerComputed(() =>
+    const regionOptions$$q = computedEager(() =>
       getOSRegions().map((region) => ({
         value: region,
         label: t(`regions.${region}`),
@@ -61,7 +61,7 @@ export default defineComponent({
 
     const isUsernameAvailableInternal = ref<true | false | undefined>();
     const checkedUsername = ref<string | undefined>();
-    debouncedWatch(
+    watchDebounced(
       username$$q,
       (username: string) => {
         isUsernameAvailableInternal.value = undefined;

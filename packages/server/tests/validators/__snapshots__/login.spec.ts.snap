@@ -1,31 +1,5 @@
 // Vitest Snapshot v1
 
-exports[`VAuthBodyWrapper > should reject malformed payloads 1`] = `
-[
-  ValidationError {
-    "children": [],
-    "constraints": {
-      "equals": "grant_type must be equal to password",
-    },
-    "property": "grant_type",
-    "value": "foo",
-  },
-]
-`;
-
-exports[`VAuthBodyWrapper > should reject malformed payloads 2`] = `
-[
-  ValidationError {
-    "children": [],
-    "constraints": {
-      "equals": "grant_type must be equal to password",
-    },
-    "property": "grant_type",
-    "value": undefined,
-  },
-]
-`;
-
 exports[`VAuthBodyWrapper > should reject malformed payloads 3`] = `
 [
   ValidationError {
@@ -34,7 +8,7 @@ exports[`VAuthBodyWrapper > should reject malformed payloads 3`] = `
       "isString": "username must be a string",
       "matches": "username must match /^[a-z0-9_]+$/ regular expression",
       "maxLength": "username must be shorter than or equal to 32 characters",
-      "minLength": "username must be longer than or equal to 3 characters",
+      "minLength": "username must be longer than or equal to 4 characters",
     },
     "property": "username",
     "value": {},

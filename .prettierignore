@@ -6,8 +6,13 @@ public
 index.js
 index.cjs
 index.mjs
+index_dev.js
+index_dev.cjs
+index_dev.mjs
 
 packages/frontend/src/auto-imports.d.ts
 packages/frontend/src/components.d.ts
+
+packages/transcoder/gcr/app/**/*
 
 packages/server/**/$*.ts

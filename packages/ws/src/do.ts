@@ -8,7 +8,6 @@ import type {
   WSSession,
   WSSessionForResponse,
 } from '$shared/types';
-import { decodeUTF8Base64URL } from '$shared/unicodeBase64';
 import { zWSRequest } from '$shared/validations';
 import type { DORequestData, WSBindings } from './types';
 
@@ -241,7 +240,7 @@ export class DO extends Actor {
     }
 
     const { deviceId, host, info } = JSON.parse(
-      decodeUTF8Base64URL(strRequestData)
+      decodeURIComponent(strRequestData)
     ) as DORequestData;
 
     const id = crypto.randomUUID();

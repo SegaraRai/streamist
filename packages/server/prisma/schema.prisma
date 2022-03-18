@@ -154,6 +154,7 @@ model Track {
   releaseDateText      String?
   genre                String?
   bpm                  Int?
+  sensitive            Boolean          @default(false)
   replayGainGain       Float?
   replayGainPeak       Float?
   createdAt            BigInt           @db.BigInt

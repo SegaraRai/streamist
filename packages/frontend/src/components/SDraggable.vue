@@ -35,8 +35,8 @@ export default defineComponent({
   },
   setup(props) {
     const tentativeItems$$q = shallowRef<any[] | undefined>();
-    const tentative$$q = eagerComputed(() => !!tentativeItems$$q.value);
-    const items$$q = eagerComputed(
+    const tentative$$q = computedEager(() => !!tentativeItems$$q.value);
+    const items$$q = computedEager(
       () => tentativeItems$$q.value || props.items
     );
 

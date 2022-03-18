@@ -14,14 +14,19 @@ function getDeviceIcon(deviceType: DeviceType): string {
 }
 
 export default defineComponent({
+  inheritAttrs: false,
+  props: {
+    showLabel: Boolean,
+  },
   setup() {
     const { t } = useI18n();
-    const { sessions$$q, setHost$$q } = useWS();
+    const { hostSession$$q, sessions$$q, setHost$$q } = useWS();
 
     return {
       t,
       popover: ref<any>(null),
       getDeviceIcon$$q: getDeviceIcon,
+      hostSession$$q,
       sessions$$q: computed(() =>
         [...sessions$$q.value].sort((a, b) => (b.you ? 1 : 0) - (a.you ? 1 : 0))
       ),
@@ -40,10 +45,22 @@ export default defineComponent({
   >
     <template #trigger>
       <button
-        class="flex items-center justify-center transition-colors select-none"
+        v-bind="$attrs"
+        class="flex gap-x-4 items-center transition-colors select-none"
         :class="sessions$$q.length > 1 ? 'text-st-primary' : ''"
       >
         <i-mdi-tablet-cellphone />
+        <template v-if="showLabel && hostSession$$q?.you === false">
+          <i18n-t
+            keypath="session.ListeningOn"
+            tag="div"
+            class="flex-1 text-st-primary overflow-hidden overflow-ellipsis"
+          >
+            <span class="font-bold">
+              {{ hostSession$$q.info.name || hostSession$$q.info.platform }}
+            </span>
+          </i18n-t>
+        </template>
       </button>
     </template>
     <div class="-m-4">

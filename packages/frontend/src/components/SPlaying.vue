@@ -1,14 +1,7 @@
-<route lang="yaml">
-meta:
-  layout: conditional
-  requiresAuth: true
-  hideShell: true
-</route>
-
 <script lang="ts">
 import { SwipeDirection } from '@vueuse/core';
 import type { RepeatType } from '$shared/types';
-import { useCurrentTrackInfo, useWS } from '~/composables';
+import { useCurrentTrackInfo } from '~/composables';
 import { SWIPE_DISTANCE_THRESHOLD_BACK } from '~/config';
 import { findAncestor } from '~/logic/findAncestor';
 import { usePlaybackStore } from '~/stores/playback';
@@ -21,7 +14,6 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const volumeStore = useVolumeStore();
     const { value: currentTrackInfo } = useCurrentTrackInfo();
-    const { hostSession$$q } = useWS();
 
     useHead({
       title: t('title.Playing.no_track'),
@@ -114,11 +106,6 @@ export default defineComponent({
       repeatIcon$$q: repeatIcon,
       position$$q: playbackStore.position$$q,
       duration$$q: playbackStore.duration$$q,
-      hostSessionName$$q: computed(() =>
-        hostSession$$q.value?.you === false
-          ? hostSession$$q.value.info.name || hostSession$$q.value.info.platform
-          : undefined
-      ),
       blurButton$$q: blurButton,
       switchRepeat$$q: switchRepeat,
       switchShuffle$$q: switchShuffle,
@@ -264,21 +251,8 @@ export default defineComponent({
             </VIcon>
           </VBtn>
         </div>
-        <div class="flex gap-4 items-center px-6 h-6">
-          <SSessionManager class="flex-none" />
-          <div class="flex-1 overflow-hidden">
-            <template v-if="hostSessionName$$q">
-              <i18n-t
-                keypath="session.ListeningOn"
-                tag="div"
-                class="text-st-primary overflow-hidden overflow-ellipsis"
-              >
-                <span class="font-bold mx-1">
-                  {{ hostSessionName$$q }}
-                </span>
-              </i18n-t>
-            </template>
-          </div>
+        <div class="px-6 h-6 flex items-center">
+          <SSessionManager show-label />
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-export const ACCOUNT_USERNAME_MIN_LENGTH = 3;
+export const ACCOUNT_USERNAME_MIN_LENGTH = 4;
 export const ACCOUNT_USERNAME_MAX_LENGTH = 32;
 export const ACCOUNT_USERNAME_REGEX = /^[a-z0-9_]+$/;
 

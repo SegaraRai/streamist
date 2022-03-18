@@ -35,7 +35,7 @@ export default defineComponent({
       scrollRef$$q: ref(0),
     });
     const menuOptions$$q = useNDropdownTrack({
-      selectedTrack$$q: eagerComputed(() => props.track),
+      selectedTrack$$q: computedEager(() => props.track),
       isSameSetList$$q: ref(true),
       playlistId$$q: ref(),
       showVisitAlbum$$q: ref(true),
@@ -83,7 +83,7 @@ export default defineComponent({
     <div class="flex-1 flex flex-col gap-y-1 overflow-hidden">
       <RouterLink
         class="s-heading-sl block max-w-max text-base"
-        :to="navigatePlaying ? '/playing' : `/albums/${track.albumId}`"
+        :to="navigatePlaying ? '#playing' : `/albums/${track.albumId}`"
       >
         {{ track.title }}
       </RouterLink>

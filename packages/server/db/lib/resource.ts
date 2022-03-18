@@ -40,15 +40,12 @@ export async function dbDeletionAddTx(
     ids = [ids];
   }
 
-  // TODO(db): use createMany for PostgreSQL
-  for (const id of ids) {
-    await txClient.deletion.create({
-      data: {
-        entityType: type,
-        entityId: id,
-        deletedAt: dbGetTimestamp(),
-        userId,
-      },
-    });
-  }
+  await txClient.deletion.createMany({
+    data: ids.map((id) => ({
+      entityType: type,
+      entityId: id,
+      deletedAt: dbGetTimestamp(),
+      userId,
+    })),
+  });
 }
