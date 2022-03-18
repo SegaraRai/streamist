@@ -10,10 +10,10 @@ import fg from 'fast-glob';
 import AutoImport from 'unplugin-auto-import/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
-import {
+import type {
   ComponentResolveResult,
   ComponentResolver,
-} from 'unplugin-vue-components/dist/types';
+} from 'unplugin-vue-components/types';
 import Components from 'unplugin-vue-components/vite';
 import { ProxyOptions, defineConfig } from 'vite';
 import { createHtmlPlugin } from 'vite-plugin-html';
