@@ -68,15 +68,13 @@ export default defineComponent({
       return rows;
     });
 
-    const { containerStyle, list, listElementRef } = useVirtualScrollList(
-      rowsRef,
-      {
+    const { containerStyle, list, listElementRef, wrapperStyle } =
+      useVirtualScrollList(rowsRef, {
         itemHeightRef,
         additionalHeight: computedEager(() => -props.itemMarginHeight),
         containerElementRef: currentScrollContainerRef,
         contentElementRef: currentScrollContentRef,
-      }
-    );
+      });
 
     watch(listElementRef, (listElement) => {
       _listElementRef.value = listElement;
@@ -86,6 +84,7 @@ export default defineComponent({
       rowStyle$$q,
       cellStyle$$q,
       containerStyle$$q: containerStyle,
+      wrapperStyle$$q: wrapperStyle,
       listRows$$q: list,
       listElementRef$$q: listElementRef,
       numColsRef$$q: numColsRef,
@@ -101,23 +100,25 @@ export default defineComponent({
     class="w-full gap-0 flex flex-col overflow-hidden"
     :style="containerStyle$$q"
   >
-    <template
-      v-for="{ data: [cols, dummyCols], index: _index } in listRows$$q"
-      :key="_index"
-    >
-      <div class="flex w-full justify-between" :style="rowStyle$$q">
-        <template v-for="(item, _index2) in cols" :key="_index2">
-          <div :_="(_index2 || undefined) && undefined" :style="cellStyle$$q">
-            <slot :data="item" :width="itemWidth"></slot>
-          </div>
-        </template>
-        <template v-for="(_item, _index2) in dummyCols" :key="_index2">
-          <div
-            :_="(_item || _index2 || undefined) && undefined"
-            :style="cellStyle$$q"
-          ></div>
-        </template>
-      </div>
-    </template>
+    <div :style="wrapperStyle$$q">
+      <template
+        v-for="{ data: [cols, dummyCols], index: _index } in listRows$$q"
+        :key="_index"
+      >
+        <div class="flex w-full justify-between" :style="rowStyle$$q">
+          <template v-for="(item, _index2) in cols" :key="_index2">
+            <div :_="(_index2 || undefined) && undefined" :style="cellStyle$$q">
+              <slot :data="item" :width="itemWidth"></slot>
+            </div>
+          </template>
+          <template v-for="(_item, _index2) in dummyCols" :key="_index2">
+            <div
+              :_="(_item || _index2 || undefined) && undefined"
+              :style="cellStyle$$q"
+            ></div>
+          </template>
+        </div>
+      </template>
+    </div>
   </div>
 </template>
