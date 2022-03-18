@@ -30,9 +30,19 @@ import {
   ETAG_VERSION,
 } from './config';
 import { calculateHMAC } from './hmac';
-import { verifyJWT } from './jwt';
+import { JWTPayload, verifyJWT } from './jwt';
 import { convertToMutableResponse } from './response';
 import type { Bindings } from './types';
+
+function getAppOrigin(
+  req: Request,
+  context: Pick<Bindings, 'bindings' | 'url'>
+): string {
+  return BUILD_TIME_DEFINITION.NODE_ENV === 'development' &&
+    context.bindings.DEV_CDN_SKIP_ORIGIN_CHECK === '1'
+    ? req.headers.get('Origin') || context.url.origin
+    : context.bindings.APP_ORIGIN;
+}
 
 const NO_CACHE_HEADERS = {
   'Cache-Control': CACHE_CONTROL_NO_STORE,
@@ -47,14 +57,16 @@ API.prepare = (req, context) => {
   return CORS.preflight({
     methods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE'],
     headers: ['Authorization', 'Cache-Control', 'Content-Type'],
-    origin: context.bindings.APP_ORIGIN,
+    origin: /* #__PURE__ */ getAppOrigin(req, context),
     credentials: true,
     maxage: CORS_MAX_AGE,
   })(req, context as any);
 };
 
 API.add('POST', '/api/cookies/token', async (req, context) => {
-  if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
+  if (
+    req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
+  ) {
     return reply(403, 'Invalid origin', NO_CACHE_HEADERS);
   }
 
@@ -85,7 +97,9 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
 });
 
 API.add('DELETE', '/api/cookies/token', (req, context) => {
-  if (req.headers.get('Origin') !== context.bindings.APP_ORIGIN) {
+  if (
+    req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
+  ) {
     return reply(403, null, NO_CACHE_HEADERS);
   }
 
@@ -105,17 +119,37 @@ API.add(
   'GET',
   '/files/:region/:type/:userId/:entityId/:filename',
   async (req, context) => {
-    const strJWT = parse(req.headers.get('Cookie') || '')[COOKIE_JWT_KEY];
-    if (!strJWT) {
-      return reply(401, 'Cookie not set', NO_CACHE_HEADERS);
-    }
-
-    const jwt = await verifyJWT(strJWT, context);
-    if (!jwt || jwt.aud !== JWT_CDN_TOKEN_AUD) {
-      return reply(401, 'Invalid cookie', NO_CACHE_HEADERS);
-    }
-
     const { entityId, filename, region, type, userId } = context.params;
+
+    let jwt: JWTPayload;
+    if (
+      BUILD_TIME_DEFINITION.NODE_ENV === 'development' &&
+      context.bindings.DEV_CDN_SKIP_COOKIE_AUTH === '1'
+    ) {
+      console.warn('Skipping cookie auth');
+
+      jwt = {
+        id: userId,
+        aud: JWT_CDN_TOKEN_AUD,
+        sub: userId,
+        exp: 253370732400,
+        iss: 'dev.streamist.app',
+        plan: 'unlimited',
+        maxTrackId: null,
+      };
+    } else {
+      const strJWT = parse(req.headers.get('Cookie') || '')[COOKIE_JWT_KEY];
+      if (!strJWT) {
+        return reply(401, 'Cookie not set', NO_CACHE_HEADERS);
+      }
+
+      const tempJWT = await verifyJWT(strJWT, context);
+      if (!tempJWT || tempJWT.aud !== JWT_CDN_TOKEN_AUD) {
+        return reply(401, 'Invalid cookie', NO_CACHE_HEADERS);
+      }
+
+      jwt = tempJWT;
+    }
 
     if (jwt.sub !== userId) {
       return reply(401, 'Token subject mismatch', NO_CACHE_HEADERS);

@@ -172,7 +172,9 @@ export default defineConfig(async ({ mode }) => {
 
     // apply VITE_ env vars
     process.env.VITE_BUILD_REV = 'development';
-    process.env.VITE_CDN_ORIGIN = process.env.CDN_ORIGIN;
+    process.env.VITE_CDN_PORT =
+      process.env.CDN_ORIGIN?.match(/:\d+$/)?.[0] || '';
+    process.env.VITE_CDN_ORIGIN = '';
     process.env.VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION =
       process.env.HCAPTCHA_SITE_KEY_FOR_REGISTRATION;
 

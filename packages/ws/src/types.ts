@@ -6,6 +6,7 @@ import type { SessionInfo } from '$shared/types';
 export interface WSBindings extends Bindings {
   readonly DO: Durable.Namespace;
   readonly APP_ORIGIN: string;
+  readonly DEV_WS_SKIP_ORIGIN_CHECK: '0' | '1';
   readonly WS_ORIGIN_FOR_SERVER: string;
   readonly SECRET_WS_JWT_SECRET: string;
   readonly SECRET_WS_AUTH_TOKEN: string;
