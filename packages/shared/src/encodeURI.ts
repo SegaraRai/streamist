@@ -1,11 +1,11 @@
-// `encodeURIComponent` does not escape:
-//   A-Z a-z 0-9 !       ' ( ) *   - .   _     ~
-//
-// unreserved characters of RFC 3986 are:
-//   A-Z a-z 0-9                   - .   _     ~
-//
-// unreserved characters of RFC 5987 are:
-//   A-Z a-z 0-9 ! # $ &         + - . ^ _ ` | ~
+/*
+spec or method      |unreserved (untransformed) characters
+--------------------|---------------------------------------------------------------
+`encodeURI`         |`` A-Z a-z 0-9 ! # $ & ' ( ) * + , - . / : ; = ? @   _     ~ ``
+`encodeURIComponent`|`` A-Z a-z 0-9 !       ' ( ) *     - .               _     ~ ``
+RFC 3986            |`` A-Z a-z 0-9                     - .               _     ~ ``
+RFC 8187 (RFC 5987) |`` A-Z a-z 0-9 ! # $ &         +   - .             ^ _ ` | ~ ``
+*/
 
 export function encodeRFC3986URIComponent(str: string): string {
   return (
@@ -18,7 +18,7 @@ export function encodeRFC3986URIComponent(str: string): string {
   );
 }
 
-export function encodeRFC5987ValueChars(str: string): string {
+export function encodeRFC8187ValueChars(str: string): string {
   return (
     encodeURIComponent(str)
       // escape ' ( ) *
