@@ -59,18 +59,6 @@ export default defineComponent({
         path: '/settings',
         text: t('sidebar.Settings'),
       },
-      // debug
-      /*
-      {
-        type: 'divider',
-      },
-      {
-        type: 'link',
-        icon: 'mdi-play',
-        path: '/playing',
-        text: 'Playing',
-      },
-      //*/
     ]);
 
     return {

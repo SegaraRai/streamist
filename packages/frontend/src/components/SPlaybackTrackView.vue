@@ -83,7 +83,7 @@ export default defineComponent({
     <div class="flex-1 flex flex-col gap-y-1 overflow-hidden">
       <RouterLink
         class="s-heading-sl block max-w-max text-base"
-        :to="navigatePlaying ? '/playing' : `/albums/${track.albumId}`"
+        :to="navigatePlaying ? '#playing' : `/albums/${track.albumId}`"
       >
         {{ track.title }}
       </RouterLink>

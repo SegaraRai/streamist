@@ -68,12 +68,12 @@ export default defineComponent({
       queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
     };
 
-    const hideShell$$q = eagerComputed(
-      () => !!router.currentRoute.value.meta.hideShell
+    const showPlaying$$q = eagerComputed(
+      () => router.currentRoute.value.hash === '#playing'
     );
 
-    watch(hideShell$$q, (newHideShell): void => {
-      if (!newHideShell) {
+    watch(showPlaying$$q, (newShowPlaying): void => {
+      if (!newShowPlaying) {
         return;
       }
 
@@ -123,7 +123,7 @@ export default defineComponent({
       scrollRef$$q,
       searchDialog$$q: ref(false),
       uploadDialog$$q: ref(false),
-      hideShell$$q,
+      showPlaying$$q,
       queueScroll$$q,
       onQueueScroll$$q,
       uploadStore$$q,
@@ -212,7 +212,7 @@ export default defineComponent({
           </NScrollbar>
           <div
             class="s-footer-height flex-none"
-            :class="hideShell$$q && '!hidden'"
+            :class="showPlaying$$q && '!hidden'"
           ></div>
           <div class="s-offline-mod-h"></div>
         </div>
@@ -223,9 +223,9 @@ export default defineComponent({
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">
             <div class="flex-none">
-              <template v-if="hideShell$$q">
+              <template v-if="showPlaying$$q">
                 <VBtn flat icon text size="small" @click="router$$q.back()">
-                  <VIcon>mdi-arrow-left</VIcon>
+                  <VIcon>mdi-chevron-down</VIcon>
                 </VBtn>
               </template>
               <template v-else>
@@ -300,9 +300,11 @@ export default defineComponent({
 
       <!-- Left Sidebar: Navigation -->
       <VNavigationDrawer
-        :model-value="leftSidebar$$q && !hideShell$$q"
+        :model-value="leftSidebar$$q && !showPlaying$$q"
         :permanent="alwaysShowLeftSidebar$$q"
-        :touchless="alwaysShowLeftSidebar$$q || rightSidebar$$q"
+        :touchless="
+          alwaysShowLeftSidebar$$q || rightSidebar$$q || showPlaying$$q
+        "
         position="left"
         rail-width="56"
         class="select-none"
@@ -315,7 +317,7 @@ export default defineComponent({
             <SNavigation />
             <div
               class="s-footer-height flex-none"
-              :class="hideShell$$q && '!hidden'"
+              :class="showPlaying$$q && '!hidden'"
             ></div>
           </div>
         </NScrollbar>
@@ -330,14 +332,28 @@ export default defineComponent({
         </NScrollbar>
         <div
           class="s-footer-height flex-none"
-          :class="hideShell$$q && '!hidden'"
+          :class="showPlaying$$q && '!hidden'"
         ></div>
       </VMain>
+
+      <div
+        class="fixed top-0 left-0 w-full h-full transition-all transform-gpu pointer-events-none pt-12 z-10"
+        :class="showPlaying$$q ? 'translate-y-0' : 'translate-y-full invisible'"
+      >
+        <SPlaying
+          class="w-full h-full bg-st-background transition-all"
+          :class="
+            showPlaying$$q
+              ? 'pointer-events-auto'
+              : 'pointer-events-none invisible'
+          "
+        />
+      </div>
     </VApp>
 
     <footer
-      class="s-footer-height flex-none select-none fixed bottom-0 z-1200 w-full m-0 p-0"
-      :class="hideShell$$q && '!hidden'"
+      class="s-footer-height flex-none select-none fixed bottom-0 z-1200 w-full m-0 p-0 transition-all"
+      :class="showPlaying$$q && 'opacity-0 invisible pointer-events-none'"
       @contextmenu.prevent
     >
       <!-- we must provide theme explicitly as this is outside of VApp -->

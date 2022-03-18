@@ -38,6 +38,14 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
   }
 
   if (ctx.isClient) {
+    // redirect /playing to /
+    ctx.router.beforeEach((to, _from, next) => {
+      if (to.path === '/playing') {
+        return next('/');
+      }
+      next();
+    });
+
     ctx.router.beforeEach(async (to, _from, next) => {
       const authenticated = await isAuthenticated();
       const isAppPage = !!to.meta.requiresAuth;

@@ -1,10 +1,3 @@
-<route lang="yaml">
-meta:
-  layout: conditional
-  requiresAuth: true
-  hideShell: true
-</route>
-
 <script lang="ts">
 import { SwipeDirection } from '@vueuse/core';
 import type { RepeatType } from '$shared/types';
