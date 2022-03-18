@@ -76,7 +76,33 @@ describe('VSourceCreateBodyWrapper', () => {
           region: 'ap-northeast-x' as any,
         },
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [
+            ValidationError {
+              "children": [],
+              "constraints": {
+                "isRegionConstraint": "region must be a valid region",
+              },
+              "property": "region",
+              "value": "ap-northeast-x",
+            },
+          ],
+          "property": "!payload",
+          "value": VSourceCreateBodyAudio {
+            "audioFile": VSourceCreateBodyAudioFile {
+              "fileSize": 1000,
+              "filename": "test.mp3",
+              "type": "audio",
+            },
+            "cueSheetFile": null,
+            "region": "ap-northeast-x",
+            "type": "audio",
+          },
+        },
+      ]
+    `);
 
     // invalid id
     await expect(
@@ -94,7 +120,35 @@ describe('VSourceCreateBodyWrapper', () => {
           region: 'ap-northeast-1',
         },
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [
+            ValidationError {
+              "children": [],
+              "constraints": {
+                "isIdConstraint": "attachToId must be a valid id",
+              },
+              "property": "attachToId",
+              "value": "/test",
+            },
+          ],
+          "property": "!payload",
+          "value": VSourceCreateBodyImage {
+            "attachPrepend": true,
+            "attachToId": "/test",
+            "attachToType": "album",
+            "imageFile": VSourceCreateBodyImageFile {
+              "fileSize": 1000,
+              "filename": "test.jpg",
+              "type": "image",
+            },
+            "region": "ap-northeast-1",
+            "type": "image",
+          },
+        },
+      ]
+    `);
 
     // invalid file type
     await expect(
@@ -110,7 +164,43 @@ describe('VSourceCreateBodyWrapper', () => {
           region: 'ap-northeast-1',
         },
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [
+            ValidationError {
+              "children": [
+                ValidationError {
+                  "children": [],
+                  "constraints": {
+                    "equals": "type must be equal to audio",
+                  },
+                  "property": "type",
+                  "value": "image",
+                },
+              ],
+              "property": "audioFile",
+              "value": VSourceCreateBodyAudioFile {
+                "fileSize": 1000,
+                "filename": "test.mp3",
+                "type": "image",
+              },
+            },
+          ],
+          "property": "!payload",
+          "value": VSourceCreateBodyAudio {
+            "audioFile": VSourceCreateBodyAudioFile {
+              "fileSize": 1000,
+              "filename": "test.mp3",
+              "type": "image",
+            },
+            "cueSheetFile": null,
+            "region": "ap-northeast-1",
+            "type": "audio",
+          },
+        },
+      ]
+    `);
 
     // inconsistent type
     await expect(
@@ -126,7 +216,49 @@ describe('VSourceCreateBodyWrapper', () => {
           region: 'ap-northeast-1',
         },
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [
+            ValidationError {
+              "children": [],
+              "constraints": {
+                "isIn": "attachToType must be one of the following values: album, artist, playlist",
+              },
+              "property": "attachToType",
+              "value": undefined,
+            },
+            ValidationError {
+              "children": [],
+              "constraints": {
+                "isIdConstraint": "attachToId must be a valid id",
+              },
+              "property": "attachToId",
+              "value": undefined,
+            },
+            ValidationError {
+              "children": [],
+              "constraints": {
+                "isBoolean": "attachPrepend must be a boolean value",
+              },
+              "property": "attachPrepend",
+              "value": undefined,
+            },
+          ],
+          "property": "!payload",
+          "value": VSourceCreateBodyImage {
+            "audioFile": {
+              "fileSize": 1000,
+              "filename": "test.mp3",
+              "type": "audio",
+            },
+            "cueSheetFile": null,
+            "region": "ap-northeast-1",
+            "type": "image",
+          },
+        },
+      ]
+    `);
 
     // invalid type
     await expect(
@@ -142,7 +274,27 @@ describe('VSourceCreateBodyWrapper', () => {
           region: 'ap-northeast-1',
         },
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [
+            ValidationError {
+              "constraints": {
+                "nestedValidation": "nested property !payload must be either object or array",
+              },
+              "property": "!payload",
+              "target": [Function],
+              "value": true,
+            },
+          ],
+          "constraints": {
+            "isObject": "type must be either \\"audio\\" or \\"image\\"",
+          },
+          "property": "!payload",
+          "value": true,
+        },
+      ]
+    `);
 
     // invalid type of type
     await expect(
@@ -158,7 +310,27 @@ describe('VSourceCreateBodyWrapper', () => {
           region: 'ap-northeast-1',
         },
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [
+            ValidationError {
+              "constraints": {
+                "nestedValidation": "nested property !payload must be either object or array",
+              },
+              "property": "!payload",
+              "target": [Function],
+              "value": true,
+            },
+          ],
+          "constraints": {
+            "isObject": "type must be either \\"audio\\" or \\"image\\"",
+          },
+          "property": "!payload",
+          "value": true,
+        },
+      ]
+    `);
 
     // missing type
     await expect(
@@ -173,7 +345,27 @@ describe('VSourceCreateBodyWrapper', () => {
           region: 'ap-northeast-1',
         } as any,
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [
+            ValidationError {
+              "constraints": {
+                "nestedValidation": "nested property !payload must be either object or array",
+              },
+              "property": "!payload",
+              "target": [Function],
+              "value": true,
+            },
+          ],
+          "constraints": {
+            "isObject": "type must be either \\"audio\\" or \\"image\\"",
+          },
+          "property": "!payload",
+          "value": true,
+        },
+      ]
+    `);
   });
 });
 
@@ -213,7 +405,18 @@ describe('VSourceFinishUploadBody', () => {
       validate(VSourceFinishUploadBody, {
         state: 'uploadable' as any,
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [],
+          "constraints": {
+            "isIn": "state must be one of the following values: upload_aborted, upload_failed, uploaded",
+          },
+          "property": "state",
+          "value": "uploadable",
+        },
+      ]
+    `);
 
     // null parts
     await expect(
@@ -221,7 +424,20 @@ describe('VSourceFinishUploadBody', () => {
         state: 'uploaded',
         parts: null as any,
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [],
+          "constraints": {
+            "arrayNotEmpty": "parts should not be empty",
+            "isArray": "parts must be an array",
+            "isString": "each value in parts must be a string",
+          },
+          "property": "parts",
+          "value": null,
+        },
+      ]
+    `);
 
     // empty parts
     await expect(
@@ -229,7 +445,18 @@ describe('VSourceFinishUploadBody', () => {
         state: 'uploaded',
         parts: [],
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [],
+          "constraints": {
+            "arrayNotEmpty": "parts should not be empty",
+          },
+          "property": "parts",
+          "value": [],
+        },
+      ]
+    `);
 
     // invalid type of parts
     await expect(
@@ -237,7 +464,20 @@ describe('VSourceFinishUploadBody', () => {
         state: 'uploaded',
         parts: [123] as any,
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [],
+          "constraints": {
+            "isString": "each value in parts must be a string",
+          },
+          "property": "parts",
+          "value": [
+            123,
+          ],
+        },
+      ]
+    `);
 
     // object parts
     await expect(
@@ -245,6 +485,21 @@ describe('VSourceFinishUploadBody', () => {
         state: 'uploaded',
         parts: { 0: 'etag1' } as any,
       })
-    ).rejects.toMatchSnapshot();
+    ).rejects.toMatchInlineSnapshot(`
+      [
+        ValidationError {
+          "children": [],
+          "constraints": {
+            "arrayNotEmpty": "parts should not be empty",
+            "isArray": "parts must be an array",
+            "isString": "each value in parts must be a string",
+          },
+          "property": "parts",
+          "value": {
+            "0": "etag1",
+          },
+        },
+      ]
+    `);
   });
 });
