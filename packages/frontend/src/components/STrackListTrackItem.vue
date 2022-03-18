@@ -118,7 +118,7 @@ export default defineComponent({
   <div
     v-ripple="readyToRender$$q"
     v-bind="$attrs"
-    class="s-hover-container s-list-item w-full px-2 py-1 h-14 !<sm:px-2 flex"
+    class="s-hover-container s-list-item w-full px-2 py-1 h-14 flex"
     :class="[
       selected ? 's-list-item--selected' : 's-list-item--unselected',
       !isAvailable$$q && 'opacity-60',
@@ -126,7 +126,7 @@ export default defineComponent({
     @contextmenu.stop.prevent="onContextMenu$$q($event)"
   >
     <!-- Track Number -->
-    <div class="s-track-list-column-icon mr-4">
+    <div class="s-track-list-column-icon mr-2">
       <div
         class="flex items-center justify-center h-full"
         data-draggable="false"
@@ -150,7 +150,13 @@ export default defineComponent({
           </template>
           <template v-else-if="isAvailable$$q">
             <!-- それ以外の曲 -->
-            <VBtn icon flat text class="bg-transparent" @click.stop="play$$q()">
+            <VBtn
+              icon
+              flat
+              text
+              class="bg-transparent text-center !indent-0px"
+              @click.stop="play$$q()"
+            >
               <template v-if="indexContentNumber$$q != null">
                 <div
                   class="s-hover-hidden s-numeric font-medium tracking-[0.01em]"
@@ -191,7 +197,14 @@ export default defineComponent({
           </template>
         </template>
         <template v-else>
-          <div class="w-9 h-9 s-lazyload-background m-auto"></div>
+          <template v-if="indexContentNumber$$q != null">
+            <div class="s-numeric font-medium tracking-[0.01em] text-base">
+              {{ indexContentNumber$$q }}
+            </div>
+          </template>
+          <template v-else-if="indexContent === 'albumArtwork'">
+            <div class="w-9 h-9 s-lazyload-background m-auto"></div>
+          </template>
         </template>
       </div>
     </div>
@@ -269,7 +282,7 @@ export default defineComponent({
       </div>
     </template>
     <!-- Menu -->
-    <div class="s-track-list-column-menu py-1">
+    <div class="s-track-list-column-menu py-1 ml-1">
       <template v-if="readyToRender$$q">
         <VBtn
           icon
