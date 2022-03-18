@@ -121,6 +121,13 @@ API.add(
   async (req, context) => {
     const { entityId, filename, region, type, userId } = context.params;
 
+    if (
+      req.headers.has('Origin') &&
+      req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
+    ) {
+      return reply(403, null, NO_CACHE_HEADERS);
+    }
+
     let jwt: JWTPayload;
     if (
       BUILD_TIME_DEFINITION.NODE_ENV === 'development' &&
