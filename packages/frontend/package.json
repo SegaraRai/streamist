@@ -18,6 +18,8 @@
     "test:unit": "vitest",
     "test_ci": "run-s test_ci:*",
     "test_ci:unit": "vitest --run",
+    "test_dev": "run-s test:*",
+    "test_dev:unit": "vitest dev",
     "pretest": "pnpm run generate",
     "pretypecheck": "pnpm run generate",
     "typecheck": "vue-tsc --noEmit"
