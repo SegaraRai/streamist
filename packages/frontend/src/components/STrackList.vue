@@ -235,6 +235,9 @@ export default defineComponent({
       }
       return array;
     });
+    const itemHeight = computed(() =>
+      useDiscNumber.value ? undefined : trackItemHeight
+    );
     const trackOnlyItems$$q = computed(() =>
       items.value.filter(
         (item): item is ListItemTrack => item.type$$q === 'track'
@@ -326,6 +329,8 @@ export default defineComponent({
         contentElementRef: computedEager(
           () => props.scrollContent || currentScrollContentRef.value
         ),
+        itemHeightReferenceRef: ref(trackItemHeight),
+        itemHeightRef: itemHeight,
         itemHeightFunc: (index: number) => items.value[index].height$$q,
       });
 
@@ -397,49 +402,42 @@ export default defineComponent({
         : 's-list--unselected'
     "
   >
-    <VList
-      flat
-      density="compact"
-      class="s-list select-none"
-      @contextmenu.prevent
-    >
+    <div class="s-list select-none" @contextmenu.prevent>
       <template v-if="!hideHeader">
-        <VListItem
-          class="w-full py-0 h-8 !min-h-0 flex items-center !<sm:px-2 select-none font-bold text-sm"
+        <div
+          class="w-full px-2 h-8 !min-h-0 flex items-center select-none font-bold text-sm"
         >
-          <div class="s-track-list-column-icon text-sm mr-4 py-2">
+          <div class="s-track-list-column-icon text-sm mr-2 py-2">
             {{
               indexContent === 'index' || indexContent === 'trackNumber'
                 ? '#'
                 : ''
             }}
           </div>
-          <VListItemHeader
-            class="s-track-list-column-title flex items-center py-2"
-          >
-            <VListItemTitle class="s-heading-sl text-sm">
+          <div class="s-track-list-column-title flex items-center py-2">
+            <div class="s-heading-sl text-sm">
               {{ t('trackList.Title') }}
-            </VListItemTitle>
-          </VListItemHeader>
+            </div>
+          </div>
           <template v-if="showAlbum">
-            <VListItemHeader
+            <div
               class="s-track-list-column-album flex items-center ml-6 py-2 !<md:hidden"
             >
-              <VListItemTitle class="s-heading-sl text-sm">
+              <div class="s-heading-sl text-sm">
                 {{ t('trackList.Album') }}
-              </VListItemTitle>
-            </VListItemHeader>
+              </div>
+            </div>
           </template>
           <template v-if="!hideDuration">
-            <div class="s-track-list-column-duration py-1 !<sm:hidden">
+            <div class="s-track-list-column-duration !<sm:hidden">
               <VIcon>mdi-clock-outline</VIcon>
             </div>
           </template>
-          <div class="s-track-list-column-menu py-1"></div>
           <template v-if="removable">
-            <div class="s-track-list-column-menu py-1"></div>
+            <div class="s-track-list-column-menu"></div>
           </template>
-        </VListItem>
+          <div class="s-track-list-column-menu ml-1"></div>
+        </div>
       </template>
       <template v-if="items$$q.length === 0"></template>
       <template v-if="renderMode === 'plain'">
@@ -558,7 +556,7 @@ export default defineComponent({
           </div>
         </div>
       </template>
-    </VList>
+    </div>
   </div>
   <template v-if="lastSelectedTrack$$q">
     <NDropdown

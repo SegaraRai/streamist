@@ -15,7 +15,7 @@ export const SEEK_BACKWARD_TIME = SEEK_FORWARD_TIME;
 /** in seconds */
 export const SEEK_TO_BEGINNING_THRESHOLD = 3;
 
-export const RENDER_DELAY_TRACK_LIST = 400;
+export const RENDER_DELAY_TRACK_LIST = 100;
 export const RENDER_DELAY_TRACK_LIST_ITEM = 200;
 
 export const DRAG_DELAY_FOR_TOUCH = 500;
