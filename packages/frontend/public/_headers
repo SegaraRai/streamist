@@ -10,7 +10,7 @@
 /*
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
-  Referrer-Policy: no-referrer
+  Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: document-domain=(), camera=(), microphone=(), geolocation=()
   Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.stst.page https://cloudflareinsights.com https://hcaptcha.com https://*.hcaptcha.com; frame-src https://hcaptcha.com https://*.hcaptcha.com; img-src 'self' data: blob: https://*.stst.page; media-src 'self' data: blob: https://*.stst.page; prefetch-src 'self' https://*.stst.page; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com https://hcaptcha.com https://*.hcaptcha.com; style-src 'self' 'unsafe-inline' https://hcaptcha.com https://*.hcaptcha.com
 

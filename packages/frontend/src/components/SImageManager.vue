@@ -321,7 +321,7 @@ export default defineComponent({
                       <a
                         class="block"
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="noopener"
                         :href="getOriginalImageURL$$q(element)"
                       >
                         <SNullableImage
