@@ -51,7 +51,7 @@ export default defineComponent({
     const menuOptions$$q = useNDropdownPlaylist({
       playlist$$q: selectedPlaylist$$q,
       playlistTracks$$q: selectedPlaylistTracks$$q,
-      showCreatePlaylist$$q: eagerComputed(() => props.showCreateItem),
+      showCreatePlaylist$$q: computedEager(() => props.showCreateItem),
       openEditPlaylistDialog$$q: () => {
         dialogEdit$$q.value = true;
       },

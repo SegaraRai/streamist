@@ -7,6 +7,7 @@ import { useLiveQuery } from '~/composables';
 import { db } from '~/db';
 
 export default defineComponent({
+  inheritAttrs: false,
   props: {
     playlist: {
       type: [String, Object] as PropType<string | ResourcePlaylist>,

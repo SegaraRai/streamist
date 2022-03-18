@@ -47,7 +47,7 @@ export default defineComponent({
           case SwipeDirection.UP:
             if (yTrigger) {
               if (currentTrackInfo.value) {
-                router.push('/playing');
+                router.push('#playing');
               }
             }
             break;
@@ -102,7 +102,7 @@ export default defineComponent({
       <template v-if="currentTrackInfo$$q">
         <RouterLink
           class="flex-1 flex items-center overflow-hidden"
-          to="/playing"
+          to="#playing"
         >
           <SPlaybackTrackView
             :track="currentTrackInfo$$q.track$$q"

@@ -38,6 +38,14 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
   }
 
   if (ctx.isClient) {
+    // redirect /playing to /
+    ctx.router.beforeEach((to, _from, next) => {
+      if (to.path === '/playing') {
+        return next('#playing');
+      }
+      next();
+    });
+
     ctx.router.beforeEach(async (to, _from, next) => {
       const authenticated = await isAuthenticated();
       const isAppPage = !!to.meta.requiresAuth;
@@ -54,7 +62,7 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
 
     // we cannot use beforeEach as it shows navigated (backed) history.state on history back
     // there seems to be no way (except handling it explicitly on popstate) to deal with it
-    throttledWatch(
+    watchThrottled(
       [currentScrollRef, currentScrollContainerRef],
       ([scrollPosition, element]): void => {
         history.replaceState(

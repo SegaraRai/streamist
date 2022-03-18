@@ -12,7 +12,14 @@ function _useLocalStorageDB() {
   });
   return {
     dbUser$$q: dbUser,
-    dbMaxTrackId$$q: eagerComputed(() => dbUser.value?.maxTrackId ?? null),
+    dbMaxTrackId$$q: computedEager(() => dbUser.value?.maxTrackId ?? null),
+    dbVersion$$q: useLocalStorage<number>('db.version', 1, {
+      writeDefaults: false,
+      serializer: {
+        read: (v: string): number => (v ? parseInt(v, 10) : 0),
+        write: (v: number): string => String(v),
+      },
+    }),
     dbLastUpdate$$q: useLocalStorage<number>('db.lastUpdate', 0, {
       writeDefaults: false,
       serializer: {

@@ -15,6 +15,7 @@ import {
   useTrackFilter,
   useVirtualScrollList,
 } from '~/composables';
+import { RENDER_DELAY_TRACK_LIST } from '~/config';
 import { db } from '~/db';
 import { formatTime } from '~/logic/formatTime';
 import { getDefaultAlbumImage } from '~/logic/image';
@@ -113,7 +114,7 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const { isTrackAvailable$$q } = useTrackFilter();
 
-    const propTracksRef = eagerComputed(() => props.tracks);
+    const propTracksRef = computedEager(() => props.tracks);
     const { value: trackItems } = useLiveQuery(async () => {
       const propTracks = propTracksRef.value;
       if (!propTracks) {
@@ -240,7 +241,7 @@ export default defineComponent({
       )
     );
 
-    const currentPlayingTrackId = eagerComputed(
+    const currentPlayingTrackId = computedEager(
       () => playbackStore.currentTrack$$q.value
     );
 
@@ -274,7 +275,7 @@ export default defineComponent({
       open$$q: openMenu$$q,
     } = useMenu({
       closeOnScroll$$q: true,
-      scrollRef$$q: eagerComputed(
+      scrollRef$$q: computedEager(
         () => props.scrollTop ?? currentScrollRef.value
       ),
       onClose$$q: () => {
@@ -285,11 +286,11 @@ export default defineComponent({
     const menuOptions$$q = useNDropdownTrack({
       selectedTrack$$q,
       isSameSetList$$q,
-      playlistId$$q: eagerComputed(() => props.playlistId),
-      showVisitAlbum$$q: eagerComputed(() => props.visitAlbum),
-      showVisitArtist$$q: eagerComputed(() => props.visitArtist),
+      playlistId$$q: computedEager(() => props.playlistId),
+      showVisitAlbum$$q: computedEager(() => props.visitAlbum),
+      showVisitArtist$$q: computedEager(() => props.visitArtist),
       showPlayback$$q: ref(true),
-      showDelete$$q: eagerComputed(() => props.showDelete),
+      showDelete$$q: computedEager(() => props.showDelete),
       play$$q: (track: ResourceTrack) => {
         if (
           !selectedTrack$$q.value ||
@@ -316,26 +317,35 @@ export default defineComponent({
       }
     });
 
-    const { containerStyle, list, listElementRef } = useVirtualScrollList(
-      items,
-      {
-        disabled: eagerComputed(() => props.renderMode !== 'virtual'),
-        containerElementRef: eagerComputed(
+    const { containerStyle, list, listElementRef, wrapperStyle } =
+      useVirtualScrollList(items, {
+        disabled: computedEager(() => props.renderMode !== 'virtual'),
+        containerElementRef: computedEager(
           () => props.scrollContainer || currentScrollContainerRef.value
         ),
-        contentElementRef: eagerComputed(
+        contentElementRef: computedEager(
           () => props.scrollContent || currentScrollContentRef.value
         ),
         itemHeightFunc: (index: number) => items.value[index].height$$q,
-      }
-    );
+      });
+
+    const readyToRender$$q = ref(false);
+    onMounted(() => {
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          readyToRender$$q.value = true;
+        });
+      }, RENDER_DELAY_TRACK_LIST);
+    });
 
     return {
       t,
       playing$$q: playbackStore.playing$$q,
       items$$q: items,
       trackOnlyItems$$q,
+      readyToRender$$q,
       containerStyle$$q: containerStyle,
+      wrapperStyle$$q: wrapperStyle,
       virtualListItems$$q: list,
       virtualListElementRef$$q: listElementRef,
       currentPlayingTrackId$$q: currentPlayingTrackId,
@@ -512,36 +522,40 @@ export default defineComponent({
           class="w-full"
           :style="containerStyle$$q"
         >
-          <template
-            v-for="{ data: item, index: _index } in virtualListItems$$q"
-            :key="_index"
-          >
-            <template v-if="item.type$$q === 'discNumberHeader'">
-              <STrackListDiscHeaderItem :item="item" />
+          <div :style="wrapperStyle$$q">
+            <template v-if="readyToRender$$q">
+              <template
+                v-for="{ data: item, index: _index } in virtualListItems$$q"
+                :key="_index"
+              >
+                <template v-if="item.type$$q === 'discNumberHeader'">
+                  <STrackListDiscHeaderItem :item="item" />
+                </template>
+                <template v-else>
+                  <STrackListTrackItem
+                    :item="item"
+                    :index-content="indexContent"
+                    :link-excludes="linkExcludes"
+                    :show-album="showAlbum"
+                    :show-artist="showArtist"
+                    :hide-duration="hideDuration"
+                    :selected="
+                      selectedTrackIndex$$q === item.index$$q &&
+                      selectedTrack$$q?.id === item.track$$q.id
+                    "
+                    :disable-current-playing="
+                      disableCurrentPlaying || !isSameSetList$$q
+                    "
+                    :removable="removable"
+                    @play="play$$q(item.track$$q, item.index$$q)"
+                    @remove="remove$$q(item.track$$q, item.index$$q)"
+                    @menu="showMenu$$q($event.target as HTMLElement, item)"
+                    @ctx-menu="showMenu$$q($event, item)"
+                  />
+                </template>
+              </template>
             </template>
-            <template v-else>
-              <STrackListTrackItem
-                :item="item"
-                :index-content="indexContent"
-                :link-excludes="linkExcludes"
-                :show-album="showAlbum"
-                :show-artist="showArtist"
-                :hide-duration="hideDuration"
-                :selected="
-                  selectedTrackIndex$$q === item.index$$q &&
-                  selectedTrack$$q?.id === item.track$$q.id
-                "
-                :disable-current-playing="
-                  disableCurrentPlaying || !isSameSetList$$q
-                "
-                :removable="removable"
-                @play="play$$q(item.track$$q, item.index$$q)"
-                @remove="remove$$q(item.track$$q, item.index$$q)"
-                @menu="showMenu$$q($event.target as HTMLElement, item)"
-                @ctx-menu="showMenu$$q($event, item)"
-              />
-            </template>
-          </template>
+          </div>
         </div>
       </template>
     </VList>

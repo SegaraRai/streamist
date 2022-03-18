@@ -39,11 +39,11 @@ export default defineComponent({
     const playbackStore = usePlaybackStore();
     const { isTrackAvailable$$q } = useTrackFilter();
 
-    const albumId$$q = eagerComputed(() =>
+    const albumId$$q = computedEager(() =>
       typeof props.album === 'string' ? props.album : props.album.id
     );
 
-    const propAlbumRef = eagerComputed(() => props.album);
+    const propAlbumRef = computedEager(() => props.album);
     const { value } = useLiveQuery(
       async () => {
         const propAlbum = propAlbumRef.value;

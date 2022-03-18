@@ -38,7 +38,7 @@ export default defineComponent({
     };
 
     watch(
-      eagerComputed(() => props.album),
+      computedEager(() => props.album),
       reloadData,
       {
         immediate: true,
@@ -51,7 +51,7 @@ export default defineComponent({
       }
     });
 
-    const modified$$q = eagerComputed(
+    const modified$$q = computedEager(
       () => newAlbumId$$q.value && newAlbumId$$q.value !== albumId$$q.value
     );
 

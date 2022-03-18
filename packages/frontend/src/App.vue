@@ -17,7 +17,9 @@ export default defineComponent({
     const rootElement = document.documentElement;
 
     // sync locale
-    biSyncRef(preferenceStore.language, locale as Ref<LanguageCode>);
+    syncRef(preferenceStore.language, locale as Ref<LanguageCode>, {
+      direction: 'ltr',
+    });
     watch(
       locale,
       (newLocale: string): void => {
@@ -50,7 +52,7 @@ export default defineComponent({
       meta: [{ name: 'description', content: t('app.meta.description') }],
     });
 
-    const naiveUITheme = eagerComputed(
+    const naiveUITheme = computedEager(
       () => NAIVE_UI_THEMES[themeName$$q.value]
     );
 

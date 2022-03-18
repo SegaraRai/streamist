@@ -45,7 +45,7 @@ export default defineComponent({
 
     const searchQuery$$q = ref('');
 
-    const debouncedSearchQuery$$q = useDebounce(
+    const debouncedSearchQuery$$q = refDebounced(
       searchQuery$$q,
       SEARCH_DEBOUNCE_INTERVAL,
       {

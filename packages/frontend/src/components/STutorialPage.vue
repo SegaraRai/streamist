@@ -6,7 +6,7 @@ export default defineComponent({
     const { t } = useI18n();
     const allTracks = useAllTracks();
 
-    const needsTutorial$$q = eagerComputed(
+    const needsTutorial$$q = computedEager(
       () => allTracks.value.value?.length === 0
     );
 

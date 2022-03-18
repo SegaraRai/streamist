@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { ScrollbarInst } from 'naive-ui';
+import { RouteLocation, onBeforeRouteUpdate } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import logoSVG from '~/assets/logo_colored.svg';
 import { useEffectiveTheme, useWS } from '~/composables';
@@ -15,6 +16,10 @@ import {
 } from '~/stores/scroll';
 import { useUploadStore } from '~/stores/upload';
 
+function isShowPlayingEnabled(route: RouteLocation): boolean {
+  return route.hash === '#playing';
+}
+
 export default defineComponent({
   setup() {
     const { t } = useI18n();
@@ -27,27 +32,15 @@ export default defineComponent({
     const { themeName$$q } = useEffectiveTheme();
     const { hostSession$$q, sessionType$$q } = useWS();
 
-    const { idle } = useIdle(IDLE_TIMEOUT);
-
-    useIntervalFn(
-      () => {
-        const active = !idle.value || playbackStore.playing$$q.value;
-        if (!active) {
-          return;
-        }
-
-        renewTokensAndSetCDNCookie();
-      },
-      COOKIE_CHECK_INTERVAL,
-      {
-        immediate: true,
-      }
-    );
+    // sidebars and playback controls
 
     const rightSidebar$$q = ref(false);
     const _leftSidebar$$q = ref(false);
-    const alwaysShowLeftSidebar$$q = eagerComputed(() => display.mdAndUp.value);
-    const desktopPlaybackControl$$q = alwaysShowLeftSidebar$$q;
+    const desktopPlaybackControl$$q = eagerComputed(
+      () => display.mdAndUp.value
+    );
+    const alwaysShowLeftSidebar$$q = desktopPlaybackControl$$q;
+    const canShowPlaying$$q = logicNot(desktopPlaybackControl$$q);
     const leftSidebar$$q = computed<boolean>({
       get: (): boolean => {
         return alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value;
@@ -63,22 +56,56 @@ export default defineComponent({
       }
     });
 
-    const queueScroll$$q = ref(0);
-    const onQueueScroll$$q = (e: Event): void => {
-      queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
-    };
+    // show playing flag
 
-    const hideShell$$q = eagerComputed(
-      () => !!router.currentRoute.value.meta.hideShell
+    const showPlaying$$q = eagerComputed(
+      () =>
+        canShowPlaying$$q.value &&
+        isShowPlayingEnabled(router.currentRoute.value)
     );
 
-    watch(hideShell$$q, (newHideShell): void => {
-      if (!newHideShell) {
+    watch(showPlaying$$q, (newShowPlaying): void => {
+      if (!newShowPlaying) {
         return;
       }
 
       _leftSidebar$$q.value = false;
     });
+
+    onBeforeRouteUpdate((to, from) => {
+      if (canShowPlaying$$q.value || !isShowPlayingEnabled(to)) {
+        return;
+      }
+
+      return to.path === from.path ? false : { ...to, hash: '' };
+    });
+
+    watch(
+      computed(
+        () =>
+          !canShowPlaying$$q.value &&
+          isShowPlayingEnabled(router.currentRoute.value)
+      ),
+      (shouldRemoveHash) => {
+        if (!shouldRemoveHash) {
+          return;
+        }
+
+        router.replace({
+          ...router.currentRoute.value,
+          hash: '',
+        });
+      }
+    );
+
+    // queue scroll
+
+    const queueScroll$$q = ref(0);
+    const onQueueScroll$$q = (e: Event): void => {
+      queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
+    };
+
+    // scroll
 
     const scrollRef$$q = ref<ScrollbarInst | undefined>();
 
@@ -112,6 +139,29 @@ export default defineComponent({
       { passive: true }
     );
 
+    // -- end of setup --
+
+    // token renewal
+
+    const { idle } = useIdle(IDLE_TIMEOUT);
+
+    useIntervalFn(
+      () => {
+        const active = !idle.value || playbackStore.playing$$q.value;
+        if (!active) {
+          return;
+        }
+
+        renewTokensAndSetCDNCookie();
+      },
+      COOKIE_CHECK_INTERVAL,
+      {
+        immediate: true,
+      }
+    );
+
+    // sync DB
+
     // FIXME: Move this to a better place
     // We want to sync DB when the user opens the app (if logged in), or when the user logged in to the app
     syncDB();
@@ -123,7 +173,7 @@ export default defineComponent({
       scrollRef$$q,
       searchDialog$$q: ref(false),
       uploadDialog$$q: ref(false),
-      hideShell$$q,
+      showPlaying$$q,
       queueScroll$$q,
       onQueueScroll$$q,
       uploadStore$$q,
@@ -212,7 +262,7 @@ export default defineComponent({
           </NScrollbar>
           <div
             class="s-footer-height flex-none"
-            :class="hideShell$$q && '!hidden'"
+            :class="showPlaying$$q && '!hidden'"
           ></div>
           <div class="s-offline-mod-h"></div>
         </div>
@@ -223,9 +273,9 @@ export default defineComponent({
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">
             <div class="flex-none">
-              <template v-if="hideShell$$q">
+              <template v-if="showPlaying$$q">
                 <VBtn flat icon text size="small" @click="router$$q.back()">
-                  <VIcon>mdi-arrow-left</VIcon>
+                  <VIcon>mdi-chevron-down</VIcon>
                 </VBtn>
               </template>
               <template v-else>
@@ -299,11 +349,12 @@ export default defineComponent({
       </VAppBar>
 
       <!-- Left Sidebar: Navigation -->
-      <!-- TODO: hide sidebar on click outside -->
       <VNavigationDrawer
-        :model-value="leftSidebar$$q && !hideShell$$q"
+        :model-value="leftSidebar$$q && !showPlaying$$q"
         :permanent="alwaysShowLeftSidebar$$q"
-        :touchless="alwaysShowLeftSidebar$$q"
+        :touchless="
+          alwaysShowLeftSidebar$$q || rightSidebar$$q || showPlaying$$q
+        "
         position="left"
         rail-width="56"
         class="select-none"
@@ -316,7 +367,7 @@ export default defineComponent({
             <SNavigation />
             <div
               class="s-footer-height flex-none"
-              :class="hideShell$$q && '!hidden'"
+              :class="showPlaying$$q && '!hidden'"
             ></div>
           </div>
         </NScrollbar>
@@ -331,14 +382,28 @@ export default defineComponent({
         </NScrollbar>
         <div
           class="s-footer-height flex-none"
-          :class="hideShell$$q && '!hidden'"
+          :class="showPlaying$$q && '!hidden'"
         ></div>
       </VMain>
+
+      <div
+        class="fixed top-0 left-0 w-full h-full transition-all transform-gpu pointer-events-none pt-12 z-10"
+        :class="showPlaying$$q ? 'translate-y-0' : 'translate-y-full invisible'"
+      >
+        <SPlaying
+          class="w-full h-full bg-st-background transition-all"
+          :class="
+            showPlaying$$q
+              ? 'pointer-events-auto'
+              : 'pointer-events-none invisible'
+          "
+        />
+      </div>
     </VApp>
 
     <footer
-      class="s-footer-height flex-none select-none fixed bottom-0 z-1200 w-full m-0 p-0"
-      :class="hideShell$$q && '!hidden'"
+      class="s-footer-height flex-none select-none fixed bottom-0 z-1200 w-full m-0 p-0 transition-all"
+      :class="showPlaying$$q && 'opacity-0 invisible pointer-events-none'"
       @contextmenu.prevent
     >
       <!-- we must provide theme explicitly as this is outside of VApp -->
@@ -348,9 +413,13 @@ export default defineComponent({
           <SPlaybackControl />
           <template v-if="sessionTypeClass$$q === 'remote'">
             <div
-              class="h-6 bg-st-primary text-st-on-primary px-2 flex justify-end"
+              class="h-6 bg-st-primary text-st-on-primary px-2 flex justify-end items-center"
             >
-              <i18n-t keypath="session.ListeningOn" tag="div" class="min-w-60">
+              <i18n-t
+                keypath="session.ListeningOn"
+                tag="div"
+                class="min-w-60 leading-none"
+              >
                 <span class="font-bold mx-1">
                   {{ hostSessionName$$q }}
                 </span>

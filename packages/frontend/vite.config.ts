@@ -10,10 +10,10 @@ import fg from 'fast-glob';
 import AutoImport from 'unplugin-auto-import/vite';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
-import {
+import type {
   ComponentResolveResult,
   ComponentResolver,
-} from 'unplugin-vue-components/dist/types';
+} from 'unplugin-vue-components/types';
 import Components from 'unplugin-vue-components/vite';
 import { ProxyOptions, defineConfig } from 'vite';
 import { createHtmlPlugin } from 'vite-plugin-html';
@@ -172,7 +172,9 @@ export default defineConfig(async ({ mode }) => {
 
     // apply VITE_ env vars
     process.env.VITE_BUILD_REV = 'development';
-    process.env.VITE_CDN_ORIGIN = process.env.CDN_ORIGIN;
+    process.env.VITE_CDN_PORT =
+      process.env.CDN_ORIGIN?.match(/:\d+$/)?.[0] || '';
+    process.env.VITE_CDN_ORIGIN = '';
     process.env.VITE_HCAPTCHA_SITE_KEY_FOR_REGISTRATION =
       process.env.HCAPTCHA_SITE_KEY_FOR_REGISTRATION;
 

@@ -205,13 +205,13 @@ function _useWS() {
   //
 
   const sessions = ref<readonly WSSessionForResponse[]>([]);
-  const currentSession = eagerComputed(() =>
+  const currentSession = computedEager(() =>
     sessions.value.find((session) => session.you)
   );
-  const hostSession = eagerComputed(() =>
+  const hostSession = computedEager(() =>
     sessions.value.find((session) => session.host)
   );
-  const sessionType = eagerComputed(() => {
+  const sessionType = computedEager(() => {
     const host = hostSession.value;
     return !host
       ? 'none'

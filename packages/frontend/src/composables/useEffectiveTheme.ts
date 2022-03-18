@@ -32,7 +32,7 @@ function _useEffectiveTheme() {
         : newRawTheme;
   });
 
-  const dark = eagerComputed(
+  const dark = computedEager(
     (): boolean => THEMES[effectiveThemeName.value].dark
   );
 

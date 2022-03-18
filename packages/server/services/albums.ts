@@ -135,12 +135,9 @@ export async function albumUpdate(
             updatedAt: timestamp,
           }))
         );
-        // TODO(db): use createMany for PostgreSQL
-        for (const coArtist of newCoArtists) {
-          await txClient.albumCoArtist.create({
-            data: coArtist,
-          });
-        }
+        await txClient.albumCoArtist.createMany({
+          data: newCoArtists,
+        });
       }
     }
 

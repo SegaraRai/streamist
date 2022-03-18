@@ -72,7 +72,7 @@ export default defineComponent({
     };
 
     watch(
-      eagerComputed(() => props.album),
+      computedEager(() => props.album),
       reloadData,
       {
         immediate: true,
@@ -85,11 +85,11 @@ export default defineComponent({
       }
     });
 
-    const isArtistEmpty$$q = eagerComputed(
+    const isArtistEmpty$$q = computedEager(
       () => !artistId$$q.value && !artistName$$q.value
     );
 
-    const modified$$q = eagerComputed(
+    const modified$$q = computedEager(
       () =>
         (itemTitle$$q.value && itemTitle$$q.value !== props.album.title) ||
         (itemTitleSort$$q.value || null) !== props.album.titleSort ||
@@ -115,10 +115,10 @@ export default defineComponent({
       itemCoArtists$$q,
       modified$$q,
       strCreatedAt$$q: useTranslatedTimeAgo(
-        eagerComputed(() => props.album.createdAt)
+        computedEager(() => props.album.createdAt)
       ),
       strUpdatedAt$$q: useTranslatedTimeAgo(
-        eagerComputed(() => props.album.updatedAt)
+        computedEager(() => props.album.updatedAt)
       ),
       apply$$q: () => {
         if (requestInProgress$$q.value) {

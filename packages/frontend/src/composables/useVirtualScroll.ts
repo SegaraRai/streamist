@@ -37,7 +37,7 @@ export function useVirtualScrollList<T>(
 
   const currentList: Ref<UseVirtualScrollListItem<T>[]> = ref([]);
   const shallowList = shallowRef(list);
-  const source = eagerComputed(() =>
+  const source = computedEager(() =>
     disabled?.value ? [] : shallowList.value
   );
 
@@ -87,7 +87,7 @@ export function useVirtualScrollList<T>(
     return source.value.length;
   };
 
-  const calculateRange = () => {
+  const calculateRange = (): void => {
     if (disabled?.value) {
       return;
     }
@@ -181,13 +181,18 @@ export function useVirtualScrollList<T>(
   const containerStyle = computed(() => {
     return {
       height: `${totalHeight.value + (additionalHeight?.value || 0)}px`,
-      paddingTop: `${offsetTop.value}px`,
+    };
+  });
+  const wrapperStyle = computed(() => {
+    return {
+      transform: `translateY(${offsetTop.value}px)`,
     };
   });
 
   return {
     list: currentList,
     containerStyle,
+    wrapperStyle,
     listElementRef,
   };
 }
