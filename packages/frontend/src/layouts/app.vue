@@ -299,11 +299,10 @@ export default defineComponent({
       </VAppBar>
 
       <!-- Left Sidebar: Navigation -->
-      <!-- TODO: hide sidebar on click outside -->
       <VNavigationDrawer
         :model-value="leftSidebar$$q && !hideShell$$q"
         :permanent="alwaysShowLeftSidebar$$q"
-        :touchless="alwaysShowLeftSidebar$$q"
+        :touchless="alwaysShowLeftSidebar$$q || rightSidebar$$q"
         position="left"
         rail-width="56"
         class="select-none"
