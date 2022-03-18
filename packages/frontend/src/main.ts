@@ -41,7 +41,7 @@ export const createApp = ViteSSG(App, { routes }, (ctx) => {
     // redirect /playing to /
     ctx.router.beforeEach((to, _from, next) => {
       if (to.path === '/playing') {
-        return next('/');
+        return next('#playing');
       }
       next();
     });
