@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { ScrollbarInst } from 'naive-ui';
+import { RouteLocation, onBeforeRouteUpdate } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import logoSVG from '~/assets/logo_colored.svg';
 import { useEffectiveTheme, useWS } from '~/composables';
@@ -15,6 +16,10 @@ import {
 } from '~/stores/scroll';
 import { useUploadStore } from '~/stores/upload';
 
+function isShowPlayingEnabled(route: RouteLocation): boolean {
+  return route.hash === '#playing';
+}
+
 export default defineComponent({
   setup() {
     const { t } = useI18n();
@@ -27,27 +32,15 @@ export default defineComponent({
     const { themeName$$q } = useEffectiveTheme();
     const { hostSession$$q, sessionType$$q } = useWS();
 
-    const { idle } = useIdle(IDLE_TIMEOUT);
-
-    useIntervalFn(
-      () => {
-        const active = !idle.value || playbackStore.playing$$q.value;
-        if (!active) {
-          return;
-        }
-
-        renewTokensAndSetCDNCookie();
-      },
-      COOKIE_CHECK_INTERVAL,
-      {
-        immediate: true,
-      }
-    );
+    // sidebars and playback controls
 
     const rightSidebar$$q = ref(false);
     const _leftSidebar$$q = ref(false);
-    const alwaysShowLeftSidebar$$q = eagerComputed(() => display.mdAndUp.value);
-    const desktopPlaybackControl$$q = alwaysShowLeftSidebar$$q;
+    const desktopPlaybackControl$$q = eagerComputed(
+      () => display.mdAndUp.value
+    );
+    const alwaysShowLeftSidebar$$q = desktopPlaybackControl$$q;
+    const canShowPlaying$$q = desktopPlaybackControl$$q;
     const leftSidebar$$q = computed<boolean>({
       get: (): boolean => {
         return alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value;
@@ -63,13 +56,12 @@ export default defineComponent({
       }
     });
 
-    const queueScroll$$q = ref(0);
-    const onQueueScroll$$q = (e: Event): void => {
-      queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
-    };
+    // show playing flag
 
     const showPlaying$$q = eagerComputed(
-      () => router.currentRoute.value.hash === '#playing'
+      () =>
+        !canShowPlaying$$q.value &&
+        isShowPlayingEnabled(router.currentRoute.value)
     );
 
     watch(showPlaying$$q, (newShowPlaying): void => {
@@ -79,6 +71,39 @@ export default defineComponent({
 
       _leftSidebar$$q.value = false;
     });
+
+    onBeforeRouteUpdate((to, from) => {
+      if (!canShowPlaying$$q.value && !isShowPlayingEnabled(to)) {
+        return;
+      }
+
+      return to.path === from.path ? false : { ...to, hash: '' };
+    });
+
+    watch(
+      computed(
+        () =>
+          canShowPlaying$$q.value &&
+          isShowPlayingEnabled(router.currentRoute.value)
+      ),
+      (shouldRemoveHash) => {
+        if (shouldRemoveHash) {
+          router.replace({
+            ...router.currentRoute.value,
+            hash: '',
+          });
+        }
+      }
+    );
+
+    // queue scroll
+
+    const queueScroll$$q = ref(0);
+    const onQueueScroll$$q = (e: Event): void => {
+      queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
+    };
+
+    // scroll
 
     const scrollRef$$q = ref<ScrollbarInst | undefined>();
 
@@ -111,6 +136,29 @@ export default defineComponent({
       },
       { passive: true }
     );
+
+    // -- end of setup --
+
+    // token renewal
+
+    const { idle } = useIdle(IDLE_TIMEOUT);
+
+    useIntervalFn(
+      () => {
+        const active = !idle.value || playbackStore.playing$$q.value;
+        if (!active) {
+          return;
+        }
+
+        renewTokensAndSetCDNCookie();
+      },
+      COOKIE_CHECK_INTERVAL,
+      {
+        immediate: true,
+      }
+    );
+
+    // sync DB
 
     // FIXME: Move this to a better place
     // We want to sync DB when the user opens the app (if logged in), or when the user logged in to the app
