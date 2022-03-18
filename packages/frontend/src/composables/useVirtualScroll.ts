@@ -4,6 +4,7 @@ import type { Ref } from 'vue';
 
 export interface UseVirtualScrollListOptions {
   disabled?: Readonly<Ref<boolean>>;
+  itemHeightReferenceRef: Readonly<Ref<number>>;
   itemHeightRef?: Readonly<Ref<number | undefined>>;
   itemHeightFunc?: (index: number) => number;
   additionalHeight?: Readonly<Ref<number>>;
@@ -22,6 +23,7 @@ export function useVirtualScrollList<T>(
   list: Ref<T[]>,
   {
     disabled,
+    itemHeightReferenceRef,
     itemHeightRef,
     itemHeightFunc,
     additionalHeight,
@@ -41,15 +43,18 @@ export function useVirtualScrollList<T>(
     disabled?.value ? [] : shallowList.value
   );
 
-  const state = ref({ start: 0, end: 10 });
+  const state = ref({ start: 0, end: 0 });
 
   const getViewCapacity = (containerHeight: number, start: number) => {
-    if (itemHeightRef?.value) {
-      return Math.ceil(containerHeight / itemHeightRef.value);
+    if (containerHeight <= 0) {
+      return Math.ceil(
+        containerHeight /
+          (itemHeightRef?.value || itemHeightReferenceRef?.value)
+      );
     }
 
-    if (containerHeight <= 0) {
-      return 0;
+    if (itemHeightRef?.value) {
+      return Math.ceil(containerHeight / itemHeightRef.value);
     }
 
     const length = source.value.length;
@@ -67,12 +72,14 @@ export function useVirtualScrollList<T>(
   };
 
   const getOffset = (scrollTop: number) => {
-    if (itemHeightRef?.value) {
-      return Math.floor(scrollTop / itemHeightRef.value);
+    if (scrollTop <= 0) {
+      return Math.floor(
+        scrollTop / (itemHeightRef?.value || itemHeightReferenceRef.value)
+      );
     }
 
-    if (scrollTop <= 0) {
-      return 0;
+    if (itemHeightRef?.value) {
+      return Math.floor(scrollTop / itemHeightRef.value);
     }
 
     let sum = 0;
@@ -109,23 +116,37 @@ export function useVirtualScrollList<T>(
 
     const offset = Math.floor(getOffset(listScrollTop) / blockSize) * blockSize;
     const viewCapacity =
-      getViewCapacity(viewHeight + Math.min(listScrollTop, 0), offset) +
+      Math.ceil(
+        getViewCapacity(
+          Math.min(viewHeight + listScrollTop, viewHeight),
+          offset
+        ) / blockSize
+      ) *
+        blockSize +
       blockSize;
 
     // console.log(listOffsetTop, listScrollTop, viewHeight, offset, viewCapacity);
 
     const from = offset - overscan;
     const to = offset + viewCapacity + overscan;
-    state.value = {
-      start: Math.max(from, 0),
-      end: Math.min(to, source.value.length),
-    };
-    currentList.value = source.value
-      .slice(state.value.start, state.value.end)
-      .map((ele, index) => ({
-        data: ele,
-        index: index + state.value.start,
-      }));
+
+    const newStart = Math.max(from, 0);
+    const newEnd = Math.max(Math.min(to, source.value.length), 0);
+
+    // console.log(offset, from, to, newStart, newEnd);
+
+    if (state.value.start !== newStart || state.value.end !== newEnd) {
+      state.value = {
+        start: newStart,
+        end: newEnd,
+      };
+      currentList.value = source.value
+        .slice(state.value.start, state.value.end)
+        .map((ele, index) => ({
+          data: ele,
+          index: index + state.value.start,
+        }));
+    }
   };
 
   watch(

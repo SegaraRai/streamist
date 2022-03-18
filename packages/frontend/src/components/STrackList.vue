@@ -329,6 +329,7 @@ export default defineComponent({
         contentElementRef: computedEager(
           () => props.scrollContent || currentScrollContentRef.value
         ),
+        itemHeightReferenceRef: ref(trackItemHeight),
         itemHeightRef: itemHeight,
         itemHeightFunc: (index: number) => items.value[index].height$$q,
       });
