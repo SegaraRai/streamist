@@ -4,7 +4,6 @@ import type { Ref } from 'vue';
 
 export interface UseVirtualScrollListOptions {
   disabled?: Readonly<Ref<boolean>>;
-  itemHeightReferenceRef: Readonly<Ref<number>>;
   itemHeightRef?: Readonly<Ref<number | undefined>>;
   itemHeightFunc?: (index: number) => number;
   additionalHeight?: Readonly<Ref<number>>;
@@ -23,7 +22,6 @@ export function useVirtualScrollList<T>(
   list: Ref<T[]>,
   {
     disabled,
-    itemHeightReferenceRef,
     itemHeightRef,
     itemHeightFunc,
     additionalHeight,
@@ -45,12 +43,14 @@ export function useVirtualScrollList<T>(
 
   const state = ref({ start: 0, end: 0 });
 
-  const getViewCapacity = (containerHeight: number, start: number) => {
-    if (containerHeight <= 0) {
-      return Math.ceil(
-        containerHeight /
-          (itemHeightRef?.value || itemHeightReferenceRef?.value)
-      );
+  const getViewCapacity = (containerHeight: number, start: number): number => {
+    // NOTE: -0 === 0
+    if (containerHeight === 0) {
+      return 0;
+    }
+
+    if (containerHeight < 0) {
+      return -getViewCapacity(-containerHeight, start);
     }
 
     if (itemHeightRef?.value) {
@@ -71,11 +71,9 @@ export function useVirtualScrollList<T>(
     return length - start;
   };
 
-  const getOffset = (scrollTop: number) => {
+  const getOffset = (scrollTop: number): number => {
     if (scrollTop <= 0) {
-      return Math.floor(
-        scrollTop / (itemHeightRef?.value || itemHeightReferenceRef.value)
-      );
+      return 0;
     }
 
     if (itemHeightRef?.value) {
@@ -121,9 +119,7 @@ export function useVirtualScrollList<T>(
           Math.min(viewHeight + listScrollTop, viewHeight),
           offset
         ) / blockSize
-      ) *
-        blockSize +
-      blockSize;
+      ) * blockSize;
 
     // console.log(listOffsetTop, listScrollTop, viewHeight, offset, viewCapacity);
 
@@ -133,7 +129,7 @@ export function useVirtualScrollList<T>(
     const newStart = Math.max(from, 0);
     const newEnd = Math.max(Math.min(to, source.value.length), 0);
 
-    // console.log(offset, from, to, newStart, newEnd);
+    // console.log(viewCapacity, offset, from, to, newStart, newEnd);
 
     if (state.value.start !== newStart || state.value.end !== newEnd) {
       state.value = {
