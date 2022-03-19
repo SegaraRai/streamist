@@ -1,0 +1,221 @@
+<script lang="ts">
+import type { PropType } from 'vue';
+
+function clamp1(value: number): number {
+  return Math.max(Math.min(value, 1), 0);
+}
+
+export default defineComponent({
+  props: {
+    mode: {
+      type: String as PropType<'native' | 'emulation'>,
+      default: 'native',
+    },
+    containerAttrs: {
+      type: Object,
+      default: undefined,
+    },
+    contentAttrs: {
+      type: Object,
+      default: undefined,
+    },
+    scrollY: {
+      type: Number,
+      default: undefined,
+    },
+  },
+  emits: {
+    'update:scrollY': (_value: number) => true,
+    'update:container': (_value: HTMLDivElement) => true,
+    'update:content': (_value: HTMLDivElement) => true,
+  },
+  setup(props, { emit }) {
+    const eContainer$$q = ref<HTMLDivElement | null | undefined>();
+    const eContent$$q = ref<HTMLDivElement | null | undefined>();
+
+    watchEffect(() => {
+      if (eContainer$$q.value) {
+        emit('update:container', eContainer$$q.value);
+      }
+    });
+
+    watchEffect(() => {
+      if (eContent$$q.value) {
+        emit('update:content', eContent$$q.value);
+      }
+    });
+
+    //
+
+    const { height: containerHeight } = useElementSize(eContainer$$q);
+    const { height: contentHeight } = useElementSize(eContent$$q);
+    const { y: vPosition } = useScroll(eContainer$$q, {
+      eventListenerOptions: { passive: true },
+    });
+
+    const { pressed } = useMousePressed();
+    const { elementY: vMousePosition } = useMouseInElement(eContainer$$q);
+
+    //
+
+    const vDragging$$q = ref(false);
+    /** in px, >= 0 */
+    const vDragThumbOffset$$q = ref(0);
+
+    /** in px, >= 0 */
+    const vThumbPosition = ref(0);
+    /** in px, >= 0 */
+    const vThumbLength = ref(0);
+
+    const vRecalculate = (): void => {
+      const thumbSizeRate = Math.max(
+        clamp1(containerHeight.value / contentHeight.value),
+        0.1
+      );
+
+      const maxRate = 1 - thumbSizeRate;
+      const maxLength = contentHeight.value - containerHeight.value;
+
+      if (maxLength > 0) {
+        vThumbLength.value = thumbSizeRate * containerHeight.value;
+        vThumbPosition.value =
+          clamp1(vPosition.value / maxLength) *
+          maxRate *
+          (containerHeight.value - 1);
+      } else {
+        vThumbLength.value = 0;
+        vThumbPosition.value = 0;
+      }
+
+      emit('update:scrollY', vPosition.value);
+    };
+
+    watch([containerHeight, contentHeight, vPosition], vRecalculate);
+
+    watch([vDragging$$q, vMousePosition], ([newDragging, newPosition]) => {
+      if (
+        !newDragging ||
+        !eContainer$$q.value ||
+        !eContent$$q.value ||
+        !vThumbLength.value
+      ) {
+        return;
+      }
+
+      const thumbStartPosition = newPosition - vDragThumbOffset$$q.value;
+      const mouseMax = containerHeight.value - vThumbLength.value;
+      const scrollMax = contentHeight.value - containerHeight.value;
+      const newScroll = clamp1(thumbStartPosition / mouseMax) * scrollMax;
+
+      eContainer$$q.value.scrollTop = newScroll;
+    });
+
+    watch(
+      computed(() => props.scrollY),
+      (newScrollY): void => {
+        if (newScrollY == null || !eContainer$$q.value) {
+          return;
+        }
+
+        eContainer$$q.value.scrollTop = newScrollY;
+      }
+    );
+
+    //
+
+    watch(pressed, (newPressed) => {
+      if (!newPressed) {
+        vDragging$$q.value = false;
+      }
+    });
+
+    //
+
+    return {
+      eContainer$$q,
+      eContent$$q,
+      vp: computed(() => `${vThumbPosition.value}px`),
+      vs: computed(() => `${vThumbLength.value}px`),
+      vThumbLength$$q: vThumbLength,
+      vDragging$$q,
+      vOnMouseDown$$q: () => {
+        if (vDragging$$q.value) {
+          return;
+        }
+
+        vDragThumbOffset$$q.value = vMousePosition.value - vThumbPosition.value;
+        vDragging$$q.value = true;
+      },
+    };
+  },
+});
+</script>
+
+<template>
+  <div class="s-scrollable relative flex overflow-hidden">
+    <div
+      v-bind="containerAttrs"
+      ref="eContainer$$q"
+      class="s-scrollable-container flex-1"
+      :class="`s-scrollable-container--${mode}`"
+    >
+      <div
+        ref="eContent$$q"
+        v-bind="contentAttrs"
+        class="s-scrollable-content min-h-full"
+      >
+        <slot></slot>
+      </div>
+    </div>
+    <template v-if="mode === 'emulation'">
+      <!-- vertical -->
+      <div
+        class="s-scrollable-track s-scrollable-track--vertical transition-opacity select-none pointer-events-none absolute top-0 right-0 h-full"
+        :class="[
+          vDragging$$q && 's-scrollable-track--dragging',
+          vThumbLength$$q && 's-scrollable-track--visible',
+        ]"
+      >
+        <div
+          class="s-scrollable-thumb s-scrollable-thumb--vertical pointer-events-auto cursor-pointer opacity-20 pr-1 flex items-center justify-center"
+          @mousedown.left="vOnMouseDown$$q"
+        >
+          <div class="rounded-full bg-st-text w-5px h-full"></div>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>
+
+<style>
+.s-scrollable-container--emulation {
+  scrollbar-width: none;
+  overflow: scroll;
+}
+
+.s-scrollable-container--native {
+  overflow: auto;
+}
+
+.s-scrollable-track {
+  opacity: 0;
+}
+
+.s-scrollable:hover > .s-scrollable-track.s-scrollable-track--visible,
+.s-scrollable-track.s-scrollable-track--visible.s-scrollable-track--dragging {
+  opacity: 100;
+}
+
+.s-scrollable-container--emulation::-webkit-scrollbar,
+.s-scrollable-container--emulation::-webkit-scrollbar-track-piece,
+.s-scrollable-container--emulation::-webkit-scrollbar-thumb {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.s-scrollable-thumb--vertical {
+  transform: translateY(v-bind('vp'));
+  height: v-bind('vs');
+}
+</style>

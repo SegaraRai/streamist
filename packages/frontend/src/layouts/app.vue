@@ -1,5 +1,4 @@
 <script lang="ts">
-import type { ScrollbarInst } from 'naive-ui';
 import { RouteLocation, onBeforeRouteUpdate } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import logoSVG from '~/assets/logo_colored.svg';
@@ -7,7 +6,6 @@ import { useEffectiveTheme, useWS } from '~/composables';
 import { COOKIE_CHECK_INTERVAL, IDLE_TIMEOUT } from '~/config';
 import { useSyncDB } from '~/db';
 import { renewTokensAndSetCDNCookie } from '~/logic/cdnCookie';
-import { getNaiveUIScrollbarElements } from '~/logic/naiveUI/getScrollbarElements';
 import { usePlaybackStore } from '~/stores/playback';
 import {
   currentScrollContainerRef,
@@ -105,40 +103,6 @@ export default defineComponent({
       queueScroll$$q.value = (e.target as HTMLElement).scrollTop;
     };
 
-    // scroll
-
-    const scrollRef$$q = ref<ScrollbarInst | undefined>();
-
-    onMounted(() => {
-      if (!scrollRef$$q.value) {
-        return;
-      }
-
-      const { container$$q, content$$q } = getNaiveUIScrollbarElements(
-        scrollRef$$q.value
-      );
-      if (!container$$q || !content$$q) {
-        return;
-      }
-
-      currentScrollContainerRef.value = container$$q;
-      currentScrollContentRef.value = content$$q;
-    });
-
-    onBeforeUnmount(() => {
-      currentScrollContainerRef.value = undefined;
-      currentScrollContentRef.value = undefined;
-    });
-
-    useEventListener(
-      currentScrollContainerRef,
-      'scroll',
-      (e) => {
-        currentScrollRef.value = (e.target as HTMLElement).scrollTop;
-      },
-      { passive: true }
-    );
-
     // -- end of setup --
 
     // token renewal
@@ -170,7 +134,12 @@ export default defineComponent({
       t,
       logoSVG$$q: logoSVG,
       router$$q: router,
-      scrollRef$$q,
+      currentScrollRef$$q: currentScrollRef,
+      currentScrollContainerRef$$q: currentScrollContainerRef,
+      currentScrollContentRef$$q: currentScrollContentRef,
+      scrollableMode$$q: computed(() =>
+        display.mobile.value ? 'native' : 'emulation'
+      ),
       searchDialog$$q: ref(false),
       uploadDialog$$q: ref(false),
       showPlaying$$q,
@@ -376,13 +345,16 @@ export default defineComponent({
         </NScrollbar>
       </VNavigationDrawer>
 
-      <VMain class="s-v-main w-full">
-        <NScrollbar
-          ref="scrollRef$$q"
-          class="s-scroll-target s-n-scrollbar-min-h-full flex-1 !h-auto"
+      <VMain class="s-v-main w-full h-full flex flex-col">
+        <SScrollable
+          v-model:scroll-y="currentScrollRef$$q"
+          :mode="scrollableMode$$q"
+          class="flex-1"
+          @update:container="currentScrollContainerRef$$q = $event"
+          @update:content="currentScrollContentRef$$q = $event"
         >
           <RouterView class="px-4" />
-        </NScrollbar>
+        </SScrollable>
         <div
           class="s-footer-height flex-none"
           :class="showPlaying$$q && '!hidden'"
