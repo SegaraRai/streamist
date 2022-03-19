@@ -1,16 +1,11 @@
 <script lang="ts">
-import type { PropType } from 'vue';
-
 function clamp1(value: number): number {
   return Math.max(Math.min(value, 1), 0);
 }
 
 export default defineComponent({
   props: {
-    mode: {
-      type: String as PropType<'native' | 'emulation'>,
-      default: 'native',
-    },
+    emulate: Boolean,
     containerAttrs: {
       type: Object,
       default: undefined,
@@ -152,12 +147,14 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="s-scrollable relative flex overflow-hidden">
+  <div
+    class="s-scrollable relative flex overflow-hidden"
+    :class="emulate ? 's-scrollable--emulation' : 's-scrollable--native'"
+  >
     <div
-      v-bind="containerAttrs"
       ref="eContainer$$q"
+      v-bind="containerAttrs"
       class="s-scrollable-container flex-1"
-      :class="`s-scrollable-container--${mode}`"
     >
       <div
         ref="eContent$$q"
@@ -167,8 +164,7 @@ export default defineComponent({
         <slot></slot>
       </div>
     </div>
-    <template v-if="mode === 'emulation'">
-      <!-- vertical -->
+    <template v-if="emulate">
       <div
         class="s-scrollable-track s-scrollable-track--vertical transition-opacity select-none pointer-events-none absolute top-0 right-0 h-full"
         :class="[
@@ -188,12 +184,12 @@ export default defineComponent({
 </template>
 
 <style>
-.s-scrollable-container--emulation {
+.s-scrollable--emulation > .s-scrollable-container {
   scrollbar-width: none;
   overflow: scroll;
 }
 
-.s-scrollable-container--native {
+.s-scrollable--native > .s-scrollable-container {
   overflow: auto;
 }
 
@@ -206,9 +202,10 @@ export default defineComponent({
   opacity: 100;
 }
 
-.s-scrollable-container--emulation::-webkit-scrollbar,
-.s-scrollable-container--emulation::-webkit-scrollbar-track-piece,
-.s-scrollable-container--emulation::-webkit-scrollbar-thumb {
+.s-scrollable--emulation > .s-scrollable-container::-webkit-scrollbar,
+.s-scrollable--emulation > .s-scrollable-container::-webkit-scrollbar-thumb,
+.s-scrollable--emulation
+  > .s-scrollable-container::-webkit-scrollbar-track-piece {
   display: none;
   width: 0;
   height: 0;

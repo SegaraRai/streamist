@@ -137,9 +137,7 @@ export default defineComponent({
       currentScrollRef$$q: currentScrollRef,
       currentScrollContainerRef$$q: currentScrollContainerRef,
       currentScrollContentRef$$q: currentScrollContentRef,
-      scrollableMode$$q: computed(() =>
-        display.mobile.value ? 'native' : 'emulation'
-      ),
+      emulateScrollbar$$q: logicNot(display.mobile),
       searchDialog$$q: ref(false),
       uploadDialog$$q: ref(false),
       showPlaying$$q,
@@ -348,8 +346,8 @@ export default defineComponent({
       <VMain class="s-v-main w-full h-full flex flex-col">
         <SScrollable
           v-model:scroll-y="currentScrollRef$$q"
-          :mode="scrollableMode$$q"
           class="flex-1"
+          :emulate="emulateScrollbar$$q"
           @update:container="currentScrollContainerRef$$q = $event"
           @update:content="currentScrollContentRef$$q = $event"
         >
