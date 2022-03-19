@@ -250,7 +250,7 @@ export default defineComponent({
               <VIcon class="ml-4 mr-2">mdi-playlist-play</VIcon>
               <span class="flex-1">{{ t('queue.title') }}</span>
               <VBtn flat icon size="small" @click="rightSidebar$$q = false">
-                <VIcon>mdi-close</VIcon>
+                <VIcon>mdi-chevron-right</VIcon>
               </VBtn>
             </div>
             <VDivider />
