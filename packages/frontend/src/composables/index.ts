@@ -9,6 +9,7 @@ export * from './useLiveQuery';
 export * from './useMenu';
 export * from './useRecentlyPlayed';
 export * from './useRecentlySearched';
+export * from './useRenderDelay';
 export * from './useSearch';
 export * from './useTimeAgo';
 export * from './useTrackFilter';

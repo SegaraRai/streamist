@@ -20,7 +20,9 @@ import {
   useAllArtists,
   useAllImageMap,
   useAllTracks,
+  useRenderDelay,
 } from '~/composables';
+import { RENDER_DELAY_ALBUM_LIST } from '~/config';
 import { usePlaybackStore } from '~/stores/playback';
 
 interface Item {
@@ -144,8 +146,11 @@ export default defineComponent({
 
     const dropdown$$q = ref<DropdownAlbumInput | undefined>();
 
+    const readyToRender$$q = useRenderDelay(RENDER_DELAY_ALBUM_LIST);
+
     return {
       t,
+      readyToRender$$q,
       displayObj$$q: displayObj,
       items$$q: items,
       dropdown$$q,
@@ -181,6 +186,7 @@ export default defineComponent({
           :item-height="displayObj$$q.height$$q"
           :item-margin-width="displayObj$$q.marginWidth$$q"
           :item-margin-height="displayObj$$q.marginHeight$$q"
+          :invisible="!readyToRender$$q"
         >
           <template #default="{ data: item, width }">
             <VCard

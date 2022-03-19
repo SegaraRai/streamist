@@ -32,29 +32,13 @@ export default defineComponent({
     const { themeName$$q } = useEffectiveTheme();
     const { hostSession$$q, sessionType$$q } = useWS();
 
-    // sidebars and playback controls
+    // playback controls
 
-    const rightSidebar$$q = ref(false);
-    const _leftSidebar$$q = ref(false);
     const desktopPlaybackControl$$q = eagerComputed(
       () => display.mdAndUp.value
     );
     const alwaysShowLeftSidebar$$q = desktopPlaybackControl$$q;
     const canShowPlaying$$q = logicNot(desktopPlaybackControl$$q);
-    const leftSidebar$$q = computed<boolean>({
-      get: (): boolean => {
-        return alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value;
-      },
-      set: (value: boolean): void => {
-        _leftSidebar$$q.value = !alwaysShowLeftSidebar$$q.value && value;
-      },
-    });
-
-    watchEffect(() => {
-      if (alwaysShowLeftSidebar$$q.value) {
-        _leftSidebar$$q.value = false;
-      }
-    });
 
     // show playing flag
 
@@ -63,14 +47,6 @@ export default defineComponent({
         canShowPlaying$$q.value &&
         isShowPlayingEnabled(router.currentRoute.value)
     );
-
-    watch(showPlaying$$q, (newShowPlaying): void => {
-      if (!newShowPlaying) {
-        return;
-      }
-
-      _leftSidebar$$q.value = false;
-    });
 
     onBeforeRouteUpdate((to, from) => {
       if (canShowPlaying$$q.value || !isShowPlayingEnabled(to)) {
@@ -97,6 +73,30 @@ export default defineComponent({
         });
       }
     );
+
+    // sidebars
+
+    const rightSidebar$$q = ref(false);
+
+    const _leftSidebar$$q = ref(false);
+    const leftSidebar$$q = computed<boolean>({
+      get: (): boolean => {
+        return (
+          !showPlaying$$q.value &&
+          (alwaysShowLeftSidebar$$q.value || _leftSidebar$$q.value)
+        );
+      },
+      set: (value: boolean): void => {
+        _leftSidebar$$q.value =
+          !showPlaying$$q.value && !alwaysShowLeftSidebar$$q.value && value;
+      },
+    });
+
+    watchEffect(() => {
+      if (alwaysShowLeftSidebar$$q.value) {
+        _leftSidebar$$q.value = false;
+      }
+    });
 
     // queue scroll
 
@@ -242,14 +242,15 @@ export default defineComponent({
         :width="400"
         disable-resize-watcher
         class="s-offline-mod-mt select-none"
+        :touchless="leftSidebar$$q && !alwaysShowLeftSidebar$$q"
       >
         <div class="flex flex-col h-full">
           <VSheet tile>
             <div class="title flex items-center py-1 -mb-1px">
-              <VIcon class="ml-4 mr-2">mdi-playlist-play</VIcon>
+              <i-mdi-playlist-play class="ml-4 mr-2 text-xl" />
               <span class="flex-1">{{ t('queue.title') }}</span>
               <VBtn flat icon size="small" @click="rightSidebar$$q = false">
-                <VIcon>mdi-close</VIcon>
+                <VIcon>mdi-chevron-right</VIcon>
               </VBtn>
             </div>
             <VDivider />
@@ -258,7 +259,9 @@ export default defineComponent({
             class="flex-1 s-n-scrollbar-min-h-full"
             @scroll="onQueueScroll$$q"
           >
-            <SQueue :scroll-top="queueScroll$$q" />
+            <template v-if="rightSidebar$$q">
+              <SQueue :scroll-top="queueScroll$$q" />
+            </template>
           </NScrollbar>
           <div
             class="s-footer-height flex-none"
@@ -350,10 +353,10 @@ export default defineComponent({
 
       <!-- Left Sidebar: Navigation -->
       <VNavigationDrawer
-        :model-value="leftSidebar$$q && !showPlaying$$q"
+        :model-value="leftSidebar$$q"
         :permanent="alwaysShowLeftSidebar$$q"
         :touchless="
-          alwaysShowLeftSidebar$$q || rightSidebar$$q || showPlaying$$q
+          alwaysShowLeftSidebar$$q || showPlaying$$q || rightSidebar$$q
         "
         position="left"
         rail-width="56"
