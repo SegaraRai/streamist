@@ -258,7 +258,9 @@ export default defineComponent({
             class="flex-1 s-n-scrollbar-min-h-full"
             @scroll="onQueueScroll$$q"
           >
-            <SQueue :scroll-top="queueScroll$$q" />
+            <template v-if="rightSidebar$$q">
+              <SQueue :scroll-top="queueScroll$$q" />
+            </template>
           </NScrollbar>
           <div
             class="s-footer-height flex-none"
