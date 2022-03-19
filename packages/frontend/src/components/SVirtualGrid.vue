@@ -27,6 +27,7 @@ export default defineComponent({
       type: Array,
       default: () => [],
     },
+    invisible: Boolean,
   },
   setup(props) {
     const _listElementRef = ref<HTMLElement | null | undefined>();
@@ -101,23 +102,28 @@ export default defineComponent({
     :style="containerStyle$$q"
   >
     <div :style="wrapperStyle$$q">
-      <template
-        v-for="{ data: [cols, dummyCols], index: _index } in listRows$$q"
-        :key="_index"
-      >
-        <div class="flex w-full justify-between" :style="rowStyle$$q">
-          <template v-for="(item, _index2) in cols" :key="_index2">
-            <div :_="(_index2 || undefined) && undefined" :style="cellStyle$$q">
-              <slot :data="item" :width="itemWidth"></slot>
-            </div>
-          </template>
-          <template v-for="(_item, _index2) in dummyCols" :key="_index2">
-            <div
-              :_="(_item || _index2 || undefined) && undefined"
-              :style="cellStyle$$q"
-            ></div>
-          </template>
-        </div>
+      <template v-if="!invisible">
+        <template
+          v-for="{ data: [cols, dummyCols], index: _index } in listRows$$q"
+          :key="_index"
+        >
+          <div class="flex w-full justify-between" :style="rowStyle$$q">
+            <template v-for="(item, _index2) in cols" :key="_index2">
+              <div
+                :_="(_index2 || undefined) && undefined"
+                :style="cellStyle$$q"
+              >
+                <slot :data="item" :width="itemWidth"></slot>
+              </div>
+            </template>
+            <template v-for="(_item, _index2) in dummyCols" :key="_index2">
+              <div
+                :_="(_item || _index2 || undefined) && undefined"
+                :style="cellStyle$$q"
+              ></div>
+            </template>
+          </div>
+        </template>
       </template>
     </div>
   </div>

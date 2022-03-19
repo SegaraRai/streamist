@@ -15,6 +15,8 @@ export const SEEK_BACKWARD_TIME = SEEK_FORWARD_TIME;
 /** in seconds */
 export const SEEK_TO_BEGINNING_THRESHOLD = 3;
 
+export const RENDER_DELAY_ALBUM_LIST = 100;
+export const RENDER_DELAY_ARTIST_LIST = 100;
 export const RENDER_DELAY_TRACK_LIST = 100;
 export const RENDER_DELAY_TRACK_LIST_ITEM = 200;
 
