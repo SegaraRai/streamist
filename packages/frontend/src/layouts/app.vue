@@ -247,7 +247,7 @@ export default defineComponent({
         <div class="flex flex-col h-full">
           <VSheet tile>
             <div class="title flex items-center py-1 -mb-1px">
-              <VIcon class="ml-4 mr-2">mdi-playlist-play</VIcon>
+              <i-mdi-playlist-play class="ml-4 mr-2 text-xl" />
               <span class="flex-1">{{ t('queue.title') }}</span>
               <VBtn flat icon size="small" @click="rightSidebar$$q = false">
                 <VIcon>mdi-chevron-right</VIcon>
