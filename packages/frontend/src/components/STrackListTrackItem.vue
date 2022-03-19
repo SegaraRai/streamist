@@ -6,7 +6,7 @@ import type {
   ResourceImage,
   ResourceTrack,
 } from '$/types';
-import { useTrackFilter } from '~/composables';
+import { useRenderDelay, useTrackFilter } from '~/composables';
 import { RENDER_DELAY_TRACK_LIST_ITEM } from '~/config';
 import { usePlaybackStore } from '~/stores/playback';
 
@@ -72,14 +72,13 @@ export default defineComponent({
         playbackStore.currentTrack$$q.value === props.item.track$$q.id
     );
 
-    const readyToRender$$q = ref(false);
-    onMounted(() => {
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          readyToRender$$q.value = true;
-        });
-      }, RENDER_DELAY_TRACK_LIST_ITEM);
+    const readyToRender$$q = useRenderDelay(RENDER_DELAY_TRACK_LIST_ITEM);
+
+    /*
+    onUpdated(() => {
+      console.log('updated', props.item.track$$q.id);
     });
+    //*/
 
     return {
       t,

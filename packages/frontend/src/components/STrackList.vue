@@ -12,6 +12,7 @@ import {
   useLiveQuery,
   useMenu,
   useNDropdownTrack,
+  useRenderDelay,
   useTrackFilter,
   useVirtualScrollList,
 } from '~/composables';
@@ -333,14 +334,13 @@ export default defineComponent({
         itemHeightFunc: (index: number) => items.value[index].height$$q,
       });
 
-    const readyToRender$$q = ref(false);
-    onMounted(() => {
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          readyToRender$$q.value = true;
-        });
-      }, RENDER_DELAY_TRACK_LIST);
+    const readyToRender$$q = useRenderDelay(RENDER_DELAY_TRACK_LIST);
+
+    /*
+    onUpdated(() => {
+      console.log('updated trackList');
     });
+    //*/
 
     return {
       t,
