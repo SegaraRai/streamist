@@ -181,6 +181,7 @@ export default defineComponent({
         <div
           class="s-scrollable-thumb s-scrollable-thumb--vertical pointer-events-auto cursor-pointer opacity-20 pr-1 flex items-center justify-center"
           @mousedown.left="vOnMouseDown$$q"
+          @contextmenu.prevent
         >
           <div class="rounded-full bg-st-text w-5px h-full"></div>
         </div>
