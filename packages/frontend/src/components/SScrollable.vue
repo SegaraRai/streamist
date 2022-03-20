@@ -1,7 +1,5 @@
 <script lang="ts">
-function clamp1(value: number): number {
-  return Math.max(Math.min(value, 1), 0);
-}
+import { clamp } from '$shared/clamp';
 
 const V_TRACK_MARGIN = 1;
 
@@ -66,7 +64,7 @@ export default defineComponent({
 
     const vRecalculate = (): void => {
       const thumbSizeRate = Math.max(
-        clamp1(containerHeight.value / contentHeight.value),
+        clamp(containerHeight.value / contentHeight.value),
         0.1
       );
 
@@ -76,7 +74,7 @@ export default defineComponent({
       if (maxLength > 0) {
         vThumbLength.value = thumbSizeRate * containerHeight.value;
         vThumbPosition.value =
-          clamp1(vPosition.value / maxLength) *
+          clamp(vPosition.value / maxLength) *
           maxRate *
           (containerHeight.value - V_TRACK_MARGIN);
       } else {
@@ -103,7 +101,7 @@ export default defineComponent({
       const mouseMax =
         containerHeight.value - V_TRACK_MARGIN - vThumbLength.value;
       const scrollMax = contentHeight.value - containerHeight.value;
-      const newScroll = clamp1(thumbStartPosition / mouseMax) * scrollMax;
+      const newScroll = clamp(thumbStartPosition / mouseMax) * scrollMax;
 
       eContainer$$q.value.scrollTop = newScroll;
     });
