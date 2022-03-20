@@ -1,10 +1,11 @@
 import { throttleFilter } from '@vueuse/core';
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { clamp } from '$shared/clamp';
 import { MAX_VOLUME, MIN_UNMUTED_VOLUME, MIN_VOLUME } from '$shared/config';
 import { VOLUME_SYNC_THROTTLE } from '~/config';
 
 function normalize(volume: number): number {
-  return Math.max(Math.min(Math.round(volume), MAX_VOLUME), MIN_VOLUME);
+  return clamp(Math.round(volume), MAX_VOLUME, MIN_VOLUME);
 }
 
 const createSerializer = (minVolume = MIN_VOLUME) => ({

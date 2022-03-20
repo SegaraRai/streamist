@@ -1,6 +1,7 @@
 // modified version of https://github.com/vueuse/vueuse/blob/main/packages/core/useVirtualList/index.ts (MIT License)
 
 import type { Ref } from 'vue';
+import { clamp } from '$shared/clamp';
 
 export interface UseVirtualScrollListOptions {
   disabled?: Readonly<Ref<boolean>>;
@@ -127,7 +128,7 @@ export function useVirtualScrollList<T>(
     const to = offset + viewCapacity + overscan;
 
     const newStart = Math.max(from, 0);
-    const newEnd = Math.max(Math.min(to, source.value.length), 0);
+    const newEnd = clamp(to, source.value.length);
 
     // console.log(viewCapacity, offset, from, to, newStart, newEnd);
 
@@ -202,7 +203,7 @@ export function useVirtualScrollList<T>(
   });
   const wrapperStyle = computed(() => {
     return {
-      transform: `translateY(${offsetTop.value}px)`,
+      transform: `translate3d(0,${offsetTop.value}px,0)`,
     };
   });
 

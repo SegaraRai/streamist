@@ -11,6 +11,7 @@ import {
 import { usePlaybackStore } from '~/stores/playback';
 import { setRedirect } from '~/stores/redirect';
 import { useTrackFilter } from '../useTrackFilter';
+import { cleanupDividers } from './utils';
 
 export interface NDropdownPlaylistCreateOptions {
   readonly playlist$$q: Readonly<Ref<ResourcePlaylist | null | undefined>>;
@@ -183,6 +184,6 @@ export function useNDropdownPlaylist({
       });
     }
 
-    return menuItems;
+    return cleanupDividers(menuItems);
   });
 }

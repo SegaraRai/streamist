@@ -268,6 +268,7 @@ export default defineComponent({
 
     const dialogEdit$$q = ref(false);
     const dialogDetails$$q = ref(false);
+    const dialogAddToPlaylist$$q = ref(false);
     const lastSelectedTrack$$q = ref<ResourceTrack | undefined>();
     const selectedTrack$$q = ref<ResourceTrack | undefined>();
     const selectedTrackIndex$$q = ref<number | undefined>();
@@ -310,6 +311,9 @@ export default defineComponent({
       },
       openTrackDetailsDialog$$q: (_track: ResourceTrack) => {
         dialogDetails$$q.value = true;
+      },
+      openAddToPlaylistDialog$$q: (_track: ResourceTrack) => {
+        dialogAddToPlaylist$$q.value = true;
       },
       closeMenu$$q,
     });
@@ -372,6 +376,7 @@ export default defineComponent({
       lastSelectedTrack$$q,
       dialogEdit$$q,
       dialogDetails$$q,
+      dialogAddToPlaylist$$q,
       menuOptions$$q,
       menuIsOpen$$q,
       menuX$$q,
@@ -572,6 +577,10 @@ export default defineComponent({
     <SDialogTrackEdit v-model="dialogEdit$$q" :track="lastSelectedTrack$$q" />
     <SDialogTrackDetails
       v-model="dialogDetails$$q"
+      :track="lastSelectedTrack$$q"
+    />
+    <SDialogTrackAddToPlaylist
+      v-model="dialogAddToPlaylist$$q"
       :track="lastSelectedTrack$$q"
     />
   </template>

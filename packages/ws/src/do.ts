@@ -1,5 +1,6 @@
 import { Actor, Durable } from 'worktop/cfw.durable';
 import type { WebSocket } from 'worktop/cfw.ws';
+import { clamp } from '$shared/clamp';
 import type {
   WSPlaybackState,
   WSPlaybackTracks,
@@ -115,9 +116,9 @@ export class DO extends Actor {
             if (!this.hostWS) {
               (this.pbState as Mutable<WSPlaybackState>).playing = false;
             }
-            (this.pbState as Mutable<WSPlaybackState>).startPosition = Math.max(
-              Math.min(this.pbState.startPosition, this.pbState.duration),
-              0
+            (this.pbState as Mutable<WSPlaybackState>).startPosition = clamp(
+              this.pbState.startPosition,
+              this.pbState.duration
             );
           }
           modifiedState = true;
@@ -201,12 +202,9 @@ export class DO extends Actor {
         this.pbState = {
           playing: false,
           duration: this.pbState.duration,
-          startPosition: Math.min(
-            Math.max(
-              this.pbState.startPosition +
-                (Date.now() - this.pbState.startedAt) / 1000,
-              0
-            ),
+          startPosition: clamp(
+            this.pbState.startPosition +
+              (Date.now() - this.pbState.startedAt) / 1000,
             this.pbState.duration
           ),
           startedAt: Date.now(),

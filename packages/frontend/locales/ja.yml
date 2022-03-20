@@ -338,6 +338,9 @@ dialogComponent:
     releaseDate:
       hint: 'リリース日は {0} として解釈されます'
       invalid: リリース日が解析できません
+  trackAddToPlaylist:
+    title: '{0} をプレイリストに追加'
+    AddToNewPlaylist: 新しいプレイリストに追加
 dialog:
   signOut:
     title: ログアウト
