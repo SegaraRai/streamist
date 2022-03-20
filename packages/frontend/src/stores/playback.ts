@@ -1,3 +1,4 @@
+import { clamp } from '$shared/clamp';
 import type { RepeatType, WSPlaybackState } from '$shared/types';
 import type { ResourceTrack } from '$/types';
 import defaultAlbumArt from '~/assets/default_album_art_256x256.png?url';
@@ -323,7 +324,7 @@ function _usePlaybackStore() {
         return;
       }
 
-      value = Math.max(0, Math.min(value, duration));
+      value = clamp(value, duration);
 
       if (audio) {
         if (sessionType$$q.value === 'host') {

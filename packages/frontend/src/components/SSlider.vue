@@ -1,4 +1,6 @@
 <script lang="ts">
+import { clamp } from '$shared/clamp';
+
 export default defineComponent({
   props: {
     max: {
@@ -31,7 +33,7 @@ export default defineComponent({
 
     const rate = computed(() =>
       props.max != null && props.modelValue != null && props.max > 0
-        ? Math.max(Math.min(props.modelValue / props.max, 1), 0)
+        ? clamp(props.modelValue / props.max)
         : 0
     );
 
@@ -48,10 +50,7 @@ export default defineComponent({
     const { x, elementPositionX, elementWidth } = useMouseInElement(e);
 
     const mousePosition = computed<number>(() =>
-      Math.min(
-        Math.max((x.value - elementPositionX.value) / elementWidth.value, 0),
-        1
-      )
+      clamp((x.value - elementPositionX.value) / elementWidth.value)
     );
 
     watch([dragging, mousePosition], ([newDragging, newPosition]) => {
@@ -105,10 +104,7 @@ export default defineComponent({
         }
 
         const delta = (rawDelta > 0 ? 1 : -1) * props.wheelDelta;
-        emit(
-          'update:modelValue',
-          Math.min(Math.max(props.modelValue + delta, 0), props.max)
-        );
+        emit('update:modelValue', clamp(props.modelValue + delta, props.max));
       },
     };
   },

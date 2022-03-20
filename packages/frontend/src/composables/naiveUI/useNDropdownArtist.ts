@@ -5,6 +5,7 @@ import {
   nCreateDropdownIcon,
   nCreateDropdownTextColorStyle,
 } from '~/logic/naiveUI/dropdown';
+import { cleanupDividers } from './utils';
 
 export interface NDropdownArtistCreateOptions {
   readonly artist$$q: Readonly<Ref<ResourceArtist | null | undefined>>;
@@ -63,6 +64,6 @@ export function useNDropdownArtist({
       });
     }
 
-    return menuItems;
+    return cleanupDividers(menuItems);
   });
 }

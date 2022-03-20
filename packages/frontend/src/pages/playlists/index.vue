@@ -123,7 +123,7 @@ export default defineComponent({
                 :_="(_index || undefined) && undefined"
                 :disabled="!!selectedPlaylist$$q"
                 :to="`/playlists/${item.id$$q}`"
-                class="flex gap-x-4 s-hover-container opacity-100"
+                class="flex gap-x-4 s-hover-container opacity-100 rounded-4px"
                 :class="
                   selectedPlaylist$$q?.id === item.id$$q
                     ? 's-list-item--selected'

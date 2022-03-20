@@ -117,7 +117,7 @@ export default defineComponent({
   <div
     v-ripple="readyToRender$$q"
     v-bind="$attrs"
-    class="s-hover-container s-list-item w-full px-2 py-1 h-14 flex"
+    class="s-hover-container s-list-item w-full px-2 py-1 h-14 flex rounded-4px"
     :class="[
       selected ? 's-list-item--selected' : 's-list-item--unselected',
       !isAvailable$$q && 'opacity-60',
