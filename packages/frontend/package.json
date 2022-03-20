@@ -28,7 +28,7 @@
     "@aspida/axios": "^1.9.0",
     "@mdi/font": "^6.5.95",
     "@prisma/client": "^3.11.0",
-    "@vueuse/core": "^8.1.1",
+    "@vueuse/core": "^8.1.2",
     "@vueuse/head": "^0.7.5",
     "axios": "^0.26.1",
     "bcp-47-match": "^2.0.1",
@@ -51,7 +51,7 @@
     "vue-i18n": "^9.2.0-beta.23",
     "vue-router": "^4.0.14",
     "vuedraggable": "^4.1.0",
-    "vuetify": "^3.0.0-alpha.13",
+    "vuetify": "^3.0.0-beta.0",
     "workbox-window": "^6.5.1"
   },
   "devDependencies": {
@@ -69,9 +69,10 @@
     "critters": "^0.0.16",
     "dotenv": "^16.0.0",
     "fast-glob": "^3.2.11",
+    "rollup": "^2.70.1",
     "unplugin-auto-import": "^0.6.6",
     "unplugin-icons": "^0.13.4",
-    "unplugin-vue-components": "^0.18.0",
+    "unplugin-vue-components": "^0.18.3",
     "vite": "^2.8.6",
     "vite-plugin-html": "^3.2.0",
     "vite-plugin-inspect": "^0.4.3",
@@ -80,7 +81,7 @@
     "vite-plugin-vue-layouts": "^0.6.0",
     "vite-plugin-windicss": "^1.8.3",
     "vite-ssg": "^0.19.0",
-    "vitest": "^0.7.1",
+    "vitest": "^0.7.6",
     "vue-tsc": "^0.33.2",
     "windicss": "^3.5.1"
   }
