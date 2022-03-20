@@ -1,5 +1,6 @@
 import { MenuOption, useDialog, useMessage } from 'naive-ui';
 import type { ComputedRef, Ref } from 'vue';
+import { useDisplay } from 'vuetify';
 import type { ResourceTrack } from '$/types';
 import { useSyncDB } from '~/db';
 import { api } from '~/logic/api';
@@ -12,6 +13,7 @@ import { usePlaybackStore } from '~/stores/playback';
 import { setRedirect } from '~/stores/redirect';
 import { useAllPlaylists } from '../useDB';
 import { useTrackFilter } from '../useTrackFilter';
+import { cleanupDividers } from './utils';
 
 export interface NDropdownTrackCreateOptions {
   readonly selectedTrack$$q: Readonly<Ref<ResourceTrack | null | undefined>>;
@@ -24,6 +26,7 @@ export interface NDropdownTrackCreateOptions {
   readonly play$$q: (track: ResourceTrack) => void;
   readonly openEditTrackDialog$$q?: (track: ResourceTrack) => void;
   readonly openTrackDetailsDialog$$q?: (track: ResourceTrack) => void;
+  readonly openAddToPlaylistDialog$$q?: (track: ResourceTrack) => void;
   readonly onNavigate$$q?: () => void;
   readonly closeMenu$$q: () => void;
 }
@@ -39,11 +42,13 @@ export function useNDropdownTrack({
   play$$q,
   openEditTrackDialog$$q,
   openTrackDetailsDialog$$q,
+  openAddToPlaylistDialog$$q,
   onNavigate$$q,
   closeMenu$$q,
 }: NDropdownTrackCreateOptions): ComputedRef<MenuOption[]> {
   const router = useRouter();
   const { t } = useI18n();
+  const display = useDisplay();
   const dialog = useDialog();
   const message = useMessage();
   const syncDB = useSyncDB();
@@ -75,6 +80,8 @@ export function useNDropdownTrack({
     const removeFromPlaylist = playlistId$$q.value
       ? playlists.find((p) => p.id === playlistId$$q.value)
       : undefined;
+
+    const noNestedItems = display.smAndDown.value;
 
     const menuItems: MenuOption[] = [];
 
@@ -194,83 +201,50 @@ export function useNDropdownTrack({
     }
 
     // Add to Playlist
-    menuItems.push({
-      key: 'addToPlaylist',
-      label: t('dropdown.track.AddToPlaylist'),
-      icon: nCreateDropdownIcon('mdi-playlist-plus'),
-      children: [
-        {
-          key: 'addToPlaylist.createNew',
-          label: t('dropdown.track.AddToNewPlaylist'),
+    if (noNestedItems) {
+      if (openAddToPlaylistDialog$$q) {
+        menuItems.push({
+          key: 'addToPlaylist',
+          label: t('dropdown.track.AddToPlaylist'),
+          icon: nCreateDropdownIcon('mdi-playlist-plus'),
           props: {
-            onClick: () => {
+            onClick: (): void => {
               delayedCloseMenu();
-
-              api.my.playlists
-                .$post({
-                  body: {
-                    title: track.title,
-                    description: '',
-                    trackIds: [track.id],
-                  },
-                })
-                .then(() => {
-                  message.success(t('message.CreatedPlaylist', [track.title]));
-                  syncDB();
-                })
-                .catch((error) => {
-                  message.error(
-                    t('message.FailedToCreatePlaylist', [
-                      track.title,
-                      String(error),
-                    ])
-                  );
-                });
+              openAddToPlaylistDialog$$q?.(track);
             },
           },
-        },
-        ...(playlists.length
-          ? [
-              {
-                key: 'addToPlaylist.div',
-                type: 'divider',
-              },
-            ]
-          : []),
-        ...playlists.map((playlist) => {
-          const disabled = playlist.trackIds.includes(trackId);
-          return {
-            key: `addToPlaylist.id-${playlist.id}`,
-            label: playlist.title,
-            disabled,
+        });
+      }
+    } else {
+      menuItems.push({
+        key: 'addToPlaylist',
+        label: t('dropdown.track.AddToPlaylist'),
+        icon: nCreateDropdownIcon('mdi-playlist-plus'),
+        children: [
+          {
+            key: 'addToPlaylist.createNew',
+            label: t('dropdown.track.AddToNewPlaylist'),
             props: {
               onClick: () => {
-                if (disabled) {
-                  return;
-                }
-
                 delayedCloseMenu();
 
                 api.my.playlists
-                  ._playlistId(playlist.id)
-                  .tracks.$post({
+                  .$post({
                     body: {
-                      trackIds: [trackId],
+                      title: track.title,
+                      description: '',
+                      trackIds: [track.id],
                     },
                   })
                   .then(() => {
                     message.success(
-                      t('message.AddedToPlaylist', [
-                        playlist.title,
-                        track.title,
-                      ])
+                      t('message.CreatedPlaylist', [track.title])
                     );
                     syncDB();
                   })
                   .catch((error) => {
                     message.error(
-                      t('message.FailedToAddToPlaylist', [
-                        playlist.title,
+                      t('message.FailedToCreatePlaylist', [
                         track.title,
                         String(error),
                       ])
@@ -278,10 +252,61 @@ export function useNDropdownTrack({
                   });
               },
             },
-          };
-        }),
-      ],
-    });
+          },
+          ...(playlists.length
+            ? [
+                {
+                  key: 'addToPlaylist.div',
+                  type: 'divider',
+                },
+              ]
+            : []),
+          ...playlists.map((playlist) => {
+            const disabled = playlist.trackIds.includes(trackId);
+            return {
+              key: `addToPlaylist.id-${playlist.id}`,
+              label: playlist.title,
+              disabled,
+              props: {
+                onClick: () => {
+                  if (disabled) {
+                    return;
+                  }
+
+                  delayedCloseMenu();
+
+                  api.my.playlists
+                    ._playlistId(playlist.id)
+                    .tracks.$post({
+                      body: {
+                        trackIds: [trackId],
+                      },
+                    })
+                    .then(() => {
+                      message.success(
+                        t('message.AddedToPlaylist', [
+                          playlist.title,
+                          track.title,
+                        ])
+                      );
+                      syncDB();
+                    })
+                    .catch((error) => {
+                      message.error(
+                        t('message.FailedToAddToPlaylist', [
+                          playlist.title,
+                          track.title,
+                          String(error),
+                        ])
+                      );
+                    });
+                },
+              },
+            };
+          }),
+        ],
+      });
+    }
 
     // Remove from Playlist
     if (removeFromPlaylist) {
@@ -400,6 +425,6 @@ export function useNDropdownTrack({
       }
     }
 
-    return menuItems;
+    return cleanupDividers(menuItems);
   });
 }

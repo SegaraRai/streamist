@@ -338,6 +338,9 @@ dialogComponent:
     releaseDate:
       hint: 'Release date will be treated as {0}'
       invalid: Cannot parse release date
+  trackAddToPlaylist:
+    title: 'Add {0} to playlist'
+    AddToNewPlaylist: Add to new playlist
 dialog:
   signOut:
     title: Sign out

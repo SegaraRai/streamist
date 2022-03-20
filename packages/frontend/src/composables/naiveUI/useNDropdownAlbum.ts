@@ -7,6 +7,7 @@ import {
 } from '~/logic/naiveUI/dropdown';
 import { usePlaybackStore } from '~/stores/playback';
 import { useTrackFilter } from '../useTrackFilter';
+import { cleanupDividers } from './utils';
 
 export interface NDropdownAlbumCreateOptions {
   readonly album$$q: Readonly<Ref<ResourceAlbum | null | undefined>>;
@@ -129,6 +130,6 @@ export function useNDropdownAlbum({
       }
     }
 
-    return menuItems;
+    return cleanupDividers(menuItems);
   });
 }
