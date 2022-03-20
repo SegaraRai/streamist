@@ -202,7 +202,7 @@ export function useVirtualScrollList<T>(
   });
   const wrapperStyle = computed(() => {
     return {
-      transform: `translateY(${offsetTop.value}px)`,
+      transform: `translate3d(0,${offsetTop.value}px,0)`,
     };
   });
 

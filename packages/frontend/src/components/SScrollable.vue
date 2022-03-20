@@ -212,7 +212,7 @@ export default defineComponent({
 }
 
 .s-scrollable-thumb--vertical {
-  transform: translateY(v-bind('vp'));
+  transform: translate3d(0, v-bind('vp'), 0);
   height: v-bind('vs');
 }
 </style>
