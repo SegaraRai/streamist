@@ -244,7 +244,7 @@ export default defineComponent({
         flat
         :border="1"
         density="compact"
-        class="border-b s-offline-mod-mt"
+        class="border-b s-offline-mod-mt px-0"
       >
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">
