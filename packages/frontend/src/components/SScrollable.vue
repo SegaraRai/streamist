@@ -1,7 +1,10 @@
 <script lang="ts">
 import { clamp } from '$shared/clamp';
-
-const V_TRACK_MARGIN = 1;
+import {
+  SCROLLABLE_V_THUMB_SIZE_MAX,
+  SCROLLABLE_V_THUMB_SIZE_MIN,
+  SCROLLABLE_V_TRACK_MARGIN,
+} from '~/config';
 
 export default defineComponent({
   props: {
@@ -63,20 +66,22 @@ export default defineComponent({
     const vThumbLength = ref(0);
 
     const vRecalculate = (): void => {
-      const thumbSizeRate = Math.max(
-        clamp(containerHeight.value / contentHeight.value),
-        0.1
-      );
+      if (contentHeight.value > containerHeight.value) {
+        // it is obvious that contentHeight is greater than 0
+        const thumbSizeRate = clamp(
+          containerHeight.value / contentHeight.value,
+          SCROLLABLE_V_THUMB_SIZE_MAX,
+          SCROLLABLE_V_THUMB_SIZE_MIN
+        );
 
-      const maxRate = 1 - thumbSizeRate;
-      const maxLength = contentHeight.value - containerHeight.value;
+        const maxThumbPositionRate = 1 - thumbSizeRate;
+        const maxScrollValue = contentHeight.value - containerHeight.value;
 
-      if (maxLength > 0) {
         vThumbLength.value = thumbSizeRate * containerHeight.value;
         vThumbPosition.value =
-          clamp(vPosition.value / maxLength) *
-          maxRate *
-          (containerHeight.value - V_TRACK_MARGIN);
+          clamp(vPosition.value / maxScrollValue) *
+          maxThumbPositionRate *
+          (containerHeight.value - SCROLLABLE_V_TRACK_MARGIN);
       } else {
         vThumbLength.value = 0;
         vThumbPosition.value = 0;
@@ -99,7 +104,7 @@ export default defineComponent({
 
       const thumbStartPosition = newPosition - vDragThumbOffset$$q.value;
       const mouseMax =
-        containerHeight.value - V_TRACK_MARGIN - vThumbLength.value;
+        containerHeight.value - SCROLLABLE_V_TRACK_MARGIN - vThumbLength.value;
       const scrollMax = contentHeight.value - containerHeight.value;
       const newScroll = clamp(thumbStartPosition / mouseMax) * scrollMax;
 
