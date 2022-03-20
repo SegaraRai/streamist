@@ -137,7 +137,7 @@ export default defineComponent({
       currentScrollRef$$q: currentScrollRef,
       currentScrollContainerRef$$q: currentScrollContainerRef,
       currentScrollContentRef$$q: currentScrollContentRef,
-      emulateScrollbar$$q: logicNot(display.mobile),
+      emulateScrollbar$$q: display.mdAndUp,
       searchDialog$$q: ref(false),
       uploadDialog$$q: ref(false),
       showPlaying$$q,
