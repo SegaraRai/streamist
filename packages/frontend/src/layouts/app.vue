@@ -239,7 +239,13 @@ export default defineComponent({
       </VNavigationDrawer>
 
       <!-- Header -->
-      <VAppBar flat :border="1" density="compact" class="s-offline-mod-mt">
+      <!-- BUG: border-b class is needed -->
+      <VAppBar
+        flat
+        :border="1"
+        density="compact"
+        class="border-b s-offline-mod-mt"
+      >
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">
             <div class="flex-none">
