@@ -3,6 +3,8 @@ function clamp1(value: number): number {
   return Math.max(Math.min(value, 1), 0);
 }
 
+const V_TRACK_MARGIN = 1;
+
 export default defineComponent({
   props: {
     emulate: Boolean,
@@ -76,7 +78,7 @@ export default defineComponent({
         vThumbPosition.value =
           clamp1(vPosition.value / maxLength) *
           maxRate *
-          (containerHeight.value - 1);
+          (containerHeight.value - V_TRACK_MARGIN);
       } else {
         vThumbLength.value = 0;
         vThumbPosition.value = 0;
@@ -98,7 +100,8 @@ export default defineComponent({
       }
 
       const thumbStartPosition = newPosition - vDragThumbOffset$$q.value;
-      const mouseMax = containerHeight.value - vThumbLength.value;
+      const mouseMax =
+        containerHeight.value - V_TRACK_MARGIN - vThumbLength.value;
       const scrollMax = contentHeight.value - containerHeight.value;
       const newScroll = clamp1(thumbStartPosition / mouseMax) * scrollMax;
 
