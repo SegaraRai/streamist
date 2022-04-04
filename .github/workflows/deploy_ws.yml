@@ -1,5 +1,9 @@
 name: 'Deploy WS'
 
+concurrency:
+  group: deploy_ws-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:

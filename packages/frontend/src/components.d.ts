@@ -23,6 +23,7 @@ declare module 'vue' {
     IMdiPlayCircle: typeof import('~icons/mdi/play-circle')['default']
     IMdiPlaylistMusic: typeof import('~icons/mdi/playlist-music')['default']
     IMdiPlaylistPlay: typeof import('~icons/mdi/playlist-play')['default']
+    IMdiPlus: typeof import('~icons/mdi/plus')['default']
     IMdiPlusCircle: typeof import('~icons/mdi/plus-circle')['default']
     IMdiTabletCellphone: typeof import('~icons/mdi/tablet-cellphone')['default']
     NAutoComplete: typeof import('naive-ui')['NAutoComplete']

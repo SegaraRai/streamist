@@ -1,5 +1,9 @@
 name: 'Test'
 
+concurrency:
+  group: test
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -20,11 +24,10 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
       - name: Setup git username and email
         run: |
           git config --global user.name "github-actions[bot]"
@@ -44,10 +47,18 @@ jobs:
       - run: pnpm run build
         env:
           TARGET_NODE_ENV: production
-      - name: Merge into staging
+      - name: Create pull request
         if: github.ref == 'refs/heads/develop'
         run: |
-          git reset --hard
-          git switch --guess staging
-          git merge '${{ github.ref }}'
-          git push
+          gh pr create -B staging -t "[Staging] Deploy" -b "Commit: $GITHUB_SHA" || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GITHUB_TOKEN does not trigger new workflow run, so we have to use PAT here
+      # https://stackoverflow.com/a/67551255
+      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+      - name: Merge pull request
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          gh pr merge --auto -m
+        env:
+          GITHUB_TOKEN: ${{ secrets.SECRET_GH_PAT }}
