@@ -55,7 +55,7 @@ export default defineComponent({
           :disabled="!canUpload$$q"
           @click="inputFileElement$$q?.click()"
         >
-          <VIcon>mdi-plus</VIcon>
+          <VIcon icon="mdi-plus" />
           <span class="ml-2">Add File</span>
         </VBtn>
         <VBtn
@@ -64,7 +64,7 @@ export default defineComponent({
           :disabled="!uploadStore$$q.canClearAll"
           @click="uploadStore$$q.clearAll()"
         >
-          <VIcon>mdi-close</VIcon>
+          <VIcon icon="mdi-close" />
           <span class="ml-2">Clear All</span>
         </VBtn>
       </div>
@@ -80,7 +80,7 @@ export default defineComponent({
           :disabled="!canUpload$$q || uploadStore$$q.stagedFiles.length === 0"
           @click="uploadStore$$q.startUpload()"
         >
-          <VIcon>mdi-cloud-upload</VIcon>
+          <VIcon icon="mdi-cloud-upload" />
           <span class="ml-2">Start Upload</span>
         </VBtn>
       </div>

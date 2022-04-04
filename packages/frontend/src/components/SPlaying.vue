@@ -220,12 +220,10 @@ export default defineComponent({
             @click="goPrevious$$q"
             @mouseup="blurButton$$q"
           >
-            <VIcon>mdi-skip-previous</VIcon>
+            <VIcon icon="mdi-skip-previous" />
           </VBtn>
           <VBtn class="mx-2" icon @click="play$$q" @mouseup="blurButton$$q">
-            <VIcon>
-              {{ playing$$q ? 'mdi-pause' : 'mdi-play' }}
-            </VIcon>
+            <VIcon :icon="playing$$q ? 'mdi-pause' : 'mdi-play'" />
           </VBtn>
           <VBtn
             flat
@@ -234,7 +232,7 @@ export default defineComponent({
             @click="skipNext$$q"
             @mouseup="blurButton$$q"
           >
-            <VIcon>mdi-skip-next</VIcon>
+            <VIcon icon="mdi-skip-next" />
           </VBtn>
           <div class="flex-1"></div>
           <VBtn

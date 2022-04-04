@@ -73,7 +73,7 @@ export default defineComponent({
             class="max-w-64"
           />
           <VBtn icon size="small" @click="switchTheme$$q()">
-            <VIcon>mdi-invert-colors</VIcon>
+            <i-mdi-invert-colors />
           </VBtn>
         </div>
       </div>

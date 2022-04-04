@@ -212,14 +212,14 @@ export default defineComponent({
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(false)"
       >
-        <VIcon>mdi-play</VIcon>
+        <VIcon icon="mdi-play" />
       </VBtn>
       <VBtn
         outlined
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(true)"
       >
-        <VIcon left>mdi-shuffle</VIcon>
+        <VIcon left icon="mdi-shuffle" />
         <span>
           {{ t('playlist.Shuffle') }}
         </span>
@@ -228,7 +228,7 @@ export default defineComponent({
         class="rounded-full transition-colors"
         @click="openMenu$$q($event.target as HTMLElement)"
       >
-        <VIcon>mdi-dots-vertical</VIcon>
+        <VIcon icon="mdi-dots-vertical" />
       </button>
       <VDivider />
     </div>

@@ -75,7 +75,7 @@ export default defineComponent({
             "
           >
             <VListItemAvatar icon class="flex items-center justify-center px-2">
-              <VIcon>{{ getDeviceIcon$$q(session.info.type) }}</VIcon>
+              <VIcon :icon="getDeviceIcon$$q(session.info.type)" />
             </VListItemAvatar>
             <VListItemHeader class="pl-2">
               <VListItemTitle class="s-heading-sl text-base">

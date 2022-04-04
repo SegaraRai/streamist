@@ -95,7 +95,7 @@ export default defineComponent({
             icon
             @click.stop.prevent="activate$$q()"
           >
-            <VIcon>mdi-fullscreen</VIcon>
+            <VIcon icon="mdi-fullscreen" />
           </VBtn>
         </slot>
       </div>
@@ -127,7 +127,7 @@ export default defineComponent({
             size="x-small"
             @click="modelValue$$q = false"
           >
-            <VIcon>mdi-close</VIcon>
+            <VIcon icon="mdi-close" />
           </VBtn>
         </div>
       </div>
