@@ -20,7 +20,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v2
         with:
@@ -44,10 +45,14 @@ jobs:
       - run: pnpm run build
         env:
           TARGET_NODE_ENV: production
-      - name: Merge into staging
+      # GITHUB_TOKEN does not trigger new workflow run
+      # https://stackoverflow.com/a/67551255
+      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+      # we had to either use PAT or merge manually and chose the latter
+      - name: Create pull request
         if: github.ref == 'refs/heads/develop'
         run: |
-          git reset --hard
-          git switch --guess staging
-          git merge '${{ github.ref }}'
-          git push
+          gh pr create -B staging -t "[Staging] Deploy" -b "Commit: $GITHUB_SHA"
+          # gh pr merge --auto -m
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
