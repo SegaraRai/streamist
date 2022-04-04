@@ -149,45 +149,52 @@ export default defineComponent({
         </VCardTitle>
         <VCardText class="opacity-100">
           <div>
-            <template v-if="value$$q.playlists$$q.length">
-              <VList class="max-h-70 mb-6" flat @contextmenu.prevent>
-                <template v-for="item in value$$q.playlists$$q" :key="item.id">
-                  <VListItem
-                    v-ripple="item.available$$q"
-                    class="flex gap-x-4 s-hover-container rounded-4px cursor-pointer"
-                    :class="item.available$$q ? 'opacity-100' : 'opacity-60'"
-                    :disabled="!item.available$$q"
-                    @click="select$$q(item.item$$q)"
-                  >
-                    <SPlaylistImage
-                      class="flex-none w-9 h-9"
-                      size="36"
-                      :playlist="item.item$$q"
-                    />
-                    <VListItemHeader class="flex-1">
-                      <VListItemTitle class="s-heading-sl">
-                        {{ item.item$$q.title }}
-                      </VListItemTitle>
-                      <VListItemSubtitle class="s-subheading-sl text-xs">
-                        <span>
-                          {{
-                            t(
-                              'playlists.n_tracks',
-                              item.item$$q.trackIds.length
-                            )
-                          }}
-                        </span>
-                      </VListItemSubtitle>
-                    </VListItemHeader>
-                  </VListItem>
-                </template>
-              </VList>
-            </template>
-            <div class="flex justify-end">
-              <VBtn color="primary" variant="outlined" @click="createNew$$q">
-                {{ t('dialogComponent.trackAddToPlaylist.AddToNewPlaylist') }}
-              </VBtn>
-            </div>
+            <VList class="max-h-70 mb-6" flat @contextmenu.prevent>
+              <template v-for="item in value$$q.playlists$$q" :key="item.id">
+                <VListItem
+                  v-ripple="item.available$$q"
+                  class="flex gap-x-4 rounded-4px cursor-pointer"
+                  :class="item.available$$q ? 'opacity-100' : 'opacity-60'"
+                  :disabled="!item.available$$q"
+                  @click="select$$q(item.item$$q)"
+                >
+                  <SPlaylistImage
+                    class="flex-none w-9 h-9"
+                    size="36"
+                    :playlist="item.item$$q"
+                  />
+                  <VListItemHeader class="flex-1">
+                    <VListItemTitle class="s-heading-sl">
+                      {{ item.item$$q.title }}
+                    </VListItemTitle>
+                    <VListItemSubtitle class="s-subheading-sl text-xs">
+                      <span>
+                        {{
+                          t('playlists.n_tracks', item.item$$q.trackIds.length)
+                        }}
+                      </span>
+                    </VListItemSubtitle>
+                  </VListItemHeader>
+                </VListItem>
+              </template>
+              <template v-if="value$$q.playlists$$q.length > 0">
+                <VDivider class="my-4 mx-4" />
+              </template>
+              <VListItem
+                v-ripple
+                class="flex gap-x-4 rounded-4px cursor-pointer opacity-100"
+                @click="createNew$$q"
+              >
+                <i-mdi-plus class="flex-none w-9 h-9" size="36" />
+                <VListItemHeader class="flex-1">
+                  <VListItemTitle class="s-heading-sl">
+                    {{
+                      t('dialogComponent.trackAddToPlaylist.AddToNewPlaylist')
+                    }}
+                  </VListItemTitle>
+                </VListItemHeader>
+              </VListItem>
+            </VList>
           </div>
         </VCardText>
       </VCard>
