@@ -122,11 +122,37 @@ function _usePlaybackStore() {
   useWSListener('connected', (data): void => {
     processingConnectedEvent = true;
     try {
-      remotePlaybackState.value = data.pbState ?? undefined;
-      internalRemoteSeekingPosition.value = undefined;
-      if (data.pbTracks) {
-        trackProvider.import$$q(data.pbTracks);
-        currentSetListName.value = data.pbTracks.setListName;
+      const isHost = !!data.sessions.find((s) => s.you)?.host;
+      if (isHost) {
+        remotePlaybackState.value = undefined;
+        internalRemoteSeekingPosition.value = undefined;
+        sendWS$$q(
+          {
+            type: 'setState',
+            host: true,
+            tracks: {
+              ...trackProvider.export$$q(),
+              setListName: currentSetListName.value,
+            },
+            trackChange: true,
+            state: currentAudio
+              ? {
+                  playing: !currentAudio.paused,
+                  duration: currentAudio.duration,
+                  startPosition: currentAudio.currentTime,
+                  startedAt: getAccurateTime(),
+                }
+              : undefined,
+          },
+          true
+        );
+      } else {
+        remotePlaybackState.value = data.pbState ?? undefined;
+        internalRemoteSeekingPosition.value = undefined;
+        if (data.pbTracks) {
+          trackProvider.import$$q(data.pbTracks);
+          currentSetListName.value = data.pbTracks.setListName;
+        }
       }
     } finally {
       processingConnectedEvent = false;
