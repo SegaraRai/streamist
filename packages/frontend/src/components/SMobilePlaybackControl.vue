@@ -90,7 +90,7 @@ export default defineComponent({
 
 <template>
   <VSheet
-    class="flex-1 w-full h-full flex flex-col m-0 p-0! select-none"
+    class="flex-1 w-full h-full !flex flex-col m-0 p-0 select-none"
     @click="preventXButton$$q"
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"

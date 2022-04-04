@@ -100,7 +100,7 @@ export default defineComponent({
 
 <template>
   <VSheet
-    class="flex-1 w-full flex flex-row px-8 py-0 select-none"
+    class="flex-1 w-full !flex flex-row px-8 py-0 select-none"
     @click="preventXButton$$q"
     @mousedown="preventXButton$$q"
     @mouseup="preventXButton$$q($event), onMouseUp$$q($event)"
