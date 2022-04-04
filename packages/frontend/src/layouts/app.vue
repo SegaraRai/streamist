@@ -212,7 +212,7 @@ export default defineComponent({
         :touchless="leftSidebar$$q && !alwaysShowLeftSidebar$$q"
       >
         <div class="flex flex-col h-full">
-          <VSheet tile>
+          <VSheet>
             <div class="title flex items-center py-1 -mb-1px">
               <i-mdi-playlist-play class="ml-4 mr-2 text-xl" />
               <span class="flex-1">{{ t('queue.title') }}</span>
@@ -386,7 +386,10 @@ export default defineComponent({
       @contextmenu.prevent
     >
       <!-- we must provide theme explicitly as this is outside of VApp -->
-      <VSheet class="m-0 p-0 w-full h-full flex flex-col" :theme="themeName$$q">
+      <VSheet
+        class="m-0 p-0 w-full h-full !flex flex-col"
+        :theme="themeName$$q"
+      >
         <VDivider />
         <template v-if="desktopPlaybackControl$$q">
           <SPlaybackControl />
