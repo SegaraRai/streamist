@@ -43,14 +43,18 @@ jobs:
       - run: pnpm run build
         env:
           TARGET_NODE_ENV: production
-      # GITHUB_TOKEN does not trigger new workflow run
-      # https://stackoverflow.com/a/67551255
-      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
-      # we had to either use PAT or merge manually and chose the latter
       - name: Create pull request
         if: github.ref == 'refs/heads/develop'
         run: |
           gh pr create -B staging -t "[Staging] Deploy" -b "Commit: $GITHUB_SHA" || true
-          # gh pr merge --auto -m
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # GITHUB_TOKEN does not trigger new workflow run, so we have to use PAT here
+      # https://stackoverflow.com/a/67551255
+      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
+      - name: Merge pull request
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          gh pr merge --auto -m
+        env:
+          GITHUB_TOKEN: ${{ secrets.SECRET_GH_PAT }}
