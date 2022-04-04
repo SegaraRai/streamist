@@ -46,7 +46,7 @@ jobs:
       - name: Create pull request
         if: github.ref == 'refs/heads/develop'
         run: |
-          gh pr create -B staging -t "[Staging] Deploy" -b "Commit: ${{ context.payload.after }}"
+          gh pr create -B staging -t "[Staging] Deploy" -b "Commit: $GITHUB_SHA"
           gh pr merge  --auto -m
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
