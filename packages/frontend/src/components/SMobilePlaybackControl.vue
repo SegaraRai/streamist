@@ -119,9 +119,7 @@ export default defineComponent({
         <SSessionManager />
         <!-- TODO: implement vertical volume control -->
         <VBtn flat icon @click="play$$q">
-          <VIcon>
-            {{ playing$$q ? 'mdi-pause' : 'mdi-play' }}
-          </VIcon>
+          <VIcon :icon="playing$$q ? 'mdi-pause' : 'mdi-play'" />
         </VBtn>
       </div>
     </div>

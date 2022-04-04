@@ -217,7 +217,7 @@ export default defineComponent({
               <i-mdi-playlist-play class="ml-4 mr-2 text-xl" />
               <span class="flex-1">{{ t('queue.title') }}</span>
               <VBtn flat icon size="small" @click="rightSidebar$$q = false">
-                <VIcon>mdi-chevron-right</VIcon>
+                <VIcon icon="mdi-chevron-right" />
               </VBtn>
             </div>
             <VDivider />
@@ -251,7 +251,7 @@ export default defineComponent({
             <div class="flex-none">
               <template v-if="showPlaying$$q">
                 <VBtn flat icon text size="small" @click="router$$q.back()">
-                  <VIcon>mdi-chevron-down</VIcon>
+                  <VIcon icon="mdi-chevron-down" />
                 </VBtn>
               </template>
               <template v-else>
@@ -262,7 +262,7 @@ export default defineComponent({
                   size="small"
                   @click="leftSidebar$$q = !leftSidebar$$q"
                 >
-                  <VIcon>mdi-menu</VIcon>
+                  <VIcon icon="mdi-menu" />
                 </VBtn>
               </template>
             </div>
@@ -306,7 +306,7 @@ export default defineComponent({
               size="small"
               @click="searchDialog$$q = true"
             >
-              <VIcon>mdi-magnify</VIcon>
+              <VIcon icon="mdi-magnify" />
             </VBtn>
             <VBtn icon size="small" @click="uploadDialog$$q = true">
               <NBadge
@@ -318,7 +318,7 @@ export default defineComponent({
               </NBadge>
             </VBtn>
             <VBtn icon size="small" @click="rightSidebar$$q = true">
-              <VIcon>mdi-playlist-play</VIcon>
+              <VIcon icon="mdi-playlist-play" />
             </VBtn>
           </div>
         </div>

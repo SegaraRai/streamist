@@ -434,7 +434,7 @@ export default defineComponent({
           </template>
           <template v-if="!hideDuration">
             <div class="s-track-list-column-duration !<sm:hidden">
-              <VIcon>mdi-clock-outline</VIcon>
+              <VIcon icon="mdi-clock-outline" />
             </div>
           </template>
           <template v-if="removable">

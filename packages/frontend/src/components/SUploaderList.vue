@@ -158,7 +158,7 @@ export default defineComponent({
                       class="s-hover-visible text-st-error"
                       @click="uploadStore$$q.removeFile(file.id)"
                     >
-                      <VIcon>mdi-delete</VIcon>
+                      <VIcon icon="mdi-delete" />
                     </VBtn>
                     <VProgressCircular
                       class="s-hover-hidden"
@@ -189,7 +189,7 @@ export default defineComponent({
                             @dragstart.stop.prevent
                           >
                             <VBtn flat icon size="small" class="text-st-error">
-                              <VIcon>mdi-cancel</VIcon>
+                              <VIcon icon="mdi-cancel" />
                             </VBtn>
                           </NButton>
                         </template>

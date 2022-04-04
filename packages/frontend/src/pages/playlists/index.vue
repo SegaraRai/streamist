@@ -106,7 +106,7 @@ export default defineComponent({
     </header>
     <div class="mb-6 flex items-center gap-x-8">
       <VBtn color="primary" flat icon @click="showCreateDialog$$q = true">
-        <VIcon>mdi-plus</VIcon>
+        <VIcon icon="mdi-plus" />
       </VBtn>
       <VDivider />
     </div>

@@ -140,7 +140,7 @@ export default defineComponent({
             class="text-st-error"
             @click="dialog$$q = false"
           >
-            <VIcon>mdi-close</VIcon>
+            <VIcon icon="mdi-close" />
           </VBtn>
         </div>
       </VCardTitle>

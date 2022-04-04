@@ -288,7 +288,7 @@ export default defineComponent({
               class="text-st-error"
               @click="dialog$$q = false"
             >
-              <VIcon>mdi-close</VIcon>
+              <VIcon icon="mdi-close" />
             </VBtn>
           </div>
         </VCardTitle>
@@ -356,7 +356,7 @@ export default defineComponent({
                                 size="small"
                                 class="text-st-error"
                               >
-                                <VIcon>mdi-delete</VIcon>
+                                <VIcon icon="mdi-delete" />
                               </VBtn>
                             </NButton>
                           </template>

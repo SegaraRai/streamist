@@ -35,7 +35,7 @@ export default defineComponent({
       icon
       class="flex-none flex items-center justify-center opacity-60"
     >
-      <VIcon>mdi-history</VIcon>
+      <VIcon icon="mdi-history" />
     </VListItemAvatar>
     <VListItemHeader class="pl-2">
       <VListItemTitle class="s-heading-sl text-sm">

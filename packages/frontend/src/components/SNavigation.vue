@@ -74,7 +74,7 @@ export default defineComponent({
       <template v-if="item.type === 'link'">
         <VListItem link :to="item.path" :_="(_index || undefined) && undefined">
           <VListItemAvatar icon class="flex items-center justify-center">
-            <VIcon>{{ item.icon }}</VIcon>
+            <VIcon :icon="item.icon" />
           </VListItemAvatar>
           <VListItemHeader class="pl-2">
             <VListItemTitle class="s-heading-sl text-sm">

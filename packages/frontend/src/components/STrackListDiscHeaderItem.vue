@@ -24,7 +24,7 @@ export default defineComponent({
 
 <template>
   <div class="w-full h-8 flex items-center gap-x-1 px-1">
-    <VIcon>mdi-disc</VIcon>
+    <VIcon icon="mdi-disc" />
     <span class="s-numeric font-medium">{{ item.discNumber$$q }}</span>
   </div>
 </template>

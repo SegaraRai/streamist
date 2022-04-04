@@ -63,7 +63,7 @@ export default defineComponent({
 <template>
   <div class="flex flex-row items-center h-6">
     <button class="flex-none p-0 m-0 transition-colors" @click="toggleMute$$q">
-      <VIcon>{{ icon$$q }}</VIcon>
+      <VIcon :icon="icon$$q" />
     </button>
     <div class="ml-2 flex-1">
       <SSlider
