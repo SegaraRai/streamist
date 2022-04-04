@@ -413,16 +413,12 @@ function _usePlaybackStore() {
       const audio = getAudio();
       const byRemote = processingConnectedEvent || processingUpdatedEvent;
 
-      console.log('playing set', value, byRemote, audio);
-
       const currentValue = playing.value;
       if (value === currentValue) {
-        console.log('nothing changed');
         return;
       }
 
       if (value && !currentTrackId.value) {
-        console.log('do playNext');
         playNext();
         return;
       }
@@ -949,8 +945,6 @@ function _usePlaybackStore() {
           console.warn('another audio is already playing');
           return;
         }
-
-        console.log(sessionType$$q.value, byRemote);
 
         if (
           sessionType$$q.value === 'host' ||
