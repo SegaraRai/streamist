@@ -20,7 +20,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     steps:
       - uses: actions/checkout@v2
@@ -47,6 +47,6 @@ jobs:
         if: github.ref == 'refs/heads/develop'
         run: |
           gh pr create -B staging -t "[Staging] Deploy" -b "Commit: $GITHUB_SHA"
-          gh pr merge  --auto -m
+          gh pr merge --auto -m
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
