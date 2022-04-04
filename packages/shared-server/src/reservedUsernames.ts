@@ -2,8 +2,10 @@
 
 const RESERVED_USERNAME_PARTIALS = ['admin', 'streamist'] as const;
 
-// https://github.com/shouldbee/reserved-usernames
 const RESERVED_USERNAME_SET: ReadonlySet<string> = new Set([
+  'cdn-cgi',
+
+  // https://github.com/shouldbee/reserved-usernames
   '0',
   '100',
   '101',
