@@ -296,6 +296,7 @@ export default defineComponent({
           flat
           text
           color="primary"
+          variant="contained"
           :disabled="!isValid$$q"
           @click="register$$q"
         >

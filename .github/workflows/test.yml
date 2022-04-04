@@ -20,9 +20,15 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     permissions:
-      contents: 'read'
+      contents: write
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Setup git username and email
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - uses: pnpm/action-setup@v2.0.1
         with:
           version: 6
@@ -38,3 +44,10 @@ jobs:
       - run: pnpm run build
         env:
           TARGET_NODE_ENV: production
+      - name: Merge into staging
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          git reset --hard
+          git switch --guess staging
+          git merge '${{ github.ref }}'
+          git push

@@ -42,7 +42,7 @@ export default defineComponent({
 <template>
   <VListItem>
     <VListItemAvatar icon class="flex-none flex items-center justify-center">
-      <VIcon>{{ typeToFileIcon$$q[fileType || 'unknown'] }}</VIcon>
+      <VIcon :icon="typeToFileIcon$$q[fileType || 'unknown']" />
     </VListItemAvatar>
     <VListItemHeader class="px-2">
       <VListItemTitle class="flex-1 flex items-center">

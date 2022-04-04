@@ -114,7 +114,7 @@ export default defineComponent({
       </VCardText>
       <VCardActions>
         <VSpacer />
-        <VBtn flat text color="transparent" @click="login$$q">
+        <VBtn flat text color="primary" @click="login$$q">
           <span :class="requestInProgress$$q && 'invisible'">
             {{ t('signIn.button.SignIn') }}
           </span>

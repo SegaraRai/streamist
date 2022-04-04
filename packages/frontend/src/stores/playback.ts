@@ -122,11 +122,37 @@ function _usePlaybackStore() {
   useWSListener('connected', (data): void => {
     processingConnectedEvent = true;
     try {
-      remotePlaybackState.value = data.pbState ?? undefined;
-      internalRemoteSeekingPosition.value = undefined;
-      if (data.pbTracks) {
-        trackProvider.import$$q(data.pbTracks);
-        currentSetListName.value = data.pbTracks.setListName;
+      const isHost = !!data.sessions.find((s) => s.you)?.host;
+      if (isHost) {
+        remotePlaybackState.value = undefined;
+        internalRemoteSeekingPosition.value = undefined;
+        sendWS$$q(
+          {
+            type: 'setState',
+            host: true,
+            tracks: {
+              ...trackProvider.export$$q(),
+              setListName: currentSetListName.value,
+            },
+            trackChange: true,
+            state: currentAudio
+              ? {
+                  playing: !currentAudio.paused,
+                  duration: currentAudio.duration,
+                  startPosition: currentAudio.currentTime,
+                  startedAt: getAccurateTime(),
+                }
+              : undefined,
+          },
+          true
+        );
+      } else {
+        remotePlaybackState.value = data.pbState ?? undefined;
+        internalRemoteSeekingPosition.value = undefined;
+        if (data.pbTracks) {
+          trackProvider.import$$q(data.pbTracks);
+          currentSetListName.value = data.pbTracks.setListName;
+        }
       }
     } finally {
       processingConnectedEvent = false;
@@ -387,16 +413,12 @@ function _usePlaybackStore() {
       const audio = getAudio();
       const byRemote = processingConnectedEvent || processingUpdatedEvent;
 
-      console.log('playing set', value, byRemote, audio);
-
       const currentValue = playing.value;
       if (value === currentValue) {
-        console.log('nothing changed');
         return;
       }
 
       if (value && !currentTrackId.value) {
-        console.log('do playNext');
         playNext();
         return;
       }
@@ -923,8 +945,6 @@ function _usePlaybackStore() {
           console.warn('another audio is already playing');
           return;
         }
-
-        console.log(sessionType$$q.value, byRemote);
 
         if (
           sessionType$$q.value === 'host' ||

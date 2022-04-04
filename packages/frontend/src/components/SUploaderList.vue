@@ -88,37 +88,36 @@ export default defineComponent({
       v-for="(file, _index) in uploadStore$$q.stagedFiles"
       :key="_index"
     >
-      <SUploaderListItem
-        :_="(_index || undefined) && undefined"
-        :filename="file.file.name"
-        :filesize="file.file.size"
-        :file-type="file.type"
-        class="s-hover-container text-st-primary"
-      >
-        <div class="w-10 flex items-center justify-center">
-          <NPopover placement="right" trigger="hover">
-            <template #trigger>
-              <div>
-                <VBtn
-                  flat
-                  icon
-                  size="small"
-                  class="s-hover-visible text-st-error"
-                  @click="uploadStore$$q.removeStagingFile(file.id)"
-                >
-                  <VIcon>mdi-delete</VIcon>
-                </VBtn>
+      <VTooltip right>
+        <template #activator="{ props }">
+          <SUploaderListItem
+            v-bind="props"
+            :_="(_index || undefined) && undefined"
+            :filename="file.file.name"
+            :filesize="file.file.size"
+            :file-type="file.type"
+            class="s-hover-container text-st-primary"
+          >
+            <div class="w-10 flex items-center justify-center">
+              <VBtn
+                flat
+                icon
+                size="small"
+                class="text-st-error"
+                @click="uploadStore$$q.removeStagingFile(file.id)"
+              >
+                <VIcon class="s-hover-visible">mdi-delete</VIcon>
                 <template v-if="file.type === 'unknown'">
-                  <VIcon class="s-hover-hidden text-st-error"
-                    >mdi-alert-circle</VIcon
-                  >
+                  <VIcon class="s-hover-hidden text-st-error">
+                    mdi-alert-circle
+                  </VIcon>
                 </template>
-              </div>
-            </template>
-            <div>{{ getStagedFileTooltipText$$q(file) }}</div>
-          </NPopover>
-        </div>
-      </SUploaderListItem>
+              </VBtn>
+            </div>
+          </SUploaderListItem>
+        </template>
+        <div>{{ getStagedFileTooltipText$$q(file) }}</div>
+      </VTooltip>
       <template v-if="file.type === 'audioWithCueSheet'">
         <SUploaderListItem
           class="ml-6 text-st-primary"
@@ -132,16 +131,17 @@ export default defineComponent({
     </template>
     <template v-for="(file, _index) in uploadStore$$q.files" :key="_index">
       <template v-if="file.status !== 'removed'">
-        <SUploaderListItem
-          :_="(_index || undefined) && undefined"
-          :filename="file.filename"
-          :filesize="file.fileSize"
-          :file-type="file.fileType"
-          class="s-hover-container"
-        >
-          <div class="w-10 flex items-center justify-center">
-            <NPopover placement="right" trigger="hover">
-              <template #trigger>
+        <VTooltip right>
+          <template #activator="{ props }">
+            <SUploaderListItem
+              v-bind="props"
+              :_="(_index || undefined) && undefined"
+              :filename="file.filename"
+              :filesize="file.fileSize"
+              :file-type="file.fileType"
+              class="s-hover-container"
+            >
+              <div class="w-10 flex items-center justify-center">
                 <div>
                   <template
                     v-if="
@@ -158,7 +158,7 @@ export default defineComponent({
                       class="s-hover-visible text-st-error"
                       @click="uploadStore$$q.removeFile(file.id)"
                     >
-                      <VIcon>mdi-delete</VIcon>
+                      <VIcon icon="mdi-delete" />
                     </VBtn>
                     <VProgressCircular
                       class="s-hover-hidden"
@@ -189,7 +189,7 @@ export default defineComponent({
                             @dragstart.stop.prevent
                           >
                             <VBtn flat icon size="small" class="text-st-error">
-                              <VIcon>mdi-cancel</VIcon>
+                              <VIcon icon="mdi-cancel" />
                             </VBtn>
                           </NButton>
                         </template>
@@ -234,28 +234,29 @@ export default defineComponent({
                       flat
                       icon
                       size="small"
-                      class="s-hover-visible text-st-success"
                       @click="uploadStore$$q.removeFile(file.id)"
                     >
-                      <VIcon>mdi-check</VIcon>
+                      <VIcon class="s-hover-visible text-st-success">
+                        mdi-check
+                      </VIcon>
+                      <template v-if="file.status === 'transcoded'">
+                        <VIcon class="s-hover-hidden text-st-success">
+                          mdi-check-circle
+                        </VIcon>
+                      </template>
+                      <template v-else>
+                        <VIcon class="s-hover-hidden text-st-error">
+                          mdi-alert-circle
+                        </VIcon>
+                      </template>
                     </VBtn>
-                    <template v-if="file.status === 'transcoded'">
-                      <VIcon class="s-hover-hidden text-st-success">
-                        mdi-check-circle
-                      </VIcon>
-                    </template>
-                    <template v-else>
-                      <VIcon class="s-hover-hidden text-st-error">
-                        mdi-alert-circle
-                      </VIcon>
-                    </template>
                   </template>
                 </div>
-              </template>
-              <div>{{ getFileTooltipText$$q(file) }}</div>
-            </NPopover>
-          </div>
-        </SUploaderListItem>
+              </div>
+            </SUploaderListItem>
+          </template>
+          <div>{{ getFileTooltipText$$q(file) }}</div>
+        </VTooltip>
       </template>
     </template>
   </VList>

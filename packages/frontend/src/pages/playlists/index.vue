@@ -106,7 +106,7 @@ export default defineComponent({
     </header>
     <div class="mb-6 flex items-center gap-x-8">
       <VBtn color="primary" flat icon @click="showCreateDialog$$q = true">
-        <VIcon>mdi-plus</VIcon>
+        <i-mdi-plus />
       </VBtn>
       <VDivider />
     </div>
@@ -157,7 +157,7 @@ export default defineComponent({
                   class="bg-transparent"
                   @click.prevent.stop="showMenu$$q($event.target as HTMLElement, item)"
                 >
-                  <VIcon class="s-hover-visible">mdi-dots-vertical</VIcon>
+                  <i-mdi-dots-vertical class="s-hover-visible" />
                 </VBtn>
               </VListItem>
             </template>

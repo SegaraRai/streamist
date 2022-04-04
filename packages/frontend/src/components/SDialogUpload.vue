@@ -36,7 +36,7 @@ export default defineComponent({
             class="text-st-error"
             @click="show$$q = false"
           >
-            <VIcon>mdi-close</VIcon>
+            <VIcon icon="mdi-close" />
           </VBtn>
         </div>
       </VCardTitle>

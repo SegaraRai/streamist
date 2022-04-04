@@ -9,13 +9,13 @@
   },
   "dependencies": {
     "dotenv": "^16.0.0",
-    "minimist": "^1.2.5"
+    "minimist": "^1.2.6"
   },
   "devDependencies": {
     "@esbuild-plugins/node-resolve": "^0.1.4",
     "@types/minimist": "^1.2.2",
     "@types/node": "^16.11.26",
-    "esbuild": "^0.14.27",
+    "esbuild": "^0.14.31",
     "esbuild-node-externals": "^1.4.1"
   }
 }
