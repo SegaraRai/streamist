@@ -1,5 +1,9 @@
 name: 'Deploy Server'
 
+concurrency:
+  group: deploy_server-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:

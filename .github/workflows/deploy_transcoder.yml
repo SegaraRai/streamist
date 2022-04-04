@@ -1,5 +1,9 @@
 name: 'Deploy Transcoder'
 
+concurrency:
+  group: deploy_transcoder-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:

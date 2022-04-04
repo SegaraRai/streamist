@@ -1,5 +1,9 @@
 name: 'Test'
 
+concurrency:
+  group: test
+  cancel-in-progress: true
+
 on:
   push:
     branches:
