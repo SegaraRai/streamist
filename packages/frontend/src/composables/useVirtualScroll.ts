@@ -20,7 +20,7 @@ export type UseVirtualScrollListItem<T> = {
 };
 
 export function useVirtualScrollList<T>(
-  list: Ref<T[]>,
+  list: Readonly<Ref<T[]>>,
   {
     disabled,
     itemHeightRef,
@@ -93,7 +93,7 @@ export function useVirtualScrollList<T>(
     return source.value.length;
   };
 
-  const calculateRange = (): void => {
+  const calculateRange = (forceUpdate = false): void => {
     if (disabled?.value) {
       return;
     }
@@ -132,16 +132,21 @@ export function useVirtualScrollList<T>(
 
     // console.log(viewCapacity, offset, from, to, newStart, newEnd);
 
-    if (state.value.start !== newStart || state.value.end !== newEnd) {
+    if (
+      forceUpdate ||
+      newStart !== state.value.start ||
+      newEnd !== state.value.end
+    ) {
       state.value = {
         start: newStart,
         end: newEnd,
       };
+
       currentList.value = source.value
-        .slice(state.value.start, state.value.end)
+        .slice(newStart, newEnd)
         .map((ele, index) => ({
           data: ele,
-          index: index + state.value.start,
+          index: index + newStart,
         }));
     }
   };
@@ -150,16 +155,19 @@ export function useVirtualScrollList<T>(
     [
       size.width,
       size.height,
-      list,
       containerElementRef,
       contentElementRef,
       listElementRef,
       itemHeightRef || ref(0),
     ],
-    () => {
+    (): void => {
       calculateRange();
     }
   );
+
+  watch(source, (): void => {
+    calculateRange(true);
+  });
 
   useEventListener(
     containerElementRef,
@@ -183,7 +191,7 @@ export function useVirtualScrollList<T>(
     );
   });
 
-  const getDistanceTop = (index: number) => {
+  const getDistanceTop = (index: number): number => {
     if (disabled?.value) {
       return 0;
     }
