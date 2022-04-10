@@ -133,11 +133,11 @@ function parseDiscAndTrackNumberEx(
     return value;
   };
 
-  const basename = getStem(filename);
+  const basename = getStem(filename).trim();
 
   if (hasCueSheet) {
     // eg. 'Disc2', 'ABCD-1234-2', 'ABCD-1234' (not valid)
-    const match = basename.match(/(\d+)\s*$/);
+    const match = basename.match(/(\d+)$/);
     if (match) {
       const newDiscNumber = parseDiscNumber(match[1]);
       if (
@@ -150,7 +150,7 @@ function parseDiscAndTrackNumberEx(
     }
   } else {
     // eg. '2.03 Track Title', '03. Track Title', '03 Track Title'
-    const match = basename.match(/^\s*(?:(\d+)[\s.-]+)?(\d+)$/);
+    const match = basename.match(/^(?:(\d+)[\s._-]+)?(\d+)/);
     if (match) {
       const newDiscNumber = match[1] ? parseDiscNumber(match[1]) : undefined;
       const newTrackNumber = parseTrackNumber(match[2]);
