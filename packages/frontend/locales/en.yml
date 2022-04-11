@@ -158,22 +158,22 @@ trackList:
   Album: Album
   Title: Title
 title:
-  Home: 'Streamist'
-  SignIn: "Sign in {'|'} Streamist"
-  SignUp: "Sign up {'|'} Streamist"
-  Albums: "Albums {'|'} Streamist"
-  Album: "{0} by {1} {'|'} Streamist"
-  AlbumInit: "Album {'|'} Streamist"
-  Artists: "Artists {'|'} Streamist"
-  Artist: "{0} {'|'} Streamist"
-  ArtistInit: "Artist {'|'} Streamist"
-  Tracks: "Tracks {'|'} Streamist"
-  Playlists: "Playlists {'|'} Streamist"
-  Playlist: "{0} {'|'} Streamist"
-  PlaylistInit: "Playlist {'|'} Streamist"
+  Home: Streamist
+  SignIn: Sign in
+  SignUp: Sign up
+  Albums: Albums
+  Album: '{0} · {1}'
+  AlbumInit: Album
+  Artists: Artists
+  Artist: '{0}'
+  ArtistInit: Artist
+  Tracks: Tracks
+  Playlists: Playlists
+  Playlist: '{0}'
+  PlaylistInit: Playlist
   Playing:
-    track: "{0} by {1} {'|'} Streamist"
-    no_track: 'Streamist'
+    track: '{0} · {1}'
+    no_track: Streamist
 coArtist:
   role:
     '#artist': Artist

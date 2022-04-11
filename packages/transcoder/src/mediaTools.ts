@@ -234,6 +234,9 @@ export async function probeImage(
     imageMagickFile,
     [
       'convert',
+      // EXIFの回転情報を元に回転する
+      // ここでは+repageは要らなそう（指定すると何故か-stripが効かなくなるので付けられない）
+      '-auto-orient',
       // JSONパースのときに（特にコメント等が文字コードの関係で）邪魔になる可能性があるのでメタデータは削除
       '-strip',
       // 入力ファイル

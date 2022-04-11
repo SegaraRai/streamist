@@ -158,22 +158,22 @@ trackList:
   Album: アルバム
   Title: タイトル
 title:
-  Home: 'Streamist'
-  SignIn: "ログイン {'|'} Streamist"
-  SignUp: "登録 {'|'} Streamist"
-  Albums: "アルバム {'|'} Streamist"
-  Album: "{1} の {0} {'|'} Streamist"
-  AlbumInit: "アルバム {'|'} Streamist"
-  Artists: "アーティスト {'|'} Streamist"
-  Artist: "{0} {'|'} Streamist"
-  ArtistInit: "アーティスト {'|'} Streamist"
-  Tracks: "トラック {'|'} Streamist"
-  Playlists: "プレイリスト {'|'} Streamist"
-  Playlist: "{0} {'|'} Streamist"
-  PlaylistInit: "プレイリスト {'|'} Streamist"
+  Home: Streamist
+  SignIn: ログイン
+  SignUp: 登録
+  Albums: アルバム
+  Album: '{0} · {1}'
+  AlbumInit: アルバム
+  Artists: アーティスト
+  Artist: '{0}'
+  ArtistInit: アーティスト
+  Tracks: トラック
+  Playlists: プレイリスト
+  Playlist: '{0}'
+  PlaylistInit: プレイリスト
   Playing:
-    track: "{0} by {1} {'|'} Streamist"
-    no_track: 'Streamist'
+    track: '{0} · {1}'
+    no_track: Streamist
 coArtist:
   role:
     '#artist': アーティスト
