@@ -50,7 +50,7 @@ export function parseDiscAndTrackNumberEx(
       return null;
     }
     const value = parseInt(strValue, 10);
-    if (!isFinite(value) || value < 1 || value > 99) {
+    if (!isFinite(value) || value < 1 || value > 9) {
       return null;
     }
     return value;
