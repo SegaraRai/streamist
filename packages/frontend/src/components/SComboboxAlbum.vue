@@ -31,6 +31,7 @@ export default defineComponent({
     const searchAlbums = useAlbumSearch();
     const modelValue$$q = useVModel(props, 'modelValue', emit);
     const albumId$$q = useVModel(props, 'albumId', emit);
+    const selectedAlbumLabel$$q = ref<string | undefined>();
 
     const albums$$q = searchAlbums(modelValue$$q);
 
@@ -50,19 +51,34 @@ export default defineComponent({
       }
     );
 
+    const options$$q = computed(
+      () =>
+        albums$$q.value.map(({ item }) => ({
+          label: item.title,
+          value: item.id,
+        })) || []
+    );
+
     return {
       t,
-      options$$q: computed(
-        () =>
-          albums$$q.value.map(({ item }) => ({
-            label: item.title,
-            value: item.id,
-          })) || []
-      ),
+      options$$q,
       modelValue$$q,
       albumId$$q,
       onSelected$$q: (albumId: string | number): void => {
+        // NOTE: label will not be undefined
+        const label = options$$q.value.find(
+          (option) => option.value === albumId
+        )?.label;
+        if (label != null) {
+          selectedAlbumLabel$$q.value = label;
+        }
         albumId$$q.value = albumId as string;
+      },
+      onUpdated$$q: (value: string): void => {
+        if (value !== selectedAlbumLabel$$q.value) {
+          albumId$$q.value = undefined;
+          selectedAlbumLabel$$q.value = undefined;
+        }
       },
     };
   },
@@ -76,7 +92,7 @@ export default defineComponent({
       class="flex-1"
       :options="options$$q"
       @select="onSelected$$q"
-      @update-value="albumId$$q = undefined"
+      @update-value="onUpdated$$q"
     >
       <template #default="{ handleInput }">
         <VTextField
