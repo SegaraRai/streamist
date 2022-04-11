@@ -27,6 +27,7 @@ export default defineComponent({
     const searchArtists = useArtistSearch();
     const modelValue$$q = useVModel(props, 'modelValue', emit);
     const artistId$$q = useVModel(props, 'artistId', emit);
+    const selectedArtistLabel$$q = ref<string | undefined>();
 
     const artists$$q = searchArtists(modelValue$$q);
 
@@ -46,19 +47,34 @@ export default defineComponent({
       }
     );
 
+    const options$$q = computed(
+      () =>
+        artists$$q.value.map(({ item }) => ({
+          label: item.name,
+          value: item.id,
+        })) || []
+    );
+
     return {
       t,
-      options$$q: computed(
-        () =>
-          artists$$q.value.map(({ item }) => ({
-            label: item.name,
-            value: item.id,
-          })) || []
-      ),
+      options$$q,
       modelValue$$q,
       artistId$$q,
       onSelected$$q: (artistId: string | number): void => {
+        // NOTE: label will not be undefined
+        const label = options$$q.value.find(
+          (option) => option.value === artistId
+        )?.label;
+        if (label != null) {
+          selectedArtistLabel$$q.value = label;
+        }
         artistId$$q.value = artistId as string;
+      },
+      onUpdated$$q: (value: string): void => {
+        if (value !== selectedArtistLabel$$q.value) {
+          artistId$$q.value = undefined;
+          selectedArtistLabel$$q.value = undefined;
+        }
       },
     };
   },
@@ -72,7 +88,7 @@ export default defineComponent({
       class="flex-1"
       :options="options$$q"
       @select="onSelected$$q"
-      @update-value="artistId$$q = undefined"
+      @update-value="onUpdated$$q"
     >
       <template #default="{ handleInput }">
         <VTextField
