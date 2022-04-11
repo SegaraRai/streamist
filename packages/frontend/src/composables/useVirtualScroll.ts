@@ -26,15 +26,24 @@ export function useVirtualScrollList<T>(
     itemHeightRef,
     itemHeightFunc,
     additionalHeight,
-    overscan = 5,
-    blockSize = 10,
+    overscan = 2,
+    blockSize = 4,
     containerElementRef,
     contentElementRef,
   }: UseVirtualScrollListOptions
 ) {
   const listElementRef = ref<HTMLElement | null>();
 
-  const size = useElementSize(containerElementRef);
+  const containerSize = useElementSize(containerElementRef);
+  const contentBBox = useElementBounding(contentElementRef, {
+    windowScroll: false,
+  });
+  const listBBox = useElementBounding(listElementRef, {
+    windowScroll: false,
+  });
+  const containerScrollTop = ref(0);
+
+  watch([contentBBox.top, contentBBox.height], listBBox.update);
 
   const currentList: Ref<UseVirtualScrollListItem<T>[]> = ref([]);
   const shallowList = shallowRef(list);
@@ -94,24 +103,24 @@ export function useVirtualScrollList<T>(
   };
 
   const calculateRange = (forceUpdate = false): void => {
+    // console.time('calculateRange');
+
     if (disabled?.value) {
       return;
     }
 
-    const listElement = listElementRef.value;
-    const containerElement = containerElementRef.value;
-    const contentElement = contentElementRef.value;
-
-    if (!listElement || !containerElement || !contentElement) {
+    if (
+      !listElementRef.value ||
+      !containerElementRef.value ||
+      !contentElementRef.value
+    ) {
       console.error('some of elements are not defined', list.value);
       return;
     }
 
-    const listOffsetTop =
-      listElement.getBoundingClientRect().top -
-      contentElement.getBoundingClientRect().top;
-    const listScrollTop = containerElement.scrollTop - listOffsetTop;
-    const viewHeight = containerElement.clientHeight;
+    const listOffsetTop = listBBox.top.value - contentBBox.top.value;
+    const listScrollTop = containerScrollTop.value - listOffsetTop;
+    const viewHeight = containerSize.height.value;
 
     const offset = Math.floor(getOffset(listScrollTop) / blockSize) * blockSize;
     const viewCapacity =
@@ -119,7 +128,9 @@ export function useVirtualScrollList<T>(
         getViewCapacity(
           Math.min(viewHeight + listScrollTop, viewHeight),
           offset
-        ) / blockSize
+        ) /
+          blockSize +
+          1
       ) * blockSize;
 
     // console.log(listOffsetTop, listScrollTop, viewHeight, offset, viewCapacity);
@@ -149,12 +160,14 @@ export function useVirtualScrollList<T>(
           index: index + newStart,
         }));
     }
+
+    // console.timeEnd('calculateRange');
   };
 
   watch(
     [
-      size.width,
-      size.height,
+      containerSize.width,
+      containerSize.height,
       containerElementRef,
       contentElementRef,
       listElementRef,
@@ -173,6 +186,11 @@ export function useVirtualScrollList<T>(
     containerElementRef,
     'scroll',
     () => {
+      if (!containerElementRef.value) {
+        return;
+      }
+
+      containerScrollTop.value = containerElementRef.value.scrollTop;
       calculateRange();
     },
     { passive: true }
