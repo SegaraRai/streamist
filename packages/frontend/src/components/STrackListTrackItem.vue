@@ -208,7 +208,7 @@ export default defineComponent({
             </div>
           </template>
           <template v-else-if="indexContent === 'albumArtwork'">
-            <div class="w-9 h-9 s-lazyload-background m-auto"></div>
+            <div class="w-9 h-9 bg-[#ddd] m-auto"></div>
           </template>
         </template>
       </div>

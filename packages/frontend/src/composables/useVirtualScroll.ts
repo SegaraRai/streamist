@@ -20,21 +20,30 @@ export type UseVirtualScrollListItem<T> = {
 };
 
 export function useVirtualScrollList<T>(
-  list: Ref<T[]>,
+  list: Readonly<Ref<T[]>>,
   {
     disabled,
     itemHeightRef,
     itemHeightFunc,
     additionalHeight,
-    overscan = 5,
-    blockSize = 10,
+    overscan = 2,
+    blockSize = 4,
     containerElementRef,
     contentElementRef,
   }: UseVirtualScrollListOptions
 ) {
   const listElementRef = ref<HTMLElement | null>();
 
-  const size = useElementSize(containerElementRef);
+  const containerSize = useElementSize(containerElementRef);
+  const contentBBox = useElementBounding(contentElementRef, {
+    windowScroll: false,
+  });
+  const listBBox = useElementBounding(listElementRef, {
+    windowScroll: false,
+  });
+  const containerScrollTop = ref(0);
+
+  watch([contentBBox.top, contentBBox.height], listBBox.update);
 
   const currentList: Ref<UseVirtualScrollListItem<T>[]> = ref([]);
   const shallowList = shallowRef(list);
@@ -93,25 +102,25 @@ export function useVirtualScrollList<T>(
     return source.value.length;
   };
 
-  const calculateRange = (): void => {
+  const calculateRange = (forceUpdate = false): void => {
+    // console.time('calculateRange');
+
     if (disabled?.value) {
       return;
     }
 
-    const listElement = listElementRef.value;
-    const containerElement = containerElementRef.value;
-    const contentElement = contentElementRef.value;
-
-    if (!listElement || !containerElement || !contentElement) {
+    if (
+      !listElementRef.value ||
+      !containerElementRef.value ||
+      !contentElementRef.value
+    ) {
       console.error('some of elements are not defined', list.value);
       return;
     }
 
-    const listOffsetTop =
-      listElement.getBoundingClientRect().top -
-      contentElement.getBoundingClientRect().top;
-    const listScrollTop = containerElement.scrollTop - listOffsetTop;
-    const viewHeight = containerElement.clientHeight;
+    const listOffsetTop = listBBox.top.value - contentBBox.top.value;
+    const listScrollTop = containerScrollTop.value - listOffsetTop;
+    const viewHeight = containerSize.height.value;
 
     const offset = Math.floor(getOffset(listScrollTop) / blockSize) * blockSize;
     const viewCapacity =
@@ -119,7 +128,9 @@ export function useVirtualScrollList<T>(
         getViewCapacity(
           Math.min(viewHeight + listScrollTop, viewHeight),
           offset
-        ) / blockSize
+        ) /
+          blockSize +
+          1
       ) * blockSize;
 
     // console.log(listOffsetTop, listScrollTop, viewHeight, offset, viewCapacity);
@@ -132,39 +143,54 @@ export function useVirtualScrollList<T>(
 
     // console.log(viewCapacity, offset, from, to, newStart, newEnd);
 
-    if (state.value.start !== newStart || state.value.end !== newEnd) {
+    if (
+      forceUpdate ||
+      newStart !== state.value.start ||
+      newEnd !== state.value.end
+    ) {
       state.value = {
         start: newStart,
         end: newEnd,
       };
+
       currentList.value = source.value
-        .slice(state.value.start, state.value.end)
+        .slice(newStart, newEnd)
         .map((ele, index) => ({
           data: ele,
-          index: index + state.value.start,
+          index: index + newStart,
         }));
     }
+
+    // console.timeEnd('calculateRange');
   };
 
   watch(
     [
-      size.width,
-      size.height,
-      list,
+      containerSize.width,
+      containerSize.height,
       containerElementRef,
       contentElementRef,
       listElementRef,
       itemHeightRef || ref(0),
     ],
-    () => {
+    (): void => {
       calculateRange();
     }
   );
+
+  watch(source, (): void => {
+    calculateRange(true);
+  });
 
   useEventListener(
     containerElementRef,
     'scroll',
     () => {
+      if (!containerElementRef.value) {
+        return;
+      }
+
+      containerScrollTop.value = containerElementRef.value.scrollTop;
       calculateRange();
     },
     { passive: true }
@@ -183,7 +209,7 @@ export function useVirtualScrollList<T>(
     );
   });
 
-  const getDistanceTop = (index: number) => {
+  const getDistanceTop = (index: number): number => {
     if (disabled?.value) {
       return 0;
     }
