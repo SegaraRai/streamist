@@ -10,7 +10,6 @@ import {
 import { osDeleteManaged } from '$shared-server/osOperations';
 import { is } from '$shared/is';
 import { parseDate } from '$shared/parseDate';
-import { getStem } from '$shared/path';
 import type {
   SourceFileAttachToType,
   SourceFileState,
@@ -19,8 +18,6 @@ import type {
 } from '$shared/types';
 import { toUnique } from '$shared/unique';
 import type {
-  FFprobeTags,
-  TranscoderRequestOptions,
   TranscoderResponse,
   TranscoderResponseArtifactAudio,
   TranscoderResponseArtifactError,
@@ -39,143 +36,8 @@ import { retryTransaction } from '$/services//transaction';
 import { SECRET_TRANSCODER_CALLBACK_SECRET } from '$/services/env';
 import { logger } from '$/services/logger';
 import { updateMaxTrackId } from '$/services/maxTrack';
-
-function numberOr<T>(
-  str: string | null | undefined,
-  fallback: T,
-  min: number
-): number | T {
-  if (!str) {
-    return fallback;
-  }
-  const value = parseInt(str, 10);
-  if (!isFinite(value)) {
-    return fallback;
-  }
-  return Math.max(value, min);
-}
-
-function floatOr<T>(str: string | null | undefined, fallback: T): number | T {
-  if (!str) {
-    return fallback;
-  }
-  const value = parseFloat(str);
-  if (!isFinite(value)) {
-    return fallback;
-  }
-  return value;
-}
-
-function parseDiscAndTrackNumber(
-  tags: FFprobeTags,
-  defaultDiscNumber = 1,
-  defaultTrackNumber = 1
-): [discNumber: number, trackNumber: number] {
-  // possible formats of tags.track:
-  // 2, 02, 2/4, 02/04, 1.2, 1.02, 01.2, 01.02
-
-  let discNumber: number | undefined;
-  let trackNumber: number | undefined;
-
-  const strDisc = tags.disc?.replace(/\s/g, '');
-  const strTrack = tags.track?.replace(/\s/g, '');
-  if (strDisc) {
-    discNumber = numberOr(strDisc, undefined, 1);
-  }
-  if (strTrack) {
-    const match = strTrack.match(/^(\d+)\.(\d+)/);
-    if (match) {
-      discNumber = numberOr(match[1], undefined, 1);
-      trackNumber = numberOr(match[2], undefined, 1);
-    } else {
-      trackNumber = numberOr(strTrack, undefined, 1);
-    }
-  }
-
-  return [
-    discNumber || defaultDiscNumber, // ディスク番号が0またはundefinedのときはdefaultDiscNumberにする
-    trackNumber || defaultTrackNumber, // トラック番号が0またはundefinedのときはdefaultTrackNumberにする
-  ];
-}
-
-function parseDiscAndTrackNumberEx(
-  tags: FFprobeTags,
-  filename: string,
-  hasCueSheet: boolean,
-  options: TranscoderRequestOptions
-): [discNumber: number, trackNumber: number] {
-  let [discNumber, trackNumber] = parseDiscAndTrackNumber(tags, 0, 0);
-
-  const parseDiscNumber = (
-    strValue: string | null | undefined
-  ): number | null => {
-    if (!strValue || strValue.length > 2) {
-      // ignore something like '0002'
-      return null;
-    }
-    const value = parseInt(strValue, 10);
-    if (!isFinite(value) || value < 1 || value > 99) {
-      return null;
-    }
-    return value;
-  };
-
-  const parseTrackNumber = (
-    strValue: string | null | undefined
-  ): number | null => {
-    if (!strValue || strValue.length > 2) {
-      return null;
-    }
-    const value = parseInt(strValue, 10);
-    if (!isFinite(value) || value < 1 || value > 99) {
-      return null;
-    }
-    return value;
-  };
-
-  const basename = getStem(filename).trim();
-
-  if (hasCueSheet) {
-    // eg. 'Disc2', 'ABCD-1234-2', 'ABCD-1234' (not valid)
-    const match = basename.match(/(\d+)$/);
-    if (match) {
-      const newDiscNumber = parseDiscNumber(match[1]);
-      if (
-        options.guessDiscNumberUsingFilenameForCue &&
-        discNumber === 0 &&
-        newDiscNumber != null
-      ) {
-        discNumber = newDiscNumber;
-      }
-    }
-  } else {
-    // eg. '2.03 Track Title', '03. Track Title', '03 Track Title'
-    const match = basename.match(/^(?:(\d+)[\s._-]+)?(\d+)/);
-    if (match) {
-      const newDiscNumber = match[1] ? parseDiscNumber(match[1]) : undefined;
-      const newTrackNumber = parseTrackNumber(match[2]);
-      if (
-        options.guessDiscNumberUsingFilename &&
-        discNumber === 0 &&
-        newDiscNumber != null
-      ) {
-        discNumber = newDiscNumber;
-      }
-      if (
-        options.guessTrackNumberUsingFilename &&
-        trackNumber === 0 &&
-        newTrackNumber != null
-      ) {
-        trackNumber = newTrackNumber;
-      }
-    }
-  }
-
-  return [
-    discNumber || 1, // discNumberが0のときは1にする
-    trackNumber || 1, // trackNumberが0のときは1にする
-  ];
-}
+import { parseDiscAndTrackNumberEx } from '$/services/parseDiscTrackNumber';
+import { floatOr, integerOr } from '$/services/parseNumber';
 
 async function registerImage(
   txClient: TransactionalPrismaClient,
@@ -479,7 +341,7 @@ async function handleTranscoderResponseArtifactAudio(
               releaseDatePrecision: date?.precision$$q ?? null,
               releaseDateText: date?.text$$q ?? null,
               genre: tags.genre || null,
-              bpm: numberOr(tags.bpm, null, 1),
+              bpm: integerOr(tags.bpm, null, 1),
               sensitive: false,
               replayGainGain: floatOr(tags.replaygain_track_gain, null),
               replayGainPeak: floatOr(tags.replaygain_track_peak, null),
