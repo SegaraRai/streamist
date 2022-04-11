@@ -47,8 +47,8 @@ function NativeUIResolver() {
     resolve: (name: string) =>
       componentSet.has(name)
         ? {
-            importName: name,
-            path: 'naive-ui',
+            name,
+            from: 'naive-ui',
           }
         : undefined,
   } as const;
@@ -316,7 +316,7 @@ export default defineConfig(async ({ mode }) => {
           NativeUIResolver(),
           CustomResolver('component', {
             VueDraggable: {
-              path: 'vuedraggable',
+              from: 'vuedraggable',
             },
           }),
         ],
