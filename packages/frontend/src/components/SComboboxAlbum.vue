@@ -51,12 +51,11 @@ export default defineComponent({
       }
     );
 
-    const options$$q = computed(
-      () =>
-        albums$$q.value.map(({ item }) => ({
-          label: item.title,
-          value: item.id,
-        })) || []
+    const options$$q = computed(() =>
+      albums$$q.value.map(({ item }) => ({
+        label: item.title,
+        value: item.id,
+      }))
     );
 
     return {

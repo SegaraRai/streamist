@@ -47,12 +47,11 @@ export default defineComponent({
       }
     );
 
-    const options$$q = computed(
-      () =>
-        artists$$q.value.map(({ item }) => ({
-          label: item.name,
-          value: item.id,
-        })) || []
+    const options$$q = computed(() =>
+      artists$$q.value.map(({ item }) => ({
+        label: item.name,
+        value: item.id,
+      }))
     );
 
     return {
