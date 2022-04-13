@@ -357,14 +357,9 @@ API.add(
     responseHeaders.delete('Server');
     responseHeaders.delete('Vary');
 
-    responseHeaders.set(
-      'Cache-Control',
-      responseOk ? CACHE_CONTROL_PRIVATE_IMMUTABLE : CACHE_CONTROL_NO_STORE
-    );
+    responseHeaders.set('Cache-Control', CACHE_CONTROL_PRIVATE_IMMUTABLE);
 
-    if (responseOk) {
-      responseHeaders.set('ETag', eTag);
-    }
+    responseHeaders.set('ETag', eTag);
 
     // NOTE: Cache-Controlにprivateを指定しておりクライアント端末でのみキャッシュされることが期待できるため、VaryにCookieは指定しない
     responseHeaders.set(
