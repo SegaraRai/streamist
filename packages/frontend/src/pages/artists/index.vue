@@ -185,8 +185,8 @@ export default defineComponent({
                     height: `${width}px`,
                   }"
                   :image="item.image$$q"
-                  :size="width"
                   :alt="item.artist$$q.name"
+                  :size="width"
                 />
               </RouterLink>
               <VCardTitle class="p-0 my-1 flex flex-col">

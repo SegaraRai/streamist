@@ -14,6 +14,10 @@ export default defineComponent({
       required: true,
     },
     expandable: Boolean,
+    size: {
+      type: [Number, String],
+      required: true,
+    },
   },
   emits: {
     imageIds: (_imageIds: readonly string[] | undefined) => true,
@@ -81,8 +85,9 @@ export default defineComponent({
   <template v-if="!fetched$$q">
     <SNullableImage
       v-bind="$attrs"
-      :image="false"
       class="select-none rounded-lg overflow-hidden"
+      :image="false"
+      :size="size"
     />
   </template>
   <template v-else-if="Array.isArray(image$$q)">
@@ -90,13 +95,15 @@ export default defineComponent({
       <SNullableImage
         v-bind="$attrs"
         class="select-none rounded-lg overflow-hidden"
+        :size="size"
       />
     </template>
     <template v-else-if="image$$q.length === 1">
       <SNullableImage
         v-bind="$attrs"
-        :image="image$$q[0]"
         class="select-none rounded-lg overflow-hidden"
+        :image="image$$q[0]"
+        :size="size"
       />
     </template>
     <template v-else-if="image$$q.length === 2">
@@ -104,10 +111,10 @@ export default defineComponent({
         v-bind="$attrs"
         class="flex flex-wrap select-none rounded-lg overflow-hidden"
       >
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" :size="size" />
         <div class="w-1/2 h-1/2"></div>
         <div class="w-1/2 h-1/2"></div>
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" :size="size" />
       </div>
     </template>
     <template v-else-if="image$$q.length === 3">
@@ -115,9 +122,9 @@ export default defineComponent({
         v-bind="$attrs"
         class="flex flex-wrap select-none rounded-lg overflow-hidden"
       >
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" />
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" />
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[2]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" :size="size" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" :size="size" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[2]" :size="size" />
         <div class="w-1/2 h-1/2"></div>
       </div>
     </template>
@@ -126,10 +133,10 @@ export default defineComponent({
         v-bind="$attrs"
         class="flex flex-wrap select-none rounded-lg overflow-hidden"
       >
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" />
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" />
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[2]" />
-        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[3]" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[0]" :size="size" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[1]" :size="size" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[2]" :size="size" />
+        <SNullableImage class="w-1/2 h-1/2" :image="image$$q[3]" :size="size" />
       </div>
     </template>
   </template>
@@ -142,8 +149,9 @@ export default defineComponent({
       :disabled="!expandable"
     >
       <SNullableImage
-        :image="image$$q"
         class="select-none rounded-lg overflow-hidden w-full h-full"
+        :image="image$$q"
+        :size="size"
       />
     </SExpandable>
   </template>

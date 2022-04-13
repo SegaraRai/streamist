@@ -46,6 +46,7 @@ export default defineComponent({
   <div class="relative">
     <SNullableImage
       class="w-full h-full"
+      size="0"
       :image="url$$q"
       :alt="t('alt.UploadingImage')"
     />
