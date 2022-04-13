@@ -25,7 +25,6 @@ import { isId } from '$shared/id';
 import {
   CACHE_VERSION,
   COOKIE_EXPIRY_DELAY,
-  COOKIE_REFERRER_KEY,
   COOKIE_TOKEN_KEY,
   CORS_MAX_AGE,
   ETAG_VERSION,
@@ -95,23 +94,17 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
     return reply(401, 'Invalid token', NO_CACHE_HEADERS);
   }
 
-  const referrer = req.headers.get('Referer') ? '1' : '0';
+  const referrerSpec = req.headers.get('Referer') ? 'r1' : 'r0';
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const expires = new Date((jwt.exp! + COOKIE_EXPIRY_DELAY) * 1000);
+  const token = `${strJWT}~${referrerSpec}`;
 
   return reply(204, null, {
     ...NO_CACHE_HEADERS,
-    'Set-Cookie': [
-      serialize(COOKIE_REFERRER_KEY, referrer, {
-        ...COOKIE_OPTIONS_BASE,
-        expires,
-      }),
-      serialize(COOKIE_TOKEN_KEY, strJWT, {
-        ...COOKIE_OPTIONS_BASE,
-        expires,
-      }),
-    ],
+    'Set-Cookie': serialize(COOKIE_TOKEN_KEY, token, {
+      ...COOKIE_OPTIONS_BASE,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      expires: new Date((jwt.exp! + COOKIE_EXPIRY_DELAY) * 1000),
+    }),
   });
 });
 
@@ -125,10 +118,7 @@ API.add('DELETE', '/api/cookies/token', (req, context) => {
 
   return reply(204, null, {
     ...NO_CACHE_HEADERS,
-    'Set-Cookie': [
-      serialize(COOKIE_REFERRER_KEY, '', COOKIE_OPTIONS_BASE),
-      serialize(COOKIE_TOKEN_KEY, '', COOKIE_OPTIONS_BASE),
-    ],
+    'Set-Cookie': serialize(COOKIE_TOKEN_KEY, '', COOKIE_OPTIONS_BASE),
   });
 });
 
@@ -147,11 +137,14 @@ API.add(
     }
 
     const cookies = parse(req.headers.get('Cookie') || '');
+    const token = cookies[COOKIE_TOKEN_KEY] || '';
+
+    const [strJWT = '', referrerSpec = ''] = token.split('~');
 
     // check Referer if Sec-Fetch-Site is cross-site (we send referrer)
     // though Sec-Fetch-Site will not be 'same-origin' or 'same-site' as there are no script in cdn domain, we permit those requests
     if (
-      cookies[COOKIE_REFERRER_KEY] === '1' &&
+      referrerSpec === 'r1' &&
       req.headers.get('Sec-Fetch-Site') === 'cross-site'
     ) {
       const referrer = req.headers.get('Referer') || '';
@@ -180,7 +173,6 @@ API.add(
         maxTrackId: null,
       };
     } else {
-      const strJWT = cookies[COOKIE_TOKEN_KEY];
       if (!strJWT) {
         return reply(401, 'Cookie not set', NO_CACHE_HEADERS);
       }
