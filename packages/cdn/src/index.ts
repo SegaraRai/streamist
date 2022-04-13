@@ -105,7 +105,7 @@ API.add('DELETE', '/api/cookies/token', (req, context) => {
 
   return reply(204, null, {
     ...NO_CACHE_HEADERS,
-    Cookie: serialize(COOKIE_JWT_KEY, '', {
+    'Set-Cookie': serialize(COOKIE_JWT_KEY, '', {
       expires: new Date(0), // 1970-01-01T00:00:00.000Z
       httpOnly: true,
       sameSite: 'none',
