@@ -326,9 +326,9 @@ export default defineComponent({
                       >
                         <SNullableImage
                           class="flex-none w-32 h-32 sm:w-48 sm:h-48"
+                          size="200"
                           :image="element"
                           :alt="attachToTitle"
-                          size="200"
                         />
                       </a>
                       <NConfigProvider :theme-overrides="errorOverrideTheme$$q">

@@ -214,6 +214,7 @@ export default defineComponent({
                           >
                             <SArtistImage
                               class="flex-none w-6 h-6"
+                              size="24"
                               :artist="coArtist.artistId"
                             />
                             <div class="s-heading-sl flex-shrink-1">

@@ -11,6 +11,10 @@ export default defineComponent({
       required: true,
     },
     expandable: Boolean,
+    size: {
+      type: [Number, String],
+      required: true,
+    },
   },
   emits: {
     imageIds: (_imageIds: readonly string[] | undefined) => true,
@@ -66,6 +70,7 @@ export default defineComponent({
       class="w-full h-full"
       :image="fetched$$q && value$$q?.image$$q"
       :alt="value$$q?.album$$q.title"
+      :size="size"
     />
   </SExpandable>
 </template>
