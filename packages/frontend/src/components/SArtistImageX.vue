@@ -14,10 +14,19 @@ export default defineComponent({
       type: String,
       default: undefined,
     },
+    size: {
+      type: [Number, String],
+      required: true,
+    },
   },
 });
 </script>
 
 <template>
-  <SNullableImage class="rounded-full select-none" :image="image" :alt="alt" />
+  <SNullableImage
+    class="rounded-full select-none"
+    :image="image"
+    :alt="alt"
+    :size="size"
+  />
 </template>

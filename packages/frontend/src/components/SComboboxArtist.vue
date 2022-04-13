@@ -47,12 +47,11 @@ export default defineComponent({
       }
     );
 
-    const options$$q = computed(
-      () =>
-        artists$$q.value.map(({ item }) => ({
-          label: item.name,
-          value: item.id,
-        })) || []
+    const options$$q = computed(() =>
+      artists$$q.value.map(({ item }) => ({
+        label: item.name,
+        value: item.id,
+      }))
     );
 
     return {
@@ -101,6 +100,7 @@ export default defineComponent({
             <template v-if="artistId$$q">
               <SArtistImage
                 class="flex-none mr-2 w-6 h-6"
+                size="24"
                 :artist="artistId$$q"
               />
             </template>

@@ -51,12 +51,11 @@ export default defineComponent({
       }
     );
 
-    const options$$q = computed(
-      () =>
-        albums$$q.value.map(({ item }) => ({
-          label: item.title,
-          value: item.id,
-        })) || []
+    const options$$q = computed(() =>
+      albums$$q.value.map(({ item }) => ({
+        label: item.title,
+        value: item.id,
+      }))
     );
 
     return {
@@ -103,7 +102,11 @@ export default defineComponent({
         >
           <template #prependInner>
             <template v-if="albumId$$q">
-              <SAlbumImage class="flex-none mr-2 w-6 h-6" :album="albumId$$q" />
+              <SAlbumImage
+                class="flex-none mr-2 w-6 h-6"
+                size="24"
+                :album="albumId$$q"
+              />
             </template>
             <template v-else-if="create && modelValue$$q">
               <NPopover placement="top" trigger="hover">

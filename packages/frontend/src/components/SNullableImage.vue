@@ -15,7 +15,7 @@ export default defineComponent({
     },
     size: {
       type: [Number, String],
-      default: 0,
+      required: true,
     },
     alt: {
       type: String,

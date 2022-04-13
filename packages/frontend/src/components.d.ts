@@ -2,15 +2,13 @@
 // We suggest you to commit this file into source control
 // Read more: https://github.com/vuejs/vue-next/pull/3399
 
-declare module 'vue' {
+declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     IMdiAccountPlus: typeof import('~icons/mdi/account-plus')['default']
     IMdiCalendarOutline: typeof import('~icons/mdi/calendar-outline')['default']
-    IMdiCheck: typeof import('~icons/mdi/check')['default']
     IMdiChevronDown: typeof import('~icons/mdi/chevron-down')['default']
     IMdiChevronRight: typeof import('~icons/mdi/chevron-right')['default']
     IMdiClockOutline: typeof import('~icons/mdi/clock-outline')['default']
-    IMdiClose: typeof import('~icons/mdi/close')['default']
     IMdiCloudUpload: typeof import('~icons/mdi/cloud-upload')['default']
     IMdiDisc: typeof import('~icons/mdi/disc')['default']
     IMdiFileMusic: typeof import('~icons/mdi/file-music')['default']
@@ -44,6 +42,8 @@ declare module 'vue' {
     NPopover: typeof import('naive-ui')['NPopover']
     NScrollbar: typeof import('naive-ui')['NScrollbar']
     NSelect: typeof import('naive-ui')['NSelect']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
     SAlbum: typeof import('./components/SAlbum.vue')['default']
     SAlbumImage: typeof import('./components/SAlbumImage.vue')['default']
     SAlbumImageX: typeof import('./components/SAlbumImageX.vue')['default']
