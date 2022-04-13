@@ -1,7 +1,12 @@
 /**
  * JWTを格納するCookieのキー
  */
-export const COOKIE_JWT_KEY = 'token' as const;
+export const COOKIE_TOKEN_KEY = 'token' as const;
+
+/**
+ * Referrerの有無を格納するCookieのキー
+ */
+export const COOKIE_REFERRER_KEY = 'referrer' as const;
 
 /**
  * Cookieの生存期間の追加の猶予（秒） \

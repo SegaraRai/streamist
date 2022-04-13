@@ -25,7 +25,8 @@ import { isId } from '$shared/id';
 import {
   CACHE_VERSION,
   COOKIE_EXPIRY_DELAY,
-  COOKIE_JWT_KEY,
+  COOKIE_REFERRER_KEY,
+  COOKIE_TOKEN_KEY,
   CORS_MAX_AGE,
   ETAG_VERSION,
 } from './config';
@@ -33,6 +34,18 @@ import { calculateHMAC } from './hmac';
 import { JWTPayload, verifyJWT } from './jwt';
 import { convertToMutableResponse } from './response';
 import type { Bindings } from './types';
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': CACHE_CONTROL_NO_STORE,
+} as const;
+
+const COOKIE_OPTIONS_BASE = {
+  expires: new Date(0),
+  httpOnly: true,
+  sameSite: 'none',
+  secure: true,
+  path: '/',
+} as const;
 
 function getAppOrigin(
   req: Request,
@@ -44,9 +57,7 @@ function getAppOrigin(
     : context.bindings.APP_ORIGIN;
 }
 
-const NO_CACHE_HEADERS = {
-  'Cache-Control': CACHE_CONTROL_NO_STORE,
-};
+//
 
 const API = new Router<Bindings>();
 
@@ -64,6 +75,7 @@ API.prepare = (req, context) => {
 };
 
 API.add('POST', '/api/cookies/token', async (req, context) => {
+  // Origin is required here
   if (
     req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
   ) {
@@ -83,20 +95,28 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
     return reply(401, 'Invalid token', NO_CACHE_HEADERS);
   }
 
+  const referrer = req.headers.get('Referer') ? '1' : '0';
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const expires = new Date((jwt.exp! + COOKIE_EXPIRY_DELAY) * 1000);
+
   return reply(204, null, {
     ...NO_CACHE_HEADERS,
-    'Set-Cookie': serialize(COOKIE_JWT_KEY, strJWT, {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      expires: new Date((jwt.exp! + COOKIE_EXPIRY_DELAY) * 1000),
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      path: '/',
-    }),
+    'Set-Cookie': [
+      serialize(COOKIE_REFERRER_KEY, referrer, {
+        ...COOKIE_OPTIONS_BASE,
+        expires,
+      }),
+      serialize(COOKIE_TOKEN_KEY, strJWT, {
+        ...COOKIE_OPTIONS_BASE,
+        expires,
+      }),
+    ],
   });
 });
 
 API.add('DELETE', '/api/cookies/token', (req, context) => {
+  // Origin is required here
   if (
     req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
   ) {
@@ -105,13 +125,10 @@ API.add('DELETE', '/api/cookies/token', (req, context) => {
 
   return reply(204, null, {
     ...NO_CACHE_HEADERS,
-    Cookie: serialize(COOKIE_JWT_KEY, '', {
-      expires: new Date(0), // 1970-01-01T00:00:00.000Z
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      path: '/',
-    }),
+    'Set-Cookie': [
+      serialize(COOKIE_REFERRER_KEY, '', COOKIE_OPTIONS_BASE),
+      serialize(COOKIE_TOKEN_KEY, '', COOKIE_OPTIONS_BASE),
+    ],
   });
 });
 
@@ -121,11 +138,29 @@ API.add(
   async (req, context) => {
     const { entityId, filename, region, type, userId } = context.params;
 
-    if (
-      req.headers.has('Origin') &&
-      req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
-    ) {
+    const appOrigin = /* #__PURE__ */ getAppOrigin(req, context);
+    const expectedReferrerPrefix = `${appOrigin}/`;
+
+    // check Origin if set
+    if (req.headers.has('Origin') && req.headers.get('Origin') !== appOrigin) {
       return reply(403, null, NO_CACHE_HEADERS);
+    }
+
+    const cookies = parse(req.headers.get('Cookie') || '');
+
+    // check Referer if Sec-Fetch-Site is cross-site (we send referrer)
+    // though Sec-Fetch-Site will not be 'same-origin' or 'same-site' as there are no script in cdn domain, we permit those requests
+    if (
+      cookies[COOKIE_REFERRER_KEY] === '1' &&
+      req.headers.get('Sec-Fetch-Site') === 'cross-site'
+    ) {
+      const referrer = req.headers.get('Referer') || '';
+      if (
+        referrer !== appOrigin &&
+        !referrer.startsWith(expectedReferrerPrefix)
+      ) {
+        return reply(403, null, NO_CACHE_HEADERS);
+      }
     }
 
     let jwt: JWTPayload;
@@ -145,7 +180,7 @@ API.add(
         maxTrackId: null,
       };
     } else {
-      const strJWT = parse(req.headers.get('Cookie') || '')[COOKIE_JWT_KEY];
+      const strJWT = cookies[COOKIE_TOKEN_KEY];
       if (!strJWT) {
         return reply(401, 'Cookie not set', NO_CACHE_HEADERS);
       }
@@ -322,17 +357,15 @@ API.add(
     responseHeaders.delete('Server');
     responseHeaders.delete('Vary');
 
-    responseHeaders.set(
-      'Cache-Control',
-      responseOk ? CACHE_CONTROL_PRIVATE_IMMUTABLE : CACHE_CONTROL_NO_STORE
-    );
+    responseHeaders.set('Cache-Control', CACHE_CONTROL_PRIVATE_IMMUTABLE);
 
-    if (responseOk) {
-      responseHeaders.set('ETag', eTag);
-    }
+    responseHeaders.set('ETag', eTag);
 
     // NOTE: Cache-Controlにprivateを指定しておりクライアント端末でのみキャッシュされることが期待できるため、VaryにCookieは指定しない
-    responseHeaders.set('Vary', 'Origin');
+    responseHeaders.set(
+      'Vary',
+      'Origin, Referer, Sec-Fetch-Mode, Sec-Fetch-Site'
+    );
 
     // レスポンスタイムの測定用
     responseHeaders.set(
