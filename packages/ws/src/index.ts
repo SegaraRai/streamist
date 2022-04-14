@@ -43,6 +43,7 @@ API.add(
   'GET',
   '/ws/channels/:userId',
   async (req, context): Promise<Response> => {
+    // we have two endpoints (client side and server side) for this worker, so we need to check the origin
     // request protocol is 'https://' (not 'wss://') here so we can compare origin safely
     if (context.url.origin !== /* #__PURE__ */ getAppOrigin(req, context)) {
       return reply(404, null);
@@ -52,7 +53,7 @@ API.add(
     if (
       req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
     ) {
-      return reply(403, null);
+      return reply(403, 'Unauthorized origin');
     }
 
     // check if the request is WebSocket upgrade request
@@ -72,7 +73,7 @@ API.add(
     const client = searchParams.get(WS_QUERY_PARAM_DEVICE_CLIENT);
     const name = searchParams.get(WS_QUERY_PARAM_DEVICE_NAME) || '';
     if (!deviceId || !deviceType || !platform || !client) {
-      return reply(400, 'query parameters not set');
+      return reply(400, 'Query parameters not set');
     }
 
     // Sec-WebSocket-Protocol may appear as a single comma-separated header or as multiple headers,
@@ -86,7 +87,7 @@ API.add(
 
     // check if the swp contains WS_PROTOCOL
     if (!protocols.includes(WS_PROTOCOL)) {
-      return reply(400, `protocol must contain ${WS_PROTOCOL}`);
+      return reply(400, `Protocol must contain ${WS_PROTOCOL}`);
     }
 
     // parse token
@@ -96,7 +97,7 @@ API.add(
       p.startsWith(WS_TOKEN_PROTOCOL_PREFIX)
     );
     if (!tokenProtocol) {
-      return reply(400, 'protocol must contain token');
+      return reply(400, 'Protocol must contain token');
     }
 
     // verify token
@@ -105,11 +106,11 @@ API.add(
       context.bindings
     );
     if (!jwt || jwt.aud !== JWT_WS_TOKEN_AUD) {
-      return reply(401, 'invalid token');
+      return reply(401, 'Invalid token');
     }
 
     if (jwt.sub !== userId) {
-      return reply(401, 'token subject mismatch');
+      return reply(401, 'Token subject mismatch');
     }
 
     // send request to DO
