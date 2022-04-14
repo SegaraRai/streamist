@@ -32,7 +32,7 @@ export default defineComponent({
 
     // playback controls
 
-    const desktopPlaybackControl$$q = eagerComputed(
+    const desktopPlaybackControl$$q = computedEager(
       () => display.mdAndUp.value
     );
     const alwaysShowLeftSidebar$$q = desktopPlaybackControl$$q;
@@ -40,7 +40,7 @@ export default defineComponent({
 
     // show playing flag
 
-    const showPlaying$$q = eagerComputed(
+    const showPlaying$$q = computedEager(
       () =>
         canShowPlaying$$q.value &&
         isShowPlayingEnabled(router.currentRoute.value)
