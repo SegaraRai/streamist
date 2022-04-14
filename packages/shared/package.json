@@ -1,8 +1,10 @@
 {
   "name": "@streamist/shared",
-  "version": "1.0.0",
-  "main": "dist/index.js",
-  "license": "MIT",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "vitest"
+  },
   "dependencies": {
     "chardet": "^1.4.0",
     "iconv-lite": "^0.6.3",
@@ -11,8 +13,5 @@
   "devDependencies": {
     "vite": "^2.9.5",
     "vitest": "^0.9.3"
-  },
-  "scripts": {
-    "test": "vitest"
   }
 }
