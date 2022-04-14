@@ -9,7 +9,7 @@
     "zod": "^3.14.4"
   },
   "devDependencies": {
-    "vite": "^2.9.1",
+    "vite": "^2.9.5",
     "vitest": "^0.9.3"
   },
   "scripts": {
