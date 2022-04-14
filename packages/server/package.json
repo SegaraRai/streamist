@@ -1,6 +1,6 @@
 {
-  "name": "frourio-app-server",
-  "version": "0.1.0",
+  "name": "@streamist/server",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "pnpm run migrate:dev && run-p dev:*",
