@@ -247,7 +247,7 @@ export default defineComponent({
                   <template v-else>
                     <NPopover placement="top" trigger="hover">
                       <template #trigger>
-                        <i-mdi-close class="w-4 h-4 text-st-error" />
+                        <i-mdi-close-circle class="w-4 h-4 text-st-error" />
                       </template>
                       <div>
                         {{ t('signUp.tooltip.UsernameAlreadyTaken') }}

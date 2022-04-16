@@ -35,24 +35,19 @@ export async function checkAPIStatus(): Promise<APIStatus> {
     // Browser integrity check and CAPTCHA
     // status: 403 or 503
     if (
-      pingResText.includes('cloudflare') &&
-      (pingResText.includes('cf-browser-verification') ||
-        pingResText.includes('cf-captcha-container'))
+      (pingResText.includes('cloudflare') ||
+        pingResText.includes('Cloudflare')) &&
+      (pingResText.includes('cf-please-wait') ||
+        pingResText.includes('cf-browser-verification') ||
+        pingResText.includes('cf-captcha-container') ||
+        pingResText.includes('challenge-form') ||
+        pingResText.includes('managed-form'))
     ) {
       return 'ng_needs_auth';
     }
 
-    // Origin down?
-    if (
-      pingRes.status === 502 ||
-      pingRes.status === 503 ||
-      pingRes.status >= 520
-    ) {
-      return 'ng_origin_down';
-    }
-
-    // unknown error
-    return 'ng_no_connection';
+    // origin down
+    return 'ng_origin_down';
   } catch (_error: unknown) {
     // do nothing
   }

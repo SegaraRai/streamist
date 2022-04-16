@@ -3,6 +3,7 @@ import { TOKEN_SHOULD_RENEW_TOLERANCE } from '~/config';
 import { isAxiosError } from '~/logic/axiosError';
 import { isJWTExpired } from '~/logic/jwt';
 import { unAuthAPI } from '~/logic/unAuthAPI';
+import { loggedInRef } from '~/stores/auth';
 
 export interface Tokens {
   readonly apiToken: string;
@@ -37,9 +38,16 @@ export const tokens = createAsyncCache<Tokens>(
     } catch (error: unknown) {
       if (isAxiosError(error)) {
         const status = error.response?.status;
-        if (status != null && status >= 400 && status < 500) {
+        const contentType = error.response?.headers['content-type'] || '';
+        if (
+          status != null &&
+          status >= 400 &&
+          status < 500 &&
+          contentType.startsWith('application/json')
+        ) {
           // console.log('cleared refreshToken');
           localStorage.removeItem('refreshToken');
+          loggedInRef.value = false;
         }
       }
       throw error;

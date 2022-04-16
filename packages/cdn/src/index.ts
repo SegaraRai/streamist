@@ -78,7 +78,7 @@ API.add('POST', '/api/cookies/token', async (req, context) => {
   if (
     req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
   ) {
-    return reply(403, 'Invalid origin', NO_CACHE_HEADERS);
+    return reply(403, 'Unauthorized origin', NO_CACHE_HEADERS);
   }
 
   const auth = req.headers.get('Authorization');
@@ -113,7 +113,7 @@ API.add('DELETE', '/api/cookies/token', (req, context) => {
   if (
     req.headers.get('Origin') !== /* #__PURE__ */ getAppOrigin(req, context)
   ) {
-    return reply(403, null, NO_CACHE_HEADERS);
+    return reply(403, 'Unauthorized origin', NO_CACHE_HEADERS);
   }
 
   return reply(204, null, {
@@ -133,7 +133,7 @@ API.add(
 
     // check Origin if set
     if (req.headers.has('Origin') && req.headers.get('Origin') !== appOrigin) {
-      return reply(403, null, NO_CACHE_HEADERS);
+      return reply(403, 'Origin missing or unauthorized', NO_CACHE_HEADERS);
     }
 
     const cookies = parse(req.headers.get('Cookie') || '');
@@ -152,7 +152,11 @@ API.add(
         referrer !== appOrigin &&
         !referrer.startsWith(expectedReferrerPrefix)
       ) {
-        return reply(403, null, NO_CACHE_HEADERS);
+        return reply(
+          403,
+          'Referrer missing or unauthorized while cross site request',
+          NO_CACHE_HEADERS
+        );
       }
     }
 

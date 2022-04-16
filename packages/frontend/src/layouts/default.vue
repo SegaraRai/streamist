@@ -18,6 +18,8 @@ export default defineComponent({
       () => router.currentRoute.value.path === '/signup'
     );
 
+    const dialogLanguage$$q = ref(false);
+
     return {
       t,
       logoSVG$$q: logoSVG,
@@ -27,6 +29,7 @@ export default defineComponent({
       languageOptions$$q: PREFERENCE_LANGUAGE_OPTIONS,
       isSignInPage$$q,
       isSignUpPage$$q,
+      dialogLanguage$$q,
     };
   },
 });
@@ -34,7 +37,12 @@ export default defineComponent({
 
 <template>
   <VApp :theme="themeName$$q">
-    <VAppBar flat :border="1" density="compact" class="s-offline-mod-mt">
+    <VAppBar
+      flat
+      :border="1"
+      density="compact"
+      class="s-offline-mod-mt border-b"
+    >
       <div class="w-full flex justify-between items-center">
         <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
           <RouterLink
@@ -57,7 +65,10 @@ export default defineComponent({
         </div>
         <div class="flex-1"></div>
         <div class="flex items-center gap-x-2">
-          <div v-show="!isSignInPage$$q">
+          <div
+            v-show="!isSignInPage$$q"
+            :class="isSignUpPage$$q ? '' : '<sm:hidden'"
+          >
             <VBtn class="whitespace-nowrap" to="/login">
               {{ t('appBar.button.SignIn') }}
             </VBtn>
@@ -67,18 +78,50 @@ export default defineComponent({
               {{ t('appBar.button.SignUp') }}
             </VBtn>
           </div>
-          <NSelect
-            v-model:value="preferenceStore$$q.language"
-            :options="languageOptions$$q"
-            class="max-w-64"
-          />
+          <div class="<sm:hidden">
+            <NSelect
+              v-model:value="preferenceStore$$q.language"
+              :options="languageOptions$$q"
+              class="max-w-64"
+            />
+          </div>
+          <VDialog v-model="dialogLanguage$$q">
+            <template #activator="{ props }">
+              <VBtn v-bind="props" icon size="small" class="sm:hidden">
+                <i-mdi-translate />
+              </VBtn>
+            </template>
+            <VSheet>
+              <div class="text-xl px-4 py-2">Choose language</div>
+              <VDivider />
+              <VList class="w-80 max-w-full" @contextmenu.prevent>
+                <template v-for="item in languageOptions$$q" :key="item.value">
+                  <VListItem
+                    class="flex gap-x-4 rounded-4px cursor-pointer"
+                    active-color="primary"
+                    :active="preferenceStore$$q.language === item.value"
+                    @click="
+                      (preferenceStore$$q.language = item.value),
+                        (dialogLanguage$$q = false)
+                    "
+                  >
+                    <VListItemHeader class="flex-1">
+                      <VListItemTitle class="s-heading-sl">
+                        {{ item.label }}
+                      </VListItemTitle>
+                    </VListItemHeader>
+                  </VListItem>
+                </template>
+              </VList>
+            </VSheet>
+          </VDialog>
           <VBtn icon size="small" @click="switchTheme$$q()">
             <i-mdi-invert-colors />
           </VBtn>
         </div>
       </div>
     </VAppBar>
-    <VMain>
+    <VMain class="w-full h-full flex flex-col">
       <RouterView class="px-4" />
     </VMain>
   </VApp>
