@@ -241,7 +241,7 @@ export default defineComponent({
       <!-- Header -->
       <!-- BUG: border-b class is needed -->
       <VAppBar
-        class="border-b s-offline-mod-mt px-0"
+        class="s-offline-mod-mt border-b px-2"
         density="compact"
         :border="1"
       >
