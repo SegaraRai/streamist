@@ -37,7 +37,11 @@ export default defineComponent({
 
 <template>
   <VApp class="h-full" :theme="themeName$$q">
-    <VAppBar class="s-offline-mod-mt border-b" density="compact" :border="1">
+    <VAppBar
+      class="s-offline-mod-mt border-b px-2"
+      density="compact"
+      :border="1"
+    >
       <div class="w-full flex justify-between items-center">
         <div class="ml-0 pl-2 sm:pr-12 hidden-xs-only select-none flex-none">
           <RouterLink
