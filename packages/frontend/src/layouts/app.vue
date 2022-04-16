@@ -241,10 +241,9 @@ export default defineComponent({
       <!-- Header -->
       <!-- BUG: border-b class is needed -->
       <VAppBar
-        flat
-        :border="1"
-        density="compact"
         class="border-b s-offline-mod-mt px-0"
+        density="compact"
+        :border="1"
       >
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">
