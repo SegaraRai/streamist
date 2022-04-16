@@ -38,7 +38,13 @@ export const tokens = createAsyncCache<Tokens>(
     } catch (error: unknown) {
       if (isAxiosError(error)) {
         const status = error.response?.status;
-        if (status != null && status >= 400 && status < 500) {
+        const contentType = error.response?.headers['content-type'] || '';
+        if (
+          status != null &&
+          status >= 400 &&
+          status < 500 &&
+          contentType.startsWith('application/json')
+        ) {
           // console.log('cleared refreshToken');
           localStorage.removeItem('refreshToken');
           loggedInRef.value = false;
