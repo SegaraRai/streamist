@@ -32,7 +32,7 @@ export default defineComponent({
 
     // playback controls
 
-    const desktopPlaybackControl$$q = eagerComputed(
+    const desktopPlaybackControl$$q = computedEager(
       () => display.mdAndUp.value
     );
     const alwaysShowLeftSidebar$$q = desktopPlaybackControl$$q;
@@ -40,7 +40,7 @@ export default defineComponent({
 
     // show playing flag
 
-    const showPlaying$$q = eagerComputed(
+    const showPlaying$$q = computedEager(
       () =>
         canShowPlaying$$q.value &&
         isShowPlayingEnabled(router.currentRoute.value)
@@ -241,10 +241,9 @@ export default defineComponent({
       <!-- Header -->
       <!-- BUG: border-b class is needed -->
       <VAppBar
-        flat
-        :border="1"
-        density="compact"
         class="border-b s-offline-mod-mt px-0"
+        density="compact"
+        :border="1"
       >
         <div class="w-full flex justify-between items-center">
           <template v-if="!alwaysShowLeftSidebar$$q">

@@ -1,6 +1,6 @@
 {
-  "name": "frourio-app-server",
-  "version": "0.1.0",
+  "name": "@streamist/server",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "pnpm run migrate:dev && run-p dev:*",
@@ -21,9 +21,9 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.67.0",
-    "@aws-sdk/client-s3": "^3.67.0",
-    "@aws-sdk/s3-request-presigner": "^3.67.0",
+    "@aws-sdk/client-lambda": "^3.72.0",
+    "@aws-sdk/client-s3": "^3.72.0",
+    "@aws-sdk/s3-request-presigner": "^3.72.0",
     "@google-cloud/tasks": "^2.5.0",
     "@prisma/client": "^3.12.0",
     "aspida": "^1.9.1",
@@ -47,9 +47,9 @@
     "velona": "^0.7.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.0.3",
+    "@rollup/plugin-commonjs": "^21.1.0",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.2.0",
+    "@rollup/plugin-node-resolve": "^13.2.1",
     "@segararai/frourio": "^0.25.1-fork.2",
     "@types/busboy": "^1.5.0",
     "@types/minimist": "^1.2.2",
@@ -59,11 +59,11 @@
     "esbuild-plugin-alias": "^0.2.1",
     "node-dev": "^7.4.2",
     "prisma": "^3.12.0",
-    "rollup": "^2.70.1",
+    "rollup": "^2.70.2",
     "rollup-plugin-esbuild": "^4.9.1",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-tsconfig-paths": "^1.1.6",
-    "vite": "^2.9.1",
+    "vite": "^2.9.5",
     "vitest": "^0.9.3"
   }
 }

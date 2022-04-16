@@ -1,6 +1,6 @@
 {
   "name": "@streamist/transcoder",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
     "dev": "run-p dev:*",
@@ -12,23 +12,23 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.67.0",
+    "@aws-sdk/client-s3": "^3.72.0",
     "dotenv": "^16.0.0",
-    "log4js": "^6.4.4",
+    "log4js": "^6.4.5",
     "undici": "^5.0.0"
   },
   "devDependencies": {
     "@esbuild-plugins/node-resolve": "^0.1.4",
-    "@rollup/plugin-commonjs": "^21.0.3",
+    "@rollup/plugin-commonjs": "^21.1.0",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.2.0",
+    "@rollup/plugin-node-resolve": "^13.2.1",
     "@types/aws-lambda": "^8.10.93",
     "@types/node": "^16.11.26",
     "esbuild": "^0.14.36",
     "esbuild-node-externals": "^1.4.1",
     "jszip": "^3.9.1",
     "node-dev": "^7.4.2",
-    "rollup": "^2.70.1",
+    "rollup": "^2.70.2",
     "rollup-plugin-esbuild": "^4.9.1",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-tsconfig-paths": "^1.1.6"
