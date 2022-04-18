@@ -5,6 +5,16 @@ import { init } from '$/services/app';
 import { API_SERVER_PORT } from '$/services/env';
 import { logger } from '$/services/logger';
 
+if (process.env.BUNDLE_SCRIPT_ABSOLUTE_DIR) {
+  (global as any).__bundlerPathsOverrides = {
+    'pino-pipeline-worker': `${process.env.BUNDLE_SCRIPT_ABSOLUTE_DIR}vendor-pino-pipeline-worker.js`,
+    'pino-pretty': `${process.env.BUNDLE_SCRIPT_ABSOLUTE_DIR}vendor-pino-pretty.js`,
+    'pino-worker': `${process.env.BUNDLE_SCRIPT_ABSOLUTE_DIR}vendor-pino-worker.js`,
+    'pino/file': `${process.env.BUNDLE_SCRIPT_ABSOLUTE_DIR}vendor-pino-file.js`,
+    'thread-stream-worker': `${process.env.BUNDLE_SCRIPT_ABSOLUTE_DIR}vendor-thread-stream-worker.js`,
+  };
+}
+
 function mainAPI(): void {
   if (cluster.isPrimary) {
     logger.info('primary: started');

@@ -43,25 +43,25 @@ if (TARGET_NODE_ENV !== 'production' && TARGET_NODE_ENV !== 'staging') {
 }
 
 export default defineConfig({
-  input: 'entrypoints/index.ts',
+  input: [
+    'entrypoints/index.ts',
+    'entrypoints/vendor/vendor-pino-file.js',
+    'entrypoints/vendor/vendor-pino-pipeline-worker.js',
+    'entrypoints/vendor/vendor-pino-pretty.js',
+    'entrypoints/vendor/vendor-pino-worker.js',
+    'entrypoints/vendor/vendor-thread-stream-worker.js',
+  ],
   output: {
     dir: `${DOCKER_APP_DIR}/dist`,
     format: 'cjs',
+    exports: 'auto',
     entryFileNames: '[name].js',
     chunkFileNames: 'chunk.[name].[hash].js',
-    manualChunks: (id) => (id.includes('node_modules') ? 'vendor' : undefined),
   },
   external: [
-    /^node:|^_http_common$/,
-    /^[@.]?prisma(\/|$)/,
-    /node_modules[\\/][@.]?prisma(\/|$)/,
-    /^fastify(\/|$)/,
-    /^fastify-helmet(\/|$)/,
-    /^fastify-jwt(\/|$)/,
-    /^google-gax(\/|$)/,
-    /^pino/,
-    /^protobufjs(\/|$)/,
-    /^semver(\/|$)/,
+    /^node:|^_http_common$|^stream\/web$|^util\/types$/,
+    /^[@.]?prisma([\\/]|$)/,
+    /node_modules[\\/][@.]?prisma([\\/]|$)/,
   ],
   plugins: [
     {
@@ -92,18 +92,7 @@ export default defineConfig({
           description: thisPackageJSON.description,
           main: 'dist/index.js',
           private: true,
-          dependencies: await createDependencies([
-            '@prisma/client',
-            'prisma',
-            'fastify',
-            'fastify-helmet',
-            'fastify-jwt',
-            'google-gax',
-            'pino',
-            'pino-pretty',
-            'protobufjs',
-            'semver',
-          ]),
+          dependencies: await createDependencies(['@prisma/client', 'prisma']),
         };
         await writeFile(
           `${DOCKER_APP_DIR}/package.json`,
@@ -135,6 +124,7 @@ export default defineConfig({
           process.env.TARGET_BUILD_REV || 'unknown'
         }"`,
         'process.env.NODE_ENV': `"${TARGET_NODE_ENV}"`,
+        'process.env.BUNDLE_SCRIPT_ABSOLUTE_DIR': '"/app/dist/"',
       },
       minify: false,
       target: 'node16',

@@ -14,7 +14,7 @@
   "devDependencies": {
     "@esbuild-plugins/node-resolve": "^0.1.4",
     "@types/minimist": "^1.2.2",
-    "@types/node": "^16.11.26",
+    "@types/node": "^16.11.27",
     "esbuild": "^0.14.36",
     "esbuild-node-externals": "^1.4.1"
   }
