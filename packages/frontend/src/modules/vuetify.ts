@@ -1,6 +1,4 @@
 import { createVuetify } from 'vuetify';
-import '@mdi/font/css/materialdesignicons.css';
-import 'vuetify/styles';
 import { VUETIFY_THEMES } from '~/logic/theme';
 import type { UserModule } from '~/types';
 
