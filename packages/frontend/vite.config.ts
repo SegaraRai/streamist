@@ -377,6 +377,9 @@ export default defineConfig(async ({ mode }) => {
           ],
         },
         workbox: {
+          // this is needed to cache fonts (default: ['**\/*.{js,css,html}'])
+          // see https://developer.chrome.com/docs/workbox/reference/workbox-build/#type-GlobPartial
+          globPatterns: ['**/*.{js,css,html}', 'assets/*'],
           navigateFallbackDenylist: [
             /^\/cdn-cgi\//,
             /^\/api\//,
