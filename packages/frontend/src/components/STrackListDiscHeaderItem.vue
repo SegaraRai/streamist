@@ -23,7 +23,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="w-full h-8 flex items-center gap-x-1 px-1">
+  <div class="w-full h-8 flex items-center gap-x-1 px-1 opacity-80">
     <i-mdi-disc />
     <span class="s-numeric font-medium">{{ item.discNumber$$q }}</span>
   </div>
