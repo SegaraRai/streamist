@@ -389,6 +389,8 @@ export default defineConfig(async ({ mode }) => {
             /^\/ws\//,
             /^\/auth([/#?]|$)/,
           ],
+          // for fonts
+          ignoreURLParametersMatching: [/^v=/],
         },
       }),
 
