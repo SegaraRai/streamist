@@ -35,7 +35,7 @@ export default defineComponent({
       icon
       class="flex-none flex items-center justify-center opacity-60"
     >
-      <VIcon icon="mdi-history" />
+      <i-mdi-history />
     </VListItemAvatar>
     <VListItemHeader class="pl-2">
       <VListItemTitle class="s-heading-sl text-sm">
@@ -53,7 +53,7 @@ export default defineComponent({
       class="bg-transparent text-st-error"
       @click.prevent.stop="$emit('remove', query)"
     >
-      <VIcon class="s-hover-visible">mdi-close</VIcon>
+      <i-mdi-close class="s-hover-visible" />
     </VBtn>
   </VListItem>
 </template>

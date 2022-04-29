@@ -329,6 +329,7 @@ export default defineConfig(async ({ mode }) => {
       // https://github.com/antfu/unplugin-icons
       Icons({
         autoInstall: true,
+        scale: 1.25,
       }),
 
       // https://github.com/antfu/vite-plugin-windicss
@@ -388,6 +389,8 @@ export default defineConfig(async ({ mode }) => {
             /^\/ws\//,
             /^\/auth([/#?]|$)/,
           ],
+          // for fonts
+          ignoreURLParametersMatching: [/^v=/],
         },
       }),
 

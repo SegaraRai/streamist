@@ -93,7 +93,7 @@ export default defineComponent({
         icon
         @click.stop.prevent="activate()"
       >
-        <VIcon icon="mdi-fullscreen" />
+        <i-mdi-fullscreen />
       </VBtn>
     </template>
   </SExpandable>

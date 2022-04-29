@@ -106,11 +106,9 @@ export default defineComponent({
                 class="text-st-error"
                 @click="uploadStore$$q.removeStagingFile(file.id)"
               >
-                <VIcon class="s-hover-visible">mdi-delete</VIcon>
+                <i-mdi-delete class="s-hover-visible" />
                 <template v-if="file.type === 'unknown'">
-                  <VIcon class="s-hover-hidden text-st-error">
-                    mdi-alert-circle
-                  </VIcon>
+                  <i-mdi-alert-circle class="s-hover-hidden text-st-error" />
                 </template>
               </VBtn>
             </div>
@@ -158,7 +156,7 @@ export default defineComponent({
                       class="s-hover-visible text-st-error"
                       @click="uploadStore$$q.removeFile(file.id)"
                     >
-                      <VIcon icon="mdi-delete" />
+                      <i-mdi-delete />
                     </VBtn>
                     <VProgressCircular
                       class="s-hover-hidden"
@@ -189,7 +187,7 @@ export default defineComponent({
                             @dragstart.stop.prevent
                           >
                             <VBtn flat icon size="small" class="text-st-error">
-                              <VIcon icon="mdi-cancel" />
+                              <i-mdi-cancel />
                             </VBtn>
                           </NButton>
                         </template>
@@ -236,18 +234,16 @@ export default defineComponent({
                       size="small"
                       @click="uploadStore$$q.removeFile(file.id)"
                     >
-                      <VIcon class="s-hover-visible text-st-success">
-                        mdi-check
-                      </VIcon>
+                      <i-mdi-check class="s-hover-visible text-st-success" />
                       <template v-if="file.status === 'transcoded'">
-                        <VIcon class="s-hover-hidden text-st-success">
-                          mdi-check-circle
-                        </VIcon>
+                        <i-mdi-check-circle
+                          class="s-hover-hidden text-st-success"
+                        />
                       </template>
                       <template v-else>
-                        <VIcon class="s-hover-hidden text-st-error">
-                          mdi-alert-circle
-                        </VIcon>
+                        <i-mdi-alert-circle
+                          class="s-hover-hidden text-st-error"
+                        />
                       </template>
                     </VBtn>
                   </template>
