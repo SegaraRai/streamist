@@ -390,7 +390,7 @@ export default defineConfig(async ({ mode }) => {
             /^\/auth([/#?]|$)/,
           ],
           // for fonts
-          ignoreURLParametersMatching: [/^v=/],
+          ignoreURLParametersMatching: [/^v$/],
         },
       }),
 
