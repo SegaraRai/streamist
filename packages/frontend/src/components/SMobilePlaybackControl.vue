@@ -119,7 +119,12 @@ export default defineComponent({
         <SSessionManager />
         <!-- TODO: implement vertical volume control -->
         <VBtn flat icon @click="play$$q">
-          <VIcon :icon="playing$$q ? 'mdi-pause' : 'mdi-play'" />
+          <template v-if="playing$$q">
+            <i-mdi-pause />
+          </template>
+          <template v-else>
+            <i-mdi-play />
+          </template>
         </VBtn>
       </div>
     </div>

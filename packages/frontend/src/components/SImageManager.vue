@@ -288,7 +288,7 @@ export default defineComponent({
               class="text-st-error"
               @click="dialog$$q = false"
             >
-              <VIcon icon="mdi-close" />
+              <i-mdi-close />
             </VBtn>
           </div>
         </VCardTitle>
@@ -356,7 +356,7 @@ export default defineComponent({
                                 size="small"
                                 class="text-st-error"
                               >
-                                <VIcon icon="mdi-delete" />
+                                <i-mdi-delete />
                               </VBtn>
                             </NButton>
                           </template>
@@ -390,7 +390,7 @@ export default defineComponent({
                         class="!w-32 !h-32 !sm:w-48 !sm:h-48 flex items-center justify-center border"
                         @click="inputFileElement$$q?.click()"
                       >
-                        <VIcon size="48">mdi-image-plus</VIcon>
+                        <i-mdi-image-plus class="text-3rem" />
                       </VBtn>
                     </div>
                   </template>

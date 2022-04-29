@@ -263,23 +263,23 @@ export default defineComponent({
         :disabled="!filteredSetList$$q.length"
         @click="play$$q(false)"
       >
-        <VIcon icon="mdi-play" />
+        <i-mdi-play />
       </VBtn>
       <VBtn
         outlined
         :disabled="!filteredSetList$$q.length"
         @click="play$$q(true)"
       >
-        <VIcon left icon="mdi-shuffle" />
-        <span>
+        <i-mdi-shuffle />
+        <span class="pl-1">
           {{ t('artist.Shuffle') }}
         </span>
       </VBtn>
       <button
-        class="rounded-full transition-colors"
+        class="rounded-full transition-colors flex items-center"
         @click="openMenu$$q($event.target as HTMLElement)"
       >
-        <VIcon icon="mdi-dots-vertical" />
+        <i-mdi-dots-vertical />
       </button>
       <VDivider />
     </div>
@@ -306,9 +306,6 @@ export default defineComponent({
             <div class="flex-none text-3xl whitespace-nowrap">
               {{ t('artist.MoreTracks', [value$$q.artist$$q.name]) }}
             </div>
-            <!-- v-btn color="primary" flat icon @click="playAdditional$$q()">
-              <v-icon>mdi-play</v-icon>
-            </v-btn -->
           </div>
         </template>
         <STrackList

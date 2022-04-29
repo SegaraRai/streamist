@@ -222,23 +222,23 @@ export default defineComponent({
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(false)"
       >
-        <VIcon icon="mdi-play" />
+        <i-mdi-play />
       </VBtn>
       <VBtn
         outlined
         :disabled="!availableTracks$$q?.length"
         @click="play$$q(true)"
       >
-        <VIcon left icon="mdi-shuffle" />
-        <span>
+        <i-mdi-shuffle />
+        <span class="pl-1">
           {{ t('album.Shuffle') }}
         </span>
       </VBtn>
       <button
-        class="rounded-full transition-colors"
+        class="rounded-full transition-colors flex items-center"
         @click="openMenu$$q($event.target as HTMLElement)"
       >
-        <VIcon icon="mdi-dots-vertical" />
+        <i-mdi-dots-vertical />
       </button>
       <VDivider />
     </div>

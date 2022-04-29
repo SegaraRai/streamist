@@ -135,20 +135,26 @@ export default defineComponent({
           <template v-if="isCurrentPlayingTrack$$q">
             <!-- 再生中（または一時停止中）の曲 -->
             <VBtn icon flat text class="bg-transparent" @click.stop="play$$q()">
-              <VIcon
-                class="s-hover-visible"
-                :class="$style.icon"
-                :icon="
-                  playing$$q
-                    ? 'mdi-pause-circle-outline'
-                    : 'mdi-play-circle-outline'
-                "
-              />
-              <VIcon
-                class="s-hover-hidden"
-                :class="$style.icon"
-                :icon="playing$$q ? 'mdi-play-circle' : 'mdi-pause-circle'"
-              />
+              <template v-if="playing$$q">
+                <i-mdi-pause-circle-outline
+                  class="s-hover-visible"
+                  :class="$style.icon"
+                />
+                <i-mdi-play-circle
+                  class="s-hover-hidden"
+                  :class="$style.icon"
+                />
+              </template>
+              <template v-else>
+                <i-mdi-play-circle-outline
+                  class="s-hover-visible"
+                  :class="$style.icon"
+                />
+                <i-mdi-pause-circle
+                  class="s-hover-hidden"
+                  :class="$style.icon"
+                />
+              </template>
             </VBtn>
           </template>
           <template v-else-if="isAvailable$$q">
@@ -175,10 +181,9 @@ export default defineComponent({
                   :alt="item.album$$q.title"
                 />
               </template>
-              <VIcon
+              <i-mdi-play-circle-outline
                 class="s-hover-visible"
                 :class="$style.icon"
-                icon="mdi-play-circle-outline"
               />
             </VBtn>
           </template>
@@ -282,7 +287,7 @@ export default defineComponent({
           @click.stop="remove$$q()"
           @dragstart.stop.prevent
         >
-          <VIcon color="error" class="s-hover-visible" icon="mdi-close" />
+          <i-mdi-close class="s-hover-visible text-st-error" />
         </VBtn>
       </div>
     </template>
@@ -299,7 +304,7 @@ export default defineComponent({
           @click.stop="!selected && onMenu$$q($event)"
           @dragstart.stop.prevent
         >
-          <VIcon class="s-hover-visible" icon="mdi-dots-vertical" />
+          <i-mdi-dots-vertical class="s-hover-visible" />
         </VBtn>
       </template>
     </div>
