@@ -1,14 +1,14 @@
 import '$/services/initOS';
 import '$/services/initCredentials';
 
+import { fastifyHelmet } from '@fastify/helmet';
+import { fastifyJwt } from '@fastify/jwt';
 import closeWithGrace from 'close-with-grace';
 import Fastify, {
   FastifyInstance,
   FastifyPluginCallback,
   FastifyServerFactory,
 } from 'fastify';
-import helmet from 'fastify-helmet';
-import { fastifyJwt } from 'fastify-jwt';
 import server from '$/$server';
 import { TRANSCODER_CALLBACK_API_PATH } from '$/config';
 import {
@@ -77,7 +77,7 @@ export const init = (serverFactory?: FastifyServerFactory) => {
     },
   });
 
-  app.register(helmet, {
+  app.register(fastifyHelmet, {
     contentSecurityPolicy: {
       useDefaults: false,
       directives: {

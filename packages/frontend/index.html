@@ -27,7 +27,7 @@
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#2a8dfe" />
     <title>Streamist</title>
     <script>
-      (function () {
+      (() => {
         const prefersDark =
           window.matchMedia &&
           window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -38,6 +38,11 @@
         const rootElement = document.documentElement;
         rootElement.classList.add(isDark ? 'dark' : 'light');
         rootElement.dataset.sTheme = themeName;
+
+        // just for suppressing warning from hCaptcha
+        if (!window.hCaptchaCallback) {
+          window.hCaptchaCallback = () => {};
+        }
       })();
     </script>
   </head>

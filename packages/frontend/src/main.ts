@@ -16,6 +16,9 @@ import { parseRedirectTo } from '~/logic/parseRedirectTo';
 import { isAuthenticated } from '~/logic/tokens';
 import { currentScrollContainerRef, currentScrollRef } from '~/stores/scroll';
 
+// vuetify
+import '@mdi/font/css/materialdesignicons.css';
+import 'vuetify/styles';
 // windicss layers
 import 'virtual:windi-base.css';
 import 'virtual:windi-components.css';

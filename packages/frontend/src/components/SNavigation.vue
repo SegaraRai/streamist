@@ -1,4 +1,11 @@
 <script lang="ts">
+import IconAccountMusic from '~icons/mdi/account-music?raw';
+import IconAlbum from '~icons/mdi/album?raw';
+import IconCog from '~icons/mdi/cog?raw';
+import IconHome from '~icons/mdi/home?raw';
+import IconMusic from '~icons/mdi/music?raw';
+import IconPlaylistMusic from '~icons/mdi/playlist-music?raw';
+
 interface NavItemLink {
   type: 'link';
   path: string;
@@ -19,7 +26,7 @@ export default defineComponent({
     const navItems$$q = computed<readonly NavItem[]>(() => [
       {
         type: 'link',
-        icon: 'mdi-home',
+        icon: IconHome,
         path: '/',
         text: t('sidebar.Home'),
       },
@@ -28,25 +35,25 @@ export default defineComponent({
       },
       {
         type: 'link',
-        icon: 'mdi-album',
+        icon: IconAlbum,
         path: '/albums',
         text: t('sidebar.Albums'),
       },
       {
         type: 'link',
-        icon: 'mdi-account-music',
+        icon: IconAccountMusic,
         path: '/artists',
         text: t('sidebar.Artists'),
       },
       {
         type: 'link',
-        icon: 'mdi-music',
+        icon: IconMusic,
         path: '/tracks',
         text: t('sidebar.Tracks'),
       },
       {
         type: 'link',
-        icon: 'mdi-playlist-music',
+        icon: IconPlaylistMusic,
         path: '/playlists',
         text: t('sidebar.Playlists'),
       },
@@ -55,7 +62,7 @@ export default defineComponent({
       },
       {
         type: 'link',
-        icon: 'mdi-cog',
+        icon: IconCog,
         path: '/settings',
         text: t('sidebar.Settings'),
       },
@@ -74,7 +81,10 @@ export default defineComponent({
       <template v-if="item.type === 'link'">
         <VListItem link :to="item.path" :_="(_index || undefined) && undefined">
           <VListItemAvatar icon class="flex items-center justify-center">
-            <VIcon :icon="item.icon" />
+            <span
+              class="flex items-center justify-center text-base opacity-60"
+              v-html="item.icon"
+            ></span>
           </VListItemAvatar>
           <VListItemHeader class="pl-2">
             <VListItemTitle class="s-heading-sl text-sm">

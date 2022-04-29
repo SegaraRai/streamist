@@ -386,7 +386,7 @@ export default defineComponent({
                     class="bg-transparent"
                     @click.prevent.stop="showMenu$$q($event.target as HTMLElement, item)"
                   >
-                    <VIcon class="s-hover-visible">mdi-dots-vertical</VIcon>
+                    <i-mdi-dots-vertical class="s-hover-visible" />
                   </VBtn>
                 </VListItem>
               </RouterLink>

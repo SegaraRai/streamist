@@ -75,7 +75,12 @@ export default defineComponent({
             "
           >
             <VListItemAvatar icon class="flex items-center justify-center px-2">
-              <VIcon :icon="getDeviceIcon$$q(session.info.type)" />
+              <template v-if="session.info.type === 'mobile'">
+                <i-mdi-cellphone />
+              </template>
+              <template>
+                <i-mdi-laptop />
+              </template>
             </VListItemAvatar>
             <VListItemHeader class="pl-2">
               <VListItemTitle class="s-heading-sl text-base">

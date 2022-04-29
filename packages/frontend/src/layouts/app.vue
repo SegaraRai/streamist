@@ -213,10 +213,16 @@ export default defineComponent({
       >
         <div class="flex flex-col h-full">
           <VSheet>
-            <div class="title flex items-center py-1 -mb-1px">
-              <i-mdi-playlist-play class="ml-4 mr-2 text-xl" />
+            <div class="title flex items-center py-1 -mb-1px px-2">
+              <i-mdi-playlist-play class="ml-2 mr-2 text-base" />
               <span class="flex-1">{{ t('queue.title') }}</span>
-              <VBtn flat icon size="small" @click="rightSidebar$$q = false">
+              <VBtn
+                flat
+                icon
+                size="small"
+                class="text-base"
+                @click="rightSidebar$$q = false"
+              >
                 <i-mdi-chevron-right />
               </VBtn>
             </div>

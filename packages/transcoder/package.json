@@ -12,25 +12,25 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.72.0",
+    "@aws-sdk/client-s3": "^3.80.0",
     "dotenv": "^16.0.0",
-    "log4js": "^6.4.5",
+    "log4js": "^6.4.6",
     "undici": "^5.0.0"
   },
   "devDependencies": {
     "@esbuild-plugins/node-resolve": "^0.1.4",
-    "@rollup/plugin-commonjs": "^21.1.0",
+    "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.2.1",
-    "@types/aws-lambda": "^8.10.93",
-    "@types/node": "^16.11.26",
-    "esbuild": "^0.14.36",
+    "@types/aws-lambda": "^8.10.95",
+    "@types/node": "^16.11.27",
+    "esbuild": "^0.14.38",
     "esbuild-node-externals": "^1.4.1",
     "jszip": "^3.9.1",
-    "node-dev": "^7.4.2",
+    "node-dev": "^7.4.3",
     "rollup": "^2.70.2",
     "rollup-plugin-esbuild": "^4.9.1",
     "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-tsconfig-paths": "^1.1.6"
+    "rollup-plugin-tsconfig-paths": "^1.1.8"
   }
 }

@@ -17,20 +17,6 @@ export default defineComponent({
     );
     const shuffleEnabled = playbackStore.shuffle$$q;
 
-    const repeatIcon = computed((): string => {
-      switch (playbackStore.repeat$$q.value) {
-        case 'off':
-          return 'mdi-repeat-off';
-
-        case 'all':
-          return 'mdi-repeat';
-
-        case 'one':
-          return 'mdi-repeat-once';
-      }
-      return '';
-    });
-
     const blurButton = (event: MouseEvent) => {
       const button = findAncestor(
         event.target as HTMLElement | undefined,
@@ -57,9 +43,9 @@ export default defineComponent({
       volumeStore$$q: volumeStore,
       showRemainingTime$$q: playbackStore.showRemainingTime$$q,
       playing$$q: playbackStore.playing$$q,
+      repeat$$q: playbackStore.repeat$$q,
       repeatEnabled$$q: repeatEnabled,
       shuffleEnabled$$q: shuffleEnabled,
-      repeatIcon$$q: repeatIcon,
       position$$q: playbackStore.position$$q,
       duration$$q: playbackStore.duration$$q,
       blurButton$$q: blurButton,
@@ -114,17 +100,20 @@ export default defineComponent({
       </template>
     </div>
     <div class="flex-1 flex flex-col justify-center">
-      <div class="flex flex-row justify-center px-12">
+      <div class="flex flex-row justify-center items-center px-12">
         <!-- clickではなくmouseupでblurButtonを呼んでいるのはキーで操作されたときにblurしないようにするため -->
         <button
-          class="mx-5 rounded-full transition-colors"
-          :class="shuffleEnabled$$q && 'text-shadow'"
+          class="block mx-2 transition-colors w-12 h-12 rounded-full leading-none text-lg"
+          :class="shuffleEnabled$$q && 'text-shadow text-st-primary'"
           @click="switchShuffle$$q"
           @mouseup="blurButton$$q"
         >
-          <VIcon :color="(shuffleEnabled$$q && 'primary') || undefined">
-            {{ shuffleEnabled$$q ? 'mdi-shuffle' : 'mdi-shuffle-disabled' }}
-          </VIcon>
+          <template v-if="shuffleEnabled$$q">
+            <i-mdi-shuffle />
+          </template>
+          <template v-else>
+            <i-mdi-shuffle-disabled />
+          </template>
         </button>
         <VBtn
           class="mx-5"
@@ -133,10 +122,15 @@ export default defineComponent({
           @click="goPrevious$$q"
           @mouseup="blurButton$$q"
         >
-          <VIcon icon="mdi-skip-previous" />
+          <i-mdi-skip-previous class="text-xl leading-none" />
         </VBtn>
         <VBtn class="mx-3" icon @click="play$$q" @mouseup="blurButton$$q">
-          <VIcon :icon="playing$$q ? 'mdi-pause' : 'mdi-play'" />
+          <template v-if="playing$$q">
+            <i-mdi-pause class="text-xl leading-none" />
+          </template>
+          <template v-else>
+            <i-mdi-play class="text-xl leading-none" />
+          </template>
         </VBtn>
         <VBtn
           flat
@@ -145,17 +139,23 @@ export default defineComponent({
           @click="skipNext$$q"
           @mouseup="blurButton$$q"
         >
-          <VIcon icon="mdi-skip-next" />
+          <i-mdi-skip-next class="text-xl leading-none" />
         </VBtn>
         <button
-          class="mx-5 rounded-full transition-colors"
-          :class="repeatEnabled$$q && 'text-shadow'"
+          class="block mx-2 transition-colors w-12 h-12 rounded-full leading-none text-base leading-none"
+          :class="repeatEnabled$$q && 'text-shadow text-st-primary'"
           @click="switchRepeat$$q"
           @mouseup="blurButton$$q"
         >
-          <VIcon :color="(repeatEnabled$$q && 'primary') || undefined">
-            {{ repeatIcon$$q }}
-          </VIcon>
+          <template v-if="repeat$$q === 'all'">
+            <i-mdi-repeat />
+          </template>
+          <template v-else-if="repeat$$q === 'one'">
+            <i-mdi-repeat-once />
+          </template>
+          <template v-else>
+            <i-mdi-repeat-off />
+          </template>
         </button>
       </div>
       <SSeekBar

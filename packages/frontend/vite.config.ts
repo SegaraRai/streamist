@@ -166,6 +166,7 @@ export default defineConfig(async ({ mode }) => {
   const IS_DEV = mode === 'development';
 
   let proxy: Record<string, ProxyOptions> = {};
+  let staging = false;
 
   if (IS_DEV) {
     config({ path: '../shared-server/env/development.env' });
@@ -203,6 +204,7 @@ export default defineConfig(async ({ mode }) => {
     };
   } else {
     process.env.VITE_BUILD_REV = process.env.TARGET_BUILD_REV || 'unknown';
+    staging = process.env.TARGET_NODE_ENV === 'staging';
   }
 
   const mangleReplacements = IS_DEV ? [] : await createMangleReplacements();
@@ -327,6 +329,7 @@ export default defineConfig(async ({ mode }) => {
       // https://github.com/antfu/unplugin-icons
       Icons({
         autoInstall: true,
+        scale: 1.25,
       }),
 
       // https://github.com/antfu/vite-plugin-windicss
@@ -351,8 +354,8 @@ export default defineConfig(async ({ mode }) => {
         ],
         manifest: {
           id: '/',
-          name: 'Streamist',
-          short_name: 'Streamist',
+          name: staging ? 'Streamist Staging' : 'Streamist',
+          short_name: staging ? 'Streamist Staging' : 'Streamist',
           start_url: '/pwa',
           display: 'standalone',
           background_color: '#2a8dfe',
@@ -377,12 +380,17 @@ export default defineConfig(async ({ mode }) => {
           ],
         },
         workbox: {
+          // this is needed to cache fonts (default: ['**\/*.{js,css,html}'])
+          // see https://developer.chrome.com/docs/workbox/reference/workbox-build/#type-GlobPartial
+          globPatterns: ['**/*.{js,css,html}', 'assets/*'],
           navigateFallbackDenylist: [
             /^\/cdn-cgi\//,
             /^\/api\//,
             /^\/ws\//,
             /^\/auth([/#?]|$)/,
           ],
+          // for fonts
+          ignoreURLParametersMatching: [/^v$/],
         },
       }),
 
