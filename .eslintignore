@@ -12,5 +12,4 @@ index_dev.mjs
 
 packages/transcoder/gcr/app/**/*
 
-packages/server/api/$api.ts
-packages/server/migration
+packages/server/**/$*.ts
