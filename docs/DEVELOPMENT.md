@@ -219,14 +219,13 @@ ufw enable
 ###### Docker のインストール
 
 ```sh
-apt install -y apt-transport-https ca-certificates curl software-properties-common
-
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
 apt update
-apt-cache policy docker-ce
+apt install -y ca-certificates curl gnupg lsb-release
 
-apt install -y docker-ce
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+apt update
+apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
 systemctl status docker
 
@@ -241,13 +240,6 @@ chmod 700 /home/deploy/.ssh
 chmod 600 /home/deploy/.ssh/authorized_keys
 
 usermod -aG docker deploy
-```
-
-###### Docker Compose のインストール
-
-```sh
-curl -L -o /usr/local/bin/docker-compose https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
-chmod +x /usr/local/bin/docker-compose
 ```
 
 ###### アプリディレクトリのセットアップ
@@ -306,7 +298,7 @@ chmod 644 /app/data/lego/cert.pem
 
 if [ "$COMMAND" == "renew" ]; then
   cd /app
-  docker-compose restart haproxy
+  docker compose restart haproxy
 fi
 ```
 
@@ -412,13 +404,12 @@ volumes:
 起動する
 
 ```sh
-docker-compose up -d
+docker compose up -d
 ```
 
 ###### 最終確認
 
 - `docker`コマンドは存在するか
-- `docker-compose`コマンドは存在するか
 - `lego`コマンドは存在するか
 - `vps`ユーザーは
   - 存在するか
