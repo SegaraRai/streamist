@@ -313,13 +313,13 @@ export default defineComponent({
 
 <style module>
 .icon {
-  font-size: 32px !important;
+  font-size: 28px !important;
   transition: all 0.1s ease-in-out;
   opacity: 0.9;
 }
 
 .icon:hover {
-  font-size: 36px !important;
+  font-size: 30px !important;
   opacity: 1;
 }
 </style>
