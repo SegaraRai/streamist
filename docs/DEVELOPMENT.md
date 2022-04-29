@@ -189,15 +189,14 @@ usermod -aG sudo vps
 `/etc/ssh/sshd_config` を変更する
 パスワードログインは本当は無効化したほうが良いがとりあえず有効なままにしておく
 
-```diff
-- #Port 22
-+ Port 43642
-
-- PermitRootLogin yes
-+ PermitRootLogin no
-
-- #PubkeyAuthentication yes
-+ PubkeyAuthentication yes
+```plaintext
+Port 43642
+PermitRootLogin no
+PubkeyAuthentication yes
+PasswordAuthentication yes
+PermitEmptyPasswords no
+ClientAliveInterval 30
+ClientAliveCountMax 3
 ```
 
 以下を実行する
@@ -319,7 +318,7 @@ curl -L -o lego_binary.tar.gz https://github.com/go-acme/lego/releases/download/
 tar xf lego_binary.tar.gz
 chown root:root lego
 chmod 0755 lego
-sudo cp lego /usr/local/bin/lego
+cp lego /usr/local/bin/lego
 
 adduser --gecos "" --disabled-password lego
 usermod -aG docker lego
