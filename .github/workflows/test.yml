@@ -34,7 +34,7 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
       - uses: pnpm/action-setup@v2.2.1
         with:
-          version: latest
+          version: 7
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
