@@ -39,9 +39,9 @@ jobs:
           echo "APP_ORIGIN=https://staging.streamist.app" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
-      - uses: pnpm/action-setup@v2.0.1
+      - uses: pnpm/action-setup@v2.2.1
         with:
-          version: 6
+          version: 7
       - uses: actions/setup-node@v2
         with:
           node-version: '16'
